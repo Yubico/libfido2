@@ -62,28 +62,25 @@ fail:
 }
 
 static int
-authdata_cbor_get(const char *rp_id, uint8_t flags, uint32_t sigcount,
-    fido_blob_t *authdata_cbor)
+authdata_fake(const char *rp_id, uint8_t flags, uint32_t sigcount,
+    fido_blob_t *fake_cbor_ad)
 {
 	fido_authdata_t	 ad;
 	cbor_item_t	*item = NULL;
-	int		 ok = -1;
 
-	SHA256((const unsigned char *)rp_id, strlen(rp_id), ad.rp_id_hash);
+	SHA256((const void *)rp_id, strlen(rp_id), ad.rp_id_hash);
 	ad.flags = flags; /* XXX translate? */
 	ad.sigcount = sigcount;
 
 	if ((item = cbor_build_bytestring((const unsigned char *)&ad,
 	    sizeof(ad))) == NULL || cbor_serialize_alloc(item,
-	    &authdata_cbor->ptr, &authdata_cbor->len) == 0)
-		goto fail;
+	    &fake_cbor_ad->ptr, &fake_cbor_ad->len) == 0) {
+		if (item != NULL)
+			cbor_decref(&item);
+		return (-1);
+	}
 
-	ok = 0;
-fail:
-	if (item != NULL)
-		cbor_decref(&item);
-
-	return (ok);
+	return (0);
 }
 
 static int
@@ -94,19 +91,19 @@ send_dummy_register(fido_dev_t *dev, int ms)
 	unsigned char	 challenge[SHA256_DIGEST_LENGTH];
 	unsigned char	 application[SHA256_DIGEST_LENGTH];
 	unsigned char	 reply[2048];
-	int		 r = FIDO_ERR_INTERNAL;
-
-	apdu = iso7816_new(U2F_CMD_REGISTER, 0, 2 * SHA256_DIGEST_LENGTH);
-	if (apdu == NULL)
-		goto fail;
+	int		 r;
 
 	/* dummy challenge & application */
 	memset(&challenge, 0xff, sizeof(challenge));
 	memset(&application, 0xff, sizeof(application));
 
-	if (iso7816_add(apdu, &challenge, sizeof(challenge)) < 0 ||
-	    iso7816_add(apdu, &application, sizeof(application)) < 0)
+	if ((apdu = iso7816_new(U2F_CMD_REGISTER, 0,
+	    2 * SHA256_DIGEST_LENGTH)) == NULL ||
+	    iso7816_add(apdu, &challenge, sizeof(challenge)) < 0 ||
+	    iso7816_add(apdu, &application, sizeof(application)) < 0) {
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
+	}
 
 	do {
 		if (tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
@@ -138,28 +135,27 @@ key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
 	unsigned char	 reply[8];
 	uint8_t		 key_id_len;
-	int		 r = FIDO_ERR_INTERNAL;
+	int		 r;
 
 	if (key_id->len > UINT8_MAX || rp_id == NULL) {
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
 
-	key_id_len = key_id->len;
-	apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_CHECK,
-	    2 * SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len);
-	if (apdu == NULL)
-		goto fail;
-
 	memset(&challenge, 0xff, sizeof(challenge));
 	memset(&rp_id_hash, 0, sizeof(rp_id_hash));
 	SHA256((const void *)rp_id, strlen(rp_id), rp_id_hash);
+	key_id_len = key_id->len;
 
-	if (iso7816_add(apdu, &challenge, sizeof(challenge)) < 0 ||
+	if ((apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_CHECK, 2 *
+	    SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len)) == NULL ||
+	    iso7816_add(apdu, &challenge, sizeof(challenge)) < 0 ||
 	    iso7816_add(apdu, &rp_id_hash, sizeof(rp_id_hash)) < 0 ||
 	    iso7816_add(apdu, &key_id_len, sizeof(key_id_len)) < 0 ||
-	    iso7816_add(apdu, key_id->ptr, key_id_len) < 0)
+	    iso7816_add(apdu, key_id->ptr, key_id_len) < 0) {
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
+	}
 
 	if (tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
 		r = FIDO_ERR_TX;
@@ -179,6 +175,7 @@ key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
 		break;
 	default:
 		/* unexpected sw */
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
 
@@ -190,62 +187,37 @@ fail:
 }
 
 static int
-parse_auth_reply(fido_assert_t *assert, size_t idx, const unsigned char *reply,
-    size_t len)
+parse_auth_reply(fido_blob_t *sig, fido_blob_t *ad, const char *rp_id,
+    const unsigned char *reply, size_t len)
 {
-	fido_blob_t	sig;
-	fido_blob_t	authdata;
 	uint8_t		flags;
 	uint32_t	sigcount;
-	int		r;
 
-	memset(&sig, 0, sizeof(sig));
-	memset(&authdata, 0, sizeof(authdata));
-	r = FIDO_ERR_RX;
-
-	/* check status word */
 	if (len < 2 || ((reply[len - 2] << 8) | reply[len - 1]) != SW_NO_ERROR)
-		goto fail;
+		return (FIDO_ERR_RX); /* unexpected status word */
+
 	len -= 2;
 
-	/* fake authdata */
 	if (buf_read(&reply, &len, &flags, sizeof(flags)) < 0 ||
 	    buf_read(&reply, &len, &sigcount, sizeof(sigcount)) < 0 ||
-	    sig_get(&sig, &reply, &len) < 0 || authdata_cbor_get(assert->rp_id,
-	     flags, sigcount, &authdata) < 0)
-		goto fail;
+	    sig_get(sig, &reply, &len) < 0 || authdata_fake(rp_id, flags,
+	    sigcount, ad) < 0)
+		return (FIDO_ERR_RX);
 
-	/* set the retrieved parameters */
-	if ((r = fido_assert_set_authdata(assert, idx, authdata.ptr,
-	    authdata.len)) != FIDO_OK || (r = fido_assert_set_sig(assert, idx,
-	    sig.ptr, sig.len)) != FIDO_OK)
-		goto fail;
-
-	r = FIDO_OK;
-fail:
-	if (sig.ptr != NULL) {
-		explicit_bzero(sig.ptr, sig.len);
-		free(sig.ptr);
-	}
-	if (authdata.ptr != NULL) {
-		explicit_bzero(authdata.ptr, authdata.len);
-		free(authdata.ptr);
-	}
-
-	return (r);
+	return (FIDO_OK);
 }
 
 static int
 do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
-    const fido_blob_t *key_id, fido_assert_t *assert, size_t idx, int ms)
+    const fido_blob_t *key_id, fido_blob_t *sig, fido_blob_t *ad, int ms)
 {
 	const uint8_t	 cmd = CTAP_FRAME_INIT | CTAP_CMD_MSG;
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
 	unsigned char	 reply[128];
-	uint8_t		 key_id_len;
 	int		 reply_len;
-	int		 r = FIDO_ERR_INTERNAL;
+	uint8_t		 key_id_len;
+	int		 r;
 
 	if (cdh->len != SHA256_DIGEST_LENGTH || key_id->len > UINT8_MAX ||
 	    rp_id == NULL) {
@@ -253,20 +225,19 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 		goto fail;
 	}
 
-	key_id_len = key_id->len;
-	apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_SIGN,
-	    2 * SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len);
-	if (apdu == NULL)
-		goto fail;
-
 	memset(&rp_id_hash, 0, sizeof(rp_id_hash));
 	SHA256((const void *)rp_id, strlen(rp_id), rp_id_hash);
+	key_id_len = key_id->len;
 
-	if (iso7816_add(apdu, cdh->ptr, cdh->len) < 0 ||
+	if ((apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_SIGN, 2 *
+	    SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len)) == NULL ||
+	    iso7816_add(apdu, cdh->ptr, cdh->len) < 0 ||
 	    iso7816_add(apdu, &rp_id_hash, sizeof(rp_id_hash)) < 0 ||
 	    iso7816_add(apdu, &key_id_len, sizeof(key_id_len)) < 0 ||
-	    iso7816_add(apdu, key_id->ptr, key_id_len) < 0)
+	    iso7816_add(apdu, key_id->ptr, key_id_len) < 0) {
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
+	}
 
 	do {
 		if (tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
@@ -280,10 +251,7 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 		usleep((ms == -1 ? 500 : ms) * 1000);
 	} while (((reply[0] << 8) | reply[1]) == SW_CONDITIONS_NOT_SATISFIED);
 
-	/* XXX */
-	fido_blob_set(&assert->stmt[idx].id, key_id->ptr, key_id->len);
-
-	r = parse_auth_reply(assert, idx, reply, (size_t)reply_len);
+	r = parse_auth_reply(sig, ad, rp_id, reply, (size_t)reply_len);
 fail:
 	iso7816_free(&apdu);
 
@@ -359,7 +327,7 @@ parse_register_reply(fido_cred_t *cred, const unsigned char *reply, size_t len)
 {
 	fido_blob_t	 x5c;
 	fido_blob_t	 sig;
-	fido_blob_t	 authdata;
+	fido_blob_t	 ad;
 	uint8_t		 dummy;
 	uint8_t		 pubkey[65];
 	uint8_t		 kh_len;
@@ -368,7 +336,7 @@ parse_register_reply(fido_cred_t *cred, const unsigned char *reply, size_t len)
 
 	memset(&x5c, 0, sizeof(x5c));
 	memset(&sig, 0, sizeof(sig));
-	memset(&authdata, 0, sizeof(authdata));
+	memset(&ad, 0, sizeof(ad));
 	r = FIDO_ERR_RX;
 
 	/* status word */
@@ -396,32 +364,32 @@ parse_register_reply(fido_cred_t *cred, const unsigned char *reply, size_t len)
 
 	/* authdata */
 	if (encode_cred_authdata(cred->rp.id, kh, kh_len, pubkey,
-	    sizeof(pubkey), &authdata) < 0)
+	    sizeof(pubkey), &ad) < 0)
 		goto fail;
 
 	if ((r = fido_cred_set_fmt(cred, "fido-u2f")) != FIDO_OK ||
-	    (r = fido_cred_set_authdata(cred, authdata.ptr, authdata.len)) != FIDO_OK ||
+	    (r = fido_cred_set_authdata(cred, ad.ptr, ad.len)) != FIDO_OK ||
 	    (r = fido_cred_set_x509(cred, x5c.ptr, x5c.len)) != FIDO_OK ||
 	    (r = fido_cred_set_sig(cred, sig.ptr, sig.len)) != FIDO_OK)
 		goto fail;
 
 	r = FIDO_OK;
 fail:
-	if (kh != NULL) {
+	if (kh) {
 		explicit_bzero(kh, kh_len);
 		free(kh);
 	}
-	if (x5c.ptr != NULL) {
+	if (x5c.ptr) {
 		explicit_bzero(x5c.ptr, x5c.len);
 		free(x5c.ptr);
 	}
-	if (sig.ptr != NULL) {
+	if (sig.ptr) {
 		explicit_bzero(sig.ptr, sig.len);
 		free(sig.ptr);
 	}
-	if (authdata.ptr != NULL) {
-		explicit_bzero(authdata.ptr, authdata.len);
-		free(authdata.ptr);
+	if (ad.ptr) {
+		explicit_bzero(ad.ptr, ad.len);
+		free(ad.ptr);
 	}
 
 	return (r);
@@ -455,16 +423,12 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 		}
 	}
 
-	apdu = iso7816_new(U2F_CMD_REGISTER, 0, 2 * SHA256_DIGEST_LENGTH);
-	if (apdu == NULL) {
-		r = FIDO_ERR_INTERNAL;
-		goto fail;
-	}
-
 	memset(&rp_id_hash, 0, sizeof(rp_id_hash));
 	SHA256((const void *)cred->rp.id, strlen(cred->rp.id), rp_id_hash);
 
-	if (iso7816_add(apdu, cred->cdh.ptr, cred->cdh.len) < 0 ||
+	if ((apdu = iso7816_new(U2F_CMD_REGISTER, 0, 2 *
+	    SHA256_DIGEST_LENGTH)) == NULL ||
+	    iso7816_add(apdu, cred->cdh.ptr, cred->cdh.len) < 0 ||
 	    iso7816_add(apdu, rp_id_hash, sizeof(rp_id_hash)) < 0) {
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -490,30 +454,74 @@ fail:
 
 }
 
-int
-u2f_authenticate(fido_dev_t *dev, fido_assert_t *assert, int ms)
+static int
+u2f_authenticate_single(fido_dev_t *dev, const fido_blob_t *key_id,
+    fido_assert_t *fa, size_t idx, int ms)
 {
-	int	found;
+	fido_blob_t	sig;
+	fido_blob_t	ad;
+	int		found;
+	int		r;
+
+	memset(&sig, 0, sizeof(sig));
+	memset(&ad, 0, sizeof(ad));
+
+	if ((r = key_lookup(dev, fa->rp_id, key_id, &found, ms)) != FIDO_OK)
+		goto fail;
+
+	if (!found) {
+		r = FIDO_ERR_CREDENTIAL_EXCLUDED;
+		goto fail;
+	}
+
+	if ((r = do_auth(dev, &fa->cdh, fa->rp_id, key_id, &sig, &ad,
+	    ms)) != FIDO_OK)
+		goto fail;
+
+	if (fido_blob_set(&fa->stmt[idx].id, key_id->ptr, key_id->len) < 0 ||
+	    fido_assert_set_authdata(fa, idx, ad.ptr, ad.len) < 0 ||
+	    fido_assert_set_sig(fa, idx, sig.ptr, sig.len) < 0) {
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	r = FIDO_OK;
+fail:
+	if (sig.ptr) {
+		explicit_bzero(sig.ptr, sig.len);
+		free(sig.ptr);
+	}
+	if (ad.ptr) {
+		explicit_bzero(ad.ptr, ad.len);
+		free(ad.ptr);
+	}
+
+	return (r);
+}
+
+int
+u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
+{
+	int	nauth_ok = 0;
 	int	r;
 
-	if (assert->uv || assert->allow_list.ptr == NULL)
+	if (fa->uv || fa->allow_list.ptr == NULL)
 		return (FIDO_ERR_UNSUPPORTED_OPTION);
 
-	if ((r = fido_assert_set_count(assert,
-	    assert->allow_list.len) != FIDO_OK))
+	if ((r = fido_assert_set_count(fa, fa->allow_list.len) != FIDO_OK))
 		return (r);
 
-	for (size_t i = 0; i < assert->allow_list.len; i++) {
-		if ((r = key_lookup(dev, assert->rp_id,
-		    &assert->allow_list.ptr[i], &found, ms)) != FIDO_OK)
+	for (size_t i = 0; i < fa->allow_list.len; i++) {
+		r = u2f_authenticate_single(dev, &fa->allow_list.ptr[i], fa,
+		    nauth_ok, ms);
+		if (r == FIDO_OK)
+			nauth_ok++;
+		else if (r != FIDO_ERR_CREDENTIAL_EXCLUDED)
 			return (r);
-		if (found) {
-			if ((r = do_auth(dev, &assert->cdh, assert->rp_id,
-			    &assert->allow_list.ptr[i], assert, i,
-			    ms)) != FIDO_OK)
-				return (r); /* XXX */
-		}
+		/* ignore credentials that don't exist */
 	}
+
+	fa->stmt_len = nauth_ok;
 
 	return (FIDO_OK);
 }
