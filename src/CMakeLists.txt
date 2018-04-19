@@ -21,6 +21,7 @@ list(APPEND FIDO_SOURCES
 	hid.c
 	info.c
 	io.c
+	iso7816.c
 	pin.c
 	reset.c
 	u2f.c

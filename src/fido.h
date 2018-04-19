@@ -18,6 +18,7 @@
 #include "blob.h"
 #include "compat.h"
 #include "es256.h"
+#include "iso7816.h"
 #include "types.h"
 #include "extern.h"
 #endif
