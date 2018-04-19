@@ -90,31 +90,26 @@ static int
 send_dummy_register(fido_dev_t *dev, int ms)
 {
 	const uint8_t	 cmd = CTAP_FRAME_INIT | CTAP_CMD_MSG;
-	unsigned char	*reg_apdu = NULL;
+	iso7816_apdu_t	*apdu = NULL;
+	unsigned char	 challenge[SHA256_DIGEST_LENGTH];
+	unsigned char	 application[SHA256_DIGEST_LENGTH];
 	unsigned char	 reply[2048];
-	size_t		 alloc_len;
-	size_t		 payload_len;
-	int		 r;
+	int		 r = FIDO_ERR_INTERNAL;
 
-	payload_len = 64;
-	alloc_len = payload_len + 7 + 2;
-	if ((reg_apdu = calloc(1, alloc_len)) == NULL) {
-		r = FIDO_ERR_INTERNAL;
+	apdu = iso7816_new(U2F_CMD_REGISTER, 0, 2 * SHA256_DIGEST_LENGTH);
+	if (apdu == NULL)
 		goto fail;
-	}
 
-	reg_apdu[0] = 0x00; /* cla */
-	reg_apdu[1] = U2F_CMD_REGISTER; /* ins */
-	reg_apdu[2] = 0x00; /* p1 */
-	reg_apdu[3] = 0x00; /* p2 */
-	reg_apdu[4] = 0x00; /* lc1 */
-	reg_apdu[5] = (payload_len >> 8) & 0xff; /* lc2 */
-	reg_apdu[6] = payload_len & 0xff; /* lc3 */
-	memset(&reg_apdu[7], 0xff, 32); /* dummy challenge */
-	memset(&reg_apdu[39], 0xff, 32); /* dummy application */
+	/* dummy challenge & application */
+	memset(&challenge, 0xff, sizeof(challenge));
+	memset(&application, 0xff, sizeof(application));
+
+	if (iso7816_add(apdu, &challenge, sizeof(challenge)) < 0 ||
+	    iso7816_add(apdu, &application, sizeof(application)) < 0)
+		goto fail;
 
 	do {
-		if (tx(dev, cmd, reg_apdu, alloc_len) < 0) {
+		if (tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
 			r = FIDO_ERR_TX;
 			goto fail;
 		}
@@ -128,10 +123,7 @@ send_dummy_register(fido_dev_t *dev, int ms)
 
 	r = FIDO_OK;
 fail:
-	if (reg_apdu != NULL) {
-		explicit_bzero(reg_apdu, alloc_len);
-		free(reg_apdu);
-	}
+	iso7816_free(&apdu);
 
 	return (r);
 }
@@ -141,37 +133,35 @@ key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
     int *found, int ms)
 {
 	const uint8_t	 cmd = CTAP_FRAME_INIT | CTAP_CMD_MSG;
-	unsigned char	*auth_apdu = NULL;
+	iso7816_apdu_t	*apdu = NULL;
+	unsigned char	 challenge[SHA256_DIGEST_LENGTH];
+	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
 	unsigned char	 reply[8];
-	size_t		 alloc_len;
-	size_t		 payload_len;
-	int		 r;
+	uint8_t		 key_id_len;
+	int		 r = FIDO_ERR_INTERNAL;
 
 	if (key_id->len > UINT8_MAX || rp_id == NULL) {
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
 
-	payload_len = 65 + key_id->len;
-	alloc_len = payload_len + 7 + 2;
-	if ((auth_apdu = calloc(1, alloc_len)) == NULL) {
-		r = FIDO_ERR_INTERNAL;
+	key_id_len = key_id->len;
+	apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_CHECK,
+	    2 * SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len);
+	if (apdu == NULL)
 		goto fail;
-	}
 
-	auth_apdu[0] = 0x00; /* cla */
-	auth_apdu[1] = U2F_CMD_AUTH; /* ins */
-	auth_apdu[2] = U2F_AUTH_CHECK; /* p1 */
-	auth_apdu[3] = 0x00; /* p2 */
-	auth_apdu[4] = 0x00; /* lc1 */
-	auth_apdu[5] = (payload_len >> 8) & 0xff; /* lc2 */
-	auth_apdu[6] = payload_len & 0xff; /* lc3 */
-	memset(&auth_apdu[7], 0xff, 32); /* dummy challenge */
-	SHA256((const unsigned char *)rp_id, strlen(rp_id), &auth_apdu[39]);
-	auth_apdu[71] = key_id->len;
-	memcpy(&auth_apdu[72], key_id->ptr, key_id->len);
+	memset(&challenge, 0xff, sizeof(challenge));
+	memset(&rp_id_hash, 0, sizeof(rp_id_hash));
+	SHA256((const void *)rp_id, strlen(rp_id), rp_id_hash);
 
-	if (tx(dev, cmd, auth_apdu, alloc_len) < 0) {
+	if (iso7816_add(apdu, &challenge, sizeof(challenge)) < 0 ||
+	    iso7816_add(apdu, &rp_id_hash, sizeof(rp_id_hash)) < 0 ||
+	    iso7816_add(apdu, &key_id_len, sizeof(key_id_len)) < 0 ||
+	    iso7816_add(apdu, key_id->ptr, key_id_len) < 0)
+		goto fail;
+
+	if (tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
 		r = FIDO_ERR_TX;
 		goto fail;
 	}
@@ -189,16 +179,12 @@ key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
 		break;
 	default:
 		/* unexpected sw */
-		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
 
 	r = FIDO_OK;
 fail:
-	if (auth_apdu != NULL) {
-		explicit_bzero(auth_apdu, alloc_len);
-		free(auth_apdu);
-	}
+	iso7816_free(&apdu);
 
 	return (r);
 }
@@ -254,39 +240,36 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
     const fido_blob_t *key_id, fido_assert_t *assert, size_t idx, int ms)
 {
 	const uint8_t	 cmd = CTAP_FRAME_INIT | CTAP_CMD_MSG;
-	unsigned char	*auth_apdu = NULL;
+	iso7816_apdu_t	*apdu = NULL;
+	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
 	unsigned char	 reply[128];
-	size_t		 alloc_len;
-	size_t		 payload_len;
+	uint8_t		 key_id_len;
 	int		 reply_len;
-	int		 r;
+	int		 r = FIDO_ERR_INTERNAL;
 
-	if (cdh->len != 32 || key_id->len > UINT8_MAX || rp_id == NULL) {
+	if (cdh->len != SHA256_DIGEST_LENGTH || key_id->len > UINT8_MAX ||
+	    rp_id == NULL) {
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
 
-	payload_len = 65 + key_id->len;
-	alloc_len = payload_len + 7 + 2;
-	if ((auth_apdu = calloc(1, alloc_len)) == NULL) {
-		r = FIDO_ERR_INTERNAL;
+	key_id_len = key_id->len;
+	apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_SIGN,
+	    2 * SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len);
+	if (apdu == NULL)
 		goto fail;
-	}
 
-	auth_apdu[0] = 0x00; /* cla */
-	auth_apdu[1] = U2F_CMD_AUTH; /* ins */
-	auth_apdu[2] = U2F_AUTH_SIGN; /* p1 */
-	auth_apdu[3] = 0x00; /* p2 */
-	auth_apdu[4] = 0x00; /* lc1 */
-	auth_apdu[5] = (payload_len >> 8) & 0xff; /* lc2 */
-	auth_apdu[6] = payload_len & 0xff; /* lc3 */
-	memcpy(&auth_apdu[7], cdh->ptr, 32); /* XXX */
-	SHA256((const unsigned char *)rp_id, strlen(rp_id), &auth_apdu[39]);
-	auth_apdu[71] = key_id->len;
-	memcpy(&auth_apdu[72], key_id->ptr, key_id->len);
+	memset(&rp_id_hash, 0, sizeof(rp_id_hash));
+	SHA256((const void *)rp_id, strlen(rp_id), rp_id_hash);
+
+	if (iso7816_add(apdu, cdh->ptr, cdh->len) < 0 ||
+	    iso7816_add(apdu, &rp_id_hash, sizeof(rp_id_hash)) < 0 ||
+	    iso7816_add(apdu, &key_id_len, sizeof(key_id_len)) < 0 ||
+	    iso7816_add(apdu, key_id->ptr, key_id_len) < 0)
+		goto fail;
 
 	do {
-		if (tx(dev, cmd, auth_apdu, alloc_len) < 0) {
+		if (tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
 			r = FIDO_ERR_TX;
 			goto fail;
 		}
@@ -302,10 +285,7 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 
 	r = parse_auth_reply(assert, idx, reply, (size_t)reply_len);
 fail:
-	if (auth_apdu != NULL) {
-		explicit_bzero(auth_apdu, alloc_len);
-		free(auth_apdu);
-	}
+	iso7816_free(&apdu);
 
 	return (r);
 }
@@ -451,17 +431,17 @@ int
 u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 {
 	const uint8_t	 cmd = CTAP_FRAME_INIT | CTAP_CMD_MSG;
-	unsigned char	*reg_apdu = NULL;
+	iso7816_apdu_t	*apdu = NULL;
+	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
 	unsigned char	 reply[2048];
-	size_t		 alloc_len;
-	size_t		 payload_len;
 	int		 reply_len;
 	int		 found;
 	int		 r;
 
 	if (cred->rk || cred->uv)
 		return (FIDO_ERR_UNSUPPORTED_OPTION);
-	if (cred->cdh.ptr == NULL || cred->cdh.len != 32)
+
+	if (cred->cdh.ptr == NULL || cred->cdh.len != SHA256_DIGEST_LENGTH)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	for (size_t i = 0; i < cred->excl.len; i++) {
@@ -475,26 +455,23 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 		}
 	}
 
-	payload_len = 64;
-	alloc_len = payload_len + 7 + 2;
-	if ((reg_apdu = calloc(1, alloc_len)) == NULL) {
+	apdu = iso7816_new(U2F_CMD_REGISTER, 0, 2 * SHA256_DIGEST_LENGTH);
+	if (apdu == NULL) {
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
 
-	reg_apdu[0] = 0x00; /* cla */
-	reg_apdu[1] = U2F_CMD_REGISTER; /* ins */
-	reg_apdu[2] = 0x00; /* p1 */
-	reg_apdu[3] = 0x00; /* p2 */
-	reg_apdu[4] = 0x00; /* lc1 */
-	reg_apdu[5] = (payload_len >> 8) & 0xff; /* lc2 */
-	reg_apdu[6] = payload_len & 0xff; /* lc3 */
-	memcpy(&reg_apdu[7], cred->cdh.ptr, 32);
-	SHA256((const unsigned char *)cred->rp.id, strlen(cred->rp.id),
-	    &reg_apdu[39]);
+	memset(&rp_id_hash, 0, sizeof(rp_id_hash));
+	SHA256((const void *)cred->rp.id, strlen(cred->rp.id), rp_id_hash);
+
+	if (iso7816_add(apdu, cred->cdh.ptr, cred->cdh.len) < 0 ||
+	    iso7816_add(apdu, rp_id_hash, sizeof(rp_id_hash)) < 0) {
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
 
 	do {
-		if (tx(dev, cmd, reg_apdu, alloc_len) < 0) {
+		if (tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
 			r = FIDO_ERR_TX;
 			goto fail;
 		}
@@ -507,10 +484,7 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 
 	r = parse_register_reply(cred, reply, (size_t)reply_len);
 fail:
-	if (reg_apdu != NULL) {
-		explicit_bzero(reg_apdu, alloc_len);
-		free(reg_apdu);
-	}
+	iso7816_free(&apdu);
 
 	return (r);
 
