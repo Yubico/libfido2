@@ -39,3 +39,6 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", \
 This project depends on hidapi, libcbor and OpenSSL. For instructions on
 installing these dependencies, see http://www.signal11.us/oss/hidapi/,
 http://libcbor.org/, and https://www.openssl.org/.
+
+As of April 2018, libcbor was available as a package on Debian Buster and
+Ubuntu Bionic Beaver.
