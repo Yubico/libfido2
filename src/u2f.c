@@ -137,8 +137,8 @@ fail:
 }
 
 static int
-key_exists(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
-    int *ok, int ms)
+key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
+    int *found, int ms)
 {
 	const uint8_t	 cmd = CTAP_FRAME_INIT | CTAP_CMD_MSG;
 	unsigned char	*auth_apdu = NULL;
@@ -182,10 +182,10 @@ key_exists(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
 
 	switch ((reply[0] << 8) | reply[1]) {
 	case SW_CONDITIONS_NOT_SATISFIED:
-		*ok = 1; /* key exists */
+		*found = 1; /* key exists */
 		break;
 	case SW_WRONG_DATA:
-		*ok = 0; /* key does not exist */
+		*found = 0; /* key does not exist */
 		break;
 	default:
 		/* unexpected sw */
@@ -456,7 +456,7 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 	size_t		 alloc_len;
 	size_t		 payload_len;
 	int		 reply_len;
-	int		 ok;
+	int		 found;
 	int		 r;
 
 	if (cred->rk || cred->uv)
@@ -465,10 +465,10 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	for (size_t i = 0; i < cred->excl.len; i++) {
-		if ((r = key_exists(dev, cred->rp.id, &cred->excl.ptr[i], &ok,
-		    ms)) != FIDO_OK)
+		if ((r = key_lookup(dev, cred->rp.id, &cred->excl.ptr[i],
+		    &found, ms)) != FIDO_OK)
 			return (r);
-		if (ok) {
+		if (found) {
 			if ((r = send_dummy_register(dev, ms)) != FIDO_OK)
 				return (r);
 			return (FIDO_ERR_CREDENTIAL_EXCLUDED);
@@ -519,7 +519,7 @@ fail:
 int
 u2f_authenticate(fido_dev_t *dev, fido_assert_t *assert, int ms)
 {
-	int	ok;
+	int	found;
 	int	r;
 
 	if (assert->uv || assert->allow_list.ptr == NULL)
@@ -530,10 +530,10 @@ u2f_authenticate(fido_dev_t *dev, fido_assert_t *assert, int ms)
 		return (r);
 
 	for (size_t i = 0; i < assert->allow_list.len; i++) {
-		if ((r = key_exists(dev, assert->rp_id,
-		    &assert->allow_list.ptr[i], &ok, ms)) != FIDO_OK)
+		if ((r = key_lookup(dev, assert->rp_id,
+		    &assert->allow_list.ptr[i], &found, ms)) != FIDO_OK)
 			return (r);
-		if (ok) {
+		if (found) {
 			if ((r = do_auth(dev, &assert->cdh, assert->rp_id,
 			    &assert->allow_list.ptr[i], assert, i,
 			    ms)) != FIDO_OK)
