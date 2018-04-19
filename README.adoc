@@ -1,4 +1,4 @@
-== fido
+== fido2
 
 Provides library functionality for communicating with a FIDO device over USB as
 well as verifying attestation and assertion signatures.
@@ -19,7 +19,7 @@ See the _LICENSE_ file for the full license text.
 
 === Build
 
-fido uses CMake, and can be built with the following commands:
+fido2 uses CMake, and can be built with the following commands:
 
   # (rm -rf build && mkdir build && cd build && cmake ..)
   # make -C build
