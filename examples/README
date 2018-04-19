@@ -1,0 +1,35 @@
+The following examples are provided:
+
+- manifest
+	Prints a list of configured FIDO devices on stdout.
+
+- info <device>
+	Prints information about <device> on stdout.
+
+- reset <device>
+	Performs a factory reset on <device>.
+
+- setpin <pin> [oldpin] <device>
+	Configures <pin> as the new PIN of <device>. If [oldpin] is provided,
+	it is used as the device's current PIN.
+
+- cred [-P pin] [-k pubkey] [-ei cred_id] [-rv] <device>
+	Creates a new credential on <device>. The credential's attestation
+	certificate is verified. If option -k is specified, the credential's
+	public key is stored in <pubkey>. If option -i is specified, the
+	credential ID is stored in <cred_id>. The -e option may be used to add
+	<cred_id> to the list of excluded credentials. If option -r is
+	specified, the generated credential will involve a resident key.
+	User verification may be requested through the -v option.
+
+- assert [-pv] [-a cred_id] <pubkey> <device>
+	Asks <device> for a FIDO2 assertion corresponding to [cred_id], which
+	may be omitted for resident keys. The obtained assertion is verified
+	using <pubkey>. The -p option requests that the user be present.
+	User verification may be requested through the -v option.
+
+- retries <device>
+	Get the number of PIN attempts left on <device> before lockout.
+
+Debugging is possible through the use of the FIDO_DEBUG environment variable.
+If set, libfido will produce a log of its transactions with the authenticator.
