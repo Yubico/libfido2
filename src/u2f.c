@@ -97,10 +97,10 @@ send_dummy_register(fido_dev_t *dev, int ms)
 	memset(&challenge, 0xff, sizeof(challenge));
 	memset(&application, 0xff, sizeof(application));
 
-	if ((apdu = iso7816_new(U2F_CMD_REGISTER, 0,
-	    2 * SHA256_DIGEST_LENGTH)) == NULL ||
-	    iso7816_add(apdu, &challenge, sizeof(challenge)) < 0 ||
-	    iso7816_add(apdu, &application, sizeof(application)) < 0) {
+	if ((apdu = iso7816_new(U2F_CMD_REGISTER, 0, 2 *
+	    SHA256_DIGEST_LENGTH)) == NULL || iso7816_add(apdu, &challenge,
+	    sizeof(challenge)) < 0 || iso7816_add(apdu, &application,
+	    sizeof(application)) < 0) {
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}

@@ -16,6 +16,7 @@ decode_version(const cbor_item_t *item, void *arg)
 	/* keep ptr[x] and len consistent */
 	if (cbor_string_copy(item, &v->ptr[i]) < 0)
 		return (-1);
+
 	v->len++;
 
 	return (0);
@@ -50,6 +51,7 @@ decode_extension(const cbor_item_t *item, void *arg)
 	/* keep ptr[x] and len consistent */
 	if (cbor_string_copy(item, &e->ptr[i]) < 0)
 		return (-1);
+
 	e->len++;
 
 	return (0);
@@ -237,6 +239,7 @@ fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 
 	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0)
 		return (FIDO_ERR_RX);
+
 	return (parse_cbor_reply(reply, (size_t)reply_len, ci,
 	    parse_reply_element));
 }
@@ -247,9 +250,8 @@ fido_dev_get_cbor_info_wait(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 	int r;
 
 	if ((r = fido_dev_get_cbor_info_tx(dev)) != FIDO_OK ||
-	    (r = fido_dev_get_cbor_info_rx(dev, ci, ms)) != FIDO_OK) {
+	    (r = fido_dev_get_cbor_info_rx(dev, ci, ms)) != FIDO_OK)
 		return (r);
-	}
 
 	return (FIDO_OK);
 }

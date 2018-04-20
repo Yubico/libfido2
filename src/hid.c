@@ -104,11 +104,13 @@ get_report_descriptor(const char *path, struct hidraw_report_descriptor *hrd)
 
 	if ((fd = open(path, O_RDONLY)) < 0)
 		return (-1);
+
 	if ((r = ioctl(fd, HIDIOCGRDESCSIZE, &s)) < 0 || s < 0 ||
 	    (unsigned)s > HID_MAX_DESCRIPTOR_SIZE)
 		goto fail;
 
 	hrd->size = s;
+
 	if ((r = ioctl(fd, HIDIOCGRDESC, hrd)) < 0)
 		goto fail;
 
@@ -181,6 +183,7 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 	if (ilen == 0)
 		return (FIDO_OK); /* nothing to do */
+
 	if (devlist == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 

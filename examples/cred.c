@@ -91,6 +91,7 @@ verify_cred(const char *fmt, const unsigned char *authdata_ptr,
 		if (write_ec_pubkey(key_out, fido_cred_pubkey(cred)) < 0)
 			errx(1, "write_pubkey");
 	}
+
 	if (id_out != NULL) {
 		/* extract the credential id */
 		if (write_blob(id_out, fido_cred_id_ptr(cred),
@@ -165,6 +166,7 @@ main(int argc, char **argv)
 
 	if ((dev = fido_dev_new()) == NULL)
 		errx(1, "fido_dev_new");
+
 	if ((r = fido_dev_open(dev, argv[0])) != FIDO_OK)
 		errx(1, "fido_dev_open: %s (0x%x)", fido_strerr(r), r);
 	if (u2f)

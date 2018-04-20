@@ -97,10 +97,10 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 7; i++) {
+	for (size_t i = 0; i < 7; i++)
 		if (argv[i] != NULL)
 			cbor_decref(&argv[i]);
-	}
+
 	free(f.ptr);
 
 	return (r);
@@ -122,6 +122,7 @@ fido_dev_get_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
 	/* start with room for a single assertion */
 	if ((assert->stmt = calloc(1, sizeof(fido_assert_stmt))) == NULL)
 		return (FIDO_ERR_INTERNAL);
+
 	assert->stmt_len = 0;
 	assert->stmt_cnt = 1;
 
@@ -252,9 +253,11 @@ verify_sig(const fido_blob_t *dgst, const es256_pk_t *pk,
 	/* openssl needs ints */
 	if (sig->len > INT_MAX)
 		return (-1);
+
 	if ((pkey = es256_pk_to_EVP_PKEY(pk)) == NULL ||
 	    (ec = EVP_PKEY_get0_EC_KEY(pkey)) == NULL)
 		goto fail;
+
 	if (ECDSA_verify(0, dgst->ptr, dgst->len, sig->ptr, sig->len, ec) != 1)
 		goto fail;
 
@@ -316,6 +319,7 @@ fido_assert_set_clientdata_hash(fido_assert_t *assert,
 {
 	if (fido_blob_set(&assert->cdh, hash, hash_len) < 0)
 		return (FIDO_ERR_INTERNAL);
+
 	return (FIDO_OK);
 }
 
@@ -326,6 +330,7 @@ fido_assert_set_rp(fido_assert_t *assert, const char *id)
 		free(assert->rp_id);
 		assert->rp_id = NULL;
 	}
+
 	if ((assert->rp_id = strdup(id)) == NULL)
 		return (FIDO_ERR_INTERNAL);
 
@@ -346,10 +351,10 @@ fido_assert_allow_cred(fido_assert_t *assert, const unsigned char *ptr,
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
-	if (fido_blob_set(&id, ptr, len) < 0 ||
-	    (list_ptr = recallocarray(assert->allow_list.ptr,
-	    assert->allow_list.len, assert->allow_list.len + 1,
-	    sizeof(fido_blob_t))) == NULL) {
+
+	if (fido_blob_set(&id, ptr, len) < 0 || (list_ptr =
+	    recallocarray(assert->allow_list.ptr, assert->allow_list.len,
+	    assert->allow_list.len + 1, sizeof(fido_blob_t))) == NULL) {
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
@@ -578,12 +583,12 @@ fido_assert_set_authdata(fido_assert_t *assert, size_t idx,
 
 	if (idx >= assert->stmt_len)
 		return (FIDO_ERR_INVALID_ARGUMENT);
+
 	stmt = &assert->stmt[idx];
 	fido_assert_clean_authdata(stmt);
 
-	if ((item = cbor_load(ptr, len, &cbor)) == NULL ||
-	    decode_authdata(item, &stmt->authdata_cbor, &stmt->authdata,
-	    NULL) < 0) {
+	if ((item = cbor_load(ptr, len, &cbor)) == NULL || decode_authdata(item,
+	    &stmt->authdata_cbor, &stmt->authdata, NULL) < 0) {
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
@@ -615,10 +620,12 @@ fido_assert_set_sig(fido_assert_t *a, size_t idx, const unsigned char *ptr,
 
 	if (idx >= a->stmt_len)
 		return (FIDO_ERR_INVALID_ARGUMENT);
+
 	fido_assert_clean_sig(&a->stmt[idx]);
 
 	if ((sig = malloc(len)) == NULL)
 		return (FIDO_ERR_INTERNAL);
+
 	memcpy(sig, ptr, len);
 	a->stmt[idx].sig.ptr = sig;
 	a->stmt[idx].sig.len = len;

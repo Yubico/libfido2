@@ -254,6 +254,7 @@ es256_pk_to_EVP_PKEY(const es256_pk_t *k)
 	if ((pkey = EVP_PKEY_new()) == NULL ||
 	    EVP_PKEY_assign_EC_KEY(pkey, ec) == 0)
 		goto fail;
+
 	ec = NULL; /* at this point, ec belongs to evp */
 
 	ok = 0;
@@ -330,6 +331,7 @@ es256_sk_to_EVP_PKEY(const es256_sk_t *k)
 	if ((pkey = EVP_PKEY_new()) == NULL ||
 	    EVP_PKEY_assign_EC_KEY(pkey, ec) == 0)
 		goto fail;
+
 	ec = NULL; /* at this point, ec belongs to evp */
 
 	ok = 0;

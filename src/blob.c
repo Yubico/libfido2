@@ -20,10 +20,13 @@ fido_blob_set(fido_blob_t *b, const unsigned char *ptr, size_t len)
 		explicit_bzero(b->ptr, b->len);
 		free(b->ptr);
 	}
-	b->len = 0;
 
-	if ((b->ptr = malloc(len)) == NULL)
+	b->len = 0;
+	b->ptr = malloc(len);
+
+	if (b->ptr == NULL)
 		return (-1);
+
 	memcpy(b->ptr, ptr, len);
 	b->len = len;
 

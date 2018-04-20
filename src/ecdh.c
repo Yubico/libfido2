@@ -77,11 +77,12 @@ fido_do_ecdh(fido_dev_t *dev, es256_pk_t **pk, fido_blob_t **ecdh)
 
 	if ((sk = es256_sk_new()) == NULL || (*pk = es256_pk_new()) == NULL)
 		goto fail;
+
 	if (es256_sk_create(sk) < 0 || es256_derive_pk(sk, *pk) < 0)
 		goto fail;
-	if ((ak = es256_pk_new()) == NULL ||
-	    (r = fido_dev_authkey(dev, ak)) != FIDO_OK ||
-	    do_ecdh(sk, ak, ecdh) < 0)
+
+	if ((ak = es256_pk_new()) == NULL || (r = fido_dev_authkey(dev,
+	    ak)) != FIDO_OK || do_ecdh(sk, ak, ecdh) < 0)
 		goto fail;
 
 	r = FIDO_OK;

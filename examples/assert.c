@@ -44,10 +44,13 @@ verify_assert(const unsigned char *authdata_ptr, size_t authdata_len,
 	/* credential pubkey */
 	if ((ec = read_ec_pubkey(key)) == NULL)
 		errx(1, "read_ec_pubkey");
+
 	if ((pk = es256_pk_new()) == NULL)
 		errx(1, "es256_pk_new");
+
 	if (es256_pk_from_EC_KEY(ec, pk) < 0)
 		errx(1, "es256_pk_from_EC_KEY");
+
 	EC_KEY_free(ec);
 	ec = NULL;
 
@@ -141,6 +144,7 @@ main(int argc, char **argv)
 
 	if ((dev = fido_dev_new()) == NULL)
 		errx(1, "fido_dev_new");
+
 	r = fido_dev_open(dev, argv[1]);
 	if (r != FIDO_OK)
 		errx(1, "fido_dev_open");

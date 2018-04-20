@@ -91,6 +91,7 @@ fido_dev_make_cred_rx(fido_dev_t *dev, fido_cred_t *cred, int ms)
 
 	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0)
 		return (FIDO_ERR_RX);
+
 	return (parse_cbor_reply(reply, (size_t)reply_len, cred,
 	    parse_makecred_reply));
 }
@@ -101,9 +102,8 @@ fido_dev_make_cred_wait(fido_dev_t *dev, fido_cred_t *cred, const char *pin, int
 	int  r;
 
 	if ((r = fido_dev_make_cred_tx(dev, cred, pin)) != FIDO_OK ||
-	    (r = fido_dev_make_cred_rx(dev, cred, ms)) != FIDO_OK) {
+	    (r = fido_dev_make_cred_rx(dev, cred, ms)) != FIDO_OK)
 		return (r);
-	}
 
 	return (0);
 }
@@ -370,6 +370,7 @@ fido_cred_set_authdata(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 fail:
 	if (item != NULL)
 		cbor_decref(&item);
+
 	if (r != FIDO_OK)
 		fido_cred_clean_authdata(cred);
 
@@ -386,6 +387,7 @@ fido_cred_set_x509(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 
 	if ((x509 = malloc(len)) == NULL)
 		return (FIDO_ERR_INTERNAL);
+
 	memcpy(x509, ptr, len);
 	cred->attstmt.x5c.ptr = x509;
 	cred->attstmt.x5c.len = len;
@@ -402,6 +404,7 @@ fido_cred_set_sig(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 
 	if ((sig = malloc(len)) == NULL)
 		return (FIDO_ERR_INTERNAL);
+
 	memcpy(sig, ptr, len);
 	cred->attstmt.sig.ptr = sig;
 	cred->attstmt.sig.len = len;
@@ -443,6 +446,7 @@ fido_cred_set_clientdata_hash(fido_cred_t *cred, const unsigned char *hash,
 {
 	if (fido_blob_set(&cred->cdh, hash, hash_len) < 0)
 		return (FIDO_ERR_INTERNAL);
+
 	return (FIDO_OK);
 }
 
@@ -547,6 +551,7 @@ fido_cred_set_fmt(fido_cred_t *cred, const char *fmt)
 
 	if (strcmp(fmt, "packed") && strcmp(fmt, "fido-u2f"))
 		return (FIDO_ERR_INVALID_ARGUMENT);
+
 	if ((cred->fmt = strdup(fmt)) == NULL)
 		return (FIDO_ERR_INTERNAL);
 

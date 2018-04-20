@@ -33,8 +33,8 @@ fido_dev_get_pin_token_tx(fido_dev_t *dev, const char *pin,
 	memset(argv, 0, sizeof(argv));
 	r = FIDO_ERR_TX;
 
-	if ((p = fido_blob_new()) == NULL ||
-	    fido_blob_set(p, (const unsigned char *)pin, strlen(pin)) < 0)
+	if ((p = fido_blob_new()) == NULL || fido_blob_set(p,
+	    (const unsigned char *)pin, strlen(pin)) < 0)
 		goto fail;
 
 	if ((argv[0] = cbor_build_uint8(1)) == NULL ||
@@ -49,10 +49,10 @@ fido_dev_get_pin_token_tx(fido_dev_t *dev, const char *pin,
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 6; i++) {
+	for (size_t i = 0; i < 6; i++)
 		if (argv[i] != NULL)
 			cbor_decref(&argv[i]);
-	}
+
 	free(f.ptr);
 
 	fido_blob_free(&p);
@@ -121,12 +121,15 @@ pad64(const char *pin, fido_blob_t **ppin)
 {
 	if (strlen(pin) > 64)
 		return (FIDO_ERR_INVALID_ARGUMENT);
+
 	if ((*ppin = fido_blob_new()) == NULL)
 		return (FIDO_ERR_INTERNAL);
+
 	if (((*ppin)->ptr = calloc(1, 64)) == NULL) {
 		fido_blob_free(ppin);
 		return (FIDO_ERR_INTERNAL);
 	}
+
 	memcpy((*ppin)->ptr, pin, strlen(pin));
 	(*ppin)->len = 64;
 
@@ -148,9 +151,8 @@ fido_dev_change_pin_tx(fido_dev_t *dev, const char *pin, const char *oldpin)
 	memset(argv, 0, sizeof(argv));
 	r = FIDO_ERR_INTERNAL;
 
-	if ((opin = fido_blob_new()) == NULL ||
-	    fido_blob_set(opin, (const unsigned char *)oldpin,
-	    strlen(oldpin)) < 0)
+	if ((opin = fido_blob_new()) == NULL || fido_blob_set(opin,
+	    (const unsigned char *)oldpin, strlen(oldpin)) < 0)
 		goto fail;
 
 	if ((r = pad64(pin, &ppin)) != FIDO_OK ||
@@ -171,10 +173,10 @@ fido_dev_change_pin_tx(fido_dev_t *dev, const char *pin, const char *oldpin)
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 6; i++) {
+	for (size_t i = 0; i < 6; i++)
 		if (argv[i] != NULL)
 			cbor_decref(&argv[i]);
-	}
+
 	free(f.ptr);
 
 	es256_pk_free(&pk);
@@ -216,10 +218,10 @@ fido_dev_set_pin_tx(fido_dev_t *dev, const char *pin)
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 5; i++) {
+	for (size_t i = 0; i < 5; i++)
 		if (argv[i] != NULL)
 			cbor_decref(&argv[i]);
-	}
+
 	free(f.ptr);
 
 	es256_pk_free(&pk);
@@ -306,10 +308,10 @@ fido_dev_get_retry_count_tx(fido_dev_t *dev)
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 2; i++) {
+	for (size_t i = 0; i < 2; i++)
 		if (argv[i] != NULL)
 			cbor_decref(&argv[i]);
-	}
+
 	free(f.ptr);
 
 	return (r);
@@ -326,6 +328,7 @@ fido_dev_get_retry_count_rx(fido_dev_t *dev, int *retries, int ms)
 
 	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0)
 		return (FIDO_ERR_RX);
+
 	return (parse_cbor_reply(reply, (size_t)reply_len, retries,
 	    parse_retry_count));
 }

@@ -106,9 +106,8 @@ fido_dev_open_wait(fido_dev_t *dev, const char *path, int ms)
 	int r;
 
 	if ((r = fido_dev_open_tx(dev, path)) != FIDO_OK ||
-	    (r = fido_dev_open_rx(dev, ms)) != FIDO_OK) {
+	    (r = fido_dev_open_rx(dev, ms)) != FIDO_OK)
 		return (r);
-	}
 
 	return (FIDO_OK);
 }
@@ -134,9 +133,8 @@ fido_dev_close(fido_dev_t *dev)
 void
 fido_init(void)
 {
-	if (getenv("FIDO_DEBUG") != NULL) {
+	if (getenv("FIDO_DEBUG") != NULL)
 		debug = 1;
-	}
 }
 
 /*

@@ -14,9 +14,8 @@ parse_authkey(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	if (cbor_isa_uint(key) == false ||
 	    cbor_int_get_width(key) != CBOR_INT_8 ||
-	    cbor_get_uint8(key) != 1) {
+	    cbor_get_uint8(key) != 1)
 		return (0); /* ignore */
-	}
 
 	return (es256_pk_decode(val, authkey));
 }
@@ -44,10 +43,10 @@ fido_dev_authkey_tx(fido_dev_t *dev)
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 2; i++) {
+	for (size_t i = 0; i < 2; i++)
 		if (argv[i] != NULL)
 			cbor_decref(&argv[i]);
-	}
+
 	free(f.ptr);
 
 	return (r);
@@ -64,6 +63,7 @@ fido_dev_authkey_rx(fido_dev_t *dev, es256_pk_t *authkey, int ms)
 
 	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0)
 		return (FIDO_ERR_RX);
+
 	return (parse_cbor_reply(reply, (size_t)reply_len, authkey,
 	    parse_authkey));
 }

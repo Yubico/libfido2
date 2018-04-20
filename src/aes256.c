@@ -25,6 +25,7 @@ aes256_cbc_enc(const fido_blob_t *key, const fido_blob_t *in, fido_blob_t *out)
 	    (out->ptr = calloc(1, in->len)) == NULL) {
 		goto fail;
 	}
+
 	if ((ctx = EVP_CIPHER_CTX_new()) == NULL || key->len != 32 ||
 	    !EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key->ptr, iv) ||
 	    !EVP_CIPHER_CTX_set_padding(ctx, 0) ||
@@ -32,6 +33,7 @@ aes256_cbc_enc(const fido_blob_t *key, const fido_blob_t *in, fido_blob_t *out)
 	    len < 0 || (size_t)len != in->len) {
 		goto fail;
 	}
+
 	out->len = (size_t)len;
 
 	ok = 0;
@@ -64,6 +66,7 @@ aes256_cbc_dec(const fido_blob_t *key, const fido_blob_t *in, fido_blob_t *out)
 	    (out->ptr = calloc(1, in->len)) == NULL) {
 		goto fail;
 	}
+
 	if ((ctx = EVP_CIPHER_CTX_new()) == NULL || key->len != 32 ||
 	    !EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key->ptr, iv) ||
 	    !EVP_CIPHER_CTX_set_padding(ctx, 0) ||
@@ -71,6 +74,7 @@ aes256_cbc_dec(const fido_blob_t *key, const fido_blob_t *in, fido_blob_t *out)
 	    len < 0 || (size_t)len > in->len + 32) {
 		goto fail;
 	}
+
 	out->len = (size_t)len;
 
 	ok = 0;

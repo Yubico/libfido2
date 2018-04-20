@@ -23,10 +23,9 @@ cbor_map_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
 
 	n = cbor_map_size(item);
 
-	for (size_t i = 0; i < n; i++) {
+	for (size_t i = 0; i < n; i++)
 		if (f(v[i].key, v[i].value, arg) < 0)
 			return (-1);
-	}
 
 	return (0);
 }
@@ -43,10 +42,9 @@ cbor_array_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
 
 	n = cbor_array_size(item);
 
-	for (size_t i = 0; i < n; i++) {
+	for (size_t i = 0; i < n; i++)
 		if (f(v[i], arg) < 0)
 			return (-1);
-	}
 
 	return (0);
 }
@@ -63,6 +61,7 @@ parse_cbor_reply(const unsigned char *blob, size_t blob_len, void *arg,
 		r = FIDO_ERR_RX;
 		goto fail;
 	}
+
 	if (blob[0] != FIDO_OK) {
 		r = blob[0];
 		goto fail;
@@ -198,13 +197,14 @@ cbor_flatten_vector(cbor_item_t *argv[], size_t argc)
 
 	if (argc > UINT8_MAX - 1)
 		return (NULL);
+
 	if ((map = cbor_new_definite_map(argc)) == NULL)
 		return (NULL);
 
-	for (i = 0; i < argc; i++) {
+	for (i = 0; i < argc; i++)
 		if (cbor_add_arg(map, i + 1, argv[i]) < 0)
 			break;
-	}
+
 	if (i != argc) {
 		cbor_decref(&map);
 		map = NULL;
@@ -224,9 +224,10 @@ cbor_build_frame(uint8_t cmd, cbor_item_t *argv[], size_t argc, fido_blob_t *f)
 
 	if ((flat = cbor_flatten_vector(argv, argc)) == NULL)
 		goto fail;
+
 	cbor_len = cbor_serialize_alloc(flat, &cbor, &cbor_alloc_len);
-	if (cbor_len == 0 || cbor_len == SIZE_MAX ||
-	    (f->ptr = malloc(cbor_len + 1)) == NULL)
+	if (cbor_len == 0 || cbor_len == SIZE_MAX || (f->ptr =
+	    malloc(cbor_len + 1)) == NULL)
 		goto fail;
 
 	f->len = cbor_len + 1;
@@ -337,6 +338,7 @@ encode_pubkey_list(const fido_blob_array_t *list)
 
 	if ((array = cbor_new_definite_array(list->len)) == NULL)
 		goto fail;
+
 	for (size_t i = 0; i < list->len; i++) {
 		if ((key = encode_pubkey(&list->ptr[i])) == NULL ||
 		    cbor_array_push(array, key) == false)
@@ -361,6 +363,7 @@ encode_options(bool rk, bool uv)
 
 	if ((item = cbor_new_definite_map(2)) == NULL)
 		return (NULL);
+
 	if (cbor_add_bool(item, "rk", rk) < 0 ||
 	    cbor_add_bool(item, "uv", uv) < 0) {
 		cbor_decref(&item);
@@ -377,6 +380,7 @@ encode_assert_options(bool up, bool uv)
 
 	if ((item = cbor_new_definite_map(2)) == NULL)
 		return (NULL);
+
 	if (cbor_add_bool(item, "up", up) < 0 ||
 	    cbor_add_bool(item, "uv", uv) < 0) {
 		cbor_decref(&item);
@@ -393,10 +397,9 @@ encode_pin_auth(const fido_blob_t *hmac_key, const fido_blob_t *data)
 	unsigned char	 dgst[SHA256_DIGEST_LENGTH];
 	unsigned int	 dgst_len;
 
-	if ((md = EVP_get_digestbyname("SHA256")) == NULL ||
-	    HMAC(md, hmac_key->ptr, (int)hmac_key->len, data->ptr,
-	    (int)data->len, dgst, &dgst_len) == NULL ||
-	    dgst_len != SHA256_DIGEST_LENGTH)
+	if ((md = EVP_get_digestbyname("SHA256")) == NULL || HMAC(md,
+	    hmac_key->ptr, (int)hmac_key->len, data->ptr, (int)data->len,
+	    dgst, &dgst_len) == NULL || dgst_len != SHA256_DIGEST_LENGTH)
 		return (NULL);
 
 	return (cbor_build_bytestring(dgst, 16));
@@ -416,6 +419,7 @@ encode_pin_enc(const fido_blob_t *key, const fido_blob_t *pin)
 
 	if (aes256_cbc_enc(key, pin, &pe) < 0)
 		return (NULL);
+
 	item = cbor_build_bytestring(pe.ptr, pe.len);
 	free(pe.ptr);
 
@@ -427,6 +431,7 @@ sha256(const unsigned char *data, size_t data_len, fido_blob_t *digest)
 {
 	if ((digest->ptr = calloc(1, SHA256_DIGEST_LENGTH)) == NULL)
 		return (-1);
+
 	digest->len = SHA256_DIGEST_LENGTH;
 
 	if (SHA256(data, data_len, digest->ptr) != digest->ptr) {
@@ -458,11 +463,12 @@ encode_change_pin_auth(const fido_blob_t *key, const fido_blob_t *new_pin,
 	    (phe = fido_blob_new()) == NULL)
 		goto fail;
 
-	if (aes256_cbc_enc(key, new_pin, npe) < 0 ||
-	    sha256(pin->ptr, pin->len, ph) < 0 || ph->len < 16)
+	if (aes256_cbc_enc(key, new_pin, npe) < 0 || sha256(pin->ptr, pin->len,
+	    ph) < 0 || ph->len < 16)
 		goto fail;
 
 	ph->len = 16; /* first 16 bytes */
+
 	if (aes256_cbc_enc(key, ph, phe) < 0)
 		goto fail;
 
@@ -507,6 +513,7 @@ encode_set_pin_auth(const fido_blob_t *key, const fido_blob_t *pin)
 
 	if ((pe = fido_blob_new()) == NULL || aes256_cbc_enc(key, pin, pe) < 0)
 		goto fail;
+
 	if ((md = EVP_get_digestbyname("SHA256")) == NULL || key->len != 32 ||
 	    HMAC(md, key->ptr, (int)key->len, pe->ptr, (int)pe->len, dgst,
 	    &dgst_len) == NULL || dgst_len != SHA256_DIGEST_LENGTH)
@@ -529,7 +536,9 @@ encode_pin_hash_enc(const fido_blob_t *shared, const fido_blob_t *pin)
 	if ((ph = fido_blob_new()) == NULL || (phe = fido_blob_new()) == NULL ||
 	    sha256(pin->ptr, pin->len, ph) < 0 || ph->len < 16)
 		goto fail;
+
 	ph->len = 16; /* first 16 bytes */
+
 	if (aes256_cbc_enc(shared, ph, phe) < 0)
 		goto fail;
 
@@ -572,6 +581,7 @@ decode_attcred(const unsigned char **buf, size_t *len, fido_attcred_t *attcred)
 		return (-1);
 
 	attcred->id.len = (size_t)be16toh(id_len);
+
 	if ((attcred->id.ptr = malloc(attcred->id.len)) == NULL ||
 	    buf_read(buf, len, attcred->id.ptr, attcred->id.len) < 0)
 		return (-1);
@@ -588,7 +598,6 @@ fail:
 	if (item != NULL)
 		cbor_decref(&item);
 
-
 	return (ok);
 }
 
@@ -602,6 +611,7 @@ decode_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
 	if (cbor_isa_bytestring(item) == false ||
 	    cbor_bytestring_is_definite(item) == false)
 		return (-1);
+
 	if (cbor_serialize_alloc(item, &authdata_cbor->ptr,
 	    &authdata_cbor->len) == 0)
 		return (-1);
@@ -611,6 +621,7 @@ decode_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
 
 	if (buf_read(&buf, &len, authdata, sizeof(*authdata)) < 0)
 		return (-1);
+
 	authdata->sigcount = be32toh(authdata->sigcount);
 
 	if (attcred != NULL) {
@@ -682,6 +693,7 @@ decode_uint64(const cbor_item_t *item, uint64_t *n)
 {
 	if (cbor_isa_uint(item) == false)
 		return (-1);
+
 	*n = cbor_get_uint64(item);
 
 	return (0);
@@ -696,10 +708,10 @@ decode_cred_id_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	if (cbor_string_copy(key, &name) < 0)
 		goto fail;
-	if (!strcmp(name, "id")) {
+
+	if (!strcmp(name, "id"))
 		if (cbor_bytestring_copy(val, &id->ptr, &id->len) < 0)
 			goto fail;
-	}
 
 	ok = 0;
 fail:
