@@ -280,8 +280,10 @@ fido_assert_verify(fido_assert_t *assert, size_t idx, const es256_pk_t *pk)
 	dgst.ptr = buf;
 	dgst.len = sizeof(buf);
 
-	if (idx >= assert->stmt_len)
+	if (idx >= assert->stmt_len) {
+		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto out;
+	}
 
 	stmt = &assert->stmt[idx];
 
