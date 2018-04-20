@@ -259,64 +259,96 @@ fail:
 }
 
 static int
-encode_cred_authdata(const char *rp_id, const uint8_t *kh, uint8_t kh_len,
-    const uint8_t *pubkey, size_t pubkey_len, fido_blob_t *out)
+cbor_blob_from_ec_point(const uint8_t *ec_point, size_t ec_point_len,
+    fido_blob_t *cbor_blob)
 {
-	fido_blob_t	 body;
-	fido_blob_t	 cred;
 	es256_pk_t	*pk = NULL;
 	cbor_item_t	*pk_cbor = NULL;
-	cbor_item_t	*body_cbor = NULL;
-	size_t		 dummy;
+	size_t		 alloc_len;
 	int		 ok = -1;
 
-	memset(&body, 0, sizeof(body));
-	memset(&cred, 0, sizeof(cred));
-	memset(out, 0, sizeof(*out));
+	if (ec_point_len != 65 || ec_point[0] != 0x04)
+		goto fail; /* unexpected format */
 
-	if (rp_id == NULL)
+	if ((pk = es256_pk_new()) == NULL || es256_pk_set_x(pk,
+	    &ec_point[1]) < 0 || es256_pk_set_y(pk, &ec_point[33]) < 0)
 		goto fail;
 
-	/* encode and serialize pubkey */
-	if (pubkey_len != 65 || pubkey[0] != 0x04 ||
-	    (pk = es256_pk_new()) == NULL ||
-	    es256_pk_set_x(pk, &pubkey[1]) < 0 ||
-	    es256_pk_set_y(pk, &pubkey[33]) < 0 ||
-	    (pk_cbor = es256_pk_encode(pk)) == NULL ||
-	    (cred.len = cbor_serialize_alloc(pk_cbor, &cred.ptr, &dummy)) != 77)
-		goto fail;
-
-	body.len = 32 + 1 + 4 + 16 + 2 + kh_len + 77;
-	if ((body.ptr = calloc(1, body.len)) == NULL)
-		goto fail;
-	SHA256((const unsigned char *)rp_id, strlen(rp_id), &body.ptr[0]);
-	body.ptr[32] = 0x41; /* hardcoded flags value */
-	body.ptr[53] = 0x00;
-	body.ptr[54] = kh_len;
-	memcpy(&body.ptr[55], kh, kh_len);
-	memcpy(&body.ptr[55 + kh_len], cred.ptr, 77);
-
-	if ((body_cbor = fido_blob_encode(&body)) == NULL ||
-	    (out->len = cbor_serialize_alloc(body_cbor, &out->ptr,
-	    &dummy)) == 0)
+	if ((pk_cbor = es256_pk_encode(pk)) == NULL || (cbor_blob->len =
+	    cbor_serialize_alloc(pk_cbor, &cbor_blob->ptr, &alloc_len)) != 77)
 		goto fail;
 
 	ok = 0;
 fail:
 	es256_pk_free(&pk);
 
-	if (pk_cbor != NULL)
+	if (pk_cbor)
 		cbor_decref(&pk_cbor);
-	if (body_cbor != NULL)
-		cbor_decref(&body_cbor);
 
-	if (cred.ptr != NULL) {
-		explicit_bzero(cred.ptr, cred.len);
-		free(cred.ptr);
+	return (ok);
+}
+
+static int
+encode_cred_authdata(const char *rp_id, const uint8_t *kh, uint8_t kh_len,
+    const uint8_t *pubkey, size_t pubkey_len, fido_blob_t *out)
+{
+	fido_authdata_t	 	 authdata;
+	fido_attcred_raw_t	 attcred_raw;
+	fido_blob_t		 pk_blob;
+	fido_blob_t		 authdata_blob;
+	cbor_item_t		*authdata_cbor = NULL;
+	unsigned char		*ptr;
+	size_t			 len;
+	size_t			 alloc_len;
+	int			 ok = -1;
+
+	memset(&pk_blob, 0, sizeof(pk_blob));
+	memset(&authdata_blob, 0, sizeof(authdata_blob));
+	memset(out, 0, sizeof(*out));
+
+	if (rp_id == NULL)
+		goto fail;
+
+	if (cbor_blob_from_ec_point(pubkey, pubkey_len, &pk_blob) < 0)
+		goto fail;
+
+	SHA256((const void *)rp_id, strlen(rp_id), authdata.rp_id_hash);
+	authdata.flags = 0x41; /* XXX hardcoded flags value */
+	authdata.sigcount = 0;
+
+	memset(&attcred_raw.aaguid, 0, sizeof(attcred_raw.aaguid));
+	attcred_raw.id_len = (uint16_t)(kh_len << 8); /* XXX */
+
+	len = authdata_blob.len = sizeof(authdata) + sizeof(attcred_raw) +
+	    kh_len + pk_blob.len;
+	ptr = authdata_blob.ptr = calloc(1, authdata_blob.len);
+
+	if (authdata_blob.ptr == NULL)
+		goto fail;
+
+	if (buf_write(&ptr, &len, &authdata, sizeof(authdata)) < 0 ||
+	    buf_write(&ptr, &len, &attcred_raw, sizeof(attcred_raw)) < 0 ||
+	    buf_write(&ptr, &len, kh, kh_len) < 0 || buf_write(&ptr, &len,
+	    pk_blob.ptr, pk_blob.len) < 0)
+		goto fail;
+
+	if ((authdata_cbor = fido_blob_encode(&authdata_blob)) == NULL ||
+	    (out->len = cbor_serialize_alloc(authdata_cbor, &out->ptr,
+	    &alloc_len)) == 0)
+		goto fail;
+
+	ok = 0;
+fail:
+	if (authdata_cbor)
+		cbor_decref(&authdata_cbor);
+
+	if (pk_blob.ptr) {
+		explicit_bzero(pk_blob.ptr, pk_blob.len);
+		free(pk_blob.ptr);
 	}
-	if (body.ptr != NULL) {
-		explicit_bzero(body.ptr, body.len);
-		free(body.ptr);
+	if (authdata_blob.ptr) {
+		explicit_bzero(authdata_blob.ptr, authdata_blob.len);
+		free(authdata_blob.ptr);
 	}
 
 	return (ok);

@@ -14,6 +14,12 @@ typedef struct fido_authdata {
 	/* actually longer */
 } __attribute__ ((packed)) fido_authdata_t;
 
+typedef struct fido_attcred_raw {
+	unsigned char aaguid[16]; /* credential's aaguid */
+	uint16_t      id_len;     /* credential id length */
+	uint8_t       body[];     /* credential id + pubkey */
+} __attribute__ ((packed)) fido_attcred_raw_t;
+
 typedef struct fido_attcred {
 	unsigned char aaguid[16]; /* credential's aaguid */
 	fido_blob_t   id;         /* credential id */
