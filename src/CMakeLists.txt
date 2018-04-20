@@ -12,6 +12,7 @@ list(APPEND FIDO_SOURCES
 	assert.c
 	authkey.c
 	blob.c
+	buf.c
 	cbor.c
 	cred.c
 	dev.c

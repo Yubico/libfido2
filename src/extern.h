@@ -35,7 +35,6 @@ int decode_user(const cbor_item_t *, fido_user_t *);
 int decode_x5c(const cbor_item_t *, void *);
 
 /* auxiliary cbor routines */
-int buf_read(const unsigned char **, size_t *, void *, size_t);
 int cbor_add_bool(cbor_item_t *, const char *, bool);
 int cbor_add_bytestring(cbor_item_t *, const char *, const unsigned char *,
     size_t);
@@ -49,6 +48,10 @@ int cbor_map_iter(const cbor_item_t *, void *, int(*)(const cbor_item_t *,
 int cbor_string_copy(const cbor_item_t *, char **);
 int parse_cbor_reply(const unsigned char *, size_t, void *,
     int(*)(const cbor_item_t *, const cbor_item_t *, void *));
+
+/* buf */
+int buf_read(const unsigned char **, size_t *, void *, size_t);
+int buf_write(unsigned char **, size_t *, const void *, size_t);
 
 /* u2f */
 int u2f_register(fido_dev_t *, fido_cred_t *, int);

@@ -542,19 +542,6 @@ fail:
 }
 
 int
-buf_read(const unsigned char **buf, size_t *len, void *dst, size_t count)
-{
-	if (*len < count)
-		return (-1);
-
-	memcpy(dst, *buf, count);
-	*buf += count;
-	*len -= count;
-
-	return (0);
-}
-
-int
 decode_fmt(const cbor_item_t *item, char **fmt)
 {
 	char	*type = NULL;
