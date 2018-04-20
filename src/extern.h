@@ -48,6 +48,8 @@ int cbor_map_iter(const cbor_item_t *, void *, int(*)(const cbor_item_t *,
 int cbor_string_copy(const cbor_item_t *, char **);
 int parse_cbor_reply(const unsigned char *, size_t, void *,
     int(*)(const cbor_item_t *, const cbor_item_t *, void *));
+int add_cbor_pin_params(fido_dev_t *, const fido_blob_t *, const char *,
+    cbor_item_t **, cbor_item_t **);
 
 /* buf */
 int buf_read(const unsigned char **, size_t *, void *, size_t);

@@ -64,7 +64,7 @@ parse_assert_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 }
 
 static int
-fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert)
+fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 {
 	fido_blob_t	 f;
 	cbor_item_t	*argv[7];
@@ -74,18 +74,21 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert)
 	memset(&f, 0, sizeof(f));
 	r = FIDO_ERR_INTERNAL;
 
-	/* add required parameters */
 	if ((argv[0] = cbor_build_string(assert->rp_id)) == NULL ||
 	    (argv[1] = fido_blob_encode(&assert->cdh)) == NULL ||
 	    (argv[4] = encode_assert_options(assert->up, assert->uv)) == NULL)
 		goto fail;
 
-	/* add list of allowed credentials */
-	if (assert->allow_list.len > 0) {
+	if (assert->allow_list.len) { /* allowed credentials */
 		const fido_blob_array_t *cl = &assert->allow_list;
 		if ((argv[2] = encode_pubkey_list(cl)) == NULL)
 			goto fail;
 	}
+
+	if (pin) /* pin authentication */
+		if (add_cbor_pin_params(dev, &assert->cdh, pin, &argv[5],
+		    &argv[6]) < 0)
+			goto fail;
 
 	/* frame and transmit */
 	if (cbor_build_frame(CTAP_CBOR_ASSERT, argv, 7, &f) < 0 ||
@@ -163,11 +166,12 @@ fido_get_next_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
 }
 
 static int
-fido_dev_get_assert_wait(fido_dev_t *dev, fido_assert_t *assert, int ms)
+fido_dev_get_assert_wait(fido_dev_t *dev, fido_assert_t *assert,
+    const char *pin, int ms)
 {
 	int r;
 
-	if ((r = fido_dev_get_assert_tx(dev, assert)) != FIDO_OK ||
+	if ((r = fido_dev_get_assert_tx(dev, assert, pin)) != FIDO_OK ||
 	    (r = fido_dev_get_assert_rx(dev, assert, ms)) != FIDO_OK)
 		return (r);
 
@@ -182,12 +186,15 @@ fido_dev_get_assert_wait(fido_dev_t *dev, fido_assert_t *assert, int ms)
 }
 
 int
-fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert)
+fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 {
-	if (fido_dev_is_fido2(dev) == false)
+	if (fido_dev_is_fido2(dev) == false) {
+		if (pin != NULL)
+			return (FIDO_ERR_UNSUPPORTED_OPTION);
 		return (u2f_authenticate(dev, assert, -1));
+	}
 
-	return (fido_dev_get_assert_wait(dev, assert, -1));
+	return (fido_dev_get_assert_wait(dev, assert, pin, -1));
 }
 
 static int

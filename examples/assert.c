@@ -26,7 +26,7 @@ static const unsigned char cdh[32] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: assert [-puv] [-a cred_id] <pubkey> "
+	fprintf(stderr, "usage: assert [-puv] [-P pin] [-a cred_id] <pubkey> "
 	    "<device>\n");
 	exit(EXIT_FAILURE);
 }
@@ -93,6 +93,7 @@ main(int argc, char **argv)
 	bool		 u2f = false;
 	fido_dev_t	*dev = NULL;
 	fido_assert_t	*assert = NULL;
+	const char	*pin = NULL;
 	unsigned char	*body = NULL;
 	size_t		 len;
 	int		 ch;
@@ -101,8 +102,11 @@ main(int argc, char **argv)
 	if ((assert = fido_assert_new()) == NULL)
 		errx(1, "fido_assert_new");
 
-	while ((ch = getopt(argc, argv, "a:puv")) != -1) {
+	while ((ch = getopt(argc, argv, "P:a:puv")) != -1) {
 		switch (ch) {
+		case 'P':
+			pin = optarg;
+			break;
 		case 'a':
 			if (read_blob(optarg, &body, &len) < 0)
 				errx(1, "read_blob: %s", optarg);
@@ -159,7 +163,7 @@ main(int argc, char **argv)
 	if (r != FIDO_OK)
 		errx(1, "fido_assert_set_options: %s (0x%x)", fido_strerr(r), r);
 
-	r = fido_dev_get_assert(dev, assert);
+	r = fido_dev_get_assert(dev, assert, pin);
 	if (r != FIDO_OK)
 		errx(1, "fido_dev_get_assert: %s (0x%x)", fido_strerr(r), r);
 	r = fido_dev_close(dev);
