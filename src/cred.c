@@ -35,45 +35,65 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 }
 
 static int
+add_cbor_pin_params(fido_dev_t *dev, const fido_blob_t *cdh, const char *pin,
+    cbor_item_t **auth, cbor_item_t **opt)
+{
+	fido_blob_t	*ecdh = NULL;
+	fido_blob_t	*token = NULL;
+	es256_pk_t	*pk = NULL;
+	int		 ok = -1;
+	int		 r;
+
+	if ((token = fido_blob_new()) == NULL)
+		goto fail;
+
+	if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK ||
+	    (r = fido_dev_get_pin_token(dev, pin, ecdh, pk, token)) != FIDO_OK)
+		goto fail;
+
+	if ((*auth = encode_pin_auth(token, cdh)) == NULL ||
+	    (*opt = encode_pin_opt()) == NULL)
+		goto fail;
+
+	ok = 0;
+fail:
+	es256_pk_free(&pk);
+
+	fido_blob_free(&ecdh);
+	fido_blob_free(&token);
+
+	return (ok);
+}
+
+static int
 fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 {
 	fido_blob_t	 f;
-	fido_blob_t	*ecdh = NULL;
-	fido_blob_t	*token = NULL;
 	cbor_item_t	*argv[9];
-	es256_pk_t	*pk = NULL;
 	int		 r;
 
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
 	r = FIDO_ERR_INTERNAL;
 
-	/* required parameters */
 	if ((argv[0] = fido_blob_encode(&cred->cdh)) == NULL ||
 	    (argv[1] = encode_rp_entity(&cred->rp)) == NULL ||
 	    (argv[2] = encode_user_entity(&cred->user)) == NULL ||
 	    (argv[3] = encode_pubkey_param()) == NULL)
 		goto fail;
-	/* optional parameters */
-	if (cred->excl.len > 0) {
+
+	if (cred->excl.len) /* excluded credentials */
 		if ((argv[4] = encode_pubkey_list(&cred->excl)) == NULL)
 			goto fail;
-	}
-	if (cred->rk || cred->uv) {
+
+	if (cred->rk || cred->uv) /* options */
 		if ((argv[6] = encode_options(cred->rk, cred->uv)) == NULL)
 			goto fail;
-	}
 
-	/* pin authentication */
-	if (pin != NULL) {
-		if ((token = fido_blob_new()) == NULL ||
-		    (r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK ||
-		    (r = fido_dev_get_pin_token(dev, pin, ecdh, pk, token)) != FIDO_OK)
+	if (pin) /* pin authentication */
+		if (add_cbor_pin_params(dev, &cred->cdh, pin, &argv[7],
+		    &argv[8]) < 0)
 			goto fail;
-		if ((argv[7] = encode_pin_auth(token, &cred->cdh)) == NULL ||
-		    (argv[8] = encode_pin_opt()) == NULL)
-			goto fail;
-	}
 
 	/* framing and transmission */
 	if (cbor_build_frame(CTAP_CBOR_MAKECRED, argv, 9, &f) < 0 ||
@@ -82,15 +102,11 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 9; i++) {
-		if (argv[i] != NULL)
+	for (size_t i = 0; i < 9; i++)
+		if (argv[i])
 			cbor_decref(&argv[i]);
-	}
-	free(f.ptr);
 
-	es256_pk_free(&pk);
-	fido_blob_free(&ecdh);
-	fido_blob_free(&token);
+	free(f.ptr);
 
 	return (r);
 }
