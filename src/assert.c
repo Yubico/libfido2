@@ -276,19 +276,20 @@ fido_assert_verify(fido_assert_t *assert, size_t idx, const es256_pk_t *pk)
 
 	dgst.ptr = buf;
 	dgst.len = sizeof(buf);
-	r = FIDO_ERR_INVALID_ARGUMENT;
 
 	if (idx >= assert->stmt_len)
 		goto out;
+
 	stmt = &assert->stmt[idx];
 
-	if (assert->cdh.ptr == NULL ||
-	    stmt->authdata_cbor.ptr == NULL ||
-	    stmt->sig.ptr == NULL)
+	if (assert->cdh.ptr == NULL || stmt->authdata_cbor.ptr == NULL ||
+	    stmt->sig.ptr == NULL) {
+		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto out;
+	}
 
 	if (check_flags(stmt->authdata.flags, assert->up, assert->uv) < 0) {
-		r = FIDO_ERR_INTERNAL;
+		r = FIDO_ERR_INVALID_PARAM;
 		goto out;
 	}
 
