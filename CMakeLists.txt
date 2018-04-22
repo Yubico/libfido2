@@ -49,6 +49,14 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic-errors")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-all")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+
+# Use -Wshorten-64-to-32 if available.
+include(CheckCCompilerFlag)
+check_c_compiler_flag("-Wshorten-64-to-32" HAVE_SHORTEN_64_TO_32)
+if (HAVE_SHORTEN_64_TO_32)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshorten-64-to-32")
+endif()
 
 if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
