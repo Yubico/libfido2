@@ -2,9 +2,6 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-include(CheckIncludeFiles)
-include(CheckFunctionExists)
-
 add_definitions(-D_FIDO_INTERNAL)
 
 list(APPEND FIDO_SOURCES
@@ -100,10 +97,13 @@ if(WIN32)
 	target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt)
 endif()
 
-include(GNUInstallDirs)
 install(FILES fido.h DESTINATION include)
 install(DIRECTORY fido
 	DESTINATION include REGEX "(compat).h" EXCLUDE)
 install(TARGETS fido2 fido2_shared
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+configure_file(libfido2.pc.in libfido2.pc @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libfido2.pc"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")

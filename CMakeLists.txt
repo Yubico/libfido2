@@ -5,6 +5,14 @@
 project(libfido2)
 cmake_minimum_required(VERSION 3.0)
 
+include(CheckCCompilerFlag)
+include(CheckFunctionExists)
+include(CheckFunctionExists)
+include(CheckIncludeFiles)
+include(CheckIncludeFiles)
+include(FindPkgConfig)
+include(GNUInstallDirs)
+
 set(CMAKE_COLOR_MAKEFILE off)
 set(CMAKE_VERBOSE_MAKEFILE on)
 set(FIDO_MAJOR "0")
@@ -12,7 +20,6 @@ set(FIDO_MINOR "0")
 set(FIDO_PATCH "0")
 set(FIDO_VERSION ${FIDO_MAJOR}.${FIDO_MINOR}.${FIDO_PATCH})
 
-include(FindPkgConfig)
 pkg_search_module(CBOR libcbor REQUIRED)
 if(APPLE)
 	# Look for Homebrew's OpenSSL 1.1.
@@ -30,10 +37,12 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	# Use hidapi's raw API.
 	pkg_search_module(HIDAPI hidapi-hidraw REQUIRED)
+	set(HIDAPI_NAME "hidapi-hidraw")
 	# Define be32toh().
 	add_definitions(-D_GNU_SOURCE)
 else()
 	pkg_search_module(HIDAPI hidapi REQUIRED)
+	set(HIDAPI_NAME "hidapi")
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W")
@@ -52,7 +61,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 
 # Use -Wshorten-64-to-32 if available.
-include(CheckCCompilerFlag)
 check_c_compiler_flag("-Wshorten-64-to-32" HAVE_SHORTEN_64_TO_32)
 if(HAVE_SHORTEN_64_TO_32)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshorten-64-to-32")
@@ -91,6 +99,8 @@ link_directories(${HIDAPI_LIBRARY_DIRS})
 
 message(STATUS "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
 message(STATUS "CMAKE_C_COMPILER_ID: ${CMAKE_C_COMPILER_ID}")
+message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "CMAKE_INSTALL_LIBDIR: ${CMAKE_INSTALL_LIBDIR}")
 message(STATUS "CBOR_INCLUDE_DIRS: ${CBOR_INCLUDE_DIRS}")
 message(STATUS "CBOR_LIBRARY_DIRS: ${CBOR_LIBRARY_DIRS}")
 message(STATUS "CBOR_LIBRARIES: ${CBOR_LIBRARIES}")
