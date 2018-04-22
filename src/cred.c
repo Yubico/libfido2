@@ -196,17 +196,15 @@ verify_sig(const fido_blob_t *dgst, const fido_blob_t *x5c,
 	int		 ok = -1;
 
 	/* openssl needs ints */
-	if (x5c->len > INT_MAX || sig->len > INT_MAX)
+	if (dgst->len > INT_MAX || x5c->len > INT_MAX || sig->len > INT_MAX)
 		return (-1);
 
 	/* fetch key from x509 */
 	if ((rawcert = BIO_new_mem_buf(x5c->ptr, (int)x5c->len)) == NULL ||
 	    (cert = d2i_X509_bio(rawcert, NULL)) == NULL ||
 	    (pkey = X509_get_pubkey(cert)) == NULL ||
-	    (ec = EVP_PKEY_get0_EC_KEY(pkey)) == NULL)
-		goto fail;
-
-	if (ECDSA_verify(0, dgst->ptr, dgst->len, sig->ptr, sig->len, ec) != 1)
+	    (ec = EVP_PKEY_get0_EC_KEY(pkey)) == NULL || ECDSA_verify(0,
+	    dgst->ptr, (int)dgst->len, sig->ptr, (int)sig->len, ec) != 1)
 		goto fail;
 
 	ok = 0;

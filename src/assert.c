@@ -251,14 +251,12 @@ verify_sig(const fido_blob_t *dgst, const es256_pk_t *pk,
 	int		 ok = -1;
 
 	/* openssl needs ints */
-	if (sig->len > INT_MAX)
+	if (dgst->len > INT_MAX || sig->len > INT_MAX)
 		return (-1);
 
 	if ((pkey = es256_pk_to_EVP_PKEY(pk)) == NULL ||
-	    (ec = EVP_PKEY_get0_EC_KEY(pkey)) == NULL)
-		goto fail;
-
-	if (ECDSA_verify(0, dgst->ptr, dgst->len, sig->ptr, sig->len, ec) != 1)
+	    (ec = EVP_PKEY_get0_EC_KEY(pkey)) == NULL || ECDSA_verify(0,
+	    dgst->ptr, (int)dgst->len, sig->ptr, (int)sig->len, ec) != 1)
 		goto fail;
 
 	ok = 0;
