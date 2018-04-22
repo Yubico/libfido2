@@ -14,7 +14,7 @@ set(FIDO_VERSION ${FIDO_MAJOR}.${FIDO_MINOR}.${FIDO_PATCH})
 
 include(FindPkgConfig)
 pkg_search_module(CBOR libcbor REQUIRED)
-if (APPLE)
+if(APPLE)
 	# Look for Homebrew's OpenSSL 1.1.
 	set(OPENSSL_ROOT_DIR /usr/local/opt/openssl@1.1)
 	find_package(openssl REQUIRED)
@@ -54,7 +54,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 # Use -Wshorten-64-to-32 if available.
 include(CheckCCompilerFlag)
 check_c_compiler_flag("-Wshorten-64-to-32" HAVE_SHORTEN_64_TO_32)
-if (HAVE_SHORTEN_64_TO_32)
+if(HAVE_SHORTEN_64_TO_32)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshorten-64-to-32")
 endif()
 
@@ -64,7 +64,7 @@ if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "Clang")
 else()
 	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
 	    " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/src/export.gnu")
-	if (NOT WIN32)
+	if(NOT WIN32)
 		string(CONCAT CMAKE_SHARED_LINKER_FLAGS
 		    ${CMAKE_SHARED_LINKER_FLAGS}
 		    " -Wl,-z,noexecstack -Wl,-z,relro,-z,now")
