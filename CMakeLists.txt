@@ -66,10 +66,10 @@ else()
 	endif()
 endif()
 
+include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CBOR_INCLUDE_DIRS})
 include_directories(${CRYPTO_INCLUDE_DIRS})
 include_directories(${HIDAPI_INCLUDE_DIRS})
-include_directories(${CMAKE_SOURCE_DIR}/src)
 
 link_directories(${CBOR_LIBRARY_DIRS})
 link_directories(${CRYPTO_LIBRARY_DIRS})
