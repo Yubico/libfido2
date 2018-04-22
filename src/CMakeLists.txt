@@ -80,30 +80,27 @@ if(UNIX)
 endif()
 
 add_library(fido2 STATIC ${FIDO_SOURCES})
-target_link_libraries(fido2
-	${CBOR_LIBRARIES}
-	${CRYPTO_LIBRARIES}
-	${HIDAPI_LIBRARIES})
+target_link_libraries(fido2 ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
+    ${HIDAPI_LIBRARIES})
 if(WIN32)
 	target_link_libraries(fido2 wsock32 ws2_32 bcrypt)
 endif()
 
 add_library(fido2_shared SHARED ${FIDO_SOURCES})
-target_link_libraries(fido2_shared
-	${CBOR_LIBRARIES}
-	${CRYPTO_LIBRARIES}
-	${HIDAPI_LIBRARIES})
+target_link_libraries(fido2_shared ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
+    ${HIDAPI_LIBRARIES})
 if(WIN32)
 	target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt)
 endif()
 
+set_target_properties(fido2_shared PROPERTIES OUTPUT_NAME fido2
+    VERSION ${FIDO_VERSION})
+
 install(FILES fido.h DESTINATION include)
-install(DIRECTORY fido
-	DESTINATION include REGEX "(compat).h" EXCLUDE)
-install(TARGETS fido2 fido2_shared
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY fido DESTINATION include REGEX "(compat).h" EXCLUDE)
+install(TARGETS fido2 fido2_shared ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 configure_file(libfido2.pc.in libfido2.pc @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libfido2.pc"
-	DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")

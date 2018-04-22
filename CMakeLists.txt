@@ -15,6 +15,7 @@ include(GNUInstallDirs)
 
 set(CMAKE_COLOR_MAKEFILE off)
 set(CMAKE_VERBOSE_MAKEFILE on)
+
 set(FIDO_MAJOR "0")
 set(FIDO_MINOR "0")
 set(FIDO_PATCH "0")
@@ -65,6 +66,8 @@ check_c_compiler_flag("-Wshorten-64-to-32" HAVE_SHORTEN_64_TO_32)
 if(HAVE_SHORTEN_64_TO_32)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshorten-64-to-32")
 endif()
+
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 
 if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
