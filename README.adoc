@@ -24,6 +24,9 @@ fido2 uses CMake, and can be built with the following commands:
   # (rm -rf build && mkdir build && cd build && cmake ..)
   # make -C build
 
+Depending on the platform, the PKG_CONFIG_PATH environment variable may need to
+be set.
+
 Under Linux you will need to add a Udev rule to be able to access the FIDO
 device, or run as root. For example, the Udev rule may contain the following:
 
