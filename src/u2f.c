@@ -400,11 +400,13 @@ parse_register_reply(fido_cred_t *cred, const unsigned char *reply, size_t len)
 	    sizeof(pubkey), &ad) < 0)
 		goto fail;
 
-	if ((r = fido_cred_set_fmt(cred, "fido-u2f")) != FIDO_OK ||
-	    (r = fido_cred_set_authdata(cred, ad.ptr, ad.len)) != FIDO_OK ||
-	    (r = fido_cred_set_x509(cred, x5c.ptr, x5c.len)) != FIDO_OK ||
-	    (r = fido_cred_set_sig(cred, sig.ptr, sig.len)) != FIDO_OK)
+	if (fido_cred_set_fmt(cred, "fido-u2f") != FIDO_OK ||
+	    fido_cred_set_authdata(cred, ad.ptr, ad.len) != FIDO_OK ||
+	    fido_cred_set_x509(cred, x5c.ptr, x5c.len) != FIDO_OK ||
+	    fido_cred_set_sig(cred, sig.ptr, sig.len) != FIDO_OK) {
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
+	}
 
 	r = FIDO_OK;
 fail:
@@ -511,8 +513,8 @@ u2f_authenticate_single(fido_dev_t *dev, const fido_blob_t *key_id,
 		goto fail;
 
 	if (fido_blob_set(&fa->stmt[idx].id, key_id->ptr, key_id->len) < 0 ||
-	    fido_assert_set_authdata(fa, idx, ad.ptr, ad.len) < 0 ||
-	    fido_assert_set_sig(fa, idx, sig.ptr, sig.len) < 0) {
+	    fido_assert_set_authdata(fa, idx, ad.ptr, ad.len) != FIDO_OK ||
+	    fido_assert_set_sig(fa, idx, sig.ptr, sig.len) != FIDO_OK) {
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}

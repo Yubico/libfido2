@@ -84,8 +84,8 @@ fido_do_ecdh(fido_dev_t *dev, es256_pk_t **pk, fido_blob_t **ecdh)
 		goto fail;
 	}
 
-	if ((ak = es256_pk_new()) == NULL || (r = fido_dev_authkey(dev,
-	    ak)) != FIDO_OK || do_ecdh(sk, ak, ecdh) < 0) {
+	if ((ak = es256_pk_new()) == NULL || fido_dev_authkey(dev,
+	    ak) != FIDO_OK || do_ecdh(sk, ak, ecdh) < 0) {
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
