@@ -22,19 +22,13 @@ set(FIDO_PATCH "0")
 set(FIDO_VERSION ${FIDO_MAJOR}.${FIDO_MINOR}.${FIDO_PATCH})
 
 pkg_search_module(CBOR libcbor REQUIRED)
+pkg_search_module(CRYPTO libcrypto REQUIRED)
+
 if(APPLE)
-	# Look for Homebrew's OpenSSL 1.1.
-	set(OPENSSL_ROOT_DIR /usr/local/opt/openssl@1.1)
-	find_package(openssl REQUIRED)
-	set(CRYPTO_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})
-	set(CRYPTO_LIBRARY_DIRS ${OPENSSL_LIBRARY_DIR})
-	set(CRYPTO_LIBRARIES ${OPENSSL_LIBRARIES})
 	# Define memset_s().
 	add_definitions(-D__STDC_WANT_LIB_EXT1__=1)
-else()
-	# Look for OpenSSL using pkg-config.
-	pkg_search_module(CRYPTO libcrypto REQUIRED)
 endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	# Use hidapi's raw API.
 	pkg_search_module(HIDAPI hidapi-hidraw REQUIRED)
