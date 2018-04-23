@@ -94,11 +94,9 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 	}
 
 	if (pin) /* pin authentication */
-		if (add_cbor_pin_params(dev, &assert->cdh, pin, &argv[5],
-		    &argv[6]) < 0) {
-			r = FIDO_ERR_INTERNAL;
+		if ((r = add_cbor_pin_params(dev, &assert->cdh, pin, &argv[5],
+		    &argv[6])) != FIDO_OK)
 			goto fail;
-		}
 
 	/* frame and transmit */
 	if (cbor_build_frame(CTAP_CBOR_ASSERT, argv, 7, &f) < 0 ||

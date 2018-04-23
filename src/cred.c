@@ -70,11 +70,9 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 		}
 
 	if (pin) /* pin authentication */
-		if (add_cbor_pin_params(dev, &cred->cdh, pin, &argv[7],
-		    &argv[8]) < 0) {
-			r = FIDO_ERR_INTERNAL;
+		if ((r = add_cbor_pin_params(dev, &cred->cdh, pin, &argv[7],
+		    &argv[8])) != FIDO_OK)
 			goto fail;
-		}
 
 	/* framing and transmission */
 	if (cbor_build_frame(CTAP_CBOR_MAKECRED, argv, 9, &f) < 0 ||

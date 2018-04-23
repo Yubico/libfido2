@@ -375,25 +375,29 @@ add_cbor_pin_params(fido_dev_t *dev, const fido_blob_t *cdh, const char *pin,
 	fido_blob_t	*ecdh = NULL;
 	fido_blob_t	*token = NULL;
 	es256_pk_t	*pk = NULL;
-	int		 ok = -1;
+	int		 r;
 
-	if ((token = fido_blob_new()) == NULL)
+	if ((token = fido_blob_new()) == NULL) {
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
+	}
 
-	if (fido_do_ecdh(dev, &pk, &ecdh) != FIDO_OK ||
-	    fido_dev_get_pin_token(dev, pin, ecdh, pk, token) != FIDO_OK)
+	if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK ||
+	    (r = fido_dev_get_pin_token(dev, pin, ecdh, pk, token)) != FIDO_OK)
 		goto fail;
 
 	if ((*auth = encode_pin_auth(token, cdh)) == NULL ||
-	    (*opt = encode_pin_opt()) == NULL)
+	    (*opt = encode_pin_opt()) == NULL) {
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
+	}
 
-	ok = 0;
+	r = FIDO_OK;
 fail:
 	es256_pk_free(&pk);
 
 	fido_blob_free(&ecdh);
 	fido_blob_free(&token);
 
-	return (ok);
+	return (r);
 }
