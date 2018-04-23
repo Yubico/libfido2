@@ -375,6 +375,7 @@ parse_register_reply(fido_cred_t *cred, const unsigned char *reply, size_t len)
 	if (len < 2 ||
 	    ((reply[len - 2] << 8) | reply[len - 1]) != SW_NO_ERROR)
 		goto fail;
+
 	len -= 2;
 
 	/* reserved byte */
@@ -483,7 +484,6 @@ fail:
 	iso7816_free(&apdu);
 
 	return (r);
-
 }
 
 static int
