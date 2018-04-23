@@ -43,31 +43,45 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
-	r = FIDO_ERR_INTERNAL;
+
+	if (cred->cdh.ptr == NULL) {
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto fail;
+	}
 
 	if ((argv[0] = fido_blob_encode(&cred->cdh)) == NULL ||
 	    (argv[1] = encode_rp_entity(&cred->rp)) == NULL ||
 	    (argv[2] = encode_user_entity(&cred->user)) == NULL ||
-	    (argv[3] = encode_pubkey_param()) == NULL)
+	    (argv[3] = encode_pubkey_param()) == NULL) {
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
+	}
 
 	if (cred->excl.len) /* excluded credentials */
-		if ((argv[4] = encode_pubkey_list(&cred->excl)) == NULL)
+		if ((argv[4] = encode_pubkey_list(&cred->excl)) == NULL) {
+			r = FIDO_ERR_INTERNAL;
 			goto fail;
+		}
 
 	if (cred->rk || cred->uv) /* options */
-		if ((argv[6] = encode_options(cred->rk, cred->uv)) == NULL)
+		if ((argv[6] = encode_options(cred->rk, cred->uv)) == NULL) {
+			r = FIDO_ERR_INTERNAL;
 			goto fail;
+		}
 
 	if (pin) /* pin authentication */
 		if (add_cbor_pin_params(dev, &cred->cdh, pin, &argv[7],
-		    &argv[8]) < 0)
+		    &argv[8]) < 0) {
+			r = FIDO_ERR_INTERNAL;
 			goto fail;
+		}
 
 	/* framing and transmission */
 	if (cbor_build_frame(CTAP_CBOR_MAKECRED, argv, 9, &f) < 0 ||
-	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0)
+	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+		r = FIDO_ERR_TX;
 		goto fail;
+	}
 
 	r = FIDO_OK;
 fail:
@@ -105,7 +119,7 @@ fido_dev_make_cred_wait(fido_dev_t *dev, fido_cred_t *cred, const char *pin, int
 	    (r = fido_dev_make_cred_rx(dev, cred, ms)) != FIDO_OK)
 		return (r);
 
-	return (0);
+	return (FIDO_OK);
 }
 
 int

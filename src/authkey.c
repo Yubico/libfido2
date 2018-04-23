@@ -29,17 +29,20 @@ fido_dev_authkey_tx(fido_dev_t *dev)
 
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
-	r = FIDO_ERR_TX;
 
 	/* add command parameters */
 	if ((argv[0] = cbor_build_uint8(1)) == NULL ||
-	    (argv[1] = cbor_build_uint8(2)) == NULL)
+	    (argv[1] = cbor_build_uint8(2)) == NULL) {
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
+	}
 
 	/* frame and transmit */
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 2, &f) < 0 ||
-	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0)
+	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+		r = FIDO_ERR_TX;
 		goto fail;
+	}
 
 	r = FIDO_OK;
 fail:

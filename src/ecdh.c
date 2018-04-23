@@ -73,17 +73,22 @@ fido_do_ecdh(fido_dev_t *dev, es256_pk_t **pk, fido_blob_t **ecdh)
 
 	*pk = NULL; /* our public key; returned */
 	*ecdh = NULL; /* shared ecdh secret; returned */
-	r = FIDO_ERR_INTERNAL;
 
-	if ((sk = es256_sk_new()) == NULL || (*pk = es256_pk_new()) == NULL)
+	if ((sk = es256_sk_new()) == NULL || (*pk = es256_pk_new()) == NULL) {
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
+	}
 
-	if (es256_sk_create(sk) < 0 || es256_derive_pk(sk, *pk) < 0)
+	if (es256_sk_create(sk) < 0 || es256_derive_pk(sk, *pk) < 0) {
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
+	}
 
 	if ((ak = es256_pk_new()) == NULL || (r = fido_dev_authkey(dev,
-	    ak)) != FIDO_OK || do_ecdh(sk, ak, ecdh) < 0)
+	    ak)) != FIDO_OK || do_ecdh(sk, ak, ecdh) < 0) {
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
+	}
 
 	r = FIDO_OK;
 fail:

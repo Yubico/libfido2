@@ -72,28 +72,40 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 
 	memset(argv, 0, sizeof(argv));
 	memset(&f, 0, sizeof(f));
-	r = FIDO_ERR_INTERNAL;
+
+	if (assert->rp_id == NULL || assert->cdh.ptr == NULL) {
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto fail;
+	}
 
 	if ((argv[0] = cbor_build_string(assert->rp_id)) == NULL ||
 	    (argv[1] = fido_blob_encode(&assert->cdh)) == NULL ||
-	    (argv[4] = encode_assert_options(assert->up, assert->uv)) == NULL)
+	    (argv[4] = encode_assert_options(assert->up, assert->uv)) == NULL) {
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
+	}
 
 	if (assert->allow_list.len) { /* allowed credentials */
 		const fido_blob_array_t *cl = &assert->allow_list;
-		if ((argv[2] = encode_pubkey_list(cl)) == NULL)
+		if ((argv[2] = encode_pubkey_list(cl)) == NULL) {
+			r = FIDO_ERR_INTERNAL;
 			goto fail;
+		}
 	}
 
 	if (pin) /* pin authentication */
 		if (add_cbor_pin_params(dev, &assert->cdh, pin, &argv[5],
-		    &argv[6]) < 0)
+		    &argv[6]) < 0) {
+			r = FIDO_ERR_INTERNAL;
 			goto fail;
+		}
 
 	/* frame and transmit */
 	if (cbor_build_frame(CTAP_CBOR_ASSERT, argv, 7, &f) < 0 ||
-	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0)
+	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+		r = FIDO_ERR_TX;
 		goto fail;
+	}
 
 	r = FIDO_OK;
 fail:
@@ -147,7 +159,10 @@ fido_get_next_assert_tx(fido_dev_t *dev)
 	const unsigned char	cbor[] = { CTAP_CBOR_NEXT_ASSERT };
 	const uint8_t		cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
 
-	return (tx(dev, cmd, cbor, sizeof(cbor)));
+	if (tx(dev, cmd, cbor, sizeof(cbor)) < 0)
+		return (FIDO_ERR_TX);
+
+	return (FIDO_OK);
 }
 
 static int
@@ -159,6 +174,7 @@ fido_get_next_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
 
 	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0)
 		return (FIDO_ERR_RX);
+
 	if (assert->stmt_len >= assert->stmt_cnt)
 		return (FIDO_ERR_INTERNAL);
 
@@ -641,7 +657,7 @@ fido_assert_set_count(fido_assert_t *assert, size_t n)
 	new_stmt = recallocarray(assert->stmt, assert->stmt_cnt, n,
 	    sizeof(fido_assert_stmt));
 	if (new_stmt == NULL)
-		return (-1);
+		return (FIDO_ERR_INTERNAL);
 
 	assert->stmt = new_stmt;
 	assert->stmt_cnt = n;

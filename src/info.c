@@ -185,9 +185,8 @@ decode_protocols(const cbor_item_t *item, fido_byte_array_t *p)
 	if (p->ptr == NULL)
 		return (-1);
 
-	if (cbor_array_iter(item, p, decode_protocol) < 0) {
+	if (cbor_array_iter(item, p, decode_protocol) < 0)
 		return (-1);
-	}
 
 	return (0);
 }
@@ -225,7 +224,10 @@ fido_dev_get_cbor_info_tx(fido_dev_t *dev)
 	const unsigned char	cbor[] = { CTAP_CBOR_GETINFO };
 	const uint8_t		cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
 
-	return (tx(dev, cmd, cbor, sizeof(cbor)));
+	if (tx(dev, cmd, cbor, sizeof(cbor)) < 0)
+		return (FIDO_ERR_TX);
+
+	return (FIDO_OK);
 }
 
 static int
