@@ -7,12 +7,25 @@
 #ifndef _FIDO_H
 #define _FIDO_H
 
-#ifdef _FIDO_INTERNAL
 #include <openssl/ec.h>
 
 #include <stdbool.h>
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdlib.h>
+
+typedef void *fido_dev_io_open_t(const char *);
+typedef void  fido_dev_io_close_t(void *);
+typedef int   fido_dev_io_read_t(void *, unsigned char *, size_t, int);
+typedef int   fido_dev_io_write_t(void *, const unsigned char *, size_t);
+
+typedef struct fido_dev_io {
+	fido_dev_io_open_t  *open;
+	fido_dev_io_close_t *close;
+	fido_dev_io_read_t  *read;
+	fido_dev_io_write_t *write;
+} fido_dev_io_t;
+
+#ifdef _FIDO_INTERNAL
 #include <cbor.h>
 
 #include "blob.h"
@@ -122,6 +135,7 @@ int fido_dev_info_manifest(fido_dev_info_t *, size_t, size_t *);
 int fido_dev_make_cred(fido_dev_t *, fido_cred_t *, const char *);
 int fido_dev_open(fido_dev_t *, const char *);
 int fido_dev_reset(fido_dev_t *);
+int fido_dev_set_io_functions(fido_dev_t *, const fido_dev_io_t *);
 int fido_dev_set_pin(fido_dev_t *, const char *, const char *);
 
 size_t fido_assert_authdata_len(const fido_assert_t *, size_t);

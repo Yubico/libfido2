@@ -202,6 +202,30 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 	return (FIDO_OK);
 }
 
+void *
+fido_hid_open_wrapper(const char *path)
+{
+	return ((void *)hid_open_path(path));
+}
+
+void
+fido_hid_close_wrapper(void *handle)
+{
+	hid_close(handle);
+}
+
+int
+fido_hid_read_wrapper(void *handle, unsigned char *buf, size_t len, int ms)
+{
+	return (hid_read_timeout(handle, buf, len, ms));
+}
+
+int
+fido_hid_write_wrapper(void *handle, const unsigned char *buf, size_t len)
+{
+	return (hid_write(handle, buf, len));
+}
+
 /*
  * get/set functions for fido_dev_info_t; always at the end of the file
  */

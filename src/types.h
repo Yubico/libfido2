@@ -101,8 +101,6 @@ typedef struct fido_cbor_info {
 	fido_byte_array_t protocols;  /* supported pin protocols */
 } fido_cbor_info_t;
 
-#include <hidapi.h>
-
 typedef struct fido_dev_info {
 	char    *path;         /* device path */
 	int16_t  vendor_id;    /* 2-byte vendor id */
@@ -123,10 +121,11 @@ typedef struct fido_ctap_info {
 } __attribute__ ((packed)) fido_ctap_info_t;
 
 typedef struct fido_dev {
-	uint64_t          nonce; /* issued nonce */
-	fido_ctap_info_t  attr;  /* device attributes */
-	hid_device       *hid;   /* underlying hid handle */
-	uint32_t          cid;   /* assigned channel id */
+	uint64_t          nonce;     /* issued nonce */
+	fido_ctap_info_t  attr;      /* device attributes */
+	uint32_t          cid;       /* assigned channel id */
+	void		 *io_handle; /* abstract i/o handle */
+	fido_dev_io_t	  io;        /* i/o functions & data */
 } fido_dev_t;
 
 #endif /* !_TYPES_H */

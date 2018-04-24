@@ -102,6 +102,7 @@
 		fido_dev_open;
 		fido_dev_protocol;
 		fido_dev_reset;
+		fido_dev_set_io_functions;
 		fido_dev_set_pin;
 		fido_init;
 		fido_strerr;

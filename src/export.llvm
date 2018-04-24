@@ -100,6 +100,7 @@ _fido_dev_new
 _fido_dev_open
 _fido_dev_protocol
 _fido_dev_reset
+_fido_dev_set_io_functions
 _fido_dev_set_pin
 _fido_init
 _fido_strerr

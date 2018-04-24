@@ -8,7 +8,6 @@
 #include <sys/stat.h>
 
 #include <fcntl.h>
-#include <hidapi.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -69,16 +68,17 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 {
 	const uint8_t cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;
 
-	if (dev->hid != NULL)
+	if (dev->io_handle != NULL || dev->io.open == NULL ||
+	    dev->io.close == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	if (obtain_nonce(&dev->nonce) < 0 ||
-	    (dev->hid = hid_open_path(path)) == NULL)
+	    (dev->io_handle = dev->io.open(path)) == NULL)
 		return (FIDO_ERR_INTERNAL);
 
 	if (tx(dev, cmd, &dev->nonce, sizeof(dev->nonce)) < 0) {
-		hid_close(dev->hid);
-		dev->hid = NULL;
+		dev->io.close(dev->io_handle);
+		dev->io_handle = NULL;
 		return (FIDO_ERR_TX);
 	}
 
@@ -121,11 +121,29 @@ fido_dev_open(fido_dev_t *dev, const char *path)
 int
 fido_dev_close(fido_dev_t *dev)
 {
-	if (dev->hid == NULL)
+	if (dev->io_handle == NULL || dev->io.close == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	hid_close(dev->hid);
-	dev->hid = NULL;
+	dev->io.close(dev->io_handle);
+	dev->io_handle = NULL;
+
+	return (FIDO_OK);
+}
+
+int
+fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
+{
+	if (dev->io_handle != NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	if (io->open == NULL || io->close == NULL ||
+	    io->read == NULL || io->write == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	dev->io.open = io->open;
+	dev->io.close = io->close;
+	dev->io.read = io->read;
+	dev->io.write = io->write;
 
 	return (FIDO_OK);
 }
@@ -144,12 +162,23 @@ fido_init(void)
 fido_dev_t *
 fido_dev_new(void)
 {
-	fido_dev_t *dev;
+	fido_dev_t	*dev;
+	fido_dev_io_t	 io;
 
 	if ((dev = calloc(1, sizeof(*dev))) == NULL)
 		return (NULL);
 
 	dev->cid = CTAP_CID_BROADCAST;
+
+	io.open = fido_hid_open_wrapper;
+	io.close = fido_hid_close_wrapper;
+	io.read = fido_hid_read_wrapper;
+	io.write = fido_hid_write_wrapper;
+
+	if (fido_dev_set_io_functions(dev, &io) != FIDO_OK) {
+		fido_dev_free(&dev);
+		return (NULL);
+	}
 
 	return (dev);
 }
@@ -165,18 +194,6 @@ fido_dev_free(fido_dev_t **dev_p)
 	free(dev);
 
 	*dev_p = NULL;
-}
-
-void *
-fido_dev_hid(const fido_dev_t *dev)
-{
-	return (dev->hid);
-}
-
-uint32_t
-fido_dev_cid(const fido_dev_t *dev)
-{
-	return (dev->cid);
 }
 
 uint8_t
