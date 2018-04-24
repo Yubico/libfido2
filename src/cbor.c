@@ -23,9 +23,11 @@ cbor_map_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
 
 	n = cbor_map_size(item);
 
-	for (size_t i = 0; i < n; i++)
-		if (f(v[i].key, v[i].value, arg) < 0)
+	for (size_t i = 0; i < n; i++) {
+		if (v[i].key == NULL || v[i].value == NULL ||
+		    f(v[i].key, v[i].value, arg) < 0)
 			return (-1);
+	}
 
 	return (0);
 }
@@ -43,7 +45,7 @@ cbor_array_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
 	n = cbor_array_size(item);
 
 	for (size_t i = 0; i < n; i++)
-		if (f(v[i], arg) < 0)
+		if (v[i] == NULL || f(v[i], arg) < 0)
 			return (-1);
 
 	return (0);
