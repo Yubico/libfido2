@@ -202,8 +202,8 @@ es256_sk_create(es256_sk_t *key)
 
 	if ((ec = EVP_PKEY_get0_EC_KEY(k)) == NULL ||
 	    (d = EC_KEY_get0_private_key(ec)) == NULL ||
-	    (n = BN_num_bytes(d)) < 0 || (size_t)n != sizeof(key->d) ||
-	    (n = BN_bn2bin(d, key->d)) < 0 || (size_t)n != sizeof(key->d))
+	    (n = BN_num_bytes(d)) < 0 || (size_t)n > sizeof(key->d) ||
+	    (n = BN_bn2bin(d, key->d)) < 0 || (size_t)n > sizeof(key->d))
 		goto fail;
 
 	ok = 0;
@@ -282,6 +282,7 @@ es256_pk_from_EC_KEY(const EC_KEY *ec, es256_pk_t *pk)
 	const EC_POINT	*q = NULL;
 	const EC_GROUP	*g = NULL;
 	int		 ok = -1;
+	int		 n;
 
 	if ((q = EC_KEY_get0_public_key(ec)) == NULL ||
 	    (g = EC_KEY_get0_group(ec)) == NULL)
@@ -293,12 +294,12 @@ es256_pk_from_EC_KEY(const EC_KEY *ec, es256_pk_t *pk)
 		goto fail;
 
 	if (EC_POINT_get_affine_coordinates_GFp(g, q, x, y, ctx) == 0 ||
-	    BN_num_bytes(x) != sizeof(pk->x) ||
-	    BN_num_bytes(y) != sizeof(pk->y))
+	    (n = BN_num_bytes(x)) < 0 || (size_t)n > sizeof(pk->x) ||
+	    (n = BN_num_bytes(y)) < 0 || (size_t)n > sizeof(pk->y))
 		goto fail;
 
-	if (BN_bn2bin(x, pk->x) != sizeof(pk->x) ||
-	    BN_bn2bin(y, pk->y) != sizeof(pk->y))
+	if ((n = BN_bn2bin(x, pk->x)) < 0 || (size_t)n > sizeof(pk->x) ||
+	    (n = BN_bn2bin(y, pk->y)) < 0 || (size_t)n > sizeof(pk->y))
 		goto fail;
 
 	ok = 0;
