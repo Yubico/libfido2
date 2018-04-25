@@ -147,7 +147,7 @@ main(int argc, char **argv)
 
 	r = fido_dev_open(dev, argv[1]);
 	if (r != FIDO_OK)
-		errx(1, "fido_dev_open");
+		errx(1, "fido_dev_open: %s (0x%x)", fido_strerr(r), r);
 	if (u2f)
 		fido_dev_force_u2f(dev);
 
