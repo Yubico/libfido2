@@ -39,7 +39,7 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", \
 
 === Dependencies
 
-This project depends on hidapi, libcbor and OpenSSL. For instructions on
+This project depends on hidapi, libcbor and OpenSSL 1.1. For instructions on
 installing these dependencies, see http://www.signal11.us/oss/hidapi/,
 http://libcbor.org/, and https://www.openssl.org/.
 
