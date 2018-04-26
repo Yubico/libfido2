@@ -69,6 +69,11 @@ int   fido_hid_write_wrapper(void *, const unsigned char *, size_t);
 int rx(fido_dev_t *, uint8_t, void *, size_t, int);
 int tx(fido_dev_t *, uint8_t, const void *, size_t);
 
+/* log */
+void log_debug(const char *, ...) __attribute__((__format__ (printf, 1, 2)));
+void log_init(void);
+void log_xxd(const void *, size_t);
+
 /* u2f */
 int u2f_register(fido_dev_t *, fido_cred_t *, int);
 int u2f_authenticate(fido_dev_t *, fido_assert_t *, int);
@@ -84,7 +89,5 @@ void fido_assert_reset_rx(fido_assert_t *);
 void fido_assert_reset_tx(fido_assert_t *);
 void fido_cred_reset_rx(fido_cred_t *);
 void fido_cred_reset_tx(fido_cred_t *);
-
-int debug;
 
 #endif /* !_EXTERN_H */

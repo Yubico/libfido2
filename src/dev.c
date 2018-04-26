@@ -68,15 +68,28 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 {
 	const uint8_t cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;
 
-	if (dev->io_handle != NULL || dev->io.open == NULL ||
-	    dev->io.close == NULL)
+	if (dev->io_handle != NULL) {
+		log_debug("%s: handle=%p", __func__, dev->io_handle);
 		return (FIDO_ERR_INVALID_ARGUMENT);
+	}
 
-	if (obtain_nonce(&dev->nonce) < 0 ||
-	    (dev->io_handle = dev->io.open(path)) == NULL)
+	if (dev->io.open == NULL || dev->io.close == NULL) {
+		log_debug("%s: NULL open/close", __func__);
+		return (FIDO_ERR_INVALID_ARGUMENT);
+	}
+
+	if (obtain_nonce(&dev->nonce) < 0) {
+		log_debug("%s: obtain_nonce", __func__);
 		return (FIDO_ERR_INTERNAL);
+	}
+
+	if ((dev->io_handle = dev->io.open(path)) == NULL) {
+		log_debug("%s: dev->io.open", __func__);
+		return (FIDO_ERR_INTERNAL);
+	}
 
 	if (tx(dev, cmd, &dev->nonce, sizeof(dev->nonce)) < 0) {
+		log_debug("%s: tx", __func__);
 		dev->io.close(dev->io_handle);
 		dev->io_handle = NULL;
 		return (FIDO_ERR_TX);
@@ -91,9 +104,15 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;
 	int		r;
 
-	if ((r = rx(dev, cmd, &dev->attr, sizeof(dev->attr), ms)) < 0 ||
-	    (size_t)r != sizeof(dev->attr) || dev->attr.nonce != dev->nonce)
+	if ((r = rx(dev, cmd, &dev->attr, sizeof(dev->attr), ms)) < 0) {
+		log_debug("%s: rx", __func__);
 		return (FIDO_ERR_RX);
+	}
+
+	if ((size_t)r != sizeof(dev->attr) || dev->attr.nonce != dev->nonce) {
+		log_debug("%s: invalid nonce", __func__);
+		return (FIDO_ERR_RX);
+	}
 
 	dev->cid = dev->attr.cid;
 
@@ -133,12 +152,16 @@ fido_dev_close(fido_dev_t *dev)
 int
 fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 {
-	if (dev->io_handle != NULL)
+	if (dev->io_handle != NULL) {
+		log_debug("%s: NULL handle", __func__);
 		return (FIDO_ERR_INVALID_ARGUMENT);
+	}
 
 	if (io->open == NULL || io->close == NULL ||
-	    io->read == NULL || io->write == NULL)
+	    io->read == NULL || io->write == NULL) {
+		log_debug("%s: NULL function", __func__);
 		return (FIDO_ERR_INVALID_ARGUMENT);
+	}
 
 	dev->io.open = io->open;
 	dev->io.close = io->close;
@@ -152,7 +175,7 @@ void
 fido_init(void)
 {
 	if (getenv("FIDO_DEBUG") != NULL)
-		debug = 1;
+		log_init();
 }
 
 /*
@@ -176,6 +199,7 @@ fido_dev_new(void)
 	io.write = fido_hid_write_wrapper;
 
 	if (fido_dev_set_io_functions(dev, &io) != FIDO_OK) {
+		log_debug("%s: fido_dev_set_io_functions", __func__);
 		fido_dev_free(&dev);
 		return (NULL);
 	}

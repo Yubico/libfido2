@@ -13,8 +13,10 @@ fido_dev_reset_tx(fido_dev_t *dev)
 	const unsigned char	cbor[] = { CTAP_CBOR_RESET };
 	const uint8_t		cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
 
-	if (tx(dev, cmd, cbor, sizeof(cbor)) < 0)
+	if (tx(dev, cmd, cbor, sizeof(cbor)) < 0) {
+		log_debug("%s: tx", __func__);
 		return (FIDO_ERR_TX);
+	}
 
 	return (FIDO_OK);
 }
@@ -27,8 +29,10 @@ fido_dev_reset_rx(fido_dev_t *dev, int ms)
 	int		reply_len;
 
 	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0 ||
-	    reply_len < 0 || (size_t)reply_len < 1)
+	    reply_len < 0 || (size_t)reply_len < 1) {
+		log_debug("%s: rx", __func__);
 		return (FIDO_ERR_RX);
+	}
 
 	return (reply[0]);
 }

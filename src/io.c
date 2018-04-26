@@ -31,33 +31,6 @@ struct frame {
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
 #endif
 
-#define LOG_BUF(l, p, n) do {					\
-	if (debug) {						\
-		fprintf(stderr, "[%s] %s:\n", __func__, (l));	\
-		xxd((p), (n));					\
-	}							\
-} while (0)
-
-#define LOG_RET(x) do {						\
-	int y = (x); /* evaluate x only once */			\
-	if (debug) {						\
-		fprintf(stderr, "[%s] returning %d in line "	\
-		    "%u\n", __func__, (y), __LINE__);		\
-	}							\
-	return ((y));						\
-} while (0)
-
-static void
-xxd(const void *buf, size_t count)
-{
-	const uint8_t *ptr = buf;
-
-	while (count--)
-		fprintf(stderr, "%02x", *ptr++);
-
-	fprintf(stderr, "\n");
-}
-
 static size_t
 tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 {
@@ -114,23 +87,36 @@ tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 	int	seq = 0;
 	size_t	sent;
 
-	LOG_BUF("payload", buf, count);
+	log_debug("%s: d=%p, cmd=0x%02x, buf=%p, count=%zu", __func__,
+	    (void *)d, cmd, buf, count);
+	log_xxd(buf, count);
 
-	if (d->io_handle == NULL || count > UINT16_MAX ||
-	    (sent = tx_preamble(d, cmd, buf, count)) == 0)
-		LOG_RET(-1);
+	if (d->io_handle == NULL || count > UINT16_MAX) {
+		log_debug("%s: invalid argument (%p, %zu)", __func__,
+		    d->io_handle, count);
+		return (-1);
+	}
+
+	if ((sent = tx_preamble(d, cmd, buf, count)) == 0) {
+		log_debug("%s: tx_preamble", __func__);
+		return (-1);
+	}
 
 	while (sent < count) {
-		if (seq & 0x80)
-			LOG_RET(-1);
+		if (seq & 0x80) {
+			log_debug("%s: seq & 0x80", __func__);
+			return (-1);
+		}
 		const uint8_t *p = (const uint8_t *)buf + sent;
 		size_t n = tx_frame(d, seq++, p, count - sent);
-		if (n == 0)
-			LOG_RET(-1);
+		if (n == 0) {
+			log_debug("%s: tx_frame", __func__);
+			return (-1);
+		}
 		sent += n;
 	}
 
-	LOG_RET(0);
+	return (0);
 }
 
 static int
@@ -168,22 +154,36 @@ rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 	uint16_t	flen;
 	int		seq;
 
-	if (d->io_handle == NULL || (cmd & 0x80) == 0)
-		LOG_RET(-1);
-	if (rx_preamble(d, &f, ms) < 0)
-		LOG_RET(-1);
+	if (d->io_handle == NULL || (cmd & 0x80) == 0) {
+		log_debug("%s: invalid argument (%p, 0x%02x)", __func__,
+		    d->io_handle, cmd);
+		return (-1);
+	}
 
-	LOG_BUF("initiation frame", (void *)&f, sizeof(f));
+	if (rx_preamble(d, &f, ms) < 0) {
+		log_debug("%s: rx_preamble", __func__);
+		return (-1);
+	}
 
-	if (f.cid != d->cid || f.body.init.cmd != cmd)
-		LOG_RET(-1);
+	log_debug("%s: initiation frame at %p, len %zu", __func__, (void *)&f,
+	    sizeof(f));
+	log_xxd(&f, sizeof(f));
+
+	if (f.cid != d->cid || f.body.init.cmd != cmd) {
+		log_debug("%s: cid (0x%x, 0x%x), cmd (0x%02x, 0x%02x)",
+		    __func__, f.cid, d->cid, f.body.init.cmd, cmd);
+		return (-1);
+	}
 
 	flen = (f.body.init.bcnth << 8) | f.body.init.bcntl;
-	if (count < (size_t)flen)
-		LOG_RET(-1);
+	if (count < (size_t)flen) {
+		log_debug("%s: count < flen (%zu, %zu)", __func__, count,
+		    (size_t)flen);
+		return (-1);
+	}
 	if (flen < sizeof(f.body.init.data)) {
 		memcpy(buf, f.body.init.data, flen);
-		LOG_RET(flen);
+		return (flen);
 	}
 
 	memcpy(buf, f.body.init.data, sizeof(f.body.init.data));
@@ -191,12 +191,20 @@ rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 	seq = 0;
 
 	while ((size_t)r < flen) {
-		if (rx_frame(d, &f, ms) < 0)
-			LOG_RET(-1);
+		if (rx_frame(d, &f, ms) < 0) {
+			log_debug("%s: rx_frame", __func__);
+			return (-1);
+		}
 
-		LOG_BUF("continuation frame", (void *)&f, sizeof(f));
-		if (f.cid != d->cid || f.body.cont.seq != seq++)
-			LOG_RET(-1);
+		log_debug("%s: continuation frame at %p, len %zu", __func__,
+		    (void *)&f, sizeof(f));
+		log_xxd(&f, sizeof(f));
+
+		if (f.cid != d->cid || f.body.cont.seq != seq++) {
+			log_debug("%s: cid (0x%x, 0x%x), seq (%d, %d)",
+			    __func__, f.cid, d->cid, f.body.cont.seq, seq);
+			return (-1);
+		}
 
 		uint8_t *p = (uint8_t *)buf + r;
 
@@ -209,7 +217,8 @@ rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 		}
 	}
 
-	LOG_BUF("payload", buf, r);
+	log_debug("%s: payload at %p, len %zu", __func__, buf, (size_t)r);
+	log_xxd(buf, r);
 
-	LOG_RET(r);
+	return (r);
 }

@@ -14,8 +14,10 @@ decode_version(const cbor_item_t *item, void *arg)
 	const size_t		 i = v->len;
 
 	/* keep ptr[x] and len consistent */
-	if (cbor_string_copy(item, &v->ptr[i]) < 0)
+	if (cbor_string_copy(item, &v->ptr[i]) < 0) {
+		log_debug("%s: cbor_string_copy", __func__);
 		return (-1);
+	}
 
 	v->len++;
 
@@ -29,15 +31,19 @@ decode_versions(const cbor_item_t *item, fido_str_array_t *v)
 	v->len = 0;
 
 	if (cbor_isa_array(item) == false ||
-	    cbor_array_is_definite(item) == false)
+	    cbor_array_is_definite(item) == false) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	v->ptr = recallocarray(NULL, 0, cbor_array_size(item), sizeof(char *));
 	if (v->ptr == NULL)
 		return (-1);
 
-	if (cbor_array_iter(item, v, decode_version) < 0)
+	if (cbor_array_iter(item, v, decode_version) < 0) {
+		log_debug("%s: decode_version", __func__);
 		return (-1);
+	}
 
 	return (0);
 }
@@ -49,8 +55,10 @@ decode_extension(const cbor_item_t *item, void *arg)
 	const size_t		 i = e->len;
 
 	/* keep ptr[x] and len consistent */
-	if (cbor_string_copy(item, &e->ptr[i]) < 0)
+	if (cbor_string_copy(item, &e->ptr[i]) < 0) {
+		log_debug("%s: cbor_string_copy", __func__);
 		return (-1);
+	}
 
 	e->len++;
 
@@ -65,6 +73,7 @@ decode_extensions(const cbor_item_t *item, fido_str_array_t *e)
 
 	if (cbor_isa_array(item) == false ||
 	    cbor_array_is_definite(item) == false) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
 	}
 
@@ -72,8 +81,10 @@ decode_extensions(const cbor_item_t *item, fido_str_array_t *e)
 	if (e->ptr == NULL)
 		return (-1);
 
-	if (cbor_array_iter(item, e, decode_extension) < 0)
+	if (cbor_array_iter(item, e, decode_extension) < 0) {
+		log_debug("%s: decode_extension", __func__);
 		return (-1);
+	}
 
 	return (0);
 }
@@ -83,8 +94,10 @@ decode_aaguid(const cbor_item_t *item, unsigned char *aaguid, size_t aaguid_len)
 {
 	if (cbor_isa_bytestring(item) == false ||
 	    cbor_bytestring_is_definite(item) == false ||
-	    cbor_bytestring_length(item) != aaguid_len)
+	    cbor_bytestring_length(item) != aaguid_len) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	memcpy(aaguid, cbor_bytestring_handle(item), aaguid_len);
 
@@ -97,9 +110,15 @@ decode_option(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	fido_opt_array_t	*o = arg;
 	const size_t		 i = o->len;
 
-	if (cbor_is_bool(val) == false ||
-	    cbor_string_copy(key, &o->name[i]) < 0)
+	if (cbor_is_bool(val) == false) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
+
+	if (cbor_string_copy(key, &o->name[i]) < 0) {
+		log_debug("%s: cbor_string_copy", __func__);
+		return (-1);
+	}
 
 	/* keep name/value and len consistent */
 	o->value[i] = cbor_ctrl_value(val);
@@ -116,8 +135,10 @@ decode_options(const cbor_item_t *item, fido_opt_array_t *o)
 	o->len = 0;
 
 	if (cbor_isa_map(item) == false ||
-	    cbor_map_is_definite(item) == false)
+	    cbor_map_is_definite(item) == false) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	o->name = recallocarray(NULL, 0, cbor_map_size(item), sizeof(char *));
 	o->value = recallocarray(NULL, 0, cbor_map_size(item), sizeof(bool));
@@ -130,8 +151,10 @@ decode_options(const cbor_item_t *item, fido_opt_array_t *o)
 static int
 decode_maxmsgsiz(const cbor_item_t *item, uint64_t *maxmsgsiz)
 {
-	if (cbor_isa_uint(item) == false)
+	if (cbor_isa_uint(item) == false) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	switch (cbor_int_get_width(item)) {
 	case CBOR_INT_8:
@@ -147,6 +170,7 @@ decode_maxmsgsiz(const cbor_item_t *item, uint64_t *maxmsgsiz)
 		*maxmsgsiz = cbor_get_uint64(item);
 		break;
 	default:
+		log_debug("%s: cbor_int_get_width", __func__);
 		return (-1);
 	}
 
@@ -160,8 +184,10 @@ decode_protocol(const cbor_item_t *item, void *arg)
 	const size_t		 i = p->len;
 
 	if (cbor_isa_uint(item) == false ||
-	    cbor_int_get_width(item) != CBOR_INT_8)
+	    cbor_int_get_width(item) != CBOR_INT_8) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	/* keep ptr[x] and len consistent */
 	p->ptr[i] = cbor_get_uint8(item);
@@ -177,16 +203,20 @@ decode_protocols(const cbor_item_t *item, fido_byte_array_t *p)
 	p->len = 0;
 
 	if (cbor_isa_array(item) == false ||
-	    cbor_array_is_definite(item) == false)
+	    cbor_array_is_definite(item) == false) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	p->ptr = recallocarray(NULL, 0, cbor_array_size(item),
 	    sizeof(uint8_t *));
 	if (p->ptr == NULL)
 		return (-1);
 
-	if (cbor_array_iter(item, p, decode_protocol) < 0)
+	if (cbor_array_iter(item, p, decode_protocol) < 0) {
+		log_debug("%s: decode_protocol", __func__);
 		return (-1);
+	}
 
 	return (0);
 }
@@ -197,8 +227,10 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	fido_cbor_info_t *ci = arg;
 
 	if (cbor_isa_uint(key) == false ||
-	    cbor_int_get_width(key) != CBOR_INT_8)
+	    cbor_int_get_width(key) != CBOR_INT_8) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	switch (cbor_get_uint8(key)) {
 	case 1: /* versions */
@@ -213,6 +245,10 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (decode_maxmsgsiz(val, &ci->maxmsgsiz));
 	case 6: /* pinProtocols */
 		return (decode_protocols(val, &ci->protocols));
+	default:
+		log_debug("%s: unknown key %d", __func__,
+		    (int)cbor_get_uint8(key));
+		return (-1);
 	}
 
 	return (-1);
@@ -224,8 +260,12 @@ fido_dev_get_cbor_info_tx(fido_dev_t *dev)
 	const unsigned char	cbor[] = { CTAP_CBOR_GETINFO };
 	const uint8_t		cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
 
-	if (tx(dev, cmd, cbor, sizeof(cbor)) < 0)
+	log_debug("%s: dev=%p", __func__, (void *)dev);
+
+	if (tx(dev, cmd, cbor, sizeof(cbor)) < 0) {
+		log_debug("%s: tx", __func__);
 		return (FIDO_ERR_TX);
+	}
 
 	return (FIDO_OK);
 }
@@ -237,10 +277,15 @@ fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 	unsigned char	reply[512];
 	int		reply_len;
 
+	log_debug("%s: dev=%p, ci=%p, ms=%d", __func__, (void *)dev,
+	    (void *)ci, ms);
+
 	memset(ci, 0, sizeof(*ci));
 
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0)
+	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		log_debug("%s: rx", __func__);
 		return (FIDO_ERR_RX);
+	}
 
 	return (parse_cbor_reply(reply, (size_t)reply_len, ci,
 	    parse_reply_element));

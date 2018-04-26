@@ -27,26 +27,34 @@ do_ecdh(const es256_sk_t *sk, const es256_pk_t *pk, fido_blob_t **ecdh)
 
 	/* wrap the keys as openssl objects */
 	if ((pk_evp = es256_pk_to_EVP_PKEY(pk)) == NULL ||
-	    (sk_evp = es256_sk_to_EVP_PKEY(sk)) == NULL)
+	    (sk_evp = es256_sk_to_EVP_PKEY(sk)) == NULL) {
+		log_debug("%s: es256_to_EVP_PKEY", __func__);
 		goto fail;
+	}
 
 	/* set ecdh parameters */
 	if ((ctx = EVP_PKEY_CTX_new(sk_evp, NULL)) == NULL ||
 	    EVP_PKEY_derive_init(ctx) <= 0 ||
-	    EVP_PKEY_derive_set_peer(ctx, pk_evp) <= 0)
+	    EVP_PKEY_derive_set_peer(ctx, pk_evp) <= 0) {
+		log_debug("%s: EVP_PKEY_derive_init", __func__);
 		goto fail;
+	}
 
 	/* do ecdh */
 	if (EVP_PKEY_derive(ctx, NULL, &secret->len) <= 0 ||
 	    (secret->ptr = calloc(1, secret->len)) == NULL ||
-	    EVP_PKEY_derive(ctx, secret->ptr, &secret->len) <= 0)
+	    EVP_PKEY_derive(ctx, secret->ptr, &secret->len) <= 0) {
+		log_debug("%s: EVP_PKEY_derive", __func__);
 		goto fail;
+	}
 
 	/* use sha256 as a kdf on the resulting secret */
 	(*ecdh)->len = SHA256_DIGEST_LENGTH;
 	if (((*ecdh)->ptr = calloc(1, (*ecdh)->len)) == NULL ||
-	    SHA256(secret->ptr, secret->len, (*ecdh)->ptr) == NULL)
+	    SHA256(secret->ptr, secret->len, (*ecdh)->ptr) == NULL) {
+		log_debug("%s: sha256", __func__);
 		goto fail;
+	}
 
 	ok = 0;
 fail:
@@ -80,12 +88,20 @@ fido_do_ecdh(fido_dev_t *dev, es256_pk_t **pk, fido_blob_t **ecdh)
 	}
 
 	if (es256_sk_create(sk) < 0 || es256_derive_pk(sk, *pk) < 0) {
+		log_debug("%s: es256_derive_pk", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
 
-	if ((ak = es256_pk_new()) == NULL || fido_dev_authkey(dev,
-	    ak) != FIDO_OK || do_ecdh(sk, ak, ecdh) < 0) {
+	if ((ak = es256_pk_new()) == NULL ||
+	    fido_dev_authkey(dev, ak) != FIDO_OK) {
+		log_debug("%s: fido_dev_authkey", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if (do_ecdh(sk, ak, ecdh) < 0) {
+		log_debug("%s: do_ecdh", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}

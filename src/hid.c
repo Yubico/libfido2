@@ -24,6 +24,7 @@ get_key_len(uint8_t tag, uint8_t *key, size_t *key_len)
 {
 	*key = tag & 0xfc;
 	if ((*key & 0xf0) == 0xf0) {
+		log_debug("%s: *key=0x%02x", __func__, *key);
 		return (-1);
 	}
 
@@ -51,6 +52,7 @@ get_key_val(const void *body, size_t key_len, uint32_t *val)
 		*val = (uint32_t)((ptr[1] << 8) | ptr[0]);
 		break;
 	default:
+		log_debug("%s: key_len=%zu", __func__, key_len);
 		return (-1);
 	}
 
@@ -102,17 +104,23 @@ get_report_descriptor(const char *path, struct hidraw_report_descriptor *hrd)
 	int	fd;
 	int	ok = -1;
 
-	if ((fd = open(path, O_RDONLY)) < 0)
+	if ((fd = open(path, O_RDONLY)) < 0) {
+		log_debug("%s: open", __func__);
 		return (-1);
+	}
 
 	if ((r = ioctl(fd, HIDIOCGRDESCSIZE, &s)) < 0 || s < 0 ||
-	    (unsigned)s > HID_MAX_DESCRIPTOR_SIZE)
+	    (unsigned)s > HID_MAX_DESCRIPTOR_SIZE) {
+		log_debug("%s: ioctl HIDIOCGRDESCSIZE", __func__);
 		goto fail;
+	}
 
 	hrd->size = s;
 
-	if ((r = ioctl(fd, HIDIOCGRDESC, hrd)) < 0)
+	if ((r = ioctl(fd, HIDIOCGRDESC, hrd)) < 0) {
+		log_debug("%s: ioctl HIDIOCGRDESC", __func__);
 		goto fail;
+	}
 
 	ok = 0;
 fail:

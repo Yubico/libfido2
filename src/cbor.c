@@ -18,15 +18,23 @@ cbor_map_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
 	struct cbor_pair	*v;
 	size_t			 n;
 
-	if ((v = cbor_map_handle(item)) == NULL)
+	if ((v = cbor_map_handle(item)) == NULL) {
+		log_debug("%s: cbor_map_handle", __func__);
 		return (-1);
+	}
 
 	n = cbor_map_size(item);
 
 	for (size_t i = 0; i < n; i++) {
-		if (v[i].key == NULL || v[i].value == NULL ||
-		    f(v[i].key, v[i].value, arg) < 0)
+		if (v[i].key == NULL || v[i].value == NULL) {
+			log_debug("%s: key=%p, value=%p for i=%zu", __func__,
+			    (void *)v[i].key, (void *)v[i].value, i);
 			return (-1);
+		}
+		if (f(v[i].key, v[i].value, arg) < 0) {
+			log_debug("%s: iterator < 0 on i=%zu", __func__, i);
+			return (-1);
+		}
 	}
 
 	return (0);
@@ -39,14 +47,19 @@ cbor_array_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
 	cbor_item_t	**v;
 	size_t		  n;
 
-	if ((v = cbor_array_handle(item)) == NULL)
+	if ((v = cbor_array_handle(item)) == NULL) {
+		log_debug("%s: cbor_array_handle", __func__);
 		return (-1);
+	}
 
 	n = cbor_array_size(item);
 
 	for (size_t i = 0; i < n; i++)
-		if (v[i] == NULL || f(v[i], arg) < 0)
+		if (v[i] == NULL || f(v[i], arg) < 0) {
+			log_debug("%s: iterator < 0 on i=%zu,%p", __func__, i,
+			    (void *)v[i]);
 			return (-1);
+		}
 
 	return (0);
 }
@@ -60,23 +73,32 @@ parse_cbor_reply(const unsigned char *blob, size_t blob_len, void *arg,
 	int			 r;
 
 	if (blob_len < 1) {
+		log_debug("%s: blob_len=%zu", __func__, blob_len);
 		r = FIDO_ERR_RX;
 		goto fail;
 	}
 
 	if (blob[0] != FIDO_OK) {
+		log_debug("%s: blob[0]=0x%02x", __func__, blob[0]);
 		r = blob[0];
 		goto fail;
 	}
 
 	if ((item = cbor_load(blob + 1, blob_len - 1, &cbor)) == NULL) {
+		log_debug("%s: cbor_load", __func__);
 		r = FIDO_ERR_RX_NOT_CBOR;
 		goto fail;
 	}
 
 	if (cbor_isa_map(item) == false ||
-	    cbor_map_is_definite(item) == false ||
-	    cbor_map_iter(item, arg, parser) < 0) {
+	    cbor_map_is_definite(item) == false) {
+		log_debug("%s: cbor type", __func__);
+		r = FIDO_ERR_RX_INVALID_CBOR;
+		goto fail;
+	}
+
+	if (cbor_map_iter(item, arg, parser) < 0) {
+		log_debug("%s: cbor_map_iter", __func__);
 		r = FIDO_ERR_RX_INVALID_CBOR;
 		goto fail;
 	}
@@ -96,8 +118,10 @@ cbor_bytestring_copy(const cbor_item_t *item, unsigned char **buf, size_t *len)
 	*len = 0;
 
 	if (cbor_isa_bytestring(item) == false ||
-	    cbor_bytestring_is_definite(item) == false)
+	    cbor_bytestring_is_definite(item) == false) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	*len = cbor_bytestring_length(item);
 	if ((*buf = malloc(*len)) == NULL) {
@@ -118,8 +142,10 @@ cbor_string_copy(const cbor_item_t *item, char **str)
 	*str = NULL;
 
 	if (cbor_isa_string(item) == false ||
-	    cbor_string_is_definite(item) == false)
+	    cbor_string_is_definite(item) == false) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	if ((len = cbor_string_length(item)) == SIZE_MAX ||
 	    (*str = malloc(len + 1)) == NULL)
@@ -140,8 +166,10 @@ cbor_add_bytestring(cbor_item_t *item, const char *key,
 	pair.key = cbor_move(cbor_build_string(key));
 	pair.value = cbor_move(cbor_build_bytestring(value, value_len));
 
-	if (!cbor_map_add(item, pair))
+	if (!cbor_map_add(item, pair)) {
+		log_debug("%s: cbor_map_add", __func__);
 		return (-1);
+	}
 
 	return (0);
 }
@@ -154,8 +182,10 @@ cbor_add_string(cbor_item_t *item, const char *key, const char *value)
 	pair.key = cbor_move(cbor_build_string(key));
 	pair.value = cbor_move(cbor_build_string(value));
 
-	if (!cbor_map_add(item, pair))
+	if (!cbor_map_add(item, pair)) {
+		log_debug("%s: cbor_map_add", __func__);
 		return (-1);
+	}
 
 	return (0);
 }
@@ -168,8 +198,10 @@ cbor_add_bool(cbor_item_t *item, const char *key, bool value)
 	pair.key = cbor_move(cbor_build_string(key));
 	pair.value = cbor_move(cbor_build_bool(value));
 
-	if (!cbor_map_add(item, pair))
+	if (!cbor_map_add(item, pair)) {
+		log_debug("%s: cbor_map_add", __func__);
 		return (-1);
+	}
 
 	return (0);
 }
@@ -185,8 +217,10 @@ cbor_add_arg(cbor_item_t *item, uint8_t n, cbor_item_t *arg)
 	pair.key = cbor_move(cbor_build_uint8(n));
 	pair.value = arg;
 
-	if (!cbor_map_add(item, pair))
+	if (!cbor_map_add(item, pair)) {
+		log_debug("%s: cbor_map_add", __func__);
 		return (-1);
+	}
 
 	return (0);
 }
@@ -228,8 +262,12 @@ cbor_build_frame(uint8_t cmd, cbor_item_t *argv[], size_t argc, fido_blob_t *f)
 		goto fail;
 
 	cbor_len = cbor_serialize_alloc(flat, &cbor, &cbor_alloc_len);
-	if (cbor_len == 0 || cbor_len == SIZE_MAX || (f->ptr =
-	    malloc(cbor_len + 1)) == NULL)
+	if (cbor_len == 0 || cbor_len == SIZE_MAX) {
+		log_debug("%s: cbor_len=%zu", __func__, cbor_len);
+		goto fail;
+	}
+
+	if ((f->ptr = malloc(cbor_len + 1)) == NULL)
 		goto fail;
 
 	f->len = cbor_len + 1;
@@ -465,25 +503,37 @@ encode_change_pin_auth(const fido_blob_t *key, const fido_blob_t *new_pin,
 	    (phe = fido_blob_new()) == NULL)
 		goto fail;
 
-	if (aes256_cbc_enc(key, new_pin, npe) < 0 || sha256(pin->ptr, pin->len,
-	    ph) < 0 || ph->len < 16)
+	if (aes256_cbc_enc(key, new_pin, npe) < 0) {
+		log_debug("%s: aes256_cbc_enc 1", __func__);
 		goto fail;
+	}
+
+	if (sha256(pin->ptr, pin->len, ph) < 0 || ph->len < 16) {
+		log_debug("%s: sha256", __func__);
+		goto fail;
+	}
 
 	ph->len = 16; /* first 16 bytes */
 
-	if (aes256_cbc_enc(key, ph, phe) < 0)
+	if (aes256_cbc_enc(key, ph, phe) < 0) {
+		log_debug("%s: aes256_cbc_enc 2", __func__);
 		goto fail;
+	}
 
 	if ((ctx = HMAC_CTX_new()) == NULL ||
 	    (md = EVP_get_digestbyname("SHA256")) == NULL ||
 	    HMAC_Init_ex(ctx, key->ptr, (int)key->len, md, NULL) == 0 ||
 	    HMAC_Update(ctx, npe->ptr, (int)npe->len) == 0 ||
 	    HMAC_Update(ctx, phe->ptr, (int)phe->len) == 0 ||
-	    HMAC_Final(ctx, dgst, &dgst_len) == 0 || dgst_len != 32)
+	    HMAC_Final(ctx, dgst, &dgst_len) == 0 || dgst_len != 32) {
+		log_debug("%s: HMAC", __func__);
 		goto fail;
+	}
 
-	if ((item = cbor_build_bytestring(dgst, 16)) == NULL)
+	if ((item = cbor_build_bytestring(dgst, 16)) == NULL) {
+		log_debug("%s: cbor_build_bytestring", __func__);
 		goto fail;
+	}
 
 	ok = 0;
 fail:
@@ -513,13 +563,20 @@ encode_set_pin_auth(const fido_blob_t *key, const fido_blob_t *pin)
 	cbor_item_t	*item = NULL;
 	fido_blob_t	*pe = NULL;
 
-	if ((pe = fido_blob_new()) == NULL || aes256_cbc_enc(key, pin, pe) < 0)
+	if ((pe = fido_blob_new()) == NULL)
 		goto fail;
+
+	if (aes256_cbc_enc(key, pin, pe) < 0) {
+		log_debug("%s: aes256_cbc_enc", __func__);
+		goto fail;
+	}
 
 	if ((md = EVP_get_digestbyname("SHA256")) == NULL || key->len != 32 ||
 	    HMAC(md, key->ptr, (int)key->len, pe->ptr, (int)pe->len, dgst,
-	    &dgst_len) == NULL || dgst_len != SHA256_DIGEST_LENGTH)
+	    &dgst_len) == NULL || dgst_len != SHA256_DIGEST_LENGTH) {
+		log_debug("%s: HMAC", __func__);
 		goto fail;
+	}
 
 	item = cbor_build_bytestring(dgst, 16);
 fail:
@@ -535,14 +592,20 @@ encode_pin_hash_enc(const fido_blob_t *shared, const fido_blob_t *pin)
 	fido_blob_t	*ph = NULL;
 	fido_blob_t	*phe = NULL;
 
-	if ((ph = fido_blob_new()) == NULL || (phe = fido_blob_new()) == NULL ||
-	    sha256(pin->ptr, pin->len, ph) < 0 || ph->len < 16)
+	if ((ph = fido_blob_new()) == NULL || (phe = fido_blob_new()) == NULL)
 		goto fail;
+
+	if (sha256(pin->ptr, pin->len, ph) < 0 || ph->len < 16) {
+		log_debug("%s: SHA256", __func__);
+		goto fail;
+	}
 
 	ph->len = 16; /* first 16 bytes */
 
-	if (aes256_cbc_enc(shared, ph, phe) < 0)
+	if (aes256_cbc_enc(shared, ph, phe) < 0) {
+		log_debug("%s: aes256_cbc_enc", __func__);
 		goto fail;
+	}
 
 	item = cbor_build_bytestring(phe->ptr, phe->len);
 fail:
@@ -557,10 +620,13 @@ decode_fmt(const cbor_item_t *item, char **fmt)
 {
 	char	*type = NULL;
 
-	if (cbor_string_copy(item, &type) < 0)
+	if (cbor_string_copy(item, &type) < 0) {
+		log_debug("%s: cbor_string_copy", __func__);
 		return (-1);
+	}
 
 	if (strcmp(type, "packed") && strcmp(type, "fido-u2f")) {
+		log_debug("%s: type=%s", __func__, type);
 		free(type);
 		return (-1);
 	}
@@ -578,19 +644,39 @@ decode_attcred(const unsigned char **buf, size_t *len, fido_attcred_t *attcred)
 	uint16_t		 id_len;
 	int			 ok = -1;
 
-	if (buf_read(buf, len, &attcred->aaguid, sizeof(attcred->aaguid)) < 0 ||
-	    buf_read(buf, len, &id_len, sizeof(id_len)) < 0)
+	log_debug("%s: buf=%p, len=%zu", __func__, (const void *)*buf, *len);
+
+	if (buf_read(buf, len, &attcred->aaguid, sizeof(attcred->aaguid)) < 0) {
+		log_debug("%s: buf_read aaguid", __func__);
 		return (-1);
+	}
+
+	if (buf_read(buf, len, &id_len, sizeof(id_len)) < 0) {
+		log_debug("%s: buf_read id_len", __func__);
+		return (-1);
+	}
 
 	attcred->id.len = (size_t)be16toh(id_len);
-
-	if ((attcred->id.ptr = malloc(attcred->id.len)) == NULL ||
-	    buf_read(buf, len, attcred->id.ptr, attcred->id.len) < 0)
+	if ((attcred->id.ptr = malloc(attcred->id.len)) == NULL)
 		return (-1);
 
-	if ((item = cbor_load(*buf, *len, &cbor)) == NULL ||
-	    es256_pk_decode(item, &attcred->pubkey) < 0)
+	log_debug("%s: attcred->id.len=%zu", __func__, attcred->id.len);
+
+	if (buf_read(buf, len, attcred->id.ptr, attcred->id.len) < 0) {
+		log_debug("%s: buf_read id", __func__);
+		return (-1);
+	}
+
+	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
+		log_debug("%s: cbor_load", __func__);
+		log_xxd(*buf, *len);
 		goto fail;
+	}
+
+	if (es256_pk_decode(item, &attcred->pubkey) < 0) {
+		log_debug("%s: es256_pk_decode", __func__);
+		goto fail;
+	}
 
 	*buf += cbor.read;
 	*len -= cbor.read;
@@ -611,18 +697,26 @@ decode_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
 	size_t			 len;
 
 	if (cbor_isa_bytestring(item) == false ||
-	    cbor_bytestring_is_definite(item) == false)
+	    cbor_bytestring_is_definite(item) == false) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	if (cbor_serialize_alloc(item, &authdata_cbor->ptr,
-	    &authdata_cbor->len) == 0)
+	    &authdata_cbor->len) == 0) {
+		log_debug("%s: cbor_serialize_alloc", __func__);
 		return (-1);
+	}
 
 	buf = cbor_bytestring_handle(item);
 	len = cbor_bytestring_length(item);
 
-	if (buf_read(&buf, &len, authdata, sizeof(*authdata)) < 0)
+	log_debug("%s: buf=%p, len=%zu", __func__, (const void *)buf, len);
+
+	if (buf_read(&buf, &len, authdata, sizeof(*authdata)) < 0) {
+		log_debug("%s: buf_read", __func__);
 		return (-1);
+	}
 
 	authdata->sigcount = be32toh(authdata->sigcount);
 
@@ -659,17 +753,23 @@ decode_attstmt_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	if (!strcmp(name, "alg")) {
 		if (cbor_isa_negint(val) == false ||
 		    cbor_int_get_width(val) != CBOR_INT_8 ||
-		    cbor_get_uint8(val) != -COSE_ES256 - 1)
+		    cbor_get_uint8(val) != -COSE_ES256 - 1) {
+			log_debug("%s: alg", __func__);
 			goto fail;
+		}
 	} else if (!strcmp(name, "sig")) {
 		if (cbor_bytestring_copy(val, &attstmt->sig.ptr,
-		    &attstmt->sig.len) < 0)
+		    &attstmt->sig.len) < 0) {
+			log_debug("%s: sig", __func__);
 			goto fail;
+		}
 	} else if (!strcmp(name, "x5c")) {
 		if (cbor_isa_array(val) == false ||
 		    cbor_array_is_definite(val) == false ||
-		    cbor_array_iter(val, &attstmt->x5c, decode_x5c) < 0)
+		    cbor_array_iter(val, &attstmt->x5c, decode_x5c) < 0) {
+			log_debug("%s: x5c", __func__);
 			goto fail;
+		}
 	}
 
 	ok = 0;
@@ -684,8 +784,10 @@ decode_attstmt(const cbor_item_t *item, fido_attstmt_t *attstmt)
 {
 	if (cbor_isa_map(item) == false ||
 	    cbor_map_is_definite(item) == false ||
-	    cbor_map_iter(item, attstmt, decode_attstmt_entry) < 0)
+	    cbor_map_iter(item, attstmt, decode_attstmt_entry) < 0) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	return (0);
 }
@@ -693,8 +795,10 @@ decode_attstmt(const cbor_item_t *item, fido_attstmt_t *attstmt)
 int
 decode_uint64(const cbor_item_t *item, uint64_t *n)
 {
-	if (cbor_isa_uint(item) == false)
+	if (cbor_isa_uint(item) == false) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	*n = cbor_get_uint64(item);
 
@@ -708,12 +812,16 @@ decode_cred_id_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	char		*name = NULL;
 	int		 ok = -1;
 
-	if (cbor_string_copy(key, &name) < 0)
+	if (cbor_string_copy(key, &name) < 0) {
+		log_debug("%s: cbor_string_copy", __func__);
 		goto fail;
+	}
 
 	if (!strcmp(name, "id"))
-		if (cbor_bytestring_copy(val, &id->ptr, &id->len) < 0)
+		if (cbor_bytestring_copy(val, &id->ptr, &id->len) < 0) {
+			log_debug("%s: cbor_bytestring_copy", __func__);
 			goto fail;
+		}
 
 	ok = 0;
 fail:
@@ -727,8 +835,10 @@ decode_cred_id(const cbor_item_t *item, fido_blob_t *id)
 {
 	if (cbor_isa_map(item) == false ||
 	    cbor_map_is_definite(item) == false ||
-	    cbor_map_iter(item, id, decode_cred_id_entry) < 0)
+	    cbor_map_iter(item, id, decode_cred_id_entry) < 0) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	return (0);
 }
@@ -740,21 +850,31 @@ decode_user_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	char		*name = NULL;
 	int		 ok = -1;
 
-	if (cbor_string_copy(key, &name) < 0)
+	if (cbor_string_copy(key, &name) < 0) {
+		log_debug("%s: type name", __func__);
 		goto fail;
+	}
 
 	if (!strcmp(name, "icon")) {
-		if (cbor_string_copy(val, &user->icon) < 0)
+		if (cbor_string_copy(val, &user->icon) < 0) {
+			log_debug("%s: icon", __func__);
 			goto fail;
+		}
 	} else if (!strcmp(name, "name")) {
-		if (cbor_string_copy(val, &user->name) < 0)
+		if (cbor_string_copy(val, &user->name) < 0) {
+			log_debug("%s: name", __func__);
 			goto fail;
+		}
 	} else if (!strcmp(name, "displayName")) {
-		if (cbor_string_copy(val, &user->display_name) < 0)
+		if (cbor_string_copy(val, &user->display_name) < 0) {
+			log_debug("%s: display_name", __func__);
 			goto fail;
+		}
 	} else if (!strcmp(name, "id")) {
-		if (cbor_bytestring_copy(val, &user->id.ptr, &user->id.len) < 0)
+		if (cbor_bytestring_copy(val, &user->id.ptr, &user->id.len) < 0) {
+			log_debug("%s: id", __func__);
 			goto fail;
+		}
 	}
 
 	ok = 0;
@@ -769,8 +889,10 @@ decode_user(const cbor_item_t *item, fido_user_t *user)
 {
 	if (cbor_isa_map(item) == false ||
 	    cbor_map_is_definite(item) == false ||
-	    cbor_map_iter(item, user, decode_user_entry) < 0)
+	    cbor_map_iter(item, user, decode_user_entry) < 0) {
+		log_debug("%s: cbor type", __func__);
 		return (-1);
+	}
 
 	return (0);
 }

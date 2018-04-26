@@ -27,12 +27,15 @@ fido_dev_authkey_tx(fido_dev_t *dev)
 	cbor_item_t	*argv[2];
 	int		 r;
 
+	log_debug("%s: dev=%p", __func__, (void *)dev);
+
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
 
 	/* add command parameters */
 	if ((argv[0] = cbor_build_uint8(1)) == NULL ||
 	    (argv[1] = cbor_build_uint8(2)) == NULL) {
+		log_debug("%s: cbor_build", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
@@ -40,6 +43,7 @@ fido_dev_authkey_tx(fido_dev_t *dev)
 	/* frame and transmit */
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 2, &f) < 0 ||
 	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+		log_debug("%s: tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
 	}
@@ -62,10 +66,15 @@ fido_dev_authkey_rx(fido_dev_t *dev, es256_pk_t *authkey, int ms)
 	unsigned char	reply[2048];
 	int		reply_len;
 
+	log_debug("%s: dev=%p, authkey=%p, ms=%d", __func__, (void *)dev,
+	    (void *)authkey, ms);
+
 	memset(authkey, 0, sizeof(*authkey));
 
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0)
+	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		log_debug("%s: rx", __func__);
 		return (FIDO_ERR_RX);
+	}
 
 	return (parse_cbor_reply(reply, (size_t)reply_len, authkey,
 	    parse_authkey));
