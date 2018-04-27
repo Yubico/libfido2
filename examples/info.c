@@ -153,7 +153,7 @@ getinfo(const char *path)
 	fido_cbor_info_t	*ci;
 	int			 r;
 
-	fido_init();
+	fido_init(0);
 
 	if ((dev = fido_dev_new()) == NULL)
 		errx(1, "fido_dev_new");

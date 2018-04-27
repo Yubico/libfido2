@@ -29,7 +29,7 @@ main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	fido_init();
+	fido_init(0);
 
 	if ((dev = fido_dev_new()) == NULL)
 		errx(1, "fido_dev_new");

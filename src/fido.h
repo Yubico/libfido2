@@ -68,7 +68,11 @@ void fido_cred_free(fido_cred_t **);
 void fido_dev_force_u2f(fido_dev_t *);
 void fido_dev_free(fido_dev_t **);
 void fido_dev_info_free(fido_dev_info_t **, size_t);
-void fido_init(void);
+
+/* fido_init() flags. */
+#define FIDO_DEBUG	0x01
+
+void fido_init(int);
 
 const unsigned char *es256_pk_get_x(const es256_pk_t *);
 const unsigned char *es256_pk_get_y(const es256_pk_t *);

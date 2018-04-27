@@ -20,7 +20,7 @@ main(void)
 	size_t		 ndevs;
 	int		 r;
 
-	fido_init();
+	fido_init(0);
 
 	if ((devlist = fido_dev_info_new(64)) == NULL)
 		errx(1, "fido_dev_info_new");

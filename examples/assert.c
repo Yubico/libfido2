@@ -140,7 +140,7 @@ main(int argc, char **argv)
 	if (argc != 2)
 		usage();
 
-	fido_init();
+	fido_init(0);
 
 	if ((dev = fido_dev_new()) == NULL)
 		errx(1, "fido_dev_new");

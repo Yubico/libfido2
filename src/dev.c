@@ -172,9 +172,9 @@ fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 }
 
 void
-fido_init(void)
+fido_init(int flags)
 {
-	if (getenv("FIDO_DEBUG") != NULL)
+	if (flags & FIDO_DEBUG || getenv("FIDO_DEBUG") != NULL)
 		log_init();
 }
 
