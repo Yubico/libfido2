@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include "fido.h"
 
+#ifndef _FIDO_NO_DIAGNOSTIC
+
 static int logging;
 
 void
@@ -53,3 +55,5 @@ log_debug(const char *fmt, ...)
 	fprintf(stderr, "\n");
 	fflush(stderr);
 }
+
+#endif /* !_FIDO_NO_DIAGNOSTIC */

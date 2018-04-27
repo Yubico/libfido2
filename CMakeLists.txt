@@ -40,6 +40,11 @@ else()
 	set(HIDAPI_NAME "hidapi")
 endif()
 
+# MinGW is stuck with a flavour of C89.
+if(MINGW)
+	add_definitions(-D_FIDO_NO_DIAGNOSTIC)
+endif()
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
