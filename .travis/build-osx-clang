@@ -1,0 +1,26 @@
+#!/bin/sh -eux
+
+${CC} --version
+
+# Build and install libcbor.
+git clone git://github.com/pjk/libcbor
+cd libcbor
+git checkout v0.5.0
+mkdir build
+(cd build && cmake ..)
+make -C build
+sudo make -C build install
+cd ..
+
+# Install OpenSSL 1.1.0h and hidapi from Homebrew.
+brew update
+brew upgrade openssl@1.1
+brew switch openssl@1.1 1.1.0h
+brew install hidapi
+
+# Build and install libfido2.
+export PKG_CONFIG_PATH=/usr/local/opt/openssl@1.1/lib/pkgconfig
+mkdir build
+(cd build && cmake ..)
+make -C build
+sudo make -C build install
