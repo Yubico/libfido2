@@ -1,4 +1,7 @@
-== fido2
+== libfido2
+
+image:https://api.travis-ci.org/Yubico/libfido2.svg?branch=master["Build Status (Travis)", link="https://travis-ci.org/Yubico/libfido2"]
+image:https://img.shields.io/badge/license-BSD-blue.svg["License", link="https://raw.githubusercontent.com/Yubico/libfido2/master/LICENSE"]
 
 Provides library functionality for communicating with a FIDO device over USB as
 well as verifying attestation and assertion signatures.
@@ -13,13 +16,12 @@ For usage, see the `examples/` directory.
 
 === License
 
-This project, with the exception of the files mentioned below, is licensed
-under the BSD 2-clause license.
-See the _LICENSE_ file for the full license text.
+This project is licensed under the BSD 2-clause license.  See the _LICENSE_
+file for the full license text.
 
 === Build
 
-fido2 uses CMake, and can be built with the following commands:
+libfido2 uses CMake, and can be built with the following commands:
 
   # (rm -rf build && mkdir build && cd build && cmake ..)
   # make -C build
@@ -44,4 +46,4 @@ installing these dependencies, see http://www.signal11.us/oss/hidapi/,
 http://libcbor.org/, and https://www.openssl.org/.
 
 As of April 2018, libcbor was available as a package on Debian Buster and
-Ubuntu Bionic Beaver.
+Ubuntu 18.04 (Bionic Beaver).
