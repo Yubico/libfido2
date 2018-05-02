@@ -88,7 +88,7 @@ verify_cred(const char *fmt, const unsigned char *authdata_ptr,
 
 	if (key_out != NULL) {
 		/* extract the credential pubkey */
-		if (write_ec_pubkey(key_out, fido_cred_pubkey(cred)) < 0)
+		if (write_ec_pubkey(key_out, fido_cred_pubkey_ptr(cred)) < 0)
 			errx(1, "write_pubkey");
 	}
 

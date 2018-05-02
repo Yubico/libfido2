@@ -63,7 +63,8 @@
 		fido_cred_id_len;
 		fido_cred_id_ptr;
 		fido_cred_new;
-		fido_cred_pubkey;
+		fido_cred_pubkey_len;
+		fido_cred_pubkey_ptr;
 		fido_cred_set_authdata;
 		fido_cred_set_clientdata_hash;
 		fido_cred_set_fmt;

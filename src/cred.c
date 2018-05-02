@@ -684,9 +684,15 @@ fido_cred_authdata_len(const fido_cred_t *cred)
 }
 
 const es256_pk_t *
-fido_cred_pubkey(const fido_cred_t *cred)
+fido_cred_pubkey_ptr(const fido_cred_t *cred)
 {
 	return (&cred->attcred.pubkey);
+}
+
+size_t
+fido_cred_pubkey_len(const fido_cred_t *cred)
+{
+	return (sizeof(cred->attcred.pubkey));
 }
 
 const unsigned char *

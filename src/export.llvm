@@ -61,7 +61,8 @@ _fido_cred_free
 _fido_cred_id_len
 _fido_cred_id_ptr
 _fido_cred_new
-_fido_cred_pubkey
+_fido_cred_pubkey_len
+_fido_cred_pubkey_ptr
 _fido_cred_set_authdata
 _fido_cred_set_clientdata_hash
 _fido_cred_set_fmt
