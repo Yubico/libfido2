@@ -208,8 +208,7 @@ decode_protocols(const cbor_item_t *item, fido_byte_array_t *p)
 		return (-1);
 	}
 
-	p->ptr = recallocarray(NULL, 0, cbor_array_size(item),
-	    sizeof(uint8_t *));
+	p->ptr = recallocarray(NULL, 0, cbor_array_size(item), sizeof(uint8_t));
 	if (p->ptr == NULL)
 		return (-1);
 
