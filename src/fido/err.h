@@ -61,9 +61,8 @@
 #define FIDO_ERR_INVALID_PARAM		-5
 #define FIDO_ERR_INVALID_SIG		-6
 #define FIDO_ERR_INVALID_ARGUMENT	-7
-#define FIDO_ERR_DEVICE_OPEN		-8
-#define FIDO_ERR_DEVICE_CLOSED		-9
-#define FIDO_ERR_INTERNAL		-10
+#define FIDO_ERR_USER_PRESENCE_REQUIRED	-8
+#define FIDO_ERR_INTERNAL		-9
 
 const char *fido_strerr(int);
 
