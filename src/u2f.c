@@ -599,6 +599,12 @@ u2f_authenticate_single(fido_dev_t *dev, const fido_blob_t *key_id,
 		goto fail;
 	}
 
+	if (fa->up == false) {
+		log_debug("%s: checking for key existence only", __func__);
+		r = FIDO_ERR_USER_PRESENCE_REQUIRED;
+		goto fail;
+	}
+
 	if ((r = do_auth(dev, &fa->cdh, fa->rp_id, key_id, &sig, &ad,
 	    ms)) != FIDO_OK) {
 		log_debug("%s: do_auth", __func__);
