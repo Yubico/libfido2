@@ -133,19 +133,26 @@ fido_dev_get_pin_token(fido_dev_t *dev, const char *pin,
 static int
 pad64(const char *pin, fido_blob_t **ppin)
 {
-	if (strlen(pin) > 64)
-		return (FIDO_ERR_INVALID_ARGUMENT);
+	size_t	pin_len;
+	size_t	ppin_len;
+
+	pin_len = strlen(pin);
+	if (pin_len < 4 || pin_len > 255) {
+		log_debug("%s: invalid pin length", __func__);
+		return (FIDO_ERR_PIN_POLICY_VIOLATION);
+	}
 
 	if ((*ppin = fido_blob_new()) == NULL)
 		return (FIDO_ERR_INTERNAL);
 
-	if (((*ppin)->ptr = calloc(1, 64)) == NULL) {
+	ppin_len = (pin_len + 63) & ~63;
+	if (ppin_len < pin_len || ((*ppin)->ptr = calloc(1, ppin_len)) == NULL) {
 		fido_blob_free(ppin);
 		return (FIDO_ERR_INTERNAL);
 	}
 
-	memcpy((*ppin)->ptr, pin, strlen(pin));
-	(*ppin)->len = 64;
+	memcpy((*ppin)->ptr, pin, pin_len);
+	(*ppin)->len = ppin_len;
 
 	return (FIDO_OK);
 }
