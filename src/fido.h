@@ -106,6 +106,7 @@ const wchar_t *fido_dev_info_product_string(const fido_dev_info_t *);
 
 int es256_derive_pk(const es256_sk_t *, es256_pk_t *);
 int es256_pk_from_EC_KEY(const EC_KEY *, es256_pk_t *);
+int es256_pk_from_ptr(es256_pk_t *, const void *, size_t);
 int es256_pk_set_x(es256_pk_t *, const unsigned char *);
 int es256_pk_set_y(es256_pk_t *, const unsigned char *);
 int es256_sk_create(es256_sk_t *);

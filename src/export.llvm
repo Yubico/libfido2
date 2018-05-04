@@ -1,5 +1,6 @@
 _es256_pk_free
 _es256_pk_from_EC_KEY
+_es256_pk_from_ptr
 _es256_pk_get_x
 _es256_pk_get_y
 _es256_pk_new

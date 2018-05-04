@@ -153,6 +153,17 @@ es256_pk_free(es256_pk_t **pkp)
 	*pkp = NULL;
 }
 
+int
+es256_pk_from_ptr(es256_pk_t *pk, const void *ptr, size_t len)
+{
+	if (len < sizeof(*pk))
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	memcpy(pk, ptr, sizeof(*pk));
+
+	return (FIDO_OK);
+}
+
 const unsigned char *
 es256_pk_get_x(const es256_pk_t *pk)
 {
