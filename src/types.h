@@ -7,6 +7,17 @@
 #ifndef _TYPES_H
 #define _TYPES_H
 
+/* COSE ES256 (ECDSA over P-256 with SHA-256) public key */
+typedef struct es256_pk {
+	unsigned char	x[32];
+	unsigned char	y[32];
+} es256_pk_t;
+
+/* COSE ES256 (ECDSA over P-256 with SHA-256) (secret) key */
+typedef struct es256_sk {
+	unsigned char	d[32];
+} es256_sk_t;
+
 typedef struct fido_authdata {
 	unsigned char rp_id_hash[32]; /* sha256 of fido_rp.id */
 	uint8_t       flags;          /* user present/verified */
@@ -23,7 +34,10 @@ typedef struct fido_attcred_raw {
 typedef struct fido_attcred {
 	unsigned char aaguid[16]; /* credential's aaguid */
 	fido_blob_t   id;         /* credential id */
-	es256_pk_t    pubkey;     /* credential's public key */
+	int           type;       /* credential's cose algorithm */
+	union {                   /* credential's public key */
+		es256_pk_t es256;
+	} pubkey;
 } fido_attcred_t;
 
 typedef struct fido_attstmt {
@@ -50,6 +64,7 @@ typedef struct fido_cred {
 	fido_blob_array_t excl;          /* list of credential ids to exclude */
 	bool              rk;            /* resident key */
 	bool              uv;            /* user verification */
+	int               type;          /* cose algorithm */
 	char             *fmt;           /* credential format */
 	fido_blob_t       authdata_cbor; /* raw cbor payload */
 	fido_authdata_t   authdata;      /* decoded authdata payload */

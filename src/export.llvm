@@ -70,6 +70,7 @@ _fido_cred_set_fmt
 _fido_cred_set_options
 _fido_cred_set_rp
 _fido_cred_set_sig
+_fido_cred_set_type
 _fido_cred_set_user
 _fido_cred_set_x509
 _fido_cred_sig_len

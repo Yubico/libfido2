@@ -10,6 +10,7 @@
 
 #include <string.h>
 #include "fido.h"
+#include "fido/es256.h"
 
 static int
 adjust_assert_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
@@ -305,7 +306,7 @@ fail:
 }
 
 static int
-verify_sig(const fido_blob_t *dgst, const es256_pk_t *pk,
+verify_sig_es256(const fido_blob_t *dgst, const es256_pk_t *pk,
     const fido_blob_t *sig)
 {
 	EVP_PKEY	*pkey = NULL;
@@ -340,7 +341,8 @@ fail:
 }
 
 int
-fido_assert_verify(fido_assert_t *assert, size_t idx, const es256_pk_t *pk)
+fido_assert_verify(fido_assert_t *assert, size_t idx, int cose_alg,
+    const void *pk)
 {
 	unsigned char		 buf[SHA256_DIGEST_LENGTH];
 	fido_blob_t		 dgst;
@@ -378,7 +380,13 @@ fido_assert_verify(fido_assert_t *assert, size_t idx, const es256_pk_t *pk)
 		goto out;
 	}
 
-	if (verify_sig(&dgst, pk, &stmt->sig) < 0) {
+	if (cose_alg != COSE_ES256) {
+		log_debug("%s: unsupported cose_alg %d", __func__, cose_alg);
+		r = FIDO_ERR_UNSUPPORTED_OPTION;
+		goto out;
+	}
+
+	if (verify_sig_es256(&dgst, pk, &stmt->sig) < 0) {
 		log_debug("%s: verify_sig", __func__);
 		r = FIDO_ERR_INVALID_SIG;
 		goto out;

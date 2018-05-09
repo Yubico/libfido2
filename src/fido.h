@@ -30,7 +30,6 @@ typedef struct fido_dev_io {
 
 #include "blob.h"
 #include "compat.h"
-#include "es256.h"
 #include "iso7816.h"
 #include "types.h"
 #include "extern.h"
@@ -49,19 +48,12 @@ typedef struct es256_pk es256_pk_t;
 typedef struct es256_sk es256_sk_t;
 #endif
 
-es256_pk_t *es256_pk_new(void);
-es256_sk_t *es256_sk_new(void);
 fido_assert_t *fido_assert_new(void);
 fido_cred_t *fido_cred_new(void);
 fido_dev_t *fido_dev_new(void);
 fido_dev_info_t *fido_dev_info_new(size_t);
 fido_cbor_info_t *fido_cbor_info_new(void);
 
-EVP_PKEY *es256_pk_to_EVP_PKEY(const es256_pk_t *);
-EVP_PKEY *es256_sk_to_EVP_PKEY(const es256_sk_t *);
-
-void es256_pk_free(es256_pk_t **);
-void es256_sk_free(es256_sk_t **);
 void fido_assert_free(fido_assert_t **);
 void fido_cbor_info_free(fido_cbor_info_t **);
 void fido_cred_free(fido_cred_t **);
@@ -74,9 +66,6 @@ void fido_dev_info_free(fido_dev_info_t **, size_t);
 
 void fido_init(int);
 
-const unsigned char *es256_pk_get_x(const es256_pk_t *);
-const unsigned char *es256_pk_get_y(const es256_pk_t *);
-const unsigned char *es256_sk_get_d(const es256_sk_t *);
 const unsigned char *fido_assert_authdata_ptr(const fido_assert_t *, size_t);
 const unsigned char *fido_assert_clientdata_hash_ptr(const fido_assert_t *);
 const unsigned char *fido_assert_id_ptr(const fido_assert_t *, size_t);
@@ -92,25 +81,18 @@ const char *fido_assert_user_icon(const fido_assert_t *, size_t);
 const char *fido_assert_user_name(const fido_assert_t *, size_t);
 const char *fido_cred_fmt(const fido_cred_t *);
 const char *fido_dev_info_path(const fido_dev_info_t *);
-const es256_pk_t *fido_cred_pubkey_ptr(const fido_cred_t *);
 const fido_dev_info_t *fido_dev_info_ptr(const fido_dev_info_t *, size_t);
 const uint8_t *fido_cbor_info_protocols_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cbor_info_aaguid_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cred_authdata_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_clientdata_hash_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_id_ptr(const fido_cred_t *);
+const unsigned char *fido_cred_pubkey_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_sig_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_x5c_ptr(const fido_cred_t *);
 const wchar_t *fido_dev_info_manufacturer_string(const fido_dev_info_t *);
 const wchar_t *fido_dev_info_product_string(const fido_dev_info_t *);
 
-int es256_derive_pk(const es256_sk_t *, es256_pk_t *);
-int es256_pk_from_EC_KEY(const EC_KEY *, es256_pk_t *);
-int es256_pk_from_ptr(es256_pk_t *, const void *, size_t);
-int es256_pk_set_x(es256_pk_t *, const unsigned char *);
-int es256_pk_set_y(es256_pk_t *, const unsigned char *);
-int es256_sk_create(es256_sk_t *);
-int es256_sk_set_d(es256_sk_t *, const unsigned char *);
 int fido_assert_allow_cred(fido_assert_t *, const unsigned char *, size_t);
 int fido_assert_set_authdata(fido_assert_t *, size_t, const unsigned char *,
     size_t);
@@ -120,7 +102,7 @@ int fido_assert_set_count(fido_assert_t *, size_t);
 int fido_assert_set_options(fido_assert_t *, bool, bool);
 int fido_assert_set_rp(fido_assert_t *, const char *);
 int fido_assert_set_sig(fido_assert_t *, size_t, const unsigned char *, size_t);
-int fido_assert_verify(fido_assert_t *, size_t, const es256_pk_t *);
+int fido_assert_verify(fido_assert_t *, size_t, int, const void *);
 int fido_cred_exclude(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_authdata(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_clientdata_hash(fido_cred_t *, const unsigned char *, size_t);
@@ -128,6 +110,7 @@ int fido_cred_set_fmt(fido_cred_t *, const char *);
 int fido_cred_set_options(fido_cred_t *, bool, bool);
 int fido_cred_set_rp(fido_cred_t *, const char *, const char *);
 int fido_cred_set_sig(fido_cred_t *, const unsigned char *, size_t);
+int fido_cred_set_type(fido_cred_t *, int);
 int fido_cred_set_user(fido_cred_t *, const unsigned char *, size_t,
     const char *, const char *, const char *);
 int fido_cred_set_x509(fido_cred_t *, const unsigned char *, size_t);

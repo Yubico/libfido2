@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include "fido.h"
+#include "fido/es256.h"
 #include "compat.h"
 #include "extern.h"
 
@@ -80,7 +81,7 @@ verify_assert(const unsigned char *authdata_ptr, size_t authdata_len,
 	if (r != FIDO_OK)
 		errx(1, "fido_assert_set_sig: %s (0x%x)", fido_strerr(r), r);
 
-	r = fido_assert_verify(assert, 0, pk);
+	r = fido_assert_verify(assert, 0, COSE_ES256, pk);
 	if (r != FIDO_OK)
 		errx(1, "fido_assert_verify: %s (0x%x)", fido_strerr(r), r);
 

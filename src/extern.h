@@ -21,10 +21,11 @@ cbor_item_t *encode_pin_enc(const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *encode_pin_hash_enc(const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *encode_pin_opt(void);
 cbor_item_t *encode_pubkey_list(const fido_blob_array_t *);
-cbor_item_t *encode_pubkey_param(void);
+cbor_item_t *encode_pubkey_param(int);
 cbor_item_t *encode_rp_entity(const fido_rp_t *);
 cbor_item_t *encode_set_pin_auth(const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *encode_user_entity(const fido_user_t *);
+cbor_item_t *es256_pk_encode(const es256_pk_t *);
 
 /* cbor decoding functions */
 int decode_attcred(const unsigned char **, size_t *, fido_attcred_t *);
@@ -37,6 +38,7 @@ int decode_fmt(const cbor_item_t *, char **);
 int decode_uint64(const cbor_item_t *, uint64_t *);
 int decode_user(const cbor_item_t *, fido_user_t *);
 int decode_x5c(const cbor_item_t *, void *);
+int es256_pk_decode(const cbor_item_t *, es256_pk_t *);
 
 /* auxiliary cbor routines */
 int cbor_add_bool(cbor_item_t *, const char *, bool);

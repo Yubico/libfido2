@@ -10,6 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "fido.h"
+#include "fido/es256.h"
 
 static int
 sig_get(fido_blob_t *sig, const unsigned char **buf, size_t *len)

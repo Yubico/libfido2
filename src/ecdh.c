@@ -8,6 +8,7 @@
 #include <openssl/sha.h>
 
 #include "fido.h"
+#include "fido/es256.h"
 
 static int
 do_ecdh(const es256_sk_t *sk, const es256_pk_t *pk, fido_blob_t **ecdh)

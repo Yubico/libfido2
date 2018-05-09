@@ -11,6 +11,7 @@
 
 #include <string.h>
 #include "fido.h"
+#include "fido/es256.h"
 
 static int
 decode_coord(const cbor_item_t *item, void *xy, size_t xy_len)
@@ -73,7 +74,7 @@ es256_pk_encode(const es256_pk_t *pk)
 		goto fail;
 
 	pair.key = cbor_move(cbor_build_uint8(3));
-	pair.value = cbor_move(cbor_build_negint8(6));
+	pair.value = cbor_move(cbor_build_negint8(-COSE_ES256 - 1));
 	if (!cbor_map_add(item, pair))
 		goto fail;
 

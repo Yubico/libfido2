@@ -13,6 +13,6 @@
 EC_KEY *read_ec_pubkey(const char *);
 int read_blob(const char *, unsigned char **, size_t *);
 int write_blob(const char *, const unsigned char *, size_t);
-int write_ec_pubkey(const char *, const es256_pk_t *);
+int write_ec_pubkey(const char *, const void *, size_t);
 
 #endif /* _EXTERN_H_ */

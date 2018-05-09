@@ -88,8 +88,9 @@ verify_cred(const char *fmt, const unsigned char *authdata_ptr,
 
 	if (key_out != NULL) {
 		/* extract the credential pubkey */
-		if (write_ec_pubkey(key_out, fido_cred_pubkey_ptr(cred)) < 0)
-			errx(1, "write_pubkey");
+		if (write_ec_pubkey(key_out, fido_cred_pubkey_ptr(cred),
+		    fido_cred_pubkey_len(cred)) < 0)
+			errx(1, "write_ec_pubkey");
 	}
 
 	if (id_out != NULL) {
@@ -171,6 +172,11 @@ main(int argc, char **argv)
 		errx(1, "fido_dev_open: %s (0x%x)", fido_strerr(r), r);
 	if (u2f)
 		fido_dev_force_u2f(dev);
+
+	/* type */
+	r = fido_cred_set_type(cred, COSE_ES256);
+	if (r != FIDO_OK)
+		errx(1, "fido_cred_set_type: %s (0x%x)", fido_strerr(r), r);
 
 	/* client data hash */
 	r = fido_cred_set_clientdata_hash(cred, cdh, sizeof(cdh));

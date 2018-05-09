@@ -72,6 +72,7 @@
 		fido_cred_set_options;
 		fido_cred_set_rp;
 		fido_cred_set_sig;
+		fido_cred_set_type;
 		fido_cred_set_user;
 		fido_cred_set_x509;
 		fido_cred_sig_len;

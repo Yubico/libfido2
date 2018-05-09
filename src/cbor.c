@@ -323,7 +323,7 @@ encode_user_entity(const fido_user_t *user)
 }
 
 cbor_item_t *
-encode_pubkey_param(void)
+encode_pubkey_param(int cose_alg)
 {
 	cbor_item_t		*item = NULL;
 	cbor_item_t		*body = NULL;
@@ -334,7 +334,7 @@ encode_pubkey_param(void)
 		goto fail;
 
 	alg.key = cbor_move(cbor_build_string("alg"));
-	alg.value = cbor_move(cbor_build_negint8(6));
+	alg.value = cbor_move(cbor_build_negint8(-cose_alg - 1));
 
 	if (cbor_map_add(body, alg) == false ||
 	    cbor_add_string(body, "type", "public-key") < 0 ||
@@ -636,6 +636,35 @@ decode_fmt(const cbor_item_t *item, char **fmt)
 	return (0);
 }
 
+static int
+find_cose_alg(const cbor_item_t *key, const cbor_item_t *val, void *arg)
+{
+	int *cose_alg = arg;
+
+	if (cbor_isa_negint(key) == false && cbor_get_uint8(key) == 3) {
+		if (cbor_get_int(val) > INT_MAX)
+			return (-1);
+		*cose_alg = -(int)cbor_get_int(val) - 1;
+	}
+
+	return (0);
+}
+
+static int
+get_cose_alg(const cbor_item_t *item, int *cose_alg)
+{
+	*cose_alg = 0;
+
+	if (cbor_isa_map(item) == false ||
+	    cbor_map_is_definite(item) == false ||
+	    cbor_map_iter(item, cose_alg, find_cose_alg) < 0) {
+		log_debug("%s: cbor type", __func__);
+		return (-1);
+	}
+
+	return (0);
+}
+
 int
 decode_attcred(const unsigned char **buf, size_t *len, fido_attcred_t *attcred)
 {
@@ -673,7 +702,17 @@ decode_attcred(const unsigned char **buf, size_t *len, fido_attcred_t *attcred)
 		goto fail;
 	}
 
-	if (es256_pk_decode(item, &attcred->pubkey) < 0) {
+	if (get_cose_alg(item, &attcred->type) < 0) {
+		log_debug("%s: get_cose_alg", __func__);
+		goto fail;
+	}
+
+	if (attcred->type != COSE_ES256) {
+		log_debug("%s: cose_alg mismatch", __func__);
+		goto fail;
+	}
+
+	if (es256_pk_decode(item, &attcred->pubkey.es256) < 0) {
 		log_debug("%s: es256_pk_decode", __func__);
 		goto fail;
 	}

@@ -50,8 +50,9 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
 
-	if (cred->cdh.ptr == NULL) {
-		log_debug("%s: NULL cdh", __func__);
+	if (cred->cdh.ptr == NULL || cred->type == 0) {
+		log_debug("%s: cdh=%p, type=%d", __func__,
+		    (void *)cred->cdh.ptr, cred->type);
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
@@ -59,7 +60,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 	if ((argv[0] = fido_blob_encode(&cred->cdh)) == NULL ||
 	    (argv[1] = encode_rp_entity(&cred->rp)) == NULL ||
 	    (argv[2] = encode_user_entity(&cred->user)) == NULL ||
-	    (argv[3] = encode_pubkey_param()) == NULL) {
+	    (argv[3] = encode_pubkey_param(cred->type)) == NULL) {
 		log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -314,7 +315,7 @@ fido_cred_verify(const fido_cred_t *cred)
 	} else {
 		if (get_signed_hash_u2f(&dgst, cred->authdata.rp_id_hash,
 		    sizeof(cred->authdata.rp_id_hash), &cred->cdh,
-		    &cred->attcred.id, &cred->attcred.pubkey) < 0) {
+		    &cred->attcred.id, &cred->attcred.pubkey.es256) < 0) {
 			log_debug("%s: get_signed_hash_u2f", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto out;
@@ -368,6 +369,7 @@ fido_cred_reset_tx(fido_cred_t *cred)
 	memset(&cred->user, 0, sizeof(cred->user));
 	memset(&cred->excl, 0, sizeof(cred->excl));
 
+	cred->type = 0;
 	cred->rk = false;
 	cred->uv = false;
 }
@@ -629,6 +631,17 @@ fido_cred_set_fmt(fido_cred_t *cred, const char *fmt)
 	return (FIDO_OK);
 }
 
+int
+fido_cred_set_type(fido_cred_t *cred, int cose_alg)
+{
+	if (cred->type != 0 || cose_alg != COSE_ES256)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	cred->type = cose_alg;
+
+	return (FIDO_OK);
+}
+
 uint8_t
 fido_cred_flags(const fido_cred_t *cred)
 {
@@ -683,10 +696,10 @@ fido_cred_authdata_len(const fido_cred_t *cred)
 	return (cred->authdata_cbor.len);
 }
 
-const es256_pk_t *
+const unsigned char *
 fido_cred_pubkey_ptr(const fido_cred_t *cred)
 {
-	return (&cred->attcred.pubkey);
+	return ((const unsigned char *)&cred->attcred.pubkey);
 }
 
 size_t

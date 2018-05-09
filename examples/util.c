@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 #include "fido.h"
+#include "fido/es256.h"
 #include "compat.h"
 #include "extern.h"
 
@@ -132,12 +133,23 @@ fail:
 }
 
 int
-write_ec_pubkey(const char *path, const es256_pk_t *pk)
+write_ec_pubkey(const char *path, const void *ptr, size_t len)
 {
 	FILE *fp = NULL;
 	EVP_PKEY *pkey = NULL;
+	es256_pk_t *pk = NULL;
 	int fd = -1;
 	int ok = -1;
+
+	if ((pk = es256_pk_new()) == NULL) {
+		warnx("es256_pk_new");
+		goto fail;
+	}
+
+	if (es256_pk_from_ptr(pk, ptr, len) != FIDO_OK) {
+		warnx("es256_pk_from_ptr");
+		goto fail;
+	}
 
 	if ((fd = open(path, O_WRONLY | O_CREAT, 0644)) < 0) {
 		warn("open %s", path);
@@ -160,6 +172,8 @@ write_ec_pubkey(const char *path, const es256_pk_t *pk)
 
 	ok = 0;
 fail:
+	es256_pk_free(&pk);
+
 	if (fp != NULL) {
 		fclose(fp);
 	}
