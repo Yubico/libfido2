@@ -14,6 +14,7 @@
 
 #include "fido.h"
 #include "fido/es256.h"
+#include "fido/rs256.h"
 #include "compat.h"
 #include "extern.h"
 
@@ -27,33 +28,52 @@ static const unsigned char cdh[32] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: assert [-puv] [-P pin] [-a cred_id] <pubkey> "
-	    "<device>\n");
+	fprintf(stderr, "usage: assert [-t ecdsa|rsa] [-a cred_id] [-P pin] "
+	    "[-puv] <pubkey> <device>\n");
 	exit(EXIT_FAILURE);
 }
 
 static void
-verify_assert(const unsigned char *authdata_ptr, size_t authdata_len,
+verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
     const unsigned char *sig_ptr, size_t sig_len, bool up, bool uv,
     const char *key)
 {
 	fido_assert_t	*assert = NULL;
 	EC_KEY		*ec = NULL;
-	es256_pk_t	*pk = NULL;
+	RSA		*rsa = NULL;
+	es256_pk_t	*es256_pk = NULL;
+	rs256_pk_t	*rs256_pk = NULL;
+	void		*pk;
 	int		 r;
 
 	/* credential pubkey */
-	if ((ec = read_ec_pubkey(key)) == NULL)
-		errx(1, "read_ec_pubkey");
+	if (type == COSE_ES256) {
+		if ((ec = read_ec_pubkey(key)) == NULL)
+			errx(1, "read_ec_pubkey");
 
-	if ((pk = es256_pk_new()) == NULL)
-		errx(1, "es256_pk_new");
+		if ((es256_pk = es256_pk_new()) == NULL)
+			errx(1, "es256_pk_new");
 
-	if (es256_pk_from_EC_KEY(ec, pk) < 0)
-		errx(1, "es256_pk_from_EC_KEY");
+		if (es256_pk_from_EC_KEY(ec, es256_pk) < 0)
+			errx(1, "es256_pk_from_EC_KEY");
 
-	EC_KEY_free(ec);
-	ec = NULL;
+		pk = es256_pk;
+		EC_KEY_free(ec);
+		ec = NULL;
+	} else {
+		if ((rsa = read_rsa_pubkey(key)) == NULL)
+			errx(1, "read_rsa_pubkey");
+
+		if ((rs256_pk = rs256_pk_new()) == NULL)
+			errx(1, "rs256_pk_new");
+
+		if (rs256_pk_from_RSA(rsa, rs256_pk) < 0)
+			errx(1, "rs256_pk_from_RSA");
+
+		pk = rs256_pk;
+		RSA_free(rsa);
+		rsa = NULL;
+	}
 
 	/* client data hash */
 	if ((assert = fido_assert_new()) == NULL)
@@ -81,11 +101,13 @@ verify_assert(const unsigned char *authdata_ptr, size_t authdata_len,
 	if (r != FIDO_OK)
 		errx(1, "fido_assert_set_sig: %s (0x%x)", fido_strerr(r), r);
 
-	r = fido_assert_verify(assert, 0, COSE_ES256, pk);
+	r = fido_assert_verify(assert, 0, type, pk);
 	if (r != FIDO_OK)
 		errx(1, "fido_assert_verify: %s (0x%x)", fido_strerr(r), r);
 
-	es256_pk_free(&pk);
+	es256_pk_free(&es256_pk);
+	rs256_pk_free(&rs256_pk);
+
 	fido_assert_free(&assert);
 }
 
@@ -100,13 +122,14 @@ main(int argc, char **argv)
 	const char	*pin = NULL;
 	unsigned char	*body = NULL;
 	size_t		 len;
+	int		 type = COSE_ES256;
 	int		 ch;
 	int		 r;
 
 	if ((assert = fido_assert_new()) == NULL)
 		errx(1, "fido_assert_new");
 
-	while ((ch = getopt(argc, argv, "P:a:puv")) != -1) {
+	while ((ch = getopt(argc, argv, "P:a:pt:uv")) != -1) {
 		switch (ch) {
 		case 'P':
 			pin = optarg;
@@ -123,6 +146,14 @@ main(int argc, char **argv)
 			break;
 		case 'p':
 			up = true;
+			break;
+		case 't':
+			if (strcmp(optarg, "ecdsa") == 0)
+				type = COSE_ES256;
+			else if (strcmp(optarg, "rsa") == 0)
+				type = COSE_RS256;
+			else
+				errx(1, "unknown type %s", optarg);
 			break;
 		case 'u':
 			u2f = true;
@@ -181,7 +212,7 @@ main(int argc, char **argv)
 		errx(1, "fido_assert_count: %d signatures returned",
 		    (int)fido_assert_count(assert));
 
-	verify_assert(fido_assert_authdata_ptr(assert, 0),
+	verify_assert(type, fido_assert_authdata_ptr(assert, 0),
 	    fido_assert_authdata_len(assert, 0), fido_assert_sig_ptr(assert, 0),
 	    fido_assert_sig_len(assert, 0), up, uv, argv[0]);
 

@@ -23,6 +23,7 @@ list(APPEND FIDO_SOURCES
 	log.c
 	pin.c
 	reset.c
+	rs256.c
 	u2f.c
 )
 

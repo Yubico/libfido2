@@ -18,6 +18,12 @@ typedef struct es256_sk {
 	unsigned char	d[32];
 } es256_sk_t;
 
+/* COSE RS256 (2048-bit RSA with PKCS1 padding and SHA-256) public key */
+typedef struct rs256_pk {
+	unsigned char n[256];
+	unsigned char e[3];
+} rs256_pk_t;
+
 typedef struct fido_authdata {
 	unsigned char rp_id_hash[32]; /* sha256 of fido_rp.id */
 	uint8_t       flags;          /* user present/verified */
@@ -37,6 +43,7 @@ typedef struct fido_attcred {
 	int           type;       /* credential's cose algorithm */
 	union {                   /* credential's public key */
 		es256_pk_t es256;
+		rs256_pk_t rs256;
 	} pubkey;
 } fido_attcred_t;
 

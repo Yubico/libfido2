@@ -34,13 +34,13 @@ static const unsigned char user_id[32] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: cred [-ruv] [-P pin] [-k pubkey] [-ei cred_id] "
-	    "<device>\n");
+	fprintf(stderr, "usage: cred [-t ecdsa|rsa] [-k pubkey] [-ei cred_id] "
+	    "[-P pin] [-ruv] <device>\n");
 	exit(EXIT_FAILURE);
 }
 
 static void
-verify_cred(const char *fmt, const unsigned char *authdata_ptr,
+verify_cred(int type, const char *fmt, const unsigned char *authdata_ptr,
     size_t authdata_len, const unsigned char *x509_ptr, size_t x509_len,
     const unsigned char *sig_ptr, size_t sig_len, bool rk, bool uv,
     const char *key_out, const char *id_out)
@@ -88,9 +88,15 @@ verify_cred(const char *fmt, const unsigned char *authdata_ptr,
 
 	if (key_out != NULL) {
 		/* extract the credential pubkey */
-		if (write_ec_pubkey(key_out, fido_cred_pubkey_ptr(cred),
-		    fido_cred_pubkey_len(cred)) < 0)
-			errx(1, "write_ec_pubkey");
+		if (type == COSE_ES256) {
+			if (write_ec_pubkey(key_out, fido_cred_pubkey_ptr(cred),
+			    fido_cred_pubkey_len(cred)) < 0)
+				errx(1, "write_ec_pubkey");
+		} else {
+			if (write_rsa_pubkey(key_out, fido_cred_pubkey_ptr(cred),
+			    fido_cred_pubkey_len(cred)) < 0)
+				errx(1, "write_rsa_pubkey");
+		}
 	}
 
 	if (id_out != NULL) {
@@ -116,13 +122,14 @@ main(int argc, char **argv)
 	const char	*id_out = NULL;
 	unsigned char	*body = NULL;
 	size_t		 len;
+	int		 type = COSE_ES256;
 	int		 ch;
 	int		 r;
 
 	if ((cred = fido_cred_new()) == NULL)
 		errx(1, "fido_cred_new");
 
-	while ((ch = getopt(argc, argv, "P:e:i:k:ruv")) != -1) {
+	while ((ch = getopt(argc, argv, "P:e:i:k:rt:uv")) != -1) {
 		switch (ch) {
 		case 'P':
 			pin = optarg;
@@ -145,6 +152,14 @@ main(int argc, char **argv)
 			break;
 		case 'r':
 			rk = true;
+			break;
+		case 't':
+			if (strcmp(optarg, "ecdsa") == 0)
+				type = COSE_ES256;
+			else if (strcmp(optarg, "rsa") == 0)
+				type = COSE_RS256;
+			else
+				errx(1, "unknown type %s", optarg);
 			break;
 		case 'u':
 			u2f = true;
@@ -174,7 +189,7 @@ main(int argc, char **argv)
 		fido_dev_force_u2f(dev);
 
 	/* type */
-	r = fido_cred_set_type(cred, COSE_ES256);
+	r = fido_cred_set_type(cred, type);
 	if (r != FIDO_OK)
 		errx(1, "fido_cred_set_type: %s (0x%x)", fido_strerr(r), r);
 
@@ -209,7 +224,7 @@ main(int argc, char **argv)
 
 	fido_dev_free(&dev);
 
-	verify_cred(fido_cred_fmt(cred), fido_cred_authdata_ptr(cred),
+	verify_cred(type, fido_cred_fmt(cred), fido_cred_authdata_ptr(cred),
 	    fido_cred_authdata_len(cred), fido_cred_x5c_ptr(cred),
 	    fido_cred_x5c_len(cred), fido_cred_sig_ptr(cred),
 	    fido_cred_sig_len(cred), rk, uv, key_out, id_out);

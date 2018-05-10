@@ -107,3 +107,8 @@ _fido_dev_set_io_functions
 _fido_dev_set_pin
 _fido_init
 _fido_strerr
+_rs256_pk_free
+_rs256_pk_from_RSA
+_rs256_pk_from_ptr
+_rs256_pk_new
+_rs256_pk_to_EVP_PKEY

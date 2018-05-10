@@ -11,6 +11,7 @@
 #include <string.h>
 #include "fido.h"
 #include "fido/es256.h"
+#include "fido/rs256.h"
 
 static int
 adjust_assert_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
@@ -313,7 +314,7 @@ verify_sig_es256(const fido_blob_t *dgst, const es256_pk_t *pk,
 	EC_KEY		*ec = NULL;
 	int		 ok = -1;
 
-	/* openssl needs ints */
+	/* ECDSA_verify needs ints */
 	if (dgst->len > INT_MAX || sig->len > INT_MAX) {
 		log_debug("%s: dgst->len=%zu, sig->len=%zu", __func__,
 		    dgst->len, sig->len);
@@ -340,6 +341,41 @@ fail:
 	return (ok);
 }
 
+static int
+verify_sig_rs256(const fido_blob_t *dgst, const rs256_pk_t *pk,
+    const fido_blob_t *sig)
+{
+	EVP_PKEY	*pkey = NULL;
+	RSA		*rsa = NULL;
+	int		 ok = -1;
+
+	/* RSA_verify needs unsigned ints */
+	if (dgst->len > UINT_MAX || sig->len > UINT_MAX) {
+		log_debug("%s: dgst->len=%zu, sig->len=%zu", __func__,
+		    dgst->len, sig->len);
+		return (-1);
+	}
+
+	if ((pkey = rs256_pk_to_EVP_PKEY(pk)) == NULL ||
+	    (rsa = EVP_PKEY_get0_RSA(pkey)) == NULL) {
+		log_debug("%s: pk -> ec", __func__);
+		goto fail;
+	}
+
+	if (RSA_verify(NID_sha256, dgst->ptr, (unsigned int)dgst->len, sig->ptr,
+	    (unsigned int)sig->len, rsa) != 1) {
+		log_debug("%s: RSA_verify", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	if (pkey != NULL)
+		EVP_PKEY_free(pkey);
+
+	return (ok);
+}
+
 int
 fido_assert_verify(fido_assert_t *assert, size_t idx, int cose_alg,
     const void *pk)
@@ -347,6 +383,7 @@ fido_assert_verify(fido_assert_t *assert, size_t idx, int cose_alg,
 	unsigned char		 buf[SHA256_DIGEST_LENGTH];
 	fido_blob_t		 dgst;
 	const fido_assert_stmt	*stmt = NULL;
+	int			 ok = -1;
 	int			 r;
 
 	dgst.ptr = buf;
@@ -380,19 +417,23 @@ fido_assert_verify(fido_assert_t *assert, size_t idx, int cose_alg,
 		goto out;
 	}
 
-	if (cose_alg != COSE_ES256) {
+	switch (cose_alg) {
+	case COSE_ES256:
+		ok = verify_sig_es256(&dgst, pk, &stmt->sig);
+		break;
+	case COSE_RS256:
+		ok = verify_sig_rs256(&dgst, pk, &stmt->sig);
+		break;
+	default:
 		log_debug("%s: unsupported cose_alg %d", __func__, cose_alg);
 		r = FIDO_ERR_UNSUPPORTED_OPTION;
 		goto out;
 	}
 
-	if (verify_sig_es256(&dgst, pk, &stmt->sig) < 0) {
-		log_debug("%s: verify_sig", __func__);
+	if (ok < 0)
 		r = FIDO_ERR_INVALID_SIG;
-		goto out;
-	}
-
-	r = FIDO_OK;
+	else
+		r = FIDO_OK;
 out:
 	explicit_bzero(buf, sizeof(buf));
 

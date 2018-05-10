@@ -519,9 +519,10 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 		return (FIDO_ERR_UNSUPPORTED_OPTION);
 	}
 
-	if (cred->cdh.ptr == NULL || cred->cdh.len != SHA256_DIGEST_LENGTH) {
-		log_debug("%s: cdh=(%p,%zu)" , __func__, (void *)cred->cdh.ptr,
-		    cred->cdh.len);
+	if (cred->type != COSE_ES256 || cred->cdh.ptr == NULL ||
+	    cred->cdh.len != SHA256_DIGEST_LENGTH) {
+		log_debug("%s: type=%d, cdh=(%p,%zu)" , __func__, cred->type,
+		    (void *)cred->cdh.ptr, cred->cdh.len);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 

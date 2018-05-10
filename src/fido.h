@@ -46,6 +46,7 @@ typedef struct fido_dev fido_dev_t;
 typedef struct fido_dev_info fido_dev_info_t;
 typedef struct es256_pk es256_pk_t;
 typedef struct es256_sk es256_sk_t;
+typedef struct rs256_pk rs256_pk_t;
 #endif
 
 fido_assert_t *fido_assert_new(void);

@@ -39,6 +39,7 @@ int decode_uint64(const cbor_item_t *, uint64_t *);
 int decode_user(const cbor_item_t *, fido_user_t *);
 int decode_x5c(const cbor_item_t *, void *);
 int es256_pk_decode(const cbor_item_t *, es256_pk_t *);
+int rs256_pk_decode(const cbor_item_t *, rs256_pk_t *);
 
 /* auxiliary cbor routines */
 int cbor_add_bool(cbor_item_t *, const char *, bool);

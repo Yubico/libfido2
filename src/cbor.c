@@ -334,7 +334,7 @@ encode_pubkey_param(int cose_alg)
 		goto fail;
 
 	alg.key = cbor_move(cbor_build_string("alg"));
-	alg.value = cbor_move(cbor_build_negint8(-cose_alg - 1));
+	alg.value = cbor_move(cbor_build_negint16(-cose_alg - 1));
 
 	if (cbor_map_add(body, alg) == false ||
 	    cbor_add_string(body, "type", "public-key") < 0 ||
@@ -707,13 +707,18 @@ decode_attcred(const unsigned char **buf, size_t *len, fido_attcred_t *attcred)
 		goto fail;
 	}
 
-	if (attcred->type != COSE_ES256) {
-		log_debug("%s: cose_alg mismatch", __func__);
-		goto fail;
-	}
-
-	if (es256_pk_decode(item, &attcred->pubkey.es256) < 0) {
-		log_debug("%s: es256_pk_decode", __func__);
+	if (attcred->type == COSE_ES256) {
+		if (es256_pk_decode(item, &attcred->pubkey.es256) < 0) {
+			log_debug("%s: es256_pk_decode", __func__);
+			goto fail;
+		}
+	} else if (attcred->type == COSE_RS256) {
+		if (rs256_pk_decode(item, &attcred->pubkey.rs256) < 0) {
+			log_debug("%s: rs256_pk_decode", __func__);
+			goto fail;
+		}
+	} else {
+		log_debug("%s: invalid cose_alg %d", __func__, attcred->type);
 		goto fail;
 	}
 

@@ -60,5 +60,6 @@
 #define FIDO_CAP_NMSG	0x08 /* if set, device doesn't support CTAP_CMD_MSG */
 
 #define	COSE_ES256	-7
+#define	COSE_RS256	-257
 
 #endif /* !_FIDO_PARAM_H */
