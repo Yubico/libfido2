@@ -120,12 +120,6 @@ es256_sk_free(es256_sk_t **skp)
 	*skp = NULL;
 }
 
-const unsigned char *
-es256_sk_get_d(const es256_sk_t *sk)
-{
-	return (sk->d);
-}
-
 int
 es256_sk_set_d(es256_sk_t *sk, const unsigned char *d)
 {
@@ -163,18 +157,6 @@ es256_pk_from_ptr(es256_pk_t *pk, const void *ptr, size_t len)
 	memcpy(pk, ptr, sizeof(*pk));
 
 	return (FIDO_OK);
-}
-
-const unsigned char *
-es256_pk_get_x(const es256_pk_t *pk)
-{
-	return (pk->x);
-}
-
-const unsigned char *
-es256_pk_get_y(const es256_pk_t *pk)
-{
-	return (pk->y);
 }
 
 int

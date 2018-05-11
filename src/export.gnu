@@ -3,8 +3,6 @@
 		es256_pk_free;
 		es256_pk_from_EC_KEY;
 		es256_pk_from_ptr;
-		es256_pk_get_x;
-		es256_pk_get_y;
 		es256_pk_new;
 		es256_pk_to_EVP_PKEY;
 		fido_assert_allow_cred;
