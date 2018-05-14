@@ -51,6 +51,11 @@ verify_cred(int type, const char *fmt, const unsigned char *authdata_ptr,
 	if ((cred = fido_cred_new()) == NULL)
 		errx(1, "fido_cred_new");
 
+	/* type */
+	r = fido_cred_set_type(cred, type);
+	if (r != FIDO_OK)
+		errx(1, "fido_cred_set_type: %s (0x%x)", fido_strerr(r), r);
+
 	/* client data hash */
 	r = fido_cred_set_clientdata_hash(cred, cdh, sizeof(cdh));
 	if (r != FIDO_OK)

@@ -700,13 +700,41 @@ fido_cred_authdata_len(const fido_cred_t *cred)
 const unsigned char *
 fido_cred_pubkey_ptr(const fido_cred_t *cred)
 {
-	return ((const unsigned char *)&cred->attcred.pubkey);
+	const void *ptr;
+
+	switch (cred->type) {
+	case COSE_ES256:
+		ptr = &cred->attcred.pubkey.es256;
+		break;
+	case COSE_RS256:
+		ptr = &cred->attcred.pubkey.rs256;
+		break;
+	default:
+		ptr = NULL;
+		break;
+	}
+
+	return (ptr);
 }
 
 size_t
 fido_cred_pubkey_len(const fido_cred_t *cred)
 {
-	return (sizeof(cred->attcred.pubkey));
+	size_t len;
+
+	switch (cred->type) {
+	case COSE_ES256:
+		len = sizeof(cred->attcred.pubkey.es256);
+		break;
+	case COSE_RS256:
+		len = sizeof(cred->attcred.pubkey.rs256);
+		break;
+	default:
+		len = 0;
+		break;
+	}
+
+	return (len);
 }
 
 const unsigned char *
