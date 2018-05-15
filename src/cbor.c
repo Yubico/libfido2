@@ -844,7 +844,7 @@ decode_uint64(const cbor_item_t *item, uint64_t *n)
 		return (-1);
 	}
 
-	*n = cbor_get_uint64(item);
+	*n = cbor_get_int(item);
 
 	return (0);
 }
