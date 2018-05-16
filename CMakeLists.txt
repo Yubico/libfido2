@@ -21,8 +21,12 @@ set(FIDO_MINOR "0")
 set(FIDO_PATCH "0")
 set(FIDO_VERSION ${FIDO_MAJOR}.${FIDO_MINOR}.${FIDO_PATCH})
 
-pkg_search_module(CBOR libcbor REQUIRED)
+pkg_search_module(CBOR libcbor)
 pkg_search_module(CRYPTO libcrypto REQUIRED)
+
+if(NOT CBOR_FOUND)
+	set(CBOR_LIBRARIES "cbor")
+endif()
 
 if(APPLE)
 	# Define memset_s().
