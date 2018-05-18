@@ -1,0 +1,31 @@
+Source: libfido2
+Priority: optional
+Maintainer: Debian Authentication Maintainers <pkg-auth-maintainers@lists.alioth.debian.org>
+Uploaders: pedro martelletto <pedro@yubico.com>
+Standards-Version: 4.1.2
+Section: libs
+Homepage: https://github.com/yubico/libfido2
+Build-Depends: debhelper (>= 9),
+               cmake,
+               libcbor-dev,
+               libssl-dev,
+               libhidapi-dev
+
+Package: libfido2-0
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: library for generating and verifying FIDO 2.0 objects
+ A library for communicating with a FIDO device over USB, and for verifying
+ attestation and assertion signatures. FIDO U2F (CTAP 1) and FIDO 2.0 (CTAP 2)
+ are supported. This package contains the runtime library.
+
+Package: libfido2-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libfido2-0 (= ${binary:Version}), ${misc:Depends}
+Description: library for generating and verifying FIDO 2.0 objects (development headers)
+ A library for communicating with a FIDO device over USB, and for verifying
+ attestation and assertion signatures. FIDO U2F (CTAP 1) and FIDO 2.0 (CTAP 2)
+ are supported. This package contains the development headers.
