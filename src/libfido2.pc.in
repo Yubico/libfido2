@@ -7,7 +7,7 @@ Name: @PROJECT_NAME@
 Description: A FIDO2 library
 URL: https://github.com/yubico/libfido2
 Version: @FIDO_VERSION@
-Requires.private: libcbor, @HIDAPI_NAME@
+Requires.private: @HIDAPI_NAME@
 Requires: libcrypto >= 1.1
 Libs: -L${libdir} -lfido2
 Cflags: -I${includedir}
