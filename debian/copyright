@@ -10,6 +10,10 @@ Files: examples/compat/strlcpy.c examples/compat/strlcat.c
 Copyright: Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
 License: ISC
 
+Files: src/compat/timingsafe_bcmp.c
+Copyright: Copyright (c) 2010 Damien Miller.  All rights reserved.
+License: ISC
+
 Files:
  examples/err.h
  src/compat/explicit_bzero.c
