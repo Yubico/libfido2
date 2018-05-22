@@ -396,17 +396,23 @@ fido_assert_verify(fido_assert_t *assert, size_t idx, int cose_alg,
 
 	stmt = &assert->stmt[idx];
 
-	if (assert->cdh.ptr == NULL || stmt->authdata_cbor.ptr == NULL ||
-	    stmt->sig.ptr == NULL) {
-		log_debug("%s: cdh=%p, authdata=%p, sig=%p", __func__,
-		    (void *)assert->cdh.ptr, (void *)stmt->authdata_cbor.ptr,
-		    (void *)stmt->sig.ptr);
+	if (assert->cdh.ptr == NULL || assert->rp_id == NULL ||
+	    stmt->authdata_cbor.ptr == NULL || stmt->sig.ptr == NULL) {
+		log_debug("%s: cdh=%p, rp_id=%s, authdata=%p, sig=%p", __func__,
+		    (void *)assert->cdh.ptr, assert->rp_id,
+		    (void *)stmt->authdata_cbor.ptr, (void *)stmt->sig.ptr);
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto out;
 	}
 
 	if (check_flags(stmt->authdata.flags, assert->up, assert->uv) < 0) {
 		log_debug("%s: check_flags", __func__);
+		r = FIDO_ERR_INVALID_PARAM;
+		goto out;
+	}
+
+	if (check_rp_id(assert->rp_id, stmt->authdata.rp_id_hash) != 0) {
+		log_debug("%s: check_rp_id", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
 		goto out;
 	}

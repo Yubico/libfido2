@@ -75,13 +75,19 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 		rsa = NULL;
 	}
 
-	/* client data hash */
 	if ((assert = fido_assert_new()) == NULL)
 		errx(1, "fido_assert_new");
+
+	/* client data hash */
 	r = fido_assert_set_clientdata_hash(assert, cdh, sizeof(cdh));
 	if (r != FIDO_OK)
 		errx(1, "fido_assert_set_clientdata_hash: %s (0x%x)",
 		    fido_strerr(r), r);
+
+	/* relying party */
+	r = fido_assert_set_rp(assert, "localhost");
+	if (r != FIDO_OK)
+		errx(1, "fido_assert_set_rp: %s (0x%x)", fido_strerr(r), r);
 
 	/* authdata */
 	r = fido_assert_set_count(assert, 1);
