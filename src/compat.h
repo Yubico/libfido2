@@ -38,4 +38,8 @@ void explicit_bzero(void *, size_t);
 int getpagesize(void);
 #endif
 
+#if !defined(HAVE_TIMINGSAFE_BCMP)
+int timingsafe_bcmp(const void *, const void *, size_t);
+#endif
+
 #endif /* !_COMPAT_H */

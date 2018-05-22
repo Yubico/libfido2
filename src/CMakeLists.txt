@@ -76,6 +76,14 @@ else()
 	endif()
 endif()
 
+# timingsafe_bcmp
+check_function_exists(timingsafe_bcmp HAVE_TIMINGSAFE_BCMP)
+if(HAVE_TIMINGSAFE_BCMP)
+	add_definitions(-DHAVE_TIMINGSAFE_BCMP)
+else()
+	list(APPEND FIDO_SOURCES compat/timingsafe_bcmp.c)
+endif()
+
 # /dev/urandom
 if(UNIX)
 	add_definitions(-DHAS_DEV_URANDOM)
