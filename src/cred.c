@@ -165,6 +165,18 @@ check_flags(uint8_t flags, bool uv)
 	return (0);
 }
 
+int
+check_rp_id(const char *id, const unsigned char *obtained_hash)
+{
+	unsigned char expected_hash[SHA256_DIGEST_LENGTH];
+
+	explicit_bzero(expected_hash, sizeof(expected_hash));
+	SHA256((const unsigned char *)id, strlen(id), expected_hash);
+
+	return (timingsafe_bcmp(expected_hash, obtained_hash,
+	    SHA256_DIGEST_LENGTH));
+}
+
 static int
 get_signed_hash_packed(fido_blob_t *dgst, const fido_blob_t *clientdata,
     const fido_blob_t *authdata_cbor)
@@ -288,14 +300,21 @@ fido_cred_verify(const fido_cred_t *cred)
 
 	if (cred->cdh.ptr == NULL || cred->authdata_cbor.ptr == NULL ||
 	    cred->attstmt.x5c.ptr == NULL || cred->attstmt.sig.ptr == NULL ||
-	    cred->fmt == NULL || cred->attcred.id.ptr == NULL) {
+	    cred->fmt == NULL || cred->attcred.id.ptr == NULL ||
+	    cred->rp.id == NULL) {
 		log_debug("%s: cdh=%p, authdata=%p, x5c=%p, sig=%p, fmt=%p "
-		    "id=%p", __func__, (void *)cred->cdh.ptr,
+		    "id=%p, rp.id=%s", __func__, (void *)cred->cdh.ptr,
 		    (void *)cred->authdata_cbor.ptr,
 		    (void *)cred->attstmt.x5c.ptr,
 		    (void *)cred->attstmt.sig.ptr, (void *)cred->fmt,
-		    (void *)cred->attcred.id.ptr);
+		    (void *)cred->attcred.id.ptr, cred->rp.id);
 		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto out;
+	}
+
+	if (check_rp_id(cred->rp.id, cred->authdata.rp_id_hash) != 0) {
+		log_debug("%s: check_rp_id", __func__);
+		r = FIDO_ERR_INVALID_PARAM;
 		goto out;
 	}
 

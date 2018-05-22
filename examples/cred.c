@@ -62,6 +62,11 @@ verify_cred(int type, const char *fmt, const unsigned char *authdata_ptr,
 		errx(1, "fido_cred_set_clientdata_hash: %s (0x%x)",
 		    fido_strerr(r), r);
 
+	/* relying party */
+	r = fido_cred_set_rp(cred, "localhost", "sweet home localhost");
+	if (r != FIDO_OK)
+		errx(1, "fido_cred_set_rp: %s (0x%x)", fido_strerr(r), r);
+
 	/* authdata */
 	r = fido_cred_set_authdata(cred, authdata_ptr, authdata_len);
 	if (r != FIDO_OK)

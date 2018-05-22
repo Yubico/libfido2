@@ -98,5 +98,6 @@ void fido_assert_reset_rx(fido_assert_t *);
 void fido_assert_reset_tx(fido_assert_t *);
 void fido_cred_reset_rx(fido_cred_t *);
 void fido_cred_reset_tx(fido_cred_t *);
+int check_rp_id(const char *, const unsigned char *);
 
 #endif /* !_EXTERN_H */
