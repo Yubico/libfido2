@@ -377,7 +377,7 @@ fail:
 }
 
 int
-fido_assert_verify(fido_assert_t *assert, size_t idx, int cose_alg,
+fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
     const void *pk)
 {
 	unsigned char		 buf[SHA256_DIGEST_LENGTH];
@@ -773,6 +773,9 @@ fido_assert_set_sig(fido_assert_t *a, size_t idx, const unsigned char *ptr,
 	return (FIDO_OK);
 }
 
+/*
+ * XXX shrinking leaks memory. That's not acceptable.
+ */
 int
 fido_assert_set_count(fido_assert_t *assert, size_t n)
 {

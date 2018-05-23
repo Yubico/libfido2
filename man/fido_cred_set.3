@@ -1,0 +1,187 @@
+.\" Copyright (c) 2018 Yubico AB. All rights reserved.
+.\" Use of this source code is governed by a BSD-style
+.\" license that can be found in the LICENSE file.
+.\"
+.Dd $Mdocdate: May 23 2018 $
+.Dt FIDO_CRED_SET 3
+.Os
+.Sh NAME
+.Nm fido_cred_set ,
+.Nm fido_cred_set_authdata ,
+.Nm fido_cred_set_x509 ,
+.Nm fido_cred_set_sig ,
+.Nm fido_cred_set_clientdata_hash ,
+.Nm fido_cred_set_rp ,
+.Nm fido_cred_set_user ,
+.Nm fido_cred_set_options ,
+.Nm fido_cred_set_fmt ,
+.Nm fido_cred_set_type
+.Nd set parameters of a FIDO 2 credential
+.Sh SYNOPSIS
+.In fido.h
+.Ft int
+.Fn fido_cred_set_authdata "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
+.Ft int
+.Fn fido_cred_set_x509 "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
+.Ft int
+.Fn fido_cred_set_sig "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
+.Ft int
+.Fn fido_cred_set_clientdata_hash "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
+.Ft int
+.Fn fido_cred_set_rp "fido_cred_t *cred" "const char *id" "const char *name"
+.Ft int
+.Fn fido_cred_set_user "fido_cred_t *cred" "const unsigned char *user_id" "size_t user_id_len" "const char *name" "const char *display_name" "const char *icon"
+.Ft int
+.Fn fido_cred_set_options "fido_cred_t *cred" "bool rk" "bool uv"
+.Ft int
+.Fn fido_cred_set_fmt "fido_cred_t *cred" "const char *ptr"
+.Ft int
+.Fn fido_cred_set_type "fido_cred_t *cred" "int cose_alg"
+.Sh DESCRIPTION
+The
+.Nm
+set of functions define the various parameters of a FIDO 2
+credential, allowing a
+.Fa fido_cred_t
+type to be prepared for a subsequent call to
+.Xr fido_dev_make_cred 3
+or
+.Xr fido_cred_verify 3 .
+For the complete specification of a FIDO 2 credential and the format
+of its constituent parts, please refer to the Web Authentication
+(webauthn) standard.
+.Pp
+The
+.Fn fido_cred_set_authdata ,
+.Fn fido_cred_set_x509 ,
+.Fn fido_cred_set_sig ,
+and
+.Fn fido_cred_set_clientdata_hash
+functions set the authenticator data, attestation certificate,
+signature and client data hash parts of
+.Fa cred
+to
+.Fa ptr ,
+where
+.Fa ptr
+points to
+.Fa len
+bytes.
+A copy of
+.Fa ptr
+is made, and no references to the passed pointer are kept.
+.Pp
+The
+.Fn fido_cred_set_rp
+function sets the relying party
+.Fa id
+and
+.Fa name
+parameters of
+.Fa cred ,
+where
+.Fa id
+and
+.Fa name
+are NUL-terminated UTF-8 strings.
+The contents of
+.Fa id
+and
+.Fa name
+are copied, and no references to the passed pointers are kept.
+.Pp
+The
+.Fn fido_cred_set_user
+function sets the user attributes of
+.Fa cred ,
+where
+.Fa user_id
+points to
+.Fa user_id_len
+bytes and
+.Fa name ,
+.Fa display_name ,
+and
+.Fa icon
+are NUL-terminated UTF-8 strings.
+The contents of
+.Fa user_id ,
+.Fa name ,
+.Fa display_name ,
+and
+.Fa icon
+are copied, and no references to the passed pointers are kept.
+.Pp
+The
+.Fn fido_cred_set_options
+function sets the
+.Em rk
+(resident key)
+and
+.Em uv
+(user verification)
+attributes of
+.Fa cred .
+Both are off by default.
+.Pp
+The
+.Fn fido_cred_set_fmt
+function sets the format of
+.Fa cred
+to
+.Fa fmt ,
+where
+.Fa fmt
+must be either
+.Vt "packed"
+(the format used in FIDO 2)
+or
+.Vt "fido-u2f"
+(the format used by U2F).
+A copy of
+.Fa fmt
+is made, and no references to the passed pointer are kept.
+.Pp
+The
+.Fn fido_cred_set_type
+function sets the type of
+.Fa cred to
+.Fa cose_alg ,
+where
+.Fa cose_alg
+is either
+.Dv COSE_ES256
+or
+.Dv COSE_RS256 .
+The type of a credential may only be set once.
+.Pp
+Use of the
+.Nm
+set of functions may happen in two distinct situations:
+when generating a new credential on a FIDO device, prior to
+.Xr fido_dev_make_cred 3
+(i.e, in the context of a FIDO client), or when validating
+a generated credential using
+.Xr fido_cred_verify 3
+(i.e, in the context of a FIDO server).
+.Pp
+For a complete description of the generation of a FIDO 2 credential
+and its verification, please refer to the FIDO 2 specification.
+A concrete utilisation example of the
+.Nm
+set of functions can be found in the
+.Pa cred.c
+example shipped with
+.Em libfido2 .
+.Sh RETURN VALUES
+The error codes returned by the
+.Nm
+set of functions are defined in
+.In fido/err.h .
+On success,
+.Dv FIDO_OK
+is returned.
+.Sh SEE ALSO
+.Xr fido_cred_exclude 3 ,
+.Xr fido_cred_verify 3 ,
+.Xr fido_dev_make_cred 3

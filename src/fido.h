@@ -103,7 +103,7 @@ int fido_assert_set_count(fido_assert_t *, size_t);
 int fido_assert_set_options(fido_assert_t *, bool, bool);
 int fido_assert_set_rp(fido_assert_t *, const char *);
 int fido_assert_set_sig(fido_assert_t *, size_t, const unsigned char *, size_t);
-int fido_assert_verify(fido_assert_t *, size_t, int, const void *);
+int fido_assert_verify(const fido_assert_t *, size_t, int, const void *);
 int fido_cred_exclude(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_authdata(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_clientdata_hash(fido_cred_t *, const unsigned char *, size_t);
