@@ -25,16 +25,9 @@
 		fido_assert_sig_len;
 		fido_assert_sig_ptr;
 		fido_assert_user_display_name;
-		fido_assert_user_display_name;
-		fido_assert_user_display_name;
-		fido_assert_user_icon;
-		fido_assert_user_icon;
 		fido_assert_user_icon;
 		fido_assert_user_id_len;
 		fido_assert_user_id_ptr;
-		fido_assert_user_id_ptr;
-		fido_assert_user_name;
-		fido_assert_user_name;
 		fido_assert_user_name;
 		fido_assert_verify;
 		fido_cbor_info_aaguid_len;
