@@ -151,27 +151,27 @@ rs256_pk_from_RSA(const RSA *rsa, rs256_pk_t *pk)
 
 	if (RSA_bits(rsa) != 2048) {
 		log_debug("%s: invalid key length", __func__);
-		return (-1);
+		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
 	RSA_get0_key(rsa, &n, &e, &d);
 
 	if (n == NULL || e == NULL) {
 		log_debug("%s: RSA_get0_key", __func__);
-		return (-1);
+		return (FIDO_ERR_INTERNAL);
 	}
 
 	if ((k = BN_num_bytes(n)) < 0 || (size_t)k > sizeof(pk->n) ||
 	    (k = BN_num_bytes(e)) < 0 || (size_t)k > sizeof(pk->e)) {
 		log_debug("%s: invalid key", __func__);
-		return (-1);
+		return (FIDO_ERR_INTERNAL);
 	}
 
 	if ((k = BN_bn2bin(n, pk->n)) < 0 || (size_t)k > sizeof(pk->n) ||
 	    (k = BN_bn2bin(e, pk->e)) < 0 || (size_t)k > sizeof(pk->e)) {
 		log_debug("%s: BN_bn2bin", __func__);
-		return (-1);
+		return (FIDO_ERR_INTERNAL);
 	}
 
-	return (0);
+	return (FIDO_OK);
 }

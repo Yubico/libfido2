@@ -293,7 +293,7 @@ es256_pk_from_EC_KEY(const EC_KEY *ec, es256_pk_t *pk)
 	BIGNUM		*y = NULL;
 	const EC_POINT	*q = NULL;
 	const EC_GROUP	*g = NULL;
-	int		 ok = -1;
+	int		 ok = FIDO_ERR_INTERNAL;
 	int		 n;
 
 	if ((q = EC_KEY_get0_public_key(ec)) == NULL ||
@@ -318,7 +318,7 @@ es256_pk_from_EC_KEY(const EC_KEY *ec, es256_pk_t *pk)
 		goto fail;
 	}
 
-	ok = 0;
+	ok = FIDO_OK;
 fail:
 	if (ctx != NULL)
 		BN_CTX_free(ctx);
@@ -390,7 +390,7 @@ es256_derive_pk(const es256_sk_t *sk, es256_pk_t *pk)
 
 	if (EC_POINT_mul(g, q, d, NULL, NULL, NULL) == 0 ||
 	    EC_KEY_set_public_key(ec, q) == 0 ||
-	    es256_pk_from_EC_KEY(ec, pk) < 0) {
+	    es256_pk_from_EC_KEY(ec, pk) != FIDO_OK) {
 		log_debug("%s: set", __func__);
 		goto fail;
 	}

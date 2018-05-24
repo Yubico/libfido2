@@ -54,7 +54,7 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 		if ((es256_pk = es256_pk_new()) == NULL)
 			errx(1, "es256_pk_new");
 
-		if (es256_pk_from_EC_KEY(ec, es256_pk) < 0)
+		if (es256_pk_from_EC_KEY(ec, es256_pk) != FIDO_OK)
 			errx(1, "es256_pk_from_EC_KEY");
 
 		pk = es256_pk;
@@ -67,7 +67,7 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 		if ((rs256_pk = rs256_pk_new()) == NULL)
 			errx(1, "rs256_pk_new");
 
-		if (rs256_pk_from_RSA(rsa, rs256_pk) < 0)
+		if (rs256_pk_from_RSA(rsa, rs256_pk) != FIDO_OK)
 			errx(1, "rs256_pk_from_RSA");
 
 		pk = rs256_pk;
