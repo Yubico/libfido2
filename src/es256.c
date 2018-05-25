@@ -286,7 +286,7 @@ fail:
 }
 
 int
-es256_pk_from_EC_KEY(const EC_KEY *ec, es256_pk_t *pk)
+es256_pk_from_EC_KEY(es256_pk_t *pk, const EC_KEY *ec)
 {
 	BN_CTX		*ctx = NULL;
 	BIGNUM		*x = NULL;
@@ -390,7 +390,7 @@ es256_derive_pk(const es256_sk_t *sk, es256_pk_t *pk)
 
 	if (EC_POINT_mul(g, q, d, NULL, NULL, NULL) == 0 ||
 	    EC_KEY_set_public_key(ec, q) == 0 ||
-	    es256_pk_from_EC_KEY(ec, pk) != FIDO_OK) {
+	    es256_pk_from_EC_KEY(pk, ec) != FIDO_OK) {
 		log_debug("%s: set", __func__);
 		goto fail;
 	}

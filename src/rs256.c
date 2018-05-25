@@ -142,7 +142,7 @@ fail:
 }
 
 int
-rs256_pk_from_RSA(const RSA *rsa, rs256_pk_t *pk)
+rs256_pk_from_RSA(rs256_pk_t *pk, const RSA *rsa)
 {
 	const BIGNUM	*n = NULL;
 	const BIGNUM	*e = NULL;
