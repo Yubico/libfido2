@@ -3,7 +3,7 @@
 # license that can be found in the LICENSE file.
 
 if(MANDOC_PATH)
-	add_custom_target(man_symlink ALL
+	add_custom_target(man_symlink
 		COMMAND cp ${CMAKE_SOURCE_DIR}/man/*.3 ${CMAKE_BINARY_DIR}/man
 		COMMAND ln -fs es256_pk.3 es256_pk_new.3
 		COMMAND ln -fs es256_pk.3 es256_pk_free.3
@@ -80,10 +80,10 @@ if(MANDOC_PATH)
 		COMMAND ln -fs rs256_pk.3 rs256_pk_from_ptr.3
 		COMMAND ln -fs rs256_pk.3 rs256_pk_to_EVP_PKEY.3
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
-	add_custom_target(man_lint ALL
+	add_custom_target(man_lint
 		COMMAND mandoc -T lint *.3
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
-	add_custom_target(man_html ALL
+	add_custom_target(man_html
 		COMMAND mkdir html
 		COMMAND cp ${CMAKE_SOURCE_DIR}/man/style.css html
 		COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" es256_pk.3 > html/es256_pk.html
@@ -106,7 +106,7 @@ if(MANDOC_PATH)
 		COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_strerr.3 > html/fido_strerr.html
 		COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" rs256_pk.3 > html/rs256_pk.html
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
-	add_custom_target(man_symlink_html ALL
+	add_custom_target(man_symlink_html
 		COMMAND ln -fs es256_pk.html es256_pk_new.html
 		COMMAND ln -fs es256_pk.html es256_pk_free.html
 		COMMAND ln -fs es256_pk.html es256_pk_from_EC_KEY.html

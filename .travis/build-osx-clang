@@ -12,15 +12,22 @@ make -C build
 sudo make -C build install
 cd ..
 
-# Install OpenSSL 1.1.0h and hidapi from Homebrew.
+# Prepare the ground for Homebrew.
+sudo mkdir /usr/local/sbin
+sudo chmod 775 /usr/local/sbin
+sudo chown travis:admin /usr/local/sbin
+
+# Install OpenSSL 1.1.0h, hidapi, and mandoc from Homebrew.
 brew update
 brew upgrade openssl@1.1
 brew switch openssl@1.1 1.1.0h
 brew install hidapi
+brew install mandoc
 
 # Build and install libfido2.
 export PKG_CONFIG_PATH=/usr/local/opt/openssl@1.1/lib/pkgconfig
 mkdir build
 (cd build && cmake ..)
 make -C build
+make -C build man_symlink_html
 sudo make -C build install
