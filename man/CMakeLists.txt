@@ -182,7 +182,107 @@ if(MANDOC_PATH)
 		COMMAND ln -fs rs256_pk.html rs256_pk_from_ptr.html
 		COMMAND ln -fs rs256_pk.html rs256_pk_to_EVP_PKEY.html
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man/html)
+	add_custom_target(man_html_partial
+		COMMAND mkdir html_partial
+		COMMAND mandoc -T html -O man="%N.html",fragment es256_pk.3 > html_partial/es256_pk.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido.3 > html_partial/fido.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_assert.3 > html_partial/fido_assert.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_allow_cred.3 > html_partial/fido_assert_allow_cred.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_set.3 > html_partial/fido_assert_set.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_verify.3 > html_partial/fido_assert_verify.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_cbor_info.3 > html_partial/fido_cbor_info.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_cred.3 > html_partial/fido_cred.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_exclude.3 > html_partial/fido_cred_exclude.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_set.3 > html_partial/fido_cred_set.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_verify.3 > html_partial/fido_cred_verify.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_get_assert.3 > html_partial/fido_dev_get_assert.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_info_manifest.3 > html_partial/fido_dev_info_manifest.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_make_cred.3 > html_partial/fido_dev_make_cred.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_open.3 > html_partial/fido_dev_open.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_set_io_functions.3 > html_partial/fido_dev_set_io_functions.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_set_pin.3 > html_partial/fido_dev_set_pin.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment fido_strerr.3 > html_partial/fido_strerr.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment rs256_pk.3 > html_partial/rs256_pk.partial
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
+	add_custom_target(man_symlink_html_partial
+		COMMAND ln -fs es256_pk.partial es256_pk_new.partial
+		COMMAND ln -fs es256_pk.partial es256_pk_free.partial
+		COMMAND ln -fs es256_pk.partial es256_pk_from_EC_KEY.partial
+		COMMAND ln -fs es256_pk.partial es256_pk_from_ptr.partial
+		COMMAND ln -fs es256_pk.partial es256_pk_to_EVP_PKEY.partial
+		COMMAND ln -fs fido.partial fido_init.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_new.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_free.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_count.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_user_display_name.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_user_icon.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_user_name.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_authdata_ptr.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_clientdata_hash_ptr.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_user_id_ptr.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_sig_ptr.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_authdata_len.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_clientdata_hash_len.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_user_id_len.partial
+		COMMAND ln -fs fido_assert.partial fido_assert_sig_len.partial
+		COMMAND ln -fs fido_assert_set.partial fido_assert_set_authdata.partial
+		COMMAND ln -fs fido_assert_set.partial fido_assert_set_clientdata_hash.partial
+		COMMAND ln -fs fido_assert_set.partial fido_assert_set_count.partial
+		COMMAND ln -fs fido_assert_set.partial fido_assert_set_options.partial
+		COMMAND ln -fs fido_assert_set.partial fido_assert_set_rp.partial
+		COMMAND ln -fs fido_assert_set.partial fido_assert_set_sig.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_new.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_free.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_fmt.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_authdata_ptr.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_clientdata_hash_ptr.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_id_ptr.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_pubkey_ptr.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_sig_ptr.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_x5c_ptr.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_authdata_len.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_clientdata_hash_len.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_id_len.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_pubkey_len.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_sig_len.partial
+		COMMAND ln -fs fido_cred.partial fido_cred_x5c_len.partial
+		COMMAND ln -fs fido_cred_set.partial fido_cred_set_authdata.partial
+		COMMAND ln -fs fido_cred_set.partial fido_cred_set_x509.partial
+		COMMAND ln -fs fido_cred_set.partial fido_cred_set_sig.partial
+		COMMAND ln -fs fido_cred_set.partial fido_cred_set_clientdata_hash.partial
+		COMMAND ln -fs fido_cred_set.partial fido_cred_set_rp.partial
+		COMMAND ln -fs fido_cred_set.partial fido_cred_set_user.partial
+		COMMAND ln -fs fido_cred_set.partial fido_cred_set_options.partial
+		COMMAND ln -fs fido_cred_set.partial fido_cred_set_fmt.partial
+		COMMAND ln -fs fido_cred_set.partial fido_cred_set_type.partial
+		COMMAND ln -fs fido_dev_info_manifest.partial fido_dev_info_new.partial
+		COMMAND ln -fs fido_dev_info_manifest.partial fido_dev_info_free.partial
+		COMMAND ln -fs fido_dev_info_manifest.partial fido_dev_info_ptr.partial
+		COMMAND ln -fs fido_dev_info_manifest.partial fido_dev_info_path.partial
+		COMMAND ln -fs fido_dev_info_manifest.partial fido_dev_info_product.partial
+		COMMAND ln -fs fido_dev_info_manifest.partial fido_dev_info_vendor.partial
+		COMMAND ln -fs fido_dev_info_manifest.partial fido_dev_info_manufacturer_string.partial
+		COMMAND ln -fs fido_dev_info_manifest.partial fido_dev_info_product_string.partial
+		COMMAND ln -fs fido_dev_open.partial fido_dev_close.partial
+		COMMAND ln -fs fido_dev_open.partial fido_dev_new.partial
+		COMMAND ln -fs fido_dev_open.partial fido_dev_free.partial
+		COMMAND ln -fs fido_dev_open.partial fido_dev_is_fido2.partial
+		COMMAND ln -fs fido_dev_open.partial fido_dev_protocol.partial
+		COMMAND ln -fs fido_dev_open.partial fido_dev_build.partial
+		COMMAND ln -fs fido_dev_open.partial fido_dev_flags.partial
+		COMMAND ln -fs fido_dev_open.partial fido_dev_major.partial
+		COMMAND ln -fs fido_dev_open.partial fido_dev_minor.partial
+		COMMAND ln -fs fido_dev_set_pin.partial fido_dev_get_retry_count.partial
+		COMMAND ln -fs fido_dev_set_pin.partial fido_dev_reset.partial
+		COMMAND ln -fs rs256_pk.partial rs256_pk_new.partial
+		COMMAND ln -fs rs256_pk.partial rs256_pk_free.partial
+		COMMAND ln -fs rs256_pk.partial rs256_pk_from_RSA.partial
+		COMMAND ln -fs rs256_pk.partial rs256_pk_from_ptr.partial
+		COMMAND ln -fs rs256_pk.partial rs256_pk_to_EVP_PKEY.partial
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man/html_partial)
 	add_dependencies(man_lint man_symlink)
 	add_dependencies(man_html man_lint)
 	add_dependencies(man_symlink_html man_html)
+	add_dependencies(man_html_partial man_lint)
+	add_dependencies(man_symlink_html_partial man_html_partial)
 endif()
