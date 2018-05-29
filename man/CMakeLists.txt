@@ -83,9 +83,11 @@ add_custom_target(man_symlink
 	COMMAND ln -fs rs256_pk.3 rs256_pk_from_ptr.3
 	COMMAND ln -fs rs256_pk.3 rs256_pk_to_EVP_PKEY.3
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
+
 add_custom_target(man_lint
 	COMMAND mandoc -T lint *.3
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
+
 add_custom_target(man_html
 	COMMAND mkdir html
 	COMMAND cp ${CMAKE_SOURCE_DIR}/man/style.css html
@@ -109,6 +111,7 @@ add_custom_target(man_html
 	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_strerr.3 > html/fido_strerr.html
 	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" rs256_pk.3 > html/rs256_pk.html
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
+
 add_custom_target(man_symlink_html
 	COMMAND ln -fs es256_pk.html es256_pk_new.html
 	COMMAND ln -fs es256_pk.html es256_pk_free.html
@@ -185,6 +188,7 @@ add_custom_target(man_symlink_html
 	COMMAND ln -fs rs256_pk.html rs256_pk_from_ptr.html
 	COMMAND ln -fs rs256_pk.html rs256_pk_to_EVP_PKEY.html
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man/html)
+
 add_custom_target(man_html_partial
 	COMMAND mkdir html_partial
 	COMMAND mandoc -T html -O man="%N.html",fragment es256_pk.3 > html_partial/es256_pk.partial
@@ -207,6 +211,7 @@ add_custom_target(man_html_partial
 	COMMAND mandoc -T html -O man="%N.html",fragment fido_strerr.3 > html_partial/fido_strerr.partial
 	COMMAND mandoc -T html -O man="%N.html",fragment rs256_pk.3 > html_partial/rs256_pk.partial
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
+
 add_custom_target(man_symlink_html_partial
 	COMMAND ln -fs es256_pk.partial es256_pk_new.partial
 	COMMAND ln -fs es256_pk.partial es256_pk_free.partial
