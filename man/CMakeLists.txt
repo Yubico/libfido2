@@ -2,6 +2,10 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
+find_program(MANDOC_PATH mandoc)
+
+message(STATUS "MANDOC_PATH: ${MANDOC_PATH}")
+
 if(MANDOC_PATH)
 	add_custom_target(man_symlink
 		COMMAND cp ${CMAKE_SOURCE_DIR}/man/*.3 ${CMAKE_BINARY_DIR}/man

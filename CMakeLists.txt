@@ -24,8 +24,6 @@ set(FIDO_VERSION ${FIDO_MAJOR}.${FIDO_MINOR}.${FIDO_PATCH})
 pkg_search_module(CBOR libcbor)
 pkg_search_module(CRYPTO libcrypto REQUIRED)
 
-find_program(MANDOC_PATH mandoc)
-
 if(NOT CBOR_FOUND)
 	set(CBOR_LIBRARIES "cbor")
 endif()
@@ -110,7 +108,6 @@ message(STATUS "CRYPTO_LIBRARIES: ${CRYPTO_LIBRARIES}")
 message(STATUS "HIDAPI_INCLUDE_DIRS: ${HIDAPI_INCLUDE_DIRS}")
 message(STATUS "HIDAPI_LIBRARY_DIRS: ${HIDAPI_LIBRARY_DIRS}")
 message(STATUS "HIDAPI_LIBRARIES: ${HIDAPI_LIBRARIES}")
-message(STATUS "MANDOC_PATH: ${MANDOC_PATH}")
 
 subdirs(src)
 subdirs(examples)
