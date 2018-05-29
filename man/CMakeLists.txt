@@ -89,27 +89,26 @@ add_custom_target(man_lint
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
 
 add_custom_target(man_html
-	COMMAND mkdir html
-	COMMAND cp ${CMAKE_SOURCE_DIR}/man/style.css html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" es256_pk.3 > html/es256_pk.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido.3 > html/fido.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_assert.3 > html/fido_assert.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_assert_allow_cred.3 > html/fido_assert_allow_cred.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_assert_set.3 > html/fido_assert_set.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_assert_verify.3 > html/fido_assert_verify.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_cbor_info.3 > html/fido_cbor_info.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_cred.3 > html/fido_cred.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_cred_exclude.3 > html/fido_cred_exclude.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_cred_set.3 > html/fido_cred_set.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_cred_verify.3 > html/fido_cred_verify.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_get_assert.3 > html/fido_dev_get_assert.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_info_manifest.3 > html/fido_dev_info_manifest.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_make_cred.3 > html/fido_dev_make_cred.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_open.3 > html/fido_dev_open.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_set_io_functions.3 > html/fido_dev_set_io_functions.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_set_pin.3 > html/fido_dev_set_pin.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_strerr.3 > html/fido_strerr.html
-	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" rs256_pk.3 > html/rs256_pk.html
+	COMMAND cp -f ${CMAKE_SOURCE_DIR}/man/style.css .
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" es256_pk.3 > es256_pk.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido.3 > fido.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_assert.3 > fido_assert.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_assert_allow_cred.3 > fido_assert_allow_cred.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_assert_set.3 > fido_assert_set.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_assert_verify.3 > fido_assert_verify.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_cbor_info.3 > fido_cbor_info.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_cred.3 > fido_cred.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_cred_exclude.3 > fido_cred_exclude.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_cred_set.3 > fido_cred_set.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_cred_verify.3 > fido_cred_verify.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_get_assert.3 > fido_dev_get_assert.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_info_manifest.3 > fido_dev_info_manifest.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_make_cred.3 > fido_dev_make_cred.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_open.3 > fido_dev_open.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_set_io_functions.3 > fido_dev_set_io_functions.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_set_pin.3 > fido_dev_set_pin.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_strerr.3 > fido_strerr.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" rs256_pk.3 > rs256_pk.html
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
 
 add_custom_target(man_symlink_html
@@ -187,29 +186,28 @@ add_custom_target(man_symlink_html
 	COMMAND ln -fs rs256_pk.html rs256_pk_from_RSA.html
 	COMMAND ln -fs rs256_pk.html rs256_pk_from_ptr.html
 	COMMAND ln -fs rs256_pk.html rs256_pk_to_EVP_PKEY.html
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man/html)
+	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
 
 add_custom_target(man_html_partial
-	COMMAND mkdir html_partial
-	COMMAND mandoc -T html -O man="%N.html",fragment es256_pk.3 > html_partial/es256_pk.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido.3 > html_partial/fido.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert.3 > html_partial/fido_assert.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_allow_cred.3 > html_partial/fido_assert_allow_cred.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_set.3 > html_partial/fido_assert_set.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_verify.3 > html_partial/fido_assert_verify.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_cbor_info.3 > html_partial/fido_cbor_info.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred.3 > html_partial/fido_cred.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_exclude.3 > html_partial/fido_cred_exclude.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_set.3 > html_partial/fido_cred_set.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_verify.3 > html_partial/fido_cred_verify.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_get_assert.3 > html_partial/fido_dev_get_assert.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_info_manifest.3 > html_partial/fido_dev_info_manifest.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_make_cred.3 > html_partial/fido_dev_make_cred.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_open.3 > html_partial/fido_dev_open.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_set_io_functions.3 > html_partial/fido_dev_set_io_functions.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_set_pin.3 > html_partial/fido_dev_set_pin.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_strerr.3 > html_partial/fido_strerr.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment rs256_pk.3 > html_partial/rs256_pk.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment es256_pk.3 > es256_pk.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido.3 > fido.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert.3 > fido_assert.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_allow_cred.3 > fido_assert_allow_cred.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_set.3 > fido_assert_set.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_verify.3 > fido_assert_verify.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_cbor_info.3 > fido_cbor_info.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred.3 > fido_cred.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_exclude.3 > fido_cred_exclude.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_set.3 > fido_cred_set.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_verify.3 > fido_cred_verify.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_get_assert.3 > fido_dev_get_assert.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_info_manifest.3 > fido_dev_info_manifest.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_make_cred.3 > fido_dev_make_cred.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_open.3 > fido_dev_open.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_set_io_functions.3 > fido_dev_set_io_functions.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_set_pin.3 > fido_dev_set_pin.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_strerr.3 > fido_strerr.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment rs256_pk.3 > rs256_pk.partial
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
 
 add_custom_target(man_symlink_html_partial
@@ -287,7 +285,7 @@ add_custom_target(man_symlink_html_partial
 	COMMAND ln -fs rs256_pk.partial rs256_pk_from_RSA.partial
 	COMMAND ln -fs rs256_pk.partial rs256_pk_from_ptr.partial
 	COMMAND ln -fs rs256_pk.partial rs256_pk_to_EVP_PKEY.partial
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man/html_partial)
+	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
 
 add_dependencies(man_lint man_symlink)
 add_dependencies(man_html man_lint)
