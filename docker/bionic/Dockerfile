@@ -1,6 +1,8 @@
 FROM ubuntu:bionic
+RUN rm -f /etc/dpkg/dpkg.cfg.d/excludes
 RUN mkdir /deb
-RUN apt-get -qq update && apt-get -qq upgrade && apt-get install -y git devscripts equivs pkg-config
+RUN apt-get -qq update && apt-get -qq upgrade && apt-get install -y git \
+	devscripts equivs pkg-config mandoc gzip
 COPY . /libfido2
 RUN rm -rf /libfido2/build
 RUN yes | mk-build-deps -i /libfido2/debian/control
