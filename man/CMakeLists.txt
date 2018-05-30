@@ -165,7 +165,6 @@ add_custom_target(man_gzip
 	COMMAND gzip -c fido_dev_set_pin.3 > fido_dev_set_pin.3.gz
 	COMMAND gzip -c fido_strerr.3 > fido_strerr.3.gz
 	COMMAND gzip -c rs256_pk.3 > rs256_pk.3.gz
-	COMMAND ln -sf fido.3.gz fido_test.3.gz
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
 
 define_symlink_target(man_symlink_gzip 3.gz)
@@ -181,6 +180,101 @@ add_custom_target(man ALL)
 if(MANDOC_PATH)
 	add_dependencies(man man_symlink_html)
 	add_dependencies(man_gzip man_lint)
+	install(FILES ${CMAKE_BINARY_DIR}/man/es256_pk.html
+		${CMAKE_BINARY_DIR}/man/es256_pk_free.html
+		${CMAKE_BINARY_DIR}/man/es256_pk_from_EC_KEY.html
+		${CMAKE_BINARY_DIR}/man/es256_pk_from_ptr.html
+		${CMAKE_BINARY_DIR}/man/es256_pk_new.html
+		${CMAKE_BINARY_DIR}/man/es256_pk_to_EVP_PKEY.html
+		${CMAKE_BINARY_DIR}/man/fido.html
+		${CMAKE_BINARY_DIR}/man/fido_assert.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_allow_cred.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_authdata_len.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_authdata_ptr.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_clientdata_hash_len.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_clientdata_hash_ptr.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_count.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_free.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_new.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_set.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_set_authdata.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_set_clientdata_hash.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_set_count.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_set_options.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_set_rp.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_set_sig.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_sig_len.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_sig_ptr.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_user_display_name.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_user_icon.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_user_id_len.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_user_id_ptr.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_user_name.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_verify.html
+		${CMAKE_BINARY_DIR}/man/fido_cbor_info.html
+		${CMAKE_BINARY_DIR}/man/fido_cred.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_authdata_len.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_authdata_ptr.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_clientdata_hash_len.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_clientdata_hash_ptr.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_exclude.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_fmt.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_free.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_id_len.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_id_ptr.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_new.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_pubkey_len.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_pubkey_ptr.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_set.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_set_authdata.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_set_clientdata_hash.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_set_fmt.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_set_options.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_set_rp.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_set_sig.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_set_type.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_set_user.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_set_x509.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_sig_len.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_sig_ptr.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_verify.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_x5c_len.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_x5c_ptr.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_build.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_close.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_flags.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_free.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_get_assert.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_get_retry_count.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_info_free.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_info_manifest.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_info_manufacturer_string.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_info_new.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_info_path.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_info_product.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_info_product_string.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_info_ptr.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_info_vendor.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_is_fido2.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_major.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_make_cred.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_minor.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_new.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_open.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_protocol.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_reset.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_set_io_functions.html
+		${CMAKE_BINARY_DIR}/man/fido_dev_set_pin.html
+		${CMAKE_BINARY_DIR}/man/fido_init.html
+		${CMAKE_BINARY_DIR}/man/fido_strerr.html
+		${CMAKE_BINARY_DIR}/man/rs256_pk.html
+		${CMAKE_BINARY_DIR}/man/rs256_pk_free.html
+		${CMAKE_BINARY_DIR}/man/rs256_pk_from_ptr.html
+		${CMAKE_BINARY_DIR}/man/rs256_pk_from_RSA.html
+		${CMAKE_BINARY_DIR}/man/rs256_pk_new.html
+		${CMAKE_BINARY_DIR}/man/rs256_pk_to_EVP_PKEY.html
+		${CMAKE_BINARY_DIR}/man/style.css
+		DESTINATION "${CMAKE_INSTALL_PREFIX}/share/doc/libfido2")
 endif()
 
 if(GZIP_PATH)
@@ -274,7 +368,6 @@ if(GZIP_PATH)
 		${CMAKE_BINARY_DIR}/man/fido_dev_set_pin.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_init.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_strerr.3.gz
-		${CMAKE_BINARY_DIR}/man/fido_test.3.gz
 		${CMAKE_BINARY_DIR}/man/rs256_pk.3.gz
 		${CMAKE_BINARY_DIR}/man/rs256_pk_free.3.gz
 		${CMAKE_BINARY_DIR}/man/rs256_pk_from_ptr.3.gz
