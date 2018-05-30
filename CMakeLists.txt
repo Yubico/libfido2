@@ -18,7 +18,7 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 
 set(FIDO_MAJOR "0")
 set(FIDO_MINOR "1")
-set(FIDO_PATCH "0")
+set(FIDO_PATCH "1")
 set(FIDO_VERSION ${FIDO_MAJOR}.${FIDO_MINOR}.${FIDO_PATCH})
 
 pkg_search_module(CBOR libcbor)

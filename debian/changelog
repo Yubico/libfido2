@@ -1,3 +1,10 @@
+libfido2 (0.1.1~dev) bionic; urgency=low
+
+  * Added documentation.
+  * Minor fixes.
+
+ -- pedro martelletto <pedro@yubico.com>  Wed, 30 May 2018 13:16:28 +0000
+
 libfido2 (0.1.0~dev) bionic; urgency=low
 
   * Initial release.
