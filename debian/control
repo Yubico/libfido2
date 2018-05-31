@@ -6,7 +6,9 @@ Standards-Version: 4.1.2
 Section: libs
 Homepage: https://github.com/yubico/libfido2
 Build-Depends: debhelper (>= 9),
+               pkg-config,
                cmake,
+               mandoc,
                libcbor-dev,
                libssl-dev,
                libhidapi-dev
