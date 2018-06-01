@@ -5,6 +5,7 @@
  */
 
 #include <openssl/ec.h>
+#include <openssl/ecdsa.h>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 

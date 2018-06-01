@@ -1,5 +1,6 @@
 * Version 0.1.1 (unreleased)
  ** Added documentation.
+ ** Added OpenSSL 1.0 support.
  ** Minor fixes.
 
 * Version 0.1.0 (released 2018-05-18)

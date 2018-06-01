@@ -42,4 +42,9 @@ int getpagesize(void);
 int timingsafe_bcmp(const void *, const void *, size_t);
 #endif
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define EVP_PKEY_get0_EC_KEY(x) ((x)->pkey.ec)
+#define EVP_PKEY_get0_RSA(x) ((x)->pkey.rsa)
+#endif
+
 #endif /* !_COMPAT_H */

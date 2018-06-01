@@ -12,15 +12,6 @@ make -C build
 sudo make -C build install
 cd ..
 
-# Build and install OpenSSL 1.1.0h.
-git clone git://github.com/openssl/openssl
-cd openssl
-git checkout OpenSSL_1_1_0h
-./Configure linux-x86_64-clang
-make
-sudo make install_sw
-cd ..
-
 # Build and install libfido2.
 mkdir build
 (cd build && cmake ..)
