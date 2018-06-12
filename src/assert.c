@@ -589,6 +589,12 @@ fido_assert_count(const fido_assert_t *assert)
 	return (assert->stmt_len);
 }
 
+const char *
+fido_assert_rp_id(const fido_assert_t *assert)
+{
+	return (assert->rp_id);
+}
+
 uint8_t
 fido_assert_flags(const fido_assert_t *assert, size_t idx)
 {

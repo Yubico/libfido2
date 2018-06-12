@@ -16,6 +16,7 @@
 		fido_assert_id_len;
 		fido_assert_id_ptr;
 		fido_assert_new;
+		fido_assert_rp_id;
 		fido_assert_set_authdata;
 		fido_assert_set_clientdata_hash;
 		fido_assert_set_count;
@@ -57,6 +58,8 @@
 		fido_cred_new;
 		fido_cred_pubkey_len;
 		fido_cred_pubkey_ptr;
+		fido_cred_rp_id;
+		fido_cred_rp_name;
 		fido_cred_set_authdata;
 		fido_cred_set_clientdata_hash;
 		fido_cred_set_fmt;
@@ -101,8 +104,8 @@
 		fido_init;
 		fido_strerr;
 		rs256_pk_free;
-		rs256_pk_from_RSA;
 		rs256_pk_from_ptr;
+		rs256_pk_from_RSA;
 		rs256_pk_new;
 		rs256_pk_to_EVP_PKEY;
 	local:

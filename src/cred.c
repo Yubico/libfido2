@@ -773,3 +773,15 @@ fido_cred_fmt(const fido_cred_t *cred)
 {
 	return (cred->fmt);
 }
+
+const char *
+fido_cred_rp_id(const fido_cred_t *cred)
+{
+	return (cred->rp.id);
+}
+
+const char *
+fido_cred_rp_name(const fido_cred_t *cred)
+{
+	return (cred->rp.name);
+}
