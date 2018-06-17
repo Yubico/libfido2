@@ -16,7 +16,6 @@ static int
 sig_get(fido_blob_t *sig, const unsigned char **buf, size_t *len)
 {
 	sig->len = *len; /* consume the whole buffer */
-
 	if ((sig->ptr = calloc(1, sig->len)) == NULL ||
 	    buf_read(buf, len, sig->ptr, sig->len) < 0) {
 		log_debug("%s: buf_read", __func__);
@@ -109,9 +108,9 @@ send_dummy_register(fido_dev_t *dev, int ms)
 	memset(&application, 0xff, sizeof(application));
 
 	if ((apdu = iso7816_new(U2F_CMD_REGISTER, 0, 2 *
-	    SHA256_DIGEST_LENGTH)) == NULL || iso7816_add(apdu, &challenge,
-	    sizeof(challenge)) < 0 || iso7816_add(apdu, &application,
-	    sizeof(application)) < 0) {
+	    SHA256_DIGEST_LENGTH)) == NULL ||
+	    iso7816_add(apdu, &challenge, sizeof(challenge)) < 0 ||
+	    iso7816_add(apdu, &application, sizeof(application)) < 0) {
 		log_debug("%s: iso7816", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -310,8 +309,9 @@ cbor_blob_from_ec_point(const uint8_t *ec_point, size_t ec_point_len,
 		goto fail;
 	}
 
-	if ((pk = es256_pk_new()) == NULL || es256_pk_set_x(pk,
-	    &ec_point[1]) < 0 || es256_pk_set_y(pk, &ec_point[33]) < 0) {
+	if ((pk = es256_pk_new()) == NULL ||
+	    es256_pk_set_x(pk, &ec_point[1]) < 0 ||
+	    es256_pk_set_y(pk, &ec_point[33]) < 0) {
 		log_debug("%s: es256_pk_set", __func__);
 		goto fail;
 	}
@@ -383,8 +383,8 @@ encode_cred_authdata(const char *rp_id, const uint8_t *kh, uint8_t kh_len,
 
 	if (buf_write(&ptr, &len, &authdata, sizeof(authdata)) < 0 ||
 	    buf_write(&ptr, &len, &attcred_raw, sizeof(attcred_raw)) < 0 ||
-	    buf_write(&ptr, &len, kh, kh_len) < 0 || buf_write(&ptr, &len,
-	    pk_blob.ptr, pk_blob.len) < 0) {
+	    buf_write(&ptr, &len, kh, kh_len) < 0 ||
+	    buf_write(&ptr, &len, pk_blob.ptr, pk_blob.len) < 0) {
 		log_debug("%s: buf_write", __func__);
 		goto fail;
 	}
