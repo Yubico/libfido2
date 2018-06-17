@@ -6,6 +6,8 @@
 #ifndef _COMPAT_ERR_H
 #define _COMPAT_ERR_H
 
+#if !defined(HAVE_ERR_H)
+
 #include <errno.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -77,5 +79,7 @@ warnx(const char *fmt, ...)
 	va_end(ap);
 	fprintf(stderr, "\n");
 }
+
+#endif /* !defined(HAVE_ERR_H) */
 
 #endif /* _COMPAT_ERR_H */

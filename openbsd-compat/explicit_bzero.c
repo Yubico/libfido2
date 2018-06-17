@@ -5,15 +5,15 @@
  * Written by Ted Unangst
  */
 
-#include "compat.h"
+#include "openbsd-compat.h"
+
+#if !defined(HAVE_EXPLICIT_BZERO) && !defined(_WIN32)
 
 #include <string.h>
 
 /*
  * explicit_bzero - don't let the compiler optimize away bzero
  */
-
-#ifndef HAVE_EXPLICIT_BZERO
 
 #ifdef HAVE_MEMSET_S
 
@@ -54,4 +54,4 @@ explicit_bzero(void *p, size_t n)
 
 #endif /* HAVE_MEMSET_S */
 
-#endif /* HAVE_EXPLICIT_BZERO */
+#endif /* !defined(HAVE_EXPLICIT_BZERO) && !defined(_WIN32) */

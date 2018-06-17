@@ -2,26 +2,17 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-check_include_files(err.h HAVE_ERR_H)
-if(HAVE_ERR_H)
-	add_definitions(-DHAVE_ERR_H)
-endif()
-
-check_function_exists(strlcpy HAVE_STRLCPY)
-if(HAVE_STRLCPY)
-	add_definitions(-DHAVE_STRLCPY)
-endif()
+list(APPEND COMPAT_SOURCES
+	../openbsd-compat/strlcpy.c
+	../openbsd-compat/strlcat.c
+)
 
 # manifest
 add_executable(manifest manifest.c)
 target_link_libraries(manifest fido2_shared)
 
 # info
-if(NOT HAVE_STRLCPY)
-	add_executable(info info.c compat/strlcpy.c compat/strlcat.c)
-else()
-	add_executable(info info.c)
-endif()
+add_executable(info info.c ${COMPAT_SOURCES})
 target_link_libraries(info fido2_shared)
 
 # reset

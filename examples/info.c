@@ -12,8 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../openbsd-compat/openbsd-compat.h"
+
 #include "fido.h"
-#include "compat.h"
 
 /*
  * Pretty-print a device's capabilities flags and return the result.

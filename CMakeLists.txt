@@ -15,6 +15,7 @@ include(GNUInstallDirs)
 
 set(CMAKE_COLOR_MAKEFILE off)
 set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(FIDO_MAJOR "0")
 set(FIDO_MINOR "1")
@@ -70,6 +71,76 @@ if(HAVE_SHORTEN_64_TO_32)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshorten-64-to-32")
 endif()
 
+# endian.h
+check_include_files(endian.h HAVE_ENDIAN_H)
+if(HAVE_ENDIAN_H)
+	add_definitions(-DHAVE_ENDIAN_H)
+endif()
+
+# err.h
+check_include_files(err.h HAVE_ERR_H)
+if(HAVE_ERR_H)
+	add_definitions(-DHAVE_ERR_H)
+endif()
+
+# strlcpy
+check_function_exists(strlcpy HAVE_STRLCPY)
+if(HAVE_STRLCPY)
+	add_definitions(-DHAVE_STRLCPY)
+endif()
+
+# strlcat
+check_function_exists(strlcpy HAVE_STRLCAT)
+if(HAVE_STRLCAT)
+	add_definitions(-DHAVE_STRLCAT)
+endif()
+
+# recallocarray
+check_function_exists(recallocarray HAVE_RECALLOCARRAY)
+if(HAVE_RECALLOCARRAY)
+	add_definitions(-DHAVE_RECALLOCARRAY)
+endif()
+
+# XXX getpagesize is incorrectly detected when cross-compiling
+# with mingw on Linux. Avoid.
+if(NOT WIN32)
+	check_function_exists(getpagesize HAVE_GETPAGESIZE)
+endif()
+if(HAVE_GETPAGESIZE)
+	add_definitions(-DHAVE_GETPAGESIZE)
+endif()
+
+# sysconf
+check_function_exists(sysconf HAVE_SYSCONF)
+if(HAVE_SYSCONF)
+	add_definitions(-DHAVE_SYSCONF)
+endif()
+
+# memset_s
+check_function_exists(memset_s HAVE_MEMSET_S)
+if(HAVE_MEMSET_S)
+	add_definitions(-DHAVE_MEMSET_S)
+endif()
+
+# explicit_bzero
+check_function_exists(explicit_bzero HAVE_EXPLICIT_BZERO)
+if(HAVE_EXPLICIT_BZERO)
+	add_definitions(-DHAVE_EXPLICIT_BZERO)
+endif()
+
+# timingsafe_bcmp
+check_function_exists(timingsafe_bcmp HAVE_TIMINGSAFE_BCMP)
+if(HAVE_TIMINGSAFE_BCMP)
+	add_definitions(-DHAVE_TIMINGSAFE_BCMP)
+endif()
+
+# readpassphrase
+check_function_exists(readpassphrase HAVE_READPASSPHRASE)
+if(HAVE_READPASSPHRASE)
+	add_definitions(-DHAVE_READPASSPHRASE)
+endif()
+
+# export list
 if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
 	    " -exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/src/export.llvm")

@@ -4,8 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
-#ifndef _COMPAT_H
-#define _COMPAT_H
+#ifndef _OPENBSD_COMPAT_H
+#define _OPENBSD_COMPAT_H
 
 #if defined(HAVE_ENDIAN_H)
 #include <endian.h>
@@ -26,6 +26,14 @@
 
 #include <stdlib.h>
 
+#if !defined(HAVE_STRLCAT)
+size_t strlcat(char *, const char *, size_t);
+#endif
+
+#if !defined(HAVE_STRLCPY)
+size_t strlcpy(char *, const char *, size_t);
+#endif
+
 #if !defined(HAVE_RECALLOCARRAY)
 void *recallocarray(void *, size_t, size_t, size_t);
 #endif
@@ -42,9 +50,21 @@ int getpagesize(void);
 int timingsafe_bcmp(const void *, const void *, size_t);
 #endif
 
+#if !defined(HAVE_READPASSPHRASE)
+#include "readpassphrase.h"
+#else
+#include <readpassphrase.h>
+#endif
+
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 #define EVP_PKEY_get0_EC_KEY(x) ((x)->pkey.ec)
 #define EVP_PKEY_get0_RSA(x) ((x)->pkey.rsa)
 #endif
 
-#endif /* !_COMPAT_H */
+#if !defined(HAVE_ERR_H)
+#include "err.h"
+#else
+#include <err.h>
+#endif
+
+#endif /* !_OPENBSD_COMPAT_H */

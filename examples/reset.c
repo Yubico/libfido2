@@ -15,8 +15,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../openbsd-compat/openbsd-compat.h"
+
 #include "fido.h"
-#include "compat.h"
 
 int
 main(int argc, char **argv)

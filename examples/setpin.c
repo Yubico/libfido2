@@ -15,8 +15,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../openbsd-compat/openbsd-compat.h"
+
 #include "fido.h"
-#include "compat.h"
 
 static void
 setpin(const char *path, const char *pin, const char *oldpin)

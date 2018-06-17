@@ -17,8 +17,9 @@
 
 /* OPENBSD ORIGINAL: lib/libc/string/timingsafe_bcmp.c */
 
-#include "compat.h"
-#ifndef HAVE_TIMINGSAFE_BCMP
+#include "openbsd-compat.h"
+
+#if !defined(HAVE_TIMINGSAFE_BCMP)
 
 int
 timingsafe_bcmp(const void *b1, const void *b2, size_t n)
@@ -31,4 +32,4 @@ timingsafe_bcmp(const void *b1, const void *b2, size_t n)
 	return (ret != 0);
 }
 
-#endif /* TIMINGSAFE_BCMP */
+#endif /* !defined(HAVE_TIMINGSAFE_BCMP) */

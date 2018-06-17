@@ -1,10 +1,11 @@
 /* Placed in the public domain */
 
+#include "openbsd-compat.h"
+
+#if !defined(HAVE_GETPAGESIZE)
 
 #include <unistd.h>
 #include <limits.h>
-
-#include "compat.h"
 
 int
 getpagesize(void)
@@ -20,3 +21,5 @@ getpagesize(void)
 	 */
 	return 4096;
 }
+
+#endif /* !defined(HAVE_GETPAGESIZE) */

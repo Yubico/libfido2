@@ -29,7 +29,7 @@ typedef struct fido_dev_io {
 #include <cbor.h>
 
 #include "blob.h"
-#include "compat.h"
+#include "../openbsd-compat/openbsd-compat.h"
 #include "iso7816.h"
 #include "types.h"
 #include "extern.h"

@@ -17,13 +17,15 @@
 
 /* OPENBSD ORIGINAL: lib/libc/stdlib/recallocarray.c */
 
+#include "openbsd-compat.h"
+
+#if !defined(HAVE_RECALLOCARRAY)
+
 #include <errno.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
-
-#include "compat.h"
 
 /*
  * This is sqrt(SIZE_MAX+1), as s1*s2 <= SIZE_MAX
@@ -83,3 +85,5 @@ recallocarray(void *ptr, size_t oldnmemb, size_t newnmemb, size_t size)
 	return newptr;
 }
 /* DEF_WEAK(recallocarray); */
+
+#endif /* !defined(HAVE_RECALLOCARRAY) */
