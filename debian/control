@@ -32,3 +32,12 @@ Description: library for generating and verifying FIDO 2.0 objects (development 
  A library for communicating with a FIDO device over USB, and for verifying
  attestation and assertion signatures. FIDO U2F (CTAP 1) and FIDO 2.0 (CTAP 2)
  are supported. This package contains the development headers.
+
+Package: fido2-tools
+Section: utils
+Architecture: any
+Multi-Arch: foreign
+Depends: libfido2-0 (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
+Description: command-line tools to configure and use a FIDO 2 token
+ A set of tools to manage a FIDO 2 token, generate credentials and
+ assertions, and verify them.

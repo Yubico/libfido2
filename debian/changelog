@@ -1,3 +1,10 @@
+libfido2 (0.2.0~dev) UNRELEASED; urgency=low
+
+  * Added command-line tools.
+  * Added a couple of missing get functions.
+
+ -- pedro martelletto <pedro@yubico.com>  Mon, 18 Jun 2018 10:44:11 +0000
+
 libfido2 (0.1.1~dev) bionic; urgency=low
 
   * Added documentation.

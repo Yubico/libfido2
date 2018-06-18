@@ -6,7 +6,7 @@ Files: *
 Copyright: Copyright (c) 2018 Yubico AB. All rights reserved.
 License: BSD-2-clause
 
-Files: examples/compat/strlcpy.c examples/compat/strlcat.c
+Files: openbsd-compat/strlcpy.c openbsd-compat/strlcat.c
 Copyright: Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
 License: ISC
 
@@ -15,15 +15,23 @@ Copyright: Copyright (c) 2010 Damien Miller.  All rights reserved.
 License: ISC
 
 Files:
- examples/err.h
- src/compat/explicit_bzero.c
- src/compat/bsd-getpagesize.c
- src/compat/explicit_bzero_win32.c
+ openbsd-compat/err.h
+ openbsd-compat/explicit_bzero.c
+ openbsd-compat/bsd-getpagesize.c
+ openbsd-compat/explicit_bzero_win32.c
 Copyright: Public domain
 License: public-domain
 
-Files: src/compat/recallocarray.c
+Files: openbsd-compat/recallocarray.c
 Copyright: Copyright (c) 2008, 2017 Otto Moerbeek <otto@drijf.net>
+License: ISC
+
+Files: openbsd-compat/readpassphrase.h
+Copyright: Copyright (c) 2000, 2002 Todd C. Miller <Todd.Miller@courtesan.com>
+License: ISC
+
+Files: openbsd-compat/readpassphrase.c
+Copyright: Copyright (c) 2000-2002, 2007, 2010 Todd C. Miller <Todd.Miller@courtesan.com>
 License: ISC
 
 License: BSD-2-clause

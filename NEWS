@@ -1,4 +1,8 @@
-* Version 0.1.1 (unreleased)
+* Version 0.2.0 (unreleased)
+ ** Added command-line tools.
+ ** Added a couple of missing get functions.
+
+* Version 0.1.1 (released 2018-06-05)
  ** Added documentation.
  ** Added OpenSSL 1.0 support.
  ** Minor fixes.
