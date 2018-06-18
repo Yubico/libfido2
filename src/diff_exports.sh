@@ -1,4 +1,4 @@
-#!/bin/sh -u
+#!/bin/bash -u
 
 # Copyright (c) 2018 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
