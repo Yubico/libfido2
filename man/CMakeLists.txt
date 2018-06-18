@@ -9,7 +9,7 @@ message(STATUS "MANDOC_PATH: ${MANDOC_PATH}")
 message(STATUS "GZIP_PATH: ${GZIP_PATH}")
 
 add_custom_target(man_copy
-	COMMAND cp -f ${CMAKE_SOURCE_DIR}/man/*.3 ${CMAKE_BINARY_DIR}/man)
+	COMMAND cp -f ${CMAKE_SOURCE_DIR}/man/*.[31] ${CMAKE_BINARY_DIR}/man)
 
 macro(define_symlink_target NAME EXT)
 	add_custom_target(${NAME}
@@ -93,7 +93,7 @@ endmacro()
 define_symlink_target(man_symlink 3)
 
 add_custom_target(man_lint
-	COMMAND mandoc -T lint *.3
+	COMMAND mandoc -T lint *.3 *.1
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
 
 add_custom_target(man_html
@@ -117,6 +117,9 @@ add_custom_target(man_html
 	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_dev_set_pin.3 > fido_dev_set_pin.html
 	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido_strerr.3 > fido_strerr.html
 	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" rs256_pk.3 > rs256_pk.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido2-assert.1 > fido2-assert.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido2-cred.1 > fido2-cred.html
+	COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" fido2-token.1 > fido2-token.html
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
 
 define_symlink_target(man_symlink_html html)
@@ -141,6 +144,9 @@ add_custom_target(man_html_partial
 	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_set_pin.3 > fido_dev_set_pin.partial
 	COMMAND mandoc -T html -O man="%N.html",fragment fido_strerr.3 > fido_strerr.partial
 	COMMAND mandoc -T html -O man="%N.html",fragment rs256_pk.3 > rs256_pk.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido2-assert.1 > fido2-assert.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido2-cred.1 > fido2-cred.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido2-token.1 > fido2-token.partial
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
 
 define_symlink_target(man_symlink_html_partial partial)
@@ -165,6 +171,9 @@ add_custom_target(man_gzip
 	COMMAND gzip -c fido_dev_set_pin.3 > fido_dev_set_pin.3.gz
 	COMMAND gzip -c fido_strerr.3 > fido_strerr.3.gz
 	COMMAND gzip -c rs256_pk.3 > rs256_pk.3.gz
+	COMMAND gzip -c fido2-assert.1 > fido2-assert.1.gz
+	COMMAND gzip -c fido2-cred.1 > fido2-cred.1.gz
+	COMMAND gzip -c fido2-token.1 > fido2-token.1.gz
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
 
 define_symlink_target(man_symlink_gzip 3.gz)
@@ -273,6 +282,9 @@ if(MANDOC_PATH)
 		${CMAKE_BINARY_DIR}/man/rs256_pk_from_RSA.html
 		${CMAKE_BINARY_DIR}/man/rs256_pk_new.html
 		${CMAKE_BINARY_DIR}/man/rs256_pk_to_EVP_PKEY.html
+		${CMAKE_BINARY_DIR}/man/fido2-assert.html
+		${CMAKE_BINARY_DIR}/man/fido2-cred.html
+		${CMAKE_BINARY_DIR}/man/fido2-token.html
 		${CMAKE_BINARY_DIR}/man/style.css
 		DESTINATION "${CMAKE_INSTALL_PREFIX}/share/doc/libfido2")
 endif()
@@ -375,4 +387,8 @@ if(GZIP_PATH)
 		${CMAKE_BINARY_DIR}/man/rs256_pk_new.3.gz
 		${CMAKE_BINARY_DIR}/man/rs256_pk_to_EVP_PKEY.3.gz
 		DESTINATION "${CMAKE_INSTALL_PREFIX}/share/man/man3")
+	install(FILES ${CMAKE_BINARY_DIR}/man/fido2-assert.1.gz
+		${CMAKE_BINARY_DIR}/man/fido2-cred.1.gz
+		${CMAKE_BINARY_DIR}/man/fido2-token.1.gz
+		DESTINATION "${CMAKE_INSTALL_PREFIX}/share/man/man1")
 endif()

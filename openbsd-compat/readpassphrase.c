@@ -23,6 +23,8 @@
 
 /* OPENBSD ORIGINAL: lib/libc/gen/readpassphrase.c */
 
+#include "openbsd-compat.h"
+
 #ifndef HAVE_READPASSPHRASE
 
 #include <termios.h>
@@ -33,8 +35,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <paths.h>
-
-#include "readpassphrase.h"
 
 #ifndef _PATH_TTY
 # define _PATH_TTY "/dev/tty"

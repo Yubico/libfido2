@@ -18,9 +18,13 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(FIDO_MAJOR "0")
-set(FIDO_MINOR "1")
-set(FIDO_PATCH "1")
+set(FIDO_MINOR "2")
+set(FIDO_PATCH "0")
 set(FIDO_VERSION ${FIDO_MAJOR}.${FIDO_MINOR}.${FIDO_PATCH})
+
+add_definitions(-D_FIDO_MAJOR=${FIDO_MAJOR})
+add_definitions(-D_FIDO_MINOR=${FIDO_MINOR})
+add_definitions(-D_FIDO_PATCH=${FIDO_PATCH})
 
 pkg_search_module(CBOR libcbor)
 pkg_search_module(CRYPTO libcrypto REQUIRED)
@@ -69,6 +73,11 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 check_c_compiler_flag("-Wshorten-64-to-32" HAVE_SHORTEN_64_TO_32)
 if(HAVE_SHORTEN_64_TO_32)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshorten-64-to-32")
+endif()
+
+# Avoid https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66425
+if(CMAKE_COMPILER_IS_GNUCC)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result")
 endif()
 
 # endian.h
@@ -182,4 +191,7 @@ message(STATUS "HIDAPI_LIBRARIES: ${HIDAPI_LIBRARIES}")
 
 subdirs(src)
 subdirs(examples)
+if(NOT WIN32)
+subdirs(tools)
+endif()
 subdirs(man)

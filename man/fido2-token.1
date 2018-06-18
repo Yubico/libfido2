@@ -1,0 +1,67 @@
+.\" Copyright (c) 2018 Yubico AB. All rights reserved.
+.\" Use of this source code is governed by a BSD-style
+.\" license that can be found in the LICENSE file.
+.\"
+.Dd $Mdocdate: June 14 2018 $
+.Dt FIDO2-TOKEN 1
+.Os
+.Sh NAME
+.Nm fido2-token
+.Nd find and manage a FIDO 2 authenticator
+.Sh SYNOPSIS
+.Nm
+.Op Fl CIRS
+.Op Fl d
+.Ar device
+.Nm
+.Fl L
+.Op Fl d
+.Nm
+.Fl V
+.Sh DESCRIPTION
+.Nm
+manages a FIDO 2 authenticator.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl C
+Changes the PIN of
+.Ar device .
+The user will be prompted for the current and new PINs.
+.It Fl I
+Retrieves information on
+.Ar device .
+.It Fl R
+Performs a reset on
+.Ar device .
+.Nm
+will NOT prompt for confirmation.
+.It Fl S
+Sets the PIN of
+.Ar device .
+The user will be prompted for the PIN.
+.It Fl L
+Produces a list of authenticators found by the operating system.
+.It Fl V
+Prints version information.
+.It Fl d
+Causes
+.Nm
+to emit debugging output on
+.Em stderr .
+.El
+.Pp
+If a
+.Em tty
+is available,
+.Nm
+will use it to prompt for PINs.
+Otherwise,
+.Em stdin
+is used.
+.Pp
+.Nm
+exits 0 on success and 1 on error.
+.Sh SEE ALSO
+.Xr fido2-assert 1 ,
+.Xr fido2-cred 1
