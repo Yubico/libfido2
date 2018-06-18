@@ -62,6 +62,7 @@ set_target_properties(fido2_shared PROPERTIES OUTPUT_NAME fido2
     VERSION ${FIDO_VERSION})
 
 install(FILES fido.h DESTINATION include)
+install(DIRECTORY fido DESTINATION include)
 install(TARGETS fido2 fido2_shared ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
