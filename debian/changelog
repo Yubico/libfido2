@@ -1,3 +1,9 @@
+libfido2 (0.2.1~dev) UNRELEASED; urgency=low
+
+  * Development version.
+
+ -- pedro martelletto <pedro@yubico.com>  Wed, 20 Jun 2018 10:42:19 +0200
+
 libfido2 (0.2.0) bionic; urgency=low
 
   * Added command-line tools.
