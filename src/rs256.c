@@ -59,7 +59,8 @@ decode_rsa_pubkey(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
 	rs256_pk_t *k = arg;
 
-	if (cbor_isa_negint(key) == false)
+	if (cbor_isa_negint(key) == false ||
+	    cbor_int_get_width(key) != CBOR_INT_8)
 		return (0); /* ignore */
 
 	switch (cbor_get_uint8(key)) {
