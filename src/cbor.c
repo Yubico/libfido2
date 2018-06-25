@@ -660,11 +660,15 @@ find_cose_alg(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
 	int *cose_alg = arg;
 
-	if (cbor_isa_negint(key) == false && cbor_get_uint8(key) == 3) {
-		if (cbor_get_int(val) > INT_MAX)
-			return (-1);
-		*cose_alg = -(int)cbor_get_int(val) - 1;
-	}
+	if (cbor_isa_uint(key) == false ||
+	    cbor_int_get_width(key) != CBOR_INT_8 ||
+	    cbor_get_uint8(key) != 3)
+		return (0); /* ignore */
+
+	if (cbor_isa_negint(val) == false || cbor_get_int(val) > INT_MAX)
+		return (-1);
+
+	*cose_alg = -(int)cbor_get_int(val) - 1;
 
 	return (0);
 }
