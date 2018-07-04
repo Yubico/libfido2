@@ -112,7 +112,7 @@ decode_option(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	if (cbor_isa_float_ctrl(val) == false ||
 	    cbor_float_get_width(val) != CBOR_FLOAT_0 ||
-	    cbor_ctrl_is_bool(val) == false) {
+	    cbor_is_bool(val) == false) {
 		log_debug("%s: cbor type", __func__);
 		return (-1);
 	}
