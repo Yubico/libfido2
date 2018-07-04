@@ -19,6 +19,10 @@ For usage, see the `examples/` directory.
 *libfido2* is licensed under the BSD 2-clause license.  See the _LICENSE_
 file for the full license text.
 
+=== Supported Platforms
+
+*libfido2* is known to work on Linux and MacOS.
+
 === Documentation
 
 Documentation is available in troff and HTML formats. An
