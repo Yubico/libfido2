@@ -27,6 +27,7 @@ typedef struct fido_dev_io {
 
 #ifdef _FIDO_INTERNAL
 #include <cbor.h>
+#include <limits.h>
 
 #include "blob.h"
 #include "../openbsd-compat/openbsd-compat.h"
