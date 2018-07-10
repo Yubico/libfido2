@@ -225,7 +225,7 @@ get_signed_hash_u2f(fido_blob_t *dgst, const unsigned char *rp_id,
     const es256_pk_t *pk)
 {
 	const uint8_t		zero = 0;
-	const uint8_t		four = 4;
+	const uint8_t		four = 4; /* uncompressed point */
 	SHA256_CTX		ctx;
 
 	if (dgst->len != SHA256_DIGEST_LENGTH || SHA256_Init(&ctx) == 0 ||
@@ -298,6 +298,7 @@ fido_cred_verify(const fido_cred_t *cred)
 	dgst.ptr = buf;
 	dgst.len = sizeof(buf);
 
+	/* do we have everything we need? */
 	if (cred->cdh.ptr == NULL || cred->authdata_cbor.ptr == NULL ||
 	    cred->attstmt.x5c.ptr == NULL || cred->attstmt.sig.ptr == NULL ||
 	    cred->fmt == NULL || cred->attcred.id.ptr == NULL ||

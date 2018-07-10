@@ -178,10 +178,6 @@ fido_init(int flags)
 		log_init();
 }
 
-/*
- * get/set functions for fido_dev_t; always at the end of the file
- */
-
 fido_dev_t *
 fido_dev_new(void)
 {

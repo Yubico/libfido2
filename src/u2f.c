@@ -304,6 +304,7 @@ cbor_blob_from_ec_point(const uint8_t *ec_point, size_t ec_point_len,
 	size_t		 alloc_len;
 	int		 ok = -1;
 
+	/* only handle uncompressed points */
 	if (ec_point_len != 65 || ec_point[0] != 0x04) {
 		log_debug("%s: unexpected format", __func__);
 		goto fail;

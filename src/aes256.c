@@ -21,6 +21,7 @@ aes256_cbc_enc(const fido_blob_t *key, const fido_blob_t *in, fido_blob_t *out)
 	out->ptr = NULL;
 	out->len = 0;
 
+	/* sanity check */
 	if (in->len > INT_MAX || (in->len % 16) != 0 ||
 	    (out->ptr = calloc(1, in->len)) == NULL) {
 		log_debug("%s: in->len=%zu", __func__, in->len);
@@ -64,6 +65,7 @@ aes256_cbc_dec(const fido_blob_t *key, const fido_blob_t *in, fido_blob_t *out)
 	out->ptr = NULL;
 	out->len = 0;
 
+	/* sanity check */
 	if (in->len > INT_MAX || (in->len % 16) != 0 ||
 	    (out->ptr = calloc(1, in->len)) == NULL) {
 		log_debug("%s: in->len=%zu", __func__, in->len);

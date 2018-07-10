@@ -26,6 +26,7 @@ adjust_assert_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (-1);
 	}
 
+	/* numberOfCredentials; see section 6.2 */
 	if (cbor_get_uint8(key) != 5)
 		return (0); /* ignore */
 
@@ -89,6 +90,7 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 	memset(argv, 0, sizeof(argv));
 	memset(&f, 0, sizeof(f));
 
+	/* do we have everything we need? */
 	if (assert->rp_id == NULL || assert->cdh.ptr == NULL) {
 		log_debug("%s: rp_id=%p, cdh.ptr=%p", __func__,
 		    (void *)assert->rp_id, (void *)assert->cdh.ptr);
@@ -207,6 +209,7 @@ fido_get_next_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
 		return (FIDO_ERR_RX);
 	}
 
+	/* sanity check */
 	if (assert->stmt_len >= assert->stmt_cnt) {
 		log_debug("%s: stmt_len=%zu, stmt_cnt=%zu", __func__,
 		    assert->stmt_len, assert->stmt_cnt);
@@ -397,6 +400,7 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 
 	stmt = &assert->stmt[idx];
 
+	/* do we have everything we need? */
 	if (assert->cdh.ptr == NULL || assert->rp_id == NULL ||
 	    stmt->authdata_cbor.ptr == NULL || stmt->sig.ptr == NULL) {
 		log_debug("%s: cdh=%p, rp_id=%s, authdata=%p, sig=%p", __func__,
@@ -780,9 +784,7 @@ fido_assert_set_sig(fido_assert_t *a, size_t idx, const unsigned char *ptr,
 	return (FIDO_OK);
 }
 
-/*
- * XXX shrinking leaks memory. That's not acceptable.
- */
+/* XXX shrinking leaks memory; fortunately that shouldn't happen */
 int
 fido_assert_set_count(fido_assert_t *assert, size_t n)
 {

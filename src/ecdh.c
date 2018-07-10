@@ -41,7 +41,7 @@ do_ecdh(const es256_sk_t *sk, const es256_pk_t *pk, fido_blob_t **ecdh)
 		goto fail;
 	}
 
-	/* do ecdh */
+	/* perform ecdh */
 	if (EVP_PKEY_derive(ctx, NULL, &secret->len) <= 0 ||
 	    (secret->ptr = calloc(1, secret->len)) == NULL ||
 	    EVP_PKEY_derive(ctx, secret->ptr, &secret->len) <= 0) {
