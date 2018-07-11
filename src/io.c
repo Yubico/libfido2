@@ -140,6 +140,9 @@ rx_preamble(fido_dev_t *d, struct frame *fp, int ms)
 	do {
 		if (rx_frame(d, fp, ms) < 0)
 			return (-1);
+#ifdef FIDO_FUZZ
+		fp->cid = d->cid;
+#endif
 	} while (fp->cid == d->cid &&
 	    fp->body.init.cmd == (CTAP_FRAME_INIT | CTAP_KEEPALIVE));
 
@@ -168,6 +171,11 @@ rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 	log_debug("%s: initiation frame at %p, len %zu", __func__, (void *)&f,
 	    sizeof(f));
 	log_xxd(&f, sizeof(f));
+
+#ifdef FIDO_FUZZ
+	f.cid = d->cid;
+	f.body.init.cmd = cmd;
+#endif
 
 	if (f.cid != d->cid || f.body.init.cmd != cmd) {
 		log_debug("%s: cid (0x%x, 0x%x), cmd (0x%02x, 0x%02x)",
@@ -199,6 +207,11 @@ rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 		log_debug("%s: continuation frame at %p, len %zu", __func__,
 		    (void *)&f, sizeof(f));
 		log_xxd(&f, sizeof(f));
+
+#ifdef FIDO_FUZZ
+		f.cid = d->cid;
+		f.body.cont.seq = seq;
+#endif
 
 		if (f.cid != d->cid || f.body.cont.seq != seq++) {
 			log_debug("%s: cid (0x%x, 0x%x), seq (%d, %d)",

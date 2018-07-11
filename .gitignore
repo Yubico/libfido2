@@ -1,2 +1,3 @@
 build
 cscope.out
+fuzz/preload.so

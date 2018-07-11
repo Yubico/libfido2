@@ -127,7 +127,9 @@ send_dummy_register(fido_dev_t *dev, int ms)
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
+#ifndef FIDO_FUZZ
 		usleep((ms == -1 ? 100 : ms) * 1000);
+#endif
 	} while (((reply[0] << 8) | reply[1]) == SW_CONDITIONS_NOT_SATISFIED);
 
 	r = FIDO_OK;
@@ -280,7 +282,9 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
+#ifndef FIDO_FUZZ
 		usleep((ms == -1 ? 100 : ms) * 1000);
+#endif
 	} while (((reply[0] << 8) | reply[1]) == SW_CONDITIONS_NOT_SATISFIED);
 
 	if ((r = parse_auth_reply(sig, ad, rp_id, reply,
@@ -565,7 +569,9 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
+#ifndef FIDO_FUZZ
 		usleep((ms == -1 ? 100 : ms) * 1000);
+#endif
 	} while (((reply[0] << 8) | reply[1]) == SW_CONDITIONS_NOT_SATISFIED);
 
 	if ((r = parse_register_reply(cred, reply,

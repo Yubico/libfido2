@@ -51,7 +51,12 @@ endif()
 
 # MinGW is stuck with a flavour of C89.
 if(MINGW)
-	add_definitions(-D_FIDO_NO_DIAGNOSTIC)
+	add_definitions(-DFIDO_NO_DIAGNOSTIC)
+endif()
+
+# fuzz instrumentation
+if(FUZZ)
+	add_definitions(-DFIDO_FUZZ)
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W")
@@ -188,6 +193,8 @@ message(STATUS "CRYPTO_LIBRARIES: ${CRYPTO_LIBRARIES}")
 message(STATUS "HIDAPI_INCLUDE_DIRS: ${HIDAPI_INCLUDE_DIRS}")
 message(STATUS "HIDAPI_LIBRARY_DIRS: ${HIDAPI_LIBRARY_DIRS}")
 message(STATUS "HIDAPI_LIBRARIES: ${HIDAPI_LIBRARIES}")
+message(STATUS "VERSION: ${FIDO_MAJOR}.${FIDO_MINOR}.${FIDO_PATCH}")
+message(STATUS "FUZZ: ${FUZZ}")
 
 subdirs(src)
 subdirs(examples)

@@ -1,0 +1,5 @@
+To fuzz libfido2:
+
+- Pass -DFUZZ=1 to cmake and rebuild;
+- Use preload-snoop.c with a real device to obtain test vectors;
+- Fuzz using preload-fuzz.c to read device data from stdin.

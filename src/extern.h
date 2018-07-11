@@ -73,7 +73,7 @@ int rx(fido_dev_t *, uint8_t, void *, size_t, int);
 int tx(fido_dev_t *, uint8_t, const void *, size_t);
 
 /* log */
-#ifdef _FIDO_NO_DIAGNOSTIC
+#ifdef FIDO_NO_DIAGNOSTIC
 #define log_init(...)	do { /* nothing */ } while (0)
 #define log_debug(...)	do { /* nothing */ } while (0)
 #define log_xxd(...)	do { /* nothing */ } while (0)
@@ -81,7 +81,7 @@ int tx(fido_dev_t *, uint8_t, const void *, size_t);
 void log_init(void);
 void log_debug(const char *, ...) __attribute__((__format__ (printf, 1, 2)));
 void log_xxd(const void *, size_t);
-#endif /* _FIDO_NO_DIAGNOSTIC */
+#endif /* FIDO_NO_DIAGNOSTIC */
 
 /* u2f */
 int u2f_register(fido_dev_t *, fido_cred_t *, int);
