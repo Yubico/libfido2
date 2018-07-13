@@ -261,3 +261,9 @@ fido_dev_force_u2f(fido_dev_t *dev)
 {
 	dev->attr.flags &= ~FIDO_CAP_CBOR;
 }
+
+void
+fido_dev_force_fido2(fido_dev_t *dev)
+{
+	dev->attr.flags |= FIDO_CAP_CBOR;
+}

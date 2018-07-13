@@ -59,6 +59,7 @@ fido_cbor_info_t *fido_cbor_info_new(void);
 void fido_assert_free(fido_assert_t **);
 void fido_cbor_info_free(fido_cbor_info_t **);
 void fido_cred_free(fido_cred_t **);
+void fido_dev_force_fido2(fido_dev_t *);
 void fido_dev_force_u2f(fido_dev_t *);
 void fido_dev_free(fido_dev_t **);
 void fido_dev_info_free(fido_dev_info_t **, size_t);
