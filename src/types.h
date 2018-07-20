@@ -71,8 +71,10 @@ typedef struct fido_cred {
 	fido_blob_array_t excl;          /* list of credential ids to exclude */
 	bool              rk;            /* resident key */
 	bool              uv;            /* user verification */
+	int               ext;           /* enabled extensions */
 	int               type;          /* cose algorithm */
 	char             *fmt;           /* credential format */
+	int               authdata_ext;  /* decoded extensions */
 	fido_blob_t       authdata_cbor; /* raw cbor payload */
 	fido_authdata_t   authdata;      /* decoded authdata payload */
 	fido_attcred_t    attcred;       /* returned credential (key + id) */
@@ -80,22 +82,27 @@ typedef struct fido_cred {
 } fido_cred_t;
 
 typedef struct _fido_assert_stmt {
-	fido_blob_t     id;            /* credential id */
-	fido_user_t     user;          /* user attributes */
-	fido_blob_t     authdata_cbor; /* raw cbor payload */
-	fido_authdata_t authdata;      /* decoded authdata payload */
-	fido_blob_t     sig;           /* signature of cdh + authdata */
+	fido_blob_t     id;              /* credential id */
+	fido_user_t     user;            /* user attributes */
+	fido_blob_t     hmac_secret_enc; /* hmac secret, encrypted */
+	fido_blob_t     hmac_secret;     /* hmac secret */
+	int             authdata_ext;    /* decoded extensions */
+	fido_blob_t     authdata_cbor;   /* raw cbor payload */
+	fido_authdata_t authdata;        /* decoded authdata payload */
+	fido_blob_t     sig;             /* signature of cdh + authdata */
 } fido_assert_stmt;
 
 typedef struct fido_assert {
 	char              *rp_id;        /* relying party id */
 	fido_blob_t        cdh;          /* client data hash */
+	fido_blob_t        hmac_salt;    /* optional hmac-secret salt */
 	fido_blob_array_t  allow_list;   /* list of allowed credentials */
 	bool               up;           /* user presence */
 	bool               uv;           /* user verification */
+	int                ext;          /* enabled extensions */
 	fido_assert_stmt  *stmt;         /* array of expected assertions */
 	size_t             stmt_cnt;     /* number of allocated assertions */
-        size_t             stmt_len;     /* number of received assertions */
+	size_t             stmt_len;     /* number of received assertions */
 } fido_assert_t;
 
 typedef struct fido_opt_array {

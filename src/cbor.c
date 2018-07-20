@@ -397,6 +397,25 @@ fail:
 }
 
 cbor_item_t *
+encode_extensions(int ext)
+{
+	cbor_item_t *item = NULL;
+
+	if (ext == 0 || ext != FIDO_EXT_HMAC_SECRET)
+		return (NULL);
+
+	if ((item = cbor_new_definite_map(1)) == NULL)
+		return (NULL);
+
+	if (cbor_add_bool(item, "hmac-secret", true) < 0) {
+		cbor_decref(&item);
+		return (NULL);
+	}
+
+	return (item);
+}
+
+cbor_item_t *
 encode_options(bool rk, bool uv)
 {
 	cbor_item_t *item = NULL;
@@ -634,6 +653,68 @@ fail:
 	return (item);
 }
 
+cbor_item_t *
+encode_hmac_secret_param(const fido_blob_t *ecdh, const es256_pk_t *pk,
+    const fido_blob_t *hmac_salt)
+{
+	cbor_item_t		*item = NULL;
+	cbor_item_t		*param = NULL;
+	cbor_item_t		*argv[3];
+	struct cbor_pair	 pair;
+
+	memset(argv, 0, sizeof(argv));
+
+	if (ecdh == NULL || pk == NULL || hmac_salt->ptr == NULL) {
+		log_debug("%s: ecdh=%p, pk=%p, hmac_salt->ptr=%p", __func__,
+		    (const void *)ecdh, (const void *)pk,
+		    (const void *)hmac_salt->ptr);
+		goto fail;
+	}
+
+	if (hmac_salt->len != 32 && hmac_salt->len != 64) {
+		log_debug("%s: hmac_salt->len=%zu", __func__, hmac_salt->len);
+		goto fail;
+	}
+
+	/* XXX not pin, but salt */
+	if ((argv[0] = es256_pk_encode(pk)) == NULL ||
+	    (argv[1] = encode_pin_enc(ecdh, hmac_salt)) == NULL ||
+	    (argv[2] = encode_set_pin_auth(ecdh, hmac_salt)) == NULL) {
+		log_debug("%s: cbor encode", __func__);
+		goto fail;
+	}
+
+	if ((param = cbor_flatten_vector(argv, 3)) == NULL) {
+		log_debug("%s: cbor_flatten_vector", __func__);
+		goto fail;
+	}
+
+	if ((item = cbor_new_definite_map(1)) == NULL) {
+		log_debug("%s: cbor_new_definite_map", __func__);
+		goto fail;
+	}
+
+	pair.key = cbor_move(cbor_build_string("hmac-secret"));
+	pair.value = param;
+
+	if (!cbor_map_add(item, pair)) {
+		log_debug("%s: cbor_map_add", __func__);
+		cbor_decref(&item);
+		item = NULL;
+		goto fail;
+	}
+
+fail:
+	for (size_t i = 0; i < 3; i++)
+		if (argv[i] != NULL)
+			cbor_decref(&argv[i]);
+
+	if (param != NULL)
+		cbor_decref(&param);
+
+	return (item);
+}
+
 int
 decode_fmt(const cbor_item_t *item, char **fmt)
 {
@@ -688,7 +769,7 @@ get_cose_alg(const cbor_item_t *item, int *cose_alg)
 	return (0);
 }
 
-int
+static int
 decode_attcred(const unsigned char **buf, size_t *len, fido_attcred_t *attcred)
 {
 	cbor_item_t		*item = NULL;
@@ -756,9 +837,127 @@ fail:
 	return (ok);
 }
 
+static int
+decode_extension(const cbor_item_t *key, const cbor_item_t *val, void *arg)
+{
+	int	*authdata_ext = arg;
+	char	*type = NULL;
+	int	 ok = -1;
+
+	*authdata_ext = 0;
+
+	if (cbor_string_copy(key, &type) < 0 || strcmp(type, "hmac-secret")) {
+		log_debug("%s: type", __func__);
+		goto fail;
+	}
+
+	if (cbor_isa_float_ctrl(val) == false ||
+	    cbor_float_get_width(val) != CBOR_FLOAT_0 ||
+	    cbor_is_bool(val) == false) {
+		log_debug("%s: cbor type", __func__);
+		goto fail;
+	}
+
+	if (cbor_ctrl_value(val) == CBOR_CTRL_TRUE)
+		*authdata_ext |= FIDO_EXT_HMAC_SECRET;
+
+	ok = 0;
+fail:
+	free(type);
+
+	return (ok);
+}
+
+static int
+decode_extensions(const unsigned char **buf, size_t *len, int *authdata_ext)
+{
+	cbor_item_t		*item = NULL;
+	struct cbor_load_result	 cbor;
+	int			 ok = -1;
+
+	log_debug("%s: buf=%p, len=%zu", __func__, (const void *)*buf, *len);
+
+	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
+		log_debug("%s: cbor_load", __func__);
+		log_xxd(*buf, *len);
+		goto fail;
+	}
+
+	if (cbor_isa_map(item) == false ||
+	    cbor_map_is_definite(item) == false ||
+	    cbor_map_size(item) != 1 ||
+	    cbor_map_iter(item, authdata_ext, decode_extension) < 0) {
+		log_debug("%s: cbor type", __func__);
+		goto fail;
+	}
+
+	*buf += cbor.read;
+	*len -= cbor.read;
+
+	ok = 0;
+fail:
+	if (item != NULL)
+		cbor_decref(&item);
+
+	return (ok);
+}
+
+static int
+decode_hmac_secret_aux(const cbor_item_t *key, const cbor_item_t *val, void *arg)
+{
+	fido_blob_t	*out = arg;
+	char		*type = NULL;
+	int		 ok = -1;
+
+	if (cbor_string_copy(key, &type) < 0 || strcmp(type, "hmac-secret")) {
+		log_debug("%s: type", __func__);
+		goto fail;
+	}
+
+	ok = cbor_bytestring_copy(val, &out->ptr, &out->len);
+fail:
+	free(type);
+
+	return (ok);
+}
+
+static int
+decode_hmac_secret(const unsigned char **buf, size_t *len, fido_blob_t *out)
+{
+	cbor_item_t		*item = NULL;
+	struct cbor_load_result	 cbor;
+	int			 ok = -1;
+
+	log_debug("%s: buf=%p, len=%zu", __func__, (const void *)*buf, *len);
+
+	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
+		log_debug("%s: cbor_load", __func__);
+		log_xxd(*buf, *len);
+		goto fail;
+	}
+
+	if (cbor_isa_map(item) == false ||
+	    cbor_map_is_definite(item) == false ||
+	    cbor_map_size(item) != 1 ||
+	    cbor_map_iter(item, out, decode_hmac_secret_aux) < 0) {
+		log_debug("%s: cbor type", __func__);
+		goto fail;
+	}
+
+	*buf += cbor.read;
+	*len -= cbor.read;
+
+	ok = 0;
+fail:
+	if (item != NULL)
+		cbor_decref(&item);
+
+	return (ok);
+}
+
 int
-decode_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
-    fido_authdata_t *authdata, fido_attcred_t *attcred)
+decode_cred_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
+    fido_authdata_t *authdata, fido_attcred_t *attcred, int *authdata_ext)
 {
 	const unsigned char	*buf = NULL;
 	size_t			 len;
@@ -788,10 +987,64 @@ decode_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
 	authdata->sigcount = be32toh(authdata->sigcount);
 
 	if (attcred != NULL) {
-		if ((authdata->flags & CTAP_AUTHDATA_ATT_CRED) == 0)
+		if ((authdata->flags & CTAP_AUTHDATA_ATT_CRED) == 0 ||
+		    decode_attcred(&buf, &len, attcred) < 0)
 			return (-1);
-		return (decode_attcred(&buf, &len, attcred));
 	}
+
+	if (authdata_ext != NULL) {
+		if ((authdata->flags & CTAP_AUTHDATA_EXT_DATA) != 0 && 
+		    decode_extensions(&buf, &len, authdata_ext) < 0)
+			return (-1);
+	}
+
+	/* XXX we should probably ensure that len == 0 at this point */
+
+	return (FIDO_OK);
+}
+
+int
+decode_assert_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
+    fido_authdata_t *authdata, int *authdata_ext, fido_blob_t *hmac_secret_enc)
+{
+	const unsigned char	*buf = NULL;
+	size_t			 len;
+
+	if (cbor_isa_bytestring(item) == false ||
+	    cbor_bytestring_is_definite(item) == false) {
+		log_debug("%s: cbor type", __func__);
+		return (-1);
+	}
+
+	if (cbor_serialize_alloc(item, &authdata_cbor->ptr,
+	    &authdata_cbor->len) == 0) {
+		log_debug("%s: cbor_serialize_alloc", __func__);
+		return (-1);
+	}
+
+	buf = cbor_bytestring_handle(item);
+	len = cbor_bytestring_length(item);
+
+	log_debug("%s: buf=%p, len=%zu", __func__, (const void *)buf, len);
+
+	if (buf_read(&buf, &len, authdata, sizeof(*authdata)) < 0) {
+		log_debug("%s: buf_read", __func__);
+		return (-1);
+	}
+
+	authdata->sigcount = be32toh(authdata->sigcount);
+
+	*authdata_ext = 0;
+	if ((authdata->flags & CTAP_AUTHDATA_EXT_DATA) != 0) {
+		/* XXX semantic leap: extensions -> hmac_secret */
+		if (decode_hmac_secret(&buf, &len, hmac_secret_enc) < 0) {
+			log_debug("%s: decode_hmac_secret", __func__);
+			return (-1);
+		}
+		*authdata_ext = FIDO_EXT_HMAC_SECRET;
+	}
+
+	/* XXX we should probably ensure that len == 0 at this point */
 
 	return (FIDO_OK);
 }
@@ -807,7 +1060,7 @@ decode_x5c(const cbor_item_t *item, void *arg)
 	return (cbor_bytestring_copy(item, &x5c->ptr, &x5c->len));
 }
 
-int
+static int
 decode_attstmt_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
 	fido_attstmt_t	*attstmt = arg;

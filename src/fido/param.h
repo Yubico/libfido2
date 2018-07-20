@@ -55,11 +55,16 @@
 #define FIDO_RANDOM_DEV			"/dev/urandom"
 #endif
 
+/* CTAP capability bits. */
 #define FIDO_CAP_WINK	0x01 /* if set, device supports CTAP_CMD_WINK */
 #define FIDO_CAP_CBOR	0x04 /* if set, device supports CTAP_CMD_CBOR */
 #define FIDO_CAP_NMSG	0x08 /* if set, device doesn't support CTAP_CMD_MSG */
 
+/* Supported COSE types. */
 #define	COSE_ES256	-7
 #define	COSE_RS256	-257
+
+/* Supported extensions. */
+#define FIDO_EXT_HMAC_SECRET	0x01
 
 #endif /* !_FIDO_PARAM_H */

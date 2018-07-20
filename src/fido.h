@@ -71,6 +71,7 @@ void fido_init(int);
 
 const unsigned char *fido_assert_authdata_ptr(const fido_assert_t *, size_t);
 const unsigned char *fido_assert_clientdata_hash_ptr(const fido_assert_t *);
+const unsigned char *fido_assert_hmac_secret_ptr(const fido_assert_t *, size_t);
 const unsigned char *fido_assert_id_ptr(const fido_assert_t *, size_t);
 const unsigned char *fido_assert_sig_ptr(const fido_assert_t *, size_t);
 const unsigned char *fido_assert_user_id_ptr(const fido_assert_t *, size_t);
@@ -105,6 +106,8 @@ int fido_assert_set_authdata(fido_assert_t *, size_t, const unsigned char *,
 int fido_assert_set_clientdata_hash(fido_assert_t *, const unsigned char *,
     size_t);
 int fido_assert_set_count(fido_assert_t *, size_t);
+int fido_assert_set_extensions(fido_assert_t *, int);
+int fido_assert_set_hmac_salt(fido_assert_t *, const unsigned char *, size_t);
 int fido_assert_set_options(fido_assert_t *, bool, bool);
 int fido_assert_set_rp(fido_assert_t *, const char *);
 int fido_assert_set_sig(fido_assert_t *, size_t, const unsigned char *, size_t);
@@ -112,6 +115,7 @@ int fido_assert_verify(const fido_assert_t *, size_t, int, const void *);
 int fido_cred_exclude(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_authdata(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_clientdata_hash(fido_cred_t *, const unsigned char *, size_t);
+int fido_cred_set_extensions(fido_cred_t *, int);
 int fido_cred_set_fmt(fido_cred_t *, const char *);
 int fido_cred_set_options(fido_cred_t *, bool, bool);
 int fido_cred_set_rp(fido_cred_t *, const char *, const char *);
@@ -135,6 +139,7 @@ int fido_dev_set_pin(fido_dev_t *, const char *, const char *);
 size_t fido_assert_authdata_len(const fido_assert_t *, size_t);
 size_t fido_assert_clientdata_hash_len(const fido_assert_t *);
 size_t fido_assert_count(const fido_assert_t *);
+size_t fido_assert_hmac_secret_len(const fido_assert_t *, size_t);
 size_t fido_assert_id_len(const fido_assert_t *, size_t);
 size_t fido_assert_sig_len(const fido_assert_t *, size_t);
 size_t fido_assert_user_id_len(const fido_assert_t *, size_t);

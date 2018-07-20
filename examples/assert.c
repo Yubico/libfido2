@@ -29,14 +29,15 @@ static const unsigned char cdh[32] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: assert [-t ecdsa|rsa] [-a cred_id] [-P pin] "
-	    "[-puv] <pubkey> <device>\n");
+	fprintf(stderr, "usage: assert [-t ecdsa|rsa] [-a cred_id] "
+	    "[-h hmac_secret] [-s hmac_salt] [-P pin] [-puv] <pubkey> "
+	    "<device>\n");
 	exit(EXIT_FAILURE);
 }
 
 static void
 verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
-    const unsigned char *sig_ptr, size_t sig_len, bool up, bool uv,
+    const unsigned char *sig_ptr, size_t sig_len, bool up, bool uv, int ext,
     const char *key)
 {
 	fido_assert_t	*assert = NULL;
@@ -98,6 +99,12 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 	if (r != FIDO_OK)
 		errx(1, "fido_assert_set_authdata: %s (0x%x)", fido_strerr(r), r);
 
+	/* extension */
+	r = fido_assert_set_extensions(assert, ext);
+	if (r != FIDO_OK)
+		errx(1, "fido_assert_set_extensions: %s (0x%x)", fido_strerr(r),
+		    r);
+
 	/* options */
 	r = fido_assert_set_options(assert, up, uv);
 	if (r != FIDO_OK)
@@ -127,16 +134,18 @@ main(int argc, char **argv)
 	fido_dev_t	*dev = NULL;
 	fido_assert_t	*assert = NULL;
 	const char	*pin = NULL;
+	const char	*hmac_out = NULL;
 	unsigned char	*body = NULL;
 	size_t		 len;
 	int		 type = COSE_ES256;
+	int		 ext = 0;
 	int		 ch;
 	int		 r;
 
 	if ((assert = fido_assert_new()) == NULL)
 		errx(1, "fido_assert_new");
 
-	while ((ch = getopt(argc, argv, "P:a:pt:uv")) != -1) {
+	while ((ch = getopt(argc, argv, "P:a:h:ps:t:uv")) != -1) {
 		switch (ch) {
 		case 'P':
 			pin = optarg;
@@ -151,8 +160,22 @@ main(int argc, char **argv)
 			free(body);
 			body = NULL;
 			break;
+		case 'h':
+			hmac_out = optarg;
+			break;
 		case 'p':
 			up = true;
+			break;
+		case 's':
+			ext = FIDO_EXT_HMAC_SECRET;
+			if (read_blob(optarg, &body, &len) < 0)
+				errx(1, "read_blob: %s", optarg);
+			if ((r = fido_assert_set_hmac_salt(assert, body,
+			    len)) != FIDO_OK)
+				errx(1, "fido_assert_set_hmac_salt: %s (0x%x)",
+				    fido_strerr(r), r);
+			free(body);
+			body = NULL;
 			break;
 		case 't':
 			if (strcmp(optarg, "ecdsa") == 0)
@@ -201,6 +224,12 @@ main(int argc, char **argv)
 	if (r != FIDO_OK)
 		errx(1, "fido_assert_set_rp: %s (0x%x)", fido_strerr(r), r);
 
+	/* extensions */
+	r = fido_assert_set_extensions(assert, ext);
+	if (r != FIDO_OK)
+		errx(1, "fido_assert_set_extensions: %s (0x%x)", fido_strerr(r),
+		    r);
+
 	/* options */
 	r = fido_assert_set_options(assert, up, uv);
 	if (r != FIDO_OK)
@@ -221,7 +250,14 @@ main(int argc, char **argv)
 
 	verify_assert(type, fido_assert_authdata_ptr(assert, 0),
 	    fido_assert_authdata_len(assert, 0), fido_assert_sig_ptr(assert, 0),
-	    fido_assert_sig_len(assert, 0), up, uv, argv[0]);
+	    fido_assert_sig_len(assert, 0), up, uv, ext, argv[0]);
+
+	if (hmac_out != NULL) {
+		/* extract the hmac secret */
+		if (write_blob(hmac_out, fido_assert_hmac_secret_ptr(assert, 0),
+		    fido_assert_hmac_secret_len(assert, 0)) < 0)
+			errx(1, "write_blob");
+	}
 
 	fido_assert_free(&assert);
 

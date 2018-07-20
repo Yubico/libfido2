@@ -14,10 +14,12 @@
 .Nm fido_assert_user_name ,
 .Nm fido_assert_authdata_ptr ,
 .Nm fido_assert_clientdata_hash_ptr ,
+.Nm fido_assert_hmac_secret_ptr ,
 .Nm fido_assert_user_id_ptr ,
 .Nm fido_assert_sig_ptr ,
 .Nm fido_assert_authdata_len ,
 .Nm fido_assert_clientdata_hash_len ,
+.Nm fido_assert_hmac_secret_len ,
 .Nm fido_assert_user_id_len ,
 .Nm fido_assert_sig_len
 .Nd FIDO 2 assertion API
@@ -40,6 +42,8 @@
 .Ft const unsigned char *
 .Fn fido_assert_clientdata_hash_ptr "const fido_assert_t *assert"
 .Ft const unsigned char *
+.Fn fido_assert_hmac_secret_ptr "const fido_assert_t *assert" "size_t idx"
+.Ft const unsigned char *
 .Fn fido_assert_user_id_ptr "const fido_assert_t *assert" "size_t idx"
 .Ft const unsigned char *
 .Fn fido_assert_sig_ptr "const fido_assert_t *assert" "size_t idx"
@@ -47,6 +51,8 @@
 .Fn fido_assert_authdata_len "const fido_assert_t *assert" "size_t idx"
 .Ft size_t
 .Fn fido_assert_clientdata_hash_len "const fido_assert_t *assert"
+.Ft size_t
+.Fn fido_assert_hmac_secret_len "const fido_assert_t *assert" "size_t idx"
 .Ft size_t
 .Fn fido_assert_user_id_len "const fido_assert_t *assert" "size_t idx"
 .Ft size_t
@@ -121,16 +127,18 @@ has an
 The
 .Fn fido_assert_user_id_ptr ,
 .Fn fido_assert_authdata_ptr ,
+.Fn fido_assert_hmac_secret_ptr ,
 and
 .Fn fido_assert_sig_ptr
-functions return pointers to the user ID, authenticator data, and
-signature attributes of statement
+functions return pointers to the user ID, authenticator data,
+hmac-secret, and signature attributes of statement
 .Fa idx
 in
 .Fa assert .
 The
 .Fn fido_assert_user_id_len ,
-.Fn fido_assert_authdata_len
+.Fn fido_assert_authdata_len ,
+.Fn fido_assert_hmac_secret_len ,
 and
 .Fn fido_assert_sig_len
 functions can be used to retrieve the corresponding length of a

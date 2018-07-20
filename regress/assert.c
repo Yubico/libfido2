@@ -188,8 +188,8 @@ empty_assert(fido_dev_t *d, fido_assert_t *a, int idx)
 	rs256 = alloc_rs256_pk();
 
 	fido_dev_force_u2f(d);
-	assert(fido_dev_get_assert(d, a, NULL) == FIDO_ERR_UNSUPPORTED_OPTION);
-	assert(fido_dev_get_assert(d, a, "") == FIDO_ERR_UNSUPPORTED_OPTION);
+	assert(fido_dev_get_assert(d, a, NULL) == FIDO_ERR_INVALID_ARGUMENT);
+	assert(fido_dev_get_assert(d, a, "") == FIDO_ERR_INVALID_ARGUMENT);
 	assert(fido_assert_verify(a, COSE_ES256, idx,
 	    NULL) == FIDO_ERR_INVALID_ARGUMENT);
 	assert(fido_assert_verify(a, COSE_ES256, idx,

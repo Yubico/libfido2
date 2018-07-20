@@ -44,26 +44,32 @@ The following examples are provided:
 	Configures <pin> as the new PIN of <device>. If [oldpin] is provided,
 	the device's PIN is changed from [oldpin] to <pin>.
 
-- cred [-t ecdsa|rsa] [-k pubkey] [-ei cred_id] [-P pin] [-ruv] <device>
+- cred [-t ecdsa|rsa] [-k pubkey] [-ei cred_id] [-P pin] [-hruv] <device>
 
 	Creates a new credential on <device> and verify that the credential
 	was signed by the authenticator. The device's attestation certificate
-	is not verified. If option -k is specified, the credential's public key
-	is stored in <pubkey>. If option -i is specified, the credential ID is
-	stored in <cred_id>. The -e option may be used to add <cred_id> to the
-	list of excluded credentials. If option -r is specified, the generated
-	credential will involve a resident key. User verification may be
-	requested through the -v option. If option -u is specified, the
-	credential is generated using U2F instead of FIDO2 CTAP commands.
+	is not verified. If option -k is specified, the credential's public
+	key is stored in <pubkey>. If option -i is specified, the credential
+	ID is stored in <cred_id>. The -e option may be used to add <cred_id>
+	to the list of excluded credentials. If option -h is specified,
+	the hmac-secret FIDO2 extension is enabled on the generated
+	credential. If option -r is specified, the generated credential
+	will involve a resident key. User verification may be requested
+	through the -v option. If option -u is specified, the credential
+	is generated using U2F (CTAP1) instead of FIDO2 (CTAP2) commands.
 
-- assert [-t ecdsa|rsa] [-a cred_id] [-P pin] [-puv] <pubkey> <device>
+- assert [-t ecdsa|rsa] [-a cred_id] [-h hmac_secret] [-s hmac_salt] [-P pin]
+         [-puv] <pubkey> <device>
 
-	Asks <device> for a FIDO2 assertion corresponding to [cred_id], which
-	may be omitted for resident keys. The obtained assertion is verified
-	using <pubkey>. The -p option requests that the user be present.
-	User verification may be requested through the -v option. If option -u
-	is specified, the assertion is generated using U2F instead of FIDO2
-	CTAP commands.
+	Asks <device> for a FIDO2 assertion corresponding to [cred_id],
+	which may be omitted for resident keys. The obtained assertion
+	is verified using <pubkey>. The -p option requests that the user
+	be present.  User verification may be requested through the -v
+	option. If option -u is specified, the assertion is generated using
+	U2F (CTAP1) instead of FIDO2 (CTAP2) commands. If option -s is
+	specified, a FIDO2 hmac-secret is requested from the authenticator,
+	and the contents of <hmac_salt> are used as the salt. If option -h
+	is specified, the resulting hmac-secret is stored in <hmac_secret>.
 
 - retries <device>
 	Get the number of PIN attempts left on <device> before lockout.

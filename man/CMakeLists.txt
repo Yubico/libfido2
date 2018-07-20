@@ -22,6 +22,8 @@ macro(define_symlink_target NAME EXT)
 		COMMAND ln -fs fido_assert.${EXT} fido_assert_new.${EXT}
 		COMMAND ln -fs fido_assert.${EXT} fido_assert_free.${EXT}
 		COMMAND ln -fs fido_assert.${EXT} fido_assert_count.${EXT}
+		COMMAND ln -fs fido_assert.${EXT} fido_assert_hmac_secret_len.${EXT}
+		COMMAND ln -fs fido_assert.${EXT} fido_assert_hmac_secret_ptr.${EXT}
 		COMMAND ln -fs fido_assert.${EXT} fido_assert_user_display_name.${EXT}
 		COMMAND ln -fs fido_assert.${EXT} fido_assert_user_icon.${EXT}
 		COMMAND ln -fs fido_assert.${EXT} fido_assert_user_name.${EXT}
@@ -36,6 +38,8 @@ macro(define_symlink_target NAME EXT)
 		COMMAND ln -fs fido_assert_set.${EXT} fido_assert_set_authdata.${EXT}
 		COMMAND ln -fs fido_assert_set.${EXT} fido_assert_set_clientdata_hash.${EXT}
 		COMMAND ln -fs fido_assert_set.${EXT} fido_assert_set_count.${EXT}
+		COMMAND ln -fs fido_assert_set.${EXT} fido_assert_set_extensions.${EXT}
+		COMMAND ln -fs fido_assert_set.${EXT} fido_assert_set_hmac_salt.${EXT}
 		COMMAND ln -fs fido_assert_set.${EXT} fido_assert_set_options.${EXT}
 		COMMAND ln -fs fido_assert_set.${EXT} fido_assert_set_rp.${EXT}
 		COMMAND ln -fs fido_assert_set.${EXT} fido_assert_set_sig.${EXT}
@@ -60,6 +64,7 @@ macro(define_symlink_target NAME EXT)
 		COMMAND ln -fs fido_cred_set.${EXT} fido_cred_set_clientdata_hash.${EXT}
 		COMMAND ln -fs fido_cred_set.${EXT} fido_cred_set_rp.${EXT}
 		COMMAND ln -fs fido_cred_set.${EXT} fido_cred_set_user.${EXT}
+		COMMAND ln -fs fido_cred_set.${EXT} fido_cred_set_extensions.${EXT}
 		COMMAND ln -fs fido_cred_set.${EXT} fido_cred_set_options.${EXT}
 		COMMAND ln -fs fido_cred_set.${EXT} fido_cred_set_fmt.${EXT}
 		COMMAND ln -fs fido_cred_set.${EXT} fido_cred_set_type.${EXT}
@@ -209,11 +214,15 @@ if(MANDOC_PATH)
 		${CMAKE_BINARY_DIR}/man/fido_assert_set_authdata.html
 		${CMAKE_BINARY_DIR}/man/fido_assert_set_clientdata_hash.html
 		${CMAKE_BINARY_DIR}/man/fido_assert_set_count.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_set_extensions.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_set_hmac_salt.html
 		${CMAKE_BINARY_DIR}/man/fido_assert_set_options.html
 		${CMAKE_BINARY_DIR}/man/fido_assert_set_rp.html
 		${CMAKE_BINARY_DIR}/man/fido_assert_set_sig.html
 		${CMAKE_BINARY_DIR}/man/fido_assert_sig_len.html
 		${CMAKE_BINARY_DIR}/man/fido_assert_sig_ptr.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_hmac_secret_len.html
+		${CMAKE_BINARY_DIR}/man/fido_assert_hmac_secret_ptr.html
 		${CMAKE_BINARY_DIR}/man/fido_assert_user_display_name.html
 		${CMAKE_BINARY_DIR}/man/fido_assert_user_icon.html
 		${CMAKE_BINARY_DIR}/man/fido_assert_user_id_len.html
@@ -238,6 +247,7 @@ if(MANDOC_PATH)
 		${CMAKE_BINARY_DIR}/man/fido_cred_set_authdata.html
 		${CMAKE_BINARY_DIR}/man/fido_cred_set_clientdata_hash.html
 		${CMAKE_BINARY_DIR}/man/fido_cred_set_fmt.html
+		${CMAKE_BINARY_DIR}/man/fido_cred_set_extensions.html
 		${CMAKE_BINARY_DIR}/man/fido_cred_set_options.html
 		${CMAKE_BINARY_DIR}/man/fido_cred_set_rp.html
 		${CMAKE_BINARY_DIR}/man/fido_cred_set_sig.html
@@ -313,11 +323,15 @@ if(GZIP_PATH)
 		${CMAKE_BINARY_DIR}/man/fido_assert_set_authdata.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_assert_set_clientdata_hash.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_assert_set_count.3.gz
+		${CMAKE_BINARY_DIR}/man/fido_assert_set_extensions.3.gz
+		${CMAKE_BINARY_DIR}/man/fido_assert_set_hmac_salt.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_assert_set_options.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_assert_set_rp.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_assert_set_sig.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_assert_sig_len.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_assert_sig_ptr.3.gz
+		${CMAKE_BINARY_DIR}/man/fido_assert_hmac_secret_len.3.gz
+		${CMAKE_BINARY_DIR}/man/fido_assert_hmac_secret_ptr.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_assert_user_display_name.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_assert_user_icon.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_assert_user_id_len.3.gz
@@ -342,6 +356,7 @@ if(GZIP_PATH)
 		${CMAKE_BINARY_DIR}/man/fido_cred_set_authdata.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_cred_set_clientdata_hash.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_cred_set_fmt.3.gz
+		${CMAKE_BINARY_DIR}/man/fido_cred_set_extensions.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_cred_set_options.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_cred_set_rp.3.gz
 		${CMAKE_BINARY_DIR}/man/fido_cred_set_sig.3.gz

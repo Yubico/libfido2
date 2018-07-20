@@ -15,6 +15,9 @@ int aes256_cbc_enc(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 cbor_item_t *encode_assert_options(bool, bool);
 cbor_item_t *encode_change_pin_auth(const fido_blob_t *, const fido_blob_t *,
     const fido_blob_t *);
+cbor_item_t *encode_extensions(int);
+cbor_item_t *encode_hmac_secret_param(const fido_blob_t *, const es256_pk_t *,
+    const fido_blob_t *);
 cbor_item_t *encode_options(bool, bool);
 cbor_item_t *encode_pin_auth(const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *encode_pin_enc(const fido_blob_t *, const fido_blob_t *);
@@ -28,11 +31,11 @@ cbor_item_t *encode_user_entity(const fido_user_t *);
 cbor_item_t *es256_pk_encode(const es256_pk_t *);
 
 /* cbor decoding functions */
-int decode_attcred(const unsigned char **, size_t *, fido_attcred_t *);
 int decode_attstmt(const cbor_item_t *, fido_attstmt_t *);
-int decode_attstmt_entry(const cbor_item_t *, const cbor_item_t *, void *);
-int decode_authdata(const cbor_item_t *, fido_blob_t *, fido_authdata_t *,
-    fido_attcred_t *);
+int decode_cred_authdata(const cbor_item_t *, fido_blob_t *,
+    fido_authdata_t *, fido_attcred_t *, int *);
+int decode_assert_authdata(const cbor_item_t *, fido_blob_t *,
+    fido_authdata_t *, int *, fido_blob_t *);
 int decode_cred_id(const cbor_item_t *, fido_blob_t *);
 int decode_fmt(const cbor_item_t *, char **);
 int decode_uint64(const cbor_item_t *, uint64_t *);
@@ -55,8 +58,8 @@ int cbor_map_iter(const cbor_item_t *, void *, int(*)(const cbor_item_t *,
 int cbor_string_copy(const cbor_item_t *, char **);
 int parse_cbor_reply(const unsigned char *, size_t, void *,
     int(*)(const cbor_item_t *, const cbor_item_t *, void *));
-int add_cbor_pin_params(fido_dev_t *, const fido_blob_t *, const char *,
-    cbor_item_t **, cbor_item_t **);
+int add_cbor_pin_params(fido_dev_t *, const fido_blob_t *, const es256_pk_t *,
+    const fido_blob_t *,const char *, cbor_item_t **, cbor_item_t **);
 
 /* buf */
 int buf_read(const unsigned char **, size_t *, void *, size_t);

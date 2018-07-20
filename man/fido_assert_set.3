@@ -10,6 +10,8 @@
 .Nm fido_assert_set_authdata ,
 .Nm fido_assert_set_clientdata_hash ,
 .Nm fido_assert_set_count ,
+.Nm fido_assert_set_extensions ,
+.Nm fido_assert_set_hmac_salt ,
 .Nm fido_assert_set_options ,
 .Nm fido_assert_set_rp ,
 .Nm fido_assert_set_sig
@@ -22,6 +24,10 @@
 .Fn fido_assert_set_clientdata_hash "fido_assert_t *assert" "const unsigned char *ptr" "size_t len"
 .Ft int
 .Fn fido_assert_set_count "fido_assert_t *assert" "size_t n"
+.Ft int
+.Fn fido_assert_set_extensions "fido_assert_t *assert" "int flags"
+.Ft int
+.Fn fido_assert_set_hmac_salt "fido_assert_t *assert" "const unsigned char *ptr" "size_t len"
 .Ft int
 .Fn fido_assert_set_options "fido_assert_t *assert" "bool up" "bool uv"
 .Ft int
@@ -77,7 +83,9 @@ of
 .Pp
 The
 .Fn fido_assert_set_clientdata_hash
-function sets the client data hash part of
+and
+.Fn fido_assert_set_hmac_salt
+functions set the client data hash and hmac-salt parts of
 .Fa assert
 to
 .Fa ptr ,
@@ -102,6 +110,21 @@ is a NUL-terminated UTF-8 string.
 The content of
 .Fa id
 is copied, and no references to the passed pointer are kept.
+.Pp
+The
+.Fn fido_assert_set_extensions
+function sets the extensions of
+.Fa assert
+to the bitmask
+.Fa flags .
+At the moment, only the
+.Dv FIDO_EXT_HMAC_SECRET
+extension is supported.
+If
+.Fa flags
+is zero, the extensions of
+.Fa assert
+are cleared.
 .Pp
 The
 .Fn fido_assert_set_options

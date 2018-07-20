@@ -11,6 +11,8 @@ _fido_assert_clientdata_hash_ptr
 _fido_assert_count
 _fido_assert_flags
 _fido_assert_free
+_fido_assert_hmac_secret_len
+_fido_assert_hmac_secret_ptr
 _fido_assert_id_len
 _fido_assert_id_ptr
 _fido_assert_new
@@ -18,6 +20,8 @@ _fido_assert_rp_id
 _fido_assert_set_authdata
 _fido_assert_set_clientdata_hash
 _fido_assert_set_count
+_fido_assert_set_extensions
+_fido_assert_set_hmac_salt
 _fido_assert_set_options
 _fido_assert_set_rp
 _fido_assert_set_sig
@@ -60,6 +64,7 @@ _fido_cred_rp_id
 _fido_cred_rp_name
 _fido_cred_set_authdata
 _fido_cred_set_clientdata_hash
+_fido_cred_set_extensions
 _fido_cred_set_fmt
 _fido_cred_set_options
 _fido_cred_set_rp

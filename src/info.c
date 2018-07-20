@@ -123,7 +123,7 @@ decode_option(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	}
 
 	/* keep name/value and len consistent */
-	o->value[i] = cbor_ctrl_value(val);
+	o->value[i] = cbor_ctrl_value(val) == CBOR_CTRL_TRUE;
 	o->len++;
 
 	return (0);

@@ -36,14 +36,14 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: cred [-t ecdsa|rsa] [-k pubkey] [-ei cred_id] "
-	    "[-P pin] [-ruv] <device>\n");
+	    "[-P pin] [-hruv] <device>\n");
 	exit(EXIT_FAILURE);
 }
 
 static void
 verify_cred(int type, const char *fmt, const unsigned char *authdata_ptr,
     size_t authdata_len, const unsigned char *x509_ptr, size_t x509_len,
-    const unsigned char *sig_ptr, size_t sig_len, bool rk, bool uv,
+    const unsigned char *sig_ptr, size_t sig_len, bool rk, bool uv, int ext,
     const char *key_out, const char *id_out)
 {
 	fido_cred_t	*cred;
@@ -72,6 +72,11 @@ verify_cred(int type, const char *fmt, const unsigned char *authdata_ptr,
 	r = fido_cred_set_authdata(cred, authdata_ptr, authdata_len);
 	if (r != FIDO_OK)
 		errx(1, "fido_cred_set_authdata: %s (0x%x)", fido_strerr(r), r);
+
+	/* extensions */
+	r = fido_cred_set_extensions(cred, ext);
+	if (r != FIDO_OK)
+		errx(1, "fido_cred_set_extensions: %s (0x%x)", fido_strerr(r), r);
 
 	/* options */
 	r = fido_cred_set_options(cred, rk, uv);
@@ -134,13 +139,14 @@ main(int argc, char **argv)
 	unsigned char	*body = NULL;
 	size_t		 len;
 	int		 type = COSE_ES256;
+	int		 ext = 0;
 	int		 ch;
 	int		 r;
 
 	if ((cred = fido_cred_new()) == NULL)
 		errx(1, "fido_cred_new");
 
-	while ((ch = getopt(argc, argv, "P:e:i:k:rt:uv")) != -1) {
+	while ((ch = getopt(argc, argv, "P:e:hi:k:rt:uv")) != -1) {
 		switch (ch) {
 		case 'P':
 			pin = optarg;
@@ -154,6 +160,9 @@ main(int argc, char **argv)
 				    fido_strerr(r), r);
 			free(body);
 			body = NULL;
+			break;
+		case 'h':
+			ext = FIDO_EXT_HMAC_SECRET;
 			break;
 		case 'i':
 			id_out = optarg;
@@ -221,6 +230,11 @@ main(int argc, char **argv)
 	if (r != FIDO_OK)
 		errx(1, "fido_cred_set_user: %s (0x%x)", fido_strerr(r), r);
 
+	/* extensions */
+	r = fido_cred_set_extensions(cred, ext);
+	if (r != FIDO_OK)
+		errx(1, "fido_cred_set_extensions: %s (0x%x)", fido_strerr(r), r);
+
 	/* options */
 	r = fido_cred_set_options(cred, rk, uv);
 	if (r != FIDO_OK)
@@ -238,7 +252,7 @@ main(int argc, char **argv)
 	verify_cred(type, fido_cred_fmt(cred), fido_cred_authdata_ptr(cred),
 	    fido_cred_authdata_len(cred), fido_cred_x5c_ptr(cred),
 	    fido_cred_x5c_len(cred), fido_cred_sig_ptr(cred),
-	    fido_cred_sig_len(cred), rk, uv, key_out, id_out);
+	    fido_cred_sig_len(cred), rk, uv, ext, key_out, id_out);
 
 	fido_cred_free(&cred);
 

@@ -427,21 +427,15 @@ fido_dev_get_retry_count(fido_dev_t *dev, int *retries)
 }
 
 int
-add_cbor_pin_params(fido_dev_t *dev, const fido_blob_t *cdh, const char *pin,
+add_cbor_pin_params(fido_dev_t *dev, const fido_blob_t *cdh,
+    const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin,
     cbor_item_t **auth, cbor_item_t **opt)
 {
-	fido_blob_t	*ecdh = NULL;
 	fido_blob_t	*token = NULL;
-	es256_pk_t	*pk = NULL;
 	int		 r;
 
 	if ((token = fido_blob_new()) == NULL) {
 		r = FIDO_ERR_INTERNAL;
-		goto fail;
-	}
-
-	if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
-		log_debug("%s: fido_do_ecdh", __func__);
 		goto fail;
 	}
 
@@ -459,9 +453,6 @@ add_cbor_pin_params(fido_dev_t *dev, const fido_blob_t *cdh, const char *pin,
 
 	r = FIDO_OK;
 fail:
-	es256_pk_free(&pk);
-
-	fido_blob_free(&ecdh);
 	fido_blob_free(&token);
 
 	return (r);
