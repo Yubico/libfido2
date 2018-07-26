@@ -72,6 +72,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic-errors")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-all")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address,bounds,undefined")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ftrapv")
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 
 # Use -Wshorten-64-to-32 if available.
