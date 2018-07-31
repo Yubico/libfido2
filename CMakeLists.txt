@@ -73,10 +73,13 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic-errors")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-all")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 if(FUZZ)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address,bounds,undefined")
+	# -fsanitize-trap=undefined is a superset of -ftrapv
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-trap=undefined")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ftrapv")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 endif()
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ftrapv")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 
 # Use -Wshorten-64-to-32 if available.
 check_c_compiler_flag("-Wshorten-64-to-32" HAVE_SHORTEN_64_TO_32)
