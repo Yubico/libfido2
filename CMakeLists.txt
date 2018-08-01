@@ -75,7 +75,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 if(FUZZ)
 	# -fsanitize-trap=undefined is a superset of -ftrapv
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-trap=undefined")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ftrapv")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 endif()
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ftrapv")
