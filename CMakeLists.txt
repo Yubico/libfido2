@@ -7,8 +7,6 @@ cmake_minimum_required(VERSION 3.0)
 
 include(CheckCCompilerFlag)
 include(CheckFunctionExists)
-include(CheckFunctionExists)
-include(CheckIncludeFiles)
 include(CheckIncludeFiles)
 include(FindPkgConfig)
 include(GNUInstallDirs)
