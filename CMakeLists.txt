@@ -27,7 +27,12 @@ add_definitions(-D_FIDO_PATCH=${FIDO_PATCH})
 pkg_search_module(CBOR libcbor)
 pkg_search_module(CRYPTO libcrypto REQUIRED)
 
+# XXX workaround libcbor's missing .pc file
 if(NOT CBOR_FOUND)
+	check_include_files(cbor.h HAVE_CBOR_H)
+	if(NOT HAVE_CBOR_H)
+		message(FATAL_ERROR "could not find libcbor header files")
+	endif()
 	set(CBOR_LIBRARIES "cbor")
 endif()
 
