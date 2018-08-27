@@ -52,18 +52,6 @@ fido_blob_free(fido_blob_t **bp)
 	*bp = NULL;
 }
 
-const unsigned char *
-fido_blob_ptr(const fido_blob_t *b)
-{
-	return (b->ptr);
-}
-
-size_t
-fido_blob_len(const fido_blob_t *b)
-{
-	return (b->len);
-}
-
 void
 free_blob_array(fido_blob_array_t *array)
 {
