@@ -149,6 +149,14 @@ fido_dev_make_cred_rx(fido_dev_t *dev, fido_cred_t *cred, int ms)
 		return (r);
 	}
 
+	if (cred->fmt == NULL || fido_blob_is_empty(&cred->authdata_cbor) ||
+	    fido_blob_is_empty(&cred->attcred.id) ||
+	    fido_blob_is_empty(&cred->attstmt.x5c) ||
+	    fido_blob_is_empty(&cred->attstmt.sig)) {
+		fido_cred_reset_rx(cred);
+		return (FIDO_ERR_INVALID_CBOR);
+	}
+
 	return (FIDO_OK);
 }
 
