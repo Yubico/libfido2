@@ -98,3 +98,9 @@ fido_blob_decode(const cbor_item_t *item, fido_blob_t *b)
 {
 	return (cbor_bytestring_copy(item, &b->ptr, &b->len));
 }
+
+int
+fido_blob_is_empty(const fido_blob_t *b)
+{
+	return (b->ptr == NULL || b->len == 0);
+}

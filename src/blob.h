@@ -26,5 +26,6 @@ const unsigned char *	fido_blob_ptr(const fido_blob_t *);
 size_t			fido_blob_len(const fido_blob_t *);
 cbor_item_t *		fido_blob_encode(const fido_blob_t *);
 int			fido_blob_decode(const cbor_item_t *, fido_blob_t *);
+int			fido_blob_is_empty(const fido_blob_t *);
 
 #endif /* !_BLOB_H */
