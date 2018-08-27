@@ -67,4 +67,10 @@ int timingsafe_bcmp(const void *, const void *, size_t);
 #include <err.h>
 #endif
 
+#if !defined(HAVE_GETOPT)
+#include "getopt.h"
+#else
+#include <unistd.h>
+#endif
+
 #endif /* !_OPENBSD_COMPAT_H */
