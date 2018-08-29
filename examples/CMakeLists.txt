@@ -8,30 +8,33 @@ list(APPEND COMPAT_SOURCES
 	../openbsd-compat/strlcpy.c
 )
 
+# drop -rdynamic
+set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+
 # manifest
-add_executable(manifest manifest.c)
-target_link_libraries(manifest fido2_shared)
+add_executable(manifest manifest.c ${COMPAT_SOURCES})
+target_link_libraries(manifest fido2)
 
 # info
 add_executable(info info.c ${COMPAT_SOURCES})
-target_link_libraries(info fido2_shared)
+target_link_libraries(info fido2)
 
 # reset
-add_executable(reset reset.c)
-target_link_libraries(reset fido2_shared)
+add_executable(reset reset.c ${COMPAT_SOURCES})
+target_link_libraries(reset fido2)
 
 # cred
-add_executable(cred cred.c util.c)
-target_link_libraries(cred fido2_shared)
+add_executable(cred cred.c util.c ${COMPAT_SOURCES})
+target_link_libraries(cred fido2)
 
 # assert
-add_executable(assert assert.c util.c)
-target_link_libraries(assert fido2_shared)
+add_executable(assert assert.c util.c ${COMPAT_SOURCES})
+target_link_libraries(assert fido2)
 
 # setpin
-add_executable(setpin setpin.c)
-target_link_libraries(setpin fido2_shared)
+add_executable(setpin setpin.c ${COMPAT_SOURCES})
+target_link_libraries(setpin fido2)
 
 # retries
-add_executable(retries retries.c)
-target_link_libraries(retries fido2_shared)
+add_executable(retries retries.c ${COMPAT_SOURCES})
+target_link_libraries(retries fido2)
