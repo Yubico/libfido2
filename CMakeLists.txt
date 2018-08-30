@@ -8,7 +8,6 @@ cmake_minimum_required(VERSION 3.0)
 include(CheckCCompilerFlag)
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
-include(FindPkgConfig)
 include(GNUInstallDirs)
 
 set(CMAKE_COLOR_MAKEFILE off)
@@ -24,63 +23,71 @@ add_definitions(-D_FIDO_MAJOR=${FIDO_MAJOR})
 add_definitions(-D_FIDO_MINOR=${FIDO_MINOR})
 add_definitions(-D_FIDO_PATCH=${FIDO_PATCH})
 
-pkg_search_module(CBOR libcbor)
-pkg_search_module(CRYPTO libcrypto REQUIRED)
-
-# XXX workaround libcbor's missing .pc file
-if(NOT CBOR_FOUND)
-	check_include_files(cbor.h HAVE_CBOR_H)
-	if(NOT HAVE_CBOR_H)
-		message(FATAL_ERROR "could not find libcbor header files")
+if(MSVC)
+	if ((NOT CBOR_INCLUDE_DIRS) OR (NOT CBOR_LIBRARY_DIRS) OR
+	    (NOT CRYPTO_INCLUDE_DIRS) OR (NOT CRYPTO_LIBRARY_DIRS) OR
+	    (NOT HIDAPI_INCLUDE_DIRS) OR (NOT HIDAPI_LIBRARY_DIRS))
+		message(FATAL_ERROR "please provide definitions for "
+		    "{CBOR,CRYPTO,HIDAPI}_{INCLUDE,LIBRARY}_DIRS when building "
+		    "under msvc")
 	endif()
 	set(CBOR_LIBRARIES "cbor")
-endif()
-
-if(APPLE)
-	# Define memset_s().
-	add_definitions(-D__STDC_WANT_LIB_EXT1__=1)
-endif()
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	# Use hidapi's raw API.
-	pkg_search_module(HIDAPI hidapi-hidraw REQUIRED)
-	set(HIDAPI_NAME "hidapi-hidraw")
-	# Define be32toh().
-	add_definitions(-D_GNU_SOURCE)
+	set(CRYPTO_LIBRARIES "crypto")
+	set(HIDAPI_LIBRARIES "hidapi")
 else()
-	pkg_search_module(HIDAPI hidapi REQUIRED)
-	set(HIDAPI_NAME "hidapi")
-endif()
+	include(FindPkgConfig)
+	pkg_search_module(CBOR libcbor)
+	pkg_search_module(CRYPTO libcrypto REQUIRED)
 
-# MinGW is stuck with a flavour of C89.
-if(MINGW)
-	add_definitions(-DFIDO_NO_DIAGNOSTIC)
-endif()
+	# XXX workaround libcbor's missing .pc file
+	if(NOT CBOR_FOUND)
+		check_include_files(cbor.h HAVE_CBOR_H)
+		if(NOT HAVE_CBOR_H)
+			message(FATAL_ERROR "could not find cbor header files")
+		endif()
+		set(CBOR_LIBRARIES "cbor")
+	endif()
 
-# fuzz instrumentation
-if(FUZZ)
-	add_definitions(-DFIDO_FUZZ)
-endif()
+	if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+		# Use hidapi's raw API.
+		pkg_search_module(HIDAPI hidapi-hidraw REQUIRED)
+		set(HIDAPI_NAME "hidapi-hidraw")
+		# Define be32toh().
+		add_definitions(-D_GNU_SOURCE)
+	else()
+		pkg_search_module(HIDAPI hidapi REQUIRED)
+		set(HIDAPI_NAME "hidapi")
+	endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshadow")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wwrite-strings")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-prototypes")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wbad-function-cast")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic-errors")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-all")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-if(FUZZ)
-	# -fsanitize-trap=undefined is a superset of -ftrapv
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-trap=undefined")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+	# MinGW is stuck with a flavour of C89.
+	if(MINGW)
+		add_definitions(-DFIDO_NO_DIAGNOSTIC)
+	endif()
+	# fuzz instrumentation
+	if(FUZZ)
+		add_definitions(-DFIDO_FUZZ)
+	endif()
+
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshadow")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wwrite-strings")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-prototypes")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wbad-function-cast")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic-errors")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-all")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+	if(FUZZ)
+		# -fsanitize-trap=undefined is a superset of -ftrapv
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-trap=undefined")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+	endif()
+	#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ftrapv")
+	#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 endif()
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ftrapv")
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 
 # Use -Wshorten-64-to-32 if available.
 check_c_compiler_flag("-Wshorten-64-to-32" HAVE_SHORTEN_64_TO_32)
@@ -151,6 +158,9 @@ if(HAVE_SYSCONF)
 endif()
 
 # memset_s
+if(APPLE)
+	add_definitions(-D__STDC_WANT_LIB_EXT1__=1)
+endif()
 check_function_exists(memset_s HAVE_MEMSET_S)
 if(HAVE_MEMSET_S)
 	add_definitions(-DHAVE_MEMSET_S)
