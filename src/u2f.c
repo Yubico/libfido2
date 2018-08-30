@@ -12,6 +12,10 @@
 #include "fido.h"
 #include "fido/es256.h"
 
+#if defined(_MSC_VER)
+#define usleep(x)	Sleep((x)/1000)
+#endif
+
 static int
 sig_get(fido_blob_t *sig, const unsigned char **buf, size_t *len)
 {
