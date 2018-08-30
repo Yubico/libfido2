@@ -7,7 +7,10 @@
 #ifndef _ISO7816_H
 #define _ISO7816_H
 
-typedef struct iso7816_header {
+#include "packed.h"
+
+PACKED_TYPE(iso7816_header_t,
+struct iso7816_header {
 	uint8_t cla;
 	uint8_t ins;
 	uint8_t p1;
@@ -15,15 +18,16 @@ typedef struct iso7816_header {
 	uint8_t lc1;
 	uint8_t lc2;
 	uint8_t lc3;
-} __attribute__ ((packed)) iso7816_header_t;
+})
 
-typedef struct iso7816_apdu {
+PACKED_TYPE(iso7816_apdu_t,
+struct iso7816_apdu {
 	size_t            alloc_len;
 	uint16_t          payload_len;
 	uint8_t          *payload_ptr;
 	iso7816_header_t  header;
 	uint8_t           payload[];
-} __attribute__ ((packed)) iso7816_apdu_t;
+})
 
 iso7816_apdu_t *	iso7816_new(uint8_t, uint8_t, uint16_t);
 void			iso7816_free(iso7816_apdu_t **);
