@@ -7,10 +7,8 @@
 #ifndef _OPENBSD_COMPAT_H
 #define _OPENBSD_COMPAT_H
 
-#if !defined(HAVE_TYPES_H)
+#if defined(_MSC_VER)
 #include "types.h"
-#else
-#include <sys/types.h>
 #endif
 
 #if defined(HAVE_ENDIAN_H)

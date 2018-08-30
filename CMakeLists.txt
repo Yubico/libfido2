@@ -100,12 +100,6 @@ if(CMAKE_COMPILER_IS_GNUCC)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result")
 endif()
 
-# sys/types.h
-check_include_files(sys/types.h HAVE_TYPES_H)
-if(HAVE_TYPES_H)
-	add_definitions(-DHAVE_TYPES_H)
-endif()
-
 # endian.h
 check_include_files(endian.h HAVE_ENDIAN_H)
 if(HAVE_ENDIAN_H)
