@@ -14,7 +14,9 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "../openbsd-compat/openbsd-compat.h"
 

@@ -111,6 +111,12 @@ if(HAVE_ERR_H)
 	add_definitions(-DHAVE_ERR_H)
 endif()
 
+# unistd.h
+check_include_files(unistd.h HAVE_UNISTD_H)
+if(HAVE_UNISTD_H)
+	add_definitions(-DHAVE_UNISTD_H)
+endif()
+
 # strlcpy
 check_function_exists(strlcpy HAVE_STRLCPY)
 if(HAVE_STRLCPY)

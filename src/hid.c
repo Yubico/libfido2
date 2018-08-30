@@ -14,7 +14,9 @@
 #include <fcntl.h>
 #include <hidapi.h>
 #include <string.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "fido.h"
 

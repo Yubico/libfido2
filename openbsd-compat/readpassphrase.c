@@ -33,7 +33,9 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <paths.h>
 
 #ifndef _PATH_TTY
