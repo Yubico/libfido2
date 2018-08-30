@@ -25,7 +25,9 @@
 
 #if defined(_WIN32) && !defined(HAVE_ENDIAN_H)
 #include <winsock2.h>
+#if !defined(_MSC_VER)
 #include <sys/param.h>
+#endif
 #define be16toh(x) ntohs((x))
 #define be32toh(x) ntohl((x))
 #endif /* _WIN32 && !HAVE_ENDIAN_H */
