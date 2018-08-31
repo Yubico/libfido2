@@ -330,11 +330,12 @@ encode_pubkey_param(int cose_alg)
 	struct cbor_pair	 alg;
 
 	if ((item = cbor_new_definite_array(1)) == NULL ||
-	    (body = cbor_new_definite_map(2)) == NULL)
+	    (body = cbor_new_definite_map(2)) == NULL ||
+	    cose_alg > -1 || -cose_alg - 1 > UINT16_MAX)
 		goto fail;
 
 	alg.key = cbor_move(cbor_build_string("alg"));
-	alg.value = cbor_move(cbor_build_negint16(-cose_alg - 1));
+	alg.value = cbor_move(cbor_build_negint16((uint16_t)(-cose_alg - 1)));
 
 	if (cbor_map_add(body, alg) == false ||
 	    cbor_add_string(body, "type", "public-key") < 0 ||
@@ -351,7 +352,6 @@ fail:
 		cbor_decref(&body);
 
 	return (NULL);
-
 }
 
 static cbor_item_t *
