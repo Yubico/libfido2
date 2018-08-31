@@ -442,7 +442,7 @@ parse_register_reply(fido_cred_t *cred, const unsigned char *reply, size_t len)
 	fido_blob_t	 ad;
 	uint8_t		 dummy;
 	uint8_t		 pubkey[65];
-	uint8_t		 kh_len;
+	uint8_t		 kh_len = 0;
 	uint8_t		*kh = NULL;
 	int		 r;
 
