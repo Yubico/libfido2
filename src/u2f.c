@@ -44,9 +44,14 @@ x5c_get(fido_blob_t *x5c, const unsigned char **buf, size_t *len)
 	X509	*cert = NULL;
 	int	 ok = -1;
 
+	if (*len > LONG_MAX) {
+		log_debug("%s: invalid len %zu", __func__, *len);
+		goto fail;
+	}
+
 	/* find out the certificate's length */
 	const unsigned char *end = *buf;
-	if ((cert = d2i_X509(NULL, &end, *len)) == NULL || end <= *buf ||
+	if ((cert = d2i_X509(NULL, &end, (long)*len)) == NULL || end <= *buf ||
 	    (x5c->len = (size_t)(end - *buf)) >= *len) {
 		log_debug("%s: d2i_X509", __func__);
 		goto fail;
