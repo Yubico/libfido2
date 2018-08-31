@@ -251,8 +251,6 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		    (int)cbor_get_uint8(key));
 		return (-1);
 	}
-
-	return (-1);
 }
 
 static int
