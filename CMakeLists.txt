@@ -34,6 +34,19 @@ if(MSVC)
 	set(CBOR_LIBRARIES "cbor")
 	set(CRYPTO_LIBRARIES "crypto")
 	set(HIDAPI_LIBRARIES "hidapi")
+	set(MSVC_DISABLED_WARNINGS_LIST
+		"C4200" # nonstandard extension used: zero-sized array in
+			# struct/union;
+		"C4706" # assignment within conditional expression;
+		"C4996" # The POSIX name for this item is deprecated. Instead,
+			# use the ISO C and C++ conformant name
+		)
+	# The construction in the following 3 lines was taken from LibreSSL's
+	# CMakeLists.txt.
+	string(REPLACE "C" " -wd" MSVC_DISABLED_WARNINGS_STR
+		${MSVC_DISABLED_WARNINGS_LIST})
+	string(REGEX REPLACE "[/-]W[1234][ ]?" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -MP -W4 ${MSVC_DISABLED_WARNINGS_STR}")
 else()
 	include(FindPkgConfig)
 	pkg_search_module(CBOR libcbor)
