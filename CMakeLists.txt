@@ -207,9 +207,11 @@ endif()
 
 # export list
 if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "Clang")
+	# clang + lld
 	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
 	    " -exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/src/export.llvm")
-else()
+elseif(NOT MSVC)
+	# clang/gcc + gnu ld
 	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
 	    " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/src/export.gnu")
 	if(NOT WIN32)
