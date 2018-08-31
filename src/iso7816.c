@@ -46,12 +46,12 @@ iso7816_free(iso7816_apdu_t **apdu_p)
 int
 iso7816_add(iso7816_apdu_t *apdu, const void *buf, size_t cnt)
 {
-	if (cnt > apdu->payload_len)
+	if (cnt > apdu->payload_len || cnt > UINT16_MAX)
 		return (-1);
 
 	memcpy(apdu->payload_ptr, buf, cnt);
 	apdu->payload_ptr += cnt;
-	apdu->payload_len -= cnt;
+	apdu->payload_len -= (uint16_t)cnt;
 
 	return (0);
 }
