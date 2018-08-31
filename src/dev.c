@@ -21,7 +21,6 @@
 #include <windows.h>
 
 #include <winternl.h>
-#include <ntstatus.h>
 #include <winerror.h>
 #include <stdio.h>
 #include <bcrypt.h>
