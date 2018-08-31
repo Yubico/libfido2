@@ -64,13 +64,13 @@ tx_frame(fido_dev_t *d, int seq, const void *buf, size_t count)
 	unsigned char	 pkt[sizeof(*fp) + 1];
 	int		 n;
 
-	if (d->io.write == NULL)
+	if (d->io.write == NULL || seq < 0 || seq > UINT8_MAX)
 		return (0);
 
 	memset(&pkt, 0, sizeof(pkt));
 	fp = (struct frame *)(pkt + 1);
 	fp->cid = d->cid;
-	fp->body.cont.seq = seq++;
+	fp->body.cont.seq = (uint8_t)seq;
 	count = MIN(count, sizeof(fp->body.cont.data));
 	memcpy(&fp->body.cont.data, buf, count);
 
