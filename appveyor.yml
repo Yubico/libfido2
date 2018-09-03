@@ -3,6 +3,9 @@ version: '{build}'
 platform: x64
 
 before_build:
+- mkdir build
+- cd build
+- cmake .. -G "%GENERATOR%"
 - echo "point 1"
 
 build_script:
