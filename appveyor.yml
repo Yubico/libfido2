@@ -2,6 +2,10 @@ image: Visual Studio 2017
 version: '{build}'
 platform: x64
 
+environment:
+  matrix:
+  - GENERATOR: Visual Studio 15 2017 Win64
+
 before_build:
 - mkdir build
 - cd build
