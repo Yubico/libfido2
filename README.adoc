@@ -44,9 +44,13 @@ Or from source, on UNIX-like systems:
 Depending on the platform, the PKG_CONFIG_PATH environment variable may need to
 be set.
 
-*libfido2* depends on hidapi, libcbor and OpenSSL. For instructions on
-installing these dependencies, see http://www.signal11.us/oss/hidapi/,
-http://libcbor.org/, and https://www.openssl.org/.
+*libfido2* depends on [hidapi](https://github.com/signal11/hidapi),
+[libcbor](https://github.com/pjk/libcbor), and
+[LibreSSL](https://github.com/libressl-portable/portable) (alternatively,
+[OpenSSL](https://www.openssl.org) may be used).
+
+For complete, OS-specific installation instructions, please refer to the
+`.travis/` (Linux, MacOS) and `windows/` directories.
 
 Under Linux you will need to add a Udev rule to be able to access the FIDO
 device, or run as root. For example, the Udev rule may contain the following:
