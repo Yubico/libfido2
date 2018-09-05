@@ -1,6 +1,7 @@
 == libfido2
 
 image:https://api.travis-ci.org/Yubico/libfido2.svg?branch=master["Build Status (Travis)", link="https://travis-ci.org/Yubico/libfido2"]
+image:https://ci.appveyor.com/api/projects/status/5yhnbr78gn6eraw1/branch/master?svg=true["Build Status (AppVeyor)", link="https://ci.appveyor.com/project/Yubico53275/libfido2/branch/master"]
 image:https://img.shields.io/badge/license-BSD-blue.svg["License", link="https://raw.githubusercontent.com/Yubico/libfido2/master/LICENSE"]
 
 Provides library functionality for communicating with a FIDO device over USB as
