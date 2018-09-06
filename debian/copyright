@@ -15,10 +15,11 @@ Copyright: Copyright (c) 2010 Damien Miller.  All rights reserved.
 License: ISC
 
 Files:
+ openbsd-compat/bsd-getpagesize.c
  openbsd-compat/err.h
  openbsd-compat/explicit_bzero.c
- openbsd-compat/bsd-getpagesize.c
  openbsd-compat/explicit_bzero_win32.c
+ openbsd-compat/types.h
 Copyright: Public domain
 License: public-domain
 
@@ -33,6 +34,15 @@ License: ISC
 Files: openbsd-compat/readpassphrase.c
 Copyright: Copyright (c) 2000-2002, 2007, 2010 Todd C. Miller <Todd.Miller@courtesan.com>
 License: ISC
+
+Files: openbsd-compat/getopt.h
+Copyright: Copyright (c) 2000 The NetBSD Foundation, Inc. All rights reserved.
+License: BSD-2-clause
+
+Files: openbsd-compat/getopt_long.c
+Copyright: Copyright (c) 2002 Todd C. Miller <Todd.Miller@courtesan.com>
+           Copyright (c) 2000 The NetBSD Foundation, Inc. All rights reserved.
+License: ISC and BSD-2-clause
 
 License: BSD-2-clause
   Redistribution and use in source and binary forms, with or without
