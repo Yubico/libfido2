@@ -81,7 +81,6 @@ else()
 		add_definitions(-DFIDO_FUZZ)
 	endif()
 
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
