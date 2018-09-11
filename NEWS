@@ -1,3 +1,17 @@
+* Version 0.3.0 (unreleased)
+ ** Various reliability fixes.
+ ** Merged fuzzing instrumentation.
+ ** Added regress tests.
+ ** Added support for FIDO 2's hmac-secret extension.
+ ** New API calls:
+  - fido_assert_hmac_secret_len;
+  - fido_assert_hmac_secret_ptr;
+  - fido_assert_set_extensions;
+  - fido_assert_set_hmac_salt;
+  - fido_cred_set_extensions;
+  - fido_dev_force_fido2.
+ ** Support for native builds with Microsoft Visual Studio 17.
+
 * Version 0.2.0 (released 2018-06-20)
  ** Added command-line tools.
  ** Added a couple of missing get functions.
