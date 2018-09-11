@@ -1,8 +1,19 @@
-libfido2 (0.2.1~dev) UNRELEASED; urgency=low
+libfido2 (0.3.0~dev) UNRELEASED; urgency=low
 
-  * Development version.
+  * Various reliability fixes.
+  * Merged fuzzing instrumentation.
+  * Added regress tests.
+  * Added support for FIDO 2's hmac-secret extension.
+  * New API calls:
+    - fido_assert_hmac_secret_len;
+    - fido_assert_hmac_secret_ptr;
+    - fido_assert_set_extensions;
+    - fido_assert_set_hmac_salt;
+    - fido_cred_set_extensions;
+    - fido_dev_force_fido2.
+  * Support for native builds with Microsoft Visual Studio 17.
 
- -- pedro martelletto <pedro@yubico.com>  Wed, 20 Jun 2018 10:42:19 +0200
+ -- pedro martelletto <pedro@yubico.com>  Tue, 11 Sep 2018 09:05:32 +0000
 
 libfido2 (0.2.0) bionic; urgency=low
 
