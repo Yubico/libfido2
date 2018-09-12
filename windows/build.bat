@@ -6,8 +6,10 @@ copy /y C:\projects\libfido2\windows\* C:\hidapi-Win64\windows
 MSBuild C:\hidapi-Win64\windows\hidapi.sln /property:Configuration=Debug /property:Platform=x64
 
 echo "building libressl"
-git clone --branch v2.7.4 https://github.com/libressl-portable/portable C:\libressl-portable
-cd C:\libressl-portable
+cd c:\
+curl -LO https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.7.4.tar.gz
+tar -zxvf libressl-2.7.4.tar.gz
+cd C:\libressl-2.7.4
 mkdir build
 cd build
 cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX=C:\libressl-2.7.4-Win64 -DBUILD_SHARED_LIBS=ON
