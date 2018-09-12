@@ -6,7 +6,7 @@ copy /y C:\projects\libfido2\windows\* C:\hidapi-Win64\windows
 MSBuild C:\hidapi-Win64\windows\hidapi.sln /property:Configuration=Debug /property:Platform=x64
 
 echo "building libressl"
-git clone --branch v2.7.4 https://github.com/libressl-portable C:\libressl-portable
+git clone --branch v2.7.4 https://github.com/libressl-portable/portable C:\libressl-portable
 cd C:\libressl-portable
 mkdir build
 cd build
