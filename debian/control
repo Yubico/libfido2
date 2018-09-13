@@ -1,6 +1,6 @@
 Source: libfido2
 Priority: optional
-Maintainer: Debian Authentication Maintainers <pkg-auth-maintainers@lists.alioth.debian.org>
+Maintainer: Yubico Open Source Maintainers <ossmaint@yubico.com>
 Uploaders: pedro martelletto <pedro@yubico.com>
 Standards-Version: 4.1.2
 Section: libs
@@ -41,3 +41,13 @@ Depends: libfido2-0 (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Description: command-line tools to configure and use a FIDO 2 token
  A set of tools to manage a FIDO 2 token, generate credentials and
  assertions, and verify them.
+
+Package: libfido2-udev
+Section: libs
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Conflicts: libu2f-udev
+Description: udev rules for access to U2F and FIDO2 devices
+ A set of udev rules allowing unprivileged system-level access
+ to U2F and FIDO2 USB devices for logged-on users.

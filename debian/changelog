@@ -1,4 +1,4 @@
-libfido2 (0.3.0~dev) UNRELEASED; urgency=low
+libfido2 (0.3.0) bionic; urgency=low
 
   * Various reliability fixes.
   * Merged fuzzing instrumentation.
