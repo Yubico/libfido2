@@ -1,4 +1,4 @@
-* Version 0.3.0 (unreleased)
+* Version 0.3.0 (released 2018-09-11)
  ** Various reliability fixes.
  ** Merged fuzzing instrumentation.
  ** Added regress tests.
