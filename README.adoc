@@ -29,6 +29,12 @@ is also available.
 
 === Installation
 
+==== Releases
+
+The current release of *libfido2* is 0.3.0. Please consult Yubico's
+https://developers.yubico.com/libfido2/Releases[release page] for source
+and binary releases.
+
 ==== Ubuntu
 
   $ sudo apt-add-repository ppa:yubico/stable
