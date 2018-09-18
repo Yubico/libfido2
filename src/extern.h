@@ -32,7 +32,7 @@ cbor_item_t *es256_pk_encode(const es256_pk_t *);
 
 /* cbor decoding functions */
 int decode_attstmt(const cbor_item_t *, fido_attstmt_t *);
-int decode_cred_authdata(const cbor_item_t *, fido_blob_t *,
+int decode_cred_authdata(const cbor_item_t *, int, fido_blob_t *,
     fido_authdata_t *, fido_attcred_t *, int *);
 int decode_assert_authdata(const cbor_item_t *, fido_blob_t *,
     fido_authdata_t *, int *, fido_blob_t *);

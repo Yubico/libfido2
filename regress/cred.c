@@ -396,10 +396,8 @@ static void
 no_authdata(void)
 {
 	fido_cred_t *c;
-	unsigned char zerokey[64];
 
 	c = alloc_cred();
-	memset(zerokey, 0, sizeof(zerokey));
 	assert(fido_cred_set_type(c, COSE_ES256) == FIDO_OK);
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
@@ -408,8 +406,8 @@ no_authdata(void)
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
 	assert(fido_cred_verify(c) == FIDO_ERR_INVALID_ARGUMENT);
-	assert(fido_cred_pubkey_len(c) == sizeof(zerokey));
-	assert(memcmp(fido_cred_pubkey_ptr(c), zerokey, sizeof(zerokey)) == 0);
+	assert(fido_cred_pubkey_len(c) == 0);
+	assert(fido_cred_pubkey_ptr(c) == NULL);
 	assert(fido_cred_id_len(c) == 0);
 	assert(fido_cred_id_ptr(c) == NULL);
 	free_cred(c);
@@ -664,6 +662,29 @@ junk_x509(void)
 	free(junk);
 }
 
+/* github issue #6 */
+static void
+invalid_type(void)
+{
+	fido_cred_t *c;
+
+	c = alloc_cred();
+	assert(fido_cred_set_type(c, COSE_RS256) == FIDO_OK);
+	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
+	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
+	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_ERR_INVALID_ARGUMENT);
+	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
+	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
+	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
+	assert(fido_cred_verify(c) == FIDO_ERR_INVALID_ARGUMENT);
+	assert(fido_cred_pubkey_len(c) == 0);
+	assert(fido_cred_pubkey_ptr(c) == NULL);
+	assert(fido_cred_id_len(c) == 0);
+	assert(fido_cred_id_ptr(c) == NULL);
+	free_cred(c);
+}
+
 int
 main(void)
 {
@@ -685,6 +706,7 @@ main(void)
 	junk_x509();
 	junk_sig();
 	wrong_options();
+	invalid_type();
 
 	exit(0);
 }

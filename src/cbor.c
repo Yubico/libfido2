@@ -770,7 +770,8 @@ get_cose_alg(const cbor_item_t *item, int *cose_alg)
 }
 
 static int
-decode_attcred(const unsigned char **buf, size_t *len, fido_attcred_t *attcred)
+decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
+    fido_attcred_t *attcred)
 {
 	cbor_item_t		*item = NULL;
 	struct cbor_load_result	 cbor;
@@ -808,6 +809,12 @@ decode_attcred(const unsigned char **buf, size_t *len, fido_attcred_t *attcred)
 
 	if (get_cose_alg(item, &attcred->type) < 0) {
 		log_debug("%s: get_cose_alg", __func__);
+		goto fail;
+	}
+
+	if (attcred->type != cose_alg) {
+		log_debug("%s: cose_alg mismatch (%d != %d)", __func__,
+		    attcred->type, cose_alg);
 		goto fail;
 	}
 
@@ -956,8 +963,9 @@ fail:
 }
 
 int
-decode_cred_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
-    fido_authdata_t *authdata, fido_attcred_t *attcred, int *authdata_ext)
+decode_cred_authdata(const cbor_item_t *item, int cose_alg,
+    fido_blob_t *authdata_cbor, fido_authdata_t *authdata,
+    fido_attcred_t *attcred, int *authdata_ext)
 {
 	const unsigned char	*buf = NULL;
 	size_t			 len;
@@ -988,7 +996,7 @@ decode_cred_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
 
 	if (attcred != NULL) {
 		if ((authdata->flags & CTAP_AUTHDATA_ATT_CRED) == 0 ||
-		    decode_attcred(&buf, &len, attcred) < 0)
+		    decode_attcred(&buf, &len, cose_alg, attcred) < 0)
 			return (-1);
 	}
 

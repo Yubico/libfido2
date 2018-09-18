@@ -28,8 +28,9 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	case 1: /* fmt */
 		return (decode_fmt(val, &cred->fmt));
 	case 2: /* authdata */
-		return (decode_cred_authdata(val, &cred->authdata_cbor,
-		    &cred->authdata, &cred->attcred, &cred->authdata_ext));
+		return (decode_cred_authdata(val, cred->type,
+		    &cred->authdata_cbor, &cred->authdata, &cred->attcred,
+		    &cred->authdata_ext));
 	case 3: /* attestation statement */
 		return (decode_attstmt(val, &cred->attstmt));
 	default:
@@ -500,8 +501,8 @@ fido_cred_set_authdata(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 		goto fail;
 	}
 
-	if (decode_cred_authdata(item, &cred->authdata_cbor, &cred->authdata,
-	    &cred->attcred, &cred->authdata_ext) < 0) {
+	if (decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
+	    &cred->authdata, &cred->attcred, &cred->authdata_ext) < 0) {
 		log_debug("%s: decode_cred_authdata", __func__);
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
@@ -781,7 +782,7 @@ fido_cred_pubkey_ptr(const fido_cred_t *cred)
 {
 	const void *ptr;
 
-	switch (cred->type) {
+	switch (cred->attcred.type) {
 	case COSE_ES256:
 		ptr = &cred->attcred.pubkey.es256;
 		break;
@@ -801,7 +802,7 @@ fido_cred_pubkey_len(const fido_cred_t *cred)
 {
 	size_t len;
 
-	switch (cred->type) {
+	switch (cred->attcred.type) {
 	case COSE_ES256:
 		len = sizeof(cred->attcred.pubkey.es256);
 		break;
