@@ -159,6 +159,9 @@ or
 A copy of
 .Fa fmt
 is made, and no references to the passed pointer are kept.
+Note that not all authenticators support FIDO2 and therefore may not
+be able to generate
+.Vt "packed" .
 .Pp
 The
 .Fn fido_cred_set_type
@@ -172,6 +175,7 @@ is either
 or
 .Dv COSE_RS256 .
 The type of a credential may only be set once.
+Note that not all tokens support COSE_RS256.
 .Pp
 Use of the
 .Nm
