@@ -9,7 +9,6 @@
  * export LD_PRELOAD=$(realpath preload.so)
  */
 
-#include <fido.h>
 #include <hidapi.h>
 #include <stdio.h>
 #include <stdlib.h>

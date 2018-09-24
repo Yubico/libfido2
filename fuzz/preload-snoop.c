@@ -14,7 +14,6 @@
 
 #include <dlfcn.h>
 #include <fcntl.h>
-#include <fido.h>
 #include <hidapi.h>
 #include <stdio.h>
 #include <stdlib.h>
