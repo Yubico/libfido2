@@ -75,8 +75,6 @@ readpassphrase(const char *prompt, char *buf, size_t bufsiz, int flags)
 restart:
 	for (i = 0; i < _NSIG; i++)
 		signo[i] = 0;
-	nr = -1;
-	save_errno = 0;
 	need_restart = 0;
 	/*
 	 * Read and write to /dev/tty if available.  If not, read from
