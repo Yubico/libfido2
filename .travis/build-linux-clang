@@ -12,8 +12,8 @@ make -C build
 sudo make -C build install
 cd ..
 
-# Build and install libfido2.
+# Build, analyze, and install libfido2.
 mkdir build
-(cd build && cmake ..)
-make -C build
+(cd build && scan-build cmake ..)
+scan-build --status-bugs make -C build
 sudo make -C build install
