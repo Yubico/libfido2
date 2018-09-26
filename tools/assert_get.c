@@ -100,8 +100,10 @@ assert_get(int argc, char **argv)
 	fido_assert_t *assert = NULL;
 	char pin[1024];
 	char prompt[1024];
-	FILE *in_f = stdin;
-	FILE *out_f = stdout;
+	char *in_path = NULL;
+	char *out_path = NULL;
+	FILE *in_f = NULL;
+	FILE *out_f = NULL;
 	bool rk = false;
 	bool up = false;
 	bool uv = false;
@@ -115,12 +117,10 @@ assert_get(int argc, char **argv)
 			debug = true;
 			break;
 		case 'i':
-			if (strcmp(optarg, "-"))
-				in_f = open_read(optarg);
+			in_path = optarg;
 			break;
 		case 'o':
-			if (strcmp(optarg, "-"))
-				out_f = open_write(optarg);
+			out_path = optarg;
 			break;
 		case 'p':
 			up = true;
@@ -141,6 +141,9 @@ assert_get(int argc, char **argv)
 
 	if (argc != 1)
 		usage();
+
+	in_f = open_read(in_path);
+	out_f = open_write(out_path);
 
 	fido_init(debug ? FIDO_DEBUG : 0);
 	dev = open_dev(argv[0]);
@@ -170,6 +173,11 @@ assert_get(int argc, char **argv)
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
 	fido_assert_free(&assert);
+
+	fclose(in_f);
+	fclose(out_f);
+	in_f = NULL;
+	out_f = NULL;
 
 	exit(0);
 }

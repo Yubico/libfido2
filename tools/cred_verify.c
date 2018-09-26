@@ -113,8 +113,10 @@ int
 cred_verify(int argc, char **argv)
 {
 	fido_cred_t *cred = NULL;
-	FILE *in_f = stdin;
-	FILE *out_f = stdout;
+	char *in_path = NULL;
+	char *out_path = NULL;
+	FILE *in_f = NULL;
+	FILE *out_f = NULL;
 	bool rk = false;
 	bool uv = false;
 	bool debug = false;
@@ -128,12 +130,10 @@ cred_verify(int argc, char **argv)
 			debug = true;
 			break;
 		case 'i':
-			if (strcmp(optarg, "-"))
-				in_f = open_read(optarg);
+			in_path = optarg;
 			break;
 		case 'o':
-			if (strcmp(optarg, "-"))
-				out_f = open_write(optarg);
+			out_path = optarg;
 			break;
 		case 'v':
 			uv = true;
@@ -148,6 +148,9 @@ cred_verify(int argc, char **argv)
 
 	if (argc > 1)
 		usage();
+
+	in_f = open_read(in_path);
+	out_f = open_write(out_path);
 
 	if (argc > 0) {
 		if (strcmp(argv[0], "es256") == 0)
@@ -165,6 +168,11 @@ cred_verify(int argc, char **argv)
 
 	print_cred(out_f, type, cred);
 	fido_cred_free(&cred);
+
+	fclose(in_f);
+	fclose(out_f);
+	in_f = NULL;
+	out_f = NULL;
 
 	exit(0);
 }

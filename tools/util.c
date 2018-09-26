@@ -30,6 +30,8 @@ open_write(const char *file)
 	int fd;
 	FILE *f;
 
+	if (file == NULL || strcmp(file, "-") == 0)
+		return (stdout);
 	if ((fd = open(file, O_WRONLY | O_CREAT, 0600)) < 0)
 		err(1, "open %s", file);
 	if ((f = fdopen(fd, "w")) == NULL)
@@ -44,6 +46,8 @@ open_read(const char *file)
 	int fd;
 	FILE *f;
 
+	if (file == NULL || strcmp(file, "-") == 0)
+		return (stdin);
 	if ((fd = open(file, O_RDONLY)) < 0)
 		err(1, "open %s", file);
 	if ((f = fdopen(fd, "r")) == NULL)

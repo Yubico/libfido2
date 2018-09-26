@@ -111,8 +111,10 @@ cred_make(int argc, char **argv)
 	fido_cred_t *cred = NULL;
 	char prompt[1024];
 	char pin[1024];
-	FILE *in_f = stdin;
-	FILE *out_f = stdout;
+	char *in_path = NULL;
+	char *out_path = NULL;
+	FILE *in_f = NULL;
+	FILE *out_f = NULL;
 	bool rk = false;
 	bool uv = false;
 	bool debug = false;
@@ -127,12 +129,10 @@ cred_make(int argc, char **argv)
 			debug = true;
 			break;
 		case 'i':
-			if (strcmp(optarg, "-"))
-				in_f = open_read(optarg);
+			in_path = optarg;
 			break;
 		case 'o':
-			if (strcmp(optarg, "-"))
-				out_f = open_write(optarg);
+			out_path = optarg;
 			break;
 		case 'q':
 			quiet = true;
@@ -153,6 +153,9 @@ cred_make(int argc, char **argv)
 
 	if (argc < 1 || argc > 2)
 		usage();
+
+	in_f = open_read(in_path);
+	out_f = open_write(out_path);
 
 	if (argc > 1) {
 		if (strcmp(argv[1], "es256") == 0)
@@ -186,6 +189,11 @@ cred_make(int argc, char **argv)
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
 	fido_cred_free(&cred);
+
+	fclose(in_f);
+	fclose(out_f);
+	in_f = NULL;
+	out_f = NULL;
 
 	exit(0);
 }

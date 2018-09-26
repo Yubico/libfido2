@@ -110,8 +110,9 @@ int
 assert_verify(int argc, char **argv)
 {
 	fido_assert_t *assert = NULL;
-	FILE *in_f = stdin;
 	void *pk = NULL;
+	char *in_path = NULL;
+	FILE *in_f = NULL;
 	bool up = false;
 	bool uv = false;
 	bool debug = false;
@@ -125,8 +126,7 @@ assert_verify(int argc, char **argv)
 			debug = true;
 			break;
 		case 'i':
-			if (strcmp(optarg, "-"))
-				in_f = open_read(optarg);
+			in_path = optarg;
 			break;
 		case 'p':
 			up = true;
@@ -145,6 +145,8 @@ assert_verify(int argc, char **argv)
 	if (argc < 1 || argc > 2)
 		usage();
 
+	in_f = open_read(in_path);
+
 	if (argc > 1) {
 		if (strcmp(argv[1], "es256") == 0)
 			type = COSE_ES256;
@@ -160,6 +162,9 @@ assert_verify(int argc, char **argv)
 	if ((r = fido_assert_verify(assert, 0, type, pk)) != FIDO_OK)
 		errx(1, "fido_assert_verify: %s", fido_strerr(r));
 	fido_assert_free(&assert);
+
+	fclose(in_f);
+	in_f = NULL;
 
 	exit(0);
 }
