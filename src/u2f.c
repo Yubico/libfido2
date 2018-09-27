@@ -666,7 +666,7 @@ u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
 		return (FIDO_ERR_UNSUPPORTED_OPTION);
 	}
 
-	if ((r = fido_assert_set_count(fa, fa->allow_list.len) != FIDO_OK)) {
+	if ((r = fido_assert_set_count(fa, fa->allow_list.len)) != FIDO_OK) {
 		log_debug("%s: fido_assert_set_count", __func__);
 		return (r);
 	}
