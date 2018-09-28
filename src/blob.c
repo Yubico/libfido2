@@ -63,6 +63,7 @@ free_blob_array(fido_blob_array_t *array)
 		if (b->ptr != NULL) {
 			explicit_bzero(b->ptr, b->len);
 			free(b->ptr);
+			b->ptr = NULL;
 		}
 	}
 
