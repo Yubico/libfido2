@@ -27,7 +27,7 @@ brew install mandoc
 # Build and install libfido2.
 export PKG_CONFIG_PATH=/usr/local/opt/openssl@1.1/lib/pkgconfig
 mkdir build
-(cd build && cmake ..)
+(cd build && cmake -DCMAKE_BUILD_TYPE=Debug ..)
 make -C build
 make -C build man_symlink_html
 sudo make -C build install

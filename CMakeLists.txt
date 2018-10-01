@@ -24,9 +24,9 @@ add_definitions(-D_FIDO_MINOR=${FIDO_MINOR})
 add_definitions(-D_FIDO_PATCH=${FIDO_PATCH})
 
 if(MSVC)
-	if ((NOT CBOR_INCLUDE_DIRS) OR (NOT CBOR_LIBRARY_DIRS) OR
-	    (NOT CRYPTO_INCLUDE_DIRS) OR (NOT CRYPTO_LIBRARY_DIRS) OR
-	    (NOT HIDAPI_INCLUDE_DIRS) OR (NOT HIDAPI_LIBRARY_DIRS))
+	if((NOT CBOR_INCLUDE_DIRS) OR (NOT CBOR_LIBRARY_DIRS) OR
+	   (NOT CRYPTO_INCLUDE_DIRS) OR (NOT CRYPTO_LIBRARY_DIRS) OR
+	   (NOT HIDAPI_INCLUDE_DIRS) OR (NOT HIDAPI_LIBRARY_DIRS))
 		message(FATAL_ERROR "please provide definitions for "
 		    "{CBOR,CRYPTO,HIDAPI}_{INCLUDE,LIBRARY}_DIRS when building "
 		    "under msvc")
@@ -236,6 +236,7 @@ message(STATUS "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
 message(STATUS "CMAKE_C_COMPILER_ID: ${CMAKE_C_COMPILER_ID}")
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "CMAKE_INSTALL_LIBDIR: ${CMAKE_INSTALL_LIBDIR}")
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "UDEV_RULES_DIR: ${UDEV_RULES_DIR}")
 message(STATUS "CBOR_INCLUDE_DIRS: ${CBOR_INCLUDE_DIRS}")
 message(STATUS "CBOR_LIBRARY_DIRS: ${CBOR_LIBRARY_DIRS}")
@@ -252,8 +253,10 @@ message(STATUS "FUZZ: ${FUZZ}")
 subdirs(src)
 subdirs(examples)
 if(NOT WIN32)
-subdirs(regress)
-subdirs(tools)
-subdirs(udev)
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+		subdirs(regress)
+	endif()
+	subdirs(tools)
+	subdirs(udev)
 endif()
 subdirs(man)

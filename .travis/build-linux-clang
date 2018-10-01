@@ -14,6 +14,6 @@ cd ..
 
 # Build, analyze, and install libfido2.
 mkdir build
-(cd build && scan-build cmake ..)
+(cd build && scan-build cmake -DCMAKE_BUILD_TYPE=Debug ..)
 scan-build --status-bugs make -C build
 sudo make -C build install

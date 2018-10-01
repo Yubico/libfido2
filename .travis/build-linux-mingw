@@ -51,6 +51,6 @@ cd ..
 export PKG_CONFIG_PATH=/fakeroot/lib/pkgconfig
 mkdir build
 (cd build && cmake -DCMAKE_TOOLCHAIN_FILE=/tmp/mingw.cmake \
-	-DCMAKE_INSTALL_PREFIX=/fakeroot ..)
+	-DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/fakeroot ..)
 make -C build
 sudo make -C build install
