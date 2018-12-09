@@ -327,6 +327,7 @@ encode_pubkey_param(int cose_alg)
 {
 	cbor_item_t		*item = NULL;
 	cbor_item_t		*body = NULL;
+	cbor_item_t		*alg_item = NULL;
 	struct cbor_pair	 alg;
 
 	if ((item = cbor_new_definite_array(1)) == NULL ||
@@ -335,7 +336,13 @@ encode_pubkey_param(int cose_alg)
 		goto fail;
 
 	alg.key = cbor_move(cbor_build_string("alg"));
-	alg.value = cbor_move(cbor_build_negint16((uint16_t)(-cose_alg - 1)));
+
+	if (-cose_alg - 1 > UINT8_MAX)
+		alg_item = cbor_build_negint16((uint16_t)(-cose_alg - 1));
+	else
+		alg_item = cbor_build_negint8((uint8_t)(-cose_alg - 1));
+
+	alg.value = cbor_move(alg_item);
 
 	if (cbor_map_add(body, alg) == false ||
 	    cbor_add_string(body, "type", "public-key") < 0 ||
