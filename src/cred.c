@@ -527,6 +527,8 @@ fido_cred_set_x509(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 
 	fido_cred_clean_x509(cred);
 
+	if (ptr == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
 	if ((x509 = malloc(len)) == NULL)
 		return (FIDO_ERR_INTERNAL);
 
@@ -544,6 +546,8 @@ fido_cred_set_sig(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 
 	fido_cred_clean_sig(cred);
 
+	if (ptr == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
 	if ((sig = malloc(len)) == NULL)
 		return (FIDO_ERR_INTERNAL);
 

@@ -906,7 +906,7 @@ fido_assert_set_sig(fido_assert_t *a, size_t idx, const unsigned char *ptr,
 {
 	unsigned char *sig;
 
-	if (idx >= a->stmt_len)
+	if (idx >= a->stmt_len || ptr == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	fido_assert_clean_sig(&a->stmt[idx]);
