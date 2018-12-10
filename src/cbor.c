@@ -332,7 +332,7 @@ encode_pubkey_param(int cose_alg)
 
 	if ((item = cbor_new_definite_array(1)) == NULL ||
 	    (body = cbor_new_definite_map(2)) == NULL ||
-	    cose_alg > -1 || -cose_alg - 1 > UINT16_MAX)
+	    cose_alg > -1 || cose_alg < INT16_MIN)
 		goto fail;
 
 	alg.key = cbor_move(cbor_build_string("alg"));
