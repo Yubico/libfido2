@@ -9,7 +9,9 @@
 #include <string.h>
 
 #include "fido.h"
+#include "packed.h"
 
+PACKED_TYPE(frame_t,
 struct frame {
 	uint32_t cid; /* channel id */
 	union {
@@ -25,7 +27,7 @@ struct frame {
 			uint8_t data[CTAP_RPT_SIZE - 5];
 		} cont;
 	} body;
-};
+})
 
 #ifndef MIN
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
