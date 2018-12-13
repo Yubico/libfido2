@@ -67,11 +67,12 @@ prepare_assert(FILE *in_f, bool rk, bool up, bool uv, bool debug)
 }
 
 static void
-print_assert(FILE *out_f, const fido_assert_t *assert)
+print_assert(FILE *out_f, const fido_assert_t *assert, bool rk)
 {
 	char *cdh = NULL;
 	char *authdata = NULL;
 	char *sig = NULL;
+	char *user_id = NULL;
 	int r;
 
 	r = base64_encode(fido_assert_clientdata_hash_ptr(assert),
@@ -80,6 +81,9 @@ print_assert(FILE *out_f, const fido_assert_t *assert)
 	    fido_assert_authdata_len(assert, 0), &authdata);
 	r |= base64_encode(fido_assert_sig_ptr(assert, 0),
 	    fido_assert_sig_len(assert, 0), &sig);
+	if (rk)
+		r |= base64_encode(fido_assert_user_id_ptr(assert, 0),
+		    fido_assert_user_id_len(assert, 0), &user_id);
 	if (r < 0)
 		errx(1, "output error");
 
@@ -87,10 +91,13 @@ print_assert(FILE *out_f, const fido_assert_t *assert)
 	fprintf(out_f, "%s\n", fido_assert_rp_id(assert));
 	fprintf(out_f, "%s\n", authdata);
 	fprintf(out_f, "%s\n", sig);
+	if (rk)
+		fprintf(out_f, "%s\n", user_id);
 
 	free(cdh);
 	free(authdata);
 	free(sig);
+	free(user_id);
 }
 
 int
@@ -168,7 +175,7 @@ assert_get(int argc, char **argv)
 	if (fido_assert_count(assert) != 1)
 		errx(1, "fido_assert_count: %zu", fido_assert_count(assert));
 
-	print_assert(out_f, assert);
+	print_assert(out_f, assert, rk);
 
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
