@@ -131,6 +131,10 @@ and
 The authenticator data, x509 certificate, and signature parts of a
 credential are typically passed to a FIDO 2 server for verification.
 .Sh RETURN VALUES
+The authenticator data returned by
+.Fn fido_cred_authdata_ptr
+is a CBOR-encoded byte string, as obtained from the authenticator.
+.Pp
 If not NULL, pointers returned by
 .Fn fido_cred_fmt ,
 .Fn fido_cred_authdata_ptr ,

@@ -73,6 +73,10 @@ bytes.
 A copy of
 .Fa ptr
 is made, and no references to the passed pointer are kept.
+The authenticator data passed to
+.Fn fido_cred_set_authdata
+must be a CBOR-encoded byte string, as obtained from
+.Fn fido_cred_authdata_ptr .
 .Pp
 The
 .Fn fido_cred_set_rp
