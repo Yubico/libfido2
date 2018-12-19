@@ -334,7 +334,7 @@ es256_sk_to_EVP_PKEY(const es256_sk_t *k)
 	EC_KEY		*ec = NULL;
 	EVP_PKEY	*pkey = NULL;
 	BIGNUM		*d = NULL;
-	const		 int nid = NID_X9_62_prime256v1;
+	const int	 nid = NID_X9_62_prime256v1;
 	int		 ok = -1;
 
 	if ((bnctx = BN_CTX_new()) == NULL || (d = BN_CTX_get(bnctx)) == NULL ||
