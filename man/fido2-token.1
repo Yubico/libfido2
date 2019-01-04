@@ -65,3 +65,10 @@ exits 0 on success and 1 on error.
 .Sh SEE ALSO
 .Xr fido2-assert 1 ,
 .Xr fido2-cred 1
+.Sh CAVEATS
+The actual user-flow to perform a reset is outside the scope of the
+FIDO2 specification, and may therefore vary depending on the
+authenticator.
+Yubico authenticators do not allow resets after 5 seconds from
+power-up, and expect a reset to be confirmed by the user through
+touch within 30 seconds.
