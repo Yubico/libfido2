@@ -1,3 +1,12 @@
+libfido2 (0.4.0) bionic; urgency=low
+
+  * fido2-assert: print the user id for resident credentials.
+  * Fix encoding of COSE algorithms when making a credential.
+  * Rework purpose of fido_cred_set_type; no ABI change.
+  * Minor documentation and code fixes.
+
+ -- pedro martelletto <pedro@yubico.com>  Mon, 07 Jan 2019 08:22:01 +0000
+
 libfido2 (0.3.0) bionic; urgency=low
 
   * Various reliability fixes.

@@ -1,3 +1,9 @@
+* Version 0.4.0 (released 2019-01-07)
+ ** fido2-assert: print the user id for resident credentials.
+ ** Fix encoding of COSE algorithms when making a credential.
+ ** Rework purpose of fido_cred_set_type; no ABI change.
+ ** Minor documentation and code fixes.
+
 * Version 0.3.0 (released 2018-09-11)
  ** Various reliability fixes.
  ** Merged fuzzing instrumentation.
