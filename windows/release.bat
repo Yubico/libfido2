@@ -40,5 +40,5 @@ cmake --build . --target install
 
 echo "copying dependencies"
 copy C:\workdir\libcbor-0.5.0-Win64\lib\cbor.lib C:\workdir\libfido2-Win64\lib
-copy C:\workdir\libressl-2.8.3-Win64\lib\crypto-43.lib C:\workdir\libfido2-Win64\lib
+copy C:\workdir\libressl-2.8.3-Win64\lib\crypto-44.lib C:\workdir\libfido2-Win64\lib
 copy C:\workdir\hidapi-Win64\windows\x64\Debug\hidapi.lib C:\workdir\libfido2-Win64\lib
