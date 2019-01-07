@@ -1,5 +1,6 @@
-set "PATH=%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin"
-set "PATH=%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
+set "PATH=%PATH%;C:\Program Files\Git\bin"
+set "PATH=%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin"
+set "PATH=%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
 set "PATH=%PATH%;C:\Program Files (x86)\Windows Kits\8.1\bin\x64"
 
 mkdir C:\workdir
@@ -12,7 +13,7 @@ MSBuild C:\workdir\hidapi-Win64\windows\hidapi.sln /property:Configuration=Debug
 
 echo "building libressl"
 cd C:\workdir
-curl -LO https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.8.3.tar.gz
+curl -LO https://ftp.eu.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.8.3.tar.gz
 tar -zxvf libressl-2.8.3.tar.gz
 cd C:\workdir\libressl-2.8.3
 mkdir build
