@@ -976,6 +976,7 @@ decode_cred_authdata(const cbor_item_t *item, int cose_alg,
 {
 	const unsigned char	*buf = NULL;
 	size_t			 len;
+	size_t			 alloc_len;
 
 	if (cbor_isa_bytestring(item) == false ||
 	    cbor_bytestring_is_definite(item) == false) {
@@ -983,8 +984,9 @@ decode_cred_authdata(const cbor_item_t *item, int cose_alg,
 		return (-1);
 	}
 
-	if (cbor_serialize_alloc(item, &authdata_cbor->ptr,
-	    &authdata_cbor->len) == 0) {
+	if (authdata_cbor->ptr != NULL ||
+	    (authdata_cbor->len = cbor_serialize_alloc(item,
+	    &authdata_cbor->ptr, &alloc_len)) == 0) {
 		log_debug("%s: cbor_serialize_alloc", __func__);
 		return (-1);
 	}
@@ -1024,6 +1026,7 @@ decode_assert_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
 {
 	const unsigned char	*buf = NULL;
 	size_t			 len;
+	size_t			 alloc_len;
 
 	if (cbor_isa_bytestring(item) == false ||
 	    cbor_bytestring_is_definite(item) == false) {
@@ -1031,8 +1034,9 @@ decode_assert_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
 		return (-1);
 	}
 
-	if (cbor_serialize_alloc(item, &authdata_cbor->ptr,
-	    &authdata_cbor->len) == 0) {
+	if (authdata_cbor->ptr != NULL ||
+	    (authdata_cbor->len = cbor_serialize_alloc(item,
+	    &authdata_cbor->ptr, &alloc_len)) == 0) {
 		log_debug("%s: cbor_serialize_alloc", __func__);
 		return (-1);
 	}

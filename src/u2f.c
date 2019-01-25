@@ -84,6 +84,7 @@ authdata_fake(const char *rp_id, uint8_t flags, uint32_t sigcount,
 {
 	fido_authdata_t	 ad;
 	cbor_item_t	*item = NULL;
+	size_t		 alloc_len;
 
 	SHA256((const void *)rp_id, strlen(rp_id), ad.rp_id_hash);
 	ad.flags = flags; /* XXX translate? */
@@ -95,8 +96,9 @@ authdata_fake(const char *rp_id, uint8_t flags, uint32_t sigcount,
 		return (-1);
 	}
 
-	if (cbor_serialize_alloc(item, &fake_cbor_ad->ptr,
-	    &fake_cbor_ad->len) == 0) {
+	if (fake_cbor_ad->ptr != NULL ||
+	    (fake_cbor_ad->len = cbor_serialize_alloc(item, &fake_cbor_ad->ptr,
+	    &alloc_len)) == 0) {
 		log_debug("%s: cbor_serialize_alloc", __func__);
 		cbor_decref(&item);
 		return (-1);
