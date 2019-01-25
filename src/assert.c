@@ -847,10 +847,12 @@ static void
 fido_assert_clean_authdata(fido_assert_stmt *as)
 {
 	free(as->authdata_cbor.ptr);
+	free(as->hmac_secret_enc.ptr);
 
 	memset(&as->authdata_ext, 0, sizeof(as->authdata_ext));
 	memset(&as->authdata_cbor, 0, sizeof(as->authdata_cbor));
 	memset(&as->authdata, 0, sizeof(as->authdata));
+	memset(&as->hmac_secret_enc, 0, sizeof(as->hmac_secret_enc));
 }
 
 int
