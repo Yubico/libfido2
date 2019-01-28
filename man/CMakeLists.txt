@@ -130,28 +130,51 @@ add_custom_target(man_html
 define_symlink_target(man_symlink_html html)
 
 add_custom_target(man_html_partial
-	COMMAND mandoc -T html -O man="%N.html",fragment es256_pk.3 > es256_pk.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido.3 > fido.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert.3 > fido_assert.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_allow_cred.3 > fido_assert_allow_cred.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_set.3 > fido_assert_set.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_verify.3 > fido_assert_verify.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_cbor_info.3 > fido_cbor_info.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred.3 > fido_cred.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_exclude.3 > fido_cred_exclude.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_set.3 > fido_cred_set.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_verify.3 > fido_cred_verify.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_get_assert.3 > fido_dev_get_assert.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_info_manifest.3 > fido_dev_info_manifest.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_make_cred.3 > fido_dev_make_cred.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_open.3 > fido_dev_open.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_set_io_functions.3 > fido_dev_set_io_functions.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_set_pin.3 > fido_dev_set_pin.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido_strerr.3 > fido_strerr.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment rs256_pk.3 > rs256_pk.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido2-assert.1 > fido2-assert.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido2-cred.1 > fido2-cred.partial
-	COMMAND mandoc -T html -O man="%N.html",fragment fido2-token.1 > fido2-token.partial
+	COMMAND cp -f ${CMAKE_SOURCE_DIR}/man/dyc.css .
+	COMMAND cat dyc.css > es256_pk.partial
+	COMMAND cat dyc.css > fido.partial
+	COMMAND cat dyc.css > fido_assert.partial
+	COMMAND cat dyc.css > fido_assert_allow_cred.partial
+	COMMAND cat dyc.css > fido_assert_set.partial
+	COMMAND cat dyc.css > fido_assert_verify.partial
+	COMMAND cat dyc.css > fido_cbor_info.partial
+	COMMAND cat dyc.css > fido_cred.partial
+	COMMAND cat dyc.css > fido_cred_exclude.partial
+	COMMAND cat dyc.css > fido_cred_set.partial
+	COMMAND cat dyc.css > fido_cred_verify.partial
+	COMMAND cat dyc.css > fido_dev_get_assert.partial
+	COMMAND cat dyc.css > fido_dev_info_manifest.partial
+	COMMAND cat dyc.css > fido_dev_make_cred.partial
+	COMMAND cat dyc.css > fido_dev_open.partial
+	COMMAND cat dyc.css > fido_dev_set_io_functions.partial
+	COMMAND cat dyc.css > fido_dev_set_pin.partial
+	COMMAND cat dyc.css > fido_strerr.partial
+	COMMAND cat dyc.css > rs256_pk.partial
+	COMMAND cat dyc.css > fido2-assert.partial
+	COMMAND cat dyc.css > fido2-cred.partial
+	COMMAND cat dyc.css > fido2-token.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment es256_pk.3 >> es256_pk.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido.3 >> fido.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert.3 >> fido_assert.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_allow_cred.3 >> fido_assert_allow_cred.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_set.3 >> fido_assert_set.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_assert_verify.3 >> fido_assert_verify.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_cbor_info.3 >> fido_cbor_info.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred.3 >> fido_cred.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_exclude.3 >> fido_cred_exclude.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_set.3 >> fido_cred_set.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_cred_verify.3 >> fido_cred_verify.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_get_assert.3 >> fido_dev_get_assert.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_info_manifest.3 >> fido_dev_info_manifest.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_make_cred.3 >> fido_dev_make_cred.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_open.3 >> fido_dev_open.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_set_io_functions.3 >> fido_dev_set_io_functions.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_dev_set_pin.3 >> fido_dev_set_pin.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido_strerr.3 >> fido_strerr.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment rs256_pk.3 >> rs256_pk.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido2-assert.1 >> fido2-assert.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido2-cred.1 >> fido2-cred.partial
+	COMMAND mandoc -T html -O man="%N.html",fragment fido2-token.1 >> fido2-token.partial
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/man)
 
 define_symlink_target(man_symlink_html_partial partial)
