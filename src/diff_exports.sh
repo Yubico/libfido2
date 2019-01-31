@@ -13,6 +13,9 @@ LLVM=${TMPDIR}/llvm
 egrep -o $'([^*{}\t]+);$' export.gnu | tr -d ';' | sort > ${GNU}
 sed 's/^_//g' export.llvm | sort > ${LLVM}
 diff -u ${GNU} ${LLVM}
+ERROR=$?
 
 rm ${GNU} ${LLVM}
 rmdir ${TMPDIR}
+
+exit ${ERROR}
