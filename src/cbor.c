@@ -162,8 +162,10 @@ fail:
 int
 cbor_bytestring_copy(const cbor_item_t *item, unsigned char **buf, size_t *len)
 {
-	*buf = NULL;
-	*len = 0;
+	if (*buf != NULL || *len != 0) {
+		log_debug("%s: dup", __func__);
+		return (-1);
+	}
 
 	if (cbor_isa_bytestring(item) == false ||
 	    cbor_bytestring_is_definite(item) == false) {
@@ -187,7 +189,10 @@ cbor_string_copy(const cbor_item_t *item, char **str)
 {
 	size_t len;
 
-	*str = NULL;
+	if (*str != NULL) {
+		log_debug("%s: dup", __func__);
+		return (-1);
+	}
 
 	if (cbor_isa_string(item) == false ||
 	    cbor_string_is_definite(item) == false) {
@@ -801,7 +806,8 @@ find_cose_alg(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	    cbor_get_uint8(key) != 3)
 		return (0); /* ignore */
 
-	if (cbor_isa_negint(val) == false || cbor_get_int(val) > INT_MAX)
+	if (cbor_isa_negint(val) == false || cbor_get_int(val) > INT_MAX ||
+	    *cose_alg != 0)
 		return (-1);
 
 	*cose_alg = -(int)cbor_get_int(val) - 1;
@@ -906,8 +912,6 @@ decode_extension(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	char	*type = NULL;
 	int	 ok = -1;
 
-	*authdata_ext = 0;
-
 	if (cbor_string_copy(key, &type) < 0 || strcmp(type, "hmac-secret")) {
 		log_debug("%s: type", __func__);
 		goto fail;
@@ -915,7 +919,7 @@ decode_extension(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	if (cbor_isa_float_ctrl(val) == false ||
 	    cbor_float_get_width(val) != CBOR_FLOAT_0 ||
-	    cbor_is_bool(val) == false) {
+	    cbor_is_bool(val) == false || *authdata_ext != 0) {
 		log_debug("%s: cbor type", __func__);
 		goto fail;
 	}
@@ -938,6 +942,8 @@ decode_extensions(const unsigned char **buf, size_t *len, int *authdata_ext)
 	int			 ok = -1;
 
 	log_debug("%s: buf=%p, len=%zu", __func__, (const void *)*buf, *len);
+
+	*authdata_ext = 0;
 
 	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
 		log_debug("%s: cbor_load", __func__);
