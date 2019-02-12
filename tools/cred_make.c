@@ -116,6 +116,7 @@ cred_make(int argc, char **argv)
 	FILE *in_f = NULL;
 	FILE *out_f = NULL;
 	bool rk = false;
+	bool u2f = false;
 	bool uv = false;
 	bool debug = false;
 	bool quiet = false;
@@ -123,7 +124,7 @@ cred_make(int argc, char **argv)
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "di:o:qrv")) != -1) {
+	while ((ch = getopt(argc, argv, "di:o:qruv")) != -1) {
 		switch (ch) {
 		case 'd':
 			debug = true;
@@ -139,6 +140,9 @@ cred_make(int argc, char **argv)
 			break;
 		case 'r':
 			rk = true;
+			break;
+		case 'u':
+			u2f = true;
 			break;
 		case 'v':
 			uv = true;
@@ -167,7 +171,11 @@ cred_make(int argc, char **argv)
 	}
 
 	fido_init(debug ? FIDO_DEBUG : 0);
+
 	dev = open_dev(argv[0]);
+	if (u2f)
+		fido_dev_force_u2f(dev);
+
 	cred = prepare_cred(in_f, type, rk, uv, debug);
 
 	r = fido_dev_make_cred(dev, cred, NULL);

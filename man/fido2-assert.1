@@ -11,7 +11,7 @@
 .Sh SYNOPSIS
 .Nm
 .Fl G
-.Op Fl dprv
+.Op Fl dpruv
 .Op Fl i Ar input_file
 .Op Fl o Ar output_file
 .Ar device
@@ -102,6 +102,12 @@ If
 is specified,
 .Nm
 will not expect a credential id in its input.
+.It Fl u
+Obtain an assertion using U2F.
+By default,
+.Nm
+will use FIDO2 if supported by the authenticator, and fallback to
+U2F otherwise.
 .It Fl v
 If obtaining an assertion, prompt the user for a PIN and request user verification from the authenticator.
 If a

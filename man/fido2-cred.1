@@ -11,7 +11,7 @@
 .Sh SYNOPSIS
 .Nm
 .Fl M
-.Op Fl dqrv
+.Op Fl dqruv
 .Op Fl i Ar input_file
 .Op Fl o Ar output_file
 .Ar device
@@ -117,6 +117,12 @@ is specified,
 will fail.
 .It Fl r
 Create a resident credential.
+.It Fl u
+Create a U2F credential.
+By default,
+.Nm
+will use FIDO2 if supported by the authenticator, and fallback to
+U2F otherwise.
 .It Fl v
 If making a credential, request user verification.
 If verifying a credential, check whether the user verification bit

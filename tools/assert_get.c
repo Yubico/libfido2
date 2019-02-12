@@ -111,6 +111,7 @@ assert_get(int argc, char **argv)
 	char *out_path = NULL;
 	FILE *in_f = NULL;
 	FILE *out_f = NULL;
+	bool u2f = false;
 	bool rk = false;
 	bool up = false;
 	bool uv = false;
@@ -118,7 +119,7 @@ assert_get(int argc, char **argv)
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "di:o:prv")) != -1) {
+	while ((ch = getopt(argc, argv, "di:o:pruv")) != -1) {
 		switch (ch) {
 		case 'd':
 			debug = true;
@@ -134,6 +135,9 @@ assert_get(int argc, char **argv)
 			break;
 		case 'r':
 			rk = true;
+			break;
+		case 'u':
+			u2f = true;
 			break;
 		case 'v':
 			uv = true;
@@ -153,8 +157,12 @@ assert_get(int argc, char **argv)
 	out_f = open_write(out_path);
 
 	fido_init(debug ? FIDO_DEBUG : 0);
+
 	dev = open_dev(argv[0]);
-	assert= prepare_assert(in_f, rk, up, uv, debug);
+	if (u2f)
+		fido_dev_force_u2f(dev);
+
+	assert = prepare_assert(in_f, rk, up, uv, debug);
 
 	if (uv) {
 		r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ",
