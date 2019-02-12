@@ -11,6 +11,50 @@
 #include <string.h>
 #include "fido.h"
 
+static int
+check_key_type(cbor_item_t *item)
+{
+	if (item->type == CBOR_TYPE_UINT || item->type == CBOR_TYPE_NEGINT ||
+	    item->type == CBOR_TYPE_STRING)
+		return (0);
+
+	log_debug("%s: invalid type: %d", __func__, item->type);
+
+	return (-1);
+}
+
+/*
+ * Validate CTAP2 canonical CBOR encoding rules for maps.
+ */
+static int
+ctap_check_cbor(cbor_item_t *prev, cbor_item_t *curr)
+{
+	if (check_key_type(prev) < 0 || check_key_type(curr) < 0)
+		return (-1);
+
+	if (prev->type != curr->type) {
+		if (prev->type < curr->type)
+			return (0);
+		log_debug("%s: unsorted types", __func__);
+		return (-1);
+	}
+
+	if (curr->type == CBOR_TYPE_UINT || curr->type == CBOR_TYPE_NEGINT) {
+		if (cbor_int_get_width(curr) > cbor_int_get_width(prev) ||
+		    cbor_get_int(curr) > cbor_get_int(prev))
+			return (0);
+	} else {
+		if (cbor_string_length(curr) > cbor_string_length(prev) ||
+		    memcmp(cbor_string_handle(prev), cbor_string_handle(curr),
+		    cbor_string_length(prev)) < 0)
+			return (0);
+	}
+
+	log_debug("%s: invalid cbor", __func__);
+
+	return (-1);
+}
+
 int
 cbor_map_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
     const cbor_item_t *, void *))
@@ -29,6 +73,10 @@ cbor_map_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
 		if (v[i].key == NULL || v[i].value == NULL) {
 			log_debug("%s: key=%p, value=%p for i=%zu", __func__,
 			    (void *)v[i].key, (void *)v[i].value, i);
+			return (-1);
+		}
+		if (i && ctap_check_cbor(v[i - 1].key, v[i].key) < 0) {
+			log_debug("%s: ctap_check_cbor", __func__);
 			return (-1);
 		}
 		if (f(v[i].key, v[i].value, arg) < 0) {
