@@ -3,17 +3,8 @@
 # XXX defining CC and cross-compiling confuses OpenSSL's build.
 unset CC
 
-# Build and install hidapi.
 sudo mkdir /fakeroot
 sudo chmod 755 /fakeroot
-git clone git://github.com/signal11/hidapi
-cd hidapi
-git checkout hidapi-0.8.0-rc1
-./bootstrap
-./configure --host=i686-w64-mingw32 --prefix=/fakeroot
-make
-sudo make install
-cd ..
 
 cat << EOF > /tmp/mingw.cmake
 SET(CMAKE_SYSTEM_NAME Windows)

@@ -11,12 +11,11 @@ Build-Depends: debhelper (>= 9),
                mandoc,
                libcbor-dev,
                libssl-dev,
-               libhidapi-dev
 
 Package: libfido2-0
 Architecture: any
 Multi-Arch: same
-Depends: libcbor0, libhidapi-hidraw0, libssl1.1, ${shlibs:Depends}, ${misc:Depends}
+Depends: libcbor0, libssl1.1, ${shlibs:Depends}, ${misc:Depends}
 Description: library for generating and verifying FIDO 2.0 objects
  A library for communicating with a FIDO device over USB, and for verifying
  attestation and assertion signatures. FIDO U2F (CTAP 1) and FIDO 2.0 (CTAP 2)

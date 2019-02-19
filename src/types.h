@@ -138,8 +138,8 @@ typedef struct fido_dev_info {
 	char    *path;         /* device path */
 	int16_t  vendor_id;    /* 2-byte vendor id */
 	int16_t  product_id;   /* 2-byte product id */
-	wchar_t *manufacturer; /* manufacturer string */
-	wchar_t *product;      /* product string */
+	char    *manufacturer; /* manufacturer string */
+	char    *product;      /* product string */
 } fido_dev_info_t;
 
 PACKED_TYPE(fido_ctap_info_t,

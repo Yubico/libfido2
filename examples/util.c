@@ -18,7 +18,7 @@
 #include <unistd.h>
 #endif
 #ifdef _MSC_VER
-#include <io.h>
+#include "../openbsd-compat/posix_win.h"
 #endif
 
 #include "../openbsd-compat/openbsd-compat.h"
@@ -28,94 +28,6 @@
 #include "fido/rs256.h"
 #include "extern.h"
 
-#ifdef _MSC_VER
-int
-write_blob(const char *path, const unsigned char *ptr, size_t len)
-{
-	int fd, ok = -1;
-	int n;
-
-	if ((fd = open(path, O_WRONLY | O_CREAT, 0644)) < 0) {
-		warn("open %s", path);
-		goto fail;
-	}
-
-	if (len > UINT_MAX) {
-		warn("len %zu", len);
-		goto fail;
-	}
-	if ((n = write(fd, ptr, (unsigned int)len)) < 0) {
-		warn("write");
-		goto fail;
-	}
-	if ((size_t)n != len) {
-		warnx("write");
-		goto fail;
-	}
-
-	ok = 0;
-fail:
-	if (fd != -1) {
-		close(fd);
-	}
-
-	return (ok);
-}
-
-int
-read_blob(const char *path, unsigned char **ptr, size_t *len)
-{
-	int fd, ok = -1;
-	struct stat st;
-	int n;
-
-	*ptr = NULL;
-	*len = 0;
-
-	if ((fd = open(path, O_RDONLY)) < 0) {
-		warn("open %s", path);
-		goto fail;
-	}
-	if (fstat(fd, &st) < 0) {
-		warn("stat %s", path);
-		goto fail;
-	}
-	if (st.st_size < 0) {
-		warnx("stat %s: invalid size", path);
-		goto fail;
-	}
-	*len = (size_t)st.st_size;
-	if (*len > UINT_MAX) {
-		warn("len %zu", *len);
-		goto fail;
-	}
-	if ((*ptr = malloc(*len)) == NULL) {
-		warn("malloc");
-		goto fail;
-	}
-	if ((n = read(fd, *ptr, (unsigned int)*len)) < 0) {
-		warn("read");
-		goto fail;
-	}
-	if ((size_t)n != *len) {
-		warnx("read");
-		goto fail;
-	}
-
-	ok = 0;
-fail:
-	if (fd != -1) {
-		close(fd);
-	}
-	if (ok < 0) {
-		free(*ptr);
-		*ptr = NULL;
-		*len = 0;
-	}
-
-	return (ok);
-}
-#else
 int
 write_blob(const char *path, const unsigned char *ptr, size_t len)
 {
@@ -194,7 +106,6 @@ fail:
 
 	return (ok);
 }
-#endif /* _MSC_VER */
 
 EC_KEY *
 read_ec_pubkey(const char *path)

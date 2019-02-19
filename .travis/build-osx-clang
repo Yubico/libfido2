@@ -17,11 +17,10 @@ sudo mkdir /usr/local/sbin
 sudo chmod 775 /usr/local/sbin
 sudo chown travis:admin /usr/local/sbin
 
-# Install OpenSSL 1.1.1, hidapi, and mandoc from Homebrew.
+# Install OpenSSL 1.1.1 and mandoc from Homebrew.
 brew update
 brew upgrade openssl@1.1
 brew switch openssl@1.1 1.1.1b
-brew install hidapi
 brew install mandoc
 
 # Build and install libfido2.

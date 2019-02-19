@@ -23,17 +23,19 @@ add_definitions(-D_FIDO_MAJOR=${FIDO_MAJOR})
 add_definitions(-D_FIDO_MINOR=${FIDO_MINOR})
 add_definitions(-D_FIDO_PATCH=${FIDO_PATCH})
 
+if(WIN32)
+	add_definitions(-DWIN32_LEAN_AND_MEAN)
+endif()
+
 if(MSVC)
 	if((NOT CBOR_INCLUDE_DIRS) OR (NOT CBOR_LIBRARY_DIRS) OR
-	   (NOT CRYPTO_INCLUDE_DIRS) OR (NOT CRYPTO_LIBRARY_DIRS) OR
-	   (NOT HIDAPI_INCLUDE_DIRS) OR (NOT HIDAPI_LIBRARY_DIRS))
+	   (NOT CRYPTO_INCLUDE_DIRS) OR (NOT CRYPTO_LIBRARY_DIRS))
 		message(FATAL_ERROR "please provide definitions for "
-		    "{CBOR,CRYPTO,HIDAPI}_{INCLUDE,LIBRARY}_DIRS when building "
+		    "{CBOR,CRYPTO}_{INCLUDE,LIBRARY}_DIRS when building "
 		    "under msvc")
 	endif()
-	set(CBOR_LIBRARIES "cbor")
-	set(CRYPTO_LIBRARIES "crypto-44")
-	set(HIDAPI_LIBRARIES "hidapi")
+	set(CBOR_LIBRARIES cbor)
+	set(CRYPTO_LIBRARIES crypto-44)
 	set(MSVC_DISABLED_WARNINGS_LIST
 		"C4200" # nonstandard extension used: zero-sized array in
 			# struct/union;
@@ -62,14 +64,10 @@ else()
 	endif()
 
 	if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-		# Use hidapi's raw API.
-		pkg_search_module(HIDAPI hidapi-hidraw REQUIRED)
-		set(HIDAPI_NAME "hidapi-hidraw")
+		pkg_search_module(UDEV libudev REQUIRED)
+		set(UDEV_NAME "udev")
 		# Define be32toh().
 		add_definitions(-D_GNU_SOURCE)
-	else()
-		pkg_search_module(HIDAPI hidapi REQUIRED)
-		set(HIDAPI_NAME "hidapi")
 	endif()
 
 	# MinGW is stuck with a flavour of C89.
@@ -227,27 +225,25 @@ endif()
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CBOR_INCLUDE_DIRS})
 include_directories(${CRYPTO_INCLUDE_DIRS})
-include_directories(${HIDAPI_INCLUDE_DIRS})
 
 link_directories(${CBOR_LIBRARY_DIRS})
 link_directories(${CRYPTO_LIBRARY_DIRS})
-link_directories(${HIDAPI_LIBRARY_DIRS})
 
 message(STATUS "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
 message(STATUS "CMAKE_C_COMPILER_ID: ${CMAKE_C_COMPILER_ID}")
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "CMAKE_INSTALL_LIBDIR: ${CMAKE_INSTALL_LIBDIR}")
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
-message(STATUS "UDEV_RULES_DIR: ${UDEV_RULES_DIR}")
 message(STATUS "CBOR_INCLUDE_DIRS: ${CBOR_INCLUDE_DIRS}")
 message(STATUS "CBOR_LIBRARY_DIRS: ${CBOR_LIBRARY_DIRS}")
 message(STATUS "CBOR_LIBRARIES: ${CBOR_LIBRARIES}")
 message(STATUS "CRYPTO_INCLUDE_DIRS: ${CRYPTO_INCLUDE_DIRS}")
 message(STATUS "CRYPTO_LIBRARY_DIRS: ${CRYPTO_LIBRARY_DIRS}")
 message(STATUS "CRYPTO_LIBRARIES: ${CRYPTO_LIBRARIES}")
-message(STATUS "HIDAPI_INCLUDE_DIRS: ${HIDAPI_INCLUDE_DIRS}")
-message(STATUS "HIDAPI_LIBRARY_DIRS: ${HIDAPI_LIBRARY_DIRS}")
-message(STATUS "HIDAPI_LIBRARIES: ${HIDAPI_LIBRARIES}")
+message(STATUS "UDEV_INCLUDE_DIRS: ${UDEV_INCLUDE_DIRS}")
+message(STATUS "UDEV_LIBRARY_DIRS: ${UDEV_LIBRARY_DIRS}")
+message(STATUS "UDEV_LIBRARIES: ${UDEV_LIBRARIES}")
+message(STATUS "UDEV_RULES_DIR: ${UDEV_RULES_DIR}")
 message(STATUS "VERSION: ${FIDO_MAJOR}.${FIDO_MINOR}.${FIDO_PATCH}")
 message(STATUS "FUZZ: ${FUZZ}")
 

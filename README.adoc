@@ -50,8 +50,7 @@ Or from source, on UNIX-like systems:
 Depending on the platform, the PKG_CONFIG_PATH environment variable may need to
 be set.
 
-*libfido2* depends on https://github.com/signal11/hidapi[hidapi],
-https://github.com/pjk/libcbor[libcbor], and
+*libfido2* depends on https://github.com/pjk/libcbor[libcbor] and
 https://github.com/libressl-portable/portable[LibreSSL] (alternatively,
 https://www.openssl.org[OpenSSL] may be used).
 

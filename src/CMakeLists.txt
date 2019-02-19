@@ -27,6 +27,14 @@ list(APPEND FIDO_SOURCES
 	u2f.c
 )
 
+if(WIN32)
+	list(APPEND COMPAT_SOURCES hid_win.c)
+elseif(APPLE)
+	list(APPEND COMPAT_SOURCES hid_osx.c)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	list(APPEND COMPAT_SOURCES hid_linux.c)
+endif()
+
 list(APPEND COMPAT_SOURCES
 	../openbsd-compat/bsd-getpagesize.c
 	../openbsd-compat/explicit_bzero.c
@@ -43,9 +51,12 @@ endif()
 # static library
 add_library(fido2 STATIC ${FIDO_SOURCES} ${COMPAT_SOURCES})
 target_link_libraries(fido2 ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
-	${HIDAPI_LIBRARIES})
+	${UDEV_LIBRARIES})
 if(WIN32)
-	target_link_libraries(fido2 wsock32 ws2_32 bcrypt)
+	target_link_libraries(fido2 wsock32 ws2_32 bcrypt SetupAPI hid)
+elseif(APPLE)
+	target_link_libraries(fido2 "-framework CoreFoundation"
+		"-framework IOKit")
 endif()
 install(TARGETS fido2 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -54,9 +65,13 @@ install(TARGETS fido2 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 if(NOT MSVC)
 	add_library(fido2_shared SHARED ${FIDO_SOURCES} ${COMPAT_SOURCES})
 	target_link_libraries(fido2_shared ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
-		${HIDAPI_LIBRARIES})
+		${UDEV_LIBRARIES})
 	if(WIN32)
-		target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt)
+		target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
+			SetupAPI hid)
+	elseif(APPLE)
+		target_link_libraries(fido2_shared "-framework CoreFoundation"
+			"-framework IOKit")
 	endif()
 	set_target_properties(fido2_shared PROPERTIES OUTPUT_NAME fido2
 		VERSION ${FIDO_VERSION})

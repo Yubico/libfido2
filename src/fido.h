@@ -80,14 +80,16 @@ char **fido_cbor_info_extensions_ptr(const fido_cbor_info_t *);
 char **fido_cbor_info_options_name_ptr(const fido_cbor_info_t *);
 char **fido_cbor_info_versions_ptr(const fido_cbor_info_t *);
 const bool *fido_cbor_info_options_value_ptr(const fido_cbor_info_t *);
+const char *fido_assert_rp_id(const fido_assert_t *);
 const char *fido_assert_user_display_name(const fido_assert_t *, size_t);
 const char *fido_assert_user_icon(const fido_assert_t *, size_t);
 const char *fido_assert_user_name(const fido_assert_t *, size_t);
-const char *fido_assert_rp_id(const fido_assert_t *);
 const char *fido_cred_fmt(const fido_cred_t *);
 const char *fido_cred_rp_id(const fido_cred_t *);
 const char *fido_cred_rp_name(const fido_cred_t *);
+const char *fido_dev_info_manufacturer_string(const fido_dev_info_t *);
 const char *fido_dev_info_path(const fido_dev_info_t *);
+const char *fido_dev_info_product_string(const fido_dev_info_t *);
 const fido_dev_info_t *fido_dev_info_ptr(const fido_dev_info_t *, size_t);
 const uint8_t *fido_cbor_info_protocols_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cbor_info_aaguid_ptr(const fido_cbor_info_t *);
@@ -97,8 +99,6 @@ const unsigned char *fido_cred_id_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_pubkey_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_sig_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_x5c_ptr(const fido_cred_t *);
-const wchar_t *fido_dev_info_manufacturer_string(const fido_dev_info_t *);
-const wchar_t *fido_dev_info_product_string(const fido_dev_info_t *);
 
 int fido_assert_allow_cred(fido_assert_t *, const unsigned char *, size_t);
 int fido_assert_set_authdata(fido_assert_t *, size_t, const unsigned char *,

@@ -33,9 +33,8 @@ interface defines the I/O handlers used to talk to
 Its usage is optional.
 By default,
 .Em libfido2
-will use
-.Em libhidapi
-to talk to a FIDO device.
+will use the operating system's native HID interface to talk to
+a FIDO device.
 .Pp
 A
 .Vt fido_dev_io_open_t

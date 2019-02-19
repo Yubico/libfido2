@@ -8,6 +8,10 @@ list(APPEND COMPAT_SOURCES
 	../openbsd-compat/strlcpy.c
 )
 
+if(WIN32)
+	list(APPEND COMPAT_SOURCES ../openbsd-compat/posix_win.c)
+endif()
+
 # drop -rdynamic
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 
