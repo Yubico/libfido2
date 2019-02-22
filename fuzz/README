@@ -1,6 +1,10 @@
+This directory contains utility scripts to assist the fuzzing of libfido2. They
+are not meant to be used as-is, but rather as a starting point.
+
 To fuzz libfido2:
 
 - export AFL_HARDEN=1
 - Pass -DFUZZ=1 -DCMAKE_C_COMPILER=afl-clang to cmake and rebuild;
 - Use preload-snoop.c with a real device to obtain test vectors;
-- Fuzz using preload-fuzz.c to read device data from stdin.
+- Fuzz using preload-fuzz.c to read device data from stdin;
+- Use the 'report' script to compile coverage reports.

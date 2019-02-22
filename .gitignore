@@ -1,3 +1,3 @@
 build
 cscope.out
-fuzz/preload.so
+fuzz/*.so
