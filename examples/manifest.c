@@ -40,4 +40,6 @@ main(void)
 	}
 
 	fido_dev_info_free(&devlist, ndevs);
+
+	exit(0);
 }
