@@ -243,7 +243,7 @@ fido_hid_write_wrapper(void *handle, const unsigned char *buf, size_t len)
 fido_dev_info_t *
 fido_dev_info_new(size_t n)
 {
-	return (recallocarray(NULL, 0, n, sizeof(fido_dev_info_t)));
+	return (calloc(n, sizeof(fido_dev_info_t)));
 }
 
 void

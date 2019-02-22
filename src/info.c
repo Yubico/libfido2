@@ -36,7 +36,7 @@ decode_versions(const cbor_item_t *item, fido_str_array_t *v)
 		return (-1);
 	}
 
-	v->ptr = recallocarray(NULL, 0, cbor_array_size(item), sizeof(char *));
+	v->ptr = calloc(cbor_array_size(item), sizeof(char *));
 	if (v->ptr == NULL)
 		return (-1);
 
@@ -77,7 +77,7 @@ decode_extensions(const cbor_item_t *item, fido_str_array_t *e)
 		return (-1);
 	}
 
-	e->ptr = recallocarray(NULL, 0, cbor_array_size(item), sizeof(char *));
+	e->ptr = calloc(cbor_array_size(item), sizeof(char *));
 	if (e->ptr == NULL)
 		return (-1);
 
@@ -142,8 +142,8 @@ decode_options(const cbor_item_t *item, fido_opt_array_t *o)
 		return (-1);
 	}
 
-	o->name = recallocarray(NULL, 0, cbor_map_size(item), sizeof(char *));
-	o->value = recallocarray(NULL, 0, cbor_map_size(item), sizeof(bool));
+	o->name = calloc(cbor_map_size(item), sizeof(char *));
+	o->value = calloc(cbor_map_size(item), sizeof(bool));
 	if (o->name == NULL || o->value == NULL)
 		return (-1);
 
@@ -210,7 +210,7 @@ decode_protocols(const cbor_item_t *item, fido_byte_array_t *p)
 		return (-1);
 	}
 
-	p->ptr = recallocarray(NULL, 0, cbor_array_size(item), sizeof(uint8_t));
+	p->ptr = calloc(cbor_array_size(item), sizeof(uint8_t));
 	if (p->ptr == NULL)
 		return (-1);
 
