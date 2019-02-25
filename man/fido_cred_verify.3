@@ -36,6 +36,19 @@ have been attested by the holder of the private counterpart of
 the public key contained in the credential's x509 certificate.
 .Pp
 Please note that the x509 certificate itself is not verified.
+.Pp
+The attestation statement formats supported by
+.Fn fido_cred_verify
+are
+.Em packed
+and
+.Em fido-u2f .
+The attestation type implemented by
+.Fn fido_cred_verify
+is
+.Em Basic Attestation .
+The attestation key pair is assumed to be of the type ES256.
+Other attestation formats and types are not supported.
 .Sh RETURN VALUES
 The error codes returned by
 .Fn fido_cred_verify
