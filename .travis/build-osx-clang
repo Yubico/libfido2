@@ -20,7 +20,7 @@ sudo chown travis:admin /usr/local/sbin
 # Install OpenSSL 1.1.1, hidapi, and mandoc from Homebrew.
 brew update
 brew upgrade openssl@1.1
-brew switch openssl@1.1 1.1.1a
+brew switch openssl@1.1 1.1.1b
 brew install hidapi
 brew install mandoc
 
