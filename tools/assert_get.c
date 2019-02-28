@@ -158,11 +158,11 @@ assert_get(int argc, char **argv)
 
 	fido_init(debug ? FIDO_DEBUG : 0);
 
+	assert = prepare_assert(in_f, rk, up, uv, debug);
+
 	dev = open_dev(argv[0]);
 	if (u2f)
 		fido_dev_force_u2f(dev);
-
-	assert = prepare_assert(in_f, rk, up, uv, debug);
 
 	if (uv) {
 		r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ",

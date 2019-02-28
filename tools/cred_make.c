@@ -172,11 +172,11 @@ cred_make(int argc, char **argv)
 
 	fido_init(debug ? FIDO_DEBUG : 0);
 
+	cred = prepare_cred(in_f, type, rk, uv, debug);
+
 	dev = open_dev(argv[0]);
 	if (u2f)
 		fido_dev_force_u2f(dev);
-
-	cred = prepare_cred(in_f, type, rk, uv, debug);
 
 	r = fido_dev_make_cred(dev, cred, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED && !quiet) {
