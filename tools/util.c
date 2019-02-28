@@ -46,8 +46,12 @@ open_read(const char *file)
 	int fd;
 	FILE *f;
 
-	if (file == NULL || strcmp(file, "-") == 0)
+	if (file == NULL || strcmp(file, "-") == 0) {
+#ifdef FIDO_FUZZ
+		setvbuf(stdin, NULL, _IONBF, 0);
+#endif
 		return (stdin);
+	}
 	if ((fd = open(file, O_RDONLY)) < 0)
 		err(1, "open %s", file);
 	if ((f = fdopen(fd, "r")) == NULL)
