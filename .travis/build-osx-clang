@@ -13,7 +13,7 @@ sudo make -C build install
 cd ..
 
 # Prepare the ground for Homebrew.
-sudo mkdir /usr/local/sbin
+ls -ld /usr/local/sbin
 sudo chmod 775 /usr/local/sbin
 sudo chown travis:admin /usr/local/sbin
 
