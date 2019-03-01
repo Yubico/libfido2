@@ -12,11 +12,6 @@ make -C build
 sudo make -C build install
 cd ..
 
-# Prepare the ground for Homebrew.
-ls -ld /usr/local/sbin
-sudo chmod 775 /usr/local/sbin
-sudo chown travis:admin /usr/local/sbin
-
 # Install OpenSSL 1.1.1 and mandoc from Homebrew.
 brew update
 brew upgrade openssl@1.1
