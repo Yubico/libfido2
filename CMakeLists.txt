@@ -70,9 +70,10 @@ else()
 		add_definitions(-D_GNU_SOURCE)
 	endif()
 
-	# MinGW is stuck with a flavour of C89.
 	if(MINGW)
+		# MinGW is stuck with a flavour of C89.
 		add_definitions(-DFIDO_NO_DIAGNOSTIC)
+		add_definitions(-DWC_ERR_INVALID_CHARS=0x80)
 	endif()
 	# fuzz instrumentation
 	if(FUZZ)

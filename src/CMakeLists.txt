@@ -53,7 +53,11 @@ add_library(fido2 STATIC ${FIDO_SOURCES} ${COMPAT_SOURCES})
 target_link_libraries(fido2 ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
 	${UDEV_LIBRARIES})
 if(WIN32)
-	target_link_libraries(fido2 wsock32 ws2_32 bcrypt SetupAPI hid)
+	if (MINGW)
+		target_link_libraries(fido2 wsock32 ws2_32 bcrypt setupapi hid)
+	else()
+		target_link_libraries(fido2 wsock32 ws2_32 bcrypt SetupAPI hid)
+	endif()
 elseif(APPLE)
 	target_link_libraries(fido2 "-framework CoreFoundation"
 		"-framework IOKit")
@@ -67,8 +71,13 @@ if(NOT MSVC)
 	target_link_libraries(fido2_shared ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
 		${UDEV_LIBRARIES})
 	if(WIN32)
-		target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
-			SetupAPI hid)
+		if (MINGW)
+			target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
+				setupapi hid)
+		else()
+			target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
+				SetupAPI hid)
+		endif()
 	elseif(APPLE)
 		target_link_libraries(fido2_shared "-framework CoreFoundation"
 			"-framework IOKit")
