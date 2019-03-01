@@ -1,0 +1,68 @@
+#!/bin/bash
+# Copyright (c) 2019 Yubico AB. All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+T=""
+T+=" harnesses/assert"
+T+=" harnesses/assert-rsa-h-p"
+T+=" harnesses/assert-u2f"
+T+=" harnesses/cred"
+T+=" harnesses/cred-rsa-h-p"
+T+=" harnesses/cred-u2f"
+T+=" harnesses/cred-u2f-exclude"
+T+=" harnesses/fido2-assert-G"
+T+=" harnesses/fido2-assert-V"
+T+=" harnesses/fido2-cred-M"
+T+=" harnesses/fido2-cred-V"
+T+=" harnesses/fido2-token-I"
+
+clean() {
+	echo cleaning
+	rm -rf obj
+	mkdir obj
+}
+
+build() {
+	echo building
+	mkdir obj/build
+	(cd obj/build && \
+		CC=clang CFLAGS="-fprofile-instr-generate -fcoverage-mapping" \
+		cmake -DFUZZ=1 ../../..) 2>/dev/null 1>&2
+	make -C obj/build 2>/dev/null 1>&2
+	cc -fPIC -D_GNU_SOURCE -shared -o obj/preload-fuzz.so preload-fuzz.c
+}
+
+sync() {
+	for t in ${T}; do
+		echo syncing ${t}
+		(cd obj && ../${t} sync)
+	done
+}
+
+run() {
+	export LLVM_PROFILE_FILE="profraw/%h-%p.profraw"
+	export PRELOAD=$(realpath obj/preload-fuzz.so)
+
+	for t in ${T}; do
+		echo running ${t}
+		(cd obj && ../${t} run)
+	done
+}
+
+merge() {
+	echo merging
+	(cd obj && \
+		llvm-profdata merge -sparse profraw/*.profraw \
+			-o libfido2.profdata &&
+		llvm-cov show -format=html build/src/libfido2.so \
+			-instr-profile=libfido2.profdata > report.html &&
+		llvm-cov report build/src/libfido2.so \
+			-instr-profile=libfido2.profdata > report.txt)
+}
+
+clean
+build
+sync
+run
+merge

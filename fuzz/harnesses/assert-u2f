@@ -1,0 +1,32 @@
+#!/bin/bash
+# Copyright (c) 2019 Yubico AB. All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+T=assert-u2f
+
+sync() {
+	mkdir ${T}
+	rsync -az fuzzy:${T}/afl-out/queue fuzzy:${T}/cred_id \
+		fuzzy:${T}/pubkey ${T}
+}
+
+run() {
+	find ${T}/queue -type f | while read f; do
+		cat "${f}" | LD_PRELOAD=${PRELOAD} build/examples/assert -up \
+			-a ${T}/cred_id ${T}/pubkey nodev 2>/dev/null 1>&2
+	done
+}
+
+case "$1" in
+sync)
+	sync
+	;;
+run)
+	run
+	exit 0
+	;;
+*)
+	echo unknown command "$1"
+	exit 1
+esac
