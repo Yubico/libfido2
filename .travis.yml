@@ -15,6 +15,7 @@ matrix:
             - clang-6.0
             - cmake
             - libssl-dev
+            - libudev-dev
       script: /bin/sh -eux .travis/build-linux-clang
     - os: linux
       compiler: gcc-7
@@ -28,6 +29,7 @@ matrix:
             - gcc-7
             - cmake
             - libssl-dev
+            - libudev-dev
       script: /bin/sh -eux .travis/build-linux-gcc
     - os: linux
       compiler: i686-w64-mingw32-gcc-4.8
