@@ -65,11 +65,11 @@ int add_cbor_pin_params(fido_dev_t *, const fido_blob_t *, const es256_pk_t *,
 int buf_read(const unsigned char **, size_t *, void *, size_t);
 int buf_write(unsigned char **, size_t *, const void *, size_t);
 
-/* hid i/o wrappers */
-void *fido_hid_open_wrapper(const char *);
-void  fido_hid_close_wrapper(void *);
-int   fido_hid_read_wrapper(void *, unsigned char *, size_t, int);
-int   fido_hid_write_wrapper(void *, const unsigned char *, size_t);
+/* hid i/o */
+void *hid_open(const char *);
+void  hid_close(void *);
+int   hid_read(void *, unsigned char *, size_t, int);
+int   hid_write(void *, const unsigned char *, size_t);
 
 /* generic i/o */
 int rx(fido_dev_t *, uint8_t, void *, size_t, int);

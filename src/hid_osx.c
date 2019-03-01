@@ -250,7 +250,7 @@ fail:
 }
 
 void *
-fido_hid_open_wrapper(const char *path)
+hid_open(const char *path)
 {
 	io_registry_entry_t	 entry = MACH_PORT_NULL;
 	struct dev		*dev = NULL;
@@ -311,7 +311,7 @@ fail:
 }
 
 void
-fido_hid_close_wrapper(void *handle)
+hid_close(void *handle)
 {
 	struct dev *dev = handle;
 
@@ -344,7 +344,7 @@ read_callback(void *context, IOReturn result, void *dev, IOHIDReportType type,
 }
 
 int
-fido_hid_read_wrapper(void *handle, unsigned char *buf, size_t len, int ms)
+hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct dev		*dev = handle;
 	CFRunLoopRunResult	r;
@@ -378,7 +378,7 @@ fido_hid_read_wrapper(void *handle, unsigned char *buf, size_t len, int ms)
 }
 
 int
-fido_hid_write_wrapper(void *handle, const unsigned char *buf, size_t len)
+hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	struct dev *dev = handle;
 

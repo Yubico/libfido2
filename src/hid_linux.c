@@ -283,7 +283,7 @@ fail:
 }
 
 void *
-fido_hid_open_wrapper(const char *path)
+hid_open(const char *path)
 {
 	int *fd;
 
@@ -297,7 +297,7 @@ fido_hid_open_wrapper(const char *path)
 }
 
 void
-fido_hid_close_wrapper(void *handle)
+hid_close(void *handle)
 {
 	int *fd = handle;
 
@@ -306,7 +306,7 @@ fido_hid_close_wrapper(void *handle)
 }
 
 int
-fido_hid_read_wrapper(void *handle, unsigned char *buf, size_t len, int ms)
+hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	int	*fd = handle;
 	ssize_t	 r;
@@ -325,7 +325,7 @@ fido_hid_read_wrapper(void *handle, unsigned char *buf, size_t len, int ms)
 }
 
 int
-fido_hid_write_wrapper(void *handle, const unsigned char *buf, size_t len)
+hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	int	*fd = handle;
 	ssize_t	 r;
