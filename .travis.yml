@@ -3,23 +3,23 @@ language: c
 matrix:
   include:
     - os: linux
-      compiler: clang-6.0
-      dist: trusty
+      compiler: clang-7.0
+      dist: xenial
       sudo: required
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-6.0
+            - llvm-toolchain-xenial-7.0
           packages:
-            - clang-6.0
+            - clang-7.0
             - cmake
             - libssl-dev
             - libudev-dev
       script: /bin/sh -eux .travis/build-linux-clang
     - os: linux
       compiler: gcc-7
-      dist: trusty
+      dist: xenial
       sudo: required
       addons:
         apt:
@@ -33,7 +33,7 @@ matrix:
       script: /bin/sh -eux .travis/build-linux-gcc
     - os: linux
       compiler: i686-w64-mingw32-gcc-4.8
-      dist: trusty
+      dist: xenial
       sudo: required
       addons:
         apt:
