@@ -13,7 +13,7 @@ sync() {
 run() {
 	find ${T}/queue -type f | while read f; do
 		cat "${f}" | LD_PRELOAD=${PRELOAD} build/tools/fido2-cred -V \
-			-q -o cred 2>/dev/null 1>&2
+			-o cred 2>/dev/null 1>&2
 	done
 }
 

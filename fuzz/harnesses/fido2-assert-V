@@ -12,8 +12,8 @@ sync() {
 
 run() {
 	find ${T}/queue -type f | while read f; do
-		cat "${f}" | LD_PRELOAD=${PRELOAD} build/tools/fido2-assert- \
-			V pubkey es256 2>/dev/null 1>&2
+		cat "${f}" | LD_PRELOAD=${PRELOAD} build/tools/fido2-assert -V \
+			pubkey es256 2>/dev/null 1>&2
 	done
 }
 
