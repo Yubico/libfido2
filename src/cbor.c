@@ -29,6 +29,9 @@ check_key_type(cbor_item_t *item)
 static int
 ctap_check_cbor(cbor_item_t *prev, cbor_item_t *curr)
 {
+	size_t	curr_len;
+	size_t	prev_len;
+
 	if (check_key_type(prev) < 0 || check_key_type(curr) < 0)
 		return (-1);
 
@@ -44,9 +47,12 @@ ctap_check_cbor(cbor_item_t *prev, cbor_item_t *curr)
 		    cbor_get_int(curr) > cbor_get_int(prev))
 			return (0);
 	} else {
-		if (cbor_string_length(curr) > cbor_string_length(prev) ||
+		curr_len = cbor_string_length(curr);
+		prev_len = cbor_string_length(prev);
+
+		if (curr_len > prev_len || (curr_len == prev_len &&
 		    memcmp(cbor_string_handle(prev), cbor_string_handle(curr),
-		    cbor_string_length(prev)) < 0)
+		    curr_len) < 0))
 			return (0);
 	}
 
