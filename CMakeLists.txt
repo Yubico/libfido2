@@ -91,14 +91,17 @@ else()
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic-errors")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-all")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g2")
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer")
+
 	if(FUZZ)
 		# -fsanitize-trap=undefined is a superset of -ftrapv
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-trap=undefined")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 	endif()
-	#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ftrapv")
-	#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+
 endif()
 
 # Use -Wshorten-64-to-32 if available.
