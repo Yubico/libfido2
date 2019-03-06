@@ -96,9 +96,8 @@ else()
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer")
 
 	if(FUZZ)
-		# -fsanitize-trap=undefined is a superset of -ftrapv
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-trap=undefined")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=alignment,bounds,undefined")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-trap=alignment,bounds,undefined")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 	endif()
 
