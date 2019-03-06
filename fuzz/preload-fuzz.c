@@ -6,7 +6,7 @@
 
 /*
  * cc -fPIC -D_GNU_SOURCE -shared -o preload-fuzz.so preload-fuzz.c
- * LD_PRELOAD=$(realpath preload.so)
+ * LD_PRELOAD=$(realpath preload-fuzz.so)
  */
 
 #include <sys/types.h>

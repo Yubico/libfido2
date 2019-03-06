@@ -78,6 +78,7 @@ else()
 	# fuzz instrumentation
 	if(FUZZ)
 		add_definitions(-DFIDO_FUZZ)
+		set(CMAKE_BUILD_TYPE "Debug")
 	endif()
 
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
@@ -95,12 +96,13 @@ else()
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g2")
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer")
 
-	if(FUZZ)
+	if(AFL)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=alignment,bounds,undefined")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-trap=alignment,bounds,undefined")
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+	elseif(LIBFUZZER)
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=alignment,bounds,memory,undefined")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-memory-track-origins")
 	endif()
-
 endif()
 
 # Use -Wshorten-64-to-32 if available.
@@ -175,9 +177,11 @@ if(HAVE_MEMSET_S)
 endif()
 
 # explicit_bzero
-check_function_exists(explicit_bzero HAVE_EXPLICIT_BZERO)
-if(HAVE_EXPLICIT_BZERO)
-	add_definitions(-DHAVE_EXPLICIT_BZERO)
+if(NOT LIBFUZZER)
+	check_function_exists(explicit_bzero HAVE_EXPLICIT_BZERO)
+	if(HAVE_EXPLICIT_BZERO)
+		add_definitions(-DHAVE_EXPLICIT_BZERO)
+	endif()
 endif()
 
 # timingsafe_bcmp

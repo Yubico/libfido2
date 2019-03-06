@@ -1,10 +1,38 @@
-This directory contains utility scripts to assist the fuzzing of libfido2. They
-are not meant to be used as-is, but rather as a starting point.
+libfido2 can be fuzzed using AFL or libFuzzer.
 
-To fuzz libfido2:
+To fuzz libfido2 using AFL:
 
-- export AFL_HARDEN=1
-- Pass -DFUZZ=1 -DCMAKE_C_COMPILER=afl-clang to cmake and rebuild;
-- Use preload-snoop.c with a real device to obtain test vectors;
-- Fuzz using preload-fuzz.c to read device data from stdin;
-- Use the 'report' script to compile coverage reports.
+- export AFL_HARDEN=1;
+- Pass -DFUZZ=1 -DAFL=1 -DCMAKE_C_COMPILER=afl-clang to CMake and rebuild;
+- Use preload-snoop.c with a real device to build an initial corpus;
+- Fuzz using preload-fuzz.c to read device data from stdin.
+
+The provided AFL harnesses fuzz the path from the authenticator to the library.
+
+To fuzz libfido2 using libFuzzer:
+
+- Make sure you have libcbor built with -fsanitize=memory and the diff below;
+- Make sure you have OpenSSL built with -fsanitize=memory;
+- Pass -DFUZZ=1 -DLIBFUZZER=1 -DCMAKE_C_COMPILER=clang to CMake and rebuild.
+
+A set of harnesses and auxiliary scripts can be found under harnesses/. To
+compile coverage reports, adjust the harnesses to your setup and run 'report'.
+
+diff --git a/src/cbor/internal/memory_utils.c b/src/cbor/internal/memory_utils.c
+index aa049a2..e294b38 100644
+--- a/src/cbor/internal/memory_utils.c
++++ b/src/cbor/internal/memory_utils.c
+@@ -27,9 +27,12 @@ bool _cbor_safe_to_multiply(size_t a, size_t b) {
+ }
+ 
+ void* _cbor_alloc_multiple(size_t item_size, size_t item_count) {
+   if (_cbor_safe_to_multiply(item_size, item_count)) {
+-    return _CBOR_MALLOC(item_size * item_count);
++    if (item_count > 1000) {
++      return NULL;
++    } else
++      return _CBOR_MALLOC(item_size * item_count);
+   } else {
+     return NULL;
+   }
+ }

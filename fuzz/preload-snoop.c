@@ -6,7 +6,7 @@
 
 /*
  * cc -fPIC -D_GNU_SOURCE -shared -o preload-snoop.so preload-snoop.c
- * LD_PRELOAD=$(realpath preload.so)
+ * LD_PRELOAD=$(realpath preload-snoop.so)
  */
 
 #include <sys/types.h>
