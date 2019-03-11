@@ -3,7 +3,8 @@ libfido2 can be fuzzed using AFL or libFuzzer.
 To fuzz libfido2 using AFL:
 
 - export AFL_HARDEN=1;
-- Pass -DFUZZ=1 -DAFL=1 -DCMAKE_C_COMPILER=afl-clang to CMake and rebuild;
+- Pass -DFUZZ=1 -DAFL=1 -DCMAKE_C_COMPILER=afl-clang -DCMAKE_BUILD_TYPE=Debug
+  to CMake and rebuild;
 - Use preload-snoop.c with a real device to build an initial corpus;
 - Fuzz using preload-fuzz.c to read device data from stdin.
 
@@ -11,19 +12,132 @@ The provided AFL harnesses fuzz the path from the authenticator to the library.
 
 To fuzz libfido2 using libFuzzer:
 
+1. Using ASAN
+
+- Make sure you have libcbor built with -fsanitize=address and the diff below;
+- Make sure you have OpenSSL built with -fsanitize=address;
+- Pass -DFUZZ=1 -DLIBFUZZER=1 -DASAN=1 -DCMAKE_C_COMPILER=clang
+  -DCMAKE_BUILD_TYPE=Debug to CMake and rebuild.
+
+1.1 Decide where your workspace will live
+
+$ export FAKEROOT=/home/pedro/fakeroot
+$ mkdir -p ${FAKEROOT}/src
+
+1.2 Building libcbor with ASAN
+
+$ git clone https://github.com/pjk/libcbor ${FAKEROOT}/src/libcbor
+$ cd ${FAKEROOT}/src/libcbor
+
+Assuming libfido2 is under ${FAKEROOT}/src/libfido2:
+
+$ patch -p0 < ${FAKEROOT}/src/libfido2/fuzz/README
+$ mkdir build
+$ cd build
+$ cmake -DCMAKE_C_FLAGS_DEBUG="-g2 -fno-omit-frame-pointer" \
+	-DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug \
+	-DCMAKE_INSTALL_PREFIX=${FAKEROOT} -DSANITIZE=ON \
+	-DCMAKE_INSTALL_LIBDIR=lib ..
+$ make
+$ make install
+
+1.3 Building OpenSSL with ASAN
+
+$ git clone https://github.com/openssl/openssl ${FAKEROOT}/src/openssl
+$ cd ${FAKEROOT}/src/openssl
+$ ./Configure linux-x86_64-clang enable-asan --prefix=${FAKEROOT} \
+	--openssldir=${FAKEROOT}/openssl
+$ make clean
+$ make
+$ make install_sw
+
+1.4 Building libfido2 with libFuzzer and ASAN
+
+$ cd ${FAKEROOT}/src/libfido2
+$ mkdir build
+$ cd build
+$ cmake -DFUZZ=1 -DLIBFUZZER=1 -DASAN=1 -DCMAKE_C_COMPILER=clang \
+	-DCRYPTO_INCLUDE_DIRS=${FAKEROOT}/include \
+	-DCRYPTO_LIBRARY_DIRS=${FAKEROOT}/lib \
+	-DCBOR_INCLUDE_DIRS=${FAKEROOT}/include \
+	-DCBOR_LIBRARY_DIRS=${FAKEROOT}/lib \
+	-DCMAKE_BUILD_TYPE=Debug ..
+$ make
+
+2. Using MSAN
+
 - Make sure you have libcbor built with -fsanitize=memory and the diff below;
 - Make sure you have OpenSSL built with -fsanitize=memory;
-- Pass -DFUZZ=1 -DLIBFUZZER=1 -DCMAKE_C_COMPILER=clang to CMake and rebuild.
+- Pass -DFUZZ=1 -DLIBFUZZER=1 -DMSAN=1 -DCMAKE_C_COMPILER=clang
+  -DCMAKE_BUILD_TYPE=Debug to CMake and rebuild.
+
+2.1 Decide where your workspace will live
+
+$ export FAKEROOT=/home/pedro/fakeroot
+$ mkdir -p ${FAKEROOT}/src
+
+2.2 Building libcbor with MSAN
+
+$ git clone https://github.com/pjk/libcbor ${FAKEROOT}/src/libcbor
+$ cd ${FAKEROOT}/src/libcbor
+
+Assuming libfido2 is under ${FAKEROOT}/src/libfido2:
+
+$ patch -p0 < ${FAKEROOT}/src/libfido2/fuzz/README
+$ mkdir build
+$ cd build
+$ cmake -DCMAKE_C_FLAGS_DEBUG="-fsanitize=memory,undefined -g2 -fno-omit-frame-pointer" \  
+	-DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug \
+	-DCMAKE_INSTALL_PREFIX=${FAKEROOT} -DSANITIZE=OFF \
+	-DCMAKE_INSTALL_LIBDIR=lib ..
+$ make
+$ make install
+
+2.2 Building OpenSSL with MSAN
+
+$ mkdir -p ${FAKEROOT}/src
+$ git clone https://github.com/openssl/openssl ${FAKEROOT}/src/openssl
+$ cd ${FAKEROOT}/src/openssl
+$ ./Configure linux-x86_64-clang enable-msan --prefix=${FAKEROOT} \
+	--openssldir=${FAKEROOT}/openssl
+$ make clean
+$ make
+$ make install_sw
+
+2.3 Building libfido2 with libFuzzer and MSAN
+
+$ cd ${FAKEROOT}/src/libfido2
+$ mkdir build
+$ cd build
+$ cmake -DFUZZ=1 -DLIBFUZZER=1 -DMSAN=1 -DCMAKE_C_COMPILER=clang \
+	-DCRYPTO_INCLUDE_DIRS=${FAKEROOT}/include \
+	-DCRYPTO_LIBRARY_DIRS=${FAKEROOT}/lib \
+	-DCBOR_INCLUDE_DIRS=${FAKEROOT}/include \
+	-DCBOR_LIBRARY_DIRS=${FAKEROOT}/lib \
+	-DCMAKE_BUILD_TYPE=Debug ..
+$ make
 
 A set of harnesses and auxiliary scripts can be found under harnesses/. To
 compile coverage reports, adjust the harnesses to your setup and run 'report'.
 
-diff --git a/src/cbor/internal/memory_utils.c b/src/cbor/internal/memory_utils.c
+diff --git src/cbor.c src/cbor.c
+index c2c4d47..179e2b6 100644
+--- src/cbor.c
++++ src/cbor.c
+@@ -92,7 +92,7 @@ cbor_item_t *cbor_load(cbor_data source, size_t source_size,
+         }
+     }
+ 
+-    printf("\nres: %d\n", context.syntax_error);
++    /* printf("\nres: %d\n", context.syntax_error); */
+ 
+     if (context.creation_failed) {
+       /* Most likely unsuccessful allocation - our callback has failed */
+diff --git src/cbor/internal/memory_utils.c src/cbor/internal/memory_utils.c
 index aa049a2..e294b38 100644
---- a/src/cbor/internal/memory_utils.c
-+++ b/src/cbor/internal/memory_utils.c
-@@ -27,9 +27,12 @@ bool _cbor_safe_to_multiply(size_t a, size_t b) {
- }
+--- src/cbor/internal/memory_utils.c
++++ src/cbor/internal/memory_utils.c
+@@ -28,7 +28,10 @@ bool _cbor_safe_to_multiply(size_t a, size_t b) {
  
  void* _cbor_alloc_multiple(size_t item_size, size_t item_count) {
    if (_cbor_safe_to_multiply(item_size, item_count)) {
@@ -35,4 +149,3 @@ index aa049a2..e294b38 100644
    } else {
      return NULL;
    }
- }
