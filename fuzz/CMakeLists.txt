@@ -10,6 +10,6 @@ if(LIBFUZZER)
 	# fuzz_cred
 	add_executable(fuzz_cred fuzz_cred.c mutator_aux.c ${COMPAT_SOURCES})
 	target_compile_options(fuzz_cred PRIVATE "-fsanitize=fuzzer")
-	target_link_options(fuzz_cred PRIVATE "-fsanitize=fuzzer")
+	set_target_properties(fuzz_cred PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
 	target_link_libraries(fuzz_cred fido2_shared)
 endif()
