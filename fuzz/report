@@ -28,9 +28,8 @@ clean() {
 build() {
 	echo building
 	mkdir obj/build
-	(cd obj/build && \
-		CC=clang CFLAGS="-fprofile-instr-generate -fcoverage-mapping" \
-		cmake -DFUZZ=1 ../../..) 2>/dev/null 1>&2
+	(cd obj/build && cmake -DFUZZ=1 -DLIBFUZZER=1 -DCMAKE_C_COMPILER=clang \
+		-DCOVERAGE=1 -DCMAKE_BUILD_TYPE=Debug ../../..) 2>/dev/null 1>&2
 	make -C obj/build 2>/dev/null 1>&2
 	cc -fPIC -D_GNU_SOURCE -shared -o obj/preload-fuzz.so preload-fuzz.c
 }
