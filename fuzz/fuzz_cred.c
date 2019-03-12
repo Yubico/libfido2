@@ -272,6 +272,15 @@ serialize(uint8_t *ptr, size_t len, const struct param *p)
 	return (max - len);
 }
 
+static void
+consume(const uint8_t *ptr, size_t len)
+{
+	volatile uint8_t x = 0;
+
+	while (len--)
+		x ^= *ptr++;
+}
+ 
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
@@ -306,7 +315,10 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	fido_cred_set_x509(cred, p.x509.body, p.x509.len);
 	fido_cred_set_sig(cred, p.sig.body, p.sig.len);
 
-	assert(fido_cred_verify(cred) != FIDO_OK);
+	fido_cred_verify(cred);
+
+	consume(fido_cred_pubkey_ptr(cred), fido_cred_pubkey_len(cred));
+	consume(fido_cred_id_ptr(cred), fido_cred_id_len(cred));
 
 	fido_cred_free(&cred);
 
