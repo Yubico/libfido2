@@ -1,0 +1,29 @@
+#!/bin/bash
+# Copyright (c) 2019 Yubico AB. All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+T=fuzz_assert
+
+sync() {
+	mkdir ${T}
+	rsync -az fuzzier:${T}/corpus ${T}
+}
+
+run() {
+	ASAN_OPTIONS=allocator_may_return_null=1 build/fuzz/fuzz_assert \
+		-runs=1 ${T}/corpus 2>/dev/null 1>&2
+}
+
+case "$1" in
+sync)
+	sync
+	;;
+run)
+	run
+	exit 0
+	;;
+*)
+	echo unknown command "$1"
+	exit 1
+esac
