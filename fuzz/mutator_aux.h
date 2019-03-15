@@ -29,21 +29,34 @@
 #endif
 
 #define MAXSTR	1024
-#define MAXBLOB	1024
+#define MAXBLOB	2048
 
 struct blob {
-	uint8_t body[MAXBLOB];
-	size_t len;
+	uint8_t	body[MAXBLOB];
+	size_t	len;
 };
 
-int deserialize_blob(uint8_t, uint8_t **, size_t *, struct blob *);
-int deserialize_bool(uint8_t, uint8_t **, size_t *, bool *);
-int deserialize_int(uint8_t, uint8_t **, size_t *, int *);
-int deserialize_string(uint8_t, uint8_t **, size_t *, char *);
+void consume(const uint8_t *, size_t);
 
-int serialize_blob(uint8_t, uint8_t **, size_t *, const struct blob *);
-int serialize_bool(uint8_t, uint8_t **, size_t *, bool);
-int serialize_int(uint8_t, uint8_t **, size_t *, int);
-int serialize_string(uint8_t, uint8_t **, size_t *, const char *);
+int unpack_blob(uint8_t, uint8_t **, size_t *, struct blob *);
+int unpack_byte(uint8_t, uint8_t **, size_t *, uint8_t *);
+int unpack_int(uint8_t, uint8_t **, size_t *, int *);
+int unpack_string(uint8_t, uint8_t **, size_t *, char *);
+
+int pack_blob(uint8_t, uint8_t **, size_t *, const struct blob *);
+int pack_byte(uint8_t, uint8_t **, size_t *, uint8_t);
+int pack_int(uint8_t, uint8_t **, size_t *, int);
+int pack_string(uint8_t, uint8_t **, size_t *, const char *);
+
+void mutate_byte(uint8_t *);
+void mutate_int(int *);
+void mutate_blob(struct blob *);
+void mutate_string(char *);
+
+void * dev_open(const char *);
+void dev_close(void *);
+void set_wire_data(uint8_t *, size_t);
+int dev_read(void *, unsigned char *, size_t, int);
+int dev_write(void *, const unsigned char *, size_t);
 
 #endif /* !_MUTATOR_AUX_H */

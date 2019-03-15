@@ -4,7 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
-#include <stdbool.h>
+#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -13,8 +13,22 @@
 
 #include "mutator_aux.h"
 
+size_t LLVMFuzzerMutate(uint8_t *, size_t, size_t);
+
+static uint8_t *wire_data_ptr = NULL;
+static size_t   wire_data_len = 0;
+
+void
+consume(const uint8_t *ptr, size_t len)
+{
+	volatile uint8_t x = 0;
+
+	while (len--)
+		x ^= *ptr++;
+}
+
 int
-deserialize_int(uint8_t t, uint8_t **ptr, size_t *len, int *v) NO_MSAN
+unpack_int(uint8_t t, uint8_t **ptr, size_t *len, int *v) NO_MSAN
 {
 	size_t l;
 
@@ -42,7 +56,7 @@ deserialize_int(uint8_t t, uint8_t **ptr, size_t *len, int *v) NO_MSAN
 }
 
 int
-deserialize_string(uint8_t t, uint8_t **ptr, size_t *len, char *v) NO_MSAN
+unpack_string(uint8_t t, uint8_t **ptr, size_t *len, char *v) NO_MSAN
 {
 	size_t l;
 
@@ -72,7 +86,7 @@ deserialize_string(uint8_t t, uint8_t **ptr, size_t *len, char *v) NO_MSAN
 }
 
 int
-deserialize_bool(uint8_t t, uint8_t **ptr, size_t *len, bool *v) NO_MSAN
+unpack_byte(uint8_t t, uint8_t **ptr, size_t *len, uint8_t *v) NO_MSAN
 {
 	size_t l;
 
@@ -100,7 +114,7 @@ deserialize_bool(uint8_t t, uint8_t **ptr, size_t *len, bool *v) NO_MSAN
 }
 
 int
-deserialize_blob(uint8_t t, uint8_t **ptr, size_t *len, struct blob *v) NO_MSAN
+unpack_blob(uint8_t t, uint8_t **ptr, size_t *len, struct blob *v) NO_MSAN
 {
 	size_t l;
 
@@ -132,7 +146,7 @@ deserialize_blob(uint8_t t, uint8_t **ptr, size_t *len, struct blob *v) NO_MSAN
 }
 
 int
-serialize_int(uint8_t t, uint8_t **ptr, size_t *len, int v) NO_MSAN
+pack_int(uint8_t t, uint8_t **ptr, size_t *len, int v) NO_MSAN
 {
 	const size_t l = sizeof(v);
 
@@ -150,7 +164,7 @@ serialize_int(uint8_t t, uint8_t **ptr, size_t *len, int v) NO_MSAN
 }
 
 int
-serialize_string(uint8_t t, uint8_t **ptr, size_t *len, const char *v) NO_MSAN
+pack_string(uint8_t t, uint8_t **ptr, size_t *len, const char *v) NO_MSAN
 {
 	const size_t l = strlen(v);
 
@@ -168,7 +182,7 @@ serialize_string(uint8_t t, uint8_t **ptr, size_t *len, const char *v) NO_MSAN
 }
 
 int
-serialize_bool(uint8_t t, uint8_t **ptr, size_t *len, bool v) NO_MSAN
+pack_byte(uint8_t t, uint8_t **ptr, size_t *len, uint8_t v) NO_MSAN
 {
 	const size_t l = sizeof(v);
 
@@ -186,7 +200,7 @@ serialize_bool(uint8_t t, uint8_t **ptr, size_t *len, bool v) NO_MSAN
 }
 
 int
-serialize_blob(uint8_t t, uint8_t **ptr, size_t *len, const struct blob *v) NO_MSAN
+pack_blob(uint8_t t, uint8_t **ptr, size_t *len, const struct blob *v) NO_MSAN
 {
 	const size_t l = v->len;
 
@@ -201,4 +215,87 @@ serialize_blob(uint8_t t, uint8_t **ptr, size_t *len, const struct blob *v) NO_M
 	*len -= sizeof(t) + sizeof(l) + l;
 
 	return (0);
+}
+
+void
+mutate_byte(uint8_t *b)
+{
+	LLVMFuzzerMutate(b, sizeof(*b), sizeof(*b));
+}
+
+void
+mutate_int(int *i)
+{
+	LLVMFuzzerMutate((uint8_t *)i, sizeof(*i), sizeof(*i));
+}
+
+void
+mutate_blob(struct blob *blob)
+{
+	blob->len = LLVMFuzzerMutate((uint8_t *)blob->body, blob->len,
+	    sizeof(blob->body));
+}
+
+void
+mutate_string(char *s)
+{
+	size_t n;
+
+	n = LLVMFuzzerMutate((uint8_t *)s, strlen(s), MAXSTR - 1);
+	s[n] = '\0';
+}
+ 
+void *
+dev_open(const char *path)
+{
+	(void)path;
+
+	return ((void *)0xdeadbeef);
+}
+
+void
+dev_close(void *handle)
+{
+	assert(handle == (void *)0xdeadbeef);
+}
+
+int
+dev_read(void *handle, unsigned char *ptr, size_t len, int ms)
+{
+	size_t n;
+
+	(void)ms;
+
+	assert(handle == (void *)0xdeadbeef);
+	assert(len == 64);
+
+	if (wire_data_len < len)
+		n = wire_data_len;
+	else
+		n = len;
+
+	memcpy(ptr, wire_data_ptr, n);
+
+	wire_data_ptr += n;
+	wire_data_len -= n;
+
+	return ((int)n);
+}
+
+int
+dev_write(void *handle, const unsigned char *ptr, size_t len)
+{
+	assert(handle == (void *)0xdeadbeef);
+	assert(len == 64 + 1);
+
+	consume(ptr, len);
+
+	return ((int)len);
+}
+
+void
+set_wire_data(uint8_t *ptr, size_t len)
+{
+	wire_data_ptr = ptr;
+	wire_data_len = len;
 }

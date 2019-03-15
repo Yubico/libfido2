@@ -52,7 +52,7 @@ get_fd(const char *hid_path, const char *suffix)
 
 	for (size_t i = 0; i < strlen(s); i++)
 		if (s[i] == '/')
-			s[i] = ':';
+			s[i] = '_';
 
 	if ((r = snprintf(path, sizeof(path), "%s-%s", s, suffix)) < 0 ||
 	    (size_t)r >= sizeof(path)) {

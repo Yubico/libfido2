@@ -59,10 +59,13 @@ merge() {
 	(cd obj && \
 		llvm-profdata merge -sparse profraw/*.profraw \
 			-o libfido2.profdata &&
-		llvm-cov show -format=html build/src/libfido2.so \
+		llvm-cov show -format=html -tab-size=8 build/src/libfido2.so \
 			-instr-profile=libfido2.profdata > report.html &&
-		llvm-cov report build/src/libfido2.so \
-			-instr-profile=libfido2.profdata > report.txt)
+		llvm-cov report -use-color=false build/src/libfido2.so \
+			-instr-profile=libfido2.profdata > summary.txt &&
+		llvm-cov report -use-color=false -show-functions \
+			-instr-profile=libfido2.profdata build/src/libfido2.so \
+			../../src/*.[ch] > functions.txt)
 }
 
 clean

@@ -7,12 +7,12 @@ T=fuzz_assert
 
 sync() {
 	mkdir ${T}
-	rsync -az fuzzier:${T}/corpus ${T}
+	rsync -az fuzzier:${T}/corpus ${T} || true
 }
 
 run() {
-	ASAN_OPTIONS=allocator_may_return_null=1 build/fuzz/fuzz_assert \
-		-runs=1 ${T}/corpus 2>/dev/null 1>&2
+	build/fuzz/fuzz_assert -max_len=16384 -runs=1 ${T}/corpus \
+		2>/dev/null 1>&2
 }
 
 case "$1" in
