@@ -7,8 +7,8 @@ T=assert-u2f
 
 sync() {
 	mkdir ${T}
-	rsync -az fuzzy:${T}/afl-out/queue fuzzy:${T}/cred_id \
-		fuzzy:${T}/pubkey ${T}
+	ssh fuzzy "cd ${T}/afl-out && tar -cf- queue ../cred_id ../pubkey" | \
+		tar -C ${T} -xf-
 }
 
 run() {

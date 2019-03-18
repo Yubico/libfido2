@@ -7,7 +7,7 @@ T=fuzz_assert
 
 sync() {
 	mkdir ${T}
-	rsync -az fuzzier:${T}/corpus ${T} || true
+	ssh fuzzier "cd ${T} && tar -cf- corpus" | tar -C ${T} -xf-
 }
 
 run() {
