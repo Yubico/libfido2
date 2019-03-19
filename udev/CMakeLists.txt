@@ -3,6 +3,5 @@
 # license that can be found in the LICENSE file.
 
 if(UDEV_RULES_DIR)
-	install(FILES 70-old-u2f.rules 70-u2f.rules
-		DESTINATION ${UDEV_RULES_DIR})
+	install(FILES 70-u2f.rules DESTINATION ${UDEV_RULES_DIR})
 endif()
