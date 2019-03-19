@@ -274,6 +274,8 @@ message(STATUS "COVERAGE: ${COVERAGE}")
 
 subdirs(src)
 subdirs(examples)
+subdirs(man)
+
 if(NOT WIN32)
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 		if(NOT MSAN)
@@ -286,4 +288,3 @@ if(NOT WIN32)
 	subdirs(tools)
 	subdirs(udev)
 endif()
-subdirs(man)

@@ -91,6 +91,9 @@ endif()
 
 install(FILES fido.h DESTINATION include)
 install(DIRECTORY fido DESTINATION include)
-configure_file(libfido2.pc.in libfido2.pc @ONLY)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libfido2.pc"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+
+if(NOT WIN32)
+	configure_file(libfido2.pc.in libfido2.pc @ONLY)
+	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libfido2.pc"
+		DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+endif()
