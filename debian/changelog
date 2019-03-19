@@ -1,3 +1,14 @@
+libfido2 (1.0.0) bionic; urgency=low
+
+  * Native HID support on Linux, MacOS, and Windows.
+  * fido2-{assert,cred}: new -u option to force U2F on dual authenticators.
+  * fido2-assert: support for multiple resident keys with the same RP.
+  * Strict checks for CTAP2 compliance on received CBOR payloads.
+  * Better fuzzing harnesses.
+  * Documentation and reliability fixes.
+
+ -- pedro martelletto <pedro@yubico.com>  Tue, 19 Mar 2019 07:38:36 +0000
+
 libfido2 (0.4.0) bionic; urgency=low
 
   * fido2-assert: print the user id for resident credentials.
