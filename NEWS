@@ -1,3 +1,11 @@
+* Version 1.0.0 (unreleased)
+ ** Native HID support on Linux, MacOS, and Windows.
+ ** fido2-{assert,cred}: new -u option to force U2F on dual authenticators.
+ ** fido2-assert: support for multiple resident keys with the same RP.
+ ** Strict checks for CTAP2 compliance on received CBOR payloads.
+ ** Better fuzzing harnesses.
+ ** Documentation and reliability fixes.
+
 * Version 0.4.0 (released 2019-01-07)
  ** fido2-assert: print the user id for resident credentials.
  ** Fix encoding of COSE algorithms when making a credential.
