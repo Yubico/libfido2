@@ -1,4 +1,4 @@
-* Version 1.0.0 (unreleased)
+* Version 1.0.0 (released 2019-03-21)
  ** Native HID support on Linux, MacOS, and Windows.
  ** fido2-{assert,cred}: new -u option to force U2F on dual authenticators.
  ** fido2-assert: support for multiple resident keys with the same RP.
