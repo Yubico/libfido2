@@ -129,10 +129,10 @@ read_ec_pubkey(const char *path)
 	}
 
 fail:
-	if (fp) {
+	if (fp != NULL) {
 		fclose(fp);
 	}
-	if (pkey) {
+	if (pkey != NULL) {
 		EVP_PKEY_free(pkey);
 	}
 
@@ -171,10 +171,12 @@ write_ec_pubkey(const char *path, const void *ptr, size_t len)
 
 	if ((pkey = es256_pk_to_EVP_PKEY(pk)) == NULL) {
 		warnx("es256_pk_to_EVP_PKEY");
+		goto fail;
 	}
 
 	if (PEM_write_PUBKEY(fp, pkey) == 0) {
 		warnx("PEM_write_PUBKEY");
+		goto fail;
 	}
 
 	ok = 0;
@@ -216,10 +218,10 @@ read_rsa_pubkey(const char *path)
 	}
 
 fail:
-	if (fp) {
+	if (fp != NULL) {
 		fclose(fp);
 	}
-	if (pkey) {
+	if (pkey != NULL) {
 		EVP_PKEY_free(pkey);
 	}
 
@@ -258,10 +260,12 @@ write_rsa_pubkey(const char *path, const void *ptr, size_t len)
 
 	if ((pkey = rs256_pk_to_EVP_PKEY(pk)) == NULL) {
 		warnx("rs256_pk_to_EVP_PKEY");
+		goto fail;
 	}
 
 	if (PEM_write_PUBKEY(fp, pkey) == 0) {
 		warnx("PEM_write_PUBKEY");
+		goto fail;
 	}
 
 	ok = 0;
