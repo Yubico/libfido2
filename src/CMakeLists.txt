@@ -57,6 +57,7 @@ if(WIN32)
 		target_link_libraries(fido2 wsock32 ws2_32 bcrypt setupapi hid)
 	else()
 		target_link_libraries(fido2 wsock32 ws2_32 bcrypt SetupAPI hid)
+		set_target_properties(fido2 PROPERTIES OUTPUT_NAME fido2_static)
 	endif()
 elseif(APPLE)
 	target_link_libraries(fido2 "-framework CoreFoundation"
@@ -66,30 +67,30 @@ install(TARGETS fido2 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # dynamic library
-if(NOT MSVC)
-	add_library(fido2_shared SHARED ${FIDO_SOURCES} ${COMPAT_SOURCES})
-	target_link_libraries(fido2_shared ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
-		${UDEV_LIBRARIES})
-	if(WIN32)
-		if (MINGW)
-			target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
-				setupapi hid)
-		else()
-			target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
-				SetupAPI hid)
-		endif()
-	elseif(APPLE)
-		target_link_libraries(fido2_shared "-framework CoreFoundation"
-			"-framework IOKit")
+add_library(fido2_shared SHARED ${FIDO_SOURCES} ${COMPAT_SOURCES})
+target_link_libraries(fido2_shared ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
+	${UDEV_LIBRARIES})
+if(WIN32)
+	if (MINGW)
+		target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
+			setupapi hid)
+	else()
+		target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
+			SetupAPI hid)
+		target_compile_definitions(fido2 PUBLIC -DFIDO2_NO_EXPORT)
 	endif()
-	set_target_properties(fido2_shared PROPERTIES OUTPUT_NAME fido2
-		VERSION ${FIDO_VERSION})
-	install(TARGETS fido2_shared
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+elseif(APPLE)
+	target_link_libraries(fido2_shared "-framework CoreFoundation"
+		"-framework IOKit")
 endif()
+set_target_properties(fido2_shared PROPERTIES OUTPUT_NAME fido2
+	VERSION ${FIDO_VERSION})
+install(TARGETS fido2_shared
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES fido.h DESTINATION include)
+install(FILES fido.h exports.h DESTINATION include)
 install(DIRECTORY fido DESTINATION include)
 
 if(NOT WIN32)

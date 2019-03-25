@@ -12,12 +12,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-es256_pk_t *es256_pk_new(void);
-void es256_pk_free(es256_pk_t **);
-EVP_PKEY *es256_pk_to_EVP_PKEY(const es256_pk_t *);
+FIDO_PUBLIC_API es256_pk_t *es256_pk_new(void);
+FIDO_PUBLIC_API void es256_pk_free(es256_pk_t **);
+FIDO_PUBLIC_API EVP_PKEY *es256_pk_to_EVP_PKEY(const es256_pk_t *);
 
-int es256_pk_from_EC_KEY(es256_pk_t *, const EC_KEY *);
-int es256_pk_from_ptr(es256_pk_t *, const void *, size_t);
+FIDO_PUBLIC_API int es256_pk_from_EC_KEY(es256_pk_t *, const EC_KEY *);
+FIDO_PUBLIC_API int es256_pk_from_ptr(es256_pk_t *, const void *, size_t);
 
 #ifdef _FIDO_INTERNAL
 es256_sk_t *es256_sk_new(void);

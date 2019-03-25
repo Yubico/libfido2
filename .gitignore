@@ -3,3 +3,4 @@ cscope.out
 fuzz/build
 fuzz/obj
 fuzz/*.so
+output/
