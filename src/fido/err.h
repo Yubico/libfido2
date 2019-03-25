@@ -7,8 +7,6 @@
 #ifndef _FIDO_ERR_H
 #define _FIDO_ERR_H
 
-#include "exports.h"
-
 #define	FIDO_ERR_SUCCESS		0x00
 #define FIDO_ERR_INVALID_COMMAND	0x01
 #define FIDO_ERR_INVALID_PARAMETER	0x02
@@ -66,6 +64,6 @@
 #define FIDO_ERR_USER_PRESENCE_REQUIRED	-8
 #define FIDO_ERR_INTERNAL		-9
 
-FIDO_PUBLIC_API const char *fido_strerr(int);
+const char *fido_strerr(int);
 
 #endif /* _FIDO_ERR_H */

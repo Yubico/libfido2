@@ -4,12 +4,20 @@ param(
     [string]$7zPath
 )
 
-$CMake = ($(Get-Command cmake -ErrorAction Ignore | Select-Object -ExpandProperty Source), $CMakePath -ne $null)[0]
-$Git = ($(Get-Command git -ErrorAction Ignore | Select-Object -ExpandProperty Source), $GitPath -ne $null)[0]
+$CMake = $(Get-Command cmake -ErrorAction Ignore | Select-Object -ExpandProperty Source)
+if([string]::IsNullOrEmpty($CMake)) {
+    $CMake = $CMakePath
+}
+
+$Git = $(Get-Command git -ErrorAction Ignore | Select-Object -ExpandProperty Source)
+if([string]::IsNullOrEmpty($Git)) {
+    $Git = $GitPath
+}
+
 $7z = $(Get-Command 7z -ErrorAction Ignore | Select-Object -ExpandProperty Source)
-if($null -eq $7z -and $null -eq $7zPath) {
+if([string]::IsNullOrEmpty($7z) -and [string]::IsNullOrEmpty($7zPath)) {
     throw "Unable to locate 7z.exe"
-} elseif($null -eq $7z) {
+} elseif([string]::IsNullOrEmpty($7z)) {
     $7z = $7zPath
 }
 

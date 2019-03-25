@@ -240,6 +240,9 @@ elseif(NOT MSVC)
 		    ${CMAKE_EXE_LINKER_FLAGS}
 		    " -Wl,-z,noexecstack -Wl,-z,relro,-z,now")
 	endif()
+else()
+	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
+		" /def:${CMAKE_CURRENT_SOURCE_DIR}/src/exports.def")
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/src)

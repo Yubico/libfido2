@@ -77,7 +77,6 @@ if(WIN32)
 	else()
 		target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
 			SetupAPI hid)
-		target_compile_definitions(fido2 PUBLIC -DFIDO2_NO_EXPORT)
 	endif()
 elseif(APPLE)
 	target_link_libraries(fido2_shared "-framework CoreFoundation"
@@ -90,7 +89,7 @@ install(TARGETS fido2_shared
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES fido.h exports.h DESTINATION include)
+install(FILES fido.h DESTINATION include)
 install(DIRECTORY fido DESTINATION include)
 
 if(NOT WIN32)
