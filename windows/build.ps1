@@ -53,7 +53,7 @@ try {
     }
 
     Push-Location libressl-2.8.3\build
-    & $CMake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX="$PSScriptRoot\..\output\libressl-2.8.3-Win64" -DBUILD_SHARED_LIBS=ON
+    & $CMake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX="$PSScriptRoot\..\output\libressl-2.8.3-Win64" -DBUILD_SHARED_LIBS=ON -DLIBRESSL_TESTS=OFF
     & $CMake --build . --config Release
     & $CMake --build . --config Release --target install
     Pop-Location
