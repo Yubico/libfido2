@@ -2,6 +2,9 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
+# detect AppleClang; needs to come before project()
+cmake_policy(SET CMP0025 NEW)
+
 project(libfido2)
 cmake_minimum_required(VERSION 3.0)
 
@@ -224,7 +227,7 @@ else()
 endif()
 
 # export list
-if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "Clang")
+if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
 	# clang + lld
 	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
 	    " -exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/src/export.llvm")
