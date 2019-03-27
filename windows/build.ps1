@@ -85,6 +85,8 @@ try {
     & $CMake .. -G "Visual Studio 15 2017 Win64" -DCBOR_INCLUDE_DIRS="$PSScriptRoot\..\output\libcbor-0.5.0-Win64\include" -DCBOR_LIBRARY_DIRS="$PSScriptRoot\..\output\libcbor-0.5.0-Win64\lib" -DCRYPTO_INCLUDE_DIRS="$PSScriptRoot\..\output\libressl-2.8.3-Win64\include" -DCRYPTO_LIBRARY_DIRS="$PSScriptRoot\..\output\libressl-2.8.3-Win64\lib" -DCMAKE_INSTALL_PREFIX="$PSScriptRoot\..\output\libfido2-Win64"
     & $CMake --build . --config Release
     & $CMake --build . --config Release --target install
+    & Copy-Item "$PSScriptRoot\..\output\libcbor-0.5.0-Win64\bin\cbor.dll" -Destination "$PSScriptRoot\..\build\examples\Release"
+    & Copy-Item "$PSScriptRoot\..\output\libressl-2.8.3-Win64\bin\crypto-44.dll" -Destination "$PSScriptRoot\..\build\examples\Release"
 } finally {
     Pop-Location
 }
