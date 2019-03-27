@@ -16,9 +16,9 @@ tar -zxf libressl-2.8.3.tar.gz
 cd libressl-2.8.3
 mkdir build
 cd build
-cmake.exe -DCMAKE_INSTALL_PREFIX=/root -DBUILD_SHARED_LIBS=ON ..
-cmake.exe --build .
-cmake.exe --build . --target install
+cmake.exe -DCMAKE_INSTALL_PREFIX=/root -DBUILD_SHARED_LIBS=ON -DLIBRESSL_TESTS=OFF ..
+cmake.exe --build . --config Release
+cmake.exe --build . --target install --config Release
 
 # libcbor
 # XXX no signature verification possible
@@ -29,8 +29,8 @@ git checkout v0.5.0
 mkdir build
 cd build
 cmake.exe -DCMAKE_INSTALL_PREFIX=/root ..
-cmake.exe --build .
-cmake.exe --build . --target install
+cmake.exe --build . --config Release
+cmake.exe --build . --target install --config Release
 
 # libfido2
 cd /mnt/c/stage
@@ -41,8 +41,10 @@ cd build
 cmake.exe -DCBOR_INCLUDE_DIRS=/root/include -DCBOR_LIBRARY_DIRS=/root/lib \
 	-DCRYPTO_INCLUDE_DIRS=/root/include -DCRYPTO_LIBRARY_DIRS=/root/lib \
 	-DCMAKE_INSTALL_PREFIX=/release ..
-cmake.exe --build .
-cmake.exe --build . --target install
+cmake.exe --build . --config Release
+cmake.exe --build . --target install --config Release
 
 cp /mnt/c/root/lib/cbor.lib /mnt/c/release/lib
 cp /mnt/c/root/lib/crypto-44.lib /mnt/c/release/lib
+cp /mnt/c/root/bin/cbor.dll /mnt/c/release/lib
+cp /mnt/c/root/bin/crypto-44.dll /mnt/c/release/lib
