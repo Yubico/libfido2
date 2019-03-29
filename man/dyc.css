@@ -8,5 +8,7 @@
     span.Ms { font-weight: bold; }
     dl.Bl-diag > dt { font-weight: bold; }
     code.Nm, code.Fl, code.Cm, code.Ic, code.In, code.Fd, code.Fn,
-    code.Cd { font-weight: bold; font-family: inherit; }
+    code.Cd { font-weight: bold; font-family: monospace; }
+    var { font-family: monospace; }
+    .Sh { font-size: 1.5em; padding-top: 1em; padding-bottom: 1em; }
 </style>
