@@ -5,7 +5,7 @@
 # detect AppleClang; needs to come before project()
 cmake_policy(SET CMP0025 NEW)
 
-project(libfido2)
+project(libfido2 C)
 cmake_minimum_required(VERSION 3.0)
 
 include(CheckCCompilerFlag)
