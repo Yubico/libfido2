@@ -52,7 +52,8 @@ be set.
 
 *libfido2* depends on https://github.com/pjk/libcbor[libcbor] and
 https://github.com/libressl-portable/portable[LibreSSL] (alternatively,
-https://www.openssl.org[OpenSSL] may be used).
+https://www.openssl.org[OpenSSL] may be used). On Linux, libudev (part of
+https://www.freedesktop.org/wiki/Software/systemd[systemd]) is also required.
 
 For complete, OS-specific installation instructions, please refer to the
 `.travis/` (Linux, MacOS) and `windows/` directories.
