@@ -104,6 +104,8 @@ authdata_fake(const char *rp_id, uint8_t flags, uint32_t sigcount,
 		return (-1);
 	}
 
+	cbor_decref(&item);
+
 	return (0);
 }
 
