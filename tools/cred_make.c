@@ -166,6 +166,8 @@ cred_make(int argc, char **argv)
 			type = COSE_ES256;
 		else if (strcmp(argv[1], "rs256") == 0)
 			type = COSE_RS256;
+		else if (strcmp(argv[1], "eddsa") == 0)
+			type = COSE_EDDSA;
 		else
 			errx(1, "unknown type %s", argv[1]);
 	}

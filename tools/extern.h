@@ -34,6 +34,8 @@ int token_reset(int, char **);
 int write_ec_pubkey(FILE *, const void *, size_t);
 int write_rsa_pubkey(FILE *, const void *, size_t);
 RSA *read_rsa_pubkey(const char *);
+EVP_PKEY *read_eddsa_pubkey(const char *);
+int write_eddsa_pubkey(FILE *, const void *, size_t);
 void usage(void);
 void xxd(const void *, size_t);
 

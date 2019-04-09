@@ -20,6 +20,7 @@
 #include <fido.h>
 #include <fido/es256.h>
 #include <fido/rs256.h>
+#include <fido/eddsa.h>
 
 #include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"
@@ -243,6 +244,66 @@ write_rsa_pubkey(FILE *f, const void *ptr, size_t len)
 	ok = 0;
 fail:
 	rs256_pk_free(&pk);
+
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+
+	return (ok);
+}
+
+EVP_PKEY *
+read_eddsa_pubkey(const char *path)
+{
+	FILE *fp = NULL;
+	EVP_PKEY *pkey = NULL;
+
+	if ((fp = fopen(path, "r")) == NULL) {
+		warn("fopen");
+		goto fail;
+	}
+
+	if ((pkey = PEM_read_PUBKEY(fp, NULL, NULL, NULL)) == NULL) {
+		warnx("PEM_read_PUBKEY");
+		goto fail;
+	}
+
+fail:
+	if (fp) {
+		fclose(fp);
+	}
+
+	return (pkey);
+}
+
+int
+write_eddsa_pubkey(FILE *f, const void *ptr, size_t len)
+{
+	EVP_PKEY *pkey = NULL;
+	eddsa_pk_t *pk = NULL;
+	int ok = -1;
+
+	if ((pk = eddsa_pk_new()) == NULL) {
+		warnx("eddsa_pk_new");
+		goto fail;
+	}
+
+	if (eddsa_pk_from_ptr(pk, ptr, len) != FIDO_OK) {
+		warnx("eddsa_pk_from_ptr");
+		goto fail;
+	}
+
+	if ((pkey = eddsa_pk_to_EVP_PKEY(pk)) == NULL) {
+		warnx("eddsa_pk_to_EVP_PKEY");
+	}
+
+	if (PEM_write_PUBKEY(f, pkey) == 0) {
+		warnx("PEM_write_PUBKEY");
+	}
+
+	ok = 0;
+fail:
+	eddsa_pk_free(&pk);
 
 	if (pkey != NULL) {
 		EVP_PKEY_free(pkey);

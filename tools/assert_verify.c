@@ -15,6 +15,7 @@
 #include <fido.h>
 #include <fido/es256.h>
 #include <fido/rs256.h>
+#include <fido/eddsa.h>
 
 #include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"
@@ -77,8 +78,10 @@ load_pubkey(int type, const char *file)
 {
 	EC_KEY *ec = NULL;
 	RSA *rsa = NULL;
+	EVP_PKEY *eddsa = NULL;
 	es256_pk_t *es256_pk = NULL;
 	rs256_pk_t *rs256_pk = NULL;
+	eddsa_pk_t *eddsa_pk = NULL;
 	void *pk = NULL;
 
 	if (type == COSE_ES256) {
@@ -91,7 +94,7 @@ load_pubkey(int type, const char *file)
 
 		pk = es256_pk;
 		EC_KEY_free(ec);
-	} else {
+	} else if (type == COSE_RS256) {
 		if ((rsa = read_rsa_pubkey(file)) == NULL)
 			errx(1, "read_rsa_pubkey");
 		if ((rs256_pk = rs256_pk_new()) == NULL)
@@ -101,6 +104,16 @@ load_pubkey(int type, const char *file)
 
 		pk = rs256_pk;
 		RSA_free(rsa);
+	} else if (type == COSE_EDDSA) {
+		if ((eddsa = read_eddsa_pubkey(file)) == NULL)
+			errx(1, "read_eddsa_pubkey");
+		if ((eddsa_pk = eddsa_pk_new()) == NULL)
+			errx(1, "eddsa_pk_new");
+		if (eddsa_pk_from_EVP_PKEY(eddsa_pk, eddsa) != FIDO_OK)
+			errx(1, "eddsa_pk_from_EVP_PKEY");
+
+		pk = eddsa_pk;
+		EVP_PKEY_free(eddsa);
 	}
 
 	return (pk);
@@ -152,6 +165,8 @@ assert_verify(int argc, char **argv)
 			type = COSE_ES256;
 		else if (strcmp(argv[1], "rs256") == 0)
 			type = COSE_RS256;
+		else if (strcmp(argv[1], "eddsa") == 0)
+			type = COSE_EDDSA;
 		else
 			errx(1, "unknown type %s", argv[1]);
 	}

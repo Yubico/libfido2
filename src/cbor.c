@@ -895,6 +895,11 @@ decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
 			log_debug("%s: rs256_pk_decode", __func__);
 			goto fail;
 		}
+	} else if (attcred->type == COSE_EDDSA) {
+		if (eddsa_pk_decode(item, &attcred->pubkey.eddsa) < 0) {
+			log_debug("%s: eddsa_pk_decode", __func__);
+			goto fail;
+		}
 	} else {
 		log_debug("%s: invalid cose_alg %d", __func__, attcred->type);
 		goto fail;

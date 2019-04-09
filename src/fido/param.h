@@ -62,6 +62,7 @@
 
 /* Supported COSE types. */
 #define	COSE_ES256	-7
+#define	COSE_EDDSA	-8
 #define	COSE_RS256	-257
 
 /* Supported extensions. */

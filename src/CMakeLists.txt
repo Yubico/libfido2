@@ -14,6 +14,7 @@ list(APPEND FIDO_SOURCES
 	cred.c
 	dev.c
 	ecdh.c
+	eddsa.c
 	err.c
 	es256.c
 	hid.c

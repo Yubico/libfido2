@@ -718,7 +718,7 @@ fido_cred_set_fmt(fido_cred_t *cred, const char *fmt)
 int
 fido_cred_set_type(fido_cred_t *cred, int cose_alg)
 {
-	if ((cose_alg != COSE_ES256 && cose_alg != COSE_RS256) ||
+	if ((cose_alg != COSE_ES256 && cose_alg != COSE_RS256 && cose_alg != COSE_EDDSA) ||
 	    cred->type != 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
@@ -793,6 +793,9 @@ fido_cred_pubkey_ptr(const fido_cred_t *cred)
 	case COSE_RS256:
 		ptr = &cred->attcred.pubkey.rs256;
 		break;
+	case COSE_EDDSA:
+		ptr = &cred->attcred.pubkey.eddsa;
+		break;
 	default:
 		ptr = NULL;
 		break;
@@ -812,6 +815,9 @@ fido_cred_pubkey_len(const fido_cred_t *cred)
 		break;
 	case COSE_RS256:
 		len = sizeof(cred->attcred.pubkey.rs256);
+		break;
+	case COSE_EDDSA:
+		len = sizeof(cred->attcred.pubkey.eddsa);
 		break;
 	default:
 		len = 0;

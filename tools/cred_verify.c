@@ -99,12 +99,18 @@ print_cred(FILE *out_f, int type, const fido_cred_t *cred)
 
 	fprintf(out_f, "%s\n", id);
 
-	if (type == COSE_ES256)
+	if (type == COSE_ES256) {
 		write_ec_pubkey(out_f, fido_cred_pubkey_ptr(cred),
 		    fido_cred_pubkey_len(cred));
-	else
+	} else if (type == COSE_RS256) {
 		write_rsa_pubkey(out_f, fido_cred_pubkey_ptr(cred),
 		    fido_cred_pubkey_len(cred));
+	} else if (type == COSE_EDDSA) {
+		write_eddsa_pubkey(out_f, fido_cred_pubkey_ptr(cred),
+		    fido_cred_pubkey_len(cred));
+	} else {
+		errx(1, "print_cred: unkown type");
+	}
 
 	free(id);
 }
@@ -157,6 +163,8 @@ cred_verify(int argc, char **argv)
 			type = COSE_ES256;
 		else if (strcmp(argv[0], "rs256") == 0)
 			type = COSE_RS256;
+		else if (strcmp(argv[0], "eddsa") == 0)
+			type = COSE_EDDSA;
 		else
 			errx(1, "unknown type %s", argv[0]);
 	}

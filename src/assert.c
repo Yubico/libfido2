@@ -13,6 +13,7 @@
 #include "fido.h"
 #include "fido/es256.h"
 #include "fido/rs256.h"
+#include "fido/eddsa.h"
 
 static int
 adjust_assert_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
@@ -353,7 +354,7 @@ check_extensions(int authdata_ext, int ext)
 }
 
 static int
-get_signed_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
+get_signed_hash(int cose_alg, fido_blob_t *dgst, const fido_blob_t *clientdata,
     const fido_blob_t *authdata_cbor)
 {
 	cbor_item_t		*item = NULL;
@@ -373,12 +374,23 @@ get_signed_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
 	authdata_ptr = cbor_bytestring_handle(item);
 	authdata_len = cbor_bytestring_length(item);
 
-	if (dgst->len != SHA256_DIGEST_LENGTH || SHA256_Init(&ctx) == 0 ||
-	    SHA256_Update(&ctx, authdata_ptr, authdata_len) == 0 ||
-	    SHA256_Update(&ctx, clientdata->ptr, clientdata->len) == 0 ||
-	    SHA256_Final(dgst->ptr, &ctx) == 0) {
-		log_debug("%s: sha256", __func__);
-		goto fail;
+	if (cose_alg != COSE_EDDSA) {
+		if (dgst->len < SHA256_DIGEST_LENGTH || SHA256_Init(&ctx) == 0 ||
+		    SHA256_Update(&ctx, authdata_ptr, authdata_len) == 0 ||
+		    SHA256_Update(&ctx, clientdata->ptr, clientdata->len) == 0 ||
+		    SHA256_Final(dgst->ptr, &ctx) == 0) {
+			log_debug("%s: sha256", __func__);
+			goto fail;
+		}
+		dgst->len = SHA256_DIGEST_LENGTH;
+	} else {
+		if (dgst->len < (authdata_len + clientdata->len)) {
+			log_debug("%s: memcpy", __func__);
+			goto fail;
+		}
+		memcpy(dgst->ptr, authdata_ptr, authdata_len);
+		memcpy(dgst->ptr + authdata_len, clientdata->ptr, clientdata->len);
+		dgst->len = authdata_len + clientdata->len;
 	}
 
 	ok = 0;
@@ -459,11 +471,66 @@ fail:
 	return (ok);
 }
 
+static int
+verify_sig_eddsa(const fido_blob_t *dgst, const eddsa_pk_t *pk,
+    const fido_blob_t *sig)
+{
+	EVP_PKEY	*pkey = NULL;
+	EVP_PKEY_CTX	*pctx = NULL;
+	EVP_MD_CTX	*mdctx = NULL;
+	int		ok = -1;
+
+	/* EVP_DigestVerify needs ints */
+	if (dgst->len > INT_MAX || sig->len > INT_MAX) {
+		log_debug("%s: dgst->len=%zu, sig->len=%zu", __func__,
+		    dgst->len, sig->len);
+		return (-1);
+	}
+
+	if ((pkey = eddsa_pk_to_EVP_PKEY(pk)) == NULL) {
+		log_debug("%s: pk -> pkey", __func__);
+		goto fail;
+	}
+
+	if ((mdctx = EVP_MD_CTX_new()) == NULL) {
+		log_debug("%s: mdctx new", __func__);
+		goto fail;
+	}
+
+	if ((pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL)) == NULL) {
+		log_debug("%s: pkey ctx", __func__);
+		goto fail;
+	}
+
+	if (EVP_DigestVerifyInit(mdctx, &pctx, NULL, NULL, pkey) != 1) {
+		log_debug("%s: digest verify init", __func__);
+		goto fail;
+	}
+
+	if ((EVP_DigestVerify(mdctx, sig->ptr, sig->len, dgst->ptr, dgst->len)) != 1) {
+		log_debug("%s: digest verify", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	if (pctx != NULL)
+		EVP_PKEY_CTX_free(pctx);
+
+	if (mdctx != NULL)
+		EVP_MD_CTX_free(mdctx);
+
+	if (pkey != NULL)
+		EVP_PKEY_free(pkey);
+
+	return (ok);
+}
+
 int
 fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
     const void *pk)
 {
-	unsigned char		 buf[SHA256_DIGEST_LENGTH];
+	unsigned char		 buf[1024];
 	fido_blob_t		 dgst;
 	const fido_assert_stmt	*stmt = NULL;
 	int			 ok = -1;
@@ -507,7 +574,7 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 		goto out;
 	}
 
-	if (get_signed_hash(&dgst, &assert->cdh, &stmt->authdata_cbor) < 0) {
+	if (get_signed_hash(cose_alg, &dgst, &assert->cdh, &stmt->authdata_cbor) < 0) {
 		log_debug("%s: get_signed_hash", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto out;
@@ -519,6 +586,9 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 		break;
 	case COSE_RS256:
 		ok = verify_sig_rs256(&dgst, pk, &stmt->sig);
+		break;
+	case COSE_EDDSA:
+		ok = verify_sig_eddsa(&dgst, pk, &stmt->sig);
 		break;
 	default:
 		log_debug("%s: unsupported cose_alg %d", __func__, cose_alg);

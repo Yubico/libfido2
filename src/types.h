@@ -26,6 +26,11 @@ typedef struct rs256_pk {
 	unsigned char e[3];
 } rs256_pk_t;
 
+/* COSE EDDSA (ED25519) */
+typedef struct eddsa_pk {
+	unsigned char x[32];
+} eddsa_pk_t;
+
 PACKED_TYPE(fido_authdata_t,
 struct fido_authdata {
 	unsigned char rp_id_hash[32]; /* sha256 of fido_rp.id */
@@ -48,6 +53,7 @@ typedef struct fido_attcred {
 	union {                   /* credential's public key */
 		es256_pk_t es256;
 		rs256_pk_t rs256;
+		eddsa_pk_t eddsa;
 	} pubkey;
 } fido_attcred_t;
 

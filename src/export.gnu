@@ -114,6 +114,11 @@
 		rs256_pk_from_RSA;
 		rs256_pk_new;
 		rs256_pk_to_EVP_PKEY;
+		eddsa_pk_new;
+		eddsa_pk_from_EVP_PKEY;
+		eddsa_pk_from_ptr;
+		eddsa_pk_to_EVP_PKEY;
+		eddsa_pk_free;
 	local:
 		*;
 };
