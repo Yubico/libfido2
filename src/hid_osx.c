@@ -175,8 +175,10 @@ copy_info(fido_dev_info_t *di, IOHIDDeviceRef dev)
 	if (is_fido(dev) == false)
 		return (-1);
 
+	// Not all devices have manufacturer info but they are valid fido devices still. This shouldn't fail the whole function
+	get_str(dev, &di->manufacturer, &di->product);
+
 	if (get_id(dev, &di->vendor_id, &di->product_id) < 0 ||
-	    get_str(dev, &di->manufacturer, &di->product) < 0 ||
 	    (di->path = get_path(dev)) == NULL) {
 		free(di->path);
 		free(di->manufacturer);
