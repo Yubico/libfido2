@@ -329,18 +329,14 @@ static void
 read_callback(void *context, IOReturn result, void *dev, IOHIDReportType type,
     uint32_t report_id, uint8_t *report, CFIndex report_len)
 {
-	int *status = context;
-
 	(void)dev;
 	(void)report;
+	(void)context;
 
 	if (result != kIOReturnSuccess || type != kIOHIDReportTypeInput ||
 	    report_id != 0 || report_len != REPORT_LEN - 1) {
 		log_debug("%s: io error", __func__);
-		return;
 	}
-
-	*status = 0;
 }
 
 int
@@ -348,7 +344,6 @@ hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct dev		*dev = handle;
 	CFRunLoopRunResult	r;
-	int			status = -1;
 
 	(void)ms; /* XXX */
 
@@ -358,21 +353,18 @@ hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 	}
 
 	IOHIDDeviceRegisterInputReportCallback(dev->ref, buf, len,
-	    &read_callback, &status);
-        IOHIDDeviceScheduleWithRunLoop(dev->ref, CFRunLoopGetCurrent(),
+	    &read_callback, NULL);
+	IOHIDDeviceScheduleWithRunLoop(dev->ref, CFRunLoopGetCurrent(),
 	    dev->loop_id);
 
 	do
 		r = CFRunLoopRunInMode(dev->loop_id, 0.003, true);
-	while (status == -1 && r != kCFRunLoopRunHandledSource);
+	while (r != kCFRunLoopRunHandledSource);
 
 	IOHIDDeviceUnscheduleFromRunLoop(dev->ref, CFRunLoopGetCurrent(),
 	    dev->loop_id);
-
-	if (status == -1) {
-		log_debug("%s: io error", __func__);
-		return (-1);
-	}
+	IOHIDDeviceRegisterInputReportCallback(dev->ref, buf, len,
+	    NULL, NULL);
 
 	return (REPORT_LEN - 1);
 }
