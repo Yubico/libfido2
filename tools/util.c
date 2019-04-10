@@ -167,10 +167,12 @@ write_ec_pubkey(FILE *f, const void *ptr, size_t len)
 
 	if ((pkey = es256_pk_to_EVP_PKEY(pk)) == NULL) {
 		warnx("es256_pk_to_EVP_PKEY");
+		goto fail;
 	}
 
 	if (PEM_write_PUBKEY(f, pkey) == 0) {
 		warnx("PEM_write_PUBKEY");
+		goto fail;
 	}
 
 	ok = 0;
@@ -235,10 +237,12 @@ write_rsa_pubkey(FILE *f, const void *ptr, size_t len)
 
 	if ((pkey = rs256_pk_to_EVP_PKEY(pk)) == NULL) {
 		warnx("rs256_pk_to_EVP_PKEY");
+		goto fail;
 	}
 
 	if (PEM_write_PUBKEY(f, pkey) == 0) {
 		warnx("PEM_write_PUBKEY");
+		goto fail;
 	}
 
 	ok = 0;
@@ -295,10 +299,12 @@ write_eddsa_pubkey(FILE *f, const void *ptr, size_t len)
 
 	if ((pkey = eddsa_pk_to_EVP_PKEY(pk)) == NULL) {
 		warnx("eddsa_pk_to_EVP_PKEY");
+		goto fail;
 	}
 
 	if (PEM_write_PUBKEY(f, pkey) == 0) {
 		warnx("PEM_write_PUBKEY");
+		goto fail;
 	}
 
 	ok = 0;
