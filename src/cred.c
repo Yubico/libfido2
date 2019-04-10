@@ -718,8 +718,8 @@ fido_cred_set_fmt(fido_cred_t *cred, const char *fmt)
 int
 fido_cred_set_type(fido_cred_t *cred, int cose_alg)
 {
-	if ((cose_alg != COSE_ES256 && cose_alg != COSE_RS256 && cose_alg != COSE_EDDSA) ||
-	    cred->type != 0)
+	if ((cose_alg != COSE_ES256 && cose_alg != COSE_RS256 &&
+	    cose_alg != COSE_EDDSA) || cred->type != 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	cred->type = cose_alg;

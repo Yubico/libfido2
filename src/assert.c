@@ -384,12 +384,14 @@ get_signed_hash(int cose_alg, fido_blob_t *dgst, const fido_blob_t *clientdata,
 		}
 		dgst->len = SHA256_DIGEST_LENGTH;
 	} else {
-		if (dgst->len < (authdata_len + clientdata->len)) {
+		if (SIZE_MAX - authdata_len < clientdata->len ||
+		    dgst->len < authdata_len + clientdata->len) {
 			log_debug("%s: memcpy", __func__);
 			goto fail;
 		}
 		memcpy(dgst->ptr, authdata_ptr, authdata_len);
-		memcpy(dgst->ptr + authdata_len, clientdata->ptr, clientdata->len);
+		memcpy(dgst->ptr + authdata_len, clientdata->ptr,
+		    clientdata->len);
 		dgst->len = authdata_len + clientdata->len;
 	}
 
@@ -478,7 +480,7 @@ verify_sig_eddsa(const fido_blob_t *dgst, const eddsa_pk_t *pk,
 	EVP_PKEY	*pkey = NULL;
 	EVP_PKEY_CTX	*pctx = NULL;
 	EVP_MD_CTX	*mdctx = NULL;
-	int		ok = -1;
+	int		 ok = -1;
 
 	/* EVP_DigestVerify needs ints */
 	if (dgst->len > INT_MAX || sig->len > INT_MAX) {
@@ -493,22 +495,23 @@ verify_sig_eddsa(const fido_blob_t *dgst, const eddsa_pk_t *pk,
 	}
 
 	if ((mdctx = EVP_MD_CTX_new()) == NULL) {
-		log_debug("%s: mdctx new", __func__);
+		log_debug("%s: EVP_MD_CTX_new", __func__);
 		goto fail;
 	}
 
 	if ((pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL)) == NULL) {
-		log_debug("%s: pkey ctx", __func__);
+		log_debug("%s: EVP_PKEY_CTX_new_id", __func__);
 		goto fail;
 	}
 
 	if (EVP_DigestVerifyInit(mdctx, &pctx, NULL, NULL, pkey) != 1) {
-		log_debug("%s: digest verify init", __func__);
+		log_debug("%s: EVP_DigestVerifyInit", __func__);
 		goto fail;
 	}
 
-	if ((EVP_DigestVerify(mdctx, sig->ptr, sig->len, dgst->ptr, dgst->len)) != 1) {
-		log_debug("%s: digest verify", __func__);
+	if (EVP_DigestVerify(mdctx, sig->ptr, sig->len, dgst->ptr,
+	    dgst->len) != 1) {
+		log_debug("%s: EVP_DigestVerify", __func__);
 		goto fail;
 	}
 
@@ -574,7 +577,8 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 		goto out;
 	}
 
-	if (get_signed_hash(cose_alg, &dgst, &assert->cdh, &stmt->authdata_cbor) < 0) {
+	if (get_signed_hash(cose_alg, &dgst, &assert->cdh,
+	    &stmt->authdata_cbor) < 0) {
 		log_debug("%s: get_signed_hash", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto out;

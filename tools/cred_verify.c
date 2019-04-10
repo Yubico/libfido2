@@ -109,7 +109,7 @@ print_cred(FILE *out_f, int type, const fido_cred_t *cred)
 		write_eddsa_pubkey(out_f, fido_cred_pubkey_ptr(cred),
 		    fido_cred_pubkey_len(cred));
 	} else {
-		errx(1, "print_cred: unkown type");
+		errx(1, "print_cred: unknown type");
 	}
 
 	free(id);

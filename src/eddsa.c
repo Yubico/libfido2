@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2019 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -138,26 +138,21 @@ eddsa_pk_to_EVP_PKEY(const eddsa_pk_t *k)
 {
 	EVP_PKEY *pkey = NULL;
 
-	if ((pkey = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, k->x, sizeof(k->x))) == NULL) {
-		log_debug("%s: EVP_PKEY raw public new", __func__);
-		goto fail;
-	}
+	if ((pkey = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, k->x,
+	    sizeof(k->x))) == NULL)
+		log_debug("%s: EVP_PKEY_new_raw_public_key", __func__);
 
-fail:
 	return (pkey);
 }
 
 int
 eddsa_pk_from_EVP_PKEY(eddsa_pk_t *pk, const EVP_PKEY *pkey)
 {
-	int	ok = FIDO_ERR_INTERNAL;
-	size_t	len = sizeof(pk->x);
+	size_t len = sizeof(pk->x);
 
-	if (EVP_PKEY_get_raw_public_key(pkey, pk->x, &len) != 1) {
-		goto fail;
-	}
+	if (EVP_PKEY_get_raw_public_key(pkey, pk->x, &len) != 1 ||
+	    len != sizeof(pk->x))
+		return (FIDO_ERR_INTERNAL);
 
-	ok = FIDO_OK;
-fail:
-	return (ok);
+	return (FIDO_OK);
 }
