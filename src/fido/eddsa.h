@@ -21,6 +21,21 @@ int eddsa_pk_from_ptr(eddsa_pk_t *, const void *, size_t);
 
 #ifdef _FIDO_INTERNAL
 int eddsa_pk_set_x(eddsa_pk_t *, const unsigned char *);
+
+#if OPENSSL_VERSION_NUMBER < 0x10101000L
+#define EVP_PKEY_ED25519 EVP_PKEY_NONE
+int EVP_PKEY_get_raw_public_key(const EVP_PKEY *, unsigned char *, size_t *);
+EVP_PKEY *EVP_PKEY_new_raw_public_key(int, ENGINE *, const unsigned char *,
+    size_t);
+int EVP_DigestVerify(EVP_MD_CTX *, const unsigned char *, size_t,
+    const unsigned char *, size_t);
 #endif
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+EVP_MD_CTX *EVP_MD_CTX_new(void);
+void EVP_MD_CTX_free(EVP_MD_CTX *);
+#endif
+
+#endif /* _FIDO_INTERNAL */
 
 #endif /* !_FIDO_EDDSA_H */

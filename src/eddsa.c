@@ -13,6 +13,59 @@
 #include "fido.h"
 #include "fido/eddsa.h"
 
+#if OPENSSL_VERSION_NUMBER < 0x10101000L
+EVP_PKEY *
+EVP_PKEY_new_raw_public_key(int type, ENGINE *e, const unsigned char *key,
+    size_t keylen)
+{
+	(void)type;
+	(void)e;
+	(void)key;
+	(void)keylen;
+
+	return (NULL);
+}
+
+int
+EVP_PKEY_get_raw_public_key(const EVP_PKEY *pkey, unsigned char *pub,
+    size_t *len)
+{
+	(void)pkey;
+	(void)pub;
+	(void)len;
+
+	return (0);
+}
+
+int
+EVP_DigestVerify(EVP_MD_CTX *ctx, const unsigned char *sigret, size_t siglen,
+    const unsigned char *tbs, size_t tbslen)
+{
+	(void)ctx;
+	(void)sigret;
+	(void)siglen;
+	(void)tbs;
+	(void)tbslen;
+
+	return (0);
+}
+#endif /* OPENSSL_VERSION_NUMBER < 0x10101000L */
+
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+EVP_MD_CTX *
+EVP_MD_CTX_new(void)
+{
+	return (NULL);
+}
+
+void
+EVP_MD_CTX_free(EVP_MD_CTX *ctx)
+{
+	(void)ctx;
+}
+#endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
+
 static int
 decode_coord(const cbor_item_t *item, void *xy, size_t xy_len)
 {
