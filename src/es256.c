@@ -96,7 +96,8 @@ es256_pk_encode(const es256_pk_t *pk)
 
 	return (item);
 fail:
-	cbor_decref(&item);
+	if (item != NULL)
+		cbor_decref(&item);
 
 	return (NULL);
 }
