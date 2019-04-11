@@ -426,8 +426,8 @@ encode_pubkey(const fido_blob_t *pubkey)
 	cbor_item_t *cbor_key = NULL;
 
 	if ((cbor_key = cbor_new_definite_map(2)) == NULL ||
-	    cbor_add_string(cbor_key, "type", "public-key") < 0 ||
-	    cbor_add_bytestring(cbor_key, "id", pubkey->ptr, pubkey->len) < 0) {
+	    cbor_add_bytestring(cbor_key, "id", pubkey->ptr, pubkey->len) < 0 ||
+	    cbor_add_string(cbor_key, "type", "public-key") < 0) {
 		if (cbor_key)
 			cbor_decref(&cbor_key);
 		return (NULL);
