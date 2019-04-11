@@ -13,7 +13,7 @@
 #include "fido.h"
 #include "fido/eddsa.h"
 
-#if OPENSSL_VERSION_NUMBER < 0x10101000L
+#if defined(LIBRESSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER < 0x10101000L
 EVP_PKEY *
 EVP_PKEY_new_raw_public_key(int type, ENGINE *e, const unsigned char *key,
     size_t keylen)
@@ -49,8 +49,7 @@ EVP_DigestVerify(EVP_MD_CTX *ctx, const unsigned char *sigret, size_t siglen,
 
 	return (0);
 }
-#endif /* OPENSSL_VERSION_NUMBER < 0x10101000L */
-
+#endif /* LIBRESSL_VERSION_NUMBER || OPENSSL_VERSION_NUMBER < 0x10101000L */
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 EVP_MD_CTX *
