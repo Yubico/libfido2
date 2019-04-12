@@ -120,6 +120,21 @@ $ cmake -DFUZZ=1 -DLIBFUZZER=1 -DMSAN=1 -DCMAKE_C_COMPILER=clang \
 	-DCMAKE_BUILD_TYPE=Debug ..
 $ make
 
+3. Running the libFuzzer harnesses
+
+When running under ASAN, you may want to set ASAN_OPTIONS to
+'allocator_may_return_null=1:detect_stack_use_after_return=1'.
+
+The recommended way to run the harnesses is:
+
+$ fuzz_{assert,cred} -use_value_profile=1 -reload=30 -print_pcs=1 \
+	-print_funcs=30 -timeout=10 -max_len=16384 CORPUS_DIR
+
+You may want to use -jobs or -workers depending on the number of logical
+cores available for fuzzing.
+
+4. Auxiliary scripts
+
 A set of harnesses and auxiliary scripts can be found under harnesses/. To
 compile coverage reports, adjust the harnesses to your setup and run 'report'.
 
