@@ -478,7 +478,6 @@ verify_sig_eddsa(const fido_blob_t *dgst, const eddsa_pk_t *pk,
     const fido_blob_t *sig)
 {
 	EVP_PKEY	*pkey = NULL;
-	EVP_PKEY_CTX	*pctx = NULL;
 	EVP_MD_CTX	*mdctx = NULL;
 	int		 ok = -1;
 
@@ -499,12 +498,7 @@ verify_sig_eddsa(const fido_blob_t *dgst, const eddsa_pk_t *pk,
 		goto fail;
 	}
 
-	if ((pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL)) == NULL) {
-		log_debug("%s: EVP_PKEY_CTX_new_id", __func__);
-		goto fail;
-	}
-
-	if (EVP_DigestVerifyInit(mdctx, &pctx, NULL, NULL, pkey) != 1) {
+	if (EVP_DigestVerifyInit(mdctx, NULL, NULL, NULL, pkey) != 1) {
 		log_debug("%s: EVP_DigestVerifyInit", __func__);
 		goto fail;
 	}
@@ -517,9 +511,6 @@ verify_sig_eddsa(const fido_blob_t *dgst, const eddsa_pk_t *pk,
 
 	ok = 0;
 fail:
-	if (pctx != NULL)
-		EVP_PKEY_CTX_free(pctx);
-
 	if (mdctx != NULL)
 		EVP_MD_CTX_free(mdctx);
 
