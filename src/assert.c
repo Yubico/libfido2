@@ -533,7 +533,7 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 	dgst.ptr = buf;
 	dgst.len = sizeof(buf);
 
-	if (idx >= assert->stmt_len) {
+	if (idx >= assert->stmt_len || pk == NULL) {
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto out;
 	}
@@ -631,6 +631,9 @@ fido_assert_set_rp(fido_assert_t *assert, const char *id)
 		free(assert->rp_id);
 		assert->rp_id = NULL;
 	}
+
+	if (id == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	if ((assert->rp_id = strdup(id)) == NULL)
 		return (FIDO_ERR_INTERNAL);
@@ -929,7 +932,7 @@ fido_assert_set_authdata(fido_assert_t *assert, size_t idx,
 	struct cbor_load_result	 cbor;
 	int			 r;
 
-	if (idx >= assert->stmt_len)
+	if (idx >= assert->stmt_len || ptr == NULL || len == 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	stmt = &assert->stmt[idx];
@@ -973,7 +976,7 @@ fido_assert_set_sig(fido_assert_t *a, size_t idx, const unsigned char *ptr,
 {
 	unsigned char *sig;
 
-	if (idx >= a->stmt_len || ptr == NULL)
+	if (idx >= a->stmt_len || ptr == NULL || len == 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	fido_assert_clean_sig(&a->stmt[idx]);

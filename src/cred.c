@@ -495,6 +495,11 @@ fido_cred_set_authdata(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 
 	fido_cred_clean_authdata(cred);
 
+	if (ptr == NULL || len == 0) {
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto fail;
+	}
+
 	if ((item = cbor_load(ptr, len, &cbor)) == NULL) {
 		log_debug("%s: cbor_load", __func__);
 		r = FIDO_ERR_INVALID_ARGUMENT;
@@ -527,7 +532,7 @@ fido_cred_set_x509(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 
 	fido_cred_clean_x509(cred);
 
-	if (ptr == NULL)
+	if (ptr == NULL || len == 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	if ((x509 = malloc(len)) == NULL)
 		return (FIDO_ERR_INTERNAL);
@@ -546,7 +551,7 @@ fido_cred_set_sig(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 
 	fido_cred_clean_sig(cred);
 
-	if (ptr == NULL)
+	if (ptr == NULL || len == 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	if ((sig = malloc(len)) == NULL)
 		return (FIDO_ERR_INTERNAL);
@@ -705,6 +710,9 @@ fido_cred_set_fmt(fido_cred_t *cred, const char *fmt)
 {
 	free(cred->fmt);
 	cred->fmt = NULL;
+
+	if (fmt == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	if (strcmp(fmt, "packed") && strcmp(fmt, "fido-u2f"))
 		return (FIDO_ERR_INVALID_ARGUMENT);

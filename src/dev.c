@@ -162,7 +162,7 @@ fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
-	if (io->open == NULL || io->close == NULL ||
+	if (io == NULL || io->open == NULL || io->close == NULL ||
 	    io->read == NULL || io->write == NULL) {
 		log_debug("%s: NULL function", __func__);
 		return (FIDO_ERR_INVALID_ARGUMENT);

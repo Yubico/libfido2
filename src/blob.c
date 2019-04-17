@@ -19,9 +19,14 @@ fido_blob_set(fido_blob_t *b, const unsigned char *ptr, size_t len)
 	if (b->ptr != NULL) {
 		explicit_bzero(b->ptr, b->len);
 		free(b->ptr);
+		b->ptr = NULL;
 	}
 
 	b->len = 0;
+
+	if (ptr == NULL || len == 0)
+		return (-1);
+
 	b->ptr = malloc(len);
 
 	if (b->ptr == NULL)
