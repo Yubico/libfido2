@@ -994,6 +994,13 @@ fido_assert_set_count(fido_assert_t *assert, size_t n)
 {
 	void *new_stmt;
 
+#ifdef FIDO_FUZZ
+	if (n > UINT8_MAX) {
+		log_debug("%s: n > UINT8_MAX", __func__);
+		return (FIDO_ERR_INTERNAL);
+	}
+#endif
+
 	new_stmt = recallocarray(assert->stmt, assert->stmt_cnt, n,
 	    sizeof(fido_assert_stmt));
 	if (new_stmt == NULL)
