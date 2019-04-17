@@ -15,6 +15,7 @@
 #include "fido.h"
 #include "fido/es256.h"
 #include "fido/rs256.h"
+#include "fido/eddsa.h"
 
 #include "../openbsd-compat/openbsd-compat.h"
 
@@ -31,6 +32,7 @@
 #define TAG_ES256	0x0b
 #define TAG_RS256	0x0c
 #define TAG_PIN		0x0d
+#define TAG_EDDSA	0x0e
 
 /* Parameter set defining a FIDO2 get assertion operation. */
 struct param {
@@ -41,6 +43,7 @@ struct param {
 	struct blob	cred;
 	struct blob	es256;
 	struct blob	rs256;
+	struct blob	eddsa;
 	struct blob	wire_data;
 	uint8_t		cred_count;
 	uint8_t		type;
@@ -105,6 +108,13 @@ static const uint8_t dummy_rs256[] = {
 	0x4d, 0xbf, 0x94, 0xf0, 0x89, 0x04, 0xb9, 0x2d,
 	0xc4, 0xa5, 0x32, 0xa9, 0x25, 0x0a, 0x99, 0x59,
 	0x01, 0x00, 0x01,
+};
+
+static const uint8_t dummy_eddsa[] = {
+	0xfe, 0x8b, 0x61, 0x50, 0x31, 0x7a, 0xe6, 0xdf,
+	0xb1, 0x04, 0x9d, 0x4d, 0xb5, 0x7a, 0x5e, 0x96,
+	0x4c, 0xb2, 0xf9, 0x5f, 0x72, 0x47, 0xb5, 0x18,
+	0xe2, 0x39, 0xdf, 0x2f, 0x87, 0x19, 0xb3, 0x02,
 };
 
 /*
@@ -197,6 +207,7 @@ unpack(const uint8_t *ptr, size_t len, struct param *p) NO_MSAN
 	    unpack_blob(TAG_WIRE_DATA, pp, &len, &p->wire_data) < 0 ||
 	    unpack_blob(TAG_RS256, pp, &len, &p->rs256) < 0 ||
 	    unpack_blob(TAG_ES256, pp, &len, &p->es256) < 0 ||
+	    unpack_blob(TAG_EDDSA, pp, &len, &p->eddsa) < 0 ||
 	    unpack_blob(TAG_CRED, pp, &len, &p->cred) < 0 ||
 	    unpack_blob(TAG_CDH, pp, &len, &p->cdh) < 0)
 		return (-1);
@@ -220,6 +231,7 @@ pack(uint8_t *ptr, size_t len, const struct param *p)
 	    pack_blob(TAG_WIRE_DATA, &ptr, &len, &p->wire_data) < 0 ||
 	    pack_blob(TAG_RS256, &ptr, &len, &p->rs256) < 0 ||
 	    pack_blob(TAG_ES256, &ptr, &len, &p->es256) < 0 ||
+	    pack_blob(TAG_EDDSA, &ptr, &len, &p->eddsa) < 0 ||
 	    pack_blob(TAG_CRED, &ptr, &len, &p->cred) < 0 ||
 	    pack_blob(TAG_CDH, &ptr, &len, &p->cdh) < 0)
 		return (0);
@@ -306,6 +318,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	fido_assert_t	*assert = NULL;
 	es256_pk_t	*es256_pk = NULL;
 	rs256_pk_t	*rs256_pk = NULL;
+	eddsa_pk_t	*eddsa_pk = NULL;
+	int		 cose_alg = 0;
 	void		*pk;
 
 	memset(&p, 0, sizeof(p));
@@ -315,7 +329,10 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 	fido_init(0);
 
-	if ((p.type & 1) == COSE_ES256) {
+	switch (p.type & 2) {
+	case 0:
+		cose_alg = COSE_ES256;
+
 		if ((es256_pk = es256_pk_new()) == NULL) {
 			warnx("%s: es256_pk_new", __func__);
 			return (0);
@@ -323,7 +340,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 		es256_pk_from_ptr(es256_pk, p.es256.body, p.es256.len);
 		pk = es256_pk;
-	} else {
+
+		break;
+	case 1:
+		cose_alg = COSE_RS256;
+
 		if ((rs256_pk = rs256_pk_new()) == NULL) {
 			warnx("%s: rs256_pk_new", __func__);
 			return (0);
@@ -331,6 +352,21 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 		rs256_pk_from_ptr(rs256_pk, p.rs256.body, p.rs256.len);
 		pk = rs256_pk;
+
+		break;
+	case 2:
+		cose_alg = COSE_EDDSA;
+
+		if ((eddsa_pk = eddsa_pk_new()) == NULL) {
+			warnx("%s: eddsa_pk_new", __func__);
+			return (0);
+		}
+
+		eddsa_pk_from_ptr(eddsa_pk, p.eddsa.body, p.eddsa.len);
+		pk = eddsa_pk;
+
+		break;
+
 	}
 
 	if ((assert = fido_assert_new()) == NULL)
@@ -342,7 +378,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    p.cred_count, &p.cred);
 
 	for (size_t i = 0; i < fido_assert_count(assert); i++) {
-		verify_assert(p.type & 1 ? COSE_ES256 : COSE_RS256,
+		verify_assert(cose_alg,
 		    fido_assert_clientdata_hash_ptr(assert),
 		    fido_assert_clientdata_hash_len(assert),
 		    fido_assert_rp_id(assert),
@@ -367,6 +403,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 out:
 	es256_pk_free(&es256_pk);
 	rs256_pk_free(&rs256_pk);
+	eddsa_pk_free(&eddsa_pk);
+
 	fido_assert_free(&assert);
 
 	return (0);
@@ -390,12 +428,14 @@ pack_dummy(uint8_t *ptr, size_t len)
 	dummy.cdh.len = sizeof(dummy_cdh);
 	dummy.es256.len = sizeof(dummy_es256);
 	dummy.rs256.len = sizeof(dummy_rs256);
+	dummy.eddsa.len = sizeof(dummy_eddsa);
 	dummy.wire_data.len = sizeof(dummy_wire_data);
 
 	memcpy(&dummy.cdh.body, &dummy_cdh, dummy.cdh.len);
 	memcpy(&dummy.wire_data.body, &dummy_wire_data, dummy.wire_data.len);
 	memcpy(&dummy.es256.body, &dummy_es256, dummy.es256.len);
 	memcpy(&dummy.rs256.body, &dummy_rs256, dummy.rs256.len);
+	memcpy(&dummy.eddsa.body, &dummy_eddsa, dummy.eddsa.len);
 
 	blob_len = pack(blob, sizeof(blob), &dummy);
 	assert(blob_len != 0);
@@ -436,6 +476,7 @@ LLVMFuzzerCustomMutator(uint8_t *data, size_t size, size_t maxsize,
 	mutate_blob(&p.wire_data);
 	mutate_blob(&p.rs256);
 	mutate_blob(&p.es256);
+	mutate_blob(&p.eddsa);
 	mutate_blob(&p.cred);
 	mutate_blob(&p.cdh);
 

@@ -464,6 +464,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
 	struct param	 p;
 	fido_cred_t	*cred = NULL;
+	int		 cose_alg = 0;
 
 	memset(&p, 0, sizeof(p));
 
@@ -477,11 +478,23 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 	set_wire_data(p.wire_data.body, p.wire_data.len);
 
-	make_cred(cred, p.u2f, p.type & 1 ? COSE_ES256 : COSE_RS256, &p.cdh,
-	    p.rp_id, p.rp_name, &p.user_id, p.user_name, p.user_nick,
-	    p.user_icon, p.ext, p.rk, p.uv, p.pin, p.excl_count, &p.excl_cred);
+	switch (p.type & 2) {
+	case 0:
+		cose_alg = COSE_ES256;
+		break;
+	case 1:
+		cose_alg = COSE_RS256;
+		break;
+	case 2:
+		cose_alg = COSE_EDDSA;
+		break;
+	}
 
-	verify_cred(p.type & 1 ? COSE_ES256 : COSE_RS256,
+	make_cred(cred, p.u2f, cose_alg, &p.cdh, p.rp_id, p.rp_name,
+	    &p.user_id, p.user_name, p.user_nick, p.user_icon, p.ext, p.rk,
+	    p.uv, p.pin, p.excl_count, &p.excl_cred);
+
+	verify_cred(cose_alg,
 	    fido_cred_clientdata_hash_ptr(cred),
 	    fido_cred_clientdata_hash_len(cred), fido_cred_rp_id(cred),
 	    fido_cred_rp_name(cred), fido_cred_authdata_ptr(cred),
