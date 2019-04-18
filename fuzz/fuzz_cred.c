@@ -478,14 +478,14 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 	set_wire_data(p.wire_data.body, p.wire_data.len);
 
-	switch (p.type & 2) {
+	switch (p.type & 3) {
 	case 0:
 		cose_alg = COSE_ES256;
 		break;
 	case 1:
 		cose_alg = COSE_RS256;
 		break;
-	case 2:
+	default:
 		cose_alg = COSE_EDDSA;
 		break;
 	}

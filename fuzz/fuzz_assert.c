@@ -329,7 +329,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 	fido_init(0);
 
-	switch (p.type & 2) {
+	switch (p.type & 3) {
 	case 0:
 		cose_alg = COSE_ES256;
 
@@ -354,7 +354,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		pk = rs256_pk;
 
 		break;
-	case 2:
+	default:
 		cose_alg = COSE_EDDSA;
 
 		if ((eddsa_pk = eddsa_pk_new()) == NULL) {
@@ -366,7 +366,6 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		pk = eddsa_pk;
 
 		break;
-
 	}
 
 	if ((assert = fido_assert_new()) == NULL)
