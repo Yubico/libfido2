@@ -1,7 +1,7 @@
 param(
     [string]$CMakePath = "C:\Program Files\CMake\bin\cmake.exe",
     [string]$GitPath = "C:\Program Files\Git\bin\git.exe",
-    [string]$7zPath
+    [string]$SevenZPath = "C:\Program Files\7-Zip\7z.exe"
 )
 
 $CMake = $(Get-Command cmake -ErrorAction Ignore | Select-Object -ExpandProperty Source)
@@ -14,11 +14,11 @@ if([string]::IsNullOrEmpty($Git)) {
     $Git = $GitPath
 }
 
-$7z = $(Get-Command 7z -ErrorAction Ignore | Select-Object -ExpandProperty Source)
-if([string]::IsNullOrEmpty($7z) -and [string]::IsNullOrEmpty($7zPath)) {
+$SevenZ = $(Get-Command 7z -ErrorAction Ignore | Select-Object -ExpandProperty Source)
+if([string]::IsNullOrEmpty($SevenZ) -and [string]::IsNullOrEmpty($SevenZPath)) {
     throw "Unable to locate 7z.exe"
-} elseif([string]::IsNullOrEmpty($7z)) {
-    $7z = $7zPath
+} elseif([string]::IsNullOrEmpty($SevenZ)) {
+    $SevenZ = $SevenZPath
 }
 
 if(-Not (Test-Path $CMake)) {
@@ -29,13 +29,13 @@ if(-Not (Test-Path $Git)) {
     throw "Unable to find Git at $Git"
 }
 
-if(-Not (Test-Path $7z)) {
-    throw "Unable to find 7z at $7z"
+if(-Not (Test-Path $SevenZ)) {
+    throw "Unable to find 7z at $SevenZ"
 }
 
 Write-Host "Git: $Git"
 Write-Host "CMake: $CMake"
-Write-Host "7z: $7z"
+Write-Host "7z: $SevenZ"
 
 New-Item -Type Directory $PSScriptRoot\..\build -ErrorAction Ignore
 New-Item -Type Directory $PSScriptRoot\..\output -ErrorAction Ignore
@@ -50,8 +50,8 @@ try {
     Write-Host "Building LibreSSL..."
     if(-Not (Test-Path libressl-2.8.3)) {
         Invoke-WebRequest https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.8.3.tar.gz -OutFile libressl-2.8.3.tar.gz 
-        & $7z e .\libressl-2.8.3.tar.gz 
-        & $7z x .\libressl-2.8.3.tar
+        & $SevenZ e .\libressl-2.8.3.tar.gz 
+        & $SevenZ x .\libressl-2.8.3.tar
         Remove-Item -Force .\libressl-2.8.3.tar.gz
         Remove-Item -Force .\libressl-2.8.3.tar
     }
