@@ -65,7 +65,7 @@ try {
         & Copy-Item "$PSScriptRoot\libressl.gpg" -Destination "$PSScriptRoot\..\build"
         & $GPG --list-keys
         & $GPG -v --no-default-keyring --keyring ./libressl.gpg --verify libressl-2.9.1.tar.gz.asc libressl-2.9.1.tar.gz
-        if ($? -eq $false) {
+        if ($LastExitCode -ne 0) {
             throw "gpg signature verification failed"
         }
         & $SevenZ e .\libressl-2.9.1.tar.gz
