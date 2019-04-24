@@ -63,6 +63,7 @@ try {
         Invoke-WebRequest https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.9.1.tar.gz -OutFile libressl-2.9.1.tar.gz
         & Invoke-WebRequest https://ftp.eu.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.9.1.tar.gz.asc -OutFile libressl-2.9.1.tar.gz.asc
         & Copy-Item "$PSScriptRoot\libressl.gpg" -Destination "$PSScriptRoot\..\build"
+        & $GPG --list-keys
         & $GPG -v --no-default-keyring --keyring ./libressl.gpg --verify libressl-2.9.1.tar.gz.asc libressl-2.9.1.tar.gz
         if ($? -eq $false) {
             throw "gpg signature verification failed"
