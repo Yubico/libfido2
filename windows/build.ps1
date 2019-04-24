@@ -39,7 +39,7 @@ Write-Host "7z: $SevenZ"
 
 New-Item -Type Directory $PSScriptRoot\..\build -ErrorAction Ignore
 New-Item -Type Directory $PSScriptRoot\..\output -ErrorAction Ignore
-New-Item -Type Directory $PSScriptRoot\..\output\libressl-2.8.3-Win64 -ErrorAction Ignore
+New-Item -Type Directory $PSScriptRoot\..\output\libressl-2.9.1-Win64 -ErrorAction Ignore
 New-Item -Type Directory $PSScriptRoot\..\output\libcbor-0.5.0-Win64 -ErrorAction Ignore
 New-Item -Type Directory $PSScriptRoot\..\output\libfido2-Win64 -ErrorAction Ignore
 
@@ -48,20 +48,20 @@ Push-Location $PSScriptRoot\..\build
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 try {
     Write-Host "Building LibreSSL..."
-    if(-Not (Test-Path libressl-2.8.3)) {
-        Invoke-WebRequest https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.8.3.tar.gz -OutFile libressl-2.8.3.tar.gz 
-        & $SevenZ e .\libressl-2.8.3.tar.gz 
-        & $SevenZ x .\libressl-2.8.3.tar
-        Remove-Item -Force .\libressl-2.8.3.tar.gz
-        Remove-Item -Force .\libressl-2.8.3.tar
+    if(-Not (Test-Path libressl-2.9.1)) {
+        Invoke-WebRequest https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.9.1.tar.gz -OutFile libressl-2.9.1.tar.gz
+        & $SevenZ e .\libressl-2.9.1.tar.gz
+        & $SevenZ x .\libressl-2.9.1.tar
+        Remove-Item -Force .\libressl-2.9.1.tar.gz
+        Remove-Item -Force .\libressl-2.9.1.tar
     }
 
-    if(-Not (Test-Path .\libressl-2.8.3\build)) {
-        New-Item -Type Directory .\libressl-2.8.3\build
+    if(-Not (Test-Path .\libressl-2.9.1\build)) {
+        New-Item -Type Directory .\libressl-2.9.1\build
     }
 
-    Push-Location libressl-2.8.3\build
-    & $CMake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX="$PSScriptRoot\..\output\libressl-2.8.3-Win64" -DBUILD_SHARED_LIBS=ON -DLIBRESSL_TESTS=OFF
+    Push-Location libressl-2.9.1\build
+    & $CMake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX="$PSScriptRoot\..\output\libressl-2.9.1-Win64" -DBUILD_SHARED_LIBS=ON -DLIBRESSL_TESTS=OFF
     & $CMake --build . --config Release
     & $CMake --build . --config Release --target install
     Pop-Location
@@ -82,11 +82,11 @@ try {
     Pop-Location
 
     Write-Host "Building libfido2..."
-    & $CMake .. -G "Visual Studio 15 2017 Win64" -DCBOR_INCLUDE_DIRS="$PSScriptRoot\..\output\libcbor-0.5.0-Win64\include" -DCBOR_LIBRARY_DIRS="$PSScriptRoot\..\output\libcbor-0.5.0-Win64\lib" -DCRYPTO_INCLUDE_DIRS="$PSScriptRoot\..\output\libressl-2.8.3-Win64\include" -DCRYPTO_LIBRARY_DIRS="$PSScriptRoot\..\output\libressl-2.8.3-Win64\lib" -DCMAKE_INSTALL_PREFIX="$PSScriptRoot\..\output\libfido2-Win64"
+    & $CMake .. -G "Visual Studio 15 2017 Win64" -DCBOR_INCLUDE_DIRS="$PSScriptRoot\..\output\libcbor-0.5.0-Win64\include" -DCBOR_LIBRARY_DIRS="$PSScriptRoot\..\output\libcbor-0.5.0-Win64\lib" -DCRYPTO_INCLUDE_DIRS="$PSScriptRoot\..\output\libressl-2.9.1-Win64\include" -DCRYPTO_LIBRARY_DIRS="$PSScriptRoot\..\output\libressl-2.9.1-Win64\lib" -DCMAKE_INSTALL_PREFIX="$PSScriptRoot\..\output\libfido2-Win64"
     & $CMake --build . --config Release
     & $CMake --build . --config Release --target install
     & Copy-Item "$PSScriptRoot\..\output\libcbor-0.5.0-Win64\bin\cbor.dll" -Destination "$PSScriptRoot\..\build\examples\Release"
-    & Copy-Item "$PSScriptRoot\..\output\libressl-2.8.3-Win64\bin\crypto-44.dll" -Destination "$PSScriptRoot\..\build\examples\Release"
+    & Copy-Item "$PSScriptRoot\..\output\libressl-2.9.1-Win64\bin\crypto-45.dll" -Destination "$PSScriptRoot\..\build\examples\Release"
 } finally {
     Pop-Location
 }
