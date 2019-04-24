@@ -1,7 +1,8 @@
 param(
     [string]$CMakePath = "C:\Program Files\CMake\bin\cmake.exe",
     [string]$GitPath = "C:\Program Files\Git\bin\git.exe",
-    [string]$SevenZPath = "C:\Program Files\7-Zip\7z.exe"
+    [string]$SevenZPath = "C:\Program Files\7-Zip\7z.exe",
+    [string]$GPGPath = "C:\Program Files (x86)\GnuPG\bin\gpg.exe"
 )
 
 $CMake = $(Get-Command cmake -ErrorAction Ignore | Select-Object -ExpandProperty Source)
@@ -21,6 +22,11 @@ if([string]::IsNullOrEmpty($SevenZ) -and [string]::IsNullOrEmpty($SevenZPath)) {
     $SevenZ = $SevenZPath
 }
 
+$GPG = $(Get-Command gpg -ErrorAction Ignore | Select-Object -ExpandProperty Source)
+if([string]::IsNullOrEmpty($GPG)) {
+    $GPG = $GPGPath
+}
+
 if(-Not (Test-Path $CMake)) {
     throw "Unable to find CMake at $CMake"
 }
@@ -33,9 +39,14 @@ if(-Not (Test-Path $SevenZ)) {
     throw "Unable to find 7z at $SevenZ"
 }
 
+if(-Not (Test-Path $GPG)) {
+    throw "Unable to find GPG at $GPG"
+}
+
 Write-Host "Git: $Git"
 Write-Host "CMake: $CMake"
 Write-Host "7z: $SevenZ"
+Write-Host "GPG: $GPG"
 
 New-Item -Type Directory $PSScriptRoot\..\build -ErrorAction Ignore
 New-Item -Type Directory $PSScriptRoot\..\output -ErrorAction Ignore
@@ -50,6 +61,12 @@ try {
     Write-Host "Building LibreSSL..."
     if(-Not (Test-Path libressl-2.9.1)) {
         Invoke-WebRequest https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.9.1.tar.gz -OutFile libressl-2.9.1.tar.gz
+        & Invoke-WebRequest https://ftp.eu.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.9.1.tar.gz.asc -OutFile libressl-2.9.1.tar.gz.asc
+        & Copy-Item "$PSScriptRoot\libressl.gpg" -Destination "$PSScriptRoot\..\build"
+        & $GPG -v --no-default-keyring --keyring .\libressl.gpg --verify libressl-2.9.1.tar.gz.asc libressl-2.9.1.tar.gz
+        if ($? -eq $false) {
+            throw "gpg signature verification failed"
+        }
         & $SevenZ e .\libressl-2.9.1.tar.gz
         & $SevenZ x .\libressl-2.9.1.tar
         Remove-Item -Force .\libressl-2.9.1.tar.gz
@@ -66,6 +83,7 @@ try {
     & $CMake --build . --config Release --target install
     Pop-Location
 
+    # XXX no signature verification possible
     Write-host "Building libcbor..."
     if(-Not (Test-Path libcbor)) {
         & $Git clone --branch v0.5.0 https://github.com/pjk/libcbor
