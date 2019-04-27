@@ -66,6 +66,21 @@ matrix:
             - libssl-dev
             - libudev-dev
       script: /bin/sh -eux .travis/fuzz-linux-asan
+    - os: linux
+      compiler: clang-7
+      dist: xenial
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-7
+          packages:
+            - clang-7
+            - cmake
+            - libssl-dev
+            - libudev-dev
+      script: /bin/sh -eux .travis/fuzz-linux-msan
 
 notifications:
   email: false
