@@ -12,10 +12,7 @@ make -C build
 sudo make -C build install
 cd ..
 
-# Install OpenSSL 1.1.1 and mandoc from Homebrew.
-brew update
-brew upgrade openssl@1.1
-brew switch openssl@1.1 1.1.1b
+# Install mandoc from Homebrew.
 brew install mandoc
 
 # Build and install libfido2.
