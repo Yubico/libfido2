@@ -101,6 +101,7 @@ try {
 	}
 	Push-Location .\${LIBRESSL}\build
 	& $CMake .. -G "Visual Studio 15 2017 Win64" `
+		-DCMAKE_C_FLAGS_RELEASE="/Zi" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" -DBUILD_SHARED_LIBS=ON `
 		-DLIBRESSL_TESTS=OFF
 	& $CMake --build . --config Release
@@ -120,6 +121,7 @@ try {
 	}
 	Push-Location libcbor\build
 	& $CMake .. -G "Visual Studio 15 2017 Win64" `
+		-DCMAKE_C_FLAGS_RELEASE="/Zi" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}"
 	& $CMake --build . --config Release
 	& $CMake --build . --config Release --target install
