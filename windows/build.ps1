@@ -67,16 +67,18 @@ Write-Host "CMake: $CMake"
 Write-Host "7z: $SevenZ"
 Write-Host "GPG: $GPG"
 
-New-Item -Type Directory ${BUILD} -ErrorAction Ignore
-New-Item -Type Directory ${BUILD}/32 -ErrorAction Ignore
-New-Item -Type Directory ${BUILD}/64 -ErrorAction Ignore
-New-Item -Type Directory ${OUTPUT} -ErrorAction Ignore
+New-Item -Type Directory ${BUILD}
+New-Item -Type Directory ${BUILD}\32
+New-Item -Type Directory ${BUILD}\64
+New-Item -Type Directory ${OUTPUT}
+New-Item -Type Directory ${OUTPUT}\pkg\Win64\Release\v141\dynamic
+New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v141\dynamic
 
 Push-Location ${BUILD}
 
 try {
 	if (Test-Path .\${LIBRESSL}) {
-		Remove-Item .\${LIBRESSL} -Recurse
+		Remove-Item .\${LIBRESSL} -Recurse -ErrorAction Stop
 	}
 
 	if(-Not (Test-Path .\${LIBRESSL}.tar.gz -PathType leaf)) {
@@ -111,7 +113,7 @@ try {
 
 Function Build(${OUTPUT}, ${GENERATOR}) {
 	if(-Not (Test-Path .\${LIBRESSL})) {
-		New-Item -Type Directory .\${LIBRESSL}
+		New-Item -Type Directory .\${LIBRESSL} -ErrorAction Stop
 	}
 
 	Push-Location .\${LIBRESSL}
@@ -124,7 +126,7 @@ Function Build(${OUTPUT}, ${GENERATOR}) {
 	Pop-Location
 
 	if(-Not (Test-Path .\${LIBCBOR})) {
-		New-Item -Type Directory .\${LIBCBOR}
+		New-Item -Type Directory .\${LIBCBOR} -ErrorAction Stop
 	}
 
 	Push-Location .\${LIBCBOR}
@@ -147,6 +149,29 @@ Function Build(${OUTPUT}, ${GENERATOR}) {
 		-Destination "examples\Release" }
 }
 
+Function Package-Headers() {
+	Copy-Item "${OUTPUT}\64\include" -Destination "${OUTPUT}\pkg" `
+		-Recurse -ErrorAction Stop
+}
+
+Function Package-Libraries(${SRC}, ${DEST}) {
+	Copy-Item "${SRC}\bin\cbor.dll" "${DEST}" -ErrorAction Stop
+	Copy-Item "${SRC}\lib\cbor.lib" "${DEST}" -ErrorAction Stop
+	Copy-Item "${SRC}\bin\crypto-45.dll" "${DEST}" -ErrorAction Stop
+	Copy-Item "${SRC}\lib\crypto-45.lib" "${DEST}" -ErrorAction Stop
+	Copy-Item "${SRC}\lib\fido2.dll" "${DEST}" -ErrorAction Stop
+	Copy-Item "${SRC}\lib\fido2.lib" "${DEST}" -ErrorAction Stop
+}
+
+Function Package-PDBs(${SRC}, ${DEST}) {
+	Copy-Item "${SRC}\${LIBRESSL}\crypto\crypto.dir\Release\vc141.pdb" `
+		"${DEST}\crypto-45.pdb" -ErrorAction Stop
+	Copy-Item "${SRC}\${LIBCBOR}\src\cbor_shared.dir\Release\vc141.pdb" `
+		"${DEST}\cbor.pdb" -ErrorAction Stop
+	Copy-Item "${SRC}\src\fido2_shared.dir\Release\vc141.pdb" `
+		"${DEST}\fido2.pdb" -ErrorAction Stop
+}
+
 Push-Location ${BUILD}\64
 Build ${OUTPUT}\64 "Visual Studio 15 2017 Win64"
 Pop-Location
@@ -154,3 +179,11 @@ Pop-Location
 Push-Location ${BUILD}\32
 Build ${OUTPUT}\32 "Visual Studio 15 2017"
 Pop-Location
+
+Package-Headers
+
+Package-Libraries ${OUTPUT}\64 ${OUTPUT}\pkg\Win64\Release\v141\dynamic
+Package-PDBs ${BUILD}\64 ${OUTPUT}\pkg\Win64\Release\v141\dynamic
+
+Package-Libraries ${OUTPUT}\32 ${OUTPUT}\pkg\Win32\Release\v141\dynamic
+Package-PDBs ${BUILD}\32 ${OUTPUT}\pkg\Win32\Release\v141\dynamic
