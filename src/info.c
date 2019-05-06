@@ -249,7 +249,7 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	default:
 		log_debug("%s: unknown key %d", __func__,
 		    (int)cbor_get_uint8(key));
-		return (-1);
+		return (0); /* ignore */
 	}
 }
 
