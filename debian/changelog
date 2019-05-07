@@ -1,3 +1,13 @@
+libfido2 (1.1.0) bionic; urgency=low
+
+  * MacOS: fix IOKit crash on HID read.
+  * Windows: fix contents of release file.
+  * EdDSA (Ed25519) support.
+  * fido_dev_make_cred: fix order of CBOR map keys.
+  * fido_dev_get_assert: plug memory leak when operating on U2F devices.
+
+ -- pedro martelletto <pedro@yubico.com>  Tue, 07 May 2019 08:03:21 +0000
+
 libfido2 (1.0.0) bionic; urgency=low
 
   * Native HID support on Linux, MacOS, and Windows.
