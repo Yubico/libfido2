@@ -89,14 +89,12 @@ get_id(IOHIDDeviceRef dev, int16_t *vendor_id, int16_t *product_id)
 	int32_t	vendor;
 	int32_t	product;
 
-	if (get_int32(dev, CFSTR(kIOHIDVendorIDKey), &vendor) < 0 ||
-	    vendor > INT32_MAX) {
+	if (get_int32(dev, CFSTR(kIOHIDVendorIDKey), &vendor) < 0) {
 		log_debug("%s: get_int32 vendor", __func__);
 		return (-1);
 	}
 
-	if (get_int32(dev, CFSTR(kIOHIDProductIDKey), &product) < 0 ||
-	    product > INT32_MAX) {
+	if (get_int32(dev, CFSTR(kIOHIDProductIDKey), &product) < 0) {
 		log_debug("%s: get_int32 product", __func__);
 		return (-1);
 	}
