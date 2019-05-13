@@ -60,10 +60,19 @@
 #define FIDO_CAP_CBOR	0x04 /* if set, device supports CTAP_CMD_CBOR */
 #define FIDO_CAP_NMSG	0x08 /* if set, device doesn't support CTAP_CMD_MSG */
 
-/* Supported COSE types. */
+/* Supported COSE algorithms. */
 #define	COSE_ES256	-7
 #define	COSE_EDDSA	-8
 #define	COSE_RS256	-257
+
+/* Supported COSE types. */
+#define COSE_KTY_OKP	1
+#define COSE_KTY_EC2	2
+#define COSE_KTY_RSA	3
+
+/* Supported curves. */
+#define COSE_P256	1
+#define COSE_ED25519	6
 
 /* Supported extensions. */
 #define FIDO_EXT_HMAC_SECRET	0x01

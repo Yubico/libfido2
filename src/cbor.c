@@ -802,21 +802,47 @@ decode_fmt(const cbor_item_t *item, char **fmt)
 	return (0);
 }
 
+struct cose_key {
+	int kty;
+	int alg;
+	int crv;
+};
+
 static int
 find_cose_alg(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
-	int *cose_alg = arg;
+	struct cose_key *cose_key = arg;
 
-	if (cbor_isa_uint(key) == false ||
-	    cbor_int_get_width(key) != CBOR_INT_8 ||
-	    cbor_get_uint8(key) != 3)
-		return (0); /* ignore */
+	if (cbor_isa_uint(key) == true &&
+	    cbor_int_get_width(key) == CBOR_INT_8) {
+		switch (cbor_get_uint8(key)) {
+		case 1:
+			if (cbor_isa_uint(val) == false ||
+			    cbor_get_int(val) > INT_MAX || cose_key->kty != 0)
+				return (-1);
 
-	if (cbor_isa_negint(val) == false || cbor_get_int(val) > INT_MAX ||
-	    *cose_alg != 0)
-		return (-1);
+			cose_key->kty = cbor_get_int(val);
 
-	*cose_alg = -(int)cbor_get_int(val) - 1;
+			break;
+		case 3:
+			if (cbor_isa_negint(val) == false ||
+			    cbor_get_int(val) > INT_MAX || cose_key->alg != 0)
+				return (-1);
+
+			cose_key->alg = -(int)cbor_get_int(val) - 1;
+
+			break;
+		}
+	} else if (cbor_isa_negint(key) == true &&
+	    cbor_int_get_width(key) == CBOR_INT_8) {
+		if (cbor_get_uint8(key) == 0) {
+			if (cbor_isa_uint(val) == false ||
+			    cbor_get_int(val) > INT_MAX || cose_key->crv != 0)
+				return (-1);
+
+			cose_key->crv = cbor_get_int(val);
+		}
+	}
 
 	return (0);
 }
@@ -824,14 +850,50 @@ find_cose_alg(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 static int
 get_cose_alg(const cbor_item_t *item, int *cose_alg)
 {
+	struct cose_key cose_key;
+
+	memset(&cose_key, 0, sizeof(cose_key));
+
 	*cose_alg = 0;
 
 	if (cbor_isa_map(item) == false ||
 	    cbor_map_is_definite(item) == false ||
-	    cbor_map_iter(item, cose_alg, find_cose_alg) < 0) {
+	    cbor_map_iter(item, &cose_key, find_cose_alg) < 0) {
 		log_debug("%s: cbor type", __func__);
 		return (-1);
 	}
+
+	switch (cose_key.alg) {
+	case COSE_ES256:
+		if (cose_key.kty != COSE_KTY_EC2 ||
+		    cose_key.crv != COSE_ES256) {
+			log_debug("%s: invalid kty/crv", __func__);
+			return (-1);
+		}
+
+		break;
+	case COSE_EDDSA:
+		if (cose_key.kty != COSE_KTY_OKP ||
+		    cose_key.crv != COSE_ED25519) {
+			log_debug("%s: invalid kty/crv", __func__);
+			return (-1);
+		}
+
+		break;
+	case COSE_RS256:
+		if (cose_key.kty != COSE_KTY_RSA) {
+			log_debug("%s: invalid kty/crv", __func__);
+			return (-1);
+		}
+
+		break;
+	default:
+		log_debug("%s: unknown alg %d", __func__, cose_key.alg);
+
+		return (-1);
+	}
+
+	*cose_alg = cose_key.alg;
 
 	return (0);
 }
