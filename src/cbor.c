@@ -821,7 +821,7 @@ find_cose_alg(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			    cbor_get_int(val) > INT_MAX || cose_key->kty != 0)
 				return (-1);
 
-			cose_key->kty = cbor_get_int(val);
+			cose_key->kty = (int)cbor_get_int(val);
 
 			break;
 		case 3:
@@ -840,7 +840,7 @@ find_cose_alg(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			    cbor_get_int(val) > INT_MAX || cose_key->crv != 0)
 				return (-1);
 
-			cose_key->crv = cbor_get_int(val);
+			cose_key->crv = (int)cbor_get_int(val);
 		}
 	}
 
