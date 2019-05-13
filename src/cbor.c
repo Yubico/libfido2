@@ -866,7 +866,7 @@ get_cose_alg(const cbor_item_t *item, int *cose_alg)
 	switch (cose_key.alg) {
 	case COSE_ES256:
 		if (cose_key.kty != COSE_KTY_EC2 ||
-		    cose_key.crv != COSE_ES256) {
+		    cose_key.crv != COSE_P256) {
 			log_debug("%s: invalid kty/crv", __func__);
 			return (-1);
 		}
