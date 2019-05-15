@@ -19,6 +19,7 @@
 #include "fido.h"
 #include "fido/es256.h"
 #include "fido/rs256.h"
+#include "fido/eddsa.h"
 #include "extern.h"
 
 static const unsigned char cdh[32] = {
@@ -31,7 +32,7 @@ static const unsigned char cdh[32] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: assert [-t ecdsa|rsa] [-a cred_id] "
+	fprintf(stderr, "usage: assert [-t ecdsa|rsa|eddsa] [-a cred_id] "
 	    "[-h hmac_secret] [-s hmac_salt] [-P pin] [-puv] <pubkey> "
 	    "<device>\n");
 	exit(EXIT_FAILURE);
@@ -45,13 +46,16 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 	fido_assert_t	*assert = NULL;
 	EC_KEY		*ec = NULL;
 	RSA		*rsa = NULL;
+	EVP_PKEY	*eddsa = NULL;
 	es256_pk_t	*es256_pk = NULL;
 	rs256_pk_t	*rs256_pk = NULL;
+	eddsa_pk_t	*eddsa_pk = NULL;
 	void		*pk;
 	int		 r;
 
 	/* credential pubkey */
-	if (type == COSE_ES256) {
+	switch (type) {
+	case COSE_ES256:
 		if ((ec = read_ec_pubkey(key)) == NULL)
 			errx(1, "read_ec_pubkey");
 
@@ -64,7 +68,9 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 		pk = es256_pk;
 		EC_KEY_free(ec);
 		ec = NULL;
-	} else {
+
+		break;
+	case COSE_RS256:
 		if ((rsa = read_rsa_pubkey(key)) == NULL)
 			errx(1, "read_rsa_pubkey");
 
@@ -77,6 +83,25 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 		pk = rs256_pk;
 		RSA_free(rsa);
 		rsa = NULL;
+
+		break;
+	case COSE_EDDSA:
+		if ((eddsa = read_eddsa_pubkey(key)) == NULL)
+			errx(1, "read_eddsa_pubkey");
+
+		if ((eddsa_pk = eddsa_pk_new()) == NULL)
+			errx(1, "eddsa_pk_new");
+
+		if (eddsa_pk_from_EVP_PKEY(eddsa_pk, eddsa) != FIDO_OK)
+			errx(1, "eddsa_pk_from_EVP_PKEY");
+
+		pk = eddsa_pk;
+		EVP_PKEY_free(eddsa);
+		eddsa = NULL;
+
+		break;
+	default:
+		errx(1, "unknown credential type %d", type);
 	}
 
 	if ((assert = fido_assert_new()) == NULL)
@@ -123,6 +148,7 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 
 	es256_pk_free(&es256_pk);
 	rs256_pk_free(&rs256_pk);
+	eddsa_pk_free(&eddsa_pk);
 
 	fido_assert_free(&assert);
 }
@@ -184,6 +210,8 @@ main(int argc, char **argv)
 				type = COSE_ES256;
 			else if (strcmp(optarg, "rsa") == 0)
 				type = COSE_RS256;
+			else if (strcmp(optarg, "eddsa") == 0)
+				type = COSE_EDDSA;
 			else
 				errx(1, "unknown type %s", optarg);
 			break;

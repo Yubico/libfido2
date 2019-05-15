@@ -44,7 +44,7 @@ The following examples are provided:
 	Configures <pin> as the new PIN of <device>. If [oldpin] is provided,
 	the device's PIN is changed from [oldpin] to <pin>.
 
-- cred [-t ecdsa|rsa] [-k pubkey] [-ei cred_id] [-P pin] [-hruv] <device>
+- cred [-t ecdsa|rsa|eddsa] [-k pubkey] [-ei cred_id] [-P pin] [-hruv] <device>
 
 	Creates a new credential on <device> and verify that the credential
 	was signed by the authenticator. The device's attestation certificate
@@ -58,8 +58,8 @@ The following examples are provided:
 	through the -v option. If option -u is specified, the credential
 	is generated using U2F (CTAP1) instead of FIDO2 (CTAP2) commands.
 
-- assert [-t ecdsa|rsa] [-a cred_id] [-h hmac_secret] [-s hmac_salt] [-P pin]
-         [-puv] <pubkey> <device>
+- assert [-t ecdsa|rsa|eddsa] [-a cred_id] [-h hmac_secret] [-s hmac_salt]
+	 [-P pin] [-puv] <pubkey> <device>
 
 	Asks <device> for a FIDO2 assertion corresponding to [cred_id],
 	which may be omitted for resident keys. The obtained assertion

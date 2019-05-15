@@ -37,8 +37,8 @@ static const unsigned char user_id[32] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: cred [-t ecdsa|rsa] [-k pubkey] [-ei cred_id] "
-	    "[-P pin] [-hruv] <device>\n");
+	fprintf(stderr, "usage: cred [-t ecdsa|rsa|eddsa] [-k pubkey] "
+	    "[-ei cred_id] [-P pin] [-hruv] <device>\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -110,10 +110,14 @@ verify_cred(int type, const char *fmt, const unsigned char *authdata_ptr,
 			if (write_ec_pubkey(key_out, fido_cred_pubkey_ptr(cred),
 			    fido_cred_pubkey_len(cred)) < 0)
 				errx(1, "write_ec_pubkey");
-		} else {
+		} else if (type == COSE_RS256) {
 			if (write_rsa_pubkey(key_out, fido_cred_pubkey_ptr(cred),
 			    fido_cred_pubkey_len(cred)) < 0)
 				errx(1, "write_rsa_pubkey");
+		} else if (type == COSE_EDDSA) {
+			if (write_eddsa_pubkey(key_out, fido_cred_pubkey_ptr(cred),
+			    fido_cred_pubkey_len(cred)) < 0)
+				errx(1, "write_eddsa_pubkey");
 		}
 	}
 
@@ -180,6 +184,8 @@ main(int argc, char **argv)
 				type = COSE_ES256;
 			else if (strcmp(optarg, "rsa") == 0)
 				type = COSE_RS256;
+			else if (strcmp(optarg, "eddsa") == 0)
+				type = COSE_EDDSA;
 			else
 				errx(1, "unknown type %s", optarg);
 			break;
