@@ -64,9 +64,11 @@ where
 .Ar type
 may be
 .Em es256
-(denoting ECDSA over NIST P-256 with SHA-256) or
+(denoting ECDSA over NIST P-256 with SHA-256),
 .Em rs256
-(denoting 2048-bit RSA with PKCS#1.5 padding and SHA-256).
+(denoting 2048-bit RSA with PKCS#1.5 padding and SHA-256), or
+.Em eddsa
+(denoting EDDSA over Curve25519 with SHA-512).
 If
 .Ar type
 is not specified,

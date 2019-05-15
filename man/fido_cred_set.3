@@ -174,12 +174,13 @@ function sets the type of
 .Fa cose_alg ,
 where
 .Fa cose_alg
-is either
-.Dv COSE_ES256
+is
+.Dv COSE_ES256 ,
+.Dv COSE_RS256 ,
 or
-.Dv COSE_RS256 .
+.Dv COSE_EDDSA .
 The type of a credential may only be set once.
-Note that not all tokens support COSE_RS256.
+Note that not all authenticators support COSE_RS256 or COSE_EDDSA.
 .Pp
 Use of the
 .Nm

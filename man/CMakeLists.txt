@@ -9,6 +9,7 @@ message(STATUS "MANDOC_PATH: ${MANDOC_PATH}")
 message(STATUS "GZIP_PATH: ${GZIP_PATH}")
 
 list(APPEND MAN_SOURCES
+	eddsa_pk.3
 	es256_pk.3
 	fido2-assert.1
 	fido2-cred.1
@@ -34,6 +35,10 @@ list(APPEND MAN_SOURCES
 )
 
 list(APPEND MAN_ALIAS
+	eddsa_pk eddsa_pk_free
+	eddsa_pk eddsa_pk_from_ptr
+	eddsa_pk eddsa_pk_new
+	eddsa_pk eddsa_pk_to_EVP_PKEY
 	es256_pk es256_pk_free
 	es256_pk es256_pk_from_EC_KEY
 	es256_pk es256_pk_from_ptr
