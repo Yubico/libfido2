@@ -818,16 +818,20 @@ find_cose_alg(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		switch (cbor_get_uint8(key)) {
 		case 1:
 			if (cbor_isa_uint(val) == false ||
-			    cbor_get_int(val) > INT_MAX || cose_key->kty != 0)
+			    cbor_get_int(val) > INT_MAX || cose_key->kty != 0) {
+				log_debug("%s: kty", __func__);
 				return (-1);
+			}
 
 			cose_key->kty = (int)cbor_get_int(val);
 
 			break;
 		case 3:
 			if (cbor_isa_negint(val) == false ||
-			    cbor_get_int(val) > INT_MAX || cose_key->alg != 0)
+			    cbor_get_int(val) > INT_MAX || cose_key->alg != 0) {
+				log_debug("%s: alg", __func__);
 				return (-1);
+			}
 
 			cose_key->alg = -(int)cbor_get_int(val) - 1;
 
@@ -836,11 +840,11 @@ find_cose_alg(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	} else if (cbor_isa_negint(key) == true &&
 	    cbor_int_get_width(key) == CBOR_INT_8) {
 		if (cbor_get_uint8(key) == 0) {
-			if (cbor_isa_uint(val) == false ||
-			    cbor_get_int(val) > INT_MAX || cose_key->crv != 0)
-				return (-1);
-
-			cose_key->crv = (int)cbor_get_int(val);
+			/* get crv if not rsa, otherwise ignore */
+			if (cbor_isa_uint(val) == true &&
+			    cbor_get_int(val) <= INT_MAX &&
+			    cose_key->crv == 0)
+				cose_key->crv = (int)cbor_get_int(val);
 		}
 	}
 
