@@ -110,43 +110,6 @@ eddsa_pk_decode(const cbor_item_t *item, eddsa_pk_t *k)
 	return (0);
 }
 
-cbor_item_t *
-eddsa_pk_encode(const eddsa_pk_t *pk)
-{
-	cbor_item_t		*item = NULL;
-	struct cbor_pair	 pair;
-
-	if ((item = cbor_new_definite_map(4)) == NULL)
-		goto fail;
-
-	pair.key = cbor_move(cbor_build_uint8(1));
-	pair.value = cbor_move(cbor_build_uint8(1));
-	if (!cbor_map_add(item, pair))
-		goto fail;
-
-	pair.key = cbor_move(cbor_build_uint8(3));
-	pair.value = cbor_move(cbor_build_negint8(-COSE_EDDSA - 1));
-	if (!cbor_map_add(item, pair))
-		goto fail;
-
-	pair.key = cbor_move(cbor_build_negint8(0));
-	pair.value = cbor_move(cbor_build_uint8(6));
-	if (!cbor_map_add(item, pair))
-		goto fail;
-
-	pair.key = cbor_move(cbor_build_negint8(1));
-	pair.value = cbor_move(cbor_build_bytestring(pk->x, sizeof(pk->x)));
-	if (!cbor_map_add(item, pair))
-		goto fail;
-
-	return (item);
-fail:
-	if (item != NULL)
-		cbor_decref(&item);
-
-	return (NULL);
-}
-
 eddsa_pk_t *
 eddsa_pk_new(void)
 {

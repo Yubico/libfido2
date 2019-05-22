@@ -29,7 +29,6 @@ cbor_item_t *encode_rp_entity(const fido_rp_t *);
 cbor_item_t *encode_set_pin_auth(const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *encode_user_entity(const fido_user_t *);
 cbor_item_t *es256_pk_encode(const es256_pk_t *);
-cbor_item_t *eddsa_pk_encode(const eddsa_pk_t *);
 
 /* cbor decoding functions */
 int decode_attstmt(const cbor_item_t *, fido_attstmt_t *);
