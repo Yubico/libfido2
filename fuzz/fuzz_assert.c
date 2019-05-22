@@ -24,21 +24,23 @@
 #define TAG_CDH		0x03
 #define TAG_RP_ID	0x04
 #define TAG_EXT		0x05
-#define TAG_UP		0x06
-#define TAG_UV		0x07
-#define TAG_WIRE_DATA	0x08
-#define TAG_CRED_COUNT	0x09
-#define TAG_CRED	0x0a
-#define TAG_ES256	0x0b
-#define TAG_RS256	0x0c
-#define TAG_PIN		0x0d
-#define TAG_EDDSA	0x0e
+#define TAG_SEED	0x06
+#define TAG_UP		0x07
+#define TAG_UV		0x08
+#define TAG_WIRE_DATA	0x09
+#define TAG_CRED_COUNT	0x0a
+#define TAG_CRED	0x0b
+#define TAG_ES256	0x0c
+#define TAG_RS256	0x0d
+#define TAG_PIN		0x0e
+#define TAG_EDDSA	0x0f
 
 /* Parameter set defining a FIDO2 get assertion operation. */
 struct param {
 	char		pin[MAXSTR];
 	char		rp_id[MAXSTR];
 	int		ext;
+	int		seed;
 	struct blob	cdh;
 	struct blob	cred;
 	struct blob	es256;
@@ -202,6 +204,7 @@ unpack(const uint8_t *ptr, size_t len, struct param *p) NO_MSAN
 	    unpack_byte(TAG_TYPE, pp, &len, &p->type) < 0 ||
 	    unpack_byte(TAG_CRED_COUNT, pp, &len, &p->cred_count) < 0 ||
 	    unpack_int(TAG_EXT, pp, &len, &p->ext) < 0 ||
+	    unpack_int(TAG_SEED, pp, &len, &p->seed) < 0 ||
 	    unpack_string(TAG_RP_ID, pp, &len, p->rp_id) < 0 ||
 	    unpack_string(TAG_PIN, pp, &len, p->pin) < 0 ||
 	    unpack_blob(TAG_WIRE_DATA, pp, &len, &p->wire_data) < 0 ||
@@ -226,6 +229,7 @@ pack(uint8_t *ptr, size_t len, const struct param *p)
 	    pack_byte(TAG_TYPE, &ptr, &len, p->type) < 0 ||
 	    pack_byte(TAG_CRED_COUNT, &ptr, &len, p->cred_count) < 0 ||
 	    pack_int(TAG_EXT, &ptr, &len, p->ext) < 0 ||
+	    pack_int(TAG_SEED, &ptr, &len, p->seed) < 0 ||
 	    pack_string(TAG_RP_ID, &ptr, &len, p->rp_id) < 0 ||
 	    pack_string(TAG_PIN, &ptr, &len, p->pin) < 0 ||
 	    pack_blob(TAG_WIRE_DATA, &ptr, &len, &p->wire_data) < 0 ||
@@ -326,6 +330,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 	if (unpack(data, size, &p) < 0)
 		return (0);
+
+	srandom((unsigned int)p.seed);
 
 	fido_init(0);
 
@@ -471,6 +477,7 @@ LLVMFuzzerCustomMutator(uint8_t *data, size_t size, size_t maxsize,
 	mutate_byte(&p.cred_count);
 
 	mutate_int(&p.ext);
+	p.seed = (int)seed;
 
 	mutate_blob(&p.wire_data);
 	mutate_blob(&p.rs256);

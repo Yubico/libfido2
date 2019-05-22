@@ -25,12 +25,13 @@
 #define TAG_USER_NICK	0x08
 #define TAG_USER_ICON	0x09
 #define TAG_EXT		0x0a
-#define TAG_RK		0x0b
-#define TAG_UV		0x0c
-#define TAG_PIN		0x0d
-#define TAG_WIRE_DATA	0x0e
-#define TAG_EXCL_COUNT	0x0f
-#define TAG_EXCL_CRED	0x10
+#define TAG_SEED	0x0b
+#define TAG_RK		0x0c
+#define TAG_UV		0x0d
+#define TAG_PIN		0x0e
+#define TAG_WIRE_DATA	0x0f
+#define TAG_EXCL_COUNT	0x10
+#define TAG_EXCL_CRED	0x11
 
 /* Parameter set defining a FIDO2 make credential operation. */
 struct param {
@@ -41,6 +42,7 @@ struct param {
 	char		user_name[MAXSTR];
 	char		user_nick[MAXSTR];
 	int		ext;
+	int		seed;
 	struct blob	cdh;
 	struct blob	excl_cred;
 	struct blob	user_id;
@@ -349,6 +351,7 @@ unpack(const uint8_t *ptr, size_t len, struct param *p) NO_MSAN
 	    unpack_string(TAG_USER_NAME, pp, &len, p->user_name) < 0 ||
 	    unpack_string(TAG_USER_NICK, pp, &len, p->user_nick) < 0 ||
 	    unpack_int(TAG_EXT, pp, &len, &p->ext) < 0 ||
+	    unpack_int(TAG_SEED, pp, &len, &p->seed) < 0 ||
 	    unpack_blob(TAG_CDH, pp, &len, &p->cdh) < 0 ||
 	    unpack_blob(TAG_USER_ID, pp, &len, &p->user_id) < 0 ||
 	    unpack_blob(TAG_WIRE_DATA, pp, &len, &p->wire_data) < 0 ||
@@ -375,6 +378,7 @@ pack(uint8_t *ptr, size_t len, const struct param *p)
 	    pack_string(TAG_USER_NAME, &ptr, &len, p->user_name) < 0 ||
 	    pack_string(TAG_USER_NICK, &ptr, &len, p->user_nick) < 0 ||
 	    pack_int(TAG_EXT, &ptr, &len, p->ext) < 0 ||
+	    pack_int(TAG_SEED, &ptr, &len, p->seed) < 0 ||
 	    pack_blob(TAG_CDH, &ptr, &len, &p->cdh) < 0 ||
 	    pack_blob(TAG_USER_ID, &ptr, &len, &p->user_id) < 0 ||
 	    pack_blob(TAG_WIRE_DATA, &ptr, &len, &p->wire_data) < 0 ||
@@ -471,6 +475,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	if (unpack(data, size, &p) < 0)
 		return (0);
 
+	srandom((unsigned int)p.seed);
 	fido_init(0);
 
 	if ((cred = fido_cred_new()) == NULL)
@@ -570,6 +575,7 @@ LLVMFuzzerCustomMutator(uint8_t *data, size_t size, size_t maxsize,
 	mutate_byte(&p.excl_count);
 
 	mutate_int(&p.ext);
+	p.seed = (int)seed;
 
 	mutate_blob(&p.cdh);
 	mutate_blob(&p.user_id);

@@ -244,6 +244,40 @@ elseif(NOT MSVC)
 		string(CONCAT CMAKE_EXE_LINKER_FLAGS
 		    ${CMAKE_EXE_LINKER_FLAGS}
 		    " -Wl,-z,noexecstack -Wl,-z,relro,-z,now")
+		if(LIBFUZZER)
+			list(APPEND WRAPPED_SYMBOLS
+				calloc
+				cbor_array_handle
+				cbor_build_bytestring
+				cbor_build_string
+				cbor_build_uint8
+				cbor_load
+				cbor_map_add
+				cbor_map_handle
+				cbor_new_definite_map
+				cbor_serialize_alloc
+				EVP_CIPHER_CTX_new
+				EVP_CIPHER_CTX_set_padding
+				EVP_DecryptInit_ex
+				EVP_DecryptUpdate
+				EVP_DigestVerifyInit
+				EVP_EncryptInit_ex
+				EVP_EncryptUpdate
+				EVP_MD_CTX_new
+				EVP_PKEY_get0_RSA
+				malloc
+				SHA256_Final
+				SHA256_Init
+				SHA256_Update
+				strdup
+				tx
+			)
+			foreach(s ${WRAPPED_SYMBOLS})
+				string(CONCAT CMAKE_SHARED_LINKER_FLAGS
+				    ${CMAKE_SHARED_LINKER_FLAGS}
+				    " -Wl,--wrap=${s}")
+			endforeach()
+		endif()
 	endif()
 else()
 	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
@@ -286,7 +320,7 @@ subdirs(man)
 
 if(NOT WIN32)
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		if(NOT MSAN)
+		if(NOT MSAN AND NOT LIBFUZZER)
 			subdirs(regress)
 		endif()
 	endif()

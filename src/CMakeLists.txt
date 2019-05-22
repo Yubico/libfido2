@@ -28,6 +28,10 @@ list(APPEND FIDO_SOURCES
 	u2f.c
 )
 
+if(LIBFUZZER)
+	list(APPEND FIDO_SOURCES ../fuzz/wrap.c)
+endif()
+
 if(WIN32)
 	list(APPEND COMPAT_SOURCES hid_win.c)
 elseif(APPLE)
