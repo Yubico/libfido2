@@ -64,42 +64,61 @@ cbor_item_t *
 es256_pk_encode(const es256_pk_t *pk)
 {
 	cbor_item_t		*item = NULL;
-	struct cbor_pair	 pair;
+	struct cbor_pair	 argv[5];
+	int			 ok = -1;
+
+	memset(argv, 0, sizeof(argv));
 
 	if ((item = cbor_new_definite_map(5)) == NULL)
 		goto fail;
 
-	pair.key = cbor_move(cbor_build_uint8(1));
-	pair.value = cbor_move(cbor_build_uint8(2));
-	if (!cbor_map_add(item, pair))
+	/* kty */
+	if ((argv[0].key = cbor_build_uint8(1)) == NULL ||
+	    (argv[0].value = cbor_build_uint8(2)) == NULL ||
+	    !cbor_map_add(item, argv[0]))
 		goto fail;
 
-	pair.key = cbor_move(cbor_build_uint8(3));
-	pair.value = cbor_move(cbor_build_negint8(-COSE_ES256 - 1));
-	if (!cbor_map_add(item, pair))
+	/* alg */
+	if ((argv[1].key = cbor_build_uint8(3)) == NULL ||
+	    (argv[1].value = cbor_build_negint8(-COSE_ES256 - 1)) == NULL ||
+	    !cbor_map_add(item, argv[1]))
 		goto fail;
 
-	pair.key = cbor_move(cbor_build_negint8(0));
-	pair.value = cbor_move(cbor_build_uint8(1));
-	if (!cbor_map_add(item, pair))
+	/* crv */
+	if ((argv[2].key = cbor_build_negint8(0)) == NULL ||
+	    (argv[2].value = cbor_build_uint8(1)) == NULL ||
+	    !cbor_map_add(item, argv[2]))
 		goto fail;
 
-	pair.key = cbor_move(cbor_build_negint8(1));
-	pair.value = cbor_move(cbor_build_bytestring(pk->x, sizeof(pk->x)));
-	if (!cbor_map_add(item, pair))
+	/* x */
+	if ((argv[3].key = cbor_build_negint8(1)) == NULL ||
+	    (argv[3].value = cbor_build_bytestring(pk->x,
+	    sizeof(pk->x))) == NULL || !cbor_map_add(item, argv[3]))
 		goto fail;
 
-	pair.key = cbor_move(cbor_build_negint8(2));
-	pair.value = cbor_move(cbor_build_bytestring(pk->y, sizeof(pk->y)));
-	if (!cbor_map_add(item, pair))
+	/* y */
+	if ((argv[4].key = cbor_build_negint8(2)) == NULL ||
+	    (argv[4].value = cbor_build_bytestring(pk->y,
+	    sizeof(pk->y))) == NULL || !cbor_map_add(item, argv[4]))
 		goto fail;
+
+	ok = 0;
+fail:
+	if (ok < 0) {
+		if (item != NULL) {
+			cbor_decref(&item);
+			item = NULL;
+		}
+	}
+
+	for (size_t i = 0; i < 5; i++) {
+		if (argv[i].key)
+			cbor_decref(&argv[i].key);
+		if (argv[i].value)
+			cbor_decref(&argv[i].value);
+	}
 
 	return (item);
-fail:
-	if (item != NULL)
-		cbor_decref(&item);
-
-	return (NULL);
 }
 
 es256_sk_t *

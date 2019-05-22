@@ -221,67 +221,118 @@ cbor_add_bytestring(cbor_item_t *item, const char *key,
     const unsigned char *value, size_t value_len)
 {
 	struct cbor_pair pair;
+	int ok = -1;
 
-	pair.key = cbor_move(cbor_build_string(key));
-	pair.value = cbor_move(cbor_build_bytestring(value, value_len));
+	memset(&pair, 0, sizeof(pair));
+
+	if ((pair.key = cbor_build_string(key)) == NULL ||
+	    (pair.value = cbor_build_bytestring(value, value_len)) == NULL) {
+		log_debug("%s: cbor_build", __func__);
+		goto fail;
+	}
 
 	if (!cbor_map_add(item, pair)) {
 		log_debug("%s: cbor_map_add", __func__);
-		return (-1);
+		goto fail;
 	}
 
-	return (0);
+	ok = 0;
+fail:
+	if (pair.key)
+		cbor_decref(&pair.key);
+	if (pair.value)
+		cbor_decref(&pair.value);
+
+	return (ok);
 }
 
 int
 cbor_add_string(cbor_item_t *item, const char *key, const char *value)
 {
 	struct cbor_pair pair;
+	int ok = -1;
 
-	pair.key = cbor_move(cbor_build_string(key));
-	pair.value = cbor_move(cbor_build_string(value));
+	memset(&pair, 0, sizeof(pair));
+
+	if ((pair.key = cbor_build_string(key)) == NULL ||
+	    (pair.value = cbor_build_string(value)) == NULL) {
+		log_debug("%s: cbor_build", __func__);
+		goto fail;
+	}
 
 	if (!cbor_map_add(item, pair)) {
 		log_debug("%s: cbor_map_add", __func__);
-		return (-1);
+		goto fail;
 	}
 
-	return (0);
+	ok = 0;
+fail:
+	if (pair.key)
+		cbor_decref(&pair.key);
+	if (pair.value)
+		cbor_decref(&pair.value);
+
+	return (ok);
 }
 
 int
 cbor_add_bool(cbor_item_t *item, const char *key, bool value)
 {
 	struct cbor_pair pair;
+	int ok = -1;
 
-	pair.key = cbor_move(cbor_build_string(key));
-	pair.value = cbor_move(cbor_build_bool(value));
+	memset(&pair, 0, sizeof(pair));
+
+	if ((pair.key = cbor_build_string(key)) == NULL ||
+	    (pair.value = cbor_build_bool(value)) == NULL) {
+		log_debug("%s: cbor_build", __func__);
+		goto fail;
+	}
 
 	if (!cbor_map_add(item, pair)) {
 		log_debug("%s: cbor_map_add", __func__);
-		return (-1);
+		goto fail;
 	}
 
-	return (0);
+	ok = 0;
+fail:
+	if (pair.key)
+		cbor_decref(&pair.key);
+	if (pair.value)
+		cbor_decref(&pair.value);
+
+	return (ok);
 }
 
 static int
 cbor_add_arg(cbor_item_t *item, uint8_t n, cbor_item_t *arg)
 {
 	struct cbor_pair pair;
+	int ok = -1;
+
+	memset(&pair, 0, sizeof(pair));
 
 	if (arg == NULL)
 		return (0); /* empty argument */
 
-	pair.key = cbor_move(cbor_build_uint8(n));
+	if ((pair.key = cbor_build_uint8(n)) == NULL) {
+		log_debug("%s: cbor_build", __func__);
+		goto fail;
+	}
+
 	pair.value = arg;
 
 	if (!cbor_map_add(item, pair)) {
 		log_debug("%s: cbor_map_add", __func__);
-		return (-1);
+		goto fail;
 	}
 
-	return (0);
+	ok = 0;
+fail:
+	if (pair.key)
+		cbor_decref(&pair.key);
+
+	return (ok);
 }
 
 static cbor_item_t *
@@ -386,38 +437,50 @@ encode_pubkey_param(int cose_alg)
 {
 	cbor_item_t		*item = NULL;
 	cbor_item_t		*body = NULL;
-	cbor_item_t		*alg_item = NULL;
 	struct cbor_pair	 alg;
+	int			 ok = -1;
+
+	memset(&alg, 0, sizeof(alg));
 
 	if ((item = cbor_new_definite_array(1)) == NULL ||
 	    (body = cbor_new_definite_map(2)) == NULL ||
 	    cose_alg > -1 || cose_alg < INT16_MIN)
 		goto fail;
 
-	alg.key = cbor_move(cbor_build_string("alg"));
+	alg.key = cbor_build_string("alg");
 
 	if (-cose_alg - 1 > UINT8_MAX)
-		alg_item = cbor_build_negint16((uint16_t)(-cose_alg - 1));
+		alg.value = cbor_build_negint16((uint16_t)(-cose_alg - 1));
 	else
-		alg_item = cbor_build_negint8((uint8_t)(-cose_alg - 1));
+		alg.value = cbor_build_negint8((uint8_t)(-cose_alg - 1));
 
-	alg.value = cbor_move(alg_item);
+	if (alg.key == NULL || alg.value == NULL) {
+		log_debug("%s: cbor_build", __func__);
+		goto fail;
+	}
 
 	if (cbor_map_add(body, alg) == false ||
 	    cbor_add_string(body, "type", "public-key") < 0 ||
 	    cbor_array_push(item, body) == false)
 		goto fail;
 
-	cbor_decref(&body);
-
-	return (item);
+	ok  = 0;
 fail:
-	if (item != NULL)
-		cbor_decref(&item);
+	if (ok < 0) {
+		if (item != NULL) {
+			cbor_decref(&item);
+			item = NULL;
+		}
+	}
+
 	if (body != NULL)
 		cbor_decref(&body);
+	if (alg.key != NULL)
+		cbor_decref(&alg.key);
+	if (alg.value != NULL)
+		cbor_decref(&alg.value);
 
-	return (NULL);
+	return (item);
 }
 
 static cbor_item_t *
@@ -729,6 +792,7 @@ encode_hmac_secret_param(const fido_blob_t *ecdh, const es256_pk_t *pk,
 	struct cbor_pair	 pair;
 
 	memset(argv, 0, sizeof(argv));
+	memset(&pair, 0, sizeof(pair));
 
 	if (ecdh == NULL || pk == NULL || hmac_salt->ptr == NULL) {
 		log_debug("%s: ecdh=%p, pk=%p, hmac_salt->ptr=%p", __func__,
@@ -760,7 +824,11 @@ encode_hmac_secret_param(const fido_blob_t *ecdh, const es256_pk_t *pk,
 		goto fail;
 	}
 
-	pair.key = cbor_move(cbor_build_string("hmac-secret"));
+	if ((pair.key = cbor_build_string("hmac-secret")) == NULL) {
+		log_debug("%s: cbor_build", __func__);
+		goto fail;
+	}
+
 	pair.value = param;
 
 	if (!cbor_map_add(item, pair)) {
@@ -777,6 +845,8 @@ fail:
 
 	if (param != NULL)
 		cbor_decref(&param);
+	if (pair.key != NULL)
+		cbor_decref(&pair.key);
 
 	return (item);
 }
