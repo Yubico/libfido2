@@ -20,6 +20,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <openssl/bn.h>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 
@@ -204,6 +205,177 @@ WRAP(int,
 	    EVP_PKEY *pkey),
 	0,
 	(ctx, pctx, type, e, pkey),
+	1
+)
+
+WRAP(BIGNUM *,
+	BN_bin2bn,
+	(const unsigned char *s, int len, BIGNUM *ret),
+	NULL,
+	(s, len, ret),
+	1
+)
+
+WRAP(BIGNUM *,
+	BN_CTX_get,
+	(BN_CTX *ctx),
+	NULL,
+	(ctx),
+	1
+)
+
+WRAP(BN_CTX *,
+	BN_CTX_new,
+	(void),
+	NULL,
+	(),
+	1
+)
+
+WRAP(BIGNUM *,
+	BN_new,
+	(void),
+	NULL,
+	(),
+	1
+)
+
+WRAP(int,
+	RSA_set0_key,
+	(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d),
+	0,
+	(r, n, e, d),
+	1
+)
+
+WRAP(EC_KEY *,
+	EC_KEY_new_by_curve_name,
+	(int nid),
+	NULL,
+	(nid),
+	1
+)
+
+WRAP(const EC_GROUP *,
+	EC_KEY_get0_group,
+	(const EC_KEY *key),
+	NULL,
+	(key),
+	1
+)
+
+WRAP(EC_POINT *,
+	EC_POINT_new,
+	(const EC_GROUP *group),
+	NULL,
+	(group),
+	1
+)
+
+WRAP(EVP_PKEY *,
+	EVP_PKEY_new,
+	(void),
+	NULL,
+	(),
+	1
+)
+
+WRAP(int,
+	EVP_PKEY_assign,
+	(EVP_PKEY *pkey, int type, void *key),
+	0,
+	(pkey, type, key),
+	1
+)
+
+WRAP(EVP_PKEY *,
+	EVP_PKEY_new_raw_public_key,
+	(int type, ENGINE *e, const unsigned char *key, size_t keylen),
+	NULL,
+	(type, e, key, keylen),
+	1
+)
+
+WRAP(EVP_PKEY_CTX *,
+	EVP_PKEY_CTX_new,
+	(EVP_PKEY *pkey, ENGINE *e),
+	NULL,
+	(pkey, e),
+	1
+)
+
+WRAP(int,
+	EVP_PKEY_derive_init,
+	(EVP_PKEY_CTX *ctx),
+	0,
+	(ctx),
+	1
+)
+
+WRAP(int,
+	EVP_PKEY_derive_set_peer,
+	(EVP_PKEY_CTX *ctx, EVP_PKEY *peer),
+	0,
+	(ctx, peer),
+	1
+)
+
+WRAP(const EVP_MD *,
+	EVP_sha256,
+	(void),
+	NULL,
+	(),
+	1
+)
+
+WRAP(unsigned char *,
+	HMAC,
+	(const EVP_MD *evp_md, const void *key, int key_len,
+	    const unsigned char *d, int n, unsigned char *md,
+	    unsigned int *md_len),
+	NULL,
+	(evp_md, key, key_len, d, n, md, md_len),
+	1
+)
+
+WRAP(HMAC_CTX *,
+	HMAC_CTX_new,
+	(void),
+	NULL,
+	(),
+	1
+)
+
+WRAP(int,
+	HMAC_Init_ex,
+	(HMAC_CTX *ctx, const void *key, int key_len, const EVP_MD *md,
+	    ENGINE *impl),
+	0,
+	(ctx, key, key_len, md, impl),
+	1
+)
+
+WRAP(int,
+	HMAC_Update,
+	(HMAC_CTX *ctx, const unsigned char *data, int len),
+	0,
+	(ctx, data, len),
+	1
+)
+
+WRAP(int,
+	HMAC_Final,
+	(HMAC_CTX *ctx, unsigned char *md, unsigned int *len),
+	0,
+	(ctx, md, len),
+	1
+)
+
+WRAP(unsigned char *,
+	SHA256,
+	(const unsigned char *d, size_t n, unsigned char *md),
+	NULL,
+	(d, n, md),
 	1
 )
 
