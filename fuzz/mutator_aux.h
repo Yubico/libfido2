@@ -29,7 +29,7 @@
 #endif
 
 #define MAXSTR	1024
-#define MAXBLOB	2048
+#define MAXBLOB	3072
 
 struct blob {
 	uint8_t	body[MAXBLOB];
