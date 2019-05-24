@@ -21,6 +21,7 @@ T+=" harnesses/fido2-cred-V"
 T+=" harnesses/fido2-token-I"
 T+=" harnesses/fuzz_cred"
 T+=" harnesses/fuzz_assert"
+T+=" harnesses/fuzz_mgmt"
 
 clean() {
 	echo cleaning

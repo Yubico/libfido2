@@ -4,6 +4,7 @@
 
 list(APPEND COMPAT_SOURCES
 	../openbsd-compat/strlcpy.c
+	../openbsd-compat/strlcat.c
 )
 
 if(LIBFUZZER)
@@ -18,4 +19,10 @@ if(LIBFUZZER)
 	target_compile_options(fuzz_assert PRIVATE "-fsanitize=fuzzer")
 	set_target_properties(fuzz_assert PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
 	target_link_libraries(fuzz_assert fido2_shared)
+
+	# fuzz_mgmt
+	add_executable(fuzz_mgmt fuzz_mgmt.c mutator_aux.c ${COMPAT_SOURCES})
+	target_compile_options(fuzz_mgmt PRIVATE "-fsanitize=fuzzer")
+	set_target_properties(fuzz_mgmt PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
+	target_link_libraries(fuzz_mgmt fido2_shared)
 endif()
