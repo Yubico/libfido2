@@ -731,7 +731,8 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
     const unsigned char *x5c_ptr, size_t x5c_len, const unsigned char *sig_ptr,
     size_t sig_len, const char *fmt)
 {
-	fido_cred_t *cred;
+	fido_cred_t	*cred;
+	uint8_t		 flags;
 
 	if ((cred = fido_cred_new()) == NULL) {
 		warnx("%s: fido_cred_new", __func__);
@@ -755,6 +756,9 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	consume(fido_cred_pubkey_ptr(cred), fido_cred_pubkey_len(cred));
 	consume(fido_cred_id_ptr(cred), fido_cred_id_len(cred));
 
+	flags = fido_cred_flags(cred);
+	consume(&flags, sizeof(flags));
+
 	fido_cred_free(&cred);
 }
 
@@ -771,6 +775,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		return (0);
 
 	srandom((unsigned int)p.seed);
+
 	fido_init(0);
 
 	if ((cred = fido_cred_new()) == NULL)
