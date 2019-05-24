@@ -141,14 +141,6 @@ eddsa_pk_from_ptr(eddsa_pk_t *pk, const void *ptr, size_t len)
 	return (FIDO_OK);
 }
 
-int
-eddsa_pk_set_x(eddsa_pk_t *pk, const unsigned char *x)
-{
-	memcpy(pk->x, x, sizeof(pk->x));
-
-	return (0);
-}
-
 EVP_PKEY *
 eddsa_pk_to_EVP_PKEY(const eddsa_pk_t *k)
 {

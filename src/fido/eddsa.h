@@ -20,7 +20,6 @@ int eddsa_pk_from_EVP_PKEY(eddsa_pk_t *, const EVP_PKEY *);
 int eddsa_pk_from_ptr(eddsa_pk_t *, const void *, size_t);
 
 #ifdef _FIDO_INTERNAL
-int eddsa_pk_set_x(eddsa_pk_t *, const unsigned char *);
 
 #if defined(LIBRESSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER < 0x10101000L
 #define EVP_PKEY_ED25519 EVP_PKEY_NONE

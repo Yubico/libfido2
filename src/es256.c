@@ -141,14 +141,6 @@ es256_sk_free(es256_sk_t **skp)
 	*skp = NULL;
 }
 
-int
-es256_sk_set_d(es256_sk_t *sk, const unsigned char *d)
-{
-	memcpy(sk->d, d, sizeof(sk->d));
-
-	return (0);
-}
-
 es256_pk_t *
 es256_pk_new(void)
 {

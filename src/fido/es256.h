@@ -29,7 +29,6 @@ int es256_sk_create(es256_sk_t *);
 
 int es256_pk_set_x(es256_pk_t *, const unsigned char *);
 int es256_pk_set_y(es256_pk_t *, const unsigned char *);
-int es256_sk_set_d(es256_sk_t *, const unsigned char *);
 #endif
 
 #endif /* !_FIDO_ES256_H */
