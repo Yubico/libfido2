@@ -102,8 +102,7 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 	}
 
 	if ((argv[0] = cbor_build_string(assert->rp_id)) == NULL ||
-	    (argv[1] = fido_blob_encode(&assert->cdh)) == NULL ||
-	    (argv[4] = encode_assert_options(assert->up, assert->uv)) == NULL) {
+	    (argv[1] = fido_blob_encode(&assert->cdh)) == NULL) {
 		log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -124,6 +123,15 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 		if ((argv[3] = encode_hmac_secret_param(ecdh, pk,
 		    &assert->hmac_salt)) == NULL) {
 			log_debug("%s: encode_hmac_secret_param", __func__);
+			r = FIDO_ERR_INTERNAL;
+			goto fail;
+		}
+
+	/* options */
+	if (assert->up != FIDO_OPT_OMIT || assert->uv != FIDO_OPT_OMIT)
+		if ((argv[4] = encode_assert_options(assert->up,
+		    assert->uv)) == NULL) {
+			log_debug("%s: encode_assert_options", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
@@ -326,14 +334,16 @@ fail:
 }
 
 static int
-check_flags(uint8_t flags, bool up, bool uv)
+check_flags(uint8_t flags, fido_opt_t up, fido_opt_t uv)
 {
-	if (up == true && (flags & CTAP_AUTHDATA_USER_PRESENT) == 0) {
+	if (up == FIDO_OPT_TRUE &&
+	    (flags & CTAP_AUTHDATA_USER_PRESENT) == 0) {
 		log_debug("%s: CTAP_AUTHDATA_USER_PRESENT", __func__);
 		return (-1); /* user not present */
 	}
 
-	if (uv == true && (flags & CTAP_AUTHDATA_USER_VERIFIED) == 0) {
+	if (uv == FIDO_OPT_TRUE &&
+	    (flags & CTAP_AUTHDATA_USER_VERIFIED) == 0) {
 		log_debug("%s: CTAP_AUTHDATA_USER_VERIFIED", __func__);
 		return (-1); /* user not verified */
 	}
@@ -688,7 +698,23 @@ fido_assert_set_extensions(fido_assert_t *assert, int ext)
 int
 fido_assert_set_options(fido_assert_t *assert, bool up, bool uv)
 {
+	assert->up = up ? FIDO_OPT_TRUE : FIDO_OPT_FALSE;
+	assert->uv = uv ? FIDO_OPT_TRUE : FIDO_OPT_FALSE;
+
+	return (FIDO_OK);
+}
+
+int
+fido_assert_set_up(fido_assert_t *assert, fido_opt_t up)
+{
 	assert->up = up;
+
+	return (FIDO_OK);
+}
+
+int
+fido_assert_set_uv(fido_assert_t *assert, fido_opt_t uv)
+{
 	assert->uv = uv;
 
 	return (FIDO_OK);
@@ -725,8 +751,8 @@ fido_assert_reset_tx(fido_assert_t *assert)
 	memset(&assert->allow_list, 0, sizeof(assert->allow_list));
 
 	assert->rp_id = NULL;
-	assert->up = false;
-	assert->uv = false;
+	assert->up = FIDO_OPT_OMIT;
+	assert->uv = FIDO_OPT_OMIT;
 	assert->ext = 0;
 }
 

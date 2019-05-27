@@ -1,4 +1,9 @@
 EXPORTS
+eddsa_pk_free
+eddsa_pk_from_EVP_PKEY
+eddsa_pk_from_ptr
+eddsa_pk_new
+eddsa_pk_to_EVP_PKEY
 es256_pk_free
 es256_pk_from_EC_KEY
 es256_pk_from_ptr
@@ -26,6 +31,8 @@ fido_assert_set_hmac_salt
 fido_assert_set_options
 fido_assert_set_rp
 fido_assert_set_sig
+fido_assert_set_up
+fido_assert_set_uv
 fido_assert_sig_len
 fido_assert_sig_ptr
 fido_assert_user_display_name
@@ -68,10 +75,12 @@ fido_cred_set_clientdata_hash
 fido_cred_set_extensions
 fido_cred_set_fmt
 fido_cred_set_options
+fido_cred_set_rk
 fido_cred_set_rp
 fido_cred_set_sig
 fido_cred_set_type
 fido_cred_set_user
+fido_cred_set_uv
 fido_cred_set_x509
 fido_cred_sig_len
 fido_cred_sig_ptr
@@ -113,8 +122,3 @@ rs256_pk_from_ptr
 rs256_pk_from_RSA
 rs256_pk_new
 rs256_pk_to_EVP_PKEY
-eddsa_pk_new
-eddsa_pk_from_EVP_PKEY
-eddsa_pk_from_ptr
-eddsa_pk_to_EVP_PKEY
-eddsa_pk_free

@@ -1,3 +1,8 @@
+_eddsa_pk_free
+_eddsa_pk_from_EVP_PKEY
+_eddsa_pk_from_ptr
+_eddsa_pk_new
+_eddsa_pk_to_EVP_PKEY
 _es256_pk_free
 _es256_pk_from_EC_KEY
 _es256_pk_from_ptr
@@ -25,6 +30,8 @@ _fido_assert_set_hmac_salt
 _fido_assert_set_options
 _fido_assert_set_rp
 _fido_assert_set_sig
+_fido_assert_set_up
+_fido_assert_set_uv
 _fido_assert_sig_len
 _fido_assert_sig_ptr
 _fido_assert_user_display_name
@@ -67,10 +74,12 @@ _fido_cred_set_clientdata_hash
 _fido_cred_set_extensions
 _fido_cred_set_fmt
 _fido_cred_set_options
+_fido_cred_set_rk
 _fido_cred_set_rp
 _fido_cred_set_sig
 _fido_cred_set_type
 _fido_cred_set_user
+_fido_cred_set_uv
 _fido_cred_set_x509
 _fido_cred_sig_len
 _fido_cred_sig_ptr
@@ -112,8 +121,3 @@ _rs256_pk_from_ptr
 _rs256_pk_from_RSA
 _rs256_pk_new
 _rs256_pk_to_EVP_PKEY
-_eddsa_pk_new
-_eddsa_pk_from_EVP_PKEY
-_eddsa_pk_from_ptr
-_eddsa_pk_to_EVP_PKEY
-_eddsa_pk_free

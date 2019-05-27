@@ -250,7 +250,8 @@ valid_assert(void)
 	assert(fido_assert_set_count(a, 1) == FIDO_OK);
 	assert(fido_assert_set_authdata(a, 0, authdata,
 	    sizeof(authdata)) == FIDO_OK);
-	assert(fido_assert_set_options(a, false, false) == FIDO_OK);
+	assert(fido_assert_set_up(a, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_assert_set_uv(a, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_assert_set_sig(a, 0, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_assert_verify(a, 0, COSE_ES256, pk) == FIDO_OK);
 	free_assert(a);
@@ -270,7 +271,8 @@ no_cdh(void)
 	assert(fido_assert_set_count(a, 1) == FIDO_OK);
 	assert(fido_assert_set_authdata(a, 0, authdata,
 	    sizeof(authdata)) == FIDO_OK);
-	assert(fido_assert_set_options(a, false, false) == FIDO_OK);
+	assert(fido_assert_set_up(a, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_assert_set_uv(a, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_assert_set_sig(a, 0, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_assert_verify(a, 0, COSE_ES256,
 	    pk) == FIDO_ERR_INVALID_ARGUMENT);
@@ -291,7 +293,8 @@ no_rp(void)
 	assert(fido_assert_set_count(a, 1) == FIDO_OK);
 	assert(fido_assert_set_authdata(a, 0, authdata,
 	    sizeof(authdata)) == FIDO_OK);
-	assert(fido_assert_set_options(a, false, false) == FIDO_OK);
+	assert(fido_assert_set_up(a, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_assert_set_uv(a, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_assert_set_sig(a, 0, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_assert_verify(a, 0, COSE_ES256,
 	    pk) == FIDO_ERR_INVALID_ARGUMENT);
@@ -311,7 +314,8 @@ no_authdata(void)
 	assert(fido_assert_set_clientdata_hash(a, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_assert_set_rp(a, "localhost") == FIDO_OK);
 	assert(fido_assert_set_count(a, 1) == FIDO_OK);
-	assert(fido_assert_set_options(a, false, false) == FIDO_OK);
+	assert(fido_assert_set_up(a, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_assert_set_uv(a, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_assert_set_sig(a, 0, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_assert_verify(a, 0, COSE_ES256,
 	    pk) == FIDO_ERR_INVALID_ARGUMENT);
@@ -333,7 +337,8 @@ no_sig(void)
 	assert(fido_assert_set_count(a, 1) == FIDO_OK);
 	assert(fido_assert_set_authdata(a, 0, authdata,
 	    sizeof(authdata)) == FIDO_OK);
-	assert(fido_assert_set_options(a, false, false) == FIDO_OK);
+	assert(fido_assert_set_up(a, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_assert_set_uv(a, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_assert_verify(a, 0, COSE_ES256,
 	    pk) == FIDO_ERR_INVALID_ARGUMENT);
 	free_assert(a);
@@ -360,7 +365,8 @@ junk_cdh(void)
 	assert(fido_assert_set_count(a, 1) == FIDO_OK);
 	assert(fido_assert_set_authdata(a, 0, authdata,
 	    sizeof(authdata)) == FIDO_OK);
-	assert(fido_assert_set_options(a, false, false) == FIDO_OK);
+	assert(fido_assert_set_up(a, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_assert_set_uv(a, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_assert_set_sig(a, 0, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_assert_verify(a, 0, COSE_ES256, pk) == FIDO_ERR_INVALID_SIG);
 	free_assert(a);
@@ -382,7 +388,8 @@ junk_rp(void)
 	assert(fido_assert_set_count(a, 1) == FIDO_OK);
 	assert(fido_assert_set_authdata(a, 0, authdata,
 	    sizeof(authdata)) == FIDO_OK);
-	assert(fido_assert_set_options(a, false, false) == FIDO_OK);
+	assert(fido_assert_set_up(a, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_assert_set_uv(a, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_assert_set_sig(a, 0, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_assert_verify(a, 0, COSE_ES256,
 	    pk) == FIDO_ERR_INVALID_PARAM);
@@ -429,7 +436,8 @@ junk_sig(void)
 	assert(fido_assert_set_count(a, 1) == FIDO_OK);
 	assert(fido_assert_set_authdata(a, 0, authdata,
 	    sizeof(authdata)) == FIDO_OK);
-	assert(fido_assert_set_options(a, false, false) == FIDO_OK);
+	assert(fido_assert_set_up(a, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_assert_set_uv(a, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_assert_set_sig(a, 0, junk, sizeof(sig)) == FIDO_OK);
 	assert(fido_assert_verify(a, 0, COSE_ES256, pk) == FIDO_ERR_INVALID_SIG);
 	free_assert(a);
@@ -451,14 +459,17 @@ wrong_options(void)
 	assert(fido_assert_set_count(a, 1) == FIDO_OK);
 	assert(fido_assert_set_authdata(a, 0, authdata,
 	    sizeof(authdata)) == FIDO_OK);
-	assert(fido_assert_set_options(a, true, false) == FIDO_OK);
+	assert(fido_assert_set_up(a, FIDO_OPT_TRUE) == FIDO_OK);
+	assert(fido_assert_set_uv(a, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_assert_set_sig(a, 0, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_assert_verify(a, 0, COSE_ES256,
 	    pk) == FIDO_ERR_INVALID_PARAM);
-	assert(fido_assert_set_options(a, false, true) == FIDO_OK);
+	assert(fido_assert_set_up(a, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_assert_set_uv(a, FIDO_OPT_TRUE) == FIDO_OK);
 	assert(fido_assert_verify(a, 0, COSE_ES256,
 	    pk) == FIDO_ERR_INVALID_PARAM);
-	assert(fido_assert_set_options(a, false, false) == FIDO_OK);
+	assert(fido_assert_set_up(a, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_assert_set_uv(a, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_assert_verify(a, 0, COSE_ES256, pk) == FIDO_OK);
 	free_assert(a);
 	free_es256_pk(pk);

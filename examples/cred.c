@@ -80,10 +80,13 @@ verify_cred(int type, const char *fmt, const unsigned char *authdata_ptr,
 	if (r != FIDO_OK)
 		errx(1, "fido_cred_set_extensions: %s (0x%x)", fido_strerr(r), r);
 
-	/* options */
-	r = fido_cred_set_options(cred, rk, uv);
-	if (r != FIDO_OK)
-		errx(1, "fido_cred_set_options: %s (0x%x)", fido_strerr(r), r);
+	/* resident key */
+	if (rk && (r = fido_cred_set_rk(cred, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_cred_set_rk: %s (0x%x)", fido_strerr(r), r);
+
+	/* user verification */
+	if (uv && (r = fido_cred_set_uv(cred, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_cred_set_uv: %s (0x%x)", fido_strerr(r), r);
 
 	/* x509 */
 	r = fido_cred_set_x509(cred, x509_ptr, x509_len);
@@ -243,10 +246,13 @@ main(int argc, char **argv)
 	if (r != FIDO_OK)
 		errx(1, "fido_cred_set_extensions: %s (0x%x)", fido_strerr(r), r);
 
-	/* options */
-	r = fido_cred_set_options(cred, rk, uv);
-	if (r != FIDO_OK)
-		errx(1, "fido_cred_set_options: %s (0x%x)", fido_strerr(r), r);
+	/* resident key */
+	if (rk && (r = fido_cred_set_rk(cred, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_cred_set_rk: %s (0x%x)", fido_strerr(r), r);
+
+	/* user verification */
+	if (uv && (r = fido_cred_set_uv(cred, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_cred_set_uv: %s (0x%x)", fido_strerr(r), r);
 
 	r = fido_dev_make_cred(dev, cred, pin);
 	if (r != FIDO_OK)

@@ -26,6 +26,12 @@ typedef struct fido_dev_io {
 	fido_dev_io_write_t *write;
 } fido_dev_io_t;
 
+typedef enum {
+	FIDO_OPT_OMIT = 0, /* use authenticator's default */
+	FIDO_OPT_FALSE,    /* explicitly set option to false */
+        FIDO_OPT_TRUE,     /* explicitly set option to true */
+} fido_opt_t;
+
 #ifdef _FIDO_INTERNAL
 #include <cbor.h>
 #include <limits.h>
@@ -110,8 +116,10 @@ int fido_assert_set_clientdata_hash(fido_assert_t *, const unsigned char *,
 int fido_assert_set_count(fido_assert_t *, size_t);
 int fido_assert_set_extensions(fido_assert_t *, int);
 int fido_assert_set_hmac_salt(fido_assert_t *, const unsigned char *, size_t);
-int fido_assert_set_options(fido_assert_t *, bool, bool);
+int fido_assert_set_options(fido_assert_t *, bool, bool) __attribute__((__deprecated__));
 int fido_assert_set_rp(fido_assert_t *, const char *);
+int fido_assert_set_up(fido_assert_t *, fido_opt_t);
+int fido_assert_set_uv(fido_assert_t *, fido_opt_t);
 int fido_assert_set_sig(fido_assert_t *, size_t, const unsigned char *, size_t);
 int fido_assert_verify(const fido_assert_t *, size_t, int, const void *);
 int fido_cred_exclude(fido_cred_t *, const unsigned char *, size_t);
@@ -119,8 +127,10 @@ int fido_cred_set_authdata(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_clientdata_hash(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_extensions(fido_cred_t *, int);
 int fido_cred_set_fmt(fido_cred_t *, const char *);
-int fido_cred_set_options(fido_cred_t *, bool, bool);
+int fido_cred_set_options(fido_cred_t *, bool, bool) __attribute__((__deprecated__));
+int fido_cred_set_rk(fido_cred_t *, fido_opt_t);
 int fido_cred_set_rp(fido_cred_t *, const char *, const char *);
+int fido_cred_set_uv(fido_cred_t *, fido_opt_t);
 int fido_cred_set_sig(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_type(fido_cred_t *, int);
 int fido_cred_set_user(fido_cred_t *, const unsigned char *, size_t,

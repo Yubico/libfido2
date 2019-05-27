@@ -132,10 +132,13 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 		errx(1, "fido_assert_set_extensions: %s (0x%x)", fido_strerr(r),
 		    r);
 
-	/* options */
-	r = fido_assert_set_options(assert, up, uv);
-	if (r != FIDO_OK)
-		errx(1, "fido_assert_set_options: %s (0x%x)", fido_strerr(r), r);
+	/* user presence */
+	if (up && (r = fido_assert_set_up(assert, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_assert_set_up: %s (0x%x)", fido_strerr(r), r);
+
+	/* user verification */
+	if (uv && (r = fido_assert_set_uv(assert, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_assert_set_uv: %s (0x%x)", fido_strerr(r), r);
 
 	/* sig */
 	r = fido_assert_set_sig(assert, 0, sig_ptr, sig_len);
@@ -260,10 +263,13 @@ main(int argc, char **argv)
 		errx(1, "fido_assert_set_extensions: %s (0x%x)", fido_strerr(r),
 		    r);
 
-	/* options */
-	r = fido_assert_set_options(assert, up, uv);
-	if (r != FIDO_OK)
-		errx(1, "fido_assert_set_options: %s (0x%x)", fido_strerr(r), r);
+	/* user presence */
+	if (up && (r = fido_assert_set_up(assert, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_assert_set_up: %s (0x%x)", fido_strerr(r), r);
+
+	/* user verification */
+	if (uv && (r = fido_assert_set_uv(assert, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_assert_set_uv: %s (0x%x)", fido_strerr(r), r);
 
 	r = fido_dev_get_assert(dev, assert, pin);
 	if (r != FIDO_OK)

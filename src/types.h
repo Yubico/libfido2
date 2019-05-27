@@ -79,8 +79,8 @@ typedef struct fido_cred {
 	fido_rp_t         rp;            /* relying party */
 	fido_user_t       user;          /* user entity */
 	fido_blob_array_t excl;          /* list of credential ids to exclude */
-	bool              rk;            /* resident key */
-	bool              uv;            /* user verification */
+	fido_opt_t        rk;            /* resident key */
+	fido_opt_t        uv;            /* user verification */
 	int               ext;           /* enabled extensions */
 	int               type;          /* cose algorithm */
 	char             *fmt;           /* credential format */
@@ -107,8 +107,8 @@ typedef struct fido_assert {
 	fido_blob_t        cdh;          /* client data hash */
 	fido_blob_t        hmac_salt;    /* optional hmac-secret salt */
 	fido_blob_array_t  allow_list;   /* list of allowed credentials */
-	bool               up;           /* user presence */
-	bool               uv;           /* user verification */
+	fido_opt_t         up;           /* user presence */
+	fido_opt_t         uv;           /* user verification */
 	int                ext;          /* enabled extensions */
 	fido_assert_stmt  *stmt;         /* array of expected assertions */
 	size_t             stmt_cnt;     /* number of allocated assertions */

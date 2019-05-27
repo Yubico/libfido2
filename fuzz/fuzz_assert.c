@@ -374,7 +374,10 @@ get_assert(fido_assert_t *assert, uint8_t u2f, const struct blob *cdh,
 	fido_assert_set_clientdata_hash(assert, cdh->body, cdh->len);
 	fido_assert_set_rp(assert, rp_id);
 	fido_assert_set_extensions(assert, ext);
-	fido_assert_set_options(assert, up & 1, uv & 1);
+	if (up & 1)
+		fido_assert_set_up(assert, FIDO_OPT_TRUE);
+	if (uv & 1)
+		fido_assert_set_uv(assert, FIDO_OPT_TRUE);
 	/* XXX reuse cred as hmac salt to keep struct param small */
 	fido_assert_set_hmac_salt(assert, cred->body, cred->len);
 
@@ -402,7 +405,8 @@ verify_assert(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	fido_assert_set_count(assert, 1);
 	fido_assert_set_authdata(assert, 0, authdata_ptr, authdata_len);
 	fido_assert_set_extensions(assert, ext);
-	fido_assert_set_options(assert, up & 1, uv & 1);
+	if (up & 1) fido_assert_set_up(assert, FIDO_OPT_TRUE);
+	if (uv & 1) fido_assert_set_uv(assert, FIDO_OPT_TRUE);
 	fido_assert_set_sig(assert, 0, sig_ptr, sig_len);
 	fido_assert_verify(assert, 0, type, pk);
 

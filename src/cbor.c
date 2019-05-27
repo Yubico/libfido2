@@ -276,7 +276,7 @@ fail:
 }
 
 int
-cbor_add_bool(cbor_item_t *item, const char *key, bool value)
+cbor_add_bool(cbor_item_t *item, const char *key, fido_opt_t value)
 {
 	struct cbor_pair pair;
 	int ok = -1;
@@ -284,7 +284,7 @@ cbor_add_bool(cbor_item_t *item, const char *key, bool value)
 	memset(&pair, 0, sizeof(pair));
 
 	if ((pair.key = cbor_build_string(key)) == NULL ||
-	    (pair.value = cbor_build_bool(value)) == NULL) {
+	    (pair.value = cbor_build_bool(value == FIDO_OPT_TRUE)) == NULL) {
 		log_debug("%s: cbor_build", __func__);
 		goto fail;
 	}
@@ -545,15 +545,15 @@ encode_extensions(int ext)
 }
 
 cbor_item_t *
-encode_options(bool rk, bool uv)
+encode_options(fido_opt_t rk, fido_opt_t uv)
 {
 	cbor_item_t *item = NULL;
 
 	if ((item = cbor_new_definite_map(2)) == NULL)
 		return (NULL);
 
-	if (cbor_add_bool(item, "rk", rk) < 0 ||
-	    cbor_add_bool(item, "uv", uv) < 0) {
+	if ((rk != FIDO_OPT_OMIT && cbor_add_bool(item, "rk", rk) < 0) ||
+	    (uv != FIDO_OPT_OMIT && cbor_add_bool(item, "uv", uv) < 0)) {
 		cbor_decref(&item);
 		return (NULL);
 	}
@@ -562,15 +562,15 @@ encode_options(bool rk, bool uv)
 }
 
 cbor_item_t *
-encode_assert_options(bool up, bool uv)
+encode_assert_options(fido_opt_t up, fido_opt_t uv)
 {
 	cbor_item_t *item = NULL;
 
 	if ((item = cbor_new_definite_map(2)) == NULL)
 		return (NULL);
 
-	if (cbor_add_bool(item, "up", up) < 0 ||
-	    cbor_add_bool(item, "uv", uv) < 0) {
+	if ((up != FIDO_OPT_OMIT && cbor_add_bool(item, "up", up) < 0) ||
+	    (uv != FIDO_OPT_OMIT && cbor_add_bool(item, "uv", uv) < 0)) {
 		cbor_decref(&item);
 		return (NULL);
 	}

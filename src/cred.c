@@ -85,7 +85,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 		}
 
 	/* options */
-	if (cred->rk || cred->uv)
+	if (cred->rk != FIDO_OPT_OMIT || cred->uv != FIDO_OPT_OMIT)
 		if ((argv[6] = encode_options(cred->rk, cred->uv)) == NULL) {
 			log_debug("%s: encode_options", __func__);
 			r = FIDO_ERR_INTERNAL;
@@ -175,7 +175,7 @@ int
 fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 {
 	if (fido_dev_is_fido2(dev) == false) {
-		if (pin != NULL || cred->rk == true || cred->ext != 0)
+		if (pin != NULL || cred->rk == FIDO_OPT_TRUE || cred->ext != 0)
 			return (FIDO_ERR_UNSUPPORTED_OPTION);
 		return (u2f_register(dev, cred, -1));
 	}
@@ -184,9 +184,10 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 }
 
 static int
-check_flags(uint8_t flags, bool uv)
+check_flags(uint8_t flags, fido_opt_t uv)
 {
-	if (uv == true && (flags & CTAP_AUTHDATA_USER_VERIFIED) == 0) {
+	if (uv == FIDO_OPT_TRUE &&
+	    (flags & CTAP_AUTHDATA_USER_VERIFIED) == 0) {
 		log_debug("%s: CTAP_AUTHDATA_USER_VERIFIED", __func__);
 		return (-1);
 	}
@@ -439,8 +440,8 @@ fido_cred_reset_tx(fido_cred_t *cred)
 
 	cred->type = 0;
 	cred->ext = 0;
-	cred->rk = false;
-	cred->uv = false;
+	cred->rk = FIDO_OPT_OMIT;
+	cred->uv = FIDO_OPT_OMIT;
 }
 
 static void
@@ -699,7 +700,23 @@ fido_cred_set_extensions(fido_cred_t *cred, int ext)
 int
 fido_cred_set_options(fido_cred_t *cred, bool rk, bool uv)
 {
+	cred->rk = rk ? FIDO_OPT_TRUE : FIDO_OPT_FALSE;
+	cred->uv = uv ? FIDO_OPT_TRUE : FIDO_OPT_FALSE;
+
+	return (FIDO_OK);
+}
+
+int
+fido_cred_set_rk(fido_cred_t *cred, fido_opt_t rk)
+{
 	cred->rk = rk;
+
+	return (FIDO_OK);
+}
+
+int
+fido_cred_set_uv(fido_cred_t *cred, fido_opt_t uv)
+{
 	cred->uv = uv;
 
 	return (FIDO_OK);

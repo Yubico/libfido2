@@ -65,7 +65,8 @@ list(APPEND MAN_ALIAS
 	fido_assert_set fido_assert_set_count
 	fido_assert_set fido_assert_set_extensions
 	fido_assert_set fido_assert_set_hmac_salt
-	fido_assert_set fido_assert_set_options
+	fido_assert_set fido_assert_set_up
+	fido_assert_set fido_assert_set_uv
 	fido_assert_set fido_assert_set_rp
 	fido_assert_set fido_assert_set_sig
 	fido_cred fido_cred_authdata_len
@@ -87,7 +88,8 @@ list(APPEND MAN_ALIAS
 	fido_cred_set fido_cred_set_clientdata_hash
 	fido_cred_set fido_cred_set_extensions
 	fido_cred_set fido_cred_set_fmt
-	fido_cred_set fido_cred_set_options
+	fido_cred_set fido_cred_set_rk
+	fido_cred_set fido_cred_set_uv
 	fido_cred_set fido_cred_set_rp
 	fido_cred_set fido_cred_set_sig
 	fido_cred_set fido_cred_set_type

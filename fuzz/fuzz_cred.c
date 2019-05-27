@@ -716,7 +716,10 @@ make_cred(fido_cred_t *cred, uint8_t u2f, int type, const struct blob *cdh,
 	fido_cred_set_user(cred, user_id->body, user_id->len, user_name,
 	    user_nick, user_icon);
 	fido_cred_set_extensions(cred, ext);
-	fido_cred_set_options(cred, rk & 1, uv & 1);
+	if (rk & 1)
+		fido_cred_set_rk(cred, FIDO_OPT_TRUE);
+	if (uv & 1)
+		fido_cred_set_uv(cred, FIDO_OPT_TRUE);
 
 	fido_dev_make_cred(dev, cred, u2f & 1 ? NULL : pin);
 
@@ -744,10 +747,13 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	fido_cred_set_rp(cred, rp_id, rp_name);
 	fido_cred_set_authdata(cred, authdata_ptr, authdata_len);
 	fido_cred_set_extensions(cred, ext);
-	fido_cred_set_options(cred, rk & 1, uv & 1);
 	fido_cred_set_x509(cred, x5c_ptr, x5c_len);
 	fido_cred_set_sig(cred, sig_ptr, sig_len);
 
+	if (rk & 1)
+		fido_cred_set_rk(cred, FIDO_OPT_TRUE);
+	if (uv & 1)
+		fido_cred_set_uv(cred, FIDO_OPT_TRUE);
 	if (fmt)
 		fido_cred_set_fmt(cred, fmt);
 

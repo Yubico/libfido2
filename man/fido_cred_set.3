@@ -14,12 +14,20 @@
 .Nm fido_cred_set_rp ,
 .Nm fido_cred_set_user ,
 .Nm fido_cred_set_extensions ,
-.Nm fido_cred_set_options ,
+.Nm fido_cred_set_rk ,
+.Nm fido_cred_set uv ,
 .Nm fido_cred_set_fmt ,
 .Nm fido_cred_set_type
 .Nd set parameters of a FIDO 2 credential
 .Sh SYNOPSIS
 .In fido.h
+.Bd -literal
+typedef enum {
+	FIDO_OPT_OMIT = 0, /* use authenticator's default */
+	FIDO_OPT_FALSE,    /* explicitly set option to false */
+        FIDO_OPT_TRUE,     /* explicitly set option to true */
+} fido_opt_t;
+.Ed
 .Ft int
 .Fn fido_cred_set_authdata "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
 .Ft int
@@ -35,7 +43,9 @@
 .Ft int
 .Fn fido_cred_set_extensions "fido_cred_t *cred" "int flags"
 .Ft int
-.Fn fido_cred_set_options "fido_cred_t *cred" "bool rk" "bool uv"
+.Fn fido_cred_set_rk "fido_cred_t *cred" "fido_opt_t rk"
+.Ft int
+.Fn fido_cred_set_uv "fido_cred_t *cred" "fido_opt_t uv"
 .Ft int
 .Fn fido_cred_set_fmt "fido_cred_t *cred" "const char *ptr"
 .Ft int
@@ -135,8 +145,10 @@ is zero, the extensions of
 are cleared.
 .Pp
 The
-.Fn fido_cred_set_options
-function sets the
+.Fn fido_cred_set_rk
+and
+.Fn fido_cred_set_uv
+functions set the
 .Em rk
 (resident key)
 and
@@ -144,7 +156,9 @@ and
 (user verification)
 attributes of
 .Fa cred .
-Both are off by default.
+Both are
+.Dv FIDO_OPT_OMIT
+by default, allowing the authenticator to use its default settings.
 .Pp
 The
 .Fn fido_cred_set_fmt

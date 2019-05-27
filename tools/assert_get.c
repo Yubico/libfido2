@@ -51,9 +51,13 @@ prepare_assert(FILE *in_f, bool rk, bool up, bool uv, bool debug)
 
 	if ((r = fido_assert_set_clientdata_hash(assert, cdh.ptr,
 	    cdh.len)) != FIDO_OK ||
-	    (r = fido_assert_set_rp(assert, rpid)) != FIDO_OK ||
-	    (r = fido_assert_set_options(assert, up, uv)) != FIDO_OK)
+	    (r = fido_assert_set_rp(assert, rpid)) != FIDO_OK)
 		errx(1, "fido_assert_set: %s", fido_strerr(r));
+
+	if (up && (r = fido_assert_set_up(assert, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_assert_set_up: %s", fido_strerr(r));
+	if (uv && (r = fido_assert_set_uv(assert, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_assert_set_uv: %s", fido_strerr(r));
 
 	if (rk == false && (r = fido_assert_allow_cred(assert, id.ptr,
 	    id.len)) != FIDO_OK)

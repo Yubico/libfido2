@@ -12,12 +12,20 @@
 .Nm fido_assert_set_count ,
 .Nm fido_assert_set_extensions ,
 .Nm fido_assert_set_hmac_salt ,
-.Nm fido_assert_set_options ,
+.Nm fido_assert_set_up ,
+.Nm fido_assert_set_uv ,
 .Nm fido_assert_set_rp ,
 .Nm fido_assert_set_sig
 .Nd set parameters of a FIDO 2 assertion
 .Sh SYNOPSIS
 .In fido.h
+.Bd -literal
+typedef enum {
+	FIDO_OPT_OMIT = 0, /* use authenticator's default */
+	FIDO_OPT_FALSE,    /* explicitly set option to false */
+        FIDO_OPT_TRUE,     /* explicitly set option to true */
+} fido_opt_t;
+.Ed
 .Ft int
 .Fn fido_assert_set_authdata "fido_assert_t *assert" " size_t idx" "const unsigned char *ptr" "size_t len"
 .Ft int
@@ -29,7 +37,9 @@
 .Ft int
 .Fn fido_assert_set_hmac_salt "fido_assert_t *assert" "const unsigned char *ptr" "size_t len"
 .Ft int
-.Fn fido_assert_set_options "fido_assert_t *assert" "bool up" "bool uv"
+.Fn fido_assert_set_up "fido_assert_t *assert" "fido_opt_t up"
+.Ft int
+.Fn fido_assert_set_uv "fido_assert_t *assert" "fido_opt_t uv"
 .Ft int
 .Fn fido_assert_set_rp "fido_assert_t *assert" "const char *id"
 .Ft int
@@ -127,15 +137,19 @@ is zero, the extensions of
 are cleared.
 .Pp
 The
-.Fn fido_assert_set_options
-function sets the
+.Fn fido_assert_set_up
+and
+.Fn fido_assert_set_uv
+functions set the
 .Fa up
 (user presence) and
 .Fa uv
 (user verification)
 attributes of
 .Fa assert .
-Both are off by default.
+Both are
+.Dv FIDO_OPT_OMIT
+by default, allowing the authenticator to use its default settings.
 .Pp
 Use of the
 .Nm

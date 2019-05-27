@@ -54,9 +54,12 @@ prepare_cred(FILE *in_f, int type, bool rk, bool uv, bool debug)
 	    cdh.len)) != FIDO_OK ||
 	    (r = fido_cred_set_rp(cred, rpid, NULL)) != FIDO_OK ||
 	    (r = fido_cred_set_user(cred, uid.ptr, uid.len, uname, NULL,
-	    NULL)) != FIDO_OK ||
-	    (r = fido_cred_set_options(cred, rk, uv)) != FIDO_OK)
-		errx(1, "fido_cred_set: %s", fido_strerr(r));
+	    NULL)) != FIDO_OK)
+
+	if (rk && (r = fido_cred_set_rk(cred, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_cred_set_rk: %s", fido_strerr(r));
+	if (uv && (r = fido_cred_set_uv(cred, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_cred_set_uv: %s", fido_strerr(r));
 
 	free(cdh.ptr);
 	free(uid.ptr);

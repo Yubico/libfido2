@@ -535,7 +535,7 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 	int		 found;
 	int		 r;
 
-	if (cred->rk || cred->uv) {
+	if (cred->rk == FIDO_OPT_TRUE || cred->uv == FIDO_OPT_TRUE) {
 		log_debug("%s: rk=%d, uv=%d", __func__, cred->rk, cred->uv);
 		return (FIDO_ERR_UNSUPPORTED_OPTION);
 	}
@@ -624,7 +624,7 @@ u2f_authenticate_single(fido_dev_t *dev, const fido_blob_t *key_id,
 		goto fail;
 	}
 
-	if (fa->up == false) {
+	if (fa->up == FIDO_OPT_FALSE) {
 		log_debug("%s: checking for key existence only", __func__);
 		r = FIDO_ERR_USER_PRESENCE_REQUIRED;
 		goto fail;
@@ -664,7 +664,7 @@ u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
 	int	nauth_ok = 0;
 	int	r;
 
-	if (fa->uv || fa->allow_list.ptr == NULL) {
+	if (fa->uv == FIDO_OPT_TRUE || fa->allow_list.ptr == NULL) {
 		log_debug("%s: uv=%d, allow_list=%p", __func__, fa->uv,
 		    (void *)fa->allow_list.ptr);
 		return (FIDO_ERR_UNSUPPORTED_OPTION);

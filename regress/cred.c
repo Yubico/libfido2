@@ -365,7 +365,8 @@ valid_cred(void)
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
@@ -386,7 +387,8 @@ no_cdh(void)
 	assert(fido_cred_set_type(c, COSE_ES256) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
@@ -407,7 +409,8 @@ no_rp_id(void)
 	assert(fido_cred_set_type(c, COSE_ES256) == FIDO_OK);
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
@@ -429,7 +432,8 @@ no_rp_name(void)
 	assert(fido_cred_set_rp(c, rp_id, NULL) == FIDO_OK);
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
@@ -450,7 +454,8 @@ no_authdata(void)
 	assert(fido_cred_set_type(c, COSE_ES256) == FIDO_OK);
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
@@ -472,7 +477,8 @@ no_x509(void)
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
 	assert(fido_cred_verify(c) == FIDO_ERR_INVALID_ARGUMENT);
@@ -493,7 +499,8 @@ no_sig(void)
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
 	assert(fido_cred_verify(c) == FIDO_ERR_INVALID_ARGUMENT);
@@ -514,7 +521,8 @@ no_fmt(void)
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_verify(c) == FIDO_ERR_INVALID_ARGUMENT);
@@ -535,7 +543,8 @@ wrong_options(void)
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, true) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_TRUE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
@@ -563,7 +572,8 @@ junk_cdh(void)
 	assert(fido_cred_set_clientdata_hash(c, junk, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
@@ -586,7 +596,8 @@ junk_rp_id(void)
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, "potato", rp_name) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
@@ -608,7 +619,8 @@ junk_rp_name(void)
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, "potato") == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
@@ -669,7 +681,8 @@ junk_sig(void)
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, junk, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
@@ -698,7 +711,8 @@ junk_x509(void)
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, junk, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
@@ -722,7 +736,8 @@ invalid_type(void)
 	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
 	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_ERR_INVALID_ARGUMENT);
-	assert(fido_cred_set_options(c, false, false) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
 	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);

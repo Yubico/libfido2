@@ -61,9 +61,13 @@ prepare_assert(FILE *in_f, bool up, bool uv, bool debug)
 	    (r = fido_assert_set_rp(assert, rpid)) != FIDO_OK ||
 	    (r = fido_assert_set_authdata(assert, 0, authdata.ptr,
 	    authdata.len)) != FIDO_OK ||
-	    (r = fido_assert_set_options(assert, up, uv)) != FIDO_OK ||
 	    (r = fido_assert_set_sig(assert, 0, sig.ptr, sig.len)) != FIDO_OK)
 		errx(1, "fido_assert_set: %s", fido_strerr(r));
+
+	if (up && (r = fido_assert_set_up(assert, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_assert_set_up: %s", fido_strerr(r));
+	if (uv && (r = fido_assert_set_uv(assert, FIDO_OPT_TRUE)) != FIDO_OK)
+		errx(1, "fido_assert_set_uv: %s", fido_strerr(r));
 
 	free(cdh.ptr);
 	free(authdata.ptr);
