@@ -86,7 +86,14 @@ authdata_fake(const char *rp_id, uint8_t flags, uint32_t sigcount,
 	cbor_item_t	*item = NULL;
 	size_t		 alloc_len;
 
-	SHA256((const void *)rp_id, strlen(rp_id), ad.rp_id_hash);
+	memset(&ad, 0, sizeof(ad));
+
+	if (SHA256((const void *)rp_id, strlen(rp_id),
+	    ad.rp_id_hash) != ad.rp_id_hash) {
+		log_debug("%s: sha256", __func__);
+		return (-1);
+	}
+
 	ad.flags = flags; /* XXX translate? */
 	ad.sigcount = sigcount;
 
@@ -176,7 +183,14 @@ key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
 
 	memset(&challenge, 0xff, sizeof(challenge));
 	memset(&rp_id_hash, 0, sizeof(rp_id_hash));
-	SHA256((const void *)rp_id, strlen(rp_id), rp_id_hash);
+
+	if (SHA256((const void *)rp_id, strlen(rp_id),
+	    rp_id_hash) != rp_id_hash) {
+		log_debug("%s: sha256", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
 	key_id_len = (uint8_t)key_id->len;
 
 	if ((apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_CHECK, 2 *
@@ -273,7 +287,14 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 	}
 
 	memset(&rp_id_hash, 0, sizeof(rp_id_hash));
-	SHA256((const void *)rp_id, strlen(rp_id), rp_id_hash);
+
+	if (SHA256((const void *)rp_id, strlen(rp_id),
+	    rp_id_hash) != rp_id_hash) {
+		log_debug("%s: sha256", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
 	key_id_len = (uint8_t)key_id->len;
 
 	if ((apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_SIGN, 2 *
@@ -373,6 +394,7 @@ encode_cred_authdata(const char *rp_id, const uint8_t *kh, uint8_t kh_len,
 	int			 ok = -1;
 
 	memset(&pk_blob, 0, sizeof(pk_blob));
+	memset(&authdata, 0, sizeof(authdata));
 	memset(&authdata_blob, 0, sizeof(authdata_blob));
 	memset(out, 0, sizeof(*out));
 
@@ -386,7 +408,12 @@ encode_cred_authdata(const char *rp_id, const uint8_t *kh, uint8_t kh_len,
 		goto fail;
 	}
 
-	SHA256((const void *)rp_id, strlen(rp_id), authdata.rp_id_hash);
+	if (SHA256((const void *)rp_id, strlen(rp_id),
+	    authdata.rp_id_hash) != authdata.rp_id_hash) {
+		log_debug("%s: sha256", __func__);
+		goto fail;
+	}
+
 	authdata.flags = 0x41; /* XXX hardcoded flags value */
 	authdata.sigcount = 0;
 
@@ -563,7 +590,12 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 	}
 
 	memset(&rp_id_hash, 0, sizeof(rp_id_hash));
-	SHA256((const void *)cred->rp.id, strlen(cred->rp.id), rp_id_hash);
+
+	if (SHA256((const void *)cred->rp.id, strlen(cred->rp.id),
+	    rp_id_hash) != rp_id_hash) {
+		log_debug("%s: sha256", __func__);
+		return (FIDO_ERR_INTERNAL);
+	}
 
 	if ((apdu = iso7816_new(U2F_CMD_REGISTER, 0, 2 *
 	    SHA256_DIGEST_LENGTH)) == NULL ||

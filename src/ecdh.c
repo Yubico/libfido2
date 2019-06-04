@@ -52,7 +52,7 @@ do_ecdh(const es256_sk_t *sk, const es256_pk_t *pk, fido_blob_t **ecdh)
 	/* use sha256 as a kdf on the resulting secret */
 	(*ecdh)->len = SHA256_DIGEST_LENGTH;
 	if (((*ecdh)->ptr = calloc(1, (*ecdh)->len)) == NULL ||
-	    SHA256(secret->ptr, secret->len, (*ecdh)->ptr) == NULL) {
+	    SHA256(secret->ptr, secret->len, (*ecdh)->ptr) != (*ecdh)->ptr) {
 		log_debug("%s: sha256", __func__);
 		goto fail;
 	}

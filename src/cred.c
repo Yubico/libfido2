@@ -213,7 +213,12 @@ check_rp_id(const char *id, const unsigned char *obtained_hash)
 	unsigned char expected_hash[SHA256_DIGEST_LENGTH];
 
 	explicit_bzero(expected_hash, sizeof(expected_hash));
-	SHA256((const unsigned char *)id, strlen(id), expected_hash);
+
+	if (SHA256((const unsigned char *)id, strlen(id),
+	    expected_hash) != expected_hash) {
+		log_debug("%s: sha256", __func__);
+		return (-1);
+	}
 
 	return (timingsafe_bcmp(expected_hash, obtained_hash,
 	    SHA256_DIGEST_LENGTH));
