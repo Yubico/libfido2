@@ -568,7 +568,7 @@ pack_dummy(uint8_t *ptr, size_t len)
 
 size_t
 LLVMFuzzerCustomMutator(uint8_t *data, size_t size, size_t maxsize,
-    unsigned int seed)
+    unsigned int seed) NO_MSAN
 {
 	struct param	p;
 	uint8_t		blob[16384];
