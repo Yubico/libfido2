@@ -270,8 +270,8 @@ token_list(int argc, char **argv)
 		const fido_dev_info_t *di = fido_dev_info_ptr(devlist, i);
 		printf("%s: vendor=0x%04x, product=0x%04x (%s %s)\n",
 		    fido_dev_info_path(di),
-		    fido_dev_info_vendor(di),
-		    fido_dev_info_product(di),
+		    (uint16_t)fido_dev_info_vendor(di),
+		    (uint16_t)fido_dev_info_product(di),
 		    fido_dev_info_manufacturer_string(di),
 		    fido_dev_info_product_string(di));
 	}
