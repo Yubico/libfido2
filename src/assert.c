@@ -21,15 +21,13 @@ adjust_assert_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	fido_assert_t	*assert = arg;
 	uint64_t	 n;
 
-	if (cbor_isa_uint(key) == false ||
-	    cbor_int_get_width(key) != CBOR_INT_8) {
-		log_debug("%s: cbor_type", __func__);
-		return (-1);
-	}
-
 	/* numberOfCredentials; see section 6.2 */
-	if (cbor_get_uint8(key) != 5)
+	if (cbor_isa_uint(key) == false ||
+	    cbor_int_get_width(key) != CBOR_INT_8 ||
+	    cbor_get_uint8(key) != 5) {
+		log_debug("%s: cbor_type", __func__);
 		return (0); /* ignore */
+	}
 
 	if (decode_uint64(val, &n) < 0 || n > SIZE_MAX) {
 		log_debug("%s: decode_uint64", __func__);
@@ -61,7 +59,7 @@ parse_assert_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	if (cbor_isa_uint(key) == false ||
 	    cbor_int_get_width(key) != CBOR_INT_8) {
 		log_debug("%s: cbor type", __func__);
-		return (-1);
+		return (0); /* ignore */
 	}
 
 	switch (cbor_get_uint8(key)) {
@@ -75,11 +73,10 @@ parse_assert_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (fido_blob_decode(val, &stmt->sig));
 	case 4: /* user attributes */
 		return (decode_user(val, &stmt->user));
-	case 5: /* ignore */
+	default: /* ignore */
+		log_debug("%s: cbor type", __func__);
 		return (0);
 	}
-
-	return (-1);
 }
 
 static int

@@ -14,8 +14,10 @@ parse_authkey(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	if (cbor_isa_uint(key) == false ||
 	    cbor_int_get_width(key) != CBOR_INT_8 ||
-	    cbor_get_uint8(key) != 1)
+	    cbor_get_uint8(key) != 1) {
+		log_debug("%s: cbor type", __func__);
 		return (0); /* ignore */
+	}
 
 	return (es256_pk_decode(val, authkey));
 }

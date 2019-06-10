@@ -114,12 +114,12 @@ decode_option(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	    cbor_float_get_width(val) != CBOR_FLOAT_0 ||
 	    cbor_is_bool(val) == false) {
 		log_debug("%s: cbor type", __func__);
-		return (-1);
+		return (0); /* ignore */
 	}
 
 	if (cbor_string_copy(key, &o->name[i]) < 0) {
 		log_debug("%s: cbor_string_copy", __func__);
-		return (-1);
+		return (0); /* ignore */
 	}
 
 	/* keep name/value and len consistent */
@@ -230,7 +230,7 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	if (cbor_isa_uint(key) == false ||
 	    cbor_int_get_width(key) != CBOR_INT_8) {
 		log_debug("%s: cbor type", __func__);
-		return (-1);
+		return (0); /* ignore */
 	}
 
 	switch (cbor_get_uint8(key)) {
@@ -246,10 +246,9 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (decode_maxmsgsiz(val, &ci->maxmsgsiz));
 	case 6: /* pinProtocols */
 		return (decode_protocols(val, &ci->protocols));
-	default:
-		log_debug("%s: unknown key %d", __func__,
-		    (int)cbor_get_uint8(key));
-		return (0); /* ignore */
+	default: /* ignore */
+		log_debug("%s: cbor type", __func__);
+		return (0);
 	}
 }
 

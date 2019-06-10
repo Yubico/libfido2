@@ -1060,22 +1060,23 @@ decode_extension(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	int	 ok = -1;
 
 	if (cbor_string_copy(key, &type) < 0 || strcmp(type, "hmac-secret")) {
-		log_debug("%s: type", __func__);
-		goto fail;
+		log_debug("%s: cbor type", __func__);
+		ok = 0; /* ignore */
+		goto out;
 	}
 
 	if (cbor_isa_float_ctrl(val) == false ||
 	    cbor_float_get_width(val) != CBOR_FLOAT_0 ||
 	    cbor_is_bool(val) == false || *authdata_ext != 0) {
 		log_debug("%s: cbor type", __func__);
-		goto fail;
+		goto out;
 	}
 
 	if (cbor_ctrl_value(val) == CBOR_CTRL_TRUE)
 		*authdata_ext |= FIDO_EXT_HMAC_SECRET;
 
 	ok = 0;
-fail:
+out:
 	free(type);
 
 	return (ok);
@@ -1125,12 +1126,13 @@ decode_hmac_secret_aux(const cbor_item_t *key, const cbor_item_t *val, void *arg
 	int		 ok = -1;
 
 	if (cbor_string_copy(key, &type) < 0 || strcmp(type, "hmac-secret")) {
-		log_debug("%s: type", __func__);
-		goto fail;
+		log_debug("%s: cbor type", __func__);
+		ok = 0; /* ignore */
+		goto out;
 	}
 
 	ok = cbor_bytestring_copy(val, &out->ptr, &out->len);
-fail:
+out:
 	free(type);
 
 	return (ok);
@@ -1287,33 +1289,36 @@ decode_attstmt_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	char		*name = NULL;
 	int		 ok = -1;
 
-	if (cbor_string_copy(key, &name) < 0)
-		goto fail;
+	if (cbor_string_copy(key, &name) < 0) {
+		log_debug("%s: cbor type", __func__);
+		ok = 0; /* ignore */
+		goto out;
+	}
 
 	if (!strcmp(name, "alg")) {
 		if (cbor_isa_negint(val) == false ||
 		    cbor_int_get_width(val) != CBOR_INT_8 ||
 		    cbor_get_uint8(val) != -COSE_ES256 - 1) {
 			log_debug("%s: alg", __func__);
-			goto fail;
+			goto out;
 		}
 	} else if (!strcmp(name, "sig")) {
 		if (cbor_bytestring_copy(val, &attstmt->sig.ptr,
 		    &attstmt->sig.len) < 0) {
 			log_debug("%s: sig", __func__);
-			goto fail;
+			goto out;
 		}
 	} else if (!strcmp(name, "x5c")) {
 		if (cbor_isa_array(val) == false ||
 		    cbor_array_is_definite(val) == false ||
 		    cbor_array_iter(val, &attstmt->x5c, decode_x5c) < 0) {
 			log_debug("%s: x5c", __func__);
-			goto fail;
+			goto out;
 		}
 	}
 
 	ok = 0;
-fail:
+out:
 	free(name);
 
 	return (ok);
@@ -1353,18 +1358,19 @@ decode_cred_id_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	int		 ok = -1;
 
 	if (cbor_string_copy(key, &name) < 0) {
-		log_debug("%s: cbor_string_copy", __func__);
-		goto fail;
+		log_debug("%s: cbor type", __func__);
+		ok = 0; /* ignore */
+		goto out;
 	}
 
 	if (!strcmp(name, "id"))
 		if (cbor_bytestring_copy(val, &id->ptr, &id->len) < 0) {
 			log_debug("%s: cbor_bytestring_copy", __func__);
-			goto fail;
+			goto out;
 		}
 
 	ok = 0;
-fail:
+out:
 	free(name);
 
 	return (ok);
@@ -1391,34 +1397,35 @@ decode_user_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	int		 ok = -1;
 
 	if (cbor_string_copy(key, &name) < 0) {
-		log_debug("%s: type name", __func__);
-		goto fail;
+		log_debug("%s: cbor type", __func__);
+		ok = 0; /* ignore */
+		goto out;
 	}
 
 	if (!strcmp(name, "icon")) {
 		if (cbor_string_copy(val, &user->icon) < 0) {
 			log_debug("%s: icon", __func__);
-			goto fail;
+			goto out;
 		}
 	} else if (!strcmp(name, "name")) {
 		if (cbor_string_copy(val, &user->name) < 0) {
 			log_debug("%s: name", __func__);
-			goto fail;
+			goto out;
 		}
 	} else if (!strcmp(name, "displayName")) {
 		if (cbor_string_copy(val, &user->display_name) < 0) {
 			log_debug("%s: display_name", __func__);
-			goto fail;
+			goto out;
 		}
 	} else if (!strcmp(name, "id")) {
 		if (cbor_bytestring_copy(val, &user->id.ptr, &user->id.len) < 0) {
 			log_debug("%s: id", __func__);
-			goto fail;
+			goto out;
 		}
 	}
 
 	ok = 0;
-fail:
+out:
 	free(name);
 
 	return (ok);

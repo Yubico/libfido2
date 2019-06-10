@@ -21,7 +21,7 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	if (cbor_isa_uint(key) == false ||
 	    cbor_int_get_width(key) != CBOR_INT_8) {
 		log_debug("%s: cbor type", __func__);
-		return (-1);
+		return (0); /* ignore */
 	}
 
 	switch (cbor_get_uint8(key)) {
@@ -33,10 +33,9 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		    &cred->authdata_ext));
 	case 3: /* attestation statement */
 		return (decode_attstmt(val, &cred->attstmt));
-	default:
-		log_debug("%s: unknown key=%d", __func__,
-		    (int)cbor_get_uint8(key));
-		return (-1);
+	default: /* ignore */
+		log_debug("%s: cbor type", __func__);
+		return (0);
 	}
 }
 

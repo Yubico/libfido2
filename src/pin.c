@@ -17,7 +17,7 @@ parse_pintoken(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	    cbor_int_get_width(key) != CBOR_INT_8 ||
 	    cbor_get_uint8(key) != 2) {
 		log_debug("%s: cbor type", __func__);
-		return (-1);
+		return (0); /* ignore */
 	}
 
 	return (fido_blob_decode(val, token));
@@ -337,7 +337,7 @@ parse_retry_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	    cbor_int_get_width(key) != CBOR_INT_8 ||
 	    cbor_get_uint8(key) != 3) {
 		log_debug("%s: cbor type", __func__);
-		return (-1);
+		return (0); /* ignore */
 	}
 
 	if (decode_uint64(val, &n) < 0 || n > INT_MAX) {
