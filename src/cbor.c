@@ -536,7 +536,7 @@ encode_extensions(int ext)
 	if ((item = cbor_new_definite_map(1)) == NULL)
 		return (NULL);
 
-	if (cbor_add_bool(item, "hmac-secret", true) < 0) {
+	if (cbor_add_bool(item, "hmac-secret", FIDO_OPT_TRUE) < 0) {
 		cbor_decref(&item);
 		return (NULL);
 	}

@@ -29,7 +29,7 @@ typedef struct fido_dev_io {
 typedef enum {
 	FIDO_OPT_OMIT = 0, /* use authenticator's default */
 	FIDO_OPT_FALSE,    /* explicitly set option to false */
-        FIDO_OPT_TRUE,     /* explicitly set option to true */
+	FIDO_OPT_TRUE,     /* explicitly set option to true */
 } fido_opt_t;
 
 #ifdef _FIDO_INTERNAL
