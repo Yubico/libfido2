@@ -151,35 +151,6 @@ decode_options(const cbor_item_t *item, fido_opt_array_t *o)
 }
 
 static int
-decode_maxmsgsiz(const cbor_item_t *item, uint64_t *maxmsgsiz)
-{
-	if (cbor_isa_uint(item) == false) {
-		log_debug("%s: cbor type", __func__);
-		return (-1);
-	}
-
-	switch (cbor_int_get_width(item)) {
-	case CBOR_INT_8:
-		*maxmsgsiz = cbor_get_uint8(item);
-		break;
-	case CBOR_INT_16:
-		*maxmsgsiz = cbor_get_uint16(item);
-		break;
-	case CBOR_INT_32:
-		*maxmsgsiz = cbor_get_uint32(item);
-		break;
-	case CBOR_INT_64:
-		*maxmsgsiz = cbor_get_uint64(item);
-		break;
-	default:
-		log_debug("%s: cbor_int_get_width", __func__);
-		return (-1);
-	}
-
-	return (0);
-}
-
-static int
 decode_protocol(const cbor_item_t *item, void *arg)
 {
 	fido_byte_array_t	*p = arg;
@@ -243,7 +214,7 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	case 4: /* options */
 		return (decode_options(val, &ci->options));
 	case 5: /* maxMsgSize */
-		return (decode_maxmsgsiz(val, &ci->maxmsgsiz));
+		return (decode_uint64(val, &ci->maxmsgsiz));
 	case 6: /* pinProtocols */
 		return (decode_protocols(val, &ci->protocols));
 	default: /* ignore */
