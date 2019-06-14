@@ -101,17 +101,20 @@ string_read(FILE *f, char **out)
 }
 
 fido_dev_t *
-open_dev(const char *path)
+open_dev(int argc, char **argv)
 {
 	fido_dev_t *dev;
 	int r;
 
+	if (argc < 1)
+		usage();
+
 	if ((dev = fido_dev_new()) == NULL)
 		errx(1, "fido_dev_new");
 
-	r = fido_dev_open(dev, path);
+	r = fido_dev_open(dev, argv[0]);
 	if (r != FIDO_OK)
-		errx(1, "fido_dev_open %s: %s", path, fido_strerr(r));
+		errx(1, "fido_dev_open %s: %s", argv[0], fido_strerr(r));
 
 	return (dev);
 }

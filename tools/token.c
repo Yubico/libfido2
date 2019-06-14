@@ -149,15 +149,9 @@ token_info(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	if (argc != 1)
-		usage();
-
 	fido_init(debug ? FIDO_DEBUG : 0);
-	if ((dev = fido_dev_new()) == NULL)
-		errx(1, "fido_dev_new");
-	if ((r = fido_dev_open(dev, argv[0])) != FIDO_OK)
-		errx(1, "fido_dev_open: %s (0x%x)", fido_strerr(r), r);
 
+	dev = open_dev(argc, argv);
 	print_attr(dev);
 
 	if (fido_dev_is_fido2(dev) == false)
@@ -225,11 +219,8 @@ token_reset(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	if (argc != 1)
-		usage();
-
 	fido_init(debug ? FIDO_DEBUG : 0);
-	dev = open_dev(argv[0]);
+	dev = open_dev(argc, argv);
 	if ((r = fido_dev_reset(dev)) != FIDO_OK)
 		errx(1, "fido_dev_reset: %s", fido_strerr(r));
 

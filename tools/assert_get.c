@@ -154,9 +154,6 @@ assert_get(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	if (argc != 1)
-		usage();
-
 	in_f = open_read(in_path);
 	out_f = open_write(out_path);
 
@@ -164,7 +161,7 @@ assert_get(int argc, char **argv)
 
 	assert = prepare_assert(in_f, rk, up, uv, debug);
 
-	dev = open_dev(argv[0]);
+	dev = open_dev(argc, argv);
 	if (u2f)
 		fido_dev_force_u2f(dev);
 

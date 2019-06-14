@@ -15,7 +15,7 @@ struct blob {
 };
 
 EC_KEY *read_ec_pubkey(const char *);
-fido_dev_t *open_dev(const char *);
+fido_dev_t *open_dev(int, char **);
 FILE *open_read(const char *);
 FILE *open_write(const char *);
 int assert_get(int, char **);
