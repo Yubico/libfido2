@@ -12,6 +12,17 @@ add_executable(fido2-cred
 	../openbsd-compat/readpassphrase.c
 )
 
+add_executable(fido2-cred-mgmt
+	fido2-cred-mgmt.c
+	mgmt.c
+	pin.c
+	util.c
+	../openbsd-compat/strlcpy.c
+	../openbsd-compat/strlcat.c
+	../openbsd-compat/explicit_bzero.c
+	../openbsd-compat/readpassphrase.c
+)
+
 add_executable(fido2-assert
 	fido2-assert.c
 	assert_get.c
@@ -34,8 +45,9 @@ add_executable(fido2-token
 )
 
 target_link_libraries(fido2-cred ${CRYPTO_LIBRARIES} fido2_shared)
+target_link_libraries(fido2-cred-mgmt ${CRYPTO_LIBRARIES} fido2_shared)
 target_link_libraries(fido2-assert ${CRYPTO_LIBRARIES} fido2_shared)
 target_link_libraries(fido2-token ${CRYPTO_LIBRARIES} fido2_shared)
 
-install(TARGETS fido2-cred fido2-assert fido2-token
+install(TARGETS fido2-cred fido2-cred-mgmt fido2-assert fido2-token
 	DESTINATION ${CMAKE_INSTALL_BINDIR})

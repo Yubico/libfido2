@@ -25,6 +25,7 @@ int base64_encode(const void *, size_t, char **);
 int base64_read(FILE *, struct blob *);
 int cred_make(int, char **);
 int cred_verify(int, char **);
+int mgmt_meta(int, char **);
 int pin_change(int, char **);
 int pin_set(int, char **);
 int string_read(FILE *, char **);
@@ -36,6 +37,7 @@ int write_rsa_pubkey(FILE *, const void *, size_t);
 RSA *read_rsa_pubkey(const char *);
 EVP_PKEY *read_eddsa_pubkey(const char *);
 int write_eddsa_pubkey(FILE *, const void *, size_t);
+void read_pin(const char *, char *, size_t);
 void usage(void);
 void xxd(const void *, size_t);
 

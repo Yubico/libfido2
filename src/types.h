@@ -115,6 +115,11 @@ typedef struct fido_assert {
 	size_t             stmt_len;     /* number of received assertions */
 } fido_assert_t;
 
+typedef struct fido_cred_mgmt_meta {
+	uint64_t rk_existing;
+	uint64_t rk_remaining;
+} fido_cred_mgmt_meta_t;
+
 typedef struct fido_opt_array {
 	char **name;
 	bool *value;

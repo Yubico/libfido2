@@ -64,6 +64,10 @@ _fido_cred_fmt
 _fido_cred_free
 _fido_cred_id_len
 _fido_cred_id_ptr
+_fido_cred_mgmt_meta_free
+_fido_cred_mgmt_meta_new
+_fido_cred_mgmt_meta_rk_existing
+_fido_cred_mgmt_meta_rk_remaining
 _fido_cred_new
 _fido_cred_pubkey_len
 _fido_cred_pubkey_ptr
@@ -88,6 +92,7 @@ _fido_cred_x5c_len
 _fido_cred_x5c_ptr
 _fido_dev_build
 _fido_dev_close
+_fido_dev_cred_mgmt_get_meta
 _fido_dev_flags
 _fido_dev_force_fido2
 _fido_dev_force_u2f

@@ -56,6 +56,8 @@ typedef struct es256_pk es256_pk_t;
 typedef struct es256_sk es256_sk_t;
 typedef struct rs256_pk rs256_pk_t;
 typedef struct eddsa_pk eddsa_pk_t;
+
+typedef struct fido_cred_mgmt_meta fido_cred_mgmt_meta_t;
 #endif
 
 fido_assert_t *fido_assert_new(void);
@@ -71,6 +73,9 @@ void fido_dev_force_fido2(fido_dev_t *);
 void fido_dev_force_u2f(fido_dev_t *);
 void fido_dev_free(fido_dev_t **);
 void fido_dev_info_free(fido_dev_info_t **, size_t);
+
+fido_cred_mgmt_meta_t *fido_cred_mgmt_meta_new(void);
+void fido_cred_mgmt_meta_free(fido_cred_mgmt_meta_t **);
 
 /* fido_init() flags. */
 #define FIDO_DEBUG	0x01
@@ -148,6 +153,9 @@ int fido_dev_reset(fido_dev_t *);
 int fido_dev_set_io_functions(fido_dev_t *, const fido_dev_io_t *);
 int fido_dev_set_pin(fido_dev_t *, const char *, const char *);
 
+int fido_dev_cred_mgmt_get_meta(fido_dev_t *, fido_cred_mgmt_meta_t *,
+    const char *);
+
 size_t fido_assert_authdata_len(const fido_assert_t *, size_t);
 size_t fido_assert_clientdata_hash_len(const fido_assert_t *);
 size_t fido_assert_count(const fido_assert_t *);
@@ -177,6 +185,9 @@ uint8_t  fido_dev_flags(const fido_dev_t *);
 int16_t  fido_dev_info_vendor(const fido_dev_info_t *);
 int16_t  fido_dev_info_product(const fido_dev_info_t *);
 uint64_t fido_cbor_info_maxmsgsiz(const fido_cbor_info_t *);
+
+uint64_t fido_cred_mgmt_meta_rk_existing(const fido_cred_mgmt_meta_t *);
+uint64_t fido_cred_mgmt_meta_rk_remaining(const fido_cred_mgmt_meta_t *);
 
 bool fido_dev_is_fido2(const fido_dev_t *);
 

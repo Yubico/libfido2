@@ -66,6 +66,10 @@
 		fido_cred_free;
 		fido_cred_id_len;
 		fido_cred_id_ptr;
+		fido_cred_mgmt_meta_free;
+		fido_cred_mgmt_meta_new;
+		fido_cred_mgmt_meta_rk_existing;
+		fido_cred_mgmt_meta_rk_remaining;
 		fido_cred_new;
 		fido_cred_pubkey_len;
 		fido_cred_pubkey_ptr;
@@ -90,6 +94,7 @@
 		fido_cred_x5c_ptr;
 		fido_dev_build;
 		fido_dev_close;
+		fido_dev_cred_mgmt_get_meta;
 		fido_dev_flags;
 		fido_dev_force_fido2;
 		fido_dev_force_u2f;
