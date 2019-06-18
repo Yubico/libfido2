@@ -41,12 +41,15 @@ mgmt_metadata(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
+	if (argc < 1)
+		usage();
+
 	fido_init(debug ? FIDO_DEBUG : 0);
 
 	if ((metadata = fido_cred_mgmt_metadata_new()) == NULL)
 		errx(1, "fido_cred_mgmt_metadata_new");
 
-	dev = open_dev(argc, argv);
+	dev = open_dev(argv[0]);
 	read_pin(argv[0], pin, sizeof(pin));
 
 	if ((r = fido_dev_get_cred_mgmt_metadata(dev, metadata,
@@ -116,12 +119,15 @@ mgmt_rp(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
+	if (argc < 1)
+		usage();
+
 	fido_init(debug ? FIDO_DEBUG : 0);
 
 	if ((rp = fido_cred_mgmt_rp_new()) == NULL)
 		errx(1, "fido_cred_mgmt_rp_new");
 
-	dev = open_dev(argc, argv);
+	dev = open_dev(argv[0]);
 	read_pin(argv[0], pin, sizeof(pin));
 
 	if ((r = fido_dev_get_cred_mgmt_rp(dev, rp, pin)) != FIDO_OK) {
@@ -131,6 +137,78 @@ mgmt_rp(int argc, char **argv)
 		print_rp(rp);
 
 	fido_cred_mgmt_rp_free(&rp);
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+
+	explicit_bzero(pin, sizeof(pin));
+
+	exit(status);
+}
+
+static void
+print_rk(fido_cred_mgmt_rk_t *rk)
+{
+	const fido_cred_t *cred;
+	char *id = NULL;
+
+	for (size_t i = 0; i < fido_cred_mgmt_rk_count(rk); i++) {
+		cred = fido_cred_mgmt_rk(rk, i);
+
+		if (base64_encode(fido_cred_id_ptr(cred),
+		    fido_cred_id_len(cred), &id) < 0)
+			errx(1, "output error");
+
+		printf("%s\n", id);
+		free(id);
+		id = NULL;
+
+		printf("%s\n", fido_cred_user_name(cred));
+		printf("%s\n", fido_cred_display_name(cred));
+	}
+}
+
+int
+mgmt_rk(int argc, char **argv)
+{
+	fido_dev_t *dev = NULL;
+	fido_cred_mgmt_rk_t *rk = NULL;
+	char pin[1024];
+	bool debug = false;
+	int ch;
+	int r;
+	int status = 0;
+
+	while ((ch = getopt(argc, argv, "d")) != -1) {
+		switch (ch) {
+		case 'd':
+			debug = true;
+			break;
+		default:
+			usage();
+		}
+	}
+
+	argc -= optind;
+	argv += optind;
+
+	if (argc < 2)
+		usage();
+
+	fido_init(debug ? FIDO_DEBUG : 0);
+
+	if ((rk = fido_cred_mgmt_rk_new()) == NULL)
+		errx(1, "fido_cred_mgmt_rk_new");
+
+	dev = open_dev(argv[1]);
+	read_pin(argv[1], pin, sizeof(pin));
+
+	if ((r = fido_dev_get_cred_mgmt_rk(dev, argv[0], rk, pin)) != FIDO_OK) {
+		warnx("fido_dev_get_cred_mgmt_rk: %s", fido_strerr(r));
+		status = 1;
+	} else
+		print_rk(rk);
+
+	fido_cred_mgmt_rk_free(&rk);
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
 

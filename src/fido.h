@@ -59,6 +59,7 @@ typedef struct eddsa_pk eddsa_pk_t;
 
 typedef struct fido_cred_mgmt_metadata fido_cred_mgmt_metadata_t;
 typedef struct fido_cred_mgmt_rp fido_cred_mgmt_rp_t;
+typedef struct fido_cred_mgmt_rk fido_cred_mgmt_rk_t;
 #endif
 
 fido_assert_t *fido_assert_new(void);
@@ -81,6 +82,9 @@ void fido_cred_mgmt_metadata_free(fido_cred_mgmt_metadata_t **);
 fido_cred_mgmt_rp_t *fido_cred_mgmt_rp_new(void);
 void fido_cred_mgmt_rp_free(fido_cred_mgmt_rp_t **);
 
+fido_cred_mgmt_rk_t *fido_cred_mgmt_rk_new(void);
+void fido_cred_mgmt_rk_free(fido_cred_mgmt_rk_t **);
+
 /* fido_init() flags. */
 #define FIDO_DEBUG	0x01
 
@@ -101,9 +105,11 @@ const char *fido_assert_rp_id(const fido_assert_t *);
 const char *fido_assert_user_display_name(const fido_assert_t *, size_t);
 const char *fido_assert_user_icon(const fido_assert_t *, size_t);
 const char *fido_assert_user_name(const fido_assert_t *, size_t);
+const char *fido_cred_display_name(const fido_cred_t *);
 const char *fido_cred_fmt(const fido_cred_t *);
 const char *fido_cred_rp_id(const fido_cred_t *);
 const char *fido_cred_rp_name(const fido_cred_t *);
+const char *fido_cred_user_name(const fido_cred_t *);
 const char *fido_dev_info_manufacturer_string(const fido_dev_info_t *);
 const char *fido_dev_info_path(const fido_dev_info_t *);
 const char *fido_dev_info_product_string(const fido_dev_info_t *);
@@ -161,6 +167,8 @@ int fido_dev_get_cred_mgmt_metadata(fido_dev_t *, fido_cred_mgmt_metadata_t *,
     const char *);
 int fido_dev_get_cred_mgmt_rp(fido_dev_t *, fido_cred_mgmt_rp_t *,
     const char *);
+int fido_dev_get_cred_mgmt_rk(fido_dev_t *, const char *, fido_cred_mgmt_rk_t *,
+    const char *);
 
 size_t fido_assert_authdata_len(const fido_assert_t *, size_t);
 size_t fido_assert_clientdata_hash_len(const fido_assert_t *);
@@ -201,6 +209,9 @@ const unsigned char *fido_cred_mgmt_rp_id_hash_ptr(const fido_cred_mgmt_rp_t *,
     size_t);
 size_t fido_cred_mgmt_rp_count(const fido_cred_mgmt_rp_t *);
 size_t fido_cred_mgmt_rp_id_hash_len(const fido_cred_mgmt_rp_t *, size_t);
+size_t fido_cred_mgmt_rk_count(const fido_cred_mgmt_rk_t *);
+
+const fido_cred_t *fido_cred_mgmt_rk(const fido_cred_mgmt_rk_t *, size_t);
 
 bool fido_dev_is_fido2(const fido_dev_t *);
 

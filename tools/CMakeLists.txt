@@ -14,6 +14,7 @@ add_executable(fido2-cred
 
 add_executable(fido2-cred-mgmt
 	fido2-cred-mgmt.c
+	base64.c
 	mgmt.c
 	pin.c
 	util.c

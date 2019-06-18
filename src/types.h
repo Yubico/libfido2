@@ -131,6 +131,12 @@ typedef struct fido_cred_mgmt_rp {
 	size_t                    n_rx;    /* number of populated entries */
 } fido_cred_mgmt_rp_t;
 
+typedef struct fido_cred_mgmt_rk {
+	fido_cred_t *ptr;
+	size_t       n_alloc; /* number of allocated entries */
+	size_t       n_rx;    /* number of populated entries */
+} fido_cred_mgmt_rk_t;
+
 typedef struct fido_opt_array {
 	char **name;
 	bool *value;

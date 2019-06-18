@@ -885,3 +885,15 @@ fido_cred_rp_name(const fido_cred_t *cred)
 {
 	return (cred->rp.name);
 }
+
+const char *
+fido_cred_user_name(const fido_cred_t *cred)
+{
+	return (cred->user.name);
+}
+
+const char *
+fido_cred_display_name(const fido_cred_t *cred)
+{
+	return (cred->user.display_name);
+}

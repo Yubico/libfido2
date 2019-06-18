@@ -42,8 +42,11 @@ pin_set(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
+	if (argc < 1)
+		usage();
+
 	fido_init(debug ? FIDO_DEBUG : 0);
-	dev = open_dev(argc, argv);
+	dev = open_dev(argv[0]);
 
 	r = snprintf(prompt, sizeof(prompt), "Enter new PIN for %s: ", argv[0]);
 	if (r < 0 || (size_t)r >= sizeof(prompt)) {
@@ -114,8 +117,11 @@ pin_change(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
+	if (argc < 1)
+		usage();
+
 	fido_init(debug ? FIDO_DEBUG : 0);
-	dev = open_dev(argc, argv);
+	dev = open_dev(argv[0]);
 
 	r = snprintf(prompt, sizeof(prompt), "Enter current PIN for %s: ",
 	    argv[0]);

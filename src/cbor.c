@@ -335,7 +335,7 @@ fail:
 	return (ok);
 }
 
-static cbor_item_t *
+cbor_item_t *
 cbor_flatten_vector(cbor_item_t *argv[], size_t argc)
 {
 	cbor_item_t	*map;
@@ -483,7 +483,7 @@ fail:
 	return (item);
 }
 
-static cbor_item_t *
+cbor_item_t *
 encode_pubkey(const fido_blob_t *pubkey)
 {
 	cbor_item_t *cbor_key = NULL;
@@ -972,6 +972,41 @@ get_cose_alg(const cbor_item_t *item, int *cose_alg)
 	return (0);
 }
 
+int
+decode_pubkey(const cbor_item_t *item, int *type, void *key)
+{
+	if (get_cose_alg(item, type) < 0) {
+		log_debug("%s: get_cose_alg", __func__);
+		return (-1);
+	}
+
+	switch (*type) {
+	case COSE_ES256:
+		if (es256_pk_decode(item, key) < 0) {
+			log_debug("%s: es256_pk_decode", __func__);
+			return (-1);
+		}
+		break;
+	case COSE_RS256:
+		if (rs256_pk_decode(item, key) < 0) {
+			log_debug("%s: rs256_pk_decode", __func__);
+			return (-1);
+		}
+		break;
+	case COSE_EDDSA:
+		if (eddsa_pk_decode(item, key) < 0) {
+			log_debug("%s: eddsa_pk_decode", __func__);
+			return (-1);
+		}
+		break;
+	default:
+		log_debug("%s: invalid cose_alg %d", __func__, *type);
+		return (-1);
+	}
+
+	return (0);
+}
+
 static int
 decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
     fido_attcred_t *attcred)
@@ -1010,34 +1045,14 @@ decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
 		goto fail;
 	}
 
-	if (get_cose_alg(item, &attcred->type) < 0) {
-		log_debug("%s: get_cose_alg", __func__);
+	if (decode_pubkey(item, &attcred->type, &attcred->pubkey) < 0) {
+		log_debug("%s: decode_pubkey", __func__);
 		goto fail;
 	}
 
 	if (attcred->type != cose_alg) {
 		log_debug("%s: cose_alg mismatch (%d != %d)", __func__,
 		    attcred->type, cose_alg);
-		goto fail;
-	}
-
-	if (attcred->type == COSE_ES256) {
-		if (es256_pk_decode(item, &attcred->pubkey.es256) < 0) {
-			log_debug("%s: es256_pk_decode", __func__);
-			goto fail;
-		}
-	} else if (attcred->type == COSE_RS256) {
-		if (rs256_pk_decode(item, &attcred->pubkey.rs256) < 0) {
-			log_debug("%s: rs256_pk_decode", __func__);
-			goto fail;
-		}
-	} else if (attcred->type == COSE_EDDSA) {
-		if (eddsa_pk_decode(item, &attcred->pubkey.eddsa) < 0) {
-			log_debug("%s: eddsa_pk_decode", __func__);
-			goto fail;
-		}
-	} else {
-		log_debug("%s: invalid cose_alg %d", __func__, attcred->type);
 		goto fail;
 	}
 
@@ -1271,7 +1286,7 @@ decode_assert_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
 	return (FIDO_OK);
 }
 
-int
+static int
 decode_x5c(const cbor_item_t *item, void *arg)
 {
 	fido_blob_t *x5c = arg;

@@ -60,6 +60,7 @@
 		fido_cred_authdata_ptr;
 		fido_cred_clientdata_hash_len;
 		fido_cred_clientdata_hash_ptr;
+		fido_cred_display_name;
 		fido_cred_exclude;
 		fido_cred_flags;
 		fido_cred_fmt;
@@ -68,7 +69,11 @@
 		fido_cred_id_ptr;
 		fido_cred_mgmt_metadata_free;
 		fido_cred_mgmt_metadata_new;
+		fido_cred_mgmt_rk;
+		fido_cred_mgmt_rk_count;
 		fido_cred_mgmt_rk_existing;
+		fido_cred_mgmt_rk_free;
+		fido_cred_mgmt_rk_new;
 		fido_cred_mgmt_rk_remaining;
 		fido_cred_mgmt_rp_count;
 		fido_cred_mgmt_rp_free;
@@ -95,6 +100,7 @@
 		fido_cred_set_x509;
 		fido_cred_sig_len;
 		fido_cred_sig_ptr;
+		fido_cred_user_name;
 		fido_cred_verify;
 		fido_cred_x5c_len;
 		fido_cred_x5c_ptr;
@@ -107,6 +113,7 @@
 		fido_dev_get_assert;
 		fido_dev_get_cbor_info;
 		fido_dev_get_cred_mgmt_metadata;
+		fido_dev_get_cred_mgmt_rk;
 		fido_dev_get_cred_mgmt_rp;
 		fido_dev_get_retry_count;
 		fido_dev_info_free;

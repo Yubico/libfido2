@@ -15,7 +15,7 @@ struct blob {
 };
 
 EC_KEY *read_ec_pubkey(const char *);
-fido_dev_t *open_dev(int, char **);
+fido_dev_t *open_dev(const char *);
 FILE *open_read(const char *);
 FILE *open_write(const char *);
 int assert_get(int, char **);
@@ -26,6 +26,7 @@ int base64_read(FILE *, struct blob *);
 int cred_make(int, char **);
 int cred_verify(int, char **);
 int mgmt_metadata(int, char **);
+int mgmt_rk(int, char **);
 int mgmt_rp(int, char **);
 int pin_change(int, char **);
 int pin_set(int, char **);

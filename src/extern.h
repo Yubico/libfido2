@@ -12,6 +12,7 @@ int aes256_cbc_dec(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 int aes256_cbc_enc(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 
 /* cbor encoding functions */
+cbor_item_t *cbor_flatten_vector(cbor_item_t **, size_t);
 cbor_item_t *encode_assert_options(fido_opt_t, fido_opt_t);
 cbor_item_t *encode_change_pin_auth(const fido_blob_t *, const fido_blob_t *,
     const fido_blob_t *);
@@ -23,6 +24,7 @@ cbor_item_t *encode_pin_auth(const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *encode_pin_enc(const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *encode_pin_hash_enc(const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *encode_pin_opt(void);
+cbor_item_t *encode_pubkey(const fido_blob_t *);
 cbor_item_t *encode_pubkey_list(const fido_blob_array_t *);
 cbor_item_t *encode_pubkey_param(int);
 cbor_item_t *encode_rp_entity(const fido_rp_t *);
@@ -38,10 +40,10 @@ int decode_assert_authdata(const cbor_item_t *, fido_blob_t *,
     fido_authdata_t *, int *, fido_blob_t *);
 int decode_cred_id(const cbor_item_t *, fido_blob_t *);
 int decode_fmt(const cbor_item_t *, char **);
+int decode_pubkey(const cbor_item_t *, int *, void *);
 int decode_rp_entity(const cbor_item_t *, fido_rp_t *);
 int decode_uint64(const cbor_item_t *, uint64_t *);
 int decode_user(const cbor_item_t *, fido_user_t *);
-int decode_x5c(const cbor_item_t *, void *);
 int es256_pk_decode(const cbor_item_t *, es256_pk_t *);
 int rs256_pk_decode(const cbor_item_t *, rs256_pk_t *);
 int eddsa_pk_decode(const cbor_item_t *, eddsa_pk_t *);

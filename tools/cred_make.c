@@ -179,7 +179,7 @@ cred_make(int argc, char **argv)
 
 	cred = prepare_cred(in_f, type, rk, uv, debug);
 
-	dev = open_dev(argc, argv);
+	dev = open_dev(argv[0]);
 	if (u2f)
 		fido_dev_force_u2f(dev);
 
