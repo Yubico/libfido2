@@ -14,7 +14,7 @@ void
 usage(void)
 {
 	fprintf(stderr,
-"usage: fido2-cred-mgmt -M device\n"
+"usage: fido2-cred-mgmt [-MR] [-d] device\n"
 "       fido2-cred-mgmt -V\n" 
 	);
 
@@ -30,6 +30,8 @@ main(int argc, char **argv)
 	switch (argv[1][1]) {
 	case 'M':
 		return (mgmt_metadata(--argc, ++argv));
+	case 'R':
+		return (mgmt_rp(--argc, ++argv));
 	case 'V':
 		fprintf(stderr, "%d.%d.%d\n", _FIDO_MAJOR, _FIDO_MINOR,
 		    _FIDO_PATCH);

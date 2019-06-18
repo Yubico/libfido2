@@ -1443,3 +1443,49 @@ decode_user(const cbor_item_t *item, fido_user_t *user)
 
 	return (0);
 }
+
+static int
+decode_rp_entity_entry(const cbor_item_t *key, const cbor_item_t *val,
+    void *arg)
+{
+	fido_rp_t	*rp = arg;
+	char		*name = NULL;
+	int		 ok = -1;
+
+	if (cbor_string_copy(key, &name) < 0) {
+		log_debug("%s: cbor type", __func__);
+		ok = 0; /* ignore */
+		goto out;
+	}
+
+	if (!strcmp(name, "id")) {
+		if (cbor_string_copy(val, &rp->id) < 0) {
+			log_debug("%s: id", __func__);
+			goto out;
+		}
+	} else if (!strcmp(name, "name")) {
+		if (cbor_string_copy(val, &rp->name) < 0) {
+			log_debug("%s: name", __func__);
+			goto out;
+		}
+	}
+
+	ok = 0;
+out:
+	free(name);
+
+	return (ok);
+}
+
+int
+decode_rp_entity(const cbor_item_t *item, fido_rp_t *rp)
+{
+	if (cbor_isa_map(item) == false ||
+	    cbor_map_is_definite(item) == false ||
+	    cbor_map_iter(item, rp, decode_rp_entity_entry) < 0) {
+		log_debug("%s: cbor type", __func__);
+		return (-1);
+	}
+
+	return (0);
+}

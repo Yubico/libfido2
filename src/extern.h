@@ -38,6 +38,7 @@ int decode_assert_authdata(const cbor_item_t *, fido_blob_t *,
     fido_authdata_t *, int *, fido_blob_t *);
 int decode_cred_id(const cbor_item_t *, fido_blob_t *);
 int decode_fmt(const cbor_item_t *, char **);
+int decode_rp_entity(const cbor_item_t *, fido_rp_t *);
 int decode_uint64(const cbor_item_t *, uint64_t *);
 int decode_user(const cbor_item_t *, fido_user_t *);
 int decode_x5c(const cbor_item_t *, void *);
@@ -61,6 +62,7 @@ int parse_cbor_reply(const unsigned char *, size_t, void *,
     int(*)(const cbor_item_t *, const cbor_item_t *, void *));
 int add_cbor_pin_params(fido_dev_t *, const fido_blob_t *, const es256_pk_t *,
     const fido_blob_t *,const char *, cbor_item_t **, cbor_item_t **);
+int cred_mgmt_tx_common(fido_dev_t *, uint8_t, const char *);
 
 /* buf */
 int buf_read(const unsigned char **, size_t *, void *, size_t);

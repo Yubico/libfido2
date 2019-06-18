@@ -13,6 +13,7 @@ list(APPEND FIDO_SOURCES
 	cbor.c
 	cred.c
 	cred_mgmt_meta.c
+	cred_mgmt_rp.c
 	dev.c
 	ecdh.c
 	eddsa.c

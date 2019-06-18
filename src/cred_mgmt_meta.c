@@ -35,7 +35,7 @@ parse_cred_mgmt_metadata(const cbor_item_t *key, const cbor_item_t *val,
 }
 
 static int
-get_cred_mgmt_metadata_rx(fido_dev_t *dev, fido_cred_mgmt_metadata_t *metadata,
+cred_mgmt_metadata_rx(fido_dev_t *dev, fido_cred_mgmt_metadata_t *metadata,
     int ms)
 {
 	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
@@ -59,15 +59,14 @@ get_cred_mgmt_metadata_rx(fido_dev_t *dev, fido_cred_mgmt_metadata_t *metadata,
 	return (FIDO_OK);
 }
 
-static int
-get_cred_mgmt_metadata_tx(fido_dev_t *dev, const char *pin)
+int
+cred_mgmt_tx_common(fido_dev_t *dev, uint8_t subcmd, const char *pin)
 {
 	fido_blob_t	 f;
 	fido_blob_t	*ecdh = NULL;
 	fido_blob_t	 hmac;
 	es256_pk_t	*pk = NULL;
 	cbor_item_t	*argv[4];
-	uint8_t		 subcmd = GET_CRED_METADATA;
 	int		 r;
 
 	memset(&f, 0, sizeof(f));
@@ -75,17 +74,6 @@ get_cred_mgmt_metadata_tx(fido_dev_t *dev, const char *pin)
 
 	hmac.ptr = &subcmd;
 	hmac.len = sizeof(subcmd);
-
-	if (pin == NULL) {
-		log_debug("%s: NULL pin", __func__);
-		r = FIDO_ERR_INVALID_ARGUMENT;
-		goto fail;
-	}
-
-	if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
-		log_debug("%s: fido_do_ecdh", __func__);
-		goto fail;
-	}
 
 	/* subCommand */
 	if ((argv[0] = cbor_build_uint8(subcmd)) == NULL) {
@@ -95,10 +83,17 @@ get_cred_mgmt_metadata_tx(fido_dev_t *dev, const char *pin)
 	}
 
 	/* pinProtocol, pinAuth */
-	if ((r = add_cbor_pin_params(dev, &hmac, pk, ecdh, pin, &argv[3],
-	    &argv[2])) != FIDO_OK) {
-		log_debug("%s: add_cbor_pin_params", __func__);
-		goto fail;
+	if (pin != NULL) {
+		if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
+			log_debug("%s: fido_do_ecdh", __func__);
+			goto fail;
+		}
+
+		if ((r = add_cbor_pin_params(dev, &hmac, pk, ecdh, pin,
+		    &argv[3], &argv[2])) != FIDO_OK) {
+			log_debug("%s: add_cbor_pin_params", __func__);
+			goto fail;
+		}
 	}
 
 	/* framing and transmission */
@@ -124,13 +119,13 @@ fail:
 }
 
 static int
-get_cred_mgmt_metadata_wait(fido_dev_t *dev,
-    fido_cred_mgmt_metadata_t *metadata, const  char *pin, int ms)
+cred_mgmt_metadata_wait(fido_dev_t *dev, fido_cred_mgmt_metadata_t *metadata,
+    const char *pin, int ms)
 {
 	int r;
 
-	if ((r = get_cred_mgmt_metadata_tx(dev, pin)) != FIDO_OK ||
-	    (r = get_cred_mgmt_metadata_rx(dev, metadata, ms)) != FIDO_OK)
+	if ((r = cred_mgmt_tx_common(dev, GET_CRED_METADATA, pin)) != FIDO_OK ||
+	    (r = cred_mgmt_metadata_rx(dev, metadata, ms)) != FIDO_OK)
 		return (r);
 
 	return (FIDO_OK);
@@ -142,8 +137,10 @@ fido_dev_get_cred_mgmt_metadata(fido_dev_t *dev,
 {
 	if (fido_dev_is_fido2(dev) == false)
 		return (FIDO_ERR_INVALID_COMMAND);
+	if (pin == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	return (get_cred_mgmt_metadata_wait(dev, metadata, pin, -1));
+	return (cred_mgmt_metadata_wait(dev, metadata, pin, -1));
 }
 
 fido_cred_mgmt_metadata_t *
