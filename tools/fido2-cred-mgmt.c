@@ -15,6 +15,7 @@ usage(void)
 {
 	fprintf(stderr,
 "usage: fido2-cred-mgmt [-MR] [-d] device\n"
+"       fido2-cred-mgmt -D [-d] cred_id device\n" 
 "       fido2-cred-mgmt -K [-d] rp_id device\n" 
 "       fido2-cred-mgmt -V\n" 
 	);
@@ -29,6 +30,8 @@ main(int argc, char **argv)
 		usage();
 
 	switch (argv[1][1]) {
+	case 'D':
+		return (mgmt_del_rk(--argc, ++argv));
 	case 'K':
 		return (mgmt_rk(--argc, ++argv));
 	case 'M':

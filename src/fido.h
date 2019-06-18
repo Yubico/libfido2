@@ -169,6 +169,8 @@ int fido_dev_get_cred_mgmt_rp(fido_dev_t *, fido_cred_mgmt_rp_t *,
     const char *);
 int fido_dev_get_cred_mgmt_rk(fido_dev_t *, const char *, fido_cred_mgmt_rk_t *,
     const char *);
+int fido_dev_del_cred_mgmt_rk(fido_dev_t *, const unsigned char *, size_t,
+    const char *);
 
 size_t fido_assert_authdata_len(const fido_assert_t *, size_t);
 size_t fido_assert_clientdata_hash_len(const fido_assert_t *);

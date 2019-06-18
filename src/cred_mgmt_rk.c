@@ -13,6 +13,7 @@
 
 #define ENUM_RK_BEGIN	0x04
 #define ENUM_RK_NEXT	0x05
+#define DELETE_CRED	0x06
 
 static int
 parse_cred_mgmt_rk(const cbor_item_t *key, const cbor_item_t *val, void *arg)
@@ -322,4 +323,122 @@ fido_cred_mgmt_rk(const fido_cred_mgmt_rk_t *rk, size_t idx)
 		return (NULL);
 
 	return (&rk->ptr[idx]);
+}
+
+static int
+cred_mgmt_del_rk_tx(fido_dev_t *dev, const unsigned char *cred_id_ptr,
+    size_t cred_id_len, const char *pin)
+{
+	fido_blob_t	 f;
+	fido_blob_t	*ecdh = NULL;
+	fido_blob_t	 hmac;
+	fido_blob_t	 cred_id;
+	es256_pk_t	*pk = NULL;
+	cbor_item_t	*argv[4];
+	cbor_item_t	*cred_cbor[2];
+	int		 r = FIDO_ERR_INTERNAL;
+
+	memset(&f, 0, sizeof(f));
+	memset(&hmac, 0, sizeof(hmac));
+	memset(argv, 0, sizeof(argv));
+	memset(cred_cbor, 0, sizeof(cred_cbor));
+	memset(&cred_id, 0, sizeof(cred_id));
+
+	if (fido_blob_set(&cred_id, cred_id_ptr, cred_id_len) < 0) {
+		log_debug("%s: fido_blob_set", __func__);
+		goto fail;
+
+	}
+
+	/* subCommand + subCommandParams */
+	if ((argv[0] = cbor_build_uint8(DELETE_CRED)) == NULL ||
+	    (cred_cbor[1] = encode_pubkey(&cred_id)) == NULL ||
+	    (argv[1] = cbor_flatten_vector(cred_cbor, 2)) == NULL) {
+		log_debug("%s: cbor encode", __func__);
+		goto fail;
+	}
+
+	if (cbor_build_frame(6, cred_cbor, 2, &hmac) < 0) {
+		log_debug("%s: cbor_build_frame", __func__);
+		goto fail;
+	}
+
+	if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
+		log_debug("%s: fido_do_ecdh", __func__);
+		goto fail;
+	}
+
+	/* pinProtocol, pinAuth */
+	if ((r = add_cbor_pin_params(dev, &hmac, pk, ecdh, pin, &argv[3],
+	    &argv[2])) != FIDO_OK) {
+		log_debug("%s: add_cbor_pin_params", __func__);
+		goto fail;
+	}
+
+	/* framing and transmission */
+	if (cbor_build_frame(CTAP_CBOR_CRED_MGMT_PRE, argv, 4, &f) < 0 ||
+	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+		log_debug("%s: tx", __func__);
+		r = FIDO_ERR_TX;
+		goto fail;
+	}
+
+	r = FIDO_OK;
+fail:
+	es256_pk_free(&pk);
+	fido_blob_free(&ecdh);
+
+	for (size_t i = 0; i < 4; i++)
+		if (argv[i])
+			cbor_decref(&argv[i]);
+	for (size_t i = 0; i < 2; i++)
+		if (cred_cbor[i])
+			cbor_decref(&cred_cbor[i]);
+
+	free(f.ptr);
+	free(hmac.ptr);
+	free(cred_id.ptr);
+
+	return (r);
+}
+
+static int
+cred_mgmt_del_rk_rx(fido_dev_t *dev, int ms)
+{
+	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	unsigned char	reply[2048];
+	int		reply_len;
+
+	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0 ||
+	    reply_len < 0 || (size_t)reply_len < 1) {
+		log_debug("%s: rx", __func__);
+		return (FIDO_ERR_RX);
+	}
+
+	return (reply[0]);
+}
+
+static int
+cred_mgmt_del_rk_wait(fido_dev_t *dev, const unsigned char *cred_id,
+    size_t cred_id_len, const char *pin, int ms)
+{
+	int r;
+
+	if ((r = cred_mgmt_del_rk_tx(dev, cred_id, cred_id_len,
+	    pin)) != FIDO_OK || (r = cred_mgmt_del_rk_rx(dev, ms)) != FIDO_OK)
+		return (r);
+
+	return (FIDO_OK);
+}
+
+int
+fido_dev_del_cred_mgmt_rk(fido_dev_t *dev, const unsigned char *cred_id,
+    size_t cred_id_len, const char *pin)
+{
+	if (fido_dev_is_fido2(dev) == false)
+		return (FIDO_ERR_INVALID_COMMAND);
+	if (pin == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	return (cred_mgmt_del_rk_wait(dev, cred_id, cred_id_len, pin, -1));
 }

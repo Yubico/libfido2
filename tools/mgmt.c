@@ -216,3 +216,54 @@ mgmt_rk(int argc, char **argv)
 
 	exit(status);
 }
+
+int
+mgmt_del_rk(int argc, char **argv)
+{
+	fido_dev_t *dev = NULL;
+	char pin[1024];
+	bool debug = false;
+	void *cred_id = NULL;
+	size_t cred_id_len = 0;
+	int ch;
+	int r;
+	int status = 0;
+
+	while ((ch = getopt(argc, argv, "d")) != -1) {
+		switch (ch) {
+		case 'd':
+			debug = true;
+			break;
+		default:
+			usage();
+		}
+	}
+
+	argc -= optind;
+	argv += optind;
+
+	if (argc < 2)
+		usage();
+
+	if (base64_decode(argv[0], &cred_id, &cred_id_len) < 0)
+		errx(1, "base64_decode");
+
+	fido_init(debug ? FIDO_DEBUG : 0);
+
+	dev = open_dev(argv[1]);
+	read_pin(argv[1], pin, sizeof(pin));
+
+	r = fido_dev_del_cred_mgmt_rk(dev, cred_id, cred_id_len, pin);
+	if (r != FIDO_OK) {
+		warnx("fido_dev_del_cred_mgmt_rk: %s", fido_strerr(r));
+		status = 1;
+	}
+
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+	free(cred_id);
+
+	explicit_bzero(pin, sizeof(pin));
+
+	exit(status);
+}
