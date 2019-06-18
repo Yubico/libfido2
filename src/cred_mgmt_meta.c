@@ -12,10 +12,9 @@
 #define SUBCMD_GET_CRED_METADATA	0x01
 
 static int
-parse_cred_mgmt_get_meta_reply(const cbor_item_t *key, const cbor_item_t *val,
-    void *arg)
+parse_cred_mgmt_meta(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
-	fido_cred_mgmt_meta_t *cred_meta = arg;
+	fido_cred_mgmt_meta_t *meta = arg;
 
 	if (cbor_isa_uint(key) == false ||
 	    cbor_int_get_width(key) != CBOR_INT_8) {
@@ -25,9 +24,9 @@ parse_cred_mgmt_get_meta_reply(const cbor_item_t *key, const cbor_item_t *val,
 
 	switch (cbor_get_uint8(key)) {
 	case 1:
-		return (decode_uint64(val, &cred_meta->rk_existing));
+		return (decode_uint64(val, &meta->rk_existing));
 	case 2:
-		return (decode_uint64(val, &cred_meta->rk_remaining));
+		return (decode_uint64(val, &meta->rk_remaining));
 	default:
 		log_debug("%s: cbor type", __func__);
 		return (0); /* ignore */
@@ -35,7 +34,7 @@ parse_cred_mgmt_get_meta_reply(const cbor_item_t *key, const cbor_item_t *val,
 }
 
 static int
-fido_dev_cred_mgmt_get_meta_rx(fido_dev_t *dev, fido_cred_mgmt_meta_t *cred_meta,
+fido_dev_get_cred_mgmt_meta_rx(fido_dev_t *dev, fido_cred_mgmt_meta_t *meta,
     int ms)
 {
 	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
@@ -43,16 +42,16 @@ fido_dev_cred_mgmt_get_meta_rx(fido_dev_t *dev, fido_cred_mgmt_meta_t *cred_meta
 	int		reply_len;
 	int		r;
 
-	memset(cred_meta, 0, sizeof(*cred_meta));
+	memset(meta, 0, sizeof(*meta));
 
 	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
 		log_debug("%s: rx", __func__);
 		return (FIDO_ERR_RX);
 	}
 
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len, cred_meta,
-	    parse_cred_mgmt_get_meta_reply)) != FIDO_OK) {
-		log_debug("%s: parse_cred_mgmt_get_meta_reply", __func__);
+	if ((r = parse_cbor_reply(reply, (size_t)reply_len, meta,
+	    parse_cred_mgmt_meta)) != FIDO_OK) {
+		log_debug("%s: parse_cred_mgmt_meta", __func__);
 		return (r);
 	}
 
@@ -60,7 +59,7 @@ fido_dev_cred_mgmt_get_meta_rx(fido_dev_t *dev, fido_cred_mgmt_meta_t *cred_meta
 }
 
 static int
-fido_dev_cred_mgmt_get_meta_tx(fido_dev_t *dev, const char *pin)
+fido_dev_get_cred_mgmt_meta_tx(fido_dev_t *dev, const char *pin)
 {
 	fido_blob_t	 f;
 	fido_blob_t	*ecdh = NULL;
@@ -124,26 +123,26 @@ fail:
 }
 
 static int
-fido_dev_cred_mgmt_get_meta_wait(fido_dev_t *dev,
-    fido_cred_mgmt_meta_t *cred_meta, const char *pin, int ms)
+fido_dev_get_cred_mgmt_meta_wait(fido_dev_t *dev, fido_cred_mgmt_meta_t *meta,
+    const  char *pin, int ms)
 {
 	int r;
 
-	if ((r = fido_dev_cred_mgmt_get_meta_tx(dev, pin)) != FIDO_OK ||
-	    (r = fido_dev_cred_mgmt_get_meta_rx(dev, cred_meta, ms)) != FIDO_OK)
+	if ((r = fido_dev_get_cred_mgmt_meta_tx(dev, pin)) != FIDO_OK ||
+	    (r = fido_dev_get_cred_mgmt_meta_rx(dev, meta, ms)) != FIDO_OK)
 		return (r);
 
 	return (FIDO_OK);
 }
 
 int
-fido_dev_cred_mgmt_get_meta(fido_dev_t *dev, fido_cred_mgmt_meta_t *cred_meta,
+fido_dev_get_cred_mgmt_meta(fido_dev_t *dev, fido_cred_mgmt_meta_t *meta,
     const char *pin)
 {
 	if (fido_dev_is_fido2(dev) == false)
 		return (FIDO_ERR_INVALID_COMMAND);
 
-	return (fido_dev_cred_mgmt_get_meta_wait(dev, cred_meta, pin, -1));
+	return (fido_dev_get_cred_mgmt_meta_wait(dev, meta, pin, -1));
 }
 
 fido_cred_mgmt_meta_t *
@@ -153,26 +152,26 @@ fido_cred_mgmt_meta_new(void)
 }
 
 void
-fido_cred_mgmt_meta_free(fido_cred_mgmt_meta_t **cred_meta_p)
+fido_cred_mgmt_meta_free(fido_cred_mgmt_meta_t **meta_p)
 {
-	fido_cred_mgmt_meta_t *cred_meta;
+	fido_cred_mgmt_meta_t *meta;
 
-	if (cred_meta_p == NULL || (cred_meta = *cred_meta_p) == NULL)
+	if (meta_p == NULL || (meta = *meta_p) == NULL)
 		return;
 
-	free(cred_meta);
+	free(meta);
 
-	*cred_meta_p = NULL;
+	*meta_p = NULL;
 }
 
 uint64_t
-fido_cred_mgmt_meta_rk_existing(const fido_cred_mgmt_meta_t *cred_meta)
+fido_cred_mgmt_meta_rk_existing(const fido_cred_mgmt_meta_t *meta)
 {
-	return (cred_meta->rk_existing);
+	return (meta->rk_existing);
 }
 
 uint64_t
-fido_cred_mgmt_meta_rk_remaining(const fido_cred_mgmt_meta_t *cred_meta)
+fido_cred_mgmt_meta_rk_remaining(const fido_cred_mgmt_meta_t *meta)
 {
-	return (cred_meta->rk_remaining);
+	return (meta->rk_remaining);
 }

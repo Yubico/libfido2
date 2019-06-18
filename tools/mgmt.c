@@ -49,7 +49,7 @@ mgmt_meta(int argc, char **argv)
 	dev = open_dev(argc, argv);
 	read_pin(argv[0], pin, sizeof(pin));
 
-	if ((r = fido_dev_cred_mgmt_get_meta(dev, meta, pin)) != FIDO_OK) {
+	if ((r = fido_dev_get_cred_mgmt_meta(dev, meta, pin)) != FIDO_OK) {
 		warnx("fido_dev_cred_mgmt_get_meta: %s", fido_strerr(r));
 		status = 1;
 	} else {

@@ -153,7 +153,7 @@ int fido_dev_reset(fido_dev_t *);
 int fido_dev_set_io_functions(fido_dev_t *, const fido_dev_io_t *);
 int fido_dev_set_pin(fido_dev_t *, const char *, const char *);
 
-int fido_dev_cred_mgmt_get_meta(fido_dev_t *, fido_cred_mgmt_meta_t *,
+int fido_dev_get_cred_mgmt_meta(fido_dev_t *, fido_cred_mgmt_meta_t *,
     const char *);
 
 size_t fido_assert_authdata_len(const fido_assert_t *, size_t);

@@ -94,7 +94,7 @@
 		fido_cred_x5c_ptr;
 		fido_dev_build;
 		fido_dev_close;
-		fido_dev_cred_mgmt_get_meta;
+		fido_dev_get_cred_mgmt_meta;
 		fido_dev_flags;
 		fido_dev_force_fido2;
 		fido_dev_force_u2f;
