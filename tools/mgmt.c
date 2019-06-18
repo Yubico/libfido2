@@ -18,10 +18,10 @@
 #include "extern.h"
 
 int
-mgmt_meta(int argc, char **argv)
+mgmt_metadata(int argc, char **argv)
 {
 	fido_dev_t *dev = NULL;
-	fido_cred_mgmt_meta_t *meta = NULL;
+	fido_cred_mgmt_metadata_t *metadata = NULL;
 	char pin[1024];
 	bool debug = false;
 	int ch;
@@ -41,24 +41,25 @@ mgmt_meta(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	if ((meta = fido_cred_mgmt_meta_new()) == NULL)
-		errx(1, "fido_cred_mgmt_meta_new");
+	if ((metadata = fido_cred_mgmt_metadata_new()) == NULL)
+		errx(1, "fido_cred_mgmt_metadata_new");
 
 	fido_init(debug ? FIDO_DEBUG : 0);
 
 	dev = open_dev(argc, argv);
 	read_pin(argv[0], pin, sizeof(pin));
 
-	if ((r = fido_dev_get_cred_mgmt_meta(dev, meta, pin)) != FIDO_OK) {
+	if ((r = fido_dev_get_cred_mgmt_metadata(dev, metadata,
+	    pin)) != FIDO_OK) {
 		warnx("fido_dev_cred_mgmt_get_meta: %s", fido_strerr(r));
 		status = 1;
 	} else {
 		printf("%u\n%u\n",
-		    (unsigned)fido_cred_mgmt_meta_rk_existing(meta),
-		    (unsigned)fido_cred_mgmt_meta_rk_remaining(meta));
+		    (unsigned)fido_cred_mgmt_rk_existing(metadata),
+		    (unsigned)fido_cred_mgmt_rk_remaining(metadata));
 	}
 
-	fido_cred_mgmt_meta_free(&meta);
+	fido_cred_mgmt_metadata_free(&metadata);
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
 

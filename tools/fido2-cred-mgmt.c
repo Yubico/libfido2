@@ -29,7 +29,7 @@ main(int argc, char **argv)
 
 	switch (argv[1][1]) {
 	case 'M':
-		return (mgmt_meta(--argc, ++argv));
+		return (mgmt_metadata(--argc, ++argv));
 	case 'V':
 		fprintf(stderr, "%d.%d.%d\n", _FIDO_MAJOR, _FIDO_MINOR,
 		    _FIDO_PATCH);

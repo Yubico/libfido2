@@ -25,7 +25,7 @@ int base64_encode(const void *, size_t, char **);
 int base64_read(FILE *, struct blob *);
 int cred_make(int, char **);
 int cred_verify(int, char **);
-int mgmt_meta(int, char **);
+int mgmt_metadata(int, char **);
 int pin_change(int, char **);
 int pin_set(int, char **);
 int string_read(FILE *, char **);

@@ -9,12 +9,13 @@
 #include "fido.h"
 #include "fido/es256.h"
 
-#define SUBCMD_GET_CRED_METADATA	0x01
+#define GET_CRED_METADATA	0x01
 
 static int
-parse_cred_mgmt_meta(const cbor_item_t *key, const cbor_item_t *val, void *arg)
+parse_cred_mgmt_metadata(const cbor_item_t *key, const cbor_item_t *val,
+    void *arg)
 {
-	fido_cred_mgmt_meta_t *meta = arg;
+	fido_cred_mgmt_metadata_t *metadata = arg;
 
 	if (cbor_isa_uint(key) == false ||
 	    cbor_int_get_width(key) != CBOR_INT_8) {
@@ -24,9 +25,9 @@ parse_cred_mgmt_meta(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	switch (cbor_get_uint8(key)) {
 	case 1:
-		return (decode_uint64(val, &meta->rk_existing));
+		return (decode_uint64(val, &metadata->rk_existing));
 	case 2:
-		return (decode_uint64(val, &meta->rk_remaining));
+		return (decode_uint64(val, &metadata->rk_remaining));
 	default:
 		log_debug("%s: cbor type", __func__);
 		return (0); /* ignore */
@@ -34,7 +35,7 @@ parse_cred_mgmt_meta(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 }
 
 static int
-fido_dev_get_cred_mgmt_meta_rx(fido_dev_t *dev, fido_cred_mgmt_meta_t *meta,
+get_cred_mgmt_metadata_rx(fido_dev_t *dev, fido_cred_mgmt_metadata_t *metadata,
     int ms)
 {
 	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
@@ -42,16 +43,16 @@ fido_dev_get_cred_mgmt_meta_rx(fido_dev_t *dev, fido_cred_mgmt_meta_t *meta,
 	int		reply_len;
 	int		r;
 
-	memset(meta, 0, sizeof(*meta));
+	memset(metadata, 0, sizeof(*metadata));
 
 	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
 		log_debug("%s: rx", __func__);
 		return (FIDO_ERR_RX);
 	}
 
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len, meta,
-	    parse_cred_mgmt_meta)) != FIDO_OK) {
-		log_debug("%s: parse_cred_mgmt_meta", __func__);
+	if ((r = parse_cbor_reply(reply, (size_t)reply_len, metadata,
+	    parse_cred_mgmt_metadata)) != FIDO_OK) {
+		log_debug("%s: parse_cred_mgmt_metadata", __func__);
 		return (r);
 	}
 
@@ -59,14 +60,14 @@ fido_dev_get_cred_mgmt_meta_rx(fido_dev_t *dev, fido_cred_mgmt_meta_t *meta,
 }
 
 static int
-fido_dev_get_cred_mgmt_meta_tx(fido_dev_t *dev, const char *pin)
+get_cred_mgmt_metadata_tx(fido_dev_t *dev, const char *pin)
 {
 	fido_blob_t	 f;
 	fido_blob_t	*ecdh = NULL;
 	fido_blob_t	 hmac;
 	es256_pk_t	*pk = NULL;
 	cbor_item_t	*argv[4];
-	uint8_t		 subcmd = SUBCMD_GET_CRED_METADATA;
+	uint8_t		 subcmd = GET_CRED_METADATA;
 	int		 r;
 
 	memset(&f, 0, sizeof(f));
@@ -123,55 +124,55 @@ fail:
 }
 
 static int
-fido_dev_get_cred_mgmt_meta_wait(fido_dev_t *dev, fido_cred_mgmt_meta_t *meta,
-    const  char *pin, int ms)
+get_cred_mgmt_metadata_wait(fido_dev_t *dev,
+    fido_cred_mgmt_metadata_t *metadata, const  char *pin, int ms)
 {
 	int r;
 
-	if ((r = fido_dev_get_cred_mgmt_meta_tx(dev, pin)) != FIDO_OK ||
-	    (r = fido_dev_get_cred_mgmt_meta_rx(dev, meta, ms)) != FIDO_OK)
+	if ((r = get_cred_mgmt_metadata_tx(dev, pin)) != FIDO_OK ||
+	    (r = get_cred_mgmt_metadata_rx(dev, metadata, ms)) != FIDO_OK)
 		return (r);
 
 	return (FIDO_OK);
 }
 
 int
-fido_dev_get_cred_mgmt_meta(fido_dev_t *dev, fido_cred_mgmt_meta_t *meta,
-    const char *pin)
+fido_dev_get_cred_mgmt_metadata(fido_dev_t *dev,
+    fido_cred_mgmt_metadata_t *metadata, const char *pin)
 {
 	if (fido_dev_is_fido2(dev) == false)
 		return (FIDO_ERR_INVALID_COMMAND);
 
-	return (fido_dev_get_cred_mgmt_meta_wait(dev, meta, pin, -1));
+	return (get_cred_mgmt_metadata_wait(dev, metadata, pin, -1));
 }
 
-fido_cred_mgmt_meta_t *
-fido_cred_mgmt_meta_new(void)
+fido_cred_mgmt_metadata_t *
+fido_cred_mgmt_metadata_new(void)
 {
-	return (calloc(1, sizeof(fido_cred_mgmt_meta_t)));
+	return (calloc(1, sizeof(fido_cred_mgmt_metadata_t)));
 }
 
 void
-fido_cred_mgmt_meta_free(fido_cred_mgmt_meta_t **meta_p)
+fido_cred_mgmt_metadata_free(fido_cred_mgmt_metadata_t **metadata_p)
 {
-	fido_cred_mgmt_meta_t *meta;
+	fido_cred_mgmt_metadata_t *metadata;
 
-	if (meta_p == NULL || (meta = *meta_p) == NULL)
+	if (metadata_p == NULL || (metadata = *metadata_p) == NULL)
 		return;
 
-	free(meta);
+	free(metadata);
 
-	*meta_p = NULL;
+	*metadata_p = NULL;
 }
 
 uint64_t
-fido_cred_mgmt_meta_rk_existing(const fido_cred_mgmt_meta_t *meta)
+fido_cred_mgmt_rk_existing(const fido_cred_mgmt_metadata_t *metadata)
 {
-	return (meta->rk_existing);
+	return (metadata->rk_existing);
 }
 
 uint64_t
-fido_cred_mgmt_meta_rk_remaining(const fido_cred_mgmt_meta_t *meta)
+fido_cred_mgmt_rk_remaining(const fido_cred_mgmt_metadata_t *metadata)
 {
-	return (meta->rk_remaining);
+	return (metadata->rk_remaining);
 }
