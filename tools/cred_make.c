@@ -70,7 +70,7 @@ prepare_cred(FILE *in_f, int type, bool rk, bool uv, bool debug)
 }
 
 static void
-print_cred(FILE *out_f, const fido_cred_t *cred)
+print_attcred(FILE *out_f, const fido_cred_t *cred)
 {
 	char *cdh = NULL;
 	char *authdata = NULL;
@@ -197,7 +197,7 @@ cred_make(int argc, char **argv)
 	explicit_bzero(pin, sizeof(pin));
 	if (r != FIDO_OK)
 		errx(1, "fido_dev_make_cred: %s", fido_strerr(r));
-	print_cred(out_f, cred);
+	print_attcred(out_f, cred);
 
 	fido_dev_close(dev);
 	fido_dev_free(&dev);

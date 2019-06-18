@@ -64,7 +64,6 @@ int parse_cbor_reply(const unsigned char *, size_t, void *,
     int(*)(const cbor_item_t *, const cbor_item_t *, void *));
 int add_cbor_pin_params(fido_dev_t *, const fido_blob_t *, const es256_pk_t *,
     const fido_blob_t *,const char *, cbor_item_t **, cbor_item_t **);
-int cred_mgmt_tx_common(fido_dev_t *, uint8_t, const char *);
 
 /* buf */
 int buf_read(const unsigned char **, size_t *, void *, size_t);

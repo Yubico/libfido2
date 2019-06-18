@@ -115,28 +115,6 @@ typedef struct fido_assert {
 	size_t             stmt_len;     /* number of received assertions */
 } fido_assert_t;
 
-typedef struct fido_cred_mgmt_metadata {
-	uint64_t rk_existing;
-	uint64_t rk_remaining;
-} fido_cred_mgmt_metadata_t;
-
-typedef struct fido_cred_mgmt_rp_info {
-	fido_rp_t   rp;
-	fido_blob_t rp_id_hash;
-} fido_cred_mgmt_rp_info_t;
-
-typedef struct fido_cred_mgmt_rp {
-	fido_cred_mgmt_rp_info_t *ptr;
-	size_t                    n_alloc; /* number of allocated entries */
-	size_t                    n_rx;    /* number of populated entries */
-} fido_cred_mgmt_rp_t;
-
-typedef struct fido_cred_mgmt_rk {
-	fido_cred_t *ptr;
-	size_t       n_alloc; /* number of allocated entries */
-	size_t       n_rx;    /* number of populated entries */
-} fido_cred_mgmt_rk_t;
-
 typedef struct fido_opt_array {
 	char **name;
 	bool *value;

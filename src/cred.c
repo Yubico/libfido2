@@ -756,6 +756,12 @@ fido_cred_set_type(fido_cred_t *cred, int cose_alg)
 	return (FIDO_OK);
 }
 
+int
+fido_cred_type(const fido_cred_t *cred)
+{
+	return (cred->type);
+}
+
 uint8_t
 fido_cred_flags(const fido_cred_t *cred)
 {
@@ -896,4 +902,16 @@ const char *
 fido_cred_display_name(const fido_cred_t *cred)
 {
 	return (cred->user.display_name);
+}
+
+const unsigned char *
+fido_cred_user_id_ptr(const fido_cred_t *cred)
+{
+	return (cred->user.id.ptr);
+}
+
+size_t
+fido_cred_user_id_len(const fido_cred_t *cred)
+{
+	return (cred->user.id.len);
 }
