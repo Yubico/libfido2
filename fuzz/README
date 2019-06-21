@@ -138,19 +138,6 @@ cores available for fuzzing.
 A set of harnesses and auxiliary scripts can be found under harnesses/. To
 compile coverage reports, adjust the harnesses to your setup and run 'report'.
 
-diff --git src/cbor.c src/cbor.c
-index c2c4d47..179e2b6 100644
---- src/cbor.c
-+++ src/cbor.c
-@@ -92,7 +92,7 @@ cbor_item_t *cbor_load(cbor_data source, size_t source_size,
-         }
-     }
- 
--    printf("\nres: %d\n", context.syntax_error);
-+    /* printf("\nres: %d\n", context.syntax_error); */
- 
-     if (context.creation_failed) {
-       /* Most likely unsuccessful allocation - our callback has failed */
 diff --git src/cbor/internal/memory_utils.c src/cbor/internal/memory_utils.c
 index aa049a2..e294b38 100644
 --- src/cbor/internal/memory_utils.c
