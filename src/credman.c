@@ -470,7 +470,7 @@ fido_credman_del_dev_rk(fido_dev_t *dev, const unsigned char *cred_id,
 static int
 credman_parse_rp(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
-	fido_credman_single_rp_t *rp = arg;
+	struct fido_credman_single_rp *rp = arg;
 
 	if (cbor_isa_uint(key) == false ||
 	    cbor_int_get_width(key) != CBOR_INT_8) {

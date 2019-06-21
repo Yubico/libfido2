@@ -14,36 +14,32 @@
 #include "fido/param.h"
 
 #ifdef _FIDO_INTERNAL
-
-typedef struct fido_credman_metadata {
+struct fido_credman_metadata {
 	uint64_t rk_existing;
 	uint64_t rk_remaining;
-} fido_credman_metadata_t;
+};
 
-typedef struct fido_credman_single_rp {
+struct fido_credman_single_rp {
 	fido_rp_t rp_entity;
 	fido_blob_t rp_id_hash;
-} fido_credman_single_rp_t;
+};
 
-typedef struct fido_credman_rp {
-	fido_credman_single_rp_t *ptr;
+struct fido_credman_rp {
+	struct fido_credman_single_rp *ptr;
 	size_t n_alloc; /* number of allocated entries */
 	size_t n_rx;    /* number of populated entries */
-} fido_credman_rp_t;
+};
 
-typedef struct fido_credman_rk {
+struct fido_credman_rk {
 	fido_cred_t *ptr;
 	size_t n_alloc; /* number of allocated entries */
 	size_t n_rx;    /* number of populated entries */
-} fido_credman_rk_t;
-
-#else
+};
+#endif
 
 typedef struct fido_credman_metadata fido_credman_metadata_t;
-typedef struct fido_credman_rp fido_credman_rp_t;
 typedef struct fido_credman_rk fido_credman_rk_t;
-
-#endif /* _FIDO_INTERNAL */
+typedef struct fido_credman_rp fido_credman_rp_t;
 
 const char *fido_credman_rp_id(const fido_credman_rp_t *, size_t);
 const char *fido_credman_rp_name(const fido_credman_rp_t *, size_t);
