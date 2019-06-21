@@ -45,30 +45,34 @@ typedef struct fido_credman_rk fido_credman_rk_t;
 
 #endif /* _FIDO_INTERNAL */
 
-const char		*fido_credman_rp_id(const fido_credman_rp_t *, size_t);
-const char		*fido_credman_rp_name(const fido_credman_rp_t *, size_t);
-const fido_cred_t	*fido_credman_rk(const fido_credman_rk_t *, size_t);
-const unsigned char	*fido_credman_rp_id_hash_ptr(const fido_credman_rp_t *,
-			    size_t);
-fido_credman_metadata_t	*fido_credman_metadata_new(void);
-fido_credman_rk_t	*fido_credman_rk_new(void);
-fido_credman_rp_t	*fido_credman_rp_new(void);
-int			 fido_credman_del_dev_rk(fido_dev_t *,
-			    const unsigned char *, size_t, const char *);
-int			 fido_credman_get_dev_metadata(fido_dev_t *,
-			    fido_credman_metadata_t *, const char *);
-int			 fido_credman_get_dev_rk(fido_dev_t *, const char *,
-			    fido_credman_rk_t *, const char *);
-int			 fido_credman_get_dev_rp(fido_dev_t *,
-			    fido_credman_rp_t *, const char *);
-size_t			 fido_credman_rk_count(const fido_credman_rk_t *);
-size_t			 fido_credman_rp_count(const fido_credman_rp_t *);
-size_t			 fido_credman_rp_id_hash_len(const fido_credman_rp_t *,
-			    size_t);
-uint64_t		 fido_credman_rk_existing(const fido_credman_metadata_t *);
-uint64_t		 fido_credman_rk_remaining(const fido_credman_metadata_t *);
-void			 fido_credman_metadata_free(fido_credman_metadata_t **);
-void			 fido_credman_rk_free(fido_credman_rk_t **);
-void			 fido_credman_rp_free(fido_credman_rp_t **);
+const char *fido_credman_rp_id(const fido_credman_rp_t *, size_t);
+const char *fido_credman_rp_name(const fido_credman_rp_t *, size_t);
+
+const fido_cred_t *fido_credman_rk(const fido_credman_rk_t *, size_t);
+const unsigned char *fido_credman_rp_id_hash_ptr(const fido_credman_rp_t *,
+    size_t);
+
+fido_credman_metadata_t *fido_credman_metadata_new(void);
+fido_credman_rk_t *fido_credman_rk_new(void);
+fido_credman_rp_t *fido_credman_rp_new(void);
+
+int fido_credman_del_dev_rk(fido_dev_t *, const unsigned char *, size_t,
+    const char *);
+int fido_credman_get_dev_metadata(fido_dev_t *, fido_credman_metadata_t *,
+    const char *);
+int fido_credman_get_dev_rk(fido_dev_t *, const char *, fido_credman_rk_t *,
+    const char *);
+int fido_credman_get_dev_rp(fido_dev_t *, fido_credman_rp_t *, const char *);
+
+size_t fido_credman_rk_count(const fido_credman_rk_t *);
+size_t fido_credman_rp_count(const fido_credman_rp_t *);
+size_t fido_credman_rp_id_hash_len(const fido_credman_rp_t *, size_t);
+
+uint64_t fido_credman_rk_existing(const fido_credman_metadata_t *);
+uint64_t fido_credman_rk_remaining(const fido_credman_metadata_t *);
+
+void fido_credman_metadata_free(fido_credman_metadata_t **);
+void fido_credman_rk_free(fido_credman_rk_t **);
+void fido_credman_rp_free(fido_credman_rp_t **);
 
 #endif /* !_FIDO_CREDMAN_H */
