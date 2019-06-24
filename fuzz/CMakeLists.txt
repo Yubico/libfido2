@@ -25,4 +25,10 @@ if(LIBFUZZER)
 	target_compile_options(fuzz_mgmt PRIVATE "-fsanitize=fuzzer")
 	set_target_properties(fuzz_mgmt PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
 	target_link_libraries(fuzz_mgmt fido2_shared)
+
+	# fuzz_credman
+	add_executable(fuzz_credman fuzz_credman.c mutator_aux.c ${COMPAT_SOURCES})
+	target_compile_options(fuzz_credman PRIVATE "-fsanitize=fuzzer")
+	set_target_properties(fuzz_credman PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
+	target_link_libraries(fuzz_credman fido2_shared)
 endif()

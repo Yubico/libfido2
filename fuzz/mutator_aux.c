@@ -28,8 +28,9 @@ xstrlen(const char *s)
 }
 
 void
-consume(const uint8_t *ptr, size_t len)
+consume(const void *body, size_t len)
 {
+	const volatile uint8_t *ptr = body;
 	volatile uint8_t x = 0;
 
 	while (len--)

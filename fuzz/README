@@ -7,9 +7,9 @@ authenticator to obtain an initial corpus, rebuild libfido2 with -DFUZZ=1
 this approach can be found in the harnesses under fuzz/harnesses/ that fuzz
 the standalone examples and tools bundled with libfido2.
 
-libFuzzer is better suited for bespoke fuzzers; see fuzz_cred.c, fuzz_assert.c,
-and fuzz_mgmt.c for examples. To build these harnesses, use -DFUZZ=1
--DLIBFUZZER=1.
+libFuzzer is better suited for bespoke fuzzers; see fuzz_cred.c, fuzz_credman.c,
+fuzz_assert.c, and fuzz_mgmt.c for examples. To build these harnesses,
+use -DFUZZ=1 -DLIBFUZZER=1.
 
 To run under ASAN/MSAN, libfido2 needs to be linked against flavours of
 libcbor and OpenSSL built with the respective sanitiser. In order to keep
@@ -127,8 +127,8 @@ When running under ASAN, you may want to set ASAN_OPTIONS to
 
 The recommended way to run the harnesses is:
 
-$ fuzz_{assert,cred,mgmt} -use_value_profile=1 -reload=30 -print_pcs=1 \
-	-print_funcs=30 -timeout=10 -max_len=16384 CORPUS_DIR
+$ fuzz_{assert,cred,credman,mgmt} -use_value_profile=1 -reload=30 \
+	-print_pcs=1 -print_funcs=30 -timeout=10 -max_len=17408 CORPUS_DIR
 
 You may want to use -jobs or -workers depending on the number of logical
 cores available for fuzzing.

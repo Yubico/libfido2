@@ -496,14 +496,14 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		    fido_assert_user_id_len(assert, i));
 		consume(fido_assert_hmac_secret_ptr(assert, i),
 		    fido_assert_hmac_secret_len(assert, i));
-		consume((const void *)fido_assert_user_icon(assert, i),
+		consume(fido_assert_user_icon(assert, i),
 		    xstrlen(fido_assert_user_icon(assert, i)));
-		consume((const void *)fido_assert_user_name(assert, i),
+		consume(fido_assert_user_name(assert, i),
 		    xstrlen(fido_assert_user_name(assert, i)));
-		consume((const void *)fido_assert_user_display_name(assert, i),
+		consume(fido_assert_user_display_name(assert, i),
 		    xstrlen(fido_assert_user_display_name(assert, i)));
 		flags = fido_assert_flags(assert, i);
-		consume((const void *)&flags, sizeof(flags));
+		consume(&flags, sizeof(flags));
 	}
 
 out:

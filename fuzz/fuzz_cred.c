@@ -762,15 +762,14 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	consume(fido_cred_pubkey_ptr(cred), fido_cred_pubkey_len(cred));
 	consume(fido_cred_id_ptr(cred), fido_cred_id_len(cred));
 	consume(fido_cred_user_id_ptr(cred), fido_cred_user_id_len(cred));
-	consume((const void *)fido_cred_user_name(cred),
-	    xstrlen(fido_cred_user_name(cred)));
-	consume((const void *)fido_cred_display_name(cred),
+	consume(fido_cred_user_name(cred), xstrlen(fido_cred_user_name(cred)));
+	consume(fido_cred_display_name(cred),
 	    xstrlen(fido_cred_display_name(cred)));
 
 	flags = fido_cred_flags(cred);
 	consume(&flags, sizeof(flags));
 	type = fido_cred_type(cred);
-	consume((void *)&type, sizeof(type));
+	consume(&type, sizeof(type));
 
 	fido_cred_free(&cred);
 }
@@ -874,8 +873,6 @@ LLVMFuzzerCustomMutator(uint8_t *data, size_t size, size_t maxsize,
 	struct param	p;
 	uint8_t		blob[16384];
 	size_t		blob_len;
-
-	(void)seed;
 
 	memset(&p, 0, sizeof(p));
 

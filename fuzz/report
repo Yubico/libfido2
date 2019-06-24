@@ -17,8 +17,9 @@ T+=" harnesses/fido2-assert-G"
 T+=" harnesses/fido2-assert-V"
 T+=" harnesses/fido2-cred-M"
 T+=" harnesses/fido2-cred-V"
-T+=" harnesses/fuzz_cred"
 T+=" harnesses/fuzz_assert"
+T+=" harnesses/fuzz_cred"
+T+=" harnesses/fuzz_credman"
 T+=" harnesses/fuzz_mgmt"
 
 clean() {
