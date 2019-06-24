@@ -109,7 +109,7 @@ credman_tx(fido_dev_t *dev, uint8_t cmd, const fido_blob_t *param,
 	fido_blob_t	 hmac;
 	es256_pk_t	*pk = NULL;
 	cbor_item_t	*argv[4];
-	int		 r;
+	int		 r = FIDO_ERR_INTERNAL;
 
 	memset(&f, 0, sizeof(f));
 	memset(&hmac, 0, sizeof(hmac));
@@ -118,7 +118,6 @@ credman_tx(fido_dev_t *dev, uint8_t cmd, const fido_blob_t *param,
 	/* subCommand */
 	if ((argv[0] = cbor_build_uint8(cmd)) == NULL) {
 		log_debug("%s: cbor encode", __func__);
-		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
 
