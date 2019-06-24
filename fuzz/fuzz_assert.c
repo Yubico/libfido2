@@ -413,15 +413,6 @@ verify_assert(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	fido_assert_free(&assert);
 }
 
-static size_t
-xstrlen(const char *s)
-{
-	if (s == NULL)
-		return (0);
-
-	return (strlen(s));
-}
-
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
