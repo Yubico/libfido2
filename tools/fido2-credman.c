@@ -20,7 +20,6 @@ usage(void)
 "usage: fido2-credman [-d] [-MR] device\n"
 "       fido2-credman [-d] -D cred_id device\n" 
 "       fido2-credman [-d] -K rp_id device\n" 
-"       fido2-credman -V\n" 
 	);
 
 	exit(1);
@@ -40,7 +39,7 @@ main(int argc, char **argv)
 	int ch;
 	int flags = 0;
 
-	while ((ch = getopt(argc, argv, "DKMRVd")) != -1) {
+	while ((ch = getopt(argc, argv, "DKMRd")) != -1) {
 		switch (ch) {
 		case 'd':
 			flags = FIDO_DEBUG;
@@ -68,10 +67,6 @@ main(int argc, char **argv)
 		return (credman_metadata(argc, argv));
 	case 'R':
 		return (credman_rp(argc, argv));
-	case 'V':
-		fprintf(stderr, "%d.%d.%d\n", _FIDO_MAJOR, _FIDO_MINOR,
-		    _FIDO_PATCH);
-		exit(0);
 	}
 
 	usage();
