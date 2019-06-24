@@ -83,6 +83,7 @@ fido_credman_rp_free
 fido_credman_rp_id
 fido_credman_rp_id_hash_len
 fido_credman_rp_id_hash_ptr
+fido_credman_rp_name
 fido_credman_rp_new
 fido_cred_new
 fido_cred_pubkey_len
