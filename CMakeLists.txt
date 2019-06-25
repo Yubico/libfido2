@@ -214,6 +214,12 @@ if(HAVE_READPASSPHRASE)
 	add_definitions(-DHAVE_READPASSPHRASE)
 endif()
 
+# getline
+check_function_exists(getline HAVE_GETLINE)
+if(HAVE_GETLINE)
+	add_definitions(-DHAVE_GETLINE)
+endif()
+
 # getopt
 check_function_exists(getopt HAVE_GETOPT)
 if(HAVE_GETOPT)

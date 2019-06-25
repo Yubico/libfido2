@@ -79,4 +79,9 @@ int timingsafe_bcmp(const void *, const void *, size_t);
 #include <unistd.h>
 #endif
 
+#if !defined(HAVE_GETLINE)
+#include <stdio.h>
+ssize_t getline(char **, size_t *, FILE *);
+#endif
+
 #endif /* !_OPENBSD_COMPAT_H */
