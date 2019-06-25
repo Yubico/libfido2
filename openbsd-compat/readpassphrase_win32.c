@@ -36,12 +36,12 @@
 #include <windows.h>
 #include <stdio.h>
 #include <time.h>
-#include <Shlwapi.h>
+#include <shlwapi.h>
 #include <conio.h>
-#include <LM.h>
-#include <Sddl.h>
-#include <Aclapi.h>
-#include <Ntsecapi.h>
+#include <lm.h>
+#include <sddl.h>
+#include <aclapi.h>
+#include <ntsecapi.h>
 #include <security.h>
 #include <ntstatus.h>
 #include <wchar.h>
