@@ -294,8 +294,8 @@ credman_parse_rk_count(const cbor_item_t *key, const cbor_item_t *val,
 		return (-1);
 	}
 
-	if (credman_grow_array((void **)&rk->ptr, &rk->n_alloc, &rk->n_rx, n,
-	    sizeof(*rk->ptr)) < 0) {
+	if (credman_grow_array((void **)&rk->ptr, &rk->n_alloc, &rk->n_rx,
+	    (size_t)n, sizeof(*rk->ptr)) < 0) {
 		log_debug("%s: credman_grow_array", __func__);
 		return (-1);
 	}
@@ -526,8 +526,8 @@ credman_parse_rp_count(const cbor_item_t *key, const cbor_item_t *val,
 		return (-1);
 	}
 
-	if (credman_grow_array((void **)&rp->ptr, &rp->n_alloc, &rp->n_rx, n,
-	    sizeof(*rp->ptr)) < 0) {
+	if (credman_grow_array((void **)&rp->ptr, &rp->n_alloc, &rp->n_rx,
+	    (size_t)n, sizeof(*rp->ptr)) < 0) {
 		log_debug("%s: credman_grow_array", __func__);
 		return (-1);
 	}
