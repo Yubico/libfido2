@@ -11,16 +11,16 @@
 #include <openssl/evp.h>
 #include <openssl/pem.h>
 
+#include <fido.h>
+#include <fido/es256.h>
+#include <fido/rs256.h>
+#include <fido/eddsa.h>
+
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <fido.h>
-#include <fido/es256.h>
-#include <fido/rs256.h>
-#include <fido/eddsa.h>
 
 #include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"

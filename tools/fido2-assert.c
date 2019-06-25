@@ -16,10 +16,12 @@
  * See blurb in fido2-cred.c on how to obtain cred.
  */ 
 
+#include <fido.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"
 
 void

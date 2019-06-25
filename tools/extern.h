@@ -7,8 +7,6 @@
 #ifndef _EXTERN_H_
 #define _EXTERN_H_
 
-#include <fido.h>
-
 struct blob {
 	unsigned char *ptr;
 	size_t len;

@@ -4,11 +4,12 @@
  * license that can be found in the LICENSE file.
  */
 
+#include <fido.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
+#include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"
 
 static int action;

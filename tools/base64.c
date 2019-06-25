@@ -7,10 +7,12 @@
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 
+#include <fido.h>
 #include <limits.h>
 #include <stdint.h>
 #include <string.h>
 
+#include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"
 
 int

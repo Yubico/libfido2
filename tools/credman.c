@@ -4,6 +4,9 @@
  * license that can be found in the LICENSE file.
  */
 
+#include <fido.h>
+#include <fido/credman.h>
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,9 +14,6 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-#include <fido.h>
-#include <fido/credman.h>
 
 #include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"

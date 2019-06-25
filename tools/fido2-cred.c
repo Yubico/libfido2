@@ -14,10 +14,12 @@
  * $ fido2-cred -M -i cred_param /dev/hidraw5 | fido2-cred -V -o cred
  */ 
 
+#include <fido.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"
 
 void
