@@ -33,7 +33,7 @@
 
 #define UMDF_USING_NTSTATUS 
 #define SECURITY_WIN32
-#include <Windows.h>
+#include <windows.h>
 #include <stdio.h>
 #include <time.h>
 #include <Shlwapi.h>
