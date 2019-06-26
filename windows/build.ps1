@@ -172,6 +172,17 @@ Function Package-PDBs(${SRC}, ${DEST}) {
 		"${DEST}\fido2.pdb" -ErrorAction Stop
 }
 
+Function Package-Tools(${SRC}, ${DEST}) {
+	Copy-Item "${SRC}\tools\Release\fido2-assert.exe" `
+		"${DEST}\fido2-assert.exe" -ErrorAction stop
+	Copy-Item "${SRC}\tools\Release\fido2-cred.exe" `
+		"${DEST}\fido2-cred.exe" -ErrorAction stop
+	Copy-Item "${SRC}\tools\Release\fido2-credman.exe" `
+		"${DEST}\fido2-credman.exe" -ErrorAction stop
+	Copy-Item "${SRC}\tools\Release\fido2-token.exe" `
+		"${DEST}\fido2-token.exe" -ErrorAction stop
+}
+
 Push-Location ${BUILD}\64
 Build ${OUTPUT}\64 "Visual Studio 15 2017 Win64"
 Pop-Location
@@ -184,6 +195,8 @@ Package-Headers
 
 Package-Libraries ${OUTPUT}\64 ${OUTPUT}\pkg\Win64\Release\v141\dynamic
 Package-PDBs ${BUILD}\64 ${OUTPUT}\pkg\Win64\Release\v141\dynamic
+Package-Tools ${BUILD}\64 ${OUTPUT}\pkg\Win64\Release\v141\dynamic
 
 Package-Libraries ${OUTPUT}\32 ${OUTPUT}\pkg\Win32\Release\v141\dynamic
 Package-PDBs ${BUILD}\32 ${OUTPUT}\pkg\Win32\Release\v141\dynamic
+Package-Tools ${BUILD}\32 ${OUTPUT}\pkg\Win32\Release\v141\dynamic
