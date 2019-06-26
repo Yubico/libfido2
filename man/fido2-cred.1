@@ -178,8 +178,8 @@ must not contain embedded newline or NUL characters.
 .Sh OUTPUT FORMAT
 The output of
 .Nm
-consists of base64 blobs and UTF-8 strings separated
-by newline characters ('\\n'), and PEM-encoded public keys.
+consists of base64 blobs, UTF-8 strings, and PEM-encoded public
+keys separated by newline characters ('\\n').
 .Pp
 Upon the successful generation of a credential,
 .Nm
@@ -217,7 +217,7 @@ Create a new
 .Em es256
 credential on
 .Pa /dev/hidraw5 ,
-verify it and save the credential id and public key in
+verify it, and save the id and the public key of the credential in
 .Em cred :
 .Pp
 .Dl $ echo credential challenge | openssl sha256 -binary | base64 > cred_param
