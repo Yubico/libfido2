@@ -177,8 +177,6 @@ Function Package-Tools(${SRC}, ${DEST}) {
 		"${DEST}\fido2-assert.exe" -ErrorAction stop
 	Copy-Item "${SRC}\tools\Release\fido2-cred.exe" `
 		"${DEST}\fido2-cred.exe" -ErrorAction stop
-	Copy-Item "${SRC}\tools\Release\fido2-credman.exe" `
-		"${DEST}\fido2-credman.exe" -ErrorAction stop
 	Copy-Item "${SRC}\tools\Release\fido2-token.exe" `
 		"${DEST}\fido2-token.exe" -ErrorAction stop
 }
