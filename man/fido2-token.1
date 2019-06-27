@@ -2,7 +2,7 @@
 .\" Use of this source code is governed by a BSD-style
 .\" license that can be found in the LICENSE file.
 .\"
-.Dd $Mdocdate: June 14 2018 $
+.Dd $Mdocdate: June 27 2019 $
 .Dt FIDO2-TOKEN 1
 .Os
 .Sh NAME
@@ -10,12 +10,24 @@
 .Nd find and manage a FIDO 2 authenticator
 .Sh SYNOPSIS
 .Nm
-.Op Fl CIRS
+.Op Fl CRS
 .Op Fl d
 .Ar device
 .Nm
+.Fl D
+.Fl i
+.Ar cred_id
+.Ar device
+.Nm
+.Fl I
+.Op Fl cd
+.Op Fl k Ar rp_id Fl i Ar cred_id
+.Ar device
+.Nm
 .Fl L
-.Op Fl d
+.Op Fl dr
+.Op Fl k Ar rp_id
+.Op device
 .Nm
 .Fl V
 .Sh DESCRIPTION
@@ -24,13 +36,61 @@ manages a FIDO 2 authenticator.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
-.It Fl C
+.It Fl C Ar device
 Changes the PIN of
 .Ar device .
 The user will be prompted for the current and new PINs.
-.It Fl I
+.It Fl D Fl i Ar cred_id Ar device
+Deletes the resident credential specified by
+.Ar cred_id
+from
+.Ar device ,
+where
+.Ar cred_id
+is the credential's base64-encoded id.
+The user will be prompted for the PIN.
+This feature is only available on authenticators with credential
+management support.
+.It Fl I Ar device
 Retrieves information on
 .Ar device .
+.It Fl I Fl c Ar device
+Retrieves resident credential metadata from
+.Ar device .
+The user will be prompted for the PIN.
+This feature is only available on authenticators with credential
+management support.
+.It Fl I Fl k Ar rp_id Fl i Ar cred_id Ar device
+Prints the credential id (base64-encoded) and public key
+(PEM encoded) of the resident credential specified by
+.Ar rp_id
+and
+.Ar cred_id ,
+where
+.Ar rp_id
+is a UTF-8 relying party id, and
+.Ar cred_id
+is a base64-encoded credential id.
+The user will be prompted for the PIN.
+This feature is only available on authenticators with credential
+management support.
+.It Fl L
+Produces a list of authenticators found by the operating system.
+.It Fl L Fl r Ar device
+Produces a list of relying parties with resident credentials on
+.Ar device .
+The user will be prompted for the PIN.
+This feature is only available on authenticators with credential
+management support.
+.It Fl L Fl k Ar rp_id Ar device
+Produces a list of resident credentials corresponding to
+relying party
+.Ar rp_id
+on
+.Ar device .
+The user will be prompted for the PIN.
+This feature is only available on authenticators with credential
+management support.
 .It Fl R
 Performs a reset on
 .Ar device .
@@ -40,8 +100,6 @@ will NOT prompt for confirmation.
 Sets the PIN of
 .Ar device .
 The user will be prompted for the PIN.
-.It Fl L
-Produces a list of authenticators found by the operating system.
 .It Fl V
 Prints version information.
 .It Fl d

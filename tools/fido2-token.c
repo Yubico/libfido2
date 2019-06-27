@@ -12,35 +12,73 @@
 #include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"
 
+static int action;
+
 void
 usage(void)
 {
 	fprintf(stderr,
-"usage: fido2-token [-CIRS] [-d] device\n"
-"       fido2-token -L [-d]\n" 
+"usage: fido2-token [-CRS] [-d] device\n"
+"       fido2-token -D [-d] -i cred_id device\n" 
+"       fido2-token -I [-cd] [-k rp_id -i cred_id] device\n"
+"       fido2-token -L [-dr] [-k rp_id] [device]\n" 
 "       fido2-token -V\n" 
 	);
 
 	exit(1);
 }
 
+static void
+setaction(int ch)
+{
+	if (action)
+		usage();
+	action = ch;
+}
+
 int
 main(int argc, char **argv)
 {
-	if (argc < 2 || strlen(argv[1]) != 2 || argv[1][0] != '-')
-		usage();
+	int ch;
+	int flags = 0;
+	char *device;
 
-	switch (argv[1][1]) {
+	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
+		switch (ch) {
+		case 'c':
+		case 'i':
+		case 'k':
+		case 'r':
+			break; /* ignore */
+		case 'd':
+			flags = FIDO_DEBUG;
+			break;
+		default:
+			setaction(ch);
+			break;
+		}
+	}
+
+	if (argc - optind == 1)
+		device = argv[optind];
+	else
+		device = NULL;
+
+	fido_init(flags);
+
+	switch (action) {
 	case 'C':
-		return (pin_change(--argc, ++argv));
+		return (pin_change(device));
+	case 'D':
+		return (token_delete_rk(argc, argv, device));
 	case 'I':
-		return (token_info(--argc, ++argv));
+		return (token_info(argc, argv, device));
 	case 'L':
-		return (token_list(--argc, ++argv));
+		return (token_list(argc, argv, device));
 	case 'R':
-		return (token_reset(--argc, ++argv));
+		return (token_reset(device));
 	case 'S':
-		return (pin_set(--argc, ++argv));
+		return (pin_set(device));
 	case 'V':
 		fprintf(stderr, "%d.%d.%d\n", _FIDO_MAJOR, _FIDO_MINOR,
 		    _FIDO_PATCH);

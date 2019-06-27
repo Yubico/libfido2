@@ -126,34 +126,47 @@ print_byte_array(const char *label, const uint8_t *ba, size_t len)
 }
 
 int
-token_info(int argc, char **argv)
+token_info(int argc, char **argv, char *path)
 {
 	fido_dev_t *dev = NULL;
 	fido_cbor_info_t *ci = NULL;
-	bool debug = false;
+	char *cred_id = NULL;
+	char *rp_id = NULL;
 	int retrycnt;
+	int credman = 0;
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "d")) != -1) {
+	optind = 1;
+
+	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
 		switch (ch) {
-		case 'd':
-			debug = true;
+		case 'c':
+			credman = 1;
+			break;
+		case 'i':
+			cred_id = optarg;
+			break;
+		case 'k':
+			rp_id = optarg;
 			break;
 		default:
-			usage();
+			break; /* ignore */
 		}
 	}
 
-	argc -= optind;
-	argv += optind;
-
-	if (argc < 1)
+	if (path == NULL || (credman && (cred_id != NULL || rp_id != NULL)))
 		usage();
 
-	fido_init(debug ? FIDO_DEBUG : 0);
+	dev = open_dev(path);
 
-	dev = open_dev(argv[0]);
+	if (credman)
+		return (credman_get_metadata(dev, path));
+	if (cred_id && rp_id)
+		return (credman_print_rk(dev, path, rp_id, cred_id));
+	if (cred_id || rp_id)
+		usage();
+		
 	print_attr(dev);
 
 	if (fido_dev_is_fido2(dev) == false)
@@ -201,31 +214,15 @@ end:
 }
 
 int
-token_reset(int argc, char **argv)
+token_reset(char *path)
 {
 	fido_dev_t *dev = NULL;
-	bool debug = false;
-	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "d")) != -1) {
-		switch (ch) {
-		case 'd':
-			debug = true;
-			break;
-		default:
-			usage();
-		}
-	}
-
-	argc -= optind;
-	argv += optind;
-
-	if (argc < 1)
+	if (path == NULL)
 		usage();
 
-	fido_init(debug ? FIDO_DEBUG : 0);
-	dev = open_dev(argv[0]);
+	dev = open_dev(path);
 	if ((r = fido_dev_reset(dev)) != FIDO_OK)
 		errx(1, "fido_dev_reset: %s", fido_strerr(r));
 
@@ -236,29 +233,39 @@ token_reset(int argc, char **argv)
 }
 
 int
-token_list(int argc, char **argv)
+token_list(int argc, char **argv, char *path)
 {
 	fido_dev_info_t *devlist;
 	size_t ndevs;
-	bool debug = false;
+	const char *rp_id = NULL;
+	int keys = 0;
+	int rplist = 0;
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "d")) != -1) {
+	optind = 1;
+
+	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
 		switch (ch) {
-		case 'd':
-			debug = true;
+		case 'k':
+			keys = 1;
+			rp_id = optarg;
+			break;
+		case 'r':
+			rplist = 1;
 			break;
 		default:
-			usage();
+			break; /* ignore */
 		}
 	}
 
-	fido_init(debug ? FIDO_DEBUG : 0);
+	if (keys)
+		return (credman_list_rk(path, rp_id));
+	if (rplist)
+		return (credman_list_rp(path));
 
 	if ((devlist = fido_dev_info_new(64)) == NULL)
 		errx(1, "fido_dev_info_new");
-
 	if ((r = fido_dev_info_manifest(devlist, 64, &ndevs)) != FIDO_OK)
 		errx(1, "fido_dev_info_manifest: %s (0x%x)", fido_strerr(r), r);
 
@@ -275,4 +282,31 @@ token_list(int argc, char **argv)
 	fido_dev_info_free(&devlist, ndevs);
 
 	exit(0);
+}
+
+int
+token_delete_rk(int argc, char **argv, char *path)
+{
+	fido_dev_t *dev = NULL;
+	char *id = NULL;
+	int ch;
+
+	optind = 1;
+
+	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
+		switch (ch) {
+		case 'i':
+			id = optarg;
+			break;
+		default:
+			break; /* ignore */
+		}
+	}
+
+	if (id == NULL || path == NULL)
+		usage();
+
+	dev = open_dev(path);
+
+	return (credman_delete_rk(dev, path, id));
 }

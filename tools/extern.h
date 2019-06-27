@@ -23,16 +23,18 @@ int base64_encode(const void *, size_t, char **);
 int base64_read(FILE *, struct blob *);
 int cred_make(int, char **);
 int cred_verify(int, char **);
-int credman_del_rk(int, char **);
-int credman_metadata(int, char **);
-int credman_rk(int, char **);
-int credman_rp(int, char **);
-int pin_change(int, char **);
-int pin_set(int, char **);
+int credman_delete_rk(fido_dev_t *, const char *, char *);
+int credman_get_metadata(fido_dev_t *, const char *);
+int credman_list_rk(char *, const char *);
+int credman_list_rp(char *);
+int credman_print_rk(fido_dev_t *, const char *, char *, char *);
+int pin_change(char *);
+int pin_set(char *);
 int string_read(FILE *, char **);
-int token_info(int, char **);
-int token_list(int, char **);
-int token_reset(int, char **);
+int token_delete_rk(int, char **, char *);
+int token_info(int, char **, char *);
+int token_list(int, char **, char *);
+int token_reset(char *);
 int write_ec_pubkey(FILE *, const void *, size_t);
 int write_rsa_pubkey(FILE *, const void *, size_t);
 RSA *read_rsa_pubkey(const char *);
@@ -42,5 +44,7 @@ void print_cred(FILE *, int, const fido_cred_t *);
 void read_pin(const char *, char *, size_t);
 void usage(void);
 void xxd(const void *, size_t);
+
+#define TOKEN_OPT	"CDILPRSVcdi:k:r"
 
 #endif /* _EXTERN_H_ */

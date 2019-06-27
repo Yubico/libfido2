@@ -17,37 +17,21 @@
 #include "extern.h"
 
 int
-pin_set(int argc, char **argv)
+pin_set(char *path)
 {
 	fido_dev_t *dev = NULL;
 	char prompt[1024];
 	char pin1[1024];
 	char pin2[1024];
-	bool debug = false;
-	int ch;
 	int r;
 	int status = 1;
 
-	while ((ch = getopt(argc, argv, "d")) != -1) {
-		switch (ch) {
-		case 'd':
-			debug = true;
-			break;
-		default:
-			usage();
-		}
-	}
-
-	argc -= optind;
-	argv += optind;
-
-	if (argc < 1)
+	if (path == NULL)
 		usage();
 
-	fido_init(debug ? FIDO_DEBUG : 0);
-	dev = open_dev(argv[0]);
+	dev = open_dev(path);
 
-	r = snprintf(prompt, sizeof(prompt), "Enter new PIN for %s: ", argv[0]);
+	r = snprintf(prompt, sizeof(prompt), "Enter new PIN for %s: ", path);
 	if (r < 0 || (size_t)r >= sizeof(prompt)) {
 		warnx("snprintf");
 		goto out;
@@ -91,39 +75,22 @@ out:
 }
 
 int
-pin_change(int argc, char **argv)
+pin_change(char *path)
 {
 	fido_dev_t *dev = NULL;
 	char prompt[1024];
 	char pin0[1024];
 	char pin1[1024];
 	char pin2[1024];
-	bool debug = false;
-	int ch;
 	int r;
 	int status = 1;
 
-	while ((ch = getopt(argc, argv, "d")) != -1) {
-		switch (ch) {
-		case 'd':
-			debug = true;
-			break;
-		default:
-			usage();
-		}
-	}
-
-	argc -= optind;
-	argv += optind;
-
-	if (argc < 1)
+	if (path == NULL)
 		usage();
 
-	fido_init(debug ? FIDO_DEBUG : 0);
-	dev = open_dev(argv[0]);
+	dev = open_dev(path);
 
-	r = snprintf(prompt, sizeof(prompt), "Enter current PIN for %s: ",
-	    argv[0]);
+	r = snprintf(prompt, sizeof(prompt), "Enter current PIN for %s: ", path);
 	if (r < 0 || (size_t)r >= sizeof(prompt)) {
 		warnx("snprintf");
 		goto out;
@@ -134,7 +101,7 @@ pin_change(int argc, char **argv)
 		goto out;
 	}
 
-	r = snprintf(prompt, sizeof(prompt), "Enter new PIN for %s: ", argv[0]);
+	r = snprintf(prompt, sizeof(prompt), "Enter new PIN for %s: ", path);
 	if (r < 0 || (size_t)r >= sizeof(prompt)) {
 		warnx("snprintf");
 		goto out;
