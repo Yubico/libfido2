@@ -56,7 +56,8 @@ print_rp(fido_credman_rp_t *rp, size_t idx)
 	    fido_credman_rp_id_hash_len(rp, idx), &rp_id_hash) < 0)
 		errx(1, "output error");
 
-	printf("%02zu: %s %s\n", idx, rp_id_hash, fido_credman_rp_id(rp, idx));
+	printf("%02u: %s %s\n", (unsigned)idx, rp_id_hash,
+	    fido_credman_rp_id(rp, idx));
 
 	free(rp_id_hash);
 	rp_id_hash = NULL;
@@ -101,8 +102,9 @@ print_rk(const fido_credman_rk_t *rk, size_t idx)
 	char *user_id = NULL;
 	const char *type;
 
-	if ((cred = fido_credman_rk(rk, idx)) == NULL ||
-	    base64_encode(fido_cred_id_ptr(cred), fido_cred_id_len(cred),
+	if ((cred = fido_credman_rk(rk, idx)) == NULL)
+		errx(1, "fido_credman_rk");
+	if (base64_encode(fido_cred_id_ptr(cred), fido_cred_id_len(cred),
 	    &id) < 0 || base64_encode(fido_cred_user_id_ptr(cred),
 	    fido_cred_user_id_len(cred), &user_id) < 0)
 		errx(1, "output error");
@@ -122,8 +124,8 @@ print_rk(const fido_credman_rk_t *rk, size_t idx)
 		break;
 	}
 
-	printf("%02zu: %s %s (%s) %s\n", idx, id, fido_cred_display_name(cred),
-	    user_id, type);
+	printf("%02u: %s %s (%s) %s\n", (unsigned)idx, id,
+	    fido_cred_display_name(cred), user_id, type);
 
 	free(user_id);
 	free(id);
