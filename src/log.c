@@ -11,7 +11,11 @@
 
 #ifndef FIDO_NO_DIAGNOSTIC
 
-static int logging;
+#ifndef TLS
+#define TLS
+#endif
+
+static TLS int logging;
 
 void
 log_init()

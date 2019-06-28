@@ -134,6 +134,17 @@ if(CMAKE_COMPILER_IS_GNUCC)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result")
 endif()
 
+# Decide which keyword to use for thread-local storage.
+if(CMAKE_COMPILER_IS_GNUCC OR
+   CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
+   CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
+	set(TLS "__thread")
+elseif(WIN32)
+	set(TLS "__declspec(thread)")
+endif()
+
+add_definitions(-DTLS=${TLS})
+
 # endian.h
 check_include_files(endian.h HAVE_ENDIAN_H)
 if(HAVE_ENDIAN_H)
@@ -293,6 +304,7 @@ message(STATUS "LIBFUZZER: ${LIBFUZZER}")
 message(STATUS "ASAN: ${ASAN}")
 message(STATUS "MSAN: ${MSAN}")
 message(STATUS "COVERAGE: ${COVERAGE}")
+message(STATUS "TLS: ${TLS}")
 
 subdirs(src)
 subdirs(examples)
