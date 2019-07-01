@@ -414,7 +414,7 @@ encode_cred_authdata(const char *rp_id, const uint8_t *kh, uint8_t kh_len,
 		goto fail;
 	}
 
-	authdata.flags = 0x41; /* XXX hardcoded flags value */
+	authdata.flags = (CTAP_AUTHDATA_ATT_CRED | CTAP_AUTHDATA_USER_PRESENT);
 	authdata.sigcount = 0;
 
 	memset(&attcred_raw.aaguid, 0, sizeof(attcred_raw.aaguid));
