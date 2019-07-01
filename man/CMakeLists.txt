@@ -172,11 +172,12 @@ endforeach()
 
 # man_html_partial
 foreach(f ${MAN_SOURCES})
-	add_custom_command(OUTPUT ${f}.partial
-		COMMAND cat ${CMAKE_SOURCE_DIR}/man/dyc.css > ${f}.partial
-		COMMAND mandoc -T html -O man="%N.html",fragment ${f} >> ${f}.partial
+	string(REGEX REPLACE ".[13]" "" g ${f})
+	add_custom_command(OUTPUT ${g}.partial
+		COMMAND cat ${CMAKE_SOURCE_DIR}/man/dyc.css > ${g}.partial
+		COMMAND mandoc -T html -O man="%N.html",fragment ${f} >> ${g}.partial
 		DEPENDS ${f})
-	list(APPEND HTML_PARTIAL_FILES ${f}.partial)
+	list(APPEND HTML_PARTIAL_FILES ${g}.partial)
 endforeach()
 
 # man_gzip
