@@ -183,18 +183,6 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 }
 
 static int
-check_flags(uint8_t flags, fido_opt_t uv)
-{
-	if (uv == FIDO_OPT_TRUE &&
-	    (flags & CTAP_AUTHDATA_USER_VERIFIED) == 0) {
-		log_debug("%s: CTAP_AUTHDATA_USER_VERIFIED", __func__);
-		return (-1);
-	}
-
-	return (0);
-}
-
-static int
 check_extensions(int authdata_ext, int ext)
 {
 	if (authdata_ext != ext) {
@@ -365,7 +353,7 @@ fido_cred_verify(const fido_cred_t *cred)
 		goto out;
 	}
 
-	if (check_flags(cred->authdata.flags, cred->uv) < 0) {
+	if (check_flags(cred->authdata.flags, FIDO_OPT_TRUE, cred->uv) < 0) {
 		log_debug("%s: check_flags", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
 		goto out;

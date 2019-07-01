@@ -330,7 +330,7 @@ fail:
 	return (r);
 }
 
-static int
+int
 check_flags(uint8_t flags, fido_opt_t up, fido_opt_t uv)
 {
 	if (up == FIDO_OPT_TRUE &&
