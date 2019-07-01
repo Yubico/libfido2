@@ -126,6 +126,8 @@ list(APPEND MAN_ALIAS
 	fido_dev_open fido_dev_build
 	fido_dev_open fido_dev_close
 	fido_dev_open fido_dev_flags
+	fido_dev_open fido_dev_force_fido2
+	fido_dev_open fido_dev_force_u2f
 	fido_dev_open fido_dev_free
 	fido_dev_open fido_dev_is_fido2
 	fido_dev_open fido_dev_major
