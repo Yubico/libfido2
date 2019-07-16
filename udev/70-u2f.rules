@@ -63,4 +63,7 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="06cb", ATTRS{idProduct
 # Longmai mFIDO
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="4c4d", ATTRS{idProduct}=="f703", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
+# eWBM FIDO2 - Goldengate 450, Goldengate 500 + biometric
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="311f", ATTRS{idProduct}=="f47c|5c2f", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
 LABEL="u2f_end"
