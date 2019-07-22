@@ -333,6 +333,9 @@ fail:
 int
 check_flags(uint8_t flags, fido_opt_t up, fido_opt_t uv)
 {
+	log_debug("%s: flags=%02x", __func__, flags);
+	log_debug("%s: up=%d, uv=%d", __func__, up, uv);
+
 	if (up == FIDO_OPT_TRUE &&
 	    (flags & CTAP_AUTHDATA_USER_PRESENT) == 0) {
 		log_debug("%s: CTAP_AUTHDATA_USER_PRESENT", __func__);
