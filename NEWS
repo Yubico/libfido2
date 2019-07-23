@@ -1,3 +1,12 @@
+* Version 1.2.0 (unreleased)
+ ** Credential management support.
+ ** New API reflecting FIDO's 3-state booleans (true, false, absent):
+  - fido_assert_set_up;
+  - fido_assert_set_uv;
+  - fido_cred_set_rk;
+  - fido_cred_set_uv.
+ ** Command-line tools for Windows.
+
 * Version 1.1.0 (released 2019-05-08)
  ** MacOS: fix IOKit crash on HID read.
  ** Windows: fix contents of release file.
