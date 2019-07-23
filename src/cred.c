@@ -565,7 +565,7 @@ fido_cred_exclude(fido_cred_t *cred, const unsigned char *id_ptr, size_t id_len)
 	memset(&id_blob, 0, sizeof(id_blob));
 
 	if (fido_blob_set(&id_blob, id_ptr, id_len) < 0)
-		return (FIDO_ERR_INTERNAL);
+		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	if (cred->excl.len == SIZE_MAX) {
 		free(id_blob.ptr);
@@ -589,7 +589,7 @@ fido_cred_set_clientdata_hash(fido_cred_t *cred, const unsigned char *hash,
     size_t hash_len)
 {
 	if (fido_blob_set(&cred->cdh, hash, hash_len) < 0)
-		return (FIDO_ERR_INTERNAL);
+		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	return (FIDO_OK);
 }

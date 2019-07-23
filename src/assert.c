@@ -616,7 +616,7 @@ fido_assert_set_clientdata_hash(fido_assert_t *assert,
     const unsigned char *hash, size_t hash_len)
 {
 	if (fido_blob_set(&assert->cdh, hash, hash_len) < 0)
-		return (FIDO_ERR_INTERNAL);
+		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	return (FIDO_OK);
 }
@@ -625,11 +625,9 @@ int
 fido_assert_set_hmac_salt(fido_assert_t *assert, const unsigned char *salt,
     size_t salt_len)
 {
-	if (salt_len != 32 && salt_len != 64)
+	if ((salt_len != 32 && salt_len != 64) ||
+	    fido_blob_set(&assert->hmac_salt, salt, salt_len) < 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
-
-	if (fido_blob_set(&assert->hmac_salt, salt, salt_len) < 0)
-		return (FIDO_ERR_INTERNAL);
 
 	return (FIDO_OK);
 }
@@ -669,7 +667,7 @@ fido_assert_allow_cred(fido_assert_t *assert, const unsigned char *ptr,
 	if (fido_blob_set(&id, ptr, len) < 0 || (list_ptr =
 	    recallocarray(assert->allow_list.ptr, assert->allow_list.len,
 	    assert->allow_list.len + 1, sizeof(fido_blob_t))) == NULL) {
-		r = FIDO_ERR_INTERNAL;
+		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
 
