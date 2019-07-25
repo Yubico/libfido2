@@ -43,7 +43,7 @@ ctap_check_cbor(cbor_item_t *prev, cbor_item_t *curr)
 	}
 
 	if (curr->type == CBOR_TYPE_UINT || curr->type == CBOR_TYPE_NEGINT) {
-		if (cbor_int_get_width(curr) > cbor_int_get_width(prev) ||
+		if (cbor_int_get_width(curr) >= cbor_int_get_width(prev) &&
 		    cbor_get_int(curr) > cbor_get_int(prev))
 			return (0);
 	} else {
