@@ -71,8 +71,8 @@ New-Item -Type Directory ${BUILD}
 New-Item -Type Directory ${BUILD}\32
 New-Item -Type Directory ${BUILD}\64
 New-Item -Type Directory ${OUTPUT}
-New-Item -Type Directory ${OUTPUT}\pkg\Win64\Release\v141\dynamic
-New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v141\dynamic
+New-Item -Type Directory ${OUTPUT}\pkg\Win64\Release\v142\dynamic
+New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v142\dynamic
 
 Push-Location ${BUILD}
 
@@ -111,13 +111,13 @@ try {
 	Pop-Location
 }
 
-Function Build(${OUTPUT}, ${GENERATOR}) {
+Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}) {
 	if(-Not (Test-Path .\${LIBRESSL})) {
 		New-Item -Type Directory .\${LIBRESSL} -ErrorAction Stop
 	}
 
 	Push-Location .\${LIBRESSL}
-	& $CMake ..\..\${LIBRESSL} -G "${GENERATOR}" `
+	& $CMake ..\..\${LIBRESSL} -G "${GENERATOR}" -A "${ARCH}" `
 		-DCMAKE_C_FLAGS_RELEASE="/Zi" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" -DBUILD_SHARED_LIBS=ON `
 		-DLIBRESSL_TESTS=OFF
@@ -130,14 +130,14 @@ Function Build(${OUTPUT}, ${GENERATOR}) {
 	}
 
 	Push-Location .\${LIBCBOR}
-	& $CMake ..\..\${LIBCBOR} -G "${GENERATOR}" `
+	& $CMake ..\..\${LIBCBOR} -G "${GENERATOR}" -A "${ARCH}" `
 		-DCMAKE_C_FLAGS_RELEASE="/Zi" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}"
 	& $CMake --build . --config Release
 	& $CMake --build . --config Release --target install
 	Pop-Location
 
-	& $CMake ..\.. -G "${GENERATOR}" `
+	& $CMake ..\.. -G "${GENERATOR}" -A "${ARCH}" `
 		-DCBOR_INCLUDE_DIRS="${OUTPUT}\include" `
 		-DCBOR_LIBRARY_DIRS="${OUTPUT}\lib" `
 		-DCRYPTO_INCLUDE_DIRS="${OUTPUT}\include" `
@@ -164,11 +164,11 @@ Function Package-Libraries(${SRC}, ${DEST}) {
 }
 
 Function Package-PDBs(${SRC}, ${DEST}) {
-	Copy-Item "${SRC}\${LIBRESSL}\crypto\crypto.dir\Release\vc141.pdb" `
+	Copy-Item "${SRC}\${LIBRESSL}\crypto\crypto.dir\Release\vc142.pdb" `
 		"${DEST}\crypto-45.pdb" -ErrorAction Stop
-	Copy-Item "${SRC}\${LIBCBOR}\src\cbor_shared.dir\Release\vc141.pdb" `
+	Copy-Item "${SRC}\${LIBCBOR}\src\cbor_shared.dir\Release\vc142.pdb" `
 		"${DEST}\cbor.pdb" -ErrorAction Stop
-	Copy-Item "${SRC}\src\fido2_shared.dir\Release\vc141.pdb" `
+	Copy-Item "${SRC}\src\fido2_shared.dir\Release\vc142.pdb" `
 		"${DEST}\fido2.pdb" -ErrorAction Stop
 }
 
@@ -182,19 +182,19 @@ Function Package-Tools(${SRC}, ${DEST}) {
 }
 
 Push-Location ${BUILD}\64
-Build ${OUTPUT}\64 "Visual Studio 15 2017 Win64"
+Build ${OUTPUT}\64 "Visual Studio 16 2019" "x64"
 Pop-Location
 
 Push-Location ${BUILD}\32
-Build ${OUTPUT}\32 "Visual Studio 15 2017"
+Build ${OUTPUT}\32 "Visual Studio 16 2019" "Win32"
 Pop-Location
 
 Package-Headers
 
-Package-Libraries ${OUTPUT}\64 ${OUTPUT}\pkg\Win64\Release\v141\dynamic
-Package-PDBs ${BUILD}\64 ${OUTPUT}\pkg\Win64\Release\v141\dynamic
-Package-Tools ${BUILD}\64 ${OUTPUT}\pkg\Win64\Release\v141\dynamic
+Package-Libraries ${OUTPUT}\64 ${OUTPUT}\pkg\Win64\Release\v142\dynamic
+Package-PDBs ${BUILD}\64 ${OUTPUT}\pkg\Win64\Release\v142\dynamic
+Package-Tools ${BUILD}\64 ${OUTPUT}\pkg\Win64\Release\v142\dynamic
 
-Package-Libraries ${OUTPUT}\32 ${OUTPUT}\pkg\Win32\Release\v141\dynamic
-Package-PDBs ${BUILD}\32 ${OUTPUT}\pkg\Win32\Release\v141\dynamic
-Package-Tools ${BUILD}\32 ${OUTPUT}\pkg\Win32\Release\v141\dynamic
+Package-Libraries ${OUTPUT}\32 ${OUTPUT}\pkg\Win32\Release\v142\dynamic
+Package-PDBs ${BUILD}\32 ${OUTPUT}\pkg\Win32\Release\v142\dynamic
+Package-Tools ${BUILD}\32 ${OUTPUT}\pkg\Win32\Release\v142\dynamic
