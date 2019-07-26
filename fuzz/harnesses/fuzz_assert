@@ -7,7 +7,7 @@ T=fuzz_assert
 
 sync() {
 	mkdir ${T}
-	ssh fuzzier "cd ${T} && tar -cf- corpus" | tar -C ${T} -xf-
+	ssh kafka "cd ${T} && tar -cf- corpus" | tar -C ${T} -xf-
 }
 
 run() {
