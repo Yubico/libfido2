@@ -373,7 +373,8 @@ get_assert(fido_assert_t *assert, uint8_t u2f, const struct blob *cdh,
 
 	fido_assert_set_clientdata_hash(assert, cdh->body, cdh->len);
 	fido_assert_set_rp(assert, rp_id);
-	fido_assert_set_extensions(assert, ext);
+	if (ext & 1)
+		fido_assert_set_extensions(assert, FIDO_EXT_HMAC_SECRET);
 	if (up & 1)
 		fido_assert_set_up(assert, FIDO_OPT_TRUE);
 	if (uv & 1)
@@ -395,10 +396,8 @@ verify_assert(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 {
 	fido_assert_t	*assert = NULL;
 
-	if ((assert = fido_assert_new()) == NULL) {
-		warnx("%s: fido_assert_new", __func__);
+	if ((assert = fido_assert_new()) == NULL)
 		return;
-	}
 
 	fido_assert_set_clientdata_hash(assert, cdh_ptr, cdh_len);
 	fido_assert_set_rp(assert, rp_id);
@@ -438,10 +437,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	case 0:
 		cose_alg = COSE_ES256;
 
-		if ((es256_pk = es256_pk_new()) == NULL) {
-			warnx("%s: es256_pk_new", __func__);
+		if ((es256_pk = es256_pk_new()) == NULL)
 			return (0);
-		}
 
 		es256_pk_from_ptr(es256_pk, p.es256.body, p.es256.len);
 		pk = es256_pk;
@@ -450,10 +447,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	case 1:
 		cose_alg = COSE_RS256;
 
-		if ((rs256_pk = rs256_pk_new()) == NULL) {
-			warnx("%s: rs256_pk_new", __func__);
+		if ((rs256_pk = rs256_pk_new()) == NULL)
 			return (0);
-		}
 
 		rs256_pk_from_ptr(rs256_pk, p.rs256.body, p.rs256.len);
 		pk = rs256_pk;
@@ -462,10 +457,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	default:
 		cose_alg = COSE_EDDSA;
 
-		if ((eddsa_pk = eddsa_pk_new()) == NULL) {
-			warnx("%s: eddsa_pk_new", __func__);
+		if ((eddsa_pk = eddsa_pk_new()) == NULL)
 			return (0);
-		}
 
 		eddsa_pk_from_ptr(eddsa_pk, p.eddsa.body, p.eddsa.len);
 		pk = eddsa_pk;
@@ -481,7 +474,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	get_assert(assert, p.u2f, &p.cdh, p.rp_id, p.ext, p.up, p.uv, p.pin,
 	    p.cred_count, &p.cred);
 
-	for (size_t i = 0; i < fido_assert_count(assert); i++) {
+	/* XXX +1 on purpose */
+	for (size_t i = 0; i <= fido_assert_count(assert); i++) {
 		verify_assert(cose_alg,
 		    fido_assert_clientdata_hash_ptr(assert),
 		    fido_assert_clientdata_hash_len(assert),
