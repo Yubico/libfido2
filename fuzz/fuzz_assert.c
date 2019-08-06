@@ -412,6 +412,52 @@ verify_assert(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	fido_assert_free(&assert);
 }
 
+/*
+ * Do a dummy conversion to exercise rs256_pk_from_RSA().
+ */
+static void
+rs256_convert(const rs256_pk_t *k)
+{
+	EVP_PKEY *pkey = NULL;
+	rs256_pk_t *pk = NULL;
+	RSA *rsa = NULL;
+	volatile int r;
+
+	if ((pkey = rs256_pk_to_EVP_PKEY(k)) == NULL ||
+	    (pk = rs256_pk_new()) == NULL ||
+	    (rsa = EVP_PKEY_get0_RSA(pkey)) == NULL)
+		goto out;
+
+	r = rs256_pk_from_RSA(pk, rsa);
+out:
+	if (pk)
+		rs256_pk_free(&pk);
+	if (pkey)
+		EVP_PKEY_free(pkey);
+}
+
+/*
+ * Do a dummy conversion to exercise eddsa_pk_from_EVP_PKEY().
+ */
+static void
+eddsa_convert(const eddsa_pk_t *k)
+{
+	EVP_PKEY *pkey = NULL;
+	eddsa_pk_t *pk = NULL;
+	volatile int r;
+
+	if ((pkey = eddsa_pk_to_EVP_PKEY(k)) == NULL ||
+	    (pk = eddsa_pk_new()) == NULL)
+		goto out;
+
+	r = eddsa_pk_from_EVP_PKEY(pk, pkey);
+out:
+	if (pk)
+		eddsa_pk_free(&pk);
+	if (pkey)
+		EVP_PKEY_free(pkey);
+}
+
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
@@ -453,6 +499,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		rs256_pk_from_ptr(rs256_pk, p.rs256.body, p.rs256.len);
 		pk = rs256_pk;
 
+		rs256_convert(pk);
+
 		break;
 	default:
 		cose_alg = COSE_EDDSA;
@@ -462,6 +510,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 		eddsa_pk_from_ptr(eddsa_pk, p.eddsa.body, p.eddsa.len);
 		pk = eddsa_pk;
+
+		eddsa_convert(pk);
 
 		break;
 	}
