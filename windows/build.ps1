@@ -107,6 +107,8 @@ try {
 		& $Git clone --branch ${LIBCBOR_BRANCH} ${LIBCBOR_GIT} `
 			.\${LIBCBOR}
 	}
+} catch {
+	throw "Failed to fetch and verify dependencies"
 } finally {
 	Pop-Location
 }
