@@ -10,7 +10,7 @@ param(
 # LibreSSL coordinates.
 New-Variable -Name 'LIBRESSL_URL' `
 	-Value 'https://ftp.openbsd.org/pub/OpenBSD/LibreSSL' -Option Constant
-New-Variable -Name 'LIBRESSL' -Value 'libressl-2.9.1' -Option Constant
+New-Variable -Name 'LIBRESSL' -Value 'libressl-2.9.2' -Option Constant
 
 # libcbor coordinates.
 New-Variable -Name 'LIBCBOR' -Value 'libcbor-0.5.0' -Option Constant
