@@ -41,7 +41,7 @@
 extern type __wrap_##name args;				\
 extern type __real_##name args;				\
 type __wrap_##name args {				\
-	if (uniform_random(100) < (prob)) {		\
+	if (uniform_random(400) < (prob)) {		\
 		return (retval);			\
 	}						\
 							\

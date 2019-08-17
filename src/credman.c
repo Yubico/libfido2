@@ -438,10 +438,8 @@ credman_del_rk_wait(fido_dev_t *dev, const unsigned char *cred_id,
 
 	memset(&cred, 0, sizeof(cred));
 
-	if (fido_blob_set(&cred, cred_id, cred_id_len) < 0) {
-		log_debug("%s: fido_blob_set", __func__);
-		return (FIDO_ERR_INTERNAL);
-	}
+	if (fido_blob_set(&cred, cred_id, cred_id_len) < 0)
+		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	if ((r = credman_tx(dev, CMD_DELETE_CRED, &cred, pin)) != FIDO_OK ||
 	    (r = credman_rx_del_rk(dev, ms)) != FIDO_OK)

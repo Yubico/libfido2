@@ -373,7 +373,8 @@ get_assert(fido_assert_t *assert, uint8_t u2f, const struct blob *cdh,
 
 	fido_assert_set_clientdata_hash(assert, cdh->body, cdh->len);
 	fido_assert_set_rp(assert, rp_id);
-	fido_assert_set_extensions(assert, ext);
+	if (ext & 1)
+		fido_assert_set_extensions(assert, FIDO_EXT_HMAC_SECRET);
 	if (up & 1)
 		fido_assert_set_up(assert, FIDO_OPT_TRUE);
 	if (uv & 1)
@@ -395,10 +396,8 @@ verify_assert(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 {
 	fido_assert_t	*assert = NULL;
 
-	if ((assert = fido_assert_new()) == NULL) {
-		warnx("%s: fido_assert_new", __func__);
+	if ((assert = fido_assert_new()) == NULL)
 		return;
-	}
 
 	fido_assert_set_clientdata_hash(assert, cdh_ptr, cdh_len);
 	fido_assert_set_rp(assert, rp_id);
@@ -411,6 +410,52 @@ verify_assert(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	fido_assert_verify(assert, 0, type, pk);
 
 	fido_assert_free(&assert);
+}
+
+/*
+ * Do a dummy conversion to exercise rs256_pk_from_RSA().
+ */
+static void
+rs256_convert(const rs256_pk_t *k)
+{
+	EVP_PKEY *pkey = NULL;
+	rs256_pk_t *pk = NULL;
+	RSA *rsa = NULL;
+	volatile int r;
+
+	if ((pkey = rs256_pk_to_EVP_PKEY(k)) == NULL ||
+	    (pk = rs256_pk_new()) == NULL ||
+	    (rsa = EVP_PKEY_get0_RSA(pkey)) == NULL)
+		goto out;
+
+	r = rs256_pk_from_RSA(pk, rsa);
+out:
+	if (pk)
+		rs256_pk_free(&pk);
+	if (pkey)
+		EVP_PKEY_free(pkey);
+}
+
+/*
+ * Do a dummy conversion to exercise eddsa_pk_from_EVP_PKEY().
+ */
+static void
+eddsa_convert(const eddsa_pk_t *k)
+{
+	EVP_PKEY *pkey = NULL;
+	eddsa_pk_t *pk = NULL;
+	volatile int r;
+
+	if ((pkey = eddsa_pk_to_EVP_PKEY(k)) == NULL ||
+	    (pk = eddsa_pk_new()) == NULL)
+		goto out;
+
+	r = eddsa_pk_from_EVP_PKEY(pk, pkey);
+out:
+	if (pk)
+		eddsa_pk_free(&pk);
+	if (pkey)
+		EVP_PKEY_free(pkey);
 }
 
 int
@@ -438,10 +483,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	case 0:
 		cose_alg = COSE_ES256;
 
-		if ((es256_pk = es256_pk_new()) == NULL) {
-			warnx("%s: es256_pk_new", __func__);
+		if ((es256_pk = es256_pk_new()) == NULL)
 			return (0);
-		}
 
 		es256_pk_from_ptr(es256_pk, p.es256.body, p.es256.len);
 		pk = es256_pk;
@@ -450,25 +493,25 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	case 1:
 		cose_alg = COSE_RS256;
 
-		if ((rs256_pk = rs256_pk_new()) == NULL) {
-			warnx("%s: rs256_pk_new", __func__);
+		if ((rs256_pk = rs256_pk_new()) == NULL)
 			return (0);
-		}
 
 		rs256_pk_from_ptr(rs256_pk, p.rs256.body, p.rs256.len);
 		pk = rs256_pk;
+
+		rs256_convert(pk);
 
 		break;
 	default:
 		cose_alg = COSE_EDDSA;
 
-		if ((eddsa_pk = eddsa_pk_new()) == NULL) {
-			warnx("%s: eddsa_pk_new", __func__);
+		if ((eddsa_pk = eddsa_pk_new()) == NULL)
 			return (0);
-		}
 
 		eddsa_pk_from_ptr(eddsa_pk, p.eddsa.body, p.eddsa.len);
 		pk = eddsa_pk;
+
+		eddsa_convert(pk);
 
 		break;
 	}
@@ -481,7 +524,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	get_assert(assert, p.u2f, &p.cdh, p.rp_id, p.ext, p.up, p.uv, p.pin,
 	    p.cred_count, &p.cred);
 
-	for (size_t i = 0; i < fido_assert_count(assert); i++) {
+	/* XXX +1 on purpose */
+	for (size_t i = 0; i <= fido_assert_count(assert); i++) {
 		verify_assert(cose_alg,
 		    fido_assert_clientdata_hash_ptr(assert),
 		    fido_assert_clientdata_hash_len(assert),

@@ -38,7 +38,7 @@ fido_dev_get_pin_token_tx(fido_dev_t *dev, const char *pin,
 	if ((p = fido_blob_new()) == NULL || fido_blob_set(p,
 	    (const unsigned char *)pin, strlen(pin)) < 0) {
 		log_debug("%s: fido_blob_set", __func__);
-		r = FIDO_ERR_INTERNAL;
+		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
 
@@ -175,7 +175,7 @@ fido_dev_change_pin_tx(fido_dev_t *dev, const char *pin, const char *oldpin)
 	if ((opin = fido_blob_new()) == NULL || fido_blob_set(opin,
 	    (const unsigned char *)oldpin, strlen(oldpin)) < 0) {
 		log_debug("%s: fido_blob_set", __func__);
-		r = FIDO_ERR_INTERNAL;
+		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
 

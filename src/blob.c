@@ -24,13 +24,16 @@ fido_blob_set(fido_blob_t *b, const unsigned char *ptr, size_t len)
 
 	b->len = 0;
 
-	if (ptr == NULL || len == 0)
+	if (ptr == NULL || len == 0) {
+		log_debug("%s: ptr=%p, len=%zu", __func__, (const void *)ptr,
+		    len);
 		return (-1);
+	}
 
-	b->ptr = malloc(len);
-
-	if (b->ptr == NULL)
+	if ((b->ptr = malloc(len)) == NULL) {
+		log_debug("%s: malloc", __func__);
 		return (-1);
+	}
 
 	memcpy(b->ptr, ptr, len);
 	b->len = len;

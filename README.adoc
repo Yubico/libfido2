@@ -1,7 +1,6 @@
 == libfido2
 
 image:https://api.travis-ci.org/Yubico/libfido2.svg?branch=master["Build Status (Travis)", link="https://travis-ci.org/Yubico/libfido2"]
-image:https://ci.appveyor.com/api/projects/status/5yhnbr78gn6eraw1/branch/master?svg=true["Build Status (AppVeyor)", link="https://ci.appveyor.com/project/Yubico53275/libfido2/branch/master"]
 image:https://img.shields.io/badge/license-BSD-blue.svg["License", link="https://raw.githubusercontent.com/Yubico/libfido2/master/LICENSE"]
 
 *libfido2* provides library functionality and command-line tools to
@@ -31,7 +30,7 @@ is also available.
 
 ==== Releases
 
-The current release of *libfido2* is 1.1.0. Please consult Yubico's
+The current release of *libfido2* is 1.2.0. Please consult Yubico's
 https://developers.yubico.com/libfido2/Releases[release page] for source
 and binary releases.
 
