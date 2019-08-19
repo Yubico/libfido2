@@ -161,7 +161,7 @@ assert_get(int argc, char **argv)
 
 	fido_init(debug ? FIDO_DEBUG : 0);
 
-	assert = prepare_assert(in_f, rk, up, uv, debug);
+	assert = prepare_assert(in_f, rk, up, false, debug);
 
 	dev = open_dev(argv[0]);
 	if (u2f)
