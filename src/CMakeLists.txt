@@ -8,6 +8,7 @@ list(APPEND FIDO_SOURCES
 	aes256.c
 	assert.c
 	authkey.c
+	bio.c
 	blob.c
 	buf.c
 	cbor.c

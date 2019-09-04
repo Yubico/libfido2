@@ -21,6 +21,11 @@ int assert_verify(int, char **);
 int base64_decode(char *, void **, size_t *);
 int base64_encode(const void *, size_t, char **);
 int base64_read(FILE *, struct blob *);
+int bio_delete(fido_dev_t *, char *, char *);
+int bio_enroll(char *);
+void bio_info(fido_dev_t *);
+int bio_list(char *);
+int bio_set_name(char *, char *, char *);
 int cred_make(int, char **);
 int cred_verify(int, char **);
 int credman_delete_rk(fido_dev_t *, const char *, char *);
@@ -31,10 +36,11 @@ int credman_print_rk(fido_dev_t *, const char *, char *, char *);
 int pin_change(char *);
 int pin_set(char *);
 int string_read(FILE *, char **);
-int token_delete_rk(int, char **, char *);
+int token_delete(int, char **, char *);
 int token_info(int, char **, char *);
 int token_list(int, char **, char *);
 int token_reset(char *);
+int token_set(int, char **, char *);
 int write_ec_pubkey(FILE *, const void *, size_t);
 int write_rsa_pubkey(FILE *, const void *, size_t);
 RSA *read_rsa_pubkey(const char *);
@@ -45,6 +51,6 @@ void read_pin(const char *, char *, size_t);
 void usage(void);
 void xxd(const void *, size_t);
 
-#define TOKEN_OPT	"CDILPRSVcdi:k:r"
+#define TOKEN_OPT	"CDILPRSVbcdei:k:n:r"
 
 #endif /* _EXTERN_H_ */

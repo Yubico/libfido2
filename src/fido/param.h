@@ -30,6 +30,7 @@
 #define CTAP_CBOR_CLIENT_PIN		0x06
 #define CTAP_CBOR_RESET			0x07
 #define CTAP_CBOR_NEXT_ASSERT		0x08
+#define CTAP_CBOR_BIO_ENROLL_PRE	0x40
 #define CTAP_CBOR_CRED_MGMT_PRE		0x41
 
 /* U2F command opcodes. */

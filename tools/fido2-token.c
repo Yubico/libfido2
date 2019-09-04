@@ -18,10 +18,11 @@ void
 usage(void)
 {
 	fprintf(stderr,
-"usage: fido2-token [-CRS] [-d] device\n"
-"       fido2-token -D [-d] -i cred_id device\n" 
+"usage: fido2-token [-CR] [-d] device\n"
+"       fido2-token -D [-de] -i id device\n" 
 "       fido2-token -I [-cd] [-k rp_id -i cred_id] device\n"
-"       fido2-token -L [-dr] [-k rp_id] [device]\n" 
+"       fido2-token -L [-der] [-k rp_id] [device]\n" 
+"       fido2-token -S [-de] [-i template_id -n template_name] device\n"
 "       fido2-token -V\n" 
 	);
 
@@ -45,9 +46,12 @@ main(int argc, char **argv)
 
 	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
 		switch (ch) {
+		case 'b':
 		case 'c':
+		case 'e':
 		case 'i':
 		case 'k':
+		case 'n':
 		case 'r':
 			break; /* ignore */
 		case 'd':
@@ -70,7 +74,7 @@ main(int argc, char **argv)
 	case 'C':
 		return (pin_change(device));
 	case 'D':
-		return (token_delete_rk(argc, argv, device));
+		return (token_delete(argc, argv, device));
 	case 'I':
 		return (token_info(argc, argv, device));
 	case 'L':
@@ -78,7 +82,7 @@ main(int argc, char **argv)
 	case 'R':
 		return (token_reset(device));
 	case 'S':
-		return (pin_set(device));
+		return (token_set(argc, argv, device));
 	case 'V':
 		fprintf(stderr, "%d.%d.%d\n", _FIDO_MAJOR, _FIDO_MINOR,
 		    _FIDO_PATCH);

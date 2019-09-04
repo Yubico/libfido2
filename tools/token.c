@@ -128,14 +128,14 @@ print_byte_array(const char *label, const uint8_t *ba, size_t len)
 int
 token_info(int argc, char **argv, char *path)
 {
-	fido_dev_t *dev = NULL;
-	fido_cbor_info_t *ci = NULL;
-	char *cred_id = NULL;
-	char *rp_id = NULL;
-	int retrycnt;
-	int credman = 0;
-	int ch;
-	int r;
+	char			*cred_id = NULL;
+	char			*rp_id = NULL;
+	fido_cbor_info_t	*ci = NULL;
+	fido_dev_t		*dev = NULL;
+	int			 ch;
+	int			 credman = 0;
+	int			 r;
+	int			 retrycnt;
 
 	optind = 1;
 
@@ -205,6 +205,8 @@ token_info(int argc, char **argv, char *path)
 	else
 		printf("pin retries: %d\n", retrycnt);
 
+	bio_info(dev);
+
 	fido_cbor_info_free(&ci);
 end:
 	fido_dev_close(dev);
@@ -233,11 +235,49 @@ token_reset(char *path)
 }
 
 int
+token_set(int argc, char **argv, char *path)
+{
+	char	*id = NULL;
+	char	*name = NULL;
+	int	 ch;
+	int	 enroll = 0;
+
+	optind = 1;
+
+	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
+		switch (ch) {
+		case 'e':
+			enroll = 1;
+			break;
+		case 'i':
+			id = optarg;
+			break;
+		case 'n':
+			name = optarg;
+			break;
+		default:
+			break; /* ignore */
+		}
+	}
+
+	if (enroll) {
+		if (id && name)
+			return (bio_set_name(path, id, name));
+		if (!id && !name)
+			return (bio_enroll(path));
+		usage();
+	}
+
+	return (pin_set(path));
+}
+
+int
 token_list(int argc, char **argv, char *path)
 {
 	fido_dev_info_t *devlist;
 	size_t ndevs;
 	const char *rp_id = NULL;
+	int enrolls = 0;
 	int keys = 0;
 	int rplist = 0;
 	int ch;
@@ -247,6 +287,9 @@ token_list(int argc, char **argv, char *path)
 
 	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
 		switch (ch) {
+		case 'e':
+			enrolls = 1;
+			break;
 		case 'k':
 			keys = 1;
 			rp_id = optarg;
@@ -259,6 +302,8 @@ token_list(int argc, char **argv, char *path)
 		}
 	}
 
+	if (enrolls)
+		return (bio_list(path));
 	if (keys)
 		return (credman_list_rk(path, rp_id));
 	if (rplist)
@@ -285,16 +330,20 @@ token_list(int argc, char **argv, char *path)
 }
 
 int
-token_delete_rk(int argc, char **argv, char *path)
+token_delete(int argc, char **argv, char *path)
 {
-	fido_dev_t *dev = NULL;
-	char *id = NULL;
-	int ch;
+	char		*id = NULL;
+	fido_dev_t	*dev = NULL;
+	int		 ch;
+	int		 enroll = 0;
 
 	optind = 1;
 
 	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
 		switch (ch) {
+		case 'e':
+			enroll = 1;
+			break;
 		case 'i':
 			id = optarg;
 			break;
@@ -303,10 +352,13 @@ token_delete_rk(int argc, char **argv, char *path)
 		}
 	}
 
-	if (id == NULL || path == NULL)
+	if (path == NULL || id == NULL)
 		usage();
 
 	dev = open_dev(path);
 
-	return (credman_delete_rk(dev, path, id));
+	if (id && !enroll)
+		return (credman_delete_rk(dev, path, id));
+
+	return (bio_delete(dev, path, id));
 }

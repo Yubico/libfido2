@@ -41,6 +41,7 @@ add_executable(fido2-assert
 add_executable(fido2-token
 	fido2-token.c
 	base64.c
+	bio.c
 	credman.c
 	pin.c
 	token.c
