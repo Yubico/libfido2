@@ -60,13 +60,9 @@ fido_dev_get_pin_token_tx(fido_dev_t *dev, const char *pin,
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 6; i++)
-		if (argv[i] != NULL)
-			cbor_decref(&argv[i]);
-
-	free(f.ptr);
-
+	cbor_vector_free(argv, nitems(argv));
 	fido_blob_free(&p);
+	free(f.ptr);
 
 	return (r);
 }
@@ -209,16 +205,12 @@ fido_dev_change_pin_tx(fido_dev_t *dev, const char *pin, const char *oldpin)
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 6; i++)
-		if (argv[i] != NULL)
-			cbor_decref(&argv[i]);
-
-	free(f.ptr);
-
+	cbor_vector_free(argv, nitems(argv));
 	es256_pk_free(&pk);
 	fido_blob_free(&ppin);
 	fido_blob_free(&ecdh);
 	fido_blob_free(&opin);
+	free(f.ptr);
 
 	return (r);
 
@@ -266,15 +258,11 @@ fido_dev_set_pin_tx(fido_dev_t *dev, const char *pin)
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 5; i++)
-		if (argv[i] != NULL)
-			cbor_decref(&argv[i]);
-
-	free(f.ptr);
-
+	cbor_vector_free(argv, nitems(argv));
 	es256_pk_free(&pk);
 	fido_blob_free(&ppin);
 	fido_blob_free(&ecdh);
+	free(f.ptr);
 
 	return (r);
 }
@@ -375,10 +363,7 @@ fido_dev_get_retry_count_tx(fido_dev_t *dev)
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 2; i++)
-		if (argv[i] != NULL)
-			cbor_decref(&argv[i]);
-
+	cbor_vector_free(argv, nitems(argv));
 	free(f.ptr);
 
 	return (r);

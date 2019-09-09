@@ -165,6 +165,14 @@ fail:
 	return (r);
 }
 
+void
+cbor_vector_free(cbor_item_t **item, size_t len)
+{
+	for (size_t i = 0; i < len; i++)
+		if (item[i] != NULL)
+			cbor_decref(&item[i]);
+}
+
 int
 cbor_bytestring_copy(const cbor_item_t *item, unsigned char **buf, size_t *len)
 {

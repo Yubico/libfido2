@@ -159,10 +159,7 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 7; i++)
-		if (argv[i] != NULL)
-			cbor_decref(&argv[i]);
-
+	cbor_vector_free(argv, nitems(argv));
 	free(f.ptr);
 
 	return (r);

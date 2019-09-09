@@ -116,11 +116,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 fail:
 	es256_pk_free(&pk);
 	fido_blob_free(&ecdh);
-
-	for (size_t i = 0; i < 9; i++)
-		if (argv[i])
-			cbor_decref(&argv[i]);
-
+	cbor_vector_free(argv, nitems(argv));
 	free(f.ptr);
 
 	return (r);

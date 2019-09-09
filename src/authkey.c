@@ -52,10 +52,7 @@ fido_dev_authkey_tx(fido_dev_t *dev)
 
 	r = FIDO_OK;
 fail:
-	for (size_t i = 0; i < 2; i++)
-		if (argv[i] != NULL)
-			cbor_decref(&argv[i]);
-
+	cbor_vector_free(argv, nitems(argv));
 	free(f.ptr);
 
 	return (r);

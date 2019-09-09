@@ -93,9 +93,7 @@ credman_prepare_hmac(uint8_t cmd, const fido_blob_t *body, cbor_item_t **param,
 
 	ok = 0;
 fail:
-	for (size_t i = 0; i < 2; i++)
-		if (param_cbor[i])
-			cbor_decref(&param_cbor[i]);
+	cbor_vector_free(param_cbor, nitems(param_cbor));
 
 	return (ok);
 }
@@ -150,11 +148,7 @@ credman_tx(fido_dev_t *dev, uint8_t cmd, const fido_blob_t *param,
 fail:
 	es256_pk_free(&pk);
 	fido_blob_free(&ecdh);
-
-	for (size_t i = 0; i < 4; i++)
-		if (argv[i])
-			cbor_decref(&argv[i]);
-
+	cbor_vector_free(argv, nitems(argv));
 	free(f.ptr);
 	free(hmac.ptr);
 
