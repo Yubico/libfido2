@@ -339,6 +339,16 @@ read_callback(void *context, IOReturn result, void *dev, IOHIDReportType type,
 	}
 }
 
+static void
+removal_callback(void *context, IOReturn result, void *sender)
+{
+	(void)context;
+	(void)result;
+	(void)sender;
+
+	CFRunLoopStop(CFRunLoopGetCurrent());
+}
+
 int
 hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
@@ -356,6 +366,7 @@ hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 
 	IOHIDDeviceRegisterInputReportCallback(dev->ref, buf, len,
 	    &read_callback, NULL);
+	IOHIDDeviceRegisterRemovalCallback(dev->ref, &removal_callback, dev);
 	IOHIDDeviceScheduleWithRunLoop(dev->ref, CFRunLoopGetCurrent(),
 	    dev->loop_id);
 
@@ -364,6 +375,7 @@ hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 	while (r != kCFRunLoopRunHandledSource);
 
 	IOHIDDeviceRegisterInputReportCallback(dev->ref, buf, len, NULL, NULL);
+	IOHIDDeviceRegisterRemovalCallback(dev->ref, NULL, NULL);
 	IOHIDDeviceUnscheduleFromRunLoop(dev->ref, CFRunLoopGetCurrent(),
 	    dev->loop_id);
 
