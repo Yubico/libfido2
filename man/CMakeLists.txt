@@ -19,6 +19,10 @@ list(APPEND MAN_SOURCES
 	fido_assert_allow_cred.3
 	fido_assert_set.3
 	fido_assert_verify.3
+	fido_bio_dev.3
+	fido_bio_enroll.3
+	fido_bio_info.3
+	fido_bio_template.3
 	fido_cbor_info.3
 	fido_cred.3
 	fido_cred_exclude.3
@@ -70,6 +74,31 @@ list(APPEND MAN_ALIAS
 	fido_assert_set fido_assert_set_sig
 	fido_assert_set fido_assert_set_up
 	fido_assert_set fido_assert_set_uv
+	fido_bio_dev fido_bio_dev_enroll_begin
+	fido_bio_dev fido_bio_dev_enroll_cancel
+	fido_bio_dev fido_bio_dev_enroll_continue
+	fido_bio_dev fido_bio_dev_enroll_remove
+	fido_bio_dev fido_bio_dev_get_info
+	fido_bio_dev fido_bio_dev_get_template_array
+	fido_bio_dev fido_bio_dev_set_template_name
+	fido_bio_enroll fido_bio_enroll_free
+	fido_bio_enroll fido_bio_enroll_last_status
+	fido_bio_enroll fido_bio_enroll_new
+	fido_bio_enroll fido_bio_enroll_remaining_samples
+	fido_bio_info fido_bio_info_free
+	fido_bio_info fido_bio_info_max_samples
+	fido_bio_info fido_bio_info_new
+	fido_bio_info fido_bio_info_type
+	fido_bio_template fido_bio_template_array_count
+	fido_bio_template fido_bio_template_array_free
+	fido_bio_template fido_bio_template_array_new
+	fido_bio_template fido_bio_template_free
+	fido_bio_template fido_bio_template_id_len
+	fido_bio_template fido_bio_template_id_ptr
+	fido_bio_template fido_bio_template_name
+	fido_bio_template fido_bio_template_new
+	fido_bio_template fido_bio_template_set_id
+	fido_bio_template fido_bio_template_set_name
 	fido_cred fido_cred_authdata_len
 	fido_cred fido_cred_authdata_ptr
 	fido_cred fido_cred_clientdata_hash_len
