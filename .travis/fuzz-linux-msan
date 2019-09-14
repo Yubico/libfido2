@@ -47,8 +47,10 @@ make
 mkdir corpus
 tar -C corpus -zxf ../fuzz/corpus.tgz
 fuzz/fuzz_cred -use_value_profile=1 -reload=30 -print_pcs=1 \
-	-print_funcs=30 -timeout=10 -max_len=16384 -runs=1 corpus/fuzz_cred
+	-print_funcs=30 -timeout=10 -max_len=17408 -runs=1 corpus/fuzz_cred
 fuzz/fuzz_assert -use_value_profile=1 -reload=30 -print_pcs=1 \
-	-print_funcs=30 -timeout=10 -max_len=16384 -runs=1 corpus/fuzz_assert
+	-print_funcs=30 -timeout=10 -max_len=17408 -runs=1 corpus/fuzz_assert
 fuzz/fuzz_credman -use_value_profile=1 -reload=30 -print_pcs=1 \
 	-print_funcs=30 -timeout=10 -max_len=17408 -runs=1 corpus/fuzz_credman
+fuzz/fuzz_mgmt -use_value_profile=1 -reload=30 -print_pcs=1 \
+	-print_funcs=30 -timeout=10 -max_len=17408 -runs=1 corpus/fuzz_mgmt
