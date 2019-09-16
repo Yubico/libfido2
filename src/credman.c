@@ -408,22 +408,6 @@ fido_credman_get_dev_rk(fido_dev_t *dev, const char *rp_id,
 }
 
 static int
-credman_rx_del_rk(fido_dev_t *dev, int ms)
-{
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
-	unsigned char	reply[2048];
-	int		reply_len;
-
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0 ||
-	    (size_t)reply_len < 1) {
-		log_debug("%s: rx", __func__);
-		return (FIDO_ERR_RX);
-	}
-
-	return (reply[0]);
-}
-
-static int
 credman_del_rk_wait(fido_dev_t *dev, const unsigned char *cred_id,
     size_t cred_id_len, const char *pin, int ms)
 {
@@ -436,7 +420,7 @@ credman_del_rk_wait(fido_dev_t *dev, const unsigned char *cred_id,
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	if ((r = credman_tx(dev, CMD_DELETE_CRED, &cred, pin)) != FIDO_OK ||
-	    (r = credman_rx_del_rk(dev, ms)) != FIDO_OK)
+	    (r = rx_cbor_status(dev, ms)) != FIDO_OK)
 		goto fail;
 
 	r = FIDO_OK;

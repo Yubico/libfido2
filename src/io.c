@@ -237,3 +237,19 @@ rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 
 	return (r);
 }
+
+int
+rx_cbor_status(fido_dev_t *d, int ms)
+{
+	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	unsigned char	reply[2048];
+	int		reply_len;
+
+	if ((reply_len = rx(d, cmd, &reply, sizeof(reply), ms)) < 0 ||
+	    (size_t)reply_len < 1) {
+		log_debug("%s: rx", __func__);
+		return (FIDO_ERR_RX);
+	}
+
+	return (reply[0]);
+}

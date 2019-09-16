@@ -268,22 +268,6 @@ fail:
 }
 
 static int
-fido_dev_set_pin_rx(fido_dev_t *dev, int ms)
-{
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
-	unsigned char	reply[512];
-	int		reply_len;
-
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0 ||
-	    (size_t)reply_len < 1) {
-		log_debug("%s: rx", __func__);
-		return (FIDO_ERR_RX);
-	}
-
-	return (reply[0]);
-}
-
-static int
 fido_dev_set_pin_wait(fido_dev_t *dev, const char *pin, const char *oldpin,
     int ms)
 {
@@ -301,8 +285,8 @@ fido_dev_set_pin_wait(fido_dev_t *dev, const char *pin, const char *oldpin,
 		}
 	}
 
-	if ((r = fido_dev_set_pin_rx(dev, ms)) != FIDO_OK) {
-		log_debug("%s: fido_dev_set_pin_rx", __func__);
+	if ((r = rx_cbor_status(dev, ms)) != FIDO_OK) {
+		log_debug("%s: rx_cbor_status", __func__);
 		return (r);
 	}
 
