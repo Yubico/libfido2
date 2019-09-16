@@ -87,7 +87,6 @@ fido_blob_encode(const fido_blob_t *b)
 		return (NULL);
 
 	return (cbor_build_bytestring(b->ptr, b->len));
-
 }
 
 int
