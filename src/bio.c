@@ -135,7 +135,7 @@ bio_rx(fido_dev_t *dev, int ms)
 	int		reply_len;
 
 	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0 ||
-	    reply_len < 0 || (size_t)reply_len < 1) {
+	    (size_t)reply_len < 1) {
 		log_debug("%s: rx", __func__);
 		return (FIDO_ERR_RX);
 	}
