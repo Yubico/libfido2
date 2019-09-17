@@ -384,6 +384,7 @@ get_assert(fido_assert_t *assert, uint8_t u2f, const struct blob *cdh,
 
 	fido_dev_get_assert(dev, assert, u2f & 1 ? NULL : pin);
 
+	fido_dev_cancel(dev);
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
 }

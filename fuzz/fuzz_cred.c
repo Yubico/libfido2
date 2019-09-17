@@ -723,6 +723,7 @@ make_cred(fido_cred_t *cred, uint8_t u2f, int type, const struct blob *cdh,
 
 	fido_dev_make_cred(dev, cred, u2f & 1 ? NULL : pin);
 
+	fido_dev_cancel(dev);
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
 }
