@@ -11,6 +11,7 @@ cmake_minimum_required(VERSION 3.0)
 include(CheckCCompilerFlag)
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
+include(CheckTypeSize)
 include(GNUInstallDirs)
 
 set(CMAKE_COLOR_MAKEFILE off)
@@ -168,6 +169,12 @@ if(HAVE_UNISTD_H)
 	add_definitions(-DHAVE_UNISTD_H)
 endif()
 
+# signal.h
+check_include_files(signal.h HAVE_SIGNAL_H)
+if(HAVE_SIGNAL_H)
+	add_definitions(-DHAVE_SIGNAL_H)
+endif()
+
 # strlcpy
 check_function_exists(strlcpy HAVE_STRLCPY)
 if(HAVE_STRLCPY)
@@ -248,6 +255,14 @@ else()
 	if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types-discards-qualifiers")
 	endif()
+endif()
+
+# usable sigaction
+set(CMAKE_EXTRA_INCLUDE_FILES "signal.h")
+check_function_exists(sigaction HAVE_SIGACTION)
+check_type_size("sig_atomic_t" HAVE_SIG_ATOMIC_T)
+if(HAVE_SIGACTION AND (NOT HAVE_SIG_ATOMIC_T STREQUAL ""))
+	add_definitions(-DSIGNAL_EXAMPLE)
 endif()
 
 # export list

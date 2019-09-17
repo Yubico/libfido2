@@ -11,6 +11,10 @@
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
 
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+
 /* util.c */
 EC_KEY *read_ec_pubkey(const char *);
 RSA *read_rsa_pubkey(const  char *);
@@ -20,5 +24,8 @@ int write_blob(const char *, const unsigned char *, size_t);
 int write_ec_pubkey(const char *, const void *, size_t);
 int write_rsa_pubkey(const char *, const void *, size_t);
 int write_eddsa_pubkey(const char *, const void *, size_t);
+#ifdef SIGNAL_EXAMPLE
+void prepare_signal_handler(int);
+#endif
 
 #endif /* _EXTERN_H_ */

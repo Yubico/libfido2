@@ -24,7 +24,7 @@ add_executable(info info.c ${COMPAT_SOURCES})
 target_link_libraries(info fido2)
 
 # reset
-add_executable(reset reset.c ${COMPAT_SOURCES})
+add_executable(reset reset.c util.c ${COMPAT_SOURCES})
 target_link_libraries(reset fido2)
 
 # cred

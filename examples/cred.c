@@ -20,6 +20,10 @@
 #include "fido.h"
 #include "extern.h"
 
+#ifdef SIGNAL_EXAMPLE
+extern volatile sig_atomic_t got_signal;
+#endif
+
 static const unsigned char cdh[32] = {
 	0xf9, 0x64, 0x57, 0xe7, 0x2d, 0x97, 0xf6, 0xbb,
 	0xdd, 0xd7, 0xfb, 0x06, 0x37, 0x62, 0xea, 0x26,
@@ -254,9 +258,19 @@ main(int argc, char **argv)
 	if (uv && (r = fido_cred_set_uv(cred, FIDO_OPT_TRUE)) != FIDO_OK)
 		errx(1, "fido_cred_set_uv: %s (0x%x)", fido_strerr(r), r);
 
+#ifdef SIGNAL_EXAMPLE
+	prepare_signal_handler(SIGINT);
+#endif
+
 	r = fido_dev_make_cred(dev, cred, pin);
-	if (r != FIDO_OK)
+	if (r != FIDO_OK) {
+#ifdef SIGNAL_EXAMPLE
+		if (got_signal)
+			fido_dev_cancel(dev);
+#endif
 		errx(1, "fido_makecred: %s (0x%x)", fido_strerr(r), r);
+	}
+
 	r = fido_dev_close(dev);
 	if (r != FIDO_OK)
 		errx(1, "fido_dev_close: %s (0x%x)", fido_strerr(r), r);

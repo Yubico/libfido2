@@ -14,6 +14,10 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -28,6 +32,31 @@
 #include "fido/rs256.h"
 #include "fido/eddsa.h"
 #include "extern.h"
+
+#ifdef SIGNAL_EXAMPLE
+volatile sig_atomic_t got_signal = 0;
+
+static void
+signal_handler(int signo)
+{
+	(void)signo;
+	got_signal = 1;
+}
+
+void
+prepare_signal_handler(int signo)
+{
+	struct sigaction sa;
+
+	memset(&sa, 0, sizeof(sa));
+
+	sigemptyset(&sa.sa_mask);
+	sa.sa_handler = signal_handler;
+
+	if (sigaction(signo, &sa, NULL) < 0)
+		err(1, "sigaction");
+}
+#endif
 
 int
 write_blob(const char *path, const unsigned char *ptr, size_t len)

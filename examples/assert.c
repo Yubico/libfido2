@@ -22,6 +22,10 @@
 #include "fido/eddsa.h"
 #include "extern.h"
 
+#ifdef SIGNAL_EXAMPLE
+extern volatile sig_atomic_t got_signal;
+#endif
+
 static const unsigned char cdh[32] = {
 	0xec, 0x8d, 0x8f, 0x78, 0x42, 0x4a, 0x2b, 0xb7,
 	0x82, 0x34, 0xaa, 0xca, 0x07, 0xa1, 0xf6, 0x56,
@@ -271,9 +275,19 @@ main(int argc, char **argv)
 	if (uv && (r = fido_assert_set_uv(assert, FIDO_OPT_TRUE)) != FIDO_OK)
 		errx(1, "fido_assert_set_uv: %s (0x%x)", fido_strerr(r), r);
 
+#ifdef SIGNAL_EXAMPLE
+	prepare_signal_handler(SIGINT);
+#endif
+
 	r = fido_dev_get_assert(dev, assert, pin);
-	if (r != FIDO_OK)
+	if (r != FIDO_OK) {
+#ifdef SIGNAL_EXAMPLE
+		if (got_signal)
+			fido_dev_cancel(dev);
+#endif
 		errx(1, "fido_dev_get_assert: %s (0x%x)", fido_strerr(r), r);
+	}
+
 	r = fido_dev_close(dev);
 	if (r != FIDO_OK)
 		errx(1, "fido_dev_close: %s (0x%x)", fido_strerr(r), r);

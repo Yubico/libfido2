@@ -18,6 +18,11 @@
 #include "../openbsd-compat/openbsd-compat.h"
 
 #include "fido.h"
+#include "extern.h"
+
+#ifdef SIGNAL_EXAMPLE
+extern volatile sig_atomic_t got_signal;
+#endif
 
 int
 main(int argc, char **argv)
@@ -38,8 +43,17 @@ main(int argc, char **argv)
 	if ((r = fido_dev_open(dev, argv[1])) != FIDO_OK)
 		errx(1, "fido_dev_open: %s (0x%x)", fido_strerr(r), r);
 
-	if ((r = fido_dev_reset(dev)) != FIDO_OK)
+#ifdef SIGNAL_EXAMPLE
+	prepare_signal_handler(SIGINT);
+#endif
+
+	if ((r = fido_dev_reset(dev)) != FIDO_OK) {
+#ifdef SIGNAL_EXAMPLE
+		if (got_signal)
+			fido_dev_cancel(dev);
+#endif
 		errx(1, "fido_reset: %s (0x%x)", fido_strerr(r), r);
+	}
 
 	if ((r = fido_dev_close(dev)) != FIDO_OK)
 		errx(1, "fido_dev_close: %s (0x%x)", fido_strerr(r), r);
