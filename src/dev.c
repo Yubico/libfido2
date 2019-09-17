@@ -103,11 +103,11 @@ static int
 fido_dev_open_rx(fido_dev_t *dev, int ms)
 {
 	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;
-	int		r;
+	int		r = FIDO_ERR_RX;
 
 	if ((r = rx(dev, cmd, &dev->attr, sizeof(dev->attr), ms)) < 0) {
 		log_debug("%s: rx", __func__);
-		return (FIDO_ERR_RX);
+		goto fail;
 	}
 
 #ifdef FIDO_FUZZ
@@ -116,12 +116,19 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 
 	if ((size_t)r != sizeof(dev->attr) || dev->attr.nonce != dev->nonce) {
 		log_debug("%s: invalid nonce", __func__);
-		return (FIDO_ERR_RX);
+		goto fail;
 	}
 
 	dev->cid = dev->attr.cid;
 
-	return (FIDO_OK);
+	r = FIDO_OK;
+fail:
+	if (r != FIDO_OK) {
+		dev->io.close(dev->io_handle);
+		dev->io_handle = NULL;
+	}
+
+	return (r);
 }
 
 static int
