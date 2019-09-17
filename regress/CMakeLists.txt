@@ -11,3 +11,8 @@ add_custom_command(TARGET regress_cred POST_BUILD COMMAND regress_cred)
 add_executable(regress_assert assert.c)
 target_link_libraries(regress_assert fido2_shared)
 add_custom_command(TARGET regress_assert POST_BUILD COMMAND regress_assert)
+
+# dev
+add_executable(regress_dev dev.c)
+target_link_libraries(regress_dev fido2_shared)
+add_custom_command(TARGET regress_dev POST_BUILD COMMAND regress_dev)
