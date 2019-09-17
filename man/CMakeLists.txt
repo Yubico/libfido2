@@ -153,6 +153,7 @@ list(APPEND MAN_ALIAS
 	fido_dev_info_manifest fido_dev_info_ptr
 	fido_dev_info_manifest fido_dev_info_vendor
 	fido_dev_open fido_dev_build
+	fido_dev_open fido_dev_cancel
 	fido_dev_open fido_dev_close
 	fido_dev_open fido_dev_flags
 	fido_dev_open fido_dev_force_fido2

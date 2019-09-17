@@ -141,6 +141,7 @@ int fido_cred_set_user(fido_cred_t *, const unsigned char *, size_t,
     const char *, const char *, const char *);
 int fido_cred_set_x509(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_verify(const fido_cred_t *);
+int fido_dev_cancel(fido_dev_t *);
 int fido_dev_close(fido_dev_t *);
 int fido_dev_get_assert(fido_dev_t *, fido_assert_t *, const char *);
 int fido_dev_get_cbor_info(fido_dev_t *, fido_cbor_info_t *);

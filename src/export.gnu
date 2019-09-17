@@ -49,10 +49,10 @@
 		fido_bio_dev_get_info;
 		fido_bio_dev_get_template_array;
 		fido_bio_dev_set_template_name;
-		fido_bio_enroll_last_status;
-		fido_bio_enroll_remaining_samples;
 		fido_bio_enroll_free;
+		fido_bio_enroll_last_status;
 		fido_bio_enroll_new;
+		fido_bio_enroll_remaining_samples;
 		fido_bio_info_free;
 		fido_bio_info_max_samples;
 		fido_bio_info_new;
@@ -139,6 +139,7 @@
 		fido_cred_x5c_len;
 		fido_cred_x5c_ptr;
 		fido_dev_build;
+		fido_dev_cancel;
 		fido_dev_close;
 		fido_dev_flags;
 		fido_dev_force_fido2;

@@ -20,6 +20,7 @@
 #define CTAP_CMD_INIT			0x06
 #define CTAP_CMD_WINK			0x08
 #define CTAP_CMD_CBOR			0x10
+#define CTAP_CMD_CANCEL			0x11
 #define CTAP_KEEPALIVE			0x3b
 #define CTAP_FRAME_INIT			0x80
 

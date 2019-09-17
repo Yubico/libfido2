@@ -155,6 +155,15 @@ fido_dev_close(fido_dev_t *dev)
 }
 
 int
+fido_dev_cancel(fido_dev_t *dev)
+{
+	if (tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CANCEL, NULL, 0) < 0)
+		return (FIDO_ERR_TX);
+
+	return (FIDO_OK);
+}
+
+int
 fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 {
 	if (dev->io_handle != NULL) {

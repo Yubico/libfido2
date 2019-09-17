@@ -137,6 +137,7 @@ _fido_cred_verify
 _fido_cred_x5c_len
 _fido_cred_x5c_ptr
 _fido_dev_build
+_fido_dev_cancel
 _fido_dev_close
 _fido_dev_flags
 _fido_dev_force_fido2

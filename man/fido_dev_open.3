@@ -8,6 +8,7 @@
 .Sh NAME
 .Nm fido_dev_open ,
 .Nm fido_dev_close ,
+.Nm fido_dev_cancel ,
 .Nm fido_dev_new ,
 .Nm fido_dev_free ,
 .Nm fido_dev_force_fido2 ,
@@ -25,6 +26,8 @@
 .Fn fido_dev_open "fido_dev_t *dev" "const char *path"
 .Ft int
 .Fn fido_dev_close "fido_dev_t *dev"
+.Ft int
+.Fn fido_dev_cancel "fido_dev_t *dev"
 .Ft fido_dev_t *
 .Fn fido_dev_new "void"
 .Ft void
@@ -64,6 +67,11 @@ If
 is already closed,
 .Fn fido_dev_close
 is a NOP.
+.Pp
+The
+.Fn fido_dev_cancel
+function cancels any pending requests on
+.Fa dev .
 .Pp
 The
 .Fn fido_dev_new
