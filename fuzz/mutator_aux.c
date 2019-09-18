@@ -300,6 +300,9 @@ dev_write(void *handle, const unsigned char *ptr, size_t len)
 
 	consume(ptr, len);
 
+	if (uniform_random(400) < 1)
+		return (-1);
+
 	return ((int)len);
 }
 
