@@ -105,11 +105,7 @@ else()
 	if(FUZZ)
 		add_definitions(-DFIDO_FUZZ)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
-
-		if(AFL)
-			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-trap=undefined")
-		endif()
-
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-trap=undefined")
 		if(LIBFUZZER)
 			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=fuzzer-no-link")
 		endif()
