@@ -23,6 +23,10 @@
 #include <string.h>
 
 #include "../openbsd-compat/openbsd-compat.h"
+#ifdef _MSC_VER
+#include "../openbsd-compat/posix_win.h"
+#endif
+
 #include "extern.h"
 
 void
