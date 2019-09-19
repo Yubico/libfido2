@@ -46,7 +46,7 @@ fido_assert_set_authdata                   24       0 100.00%        35       0 
 fido_assert_set_sig                        14       0 100.00%        17       0 100.00%
 fido_assert_set_count                      10       0 100.00%        21       0 100.00%
 assert.c:fido_dev_get_assert_wait          21       0 100.00%        16       0 100.00%
-assert.c:fido_dev_get_assert_tx            62       4  93.55%        85      11  87.06%
+assert.c:fido_dev_get_assert_tx            58       4  93.10%        82      11  86.59%
 assert.c:fido_dev_get_assert_rx            20       0 100.00%        38       0 100.00%
 assert.c:adjust_assert_count               24       0 100.00%        33       0 100.00%
 assert.c:parse_assert_reply                11       0 100.00%        25       0 100.00%
@@ -61,18 +61,73 @@ assert.c:verify_sig_eddsa                  23       2  91.30%        43       7 
 assert.c:fido_assert_clean_authdata         1       0 100.00%         9       0 100.00%
 assert.c:fido_assert_clean_sig              1       0 100.00%         5       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     545      29  94.68%       859      58  93.25%
+TOTAL                                     541      29  94.64%       856      58  93.22%
 
 File '/home/pedro/projects/libfido2/src/authkey.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
 ---------------------------------------------------------------------------------------
 fido_dev_authkey                            1       0 100.00%         3       0 100.00%
 authkey.c:fido_dev_authkey_wait            10       0 100.00%         9       0 100.00%
-authkey.c:fido_dev_authkey_tx              23       0 100.00%        36       0 100.00%
+authkey.c:fido_dev_authkey_tx              19       0 100.00%        33       0 100.00%
 authkey.c:fido_dev_authkey_rx               7       0 100.00%        18       0 100.00%
 authkey.c:parse_authkey                     8       0 100.00%        12       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                      49       0 100.00%        78       0 100.00%
+TOTAL                                      45       0 100.00%        75       0 100.00%
+
+File '/home/pedro/projects/libfido2/src/bio.c':
+Name                                  Regions    Miss   Cover     Lines    Miss   Cover
+---------------------------------------------------------------------------------------
+fido_bio_dev_get_template_array             5       2  60.00%         6       0 100.00%
+fido_bio_dev_set_template_name              7       0 100.00%         6       0 100.00%
+fido_bio_dev_enroll_begin                  24       2  91.67%        36       0 100.00%
+fido_bio_dev_enroll_continue                5       2  60.00%         6       0 100.00%
+fido_bio_dev_enroll_cancel                  1       1   0.00%         3       3   0.00%
+fido_bio_dev_enroll_remove                  1       0 100.00%         3       0 100.00%
+fido_bio_dev_get_info                       1       0 100.00%         3       0 100.00%
+fido_bio_template_name                      1       0 100.00%         3       0 100.00%
+fido_bio_template_id_ptr                    1       0 100.00%         3       0 100.00%
+fido_bio_template_id_len                    1       0 100.00%         3       0 100.00%
+fido_bio_template_array_count               1       0 100.00%         3       0 100.00%
+fido_bio_template_array_new                 1       0 100.00%         3       0 100.00%
+fido_bio_template_new                       1       0 100.00%         3       0 100.00%
+fido_bio_template_array_free                6       0 100.00%        10       0 100.00%
+fido_bio_template_free                      6       0 100.00%        10       0 100.00%
+fido_bio_template_set_name                  8       0 100.00%         9       0 100.00%
+fido_bio_template_set_id                    8       0 100.00%        10       0 100.00%
+fido_bio_template                           4       0 100.00%         6       0 100.00%
+fido_bio_enroll_new                         1       0 100.00%         3       0 100.00%
+fido_bio_info_new                           1       0 100.00%         3       0 100.00%
+fido_bio_info_type                          1       0 100.00%         3       0 100.00%
+fido_bio_info_max_samples                   1       0 100.00%         3       0 100.00%
+fido_bio_enroll_free                        6       0 100.00%        11       0 100.00%
+fido_bio_info_free                          6       0 100.00%         9       0 100.00%
+fido_bio_enroll_remaining_samples           1       0 100.00%         3       0 100.00%
+fido_bio_enroll_last_status                 1       0 100.00%         3       0 100.00%
+bio.c:bio_get_template_array_wait          11       0 100.00%         9       0 100.00%
+bio.c:bio_tx                               43       0 100.00%        65       0 100.00%
+bio.c:bio_prepare_hmac                     18       0 100.00%        36       0 100.00%
+bio.c:bio_rx_template_array                12       0 100.00%        21       0 100.00%
+bio.c:bio_parse_template_array             26       1  96.15%        34       4  88.24%
+bio.c:decode_template_array                12       1  91.67%        23       3  86.96%
+bio.c:decode_template                       9       0 100.00%        18       0 100.00%
+bio.c:bio_set_template_name_wait           19       0 100.00%        24       0 100.00%
+bio.c:bio_enroll_begin_wait                17       1  94.12%        24       3  87.50%
+bio.c:bio_rx_enroll_begin                  16       0 100.00%        29       0 100.00%
+bio.c:bio_parse_enroll_status              20       0 100.00%        31       0 100.00%
+bio.c:bio_parse_template_id                 8       0 100.00%        12       0 100.00%
+bio.c:bio_enroll_continue_wait             19       0 100.00%        25       0 100.00%
+bio.c:bio_rx_enroll_continue               12       0 100.00%        22       0 100.00%
+bio.c:bio_enroll_cancel_wait               11      11   0.00%        12      12   0.00%
+bio.c:bio_enroll_remove_wait               17       0 100.00%        24       0 100.00%
+bio.c:bio_get_info_wait                    11       0 100.00%        11       0 100.00%
+bio.c:bio_rx_info                          12       0 100.00%        21       0 100.00%
+bio.c:bio_reset_info                        1       0 100.00%         4       0 100.00%
+bio.c:bio_parse_info                       20       0 100.00%        31       0 100.00%
+bio.c:bio_reset_template_array              4       0 100.00%         8       0 100.00%
+bio.c:bio_reset_template                    1       0 100.00%         6       0 100.00%
+bio.c:bio_reset_enroll                      3       0 100.00%         7       0 100.00%
+---------------------------------------------------------------------------------------
+TOTAL                                     422      21  95.02%       661      25  96.22%
 
 File '/home/pedro/projects/libfido2/src/blob.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -81,11 +136,11 @@ fido_blob_new                               1       0 100.00%         3       0 
 fido_blob_set                              11       1  90.91%        25       4  84.00%
 fido_blob_free                              8       0 100.00%        16       0 100.00%
 free_blob_array                             9       0 100.00%        17       0 100.00%
-fido_blob_encode                            6       1  83.33%         7       0 100.00%
+fido_blob_encode                            6       0 100.00%         6       0 100.00%
 fido_blob_decode                            1       0 100.00%         3       0 100.00%
 fido_blob_is_empty                          3       0 100.00%         3       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                      39       2  94.87%        74       4  94.59%
+TOTAL                                      39       1  97.44%        73       4  94.52%
 
 File '/home/pedro/projects/libfido2/src/buf.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -101,6 +156,7 @@ Name                                  Regions    Miss   Cover     Lines    Miss 
 cbor_map_iter                              20       1  95.00%        29       4  86.21%
 cbor_array_iter                            12       0 100.00%        20       0 100.00%
 parse_cbor_reply                           27       0 100.00%        43       0 100.00%
+cbor_vector_free                            6       0 100.00%         5       0 100.00%
 cbor_bytestring_copy                       14       0 100.00%        22       0 100.00%
 cbor_string_copy                           14       0 100.00%        23       0 100.00%
 cbor_add_bytestring                        14       0 100.00%        26       0 100.00%
@@ -149,7 +205,7 @@ cbor.c:decode_cred_id_entry                10       0 100.00%        23       0 
 cbor.c:decode_user_entry                   25       0 100.00%        39       0 100.00%
 cbor.c:decode_rp_entity_entry              15       0 100.00%        29       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     838      31  96.30%      1308      46  96.48%
+TOTAL                                     844      31  96.33%      1313      46  96.50%
 
 File '/home/pedro/projects/libfido2/src/cred.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -196,18 +252,18 @@ fido_cred_display_name                      1       0 100.00%         3       0 
 fido_cred_user_id_ptr                       1       0 100.00%         3       0 100.00%
 fido_cred_user_id_len                       1       0 100.00%         3       0 100.00%
 cred.c:fido_dev_make_cred_wait             10       0 100.00%         9       0 100.00%
-cred.c:fido_dev_make_cred_tx               63       0 100.00%        84       0 100.00%
+cred.c:fido_dev_make_cred_tx               59       0 100.00%        80       0 100.00%
 cred.c:fido_dev_make_cred_rx               24       0 100.00%        29       0 100.00%
 cred.c:parse_makecred_reply                10       0 100.00%        23       0 100.00%
 cred.c:check_extensions                     4       0 100.00%         9       0 100.00%
-cred.c:get_signed_hash_packed              23       1  95.65%        38       3  92.11%
+cred.c:get_signed_hash_packed              23       2  91.30%        38       6  84.21%
 cred.c:get_signed_hash_u2f                 22       0 100.00%        20       0 100.00%
 cred.c:verify_sig                          27       1  96.30%        40       4  90.00%
 cred.c:fido_cred_clean_authdata             1       0 100.00%         9       0 100.00%
 cred.c:fido_cred_clean_x509                 1       0 100.00%         5       0 100.00%
 cred.c:fido_cred_clean_sig                  1       0 100.00%         5       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     462      23  95.02%       728      37  94.92%
+TOTAL                                     458      24  94.76%       724      40  94.48%
 
 File '/home/pedro/projects/libfido2/src/credman.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -232,8 +288,8 @@ fido_credman_rp_name                        4       0 100.00%         6       0 
 fido_credman_rp_id_hash_len                 4       0 100.00%         6       0 100.00%
 fido_credman_rp_id_hash_ptr                 4       0 100.00%         6       0 100.00%
 credman.c:credman_get_metadata_wait        11       0 100.00%         9       0 100.00%
-credman.c:credman_tx                       34       0 100.00%        57       0 100.00%
-credman.c:credman_prepare_hmac             25       1  96.00%        45       2  95.56%
+credman.c:credman_tx                       30       0 100.00%        53       0 100.00%
+credman.c:credman_prepare_hmac             21       1  95.24%        43       2  95.35%
 credman.c:credman_rx_metadata              12       0 100.00%        21       0 100.00%
 credman.c:credman_parse_metadata            9       0 100.00%        19       0 100.00%
 credman.c:credman_get_rk_wait              27       0 100.00%        26       0 100.00%
@@ -243,7 +299,6 @@ credman.c:credman_grow_array               17       2  88.24%        28       5 
 credman.c:credman_parse_rk                 13       0 100.00%        25       0 100.00%
 credman.c:credman_rx_next_rk               16       2  87.50%        26       4  84.62%
 credman.c:credman_del_rk_wait              16       0 100.00%        19       0 100.00%
-credman.c:credman_rx_del_rk                11       0 100.00%        13       0 100.00%
 credman.c:credman_get_rp_wait              23       0 100.00%        16       0 100.00%
 credman.c:credman_rx_rp                    20       0 100.00%        36       0 100.00%
 credman.c:credman_parse_rp_count           16       0 100.00%        25       0 100.00%
@@ -252,13 +307,14 @@ credman.c:credman_rx_next_rp               16       2  87.50%        26       4 
 credman.c:credman_reset_rk                  4       0 100.00%        10       0 100.00%
 credman.c:credman_reset_rp                  4       0 100.00%        15       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     400      18  95.50%       608      15  97.53%
+TOTAL                                     381      18  95.28%       589      15  97.45%
 
 File '/home/pedro/projects/libfido2/src/dev.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
 ---------------------------------------------------------------------------------------
 fido_dev_open                               1       0 100.00%         3       0 100.00%
 fido_dev_close                              8       2  75.00%         9       0 100.00%
+fido_dev_cancel                             8       2  75.00%         6       3  50.00%
 fido_dev_set_io_functions                  18       4  77.78%        19       6  68.42%
 fido_init                                   7       1  85.71%         4       0 100.00%
 fido_dev_new                                9       1  88.89%        22       4  81.82%
@@ -274,9 +330,9 @@ fido_dev_force_fido2                        2       2   0.00%         3       3 
 dev.c:fido_dev_open_wait                   10       0 100.00%         9       0 100.00%
 dev.c:fido_dev_open_tx                     26       8  69.23%        32      12  62.50%
 dev.c:obtain_nonce                         13       2  84.62%        18       2  88.89%
-dev.c:fido_dev_open_rx                     14       0 100.00%        22       0 100.00%
+dev.c:fido_dev_open_rx                     14       0 100.00%        27       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     123      20  83.74%       172      27  84.30%
+TOTAL                                     131      22  83.21%       183      30  83.61%
 
 File '/home/pedro/projects/libfido2/src/ecdh.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -328,6 +384,10 @@ es256.c:decode_pubkey_point                 9       0 100.00%        16       0 
 es256.c:decode_coord                        8       0 100.00%        12       0 100.00%
 ---------------------------------------------------------------------------------------
 TOTAL                                     269       4  98.51%       359      12  96.66%
+
+File '/home/pedro/projects/libfido2/src/extern.h':
+Name                                  Regions    Miss   Cover     Lines    Miss   Cover
+---------------------------------------------------------------------------------------
 
 File '/home/pedro/projects/libfido2/src/fido.h':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -405,14 +465,15 @@ TOTAL                                     148       1  99.32%       305       0 
 File '/home/pedro/projects/libfido2/src/io.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
 ---------------------------------------------------------------------------------------
-tx                                         18       2  88.89%        35       6  82.86%
+tx                                         18       0 100.00%        35       0 100.00%
 rx                                         34       3  91.18%        84      12  85.71%
-io.c:tx_preamble                           14       2  85.71%        23       2  91.30%
-io.c:tx_frame                              16       2  87.50%        21       1  95.24%
+rx_cbor_status                              9       0 100.00%        13       0 100.00%
+io.c:tx_preamble                           14       1  92.86%        23       1  95.65%
+io.c:tx_frame                              16       1  93.75%        21       0 100.00%
 io.c:rx_preamble                           11       0 100.00%        12       0 100.00%
 io.c:rx_frame                               9       1  88.89%        12       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     102      10  90.20%       187      21  88.77%
+TOTAL                                     111       6  94.59%       200      13  93.50%
 
 File '/home/pedro/projects/libfido2/src/iso7816.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -442,20 +503,19 @@ fido_dev_set_pin                            1       0 100.00%         3       0 
 fido_dev_get_retry_count                    1       0 100.00%         3       0 100.00%
 add_cbor_pin_params                        17       0 100.00%        27       0 100.00%
 pin.c:fido_dev_get_pin_token_wait          10       0 100.00%         9       0 100.00%
-pin.c:fido_dev_get_pin_token_tx            33       0 100.00%        44       0 100.00%
+pin.c:fido_dev_get_pin_token_tx            29       0 100.00%        40       0 100.00%
 pin.c:fido_dev_get_pin_token_rx            21       0 100.00%        36       0 100.00%
 pin.c:parse_pintoken                        8       0 100.00%        12       0 100.00%
 pin.c:fido_dev_set_pin_wait                16       0 100.00%        22       0 100.00%
-pin.c:fido_dev_change_pin_tx               45       0 100.00%        63       0 100.00%
+pin.c:fido_dev_change_pin_tx               41       0 100.00%        59       0 100.00%
 pin.c:pad64                                18       0 100.00%        24       0 100.00%
-pin.c:fido_dev_set_pin_tx                  37       0 100.00%        52       0 100.00%
-pin.c:fido_dev_set_pin_rx                  11       0 100.00%        13       0 100.00%
+pin.c:fido_dev_set_pin_tx                  33       0 100.00%        48       0 100.00%
 pin.c:fido_dev_get_retry_count_wait        10       0 100.00%         9       0 100.00%
-pin.c:fido_dev_get_retry_count_tx          23       0 100.00%        31       0 100.00%
+pin.c:fido_dev_get_retry_count_tx          19       0 100.00%        28       0 100.00%
 pin.c:fido_dev_get_retry_count_rx          12       0 100.00%        21       0 100.00%
 pin.c:parse_retry_count                    13       0 100.00%        20       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     277       0 100.00%       392       0 100.00%
+TOTAL                                     250       0 100.00%       364       0 100.00%
 
 File '/home/pedro/projects/libfido2/src/reset.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -463,9 +523,8 @@ Name                                  Regions    Miss   Cover     Lines    Miss 
 fido_dev_reset                              1       0 100.00%         3       0 100.00%
 reset.c:fido_dev_reset_wait                10       0 100.00%         9       0 100.00%
 reset.c:fido_dev_reset_tx                   9       0 100.00%        11       0 100.00%
-reset.c:fido_dev_reset_rx                  11       0 100.00%        13       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                      31       0 100.00%        36       0 100.00%
+TOTAL                                      20       0 100.00%        23       0 100.00%
 
 File '/home/pedro/projects/libfido2/src/rs256.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
