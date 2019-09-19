@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash -e
 # Copyright (c) 2019 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
@@ -39,10 +39,14 @@ build() {
 }
 
 sync() {
-	for t in ${T}; do
-		echo syncing ${t}
-		(cd obj && ../${t} sync)
-	done
+	if [ -n "${REMOTE}" ]; then
+		for t in ${T}; do
+			echo syncing ${t}
+			(cd obj && REMOTE="${REMOTE}" ../${t} sync)
+		done
+	else
+		tar -C obj -zxf corpus.tgz
+	fi
 }
 
 run() {

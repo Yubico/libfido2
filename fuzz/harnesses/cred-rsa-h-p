@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 # Copyright (c) 2019 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
@@ -7,7 +7,7 @@ T=cred-rsa-h-p
 
 sync() {
 	mkdir ${T}
-	ssh fuzzy "cd ${T}/afl-out && tar -cf- queue" | tar -C ${T} -xf-
+	ssh "${REMOTE}" "cd ${T}/afl-out && tar -cf- queue" | tar -C ${T} -xf-
 }
 
 run() {

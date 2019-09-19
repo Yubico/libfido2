@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 # Copyright (c) 2019 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
@@ -7,7 +7,7 @@ T=fuzz_credman
 
 sync() {
 	mkdir ${T}
-	ssh kafka "cd ${T} && tar -cf- corpus" | tar -C ${T} -xf-
+	ssh "${REMOTE}" "cd ${T} && tar -cf- corpus" | tar -C ${T} -xf-
 }
 
 run() {
