@@ -48,6 +48,8 @@ if(MSVC)
 	set(MSVC_DISABLED_WARNINGS_LIST
 		"C4200" # nonstandard extension used: zero-sized array in
 			# struct/union;
+		"C4204" # nonstandard extension used: non-constant aggregate
+			# initializer;
 		"C4706" # assignment within conditional expression;
 		"C4996" # The POSIX name for this item is deprecated. Instead,
 			# use the ISO C and C++ conformant name
