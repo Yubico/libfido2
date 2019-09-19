@@ -50,7 +50,8 @@ tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 	fp->body.init.bcnth = (count >> 8) & 0xff;
 	fp->body.init.bcntl = count & 0xff;
 	count = MIN(count, sizeof(fp->body.init.data));
-	memcpy(&fp->body.init.data, buf, count);
+	if (count)
+		memcpy(&fp->body.init.data, buf, count);
 
 	n = d->io.write(d->io_handle, pkt, sizeof(pkt));
 	if (n < 0 || (size_t)n != sizeof(pkt))
