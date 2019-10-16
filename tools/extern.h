@@ -12,6 +12,14 @@ struct blob {
 	size_t len;
 };
 
+#define TOKEN_OPT	"CDILPRSVbcdei:k:n:r"
+
+#define FLAG_DEBUG	0x01
+#define FLAG_QUIET	0x02
+#define FLAG_RK		0x04
+#define FLAG_UV		0x08
+#define FLAG_U2F	0x10
+
 EC_KEY *read_ec_pubkey(const char *);
 fido_dev_t *open_dev(const char *);
 FILE *open_read(const char *);
@@ -50,7 +58,5 @@ void print_cred(FILE *, int, const fido_cred_t *);
 void read_pin(const char *, char *, size_t);
 void usage(void);
 void xxd(const void *, size_t);
-
-#define TOKEN_OPT	"CDILPRSVbcdei:k:n:r"
 
 #endif /* _EXTERN_H_ */

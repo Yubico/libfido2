@@ -169,7 +169,7 @@ credential id (base64 blob);
 .It
 attestation signature (base64 blob);
 .It
-attestation certificate (base64 blob).
+attestation certificate (optional, base64 blob).
 .El
 .Pp
 UTF-8 strings passed to
@@ -199,7 +199,7 @@ credential id (base64 blob);
 .It
 attestation signature (base64 blob);
 .It
-attestation certificate (base64 blob).
+attestation certificate, if present (base64 blob).
 .El
 .Pp
 Upon the successful verification of a credential,
@@ -228,3 +228,7 @@ verify it, and save the id and the public key of the credential in
 .Sh SEE ALSO
 .Xr fido2-assert 1 ,
 .Xr fido2-token 1
+.Sh CAVEATS
+Please note that
+.Nm
+handles Basic Attestation and Self Attestation transparently.

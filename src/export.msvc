@@ -137,6 +137,7 @@ fido_cred_user_id_len
 fido_cred_user_id_ptr
 fido_cred_user_name
 fido_cred_verify
+fido_cred_verify_self
 fido_cred_x5c_len
 fido_cred_x5c_ptr
 fido_dev_build

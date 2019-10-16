@@ -5,7 +5,6 @@
  */
 
 #include <fido.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +16,7 @@
 #include "extern.h"
 
 static fido_cred_t *
-prepare_cred(FILE *in_f, int type, bool rk, bool uv, bool debug)
+prepare_cred(FILE *in_f, int type, int flags)
 {
 	fido_cred_t *cred = NULL;
 	struct blob cdh;
@@ -36,7 +35,7 @@ prepare_cred(FILE *in_f, int type, bool rk, bool uv, bool debug)
 	if (r < 0)
 		errx(1, "input error");
 
-	if (debug) {
+	if (flags & FLAG_DEBUG) {
 		fprintf(stderr, "client data hash:\n");
 		xxd(cdh.ptr, cdh.len);
 		fprintf(stderr, "relying party id: %s\n", rpid);
@@ -56,10 +55,14 @@ prepare_cred(FILE *in_f, int type, bool rk, bool uv, bool debug)
 	    NULL)) != FIDO_OK)
 		errx(1, "fido_cred_set: %s", fido_strerr(r));
 
-	if (rk && (r = fido_cred_set_rk(cred, FIDO_OPT_TRUE)) != FIDO_OK)
-		errx(1, "fido_cred_set_rk: %s", fido_strerr(r));
-	if (uv && (r = fido_cred_set_uv(cred, FIDO_OPT_TRUE)) != FIDO_OK)
-		errx(1, "fido_cred_set_uv: %s", fido_strerr(r));
+	if (flags & FLAG_RK) {
+		if ((r = fido_cred_set_rk(cred, FIDO_OPT_TRUE)) != FIDO_OK)
+			errx(1, "fido_cred_set_rk: %s", fido_strerr(r));
+	}
+	if (flags & FLAG_UV) {
+		if ((r = fido_cred_set_uv(cred, FIDO_OPT_TRUE)) != FIDO_OK)
+			errx(1, "fido_cred_set_uv: %s", fido_strerr(r));
+	}
 
 	free(cdh.ptr);
 	free(uid.ptr);
@@ -87,8 +90,9 @@ print_attcred(FILE *out_f, const fido_cred_t *cred)
 	    &id);
 	r |= base64_encode(fido_cred_sig_ptr(cred), fido_cred_sig_len(cred),
 	    &sig);
-	r |= base64_encode(fido_cred_x5c_ptr(cred), fido_cred_x5c_len(cred),
-	    &x5c);
+	if (fido_cred_x5c_ptr(cred) != NULL)
+		r |= base64_encode(fido_cred_x5c_ptr(cred),
+		    fido_cred_x5c_len(cred), &x5c);
 	if (r < 0)
 		errx(1, "output error");
 
@@ -98,7 +102,8 @@ print_attcred(FILE *out_f, const fido_cred_t *cred)
 	fprintf(out_f, "%s\n", authdata);
 	fprintf(out_f, "%s\n", id);
 	fprintf(out_f, "%s\n", sig);
-	fprintf(out_f, "%s\n", x5c);
+	if (x5c != NULL)
+		fprintf(out_f, "%s\n", x5c);
 
 	free(cdh);
 	free(authdata);
@@ -118,19 +123,15 @@ cred_make(int argc, char **argv)
 	char *out_path = NULL;
 	FILE *in_f = NULL;
 	FILE *out_f = NULL;
-	bool rk = false;
-	bool u2f = false;
-	bool uv = false;
-	bool debug = false;
-	bool quiet = false;
 	int type = COSE_ES256;
+	int flags = 0;
 	int ch;
 	int r;
 
 	while ((ch = getopt(argc, argv, "di:o:qruv")) != -1) {
 		switch (ch) {
 		case 'd':
-			debug = true;
+			flags |= FLAG_DEBUG;
 			break;
 		case 'i':
 			in_path = optarg;
@@ -139,16 +140,16 @@ cred_make(int argc, char **argv)
 			out_path = optarg;
 			break;
 		case 'q':
-			quiet = true;
+			flags |= FLAG_QUIET;
 			break;
 		case 'r':
-			rk = true;
+			flags |= FLAG_RK;
 			break;
 		case 'u':
-			u2f = true;
+			flags |= FLAG_U2F;
 			break;
 		case 'v':
-			uv = true;
+			flags |= FLAG_UV;
 			break;
 		default:
 			usage();
@@ -175,16 +176,16 @@ cred_make(int argc, char **argv)
 			errx(1, "unknown type %s", argv[1]);
 	}
 
-	fido_init(debug ? FIDO_DEBUG : 0);
+	fido_init((flags & FLAG_DEBUG) ? FIDO_DEBUG : 0);
 
-	cred = prepare_cred(in_f, type, rk, uv, debug);
+	cred = prepare_cred(in_f, type, flags);
 
 	dev = open_dev(argv[0]);
-	if (u2f)
+	if (flags & FLAG_U2F)
 		fido_dev_force_u2f(dev);
 
 	r = fido_dev_make_cred(dev, cred, NULL);
-	if (r == FIDO_ERR_PIN_REQUIRED && !quiet) {
+	if (r == FIDO_ERR_PIN_REQUIRED && !(flags & FLAG_QUIET)) {
 		r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ",
 		    argv[0]);
 		if (r < 0 || (size_t)r >= sizeof(prompt))

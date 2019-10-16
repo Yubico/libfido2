@@ -145,7 +145,6 @@ fido_dev_make_cred_rx(fido_dev_t *dev, fido_cred_t *cred, int ms)
 
 	if (cred->fmt == NULL || fido_blob_is_empty(&cred->authdata_cbor) ||
 	    fido_blob_is_empty(&cred->attcred.id) ||
-	    fido_blob_is_empty(&cred->attstmt.x5c) ||
 	    fido_blob_is_empty(&cred->attstmt.sig)) {
 		fido_cred_reset_rx(cred);
 		return (FIDO_ERR_INVALID_CBOR);
@@ -385,6 +384,98 @@ fido_cred_verify(const fido_cred_t *cred)
 	}
 
 	r = FIDO_OK;
+out:
+	explicit_bzero(buf, sizeof(buf));
+
+	return (r);
+}
+
+int
+fido_cred_verify_self(const fido_cred_t *cred)
+{
+	unsigned char	buf[SHA256_DIGEST_LENGTH];
+	fido_blob_t	dgst;
+	int		ok = -1;
+	int		r;
+
+	dgst.ptr = buf;
+	dgst.len = sizeof(buf);
+
+	/* do we have everything we need? */
+	if (cred->cdh.ptr == NULL || cred->authdata_cbor.ptr == NULL ||
+	    cred->attstmt.x5c.ptr != NULL || cred->attstmt.sig.ptr == NULL ||
+	    cred->fmt == NULL || cred->attcred.id.ptr == NULL ||
+	    cred->rp.id == NULL) {
+		log_debug("%s: cdh=%p, authdata=%p, x5c=%p, sig=%p, fmt=%p "
+		    "id=%p, rp.id=%s", __func__, (void *)cred->cdh.ptr,
+		    (void *)cred->authdata_cbor.ptr,
+		    (void *)cred->attstmt.x5c.ptr,
+		    (void *)cred->attstmt.sig.ptr, (void *)cred->fmt,
+		    (void *)cred->attcred.id.ptr, cred->rp.id);
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto out;
+	}
+
+	if (check_rp_id(cred->rp.id, cred->authdata.rp_id_hash) != 0) {
+		log_debug("%s: check_rp_id", __func__);
+		r = FIDO_ERR_INVALID_PARAM;
+		goto out;
+	}
+
+	if (check_flags(cred->authdata.flags, FIDO_OPT_TRUE, cred->uv) < 0) {
+		log_debug("%s: check_flags", __func__);
+		r = FIDO_ERR_INVALID_PARAM;
+		goto out;
+	}
+
+	if (check_extensions(cred->authdata_ext, cred->ext) < 0) {
+		log_debug("%s: check_extensions", __func__);
+		r = FIDO_ERR_INVALID_PARAM;
+		goto out;
+	}
+
+	if (!strcmp(cred->fmt, "packed")) {
+		if (get_signed_hash_packed(&dgst, &cred->cdh,
+		    &cred->authdata_cbor) < 0) {
+			log_debug("%s: get_signed_hash_packed", __func__);
+			r = FIDO_ERR_INTERNAL;
+			goto out;
+		}
+	} else {
+		if (get_signed_hash_u2f(&dgst, cred->authdata.rp_id_hash,
+		    sizeof(cred->authdata.rp_id_hash), &cred->cdh,
+		    &cred->attcred.id, &cred->attcred.pubkey.es256) < 0) {
+			log_debug("%s: get_signed_hash_u2f", __func__);
+			r = FIDO_ERR_INTERNAL;
+			goto out;
+		}
+	}
+
+	switch (cred->attcred.type) {
+	case COSE_ES256:
+		ok = verify_sig_es256(&dgst, &cred->attcred.pubkey.es256,
+		    &cred->attstmt.sig);
+		break;
+	case COSE_RS256:
+		ok = verify_sig_rs256(&dgst, &cred->attcred.pubkey.rs256,
+		    &cred->attstmt.sig);
+		break;
+	case COSE_EDDSA:
+		ok = verify_sig_eddsa(&dgst, &cred->attcred.pubkey.eddsa,
+		    &cred->attstmt.sig);
+		break;
+	default:
+		log_debug("%s: unsupported cose_alg %d", __func__,
+		    cred->attcred.type);
+		r = FIDO_ERR_UNSUPPORTED_OPTION;
+		goto out;
+	}
+
+	if (ok < 0)
+		r = FIDO_ERR_INVALID_SIG;
+	else
+		r = FIDO_OK;
+
 out:
 	explicit_bzero(buf, sizeof(buf));
 

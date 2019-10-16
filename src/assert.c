@@ -410,7 +410,7 @@ fail:
 	return (ok);
 }
 
-static int
+int
 verify_sig_es256(const fido_blob_t *dgst, const es256_pk_t *pk,
     const fido_blob_t *sig)
 {
@@ -445,7 +445,7 @@ fail:
 	return (ok);
 }
 
-static int
+int
 verify_sig_rs256(const fido_blob_t *dgst, const rs256_pk_t *pk,
     const fido_blob_t *sig)
 {
@@ -480,7 +480,7 @@ fail:
 	return (ok);
 }
 
-static int
+int
 verify_sig_eddsa(const fido_blob_t *dgst, const eddsa_pk_t *pk,
     const fido_blob_t *sig)
 {
