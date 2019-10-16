@@ -66,6 +66,7 @@
 /* Supported COSE algorithms. */
 #define	COSE_ES256	-7
 #define	COSE_EDDSA	-8
+#define	COSE_ECDH_ES256	-25
 #define	COSE_RS256	-257
 
 /* Supported COSE types. */

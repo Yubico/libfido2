@@ -61,10 +61,11 @@ es256_pk_decode(const cbor_item_t *item, es256_pk_t *k)
 }
 
 cbor_item_t *
-es256_pk_encode(const es256_pk_t *pk)
+es256_pk_encode(const es256_pk_t *pk, int ecdh)
 {
 	cbor_item_t		*item = NULL;
 	struct cbor_pair	 argv[5];
+	int			 alg;
 	int			 ok = -1;
 
 	memset(argv, 0, sizeof(argv));
@@ -78,9 +79,20 @@ es256_pk_encode(const es256_pk_t *pk)
 	    !cbor_map_add(item, argv[0]))
 		goto fail;
 
+	/*
+	 * "The COSEAlgorithmIdentifier used is -25 (ECDH-ES +
+	 * HKDF-256) although this is NOT the algorithm actually
+	 * used. Setting this to a different value may result in
+	 * compatibility issues."
+	 */
+	if (ecdh)
+		alg = COSE_ECDH_ES256;
+	else
+		alg = COSE_ES256;
+
 	/* alg */
 	if ((argv[1].key = cbor_build_uint8(3)) == NULL ||
-	    (argv[1].value = cbor_build_negint8(-COSE_ES256 - 1)) == NULL ||
+	    (argv[1].value = cbor_build_negint8(-alg - 1)) == NULL ||
 	    !cbor_map_add(item, argv[1]))
 		goto fail;
 

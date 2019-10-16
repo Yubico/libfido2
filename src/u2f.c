@@ -358,7 +358,7 @@ cbor_blob_from_ec_point(const uint8_t *ec_point, size_t ec_point_len,
 		goto fail;
 	}
 
-	if ((pk_cbor = es256_pk_encode(pk)) == NULL) {
+	if ((pk_cbor = es256_pk_encode(pk, 0)) == NULL) {
 		log_debug("%s: es256_pk_encode", __func__);
 		goto fail;
 	}

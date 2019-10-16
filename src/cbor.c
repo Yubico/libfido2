@@ -815,7 +815,7 @@ encode_hmac_secret_param(const fido_blob_t *ecdh, const es256_pk_t *pk,
 	}
 
 	/* XXX not pin, but salt */
-	if ((argv[0] = es256_pk_encode(pk)) == NULL ||
+	if ((argv[0] = es256_pk_encode(pk, 1)) == NULL ||
 	    (argv[1] = encode_pin_enc(ecdh, hmac_salt)) == NULL ||
 	    (argv[2] = encode_set_pin_auth(ecdh, hmac_salt)) == NULL) {
 		log_debug("%s: cbor encode", __func__);
