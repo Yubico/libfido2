@@ -73,14 +73,17 @@ is_fido(IOHIDDeviceRef dev)
 	uint32_t	usage_page;
 	int32_t		report_len;
 
+	if (get_int32(dev, CFSTR(kIOHIDPrimaryUsagePageKey),
+	    (int32_t *)&usage_page) != 0 || usage_page != 0xf1d0)
+		return (false);
+
 	if (get_int32(dev, CFSTR(kIOHIDMaxInputReportSizeKey),
 	    &report_len) < 0 || report_len != REPORT_LEN - 1) {
 		log_debug("%s: unsupported report len", __func__);
 		return (false);
 	}
 
-	return (get_int32(dev, CFSTR(kIOHIDPrimaryUsagePageKey),
-	    (int32_t *)&usage_page) == 0 && usage_page == 0xf1d0);
+	return (true);
 }
 
 static int
