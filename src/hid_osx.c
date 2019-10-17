@@ -32,9 +32,14 @@ get_int32(IOHIDDeviceRef dev, CFStringRef key, int32_t *v)
 	CFTypeRef ref;
 
 	if ((ref = IOHIDDeviceGetProperty(dev, key)) == NULL ||
-	    CFGetTypeID(ref) != CFNumberGetTypeID() ||
-	    CFNumberGetType(ref) != kCFNumberSInt32Type) {
+	    CFGetTypeID(ref) != CFNumberGetTypeID()) {
 		log_debug("%s: IOHIDDeviceGetProperty", __func__);
+		return (-1);
+	}
+
+	if (CFNumberGetType(ref) != kCFNumberSInt32Type &&
+	    CFNumberGetType(ref) != kCFNumberSInt64Type) {
+		log_debug("%s: CFNumberGetType", __func__);
 		return (-1);
 	}
 
