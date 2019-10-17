@@ -8,6 +8,7 @@
 .Sh NAME
 .Nm fido_assert_set ,
 .Nm fido_assert_set_authdata ,
+.Nm fido_assert_set_authdata_raw ,
 .Nm fido_assert_set_clientdata_hash ,
 .Nm fido_assert_set_count ,
 .Nm fido_assert_set_extensions ,
@@ -28,6 +29,8 @@ typedef enum {
 .Ed
 .Ft int
 .Fn fido_assert_set_authdata "fido_assert_t *assert" " size_t idx" "const unsigned char *ptr" "size_t len"
+.Ft int
+.Fn fido_assert_set_authdata_raw "fido_assert_t *assert" " size_t idx" "const unsigned char *ptr" "size_t len"
 .Ft int
 .Fn fido_assert_set_clientdata_hash "fido_assert_t *assert" "const unsigned char *ptr" "size_t len"
 .Ft int
@@ -90,6 +93,12 @@ has an
 .Fa idx
 of
 .Em 0 .
+The authenticator data passed to
+.Fn fido_assert_set_authdata
+must be a CBOR-encoded byte string, as obtained from
+.Fn fido_assert_authdata_ptr .
+Alternatively, a raw binary blob may be passed to
+.Fn fido_assert_set_authdata_raw .
 .Pp
 The
 .Fn fido_assert_set_clientdata_hash

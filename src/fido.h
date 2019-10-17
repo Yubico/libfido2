@@ -114,6 +114,8 @@ const unsigned char *fido_cred_x5c_ptr(const fido_cred_t *);
 int fido_assert_allow_cred(fido_assert_t *, const unsigned char *, size_t);
 int fido_assert_set_authdata(fido_assert_t *, size_t, const unsigned char *,
     size_t);
+int fido_assert_set_authdata_raw(fido_assert_t *, size_t, const unsigned char *,
+    size_t);
 int fido_assert_set_clientdata_hash(fido_assert_t *, const unsigned char *,
     size_t);
 int fido_assert_set_count(fido_assert_t *, size_t);
@@ -127,6 +129,7 @@ int fido_assert_set_sig(fido_assert_t *, size_t, const unsigned char *, size_t);
 int fido_assert_verify(const fido_assert_t *, size_t, int, const void *);
 int fido_cred_exclude(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_authdata(fido_cred_t *, const unsigned char *, size_t);
+int fido_cred_set_authdata_raw(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_clientdata_hash(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_extensions(fido_cred_t *, int);
 int fido_cred_set_fmt(fido_cred_t *, const char *);

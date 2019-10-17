@@ -515,6 +515,45 @@ fail:
 }
 
 int
+fido_cred_set_authdata_raw(fido_cred_t *cred, const unsigned char *ptr,
+    size_t len)
+{
+	cbor_item_t		*item = NULL;
+	int			 r;
+
+	fido_cred_clean_authdata(cred);
+
+	if (ptr == NULL || len == 0) {
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto fail;
+	}
+
+	if ((item = cbor_build_bytestring(ptr, len)) == NULL) {
+		log_debug("%s: cbor_build_bytestring", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if (decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
+	    &cred->authdata, &cred->attcred, &cred->authdata_ext) < 0) {
+		log_debug("%s: decode_cred_authdata", __func__);
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto fail;
+	}
+
+	r = FIDO_OK;
+fail:
+	if (item != NULL)
+		cbor_decref(&item);
+
+	if (r != FIDO_OK)
+		fido_cred_clean_authdata(cred);
+
+	return (r);
+
+}
+
+int
 fido_cred_set_x509(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 {
 	unsigned char *x509;

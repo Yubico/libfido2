@@ -8,6 +8,7 @@
 .Sh NAME
 .Nm fido_cred_set ,
 .Nm fido_cred_set_authdata ,
+.Nm fido_cred_set_authdata_raw ,
 .Nm fido_cred_set_x509 ,
 .Nm fido_cred_set_sig ,
 .Nm fido_cred_set_clientdata_hash ,
@@ -30,6 +31,8 @@ typedef enum {
 .Ed
 .Ft int
 .Fn fido_cred_set_authdata "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
+.Ft int
+.Fn fido_cred_set_authdata_raw "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
 .Ft int
 .Fn fido_cred_set_x509 "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
 .Ft int
@@ -87,6 +90,8 @@ The authenticator data passed to
 .Fn fido_cred_set_authdata
 must be a CBOR-encoded byte string, as obtained from
 .Fn fido_cred_authdata_ptr .
+Alternatively, a raw binary blob may be passed to
+.Fn fido_cred_set_authdata_raw .
 .Pp
 The
 .Fn fido_cred_set_rp

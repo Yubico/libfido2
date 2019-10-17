@@ -983,6 +983,44 @@ fail:
 	return (r);
 }
 
+int
+fido_assert_set_authdata_raw(fido_assert_t *assert, size_t idx,
+    const unsigned char *ptr, size_t len)
+{
+	cbor_item_t		*item = NULL;
+	fido_assert_stmt	*stmt = NULL;
+	int			 r;
+
+	if (idx >= assert->stmt_len || ptr == NULL || len == 0)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	stmt = &assert->stmt[idx];
+	fido_assert_clean_authdata(stmt);
+
+	if ((item = cbor_build_bytestring(ptr, len)) == NULL) {
+		log_debug("%s: cbor_build_bytestring", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if (decode_assert_authdata(item, &stmt->authdata_cbor, &stmt->authdata,
+	    &stmt->authdata_ext, &stmt->hmac_secret_enc) < 0) {
+		log_debug("%s: decode_assert_authdata", __func__);
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto fail;
+	}
+
+	r = FIDO_OK;
+fail:
+	if (item != NULL)
+		cbor_decref(&item);
+
+	if (r != FIDO_OK)
+		fido_assert_clean_authdata(stmt);
+
+	return (r);
+}
+
 static void
 fido_assert_clean_sig(fido_assert_stmt *as)
 {

@@ -746,7 +746,8 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	fido_cred_set_type(cred, type);
 	fido_cred_set_clientdata_hash(cred, cdh_ptr, cdh_len);
 	fido_cred_set_rp(cred, rp_id, rp_name);
-	fido_cred_set_authdata(cred, authdata_ptr, authdata_len);
+	if (fido_cred_set_authdata(cred, authdata_ptr, authdata_len) != FIDO_OK)
+		fido_cred_set_authdata_raw(cred, authdata_ptr, authdata_len);
 	fido_cred_set_extensions(cred, ext);
 	fido_cred_set_x509(cred, x5c_ptr, x5c_len);
 	fido_cred_set_sig(cred, sig_ptr, sig_len);
