@@ -472,6 +472,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	rs256_pk_t	*rs256_pk = NULL;
 	eddsa_pk_t	*eddsa_pk = NULL;
 	uint8_t		 flags;
+	uint32_t	 sigcount;
 	int		 cose_alg = 0;
 	void		*pk;
 
@@ -553,6 +554,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		    xstrlen(fido_assert_user_display_name(assert, i)));
 		flags = fido_assert_flags(assert, i);
 		consume(&flags, sizeof(flags));
+		sigcount = fido_assert_sigcount(assert, i);
+		consume(&sigcount, sizeof(sigcount));
 	}
 
 out:

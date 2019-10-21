@@ -35,6 +35,7 @@
 		fido_assert_set_sig;
 		fido_assert_set_up;
 		fido_assert_set_uv;
+		fido_assert_sigcount;
 		fido_assert_sig_len;
 		fido_assert_sig_ptr;
 		fido_assert_user_display_name;

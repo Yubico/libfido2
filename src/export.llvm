@@ -33,6 +33,7 @@ _fido_assert_set_rp
 _fido_assert_set_sig
 _fido_assert_set_up
 _fido_assert_set_uv
+_fido_assert_sigcount
 _fido_assert_sig_len
 _fido_assert_sig_ptr
 _fido_assert_user_display_name
