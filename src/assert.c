@@ -815,6 +815,15 @@ fido_assert_flags(const fido_assert_t *assert, size_t idx)
 	return (assert->stmt[idx].authdata.flags);
 }
 
+uint32_t
+fido_assert_sigcount(const fido_assert_t *assert, size_t idx)
+{
+	if (idx >= assert->stmt_len)
+		return (0);
+
+	return (assert->stmt[idx].authdata.sigcount);
+}
+
 const unsigned char *
 fido_assert_authdata_ptr(const fido_assert_t *assert, size_t idx)
 {

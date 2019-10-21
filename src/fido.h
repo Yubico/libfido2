@@ -177,6 +177,7 @@ size_t fido_cred_sig_len(const fido_cred_t *);
 size_t fido_cred_x5c_len(const fido_cred_t *);
 
 uint8_t  fido_assert_flags(const fido_assert_t *, size_t);
+uint32_t  fido_assert_sigcount(const fido_assert_t *, size_t);
 uint8_t  fido_cred_flags(const fido_cred_t *);
 uint8_t  fido_dev_protocol(const fido_dev_t *);
 uint8_t  fido_dev_major(const fido_dev_t *);
