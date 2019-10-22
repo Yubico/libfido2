@@ -58,6 +58,7 @@ list(APPEND MAN_ALIAS
 	fido_assert fido_assert_hmac_secret_len
 	fido_assert fido_assert_hmac_secret_ptr
 	fido_assert fido_assert_new
+	fido_assert fido_assert_sigcount
 	fido_assert fido_assert_sig_len
 	fido_assert fido_assert_sig_ptr
 	fido_assert fido_assert_user_display_name
@@ -134,6 +135,7 @@ list(APPEND MAN_ALIAS
 	fido_credman fido_credman_rp_name
 	fido_credman fido_credman_rp_new
 	fido_cred_set fido_cred_set_authdata
+	fido_cred_set fido_cred_set_authdata_raw
 	fido_cred_set fido_cred_set_clientdata_hash
 	fido_cred_set fido_cred_set_extensions
 	fido_cred_set fido_cred_set_fmt

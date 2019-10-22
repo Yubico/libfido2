@@ -2,7 +2,7 @@
 .\" Use of this source code is governed by a BSD-style
 .\" license that can be found in the LICENSE file.
 .\"
-.Dd $Mdocdate: May 24 2018 $
+.Dd $Mdocdate: October 22 2019 $
 .Dt FIDO_ASSERT 3
 .Os
 .Sh NAME
@@ -21,7 +21,8 @@
 .Nm fido_assert_clientdata_hash_len ,
 .Nm fido_assert_hmac_secret_len ,
 .Nm fido_assert_user_id_len ,
-.Nm fido_assert_sig_len
+.Nm fido_assert_sig_len ,
+.Nm fido_assert_sigcount
 .Nd FIDO 2 assertion API
 .Sh SYNOPSIS
 .In fido.h
@@ -57,6 +58,8 @@
 .Fn fido_assert_user_id_len "const fido_assert_t *assert" "size_t idx"
 .Ft size_t
 .Fn fido_assert_sig_len "const fido_assert_t *assert" "size_t idx"
+.Ft uint32_t
+.Fn fido_assert_sigcount "const fido_assert_t *assert" "size_t idx"
 .Sh DESCRIPTION
 FIDO 2 assertions are abstracted in
 .Em libfido2
@@ -118,11 +121,6 @@ in
 .Fa assert .
 If not NULL, the values returned by these functions point to
 NUL-terminated UTF-8 strings.
-Please note that the first statement in
-.Fa assert
-has an
-.Fa idx
-(index) value of 0.
 .Pp
 The
 .Fn fido_assert_user_id_ptr ,
@@ -143,6 +141,14 @@ and
 .Fn fido_assert_sig_len
 functions can be used to retrieve the corresponding length of a
 specific attribute.
+.Pp
+The
+.Fn fido_assert_sigcount
+function can be used to obtain the signature counter of statement
+.Fa idx
+in
+.Fa assert .
+.Pp
 Please note that the first statement in
 .Fa assert
 has an
