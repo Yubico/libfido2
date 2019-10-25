@@ -41,6 +41,9 @@ elseif(APPLE)
 	list(APPEND COMPAT_SOURCES hid_osx.c)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	list(APPEND COMPAT_SOURCES hid_linux.c)
+else()
+	# XXX I don't know how to drive cmake
+	list(APPEND COMPAT_SOURCES hid_openbsd.c)
 endif()
 
 list(APPEND COMPAT_SOURCES
