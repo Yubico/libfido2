@@ -190,7 +190,7 @@ endforeach()
 # man_lint
 foreach(f ${MAN_SOURCES})
 	add_custom_command(OUTPUT ${f}.lint
-		COMMAND mandoc -T lint ${f} > ${f}.lint
+		COMMAND mandoc -T lint -W warning ${f} > ${f}.lint
 		DEPENDS ${f})
 	list(APPEND LINT_FILES ${f}.lint)
 endforeach()
