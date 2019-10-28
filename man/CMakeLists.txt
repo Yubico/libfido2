@@ -3,10 +3,12 @@
 # license that can be found in the LICENSE file.
 
 find_program(MANDOC_PATH mandoc)
-find_program(GZIP_PATH gzip)
-
 message(STATUS "MANDOC_PATH: ${MANDOC_PATH}")
-message(STATUS "GZIP_PATH: ${GZIP_PATH}")
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	find_program(GZIP_PATH gzip)
+	message(STATUS "GZIP_PATH: ${GZIP_PATH}")
+endif()
 
 list(APPEND MAN_SOURCES
 	eddsa_pk.3
@@ -289,5 +291,22 @@ if(GZIP_PATH)
 		list(GET MAN_ALIAS ${j} DST)
 		install(FILES ${CMAKE_BINARY_DIR}/man/${DST}.3.gz
 			DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man3)
+	endforeach()
+else()
+	add_dependencies(man man_symlink)
+	foreach(f ${MAN_SOURCES})
+		if (${f} MATCHES ".1$")
+			install(FILES ${CMAKE_BINARY_DIR}/man/${f}
+				DESTINATION "${CMAKE_INSTALL_PREFIX}/man/man1")
+		elseif(${f} MATCHES ".3$")
+			install(FILES ${CMAKE_BINARY_DIR}/man/${f}
+				DESTINATION "${CMAKE_INSTALL_PREFIX}/man/man3")
+		endif()
+	endforeach()
+	foreach(i RANGE 0 ${MAN_ALIAS_MAX} 2)
+		math(EXPR j "${i} + 1")
+		list(GET MAN_ALIAS ${j} DST)
+		install(FILES ${CMAKE_BINARY_DIR}/man/${DST}.3
+			DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man3)
 	endforeach()
 endif()
