@@ -41,8 +41,7 @@ elseif(APPLE)
 	list(APPEND COMPAT_SOURCES hid_osx.c)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	list(APPEND COMPAT_SOURCES hid_linux.c)
-else()
-	# XXX I don't know how to drive cmake
+elseif(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
 	list(APPEND COMPAT_SOURCES hid_openbsd.c)
 endif()
 
@@ -62,7 +61,7 @@ endif()
 # static library
 add_library(fido2 STATIC ${FIDO_SOURCES} ${COMPAT_SOURCES})
 target_link_libraries(fido2 ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
-	${UDEV_LIBRARIES})
+	${UDEV_LIBRARIES} ${BASE_LIBRARIES})
 if(WIN32)
 	if (MINGW)
 		target_link_libraries(fido2 wsock32 ws2_32 bcrypt setupapi hid)
@@ -80,7 +79,7 @@ install(TARGETS fido2 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 # dynamic library
 add_library(fido2_shared SHARED ${FIDO_SOURCES} ${COMPAT_SOURCES})
 target_link_libraries(fido2_shared ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
-	${UDEV_LIBRARIES})
+	${UDEV_LIBRARIES} ${BASE_LIBRARIES})
 if(WIN32)
 	if (MINGW)
 		target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
@@ -94,7 +93,7 @@ elseif(APPLE)
 		"-framework IOKit")
 endif()
 set_target_properties(fido2_shared PROPERTIES OUTPUT_NAME fido2
-	VERSION ${FIDO_VERSION} SOVERSION ${FIDO_MAJOR})
+	VERSION ${LIB_VERSION} SOVERSION ${LIB_SOVERSION})
 install(TARGETS fido2_shared
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
