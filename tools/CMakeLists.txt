@@ -49,9 +49,14 @@ add_executable(fido2-token
 	${COMPAT_SOURCES}
 )
 
+add_library(sk-libfido2 MODULE sk-libfido2.c)
+set_target_properties(sk-libfido2 PROPERTIES OUTPUT_NAME sk-libfido2)
+
 target_link_libraries(fido2-cred ${CRYPTO_LIBRARIES} fido2_shared)
 target_link_libraries(fido2-assert ${CRYPTO_LIBRARIES} fido2_shared)
 target_link_libraries(fido2-token ${CRYPTO_LIBRARIES} fido2_shared)
+target_link_libraries(sk-libfido2 ${CRYPTO_LIBRARIES} fido2_shared)
 
 install(TARGETS fido2-cred fido2-assert fido2-token
 	DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS sk-libfido2 DESTINATION ${CMAKE_INSTALL_LIBDIR})
