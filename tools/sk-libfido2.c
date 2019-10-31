@@ -240,7 +240,7 @@ sk_sign(const uint8_t *message, size_t message_len, const char *application,
 {
 	ECDSA_SIG *sig = NULL;
 	const BIGNUM *sig_r, *sig_s;
-	const u_char *cp;
+	const unsigned char *cp;
 	fido_assert_t *assert = NULL;
 	fido_dev_t *dev = NULL;
 	struct sk_sign_response *response = NULL;
