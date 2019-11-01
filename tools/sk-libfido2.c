@@ -151,6 +151,7 @@ pack_public_key(fido_cred_t *cred, struct sk_enroll_response *response)
 	if (!success && response->public_key != NULL) {
 		memset(response->public_key, 0, response->public_key_len);
 		free(response->public_key);
+		response->public_key = NULL;
 	}
 	EC_POINT_free(q);
 	EC_GROUP_free(g);
