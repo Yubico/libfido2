@@ -18,11 +18,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <openssl/opensslv.h>
+#include <openssl/crypto.h>
 #include <openssl/bn.h>
 #include <openssl/ec.h>
 #include <openssl/ecdsa.h>
 
 #include <fido.h>
+
+/* Compatibility with OpenSSH 1.0.x */
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+#define ECDSA_SIG_get0(sig, pr, ps) \
+	do { \
+		(*pr) = sig->r; \
+		(*ps) = sig->s; \
+	} while (0)
+#endif
 
 #define SK_VERSION_MAJOR	0x00010000 /* current API version */
 
