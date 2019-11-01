@@ -201,7 +201,7 @@ hid_open(const char *path)
 		goto fail;
 	}
 	ret->report_in_len = (size_t)len;
-	if ((len = hid_report_size(rdesc, hid_input, usb_report_id)) <= 0 ||
+	if ((len = hid_report_size(rdesc, hid_output, usb_report_id)) <= 0 ||
 	    (size_t)len > MAX_REPORT_LEN) {
 		log_debug("%s: bad output report size %d", __func__, len);
  fail:
