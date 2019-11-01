@@ -70,7 +70,7 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 		}
 		if ((hdata = hid_start_parse(rdesc,
 		    1<<hid_collection, -1)) == NULL) {
-			log_debug("%s: failed to get report descriptor: %s",
+			log_debug("%s: failed to parse report descriptor: %s",
 			    __func__, path);
 			hid_dispose_report_desc(rdesc);
 			close(fd);
@@ -216,7 +216,7 @@ hid_open(const char *path)
 	    usb_report_id, ret->report_in_len, ret->report_out_len);
 
 	/*
-	 * OpenBSD (as of 201910) has a buf that causes it to lose
+	 * OpenBSD (as of 201910) has a bug that causes it to lose
 	 * track of the DATA0/DATA1 sequence toggle across uhid device
 	 * open and close. This is a terrible hack to work around it.
 	 */
