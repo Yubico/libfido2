@@ -174,7 +174,7 @@ sk_enroll(const uint8_t *challenge, size_t challenge_len,
 	char *device = NULL;
 
 	(void)flags; /* XXX; unused */
-#ifdef SK_DEBUF
+#ifdef SK_DEBUG
 	fido_init(FIDO_DEBUG);
 #endif
 
@@ -261,7 +261,7 @@ sk_sign(const uint8_t *message, size_t message_len, const char *application,
 	int r;
 	char *device = NULL;
 
-#ifdef SK_DEBUF
+#ifdef SK_DEBUG
 	fido_init(FIDO_DEBUG);
 #endif
 
