@@ -21,7 +21,7 @@
 #include "extern.h"
 
 static fido_assert_t *
-prepare_assert(FILE *in_f, bool up, bool uv, bool debug)
+prepare_assert(FILE *in_f, int flags)
 {
 	fido_assert_t *assert = NULL;
 	struct blob cdh;
@@ -41,7 +41,7 @@ prepare_assert(FILE *in_f, bool up, bool uv, bool debug)
 	if (r < 0)
 		errx(1, "input error");
 
-	if (debug) {
+	if (flags & FLAG_DEBUG) {
 		fprintf(stderr, "client data hash:\n");
 		xxd(cdh.ptr, cdh.len);
 		fprintf(stderr, "relying party id: %s\n", rpid);
@@ -64,10 +64,20 @@ prepare_assert(FILE *in_f, bool up, bool uv, bool debug)
 	    (r = fido_assert_set_sig(assert, 0, sig.ptr, sig.len)) != FIDO_OK)
 		errx(1, "fido_assert_set: %s", fido_strerr(r));
 
-	if (up && (r = fido_assert_set_up(assert, FIDO_OPT_TRUE)) != FIDO_OK)
-		errx(1, "fido_assert_set_up: %s", fido_strerr(r));
-	if (uv && (r = fido_assert_set_uv(assert, FIDO_OPT_TRUE)) != FIDO_OK)
-		errx(1, "fido_assert_set_uv: %s", fido_strerr(r));
+	if (flags & FLAG_UP) {
+		if ((r = fido_assert_set_up(assert, FIDO_OPT_TRUE)) != FIDO_OK)
+			errx(1, "fido_assert_set_up: %s", fido_strerr(r));
+	}
+	if (flags & FLAG_UV) {
+		if ((r = fido_assert_set_uv(assert, FIDO_OPT_TRUE)) != FIDO_OK)
+			errx(1, "fido_assert_set_uv: %s", fido_strerr(r));
+	}
+	if (flags & FLAG_HMAC) {
+		if ((r = fido_assert_set_extensions(assert,
+		    FIDO_EXT_HMAC_SECRET)) != FIDO_OK)
+			errx(1, "fido_assert_set_extensions: %s",
+			    fido_strerr(r));
+	}
 
 	free(cdh.ptr);
 	free(authdata.ptr);
@@ -130,26 +140,27 @@ assert_verify(int argc, char **argv)
 	void *pk = NULL;
 	char *in_path = NULL;
 	FILE *in_f = NULL;
-	bool up = false;
-	bool uv = false;
-	bool debug = false;
 	int type = COSE_ES256;
+	int flags = 0;
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "di:pv")) != -1) {
+	while ((ch = getopt(argc, argv, "dhi:pv")) != -1) {
 		switch (ch) {
 		case 'd':
-			debug = true;
+			flags |= FLAG_DEBUG;
+			break;
+		case 'h':
+			flags |= FLAG_HMAC;
 			break;
 		case 'i':
 			in_path = optarg;
 			break;
 		case 'p':
-			up = true;
+			flags |= FLAG_UP;
 			break;
 		case 'v':
-			uv = true;
+			flags |= FLAG_UV;
 			break;
 		default:
 			usage();
@@ -175,9 +186,10 @@ assert_verify(int argc, char **argv)
 			errx(1, "unknown type %s", argv[1]);
 	}
 
-	fido_init(debug ? FIDO_DEBUG : 0);
+	fido_init((flags & FLAG_DEBUG) ? FIDO_DEBUG : 0);
+
 	pk = load_pubkey(type, argv[0]);
-	assert = prepare_assert(in_f, up, uv, debug);
+	assert = prepare_assert(in_f, flags);
 	if ((r = fido_assert_verify(assert, 0, type, pk)) != FIDO_OK)
 		errx(1, "fido_assert_verify: %s", fido_strerr(r));
 	fido_assert_free(&assert);

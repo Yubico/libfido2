@@ -19,6 +19,8 @@ struct blob {
 #define FLAG_RK		0x04
 #define FLAG_UV		0x08
 #define FLAG_U2F	0x10
+#define FLAG_HMAC	0x20
+#define FLAG_UP		0x40
 
 EC_KEY *read_ec_pubkey(const char *);
 fido_dev_t *open_dev(const char *);

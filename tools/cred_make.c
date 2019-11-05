@@ -63,6 +63,11 @@ prepare_cred(FILE *in_f, int type, int flags)
 		if ((r = fido_cred_set_uv(cred, FIDO_OPT_TRUE)) != FIDO_OK)
 			errx(1, "fido_cred_set_uv: %s", fido_strerr(r));
 	}
+	if (flags & FLAG_HMAC) {
+		if ((r = fido_cred_set_extensions(cred,
+		    FIDO_EXT_HMAC_SECRET)) != FIDO_OK)
+			errx(1, "fido_cred_set_extensions: %s", fido_strerr(r));
+	}
 
 	free(cdh.ptr);
 	free(uid.ptr);
@@ -128,10 +133,13 @@ cred_make(int argc, char **argv)
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "di:o:qruv")) != -1) {
+	while ((ch = getopt(argc, argv, "dhi:o:qruv")) != -1) {
 		switch (ch) {
 		case 'd':
 			flags |= FLAG_DEBUG;
+			break;
+		case 'h':
+			flags |= FLAG_HMAC;
 			break;
 		case 'i':
 			in_path = optarg;

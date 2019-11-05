@@ -5,7 +5,6 @@
  */
 
 #include <fido.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,29 +16,33 @@
 #include "extern.h"
 
 static fido_assert_t *
-prepare_assert(FILE *in_f, bool rk, bool up, bool uv, bool debug)
+prepare_assert(FILE *in_f, int flags)
 {
 	fido_assert_t *assert = NULL;
 	struct blob cdh;
 	struct blob id;
+	struct blob hmac_salt;
 	char *rpid = NULL;
 	int r;
 
 	memset(&cdh, 0, sizeof(cdh));
 	memset(&id, 0, sizeof(id));
+	memset(&hmac_salt, 0, sizeof(hmac_salt));
 
 	r = base64_read(in_f, &cdh);
 	r |= string_read(in_f, &rpid);
-	if (rk == false)
+	if ((flags & FLAG_RK) == 0)
 		r |= base64_read(in_f, &id);
+	if (flags & FLAG_HMAC)
+		r |= base64_read(in_f, &hmac_salt);
 	if (r < 0)
 		errx(1, "input error");
 
-	if (debug) {
+	if (flags & FLAG_DEBUG) {
 		fprintf(stderr, "client data hash:\n");
 		xxd(cdh.ptr, cdh.len);
 		fprintf(stderr, "relying party id: %s\n", rpid);
-		if (rk == false) {
+		if ((flags & FLAG_RK) == 0) {
 			fprintf(stderr, "credential id:\n");
 			xxd(id.ptr, id.len);
 		}
@@ -53,15 +56,31 @@ prepare_assert(FILE *in_f, bool rk, bool up, bool uv, bool debug)
 	    (r = fido_assert_set_rp(assert, rpid)) != FIDO_OK)
 		errx(1, "fido_assert_set: %s", fido_strerr(r));
 
-	if (up && (r = fido_assert_set_up(assert, FIDO_OPT_TRUE)) != FIDO_OK)
-		errx(1, "fido_assert_set_up: %s", fido_strerr(r));
-	if (uv && (r = fido_assert_set_uv(assert, FIDO_OPT_TRUE)) != FIDO_OK)
-		errx(1, "fido_assert_set_uv: %s", fido_strerr(r));
+	if (flags & FLAG_UP) {
+		if ((r = fido_assert_set_up(assert, FIDO_OPT_TRUE)) != FIDO_OK)
+			errx(1, "fido_assert_set_up: %s", fido_strerr(r));
+	}
+	if (flags & FLAG_UV) {
+		if ((r = fido_assert_set_uv(assert, FIDO_OPT_TRUE)) != FIDO_OK)
+			errx(1, "fido_assert_set_uv: %s", fido_strerr(r));
+	}
+	if (flags & FLAG_HMAC) {
+		if ((r = fido_assert_set_extensions(assert,
+		    FIDO_EXT_HMAC_SECRET)) != FIDO_OK)
+			errx(1, "fido_assert_set_extensions: %s",
+			    fido_strerr(r));
+		if ((r = fido_assert_set_hmac_salt(assert, hmac_salt.ptr,
+		    hmac_salt.len)) != FIDO_OK)
+			errx(1, "fido_assert_set_hmac_salt: %s",
+			    fido_strerr(r));
+	}
+	if ((flags & FLAG_RK) == 0) {
+		if ((r = fido_assert_allow_cred(assert, id.ptr,
+		    id.len)) != FIDO_OK)
+			errx(1, "fido_assert_allow_cred: %s", fido_strerr(r));
+	}
 
-	if (rk == false && (r = fido_assert_allow_cred(assert, id.ptr,
-	    id.len)) != FIDO_OK)
-		errx(1, "fido_assert_allow_cred: %s", fido_strerr(r));
-
+	free(hmac_salt.ptr);
 	free(cdh.ptr);
 	free(id.ptr);
 	free(rpid);
@@ -70,12 +89,13 @@ prepare_assert(FILE *in_f, bool rk, bool up, bool uv, bool debug)
 }
 
 static void
-print_assert(FILE *out_f, const fido_assert_t *assert, size_t idx, bool rk)
+print_assert(FILE *out_f, const fido_assert_t *assert, size_t idx, int flags)
 {
 	char *cdh = NULL;
 	char *authdata = NULL;
 	char *sig = NULL;
 	char *user_id = NULL;
+	char *hmac_secret = NULL;
 	int r;
 
 	r = base64_encode(fido_assert_clientdata_hash_ptr(assert),
@@ -84,9 +104,12 @@ print_assert(FILE *out_f, const fido_assert_t *assert, size_t idx, bool rk)
 	    fido_assert_authdata_len(assert, 0), &authdata);
 	r |= base64_encode(fido_assert_sig_ptr(assert, idx),
 	    fido_assert_sig_len(assert, idx), &sig);
-	if (rk)
+	if (flags & FLAG_RK)
 		r |= base64_encode(fido_assert_user_id_ptr(assert, idx),
 		    fido_assert_user_id_len(assert, idx), &user_id);
+	if (flags & FLAG_HMAC)
+		r |= base64_encode(fido_assert_hmac_secret_ptr(assert, idx),
+		    fido_assert_hmac_secret_len(assert, idx), &hmac_secret);
 	if (r < 0)
 		errx(1, "output error");
 
@@ -94,9 +117,14 @@ print_assert(FILE *out_f, const fido_assert_t *assert, size_t idx, bool rk)
 	fprintf(out_f, "%s\n", fido_assert_rp_id(assert));
 	fprintf(out_f, "%s\n", authdata);
 	fprintf(out_f, "%s\n", sig);
-	if (rk)
+	if (flags & FLAG_RK)
 		fprintf(out_f, "%s\n", user_id);
+	if (hmac_secret) {
+		fprintf(out_f, "%s\n", hmac_secret);
+		explicit_bzero(hmac_secret, strlen(hmac_secret));
+	}
 
+	free(hmac_secret);
 	free(cdh);
 	free(authdata);
 	free(sig);
@@ -114,18 +142,17 @@ assert_get(int argc, char **argv)
 	char *out_path = NULL;
 	FILE *in_f = NULL;
 	FILE *out_f = NULL;
-	bool u2f = false;
-	bool rk = false;
-	bool up = false;
-	bool uv = false;
-	bool debug = false;
+	int flags = 0;
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "di:o:pruv")) != -1) {
+	while ((ch = getopt(argc, argv, "dhi:o:pruv")) != -1) {
 		switch (ch) {
 		case 'd':
-			debug = true;
+			flags |= FLAG_DEBUG;
+			break;
+		case 'h':
+			flags |= FLAG_HMAC;
 			break;
 		case 'i':
 			in_path = optarg;
@@ -134,16 +161,16 @@ assert_get(int argc, char **argv)
 			out_path = optarg;
 			break;
 		case 'p':
-			up = true;
+			flags |= FLAG_UP;
 			break;
 		case 'r':
-			rk = true;
+			flags |= FLAG_RK;
 			break;
 		case 'u':
-			u2f = true;
+			flags |= FLAG_U2F;
 			break;
 		case 'v':
-			uv = true;
+			flags |= FLAG_UV;
 			break;
 		default:
 			usage();
@@ -159,15 +186,15 @@ assert_get(int argc, char **argv)
 	in_f = open_read(in_path);
 	out_f = open_write(out_path);
 
-	fido_init(debug ? FIDO_DEBUG : 0);
+	fido_init((flags & FLAG_DEBUG) ? FIDO_DEBUG : 0);
 
-	assert = prepare_assert(in_f, rk, up, false, debug);
+	assert = prepare_assert(in_f, flags);
 
 	dev = open_dev(argv[0]);
-	if (u2f)
+	if (flags & FLAG_U2F)
 		fido_dev_force_u2f(dev);
 
-	if (uv) {
+	if (flags & FLAG_UV) {
 		r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ",
 		    argv[0]);
 		if (r < 0 || (size_t)r >= sizeof(prompt))
@@ -183,14 +210,14 @@ assert_get(int argc, char **argv)
 	if (r != FIDO_OK)
 		errx(1, "fido_dev_get_assert: %s", fido_strerr(r));
 
-	if (rk) {
+	if (flags & FLAG_RK) {
 		for (size_t idx = 0; idx < fido_assert_count(assert); idx++)
-			print_assert(out_f, assert, idx, rk);
+			print_assert(out_f, assert, idx, flags);
 	} else {
 		if (fido_assert_count(assert) != 1)
 			errx(1, "fido_assert_count: %zu",
 			    fido_assert_count(assert));
-		print_assert(out_f, assert, 0, rk);
+		print_assert(out_f, assert, 0, flags);
 	}
 
 	fido_dev_close(dev);

@@ -2,7 +2,7 @@
 .\" Use of this source code is governed by a BSD-style
 .\" license that can be found in the LICENSE file.
 .\"
-.Dd $Mdocdate: June 14 2018 $
+.Dd $Mdocdate: November 5 2019 $
 .Dt FIDO2-CRED 1
 .Os
 .Sh NAME
@@ -11,14 +11,14 @@
 .Sh SYNOPSIS
 .Nm
 .Fl M
-.Op Fl dqruv
+.Op Fl dhqruv
 .Op Fl i Ar input_file
 .Op Fl o Ar output_file
 .Ar device
 .Op Ar type
 .Nm
 .Fl V
-.Op Fl dv
+.Op Fl dhv
 .Op Fl i Ar input_file
 .Op Fl o Ar output_file
 .Op Ar type
@@ -94,6 +94,10 @@ Causes
 .Nm
 to emit debugging output on
 .Em stderr .
+.It Fl h
+If making a credential, enable the FIDO2 hmac-secret extension.
+If verifying a credential, check whether the extension data bit was
+signed by the authenticator.
 .It Fl i Ar input_file
 Tells
 .Nm

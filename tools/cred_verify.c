@@ -78,14 +78,14 @@ prepare_cred(FILE *in_f, int type, int flags)
 			errx(1, "fido_cred_set_x509: %s", fido_strerr(r));
 	}
 
-	/* XXX never set? */
-	if (flags & FLAG_RK) {
-		if ((r = fido_cred_set_rk(cred, FIDO_OPT_TRUE)) != FIDO_OK)
-			errx(1, "fido_cred_set_rk: %s", fido_strerr(r));
-	}
 	if (flags & FLAG_UV) {
 		if ((r = fido_cred_set_uv(cred, FIDO_OPT_TRUE)) != FIDO_OK)
 			errx(1, "fido_cred_set_uv: %s", fido_strerr(r));
+	}
+	if (flags & FLAG_HMAC) {
+		if ((r = fido_cred_set_extensions(cred,
+		    FIDO_EXT_HMAC_SECRET)) != FIDO_OK)
+			errx(1, "fido_cred_set_extensions: %s", fido_strerr(r));
 	}
 
 	free(cdh.ptr);
@@ -112,10 +112,13 @@ cred_verify(int argc, char **argv)
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "di:o:v")) != -1) {
+	while ((ch = getopt(argc, argv, "dhi:o:v")) != -1) {
 		switch (ch) {
 		case 'd':
 			flags |= FLAG_DEBUG;
+			break;
+		case 'h':
+			flags |= FLAG_HMAC;
 			break;
 		case 'i':
 			in_path = optarg;
