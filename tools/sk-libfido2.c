@@ -35,10 +35,14 @@
 	} while (0)
 #endif
 
-#define SK_VERSION_MAJOR	0x00010000 /* current API version */
+#define SK_VERSION_MAJOR	0x00020000 /* current API version */
 
 /* Flags */
 #define SK_USER_PRESENCE_REQD	0x01
+
+/* Algs */
+#define	SK_ECDSA		0x00
+#define	SK_ED25519		0x01
 
 struct sk_enroll_response {
 	uint8_t *public_key;
@@ -64,15 +68,14 @@ struct sk_sign_response {
 uint32_t sk_api_version(void);
 
 /* Enroll a U2F key (private key generation) */
-int sk_enroll(const uint8_t *challenge, size_t challenge_len,
+int sk_enroll(int alg, const uint8_t *challenge, size_t challenge_len,
     const char *application, uint8_t flags,
     struct sk_enroll_response **enroll_response);
 
 /* Sign a challenge */
-int sk_sign(const uint8_t *message, size_t message_len,
+int sk_sign(int alg, const uint8_t *message, size_t message_len,
     const char *application, const uint8_t *key_handle, size_t key_handle_len,
     uint8_t flags, struct sk_sign_response **sign_response);
-
 
 /* #define SK_DEBUG 1 */
 
@@ -108,14 +111,14 @@ pick_device(void)
  * but the API expects a SEC1 octet string.
  */
 static int
-pack_public_key(fido_cred_t *cred, struct sk_enroll_response *response)
+pack_public_key_ecdsa(fido_cred_t *cred, struct sk_enroll_response *response)
 {
 	const uint8_t *ptr;
 	BIGNUM *x = NULL, *y = NULL;
 	EC_POINT *q = NULL;
 	EC_GROUP *g = NULL;
 	BN_CTX *bn_ctx = NULL;
-	int success = 0;
+	int ret = -1;
 
 	response->public_key = NULL;
 	response->public_key_len = 0;
@@ -143,12 +146,12 @@ pack_public_key(fido_cred_t *cred, struct sk_enroll_response *response)
 	if ((response->public_key = malloc(response->public_key_len)) == NULL)
 		goto out;
 	if (EC_POINT_point2oct(g, q, POINT_CONVERSION_UNCOMPRESSED,
-            response->public_key, response->public_key_len, bn_ctx) == 0)
+	    response->public_key, response->public_key_len, bn_ctx) == 0)
 		goto out;
 	/* success */
-	success = 1;
+	ret = 0;
  out:
-	if (!success && response->public_key != NULL) {
+	if (ret != 0 && response->public_key != NULL) {
 		memset(response->public_key, 0, response->public_key_len);
 		free(response->public_key);
 		response->public_key = NULL;
@@ -156,19 +159,59 @@ pack_public_key(fido_cred_t *cred, struct sk_enroll_response *response)
 	EC_POINT_free(q);
 	EC_GROUP_free(g);
 	BN_CTX_free(bn_ctx);
-	return success ? 0 : -1;
+	return ret;
+}
+
+static int
+pack_public_key_ed25519(fido_cred_t *cred, struct sk_enroll_response *response)
+{
+	const uint8_t *ptr;
+	size_t len;
+	int ret = -1;
+
+	response->public_key = NULL;
+	response->public_key_len = 0;
+
+	if ((len = fido_cred_pubkey_len(cred)) != 32)
+		goto out;
+	if ((ptr = fido_cred_pubkey_ptr(cred)) == NULL)
+		goto out;
+	response->public_key_len = len;
+	if ((response->public_key = malloc(response->public_key_len)) == NULL)
+		goto out;
+	memcpy(response->public_key, ptr, len);
+	ret = 0;
+ out:
+	if (ret != 0)
+		free(response->public_key);
+	return ret;
+}
+
+static int
+pack_public_key(int alg, fido_cred_t *cred, struct sk_enroll_response *response)
+{
+	switch(alg) {
+	case SK_ECDSA:
+		return pack_public_key_ecdsa(cred, response);
+	case SK_ED25519:
+		return pack_public_key_ed25519(cred, response);
+	default:
+		return -1;
+	}
 }
 
 int
-sk_enroll(const uint8_t *challenge, size_t challenge_len,
+sk_enroll(int alg, const uint8_t *challenge, size_t challenge_len,
     const char *application, uint8_t flags,
     struct sk_enroll_response **enroll_reponse)
 {
 	fido_cred_t *cred = NULL;
 	fido_dev_t *dev = NULL;
 	const uint8_t *ptr;
+	uint8_t user_id[32];
 	struct sk_enroll_response *response = NULL;
 	size_t len;
+	int cose_alg;
 	int ret = -1;
 	int r;
 	char *device = NULL;
@@ -177,30 +220,42 @@ sk_enroll(const uint8_t *challenge, size_t challenge_len,
 #ifdef SK_DEBUG
 	fido_init(FIDO_DEBUG);
 #endif
-
-	if ((device = pick_device()) == NULL)
-		goto out;
 	if (enroll_reponse == NULL)
 		goto out;
 	*enroll_reponse = NULL;
+	switch(alg) {
+	case SK_ECDSA:
+		cose_alg = COSE_ES256;
+		break;
+	case SK_ED25519:
+		cose_alg = COSE_EDDSA;
+		break;
+	default:
+		goto out;
+	}
+	if ((device = pick_device()) == NULL)
+		goto out;
 	if ((cred = fido_cred_new()) == NULL)
 		goto out;
-	if ((r = fido_cred_set_type(cred, COSE_ES256)) != FIDO_OK ||
-	    (r = fido_cred_set_clientdata_hash(cred, challenge, challenge_len)) != FIDO_OK ||
+	memset(user_id, 0, sizeof(user_id));
+	if ((r = fido_cred_set_type(cred, cose_alg)) != FIDO_OK ||
+	    (r = fido_cred_set_clientdata_hash(cred, challenge,
+	    challenge_len)) != FIDO_OK ||
+	    (r = fido_cred_set_user(cred, user_id, sizeof(user_id),
+	    "openssh", "openssh", NULL)) != FIDO_OK ||
 	    (r = fido_cred_set_rp(cred, application, NULL)) != FIDO_OK)
 		goto out;
 	if ((dev = fido_dev_new()) == NULL)
 		goto out;
 	if ((r = fido_dev_open(dev, device)) != FIDO_OK)
 		goto out;
-	fido_dev_force_u2f(dev);
 	if ((r = fido_dev_make_cred(dev, cred, NULL)) != FIDO_OK)
 		goto out;
 	if ((r = fido_cred_verify(cred)) != FIDO_OK)
 		goto out;
 	if ((response = calloc(1, sizeof(*response))) == NULL)
 		goto out;
-	if (pack_public_key(cred, response) != 0)
+	if (pack_public_key(alg, cred, response) != 0)
 		goto out;
 	if ((ptr = fido_cred_id_ptr(cred)) != NULL) {
 		len = fido_cred_id_len(cred);
@@ -245,18 +300,85 @@ sk_enroll(const uint8_t *challenge, size_t challenge_len,
 	return ret;
 }
 
-int
-sk_sign(const uint8_t *message, size_t message_len, const char *application,
-    const uint8_t *key_handle, size_t key_handle_len,
-    uint8_t flags, struct sk_sign_response **sign_response)
+static int
+pack_sig_ecdsa(fido_assert_t *assert, struct sk_sign_response *response)
 {
 	ECDSA_SIG *sig = NULL;
 	const BIGNUM *sig_r, *sig_s;
 	const unsigned char *cp;
+	size_t sig_len;
+	int ret = -1;
+
+	cp = fido_assert_sig_ptr(assert, 0);
+	sig_len = fido_assert_sig_len(assert, 0);
+	if ((sig = d2i_ECDSA_SIG(NULL, &cp, sig_len)) == NULL)
+		goto out;
+	ECDSA_SIG_get0(sig, &sig_r, &sig_s);
+	response->sig_r_len = BN_num_bytes(sig_r);
+	response->sig_s_len = BN_num_bytes(sig_s);
+	if ((response->sig_r = calloc(1, response->sig_r_len)) == NULL ||
+	    (response->sig_s = calloc(1, response->sig_s_len)) == NULL)
+		goto out;
+	BN_bn2bin(sig_r, response->sig_r);
+	BN_bn2bin(sig_s, response->sig_s);
+	ret = 0;
+ out:
+	ECDSA_SIG_free(sig);
+	if (ret != 0) {
+		free(response->sig_r);
+		free(response->sig_s);
+		response->sig_r = NULL;
+		response->sig_s = NULL;
+	}
+	return ret;
+}
+
+static int
+pack_sig_ed25519(fido_assert_t *assert, struct sk_sign_response *response)
+{
+	const unsigned char *ptr;
+	size_t len;
+	int ret = -1;
+
+	ptr = fido_assert_sig_ptr(assert, 0);
+	len = fido_assert_sig_len(assert, 0);
+	if (len != 64)
+		goto out;
+	response->sig_r_len = len;
+	if ((response->sig_r = calloc(1, response->sig_r_len)) == NULL)
+		goto out;
+	memcpy(response->sig_r, ptr, len);
+	ret = 0;
+ out:
+	if (ret != 0) {
+		free(response->sig_r);
+		response->sig_r = NULL;
+	}
+	return ret;
+}
+
+static int
+pack_sig(int alg, fido_assert_t *assert, struct sk_sign_response *response)
+{
+	switch(alg) {
+	case SK_ECDSA:
+		return pack_sig_ecdsa(assert, response);
+	case SK_ED25519:
+		return pack_sig_ed25519(assert, response);
+	default:
+		return -1;
+	}
+}
+
+int
+sk_sign(int alg, const uint8_t *message, size_t message_len,
+    const char *application,
+    const uint8_t *key_handle, size_t key_handle_len,
+    uint8_t flags, struct sk_sign_response **sign_response)
+{
 	fido_assert_t *assert = NULL;
 	fido_dev_t *dev = NULL;
 	struct sk_sign_response *response = NULL;
-	size_t sig_len;
 	int ret = -1;
 	int r;
 	char *device = NULL;
@@ -284,31 +406,19 @@ sk_sign(const uint8_t *message, size_t message_len, const char *application,
 		goto out;
 	if ((r = fido_dev_open(dev, device)) != FIDO_OK)
 		goto out;
-	fido_dev_force_u2f(dev);
 	if ((r = fido_dev_get_assert(dev, assert, NULL)) != FIDO_OK)
 		goto out;
 	if ((response = calloc(1, sizeof(*response))) == NULL)
 		goto out;
 	response->flags = fido_assert_flags(assert, 0);
 	response->counter = fido_assert_sigcount(assert, 0);
-	cp = fido_assert_sig_ptr(assert, 0);
-	sig_len = fido_assert_sig_len(assert, 0);
-	if ((sig = d2i_ECDSA_SIG(NULL, &cp, sig_len)) == NULL)
+	if (pack_sig(alg, assert, response) != 0)
 		goto out;
-	ECDSA_SIG_get0(sig, &sig_r, &sig_s);
-	response->sig_r_len = BN_num_bytes(sig_r);
-	response->sig_s_len = BN_num_bytes(sig_s);
-	if ((response->sig_r = calloc(1, response->sig_r_len)) == NULL ||
-	    (response->sig_s = calloc(1, response->sig_s_len)) == NULL)
-		goto out;
-	BN_bn2bin(sig_r, response->sig_r);
-	BN_bn2bin(sig_s, response->sig_s);
 	*sign_response = response;
 	response = NULL;
 	ret = 0;
  out:
 	free(device);
-	ECDSA_SIG_free(sig);
 	if (response != NULL) {
 		free(response->sig_r);
 		free(response->sig_s);
