@@ -17,6 +17,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <stddef.h>
+#include <stdarg.h>
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
@@ -79,6 +82,26 @@ int sk_sign(int alg, const uint8_t *message, size_t message_len,
 
 /* #define SK_DEBUG 1 */
 
+static void skdebug(const char *func, const char *fmt, ...)
+    __attribute__((__format__ (printf, 2, 3)));
+
+static void
+skdebug(const char *func, const char *fmt, ...)
+{
+#ifdef SK_DEBUG
+	va_list ap;
+
+	va_start(ap, fmt);
+	fprintf(stderr, "%s: ", func);
+	vfprintf(stderr, fmt, ap);
+	fputc('\n', stderr);
+	va_end(ap);
+#else /* SK_DEBUG */
+	(void)func; /* XXX */
+	(void)fmt; /* XXX */
+#endif /* SK_DEBUG */
+}
+
 uint32_t
 sk_api_version(void)
 {
@@ -87,20 +110,32 @@ sk_api_version(void)
 
 /* Select the first identified FIDO device attached to the system */
 static char *
-pick_device(void)
+pick_first_device(void)
 {
 	char *ret = NULL;
 	fido_dev_info_t *devlist = NULL;
 	size_t olen = 0;
+	int r;
+	const fido_dev_info_t *di;
 
-	if ((devlist = fido_dev_info_new(1)) == NULL)
+	if ((devlist = fido_dev_info_new(1)) == NULL) {
+		skdebug(__func__, "fido_dev_info_new failed");
 		goto out;
-	if (fido_dev_info_manifest(devlist, 1, &olen) != FIDO_OK)
+	}
+	if ((r = fido_dev_info_manifest(devlist, 1, &olen)) != FIDO_OK) {
+		skdebug(__func__, "fido_dev_info_manifest failed: %s",
+		    fido_strerr(r));
 		goto out;
-	if (olen != 1)
+	}
+	if (olen != 1) {
+		skdebug(__func__, "fido_dev_info_manifest bad len %zu", olen);
 		goto out;
-	if ((ret = strdup(fido_dev_info_path(devlist))) == NULL)
+	}
+	di = fido_dev_info_ptr(devlist, 1);
+	if ((ret = strdup(fido_dev_info_path(di))) == NULL) {
+		skdebug(__func__, "fido_dev_info_path failed");
 		goto out;
+	}
  out:
 	fido_dev_info_free(&devlist, 1);
 	return ret;
@@ -127,27 +162,45 @@ pack_public_key_ecdsa(fido_cred_t *cred, struct sk_enroll_response *response)
 	    (x = BN_CTX_get(bn_ctx)) == NULL ||
 	    (y = BN_CTX_get(bn_ctx)) == NULL ||
 	    (g = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1)) == NULL ||
-	    (q = EC_POINT_new(g)) == NULL)
+	    (q = EC_POINT_new(g)) == NULL) {
+		skdebug(__func__, "libcrypto setup failed");
 		goto out;
-	if ((ptr = fido_cred_pubkey_ptr(cred)) == NULL)
+	}
+	if ((ptr = fido_cred_pubkey_ptr(cred)) == NULL) {
+		skdebug(__func__, "fido_cred_pubkey_ptr failed");
 		goto out;
-	if (fido_cred_pubkey_len(cred) != 64)
+	}
+	if (fido_cred_pubkey_len(cred) != 64) {
+		skdebug(__func__, "bad fido_cred_pubkey_len %zu",
+		    fido_cred_pubkey_len(cred));
 		goto out;
+	}
 
 	if (BN_bin2bn(ptr, 32, x) == NULL ||
-	    BN_bin2bn(ptr + 32, 32, y) == NULL)
+	    BN_bin2bn(ptr + 32, 32, y) == NULL) {
+		skdebug(__func__, "BN_bin2bn failed");
 		goto out;
-	if (EC_POINT_set_affine_coordinates_GFp(g, q, x, y, bn_ctx) != 1)
+	}
+	if (EC_POINT_set_affine_coordinates_GFp(g, q, x, y, bn_ctx) != 1) {
+		skdebug(__func__, "EC_POINT_set_affine_coordinates_GFp failed");
 		goto out;
+	}
 	response->public_key_len = EC_POINT_point2oct(g, q,
 	    POINT_CONVERSION_UNCOMPRESSED, NULL, 0, bn_ctx);
-	if (response->public_key_len == 0 || response->public_key_len > 2048)
+	if (response->public_key_len == 0 || response->public_key_len > 2048) {
+		skdebug(__func__, "bad pubkey length %zu",
+		    response->public_key_len);
 		goto out;
-	if ((response->public_key = malloc(response->public_key_len)) == NULL)
+	}
+	if ((response->public_key = malloc(response->public_key_len)) == NULL) {
+		skdebug(__func__, "malloc pubkey failed");
 		goto out;
+	}
 	if (EC_POINT_point2oct(g, q, POINT_CONVERSION_UNCOMPRESSED,
-	    response->public_key, response->public_key_len, bn_ctx) == 0)
+	    response->public_key, response->public_key_len, bn_ctx) == 0) {
+		skdebug(__func__, "EC_POINT_point2oct failed");
 		goto out;
+	}
 	/* success */
 	ret = 0;
  out:
@@ -172,13 +225,19 @@ pack_public_key_ed25519(fido_cred_t *cred, struct sk_enroll_response *response)
 	response->public_key = NULL;
 	response->public_key_len = 0;
 
-	if ((len = fido_cred_pubkey_len(cred)) != 32)
+	if ((len = fido_cred_pubkey_len(cred)) != 32) {
+		skdebug(__func__, "bad fido_cred_pubkey_len len %zu", len);
 		goto out;
-	if ((ptr = fido_cred_pubkey_ptr(cred)) == NULL)
+	}
+	if ((ptr = fido_cred_pubkey_ptr(cred)) == NULL) {
+		skdebug(__func__, "fido_cred_pubkey_ptr failed");
 		goto out;
+	}
 	response->public_key_len = len;
-	if ((response->public_key = malloc(response->public_key_len)) == NULL)
+	if ((response->public_key = malloc(response->public_key_len)) == NULL) {
+		skdebug(__func__, "malloc pubkey failed");
 		goto out;
+	}
 	memcpy(response->public_key, ptr, len);
 	ret = 0;
  out:
@@ -220,8 +279,10 @@ sk_enroll(int alg, const uint8_t *challenge, size_t challenge_len,
 #ifdef SK_DEBUG
 	fido_init(FIDO_DEBUG);
 #endif
-	if (enroll_reponse == NULL)
+	if (enroll_reponse == NULL) {
+		skdebug(__func__, "enroll_reponse == NULL");
 		goto out;
+	}
 	*enroll_reponse = NULL;
 	switch(alg) {
 	case SK_ECDSA:
@@ -231,50 +292,86 @@ sk_enroll(int alg, const uint8_t *challenge, size_t challenge_len,
 		cose_alg = COSE_EDDSA;
 		break;
 	default:
+		skdebug(__func__, "unsupported key type %d", alg);
 		goto out;
 	}
-	if ((device = pick_device()) == NULL)
+	if ((device = pick_first_device()) == NULL) {
+		skdebug(__func__, "pick_first_device failed");
 		goto out;
-	if ((cred = fido_cred_new()) == NULL)
+	}
+	skdebug(__func__, "using device %s", device);
+	if ((cred = fido_cred_new()) == NULL) {
+		skdebug(__func__, "fido_cred_new failed");
 		goto out;
+	}
 	memset(user_id, 0, sizeof(user_id));
-	if ((r = fido_cred_set_type(cred, cose_alg)) != FIDO_OK ||
-	    (r = fido_cred_set_clientdata_hash(cred, challenge,
-	    challenge_len)) != FIDO_OK ||
-	    (r = fido_cred_set_user(cred, user_id, sizeof(user_id),
-	    "openssh", "openssh", NULL)) != FIDO_OK ||
-	    (r = fido_cred_set_rp(cred, application, NULL)) != FIDO_OK)
+	if ((r = fido_cred_set_type(cred, cose_alg)) != FIDO_OK) {
+		skdebug(__func__, "fido_cred_set_type: %s", fido_strerr(r));
 		goto out;
-	if ((dev = fido_dev_new()) == NULL)
+	}
+	if ((r = fido_cred_set_clientdata_hash(cred, challenge,
+	    challenge_len)) != FIDO_OK) {
+		skdebug(__func__, "fido_cred_set_clientdata_hash: %s",
+		    fido_strerr(r));
 		goto out;
-	if ((r = fido_dev_open(dev, device)) != FIDO_OK)
+	}
+	if ((r = fido_cred_set_user(cred, user_id, sizeof(user_id),
+	    "openssh", "openssh", NULL)) != FIDO_OK) {
+		skdebug(__func__, "fido_cred_set_user: %s", fido_strerr(r));
 		goto out;
-	if ((r = fido_dev_make_cred(dev, cred, NULL)) != FIDO_OK)
+	}
+	if ((r = fido_cred_set_rp(cred, application, NULL)) != FIDO_OK) {
+		skdebug(__func__, "fido_cred_set_rp: %s", fido_strerr(r));
 		goto out;
-	if ((r = fido_cred_verify(cred)) != FIDO_OK)
+	}
+	if ((dev = fido_dev_new()) == NULL) {
+		skdebug(__func__, "fido_dev_new failed");
 		goto out;
-	if ((response = calloc(1, sizeof(*response))) == NULL)
+	}
+	if ((r = fido_dev_open(dev, device)) != FIDO_OK) {
+		skdebug(__func__, "fido_dev_open: %s", fido_strerr(r));
 		goto out;
-	if (pack_public_key(alg, cred, response) != 0)
+	}
+	if ((r = fido_dev_make_cred(dev, cred, NULL)) != FIDO_OK) {
+		skdebug(__func__, "fido_dev_make_cred: %s", fido_strerr(r));
 		goto out;
+	}
+	if ((r = fido_cred_verify(cred)) != FIDO_OK) {
+		skdebug(__func__, "fido_cred_verify: %s", fido_strerr(r));
+		goto out;
+	}
+	if ((response = calloc(1, sizeof(*response))) == NULL) {
+		skdebug(__func__, "calloc response failed");
+		goto out;
+	}
+	if (pack_public_key(alg, cred, response) != 0) {
+		skdebug(__func__, "pack_public_key failed");
+		goto out;
+	}
 	if ((ptr = fido_cred_id_ptr(cred)) != NULL) {
 		len = fido_cred_id_len(cred);
-		if ((response->key_handle = calloc(1, len)) == NULL)
+		if ((response->key_handle = calloc(1, len)) == NULL) {
+			skdebug(__func__, "calloc key handle failed");
 			goto out;
+		}
 		memcpy(response->key_handle, ptr, len);
 		response->key_handle_len = len;
 	}
 	if ((ptr = fido_cred_sig_ptr(cred)) != NULL) {
 		len = fido_cred_sig_len(cred);
-		if ((response->signature = calloc(1, len)) == NULL)
+		if ((response->signature = calloc(1, len)) == NULL) {
+			skdebug(__func__, "calloc signature failed");
 			goto out;
+		}
 		memcpy(response->signature, ptr, len);
 		response->signature_len = len;
 	}
 	if ((ptr = fido_cred_x5c_ptr(cred)) != NULL) {
 		len = fido_cred_x5c_len(cred);
-		if ((response->attestation_cert = calloc(1, len)) == NULL)
+		if ((response->attestation_cert = calloc(1, len)) == NULL) {
+			skdebug(__func__, "calloc attestation cert failed");
 			goto out;
+		}
 		memcpy(response->attestation_cert, ptr, len);
 		response->attestation_cert_len = len;
 	}
@@ -311,14 +408,18 @@ pack_sig_ecdsa(fido_assert_t *assert, struct sk_sign_response *response)
 
 	cp = fido_assert_sig_ptr(assert, 0);
 	sig_len = fido_assert_sig_len(assert, 0);
-	if ((sig = d2i_ECDSA_SIG(NULL, &cp, sig_len)) == NULL)
+	if ((sig = d2i_ECDSA_SIG(NULL, &cp, sig_len)) == NULL) {
+		skdebug(__func__, "d2i_ECDSA_SIG failed");
 		goto out;
+	}
 	ECDSA_SIG_get0(sig, &sig_r, &sig_s);
 	response->sig_r_len = BN_num_bytes(sig_r);
 	response->sig_s_len = BN_num_bytes(sig_s);
 	if ((response->sig_r = calloc(1, response->sig_r_len)) == NULL ||
-	    (response->sig_s = calloc(1, response->sig_s_len)) == NULL)
+	    (response->sig_s = calloc(1, response->sig_s_len)) == NULL) {
+		skdebug(__func__, "calloc signature failed");
 		goto out;
+	}
 	BN_bn2bin(sig_r, response->sig_r);
 	BN_bn2bin(sig_s, response->sig_s);
 	ret = 0;
@@ -342,11 +443,15 @@ pack_sig_ed25519(fido_assert_t *assert, struct sk_sign_response *response)
 
 	ptr = fido_assert_sig_ptr(assert, 0);
 	len = fido_assert_sig_len(assert, 0);
-	if (len != 64)
+	if (len != 64) {
+		skdebug(__func__, "bad length %zu", len);
 		goto out;
+	}
 	response->sig_r_len = len;
-	if ((response->sig_r = calloc(1, response->sig_r_len)) == NULL)
+	if ((response->sig_r = calloc(1, response->sig_r_len)) == NULL) {
+		skdebug(__func__, "calloc signature failed");
 		goto out;
+	}
 	memcpy(response->sig_r, ptr, len);
 	ret = 0;
  out:
@@ -387,33 +492,58 @@ sk_sign(int alg, const uint8_t *message, size_t message_len,
 	fido_init(FIDO_DEBUG);
 #endif
 
-	if ((device = pick_device()) == NULL)
+	if ((device = pick_first_device()) == NULL)
 		goto out;
 	if (sign_response == NULL)
 		goto out;
 	*sign_response = NULL;
-	if ((assert = fido_assert_new()) == NULL)
+	if ((assert = fido_assert_new()) == NULL) {
+		skdebug(__func__, "fido_assert_new failed");
 		goto out;
-	if ((r = fido_assert_set_clientdata_hash(assert, message, message_len)) != FIDO_OK ||
-	    (r = fido_assert_set_rp(assert, application)) != FIDO_OK ||
-	    (r = fido_assert_allow_cred(assert, key_handle, key_handle_len)) != FIDO_OK)
+	}
+	if ((r = fido_assert_set_clientdata_hash(assert, message,
+	    message_len)) != FIDO_OK) {
+		skdebug(__func__, "fido_assert_set_clientdata_hash: %s",
+		    fido_strerr(r));
 		goto out;
+	}
+	if ((r = fido_assert_set_rp(assert, application)) != FIDO_OK) {
+		skdebug(__func__, "fido_assert_set_rp: %s", fido_strerr(r));
+		goto out;
+	}
+	if ((r = fido_assert_allow_cred(assert, key_handle,
+	    key_handle_len)) != FIDO_OK) {
+		skdebug(__func__, "fido_assert_allow_cred: %s", fido_strerr(r));
+		goto out;
+	}
 	if ((r = fido_assert_set_up(assert,
 	    (flags & SK_USER_PRESENCE_REQD) ?
-	    FIDO_OPT_TRUE : FIDO_OPT_FALSE)) != FIDO_OK)
+	    FIDO_OPT_TRUE : FIDO_OPT_FALSE)) != FIDO_OK) {
+		skdebug(__func__, "fido_assert_set_up: %s", fido_strerr(r));
 		goto out;
-	if ((dev = fido_dev_new()) == NULL)
+	}
+	if ((dev = fido_dev_new()) == NULL) {
+		skdebug(__func__, "fido_dev_new failed");
 		goto out;
-	if ((r = fido_dev_open(dev, device)) != FIDO_OK)
+	}
+	if ((r = fido_dev_open(dev, device)) != FIDO_OK) {
+		skdebug(__func__, "fido_dev_open: %s", fido_strerr(r));
 		goto out;
-	if ((r = fido_dev_get_assert(dev, assert, NULL)) != FIDO_OK)
+	}
+	if ((r = fido_dev_get_assert(dev, assert, NULL)) != FIDO_OK) {
+		skdebug(__func__, "fido_dev_get_assert: %s", fido_strerr(r));
 		goto out;
-	if ((response = calloc(1, sizeof(*response))) == NULL)
+	}
+	if ((response = calloc(1, sizeof(*response))) == NULL) {
+		skdebug(__func__, "calloc response failed");
 		goto out;
+	}
 	response->flags = fido_assert_flags(assert, 0);
 	response->counter = fido_assert_sigcount(assert, 0);
-	if (pack_sig(alg, assert, response) != 0)
+	if (pack_sig(alg, assert, response) != 0) {
+		skdebug(__func__, "pack_sig failed");
 		goto out;
+	}
 	*sign_response = response;
 	response = NULL;
 	ret = 0;
