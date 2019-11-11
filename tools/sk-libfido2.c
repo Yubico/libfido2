@@ -29,6 +29,8 @@
 
 #include <fido.h>
 
+#define MAX_FIDO_DEVICES	256
+
 /* Compatibility with OpenSSH 1.0.x */
 #if (OPENSSL_VERSION_NUMBER < 0x10100000L)
 #define ECDSA_SIG_get0(sig, pr, ps) \
@@ -131,7 +133,7 @@ pick_first_device(void)
 		skdebug(__func__, "fido_dev_info_manifest bad len %zu", olen);
 		goto out;
 	}
-	di = fido_dev_info_ptr(devlist, 1);
+	di = fido_dev_info_ptr(devlist, 0);
 	if ((ret = strdup(fido_dev_info_path(di))) == NULL) {
 		skdebug(__func__, "fido_dev_info_path failed");
 		goto out;
@@ -484,18 +486,20 @@ sk_sign(int alg, const uint8_t *message, size_t message_len,
 	fido_assert_t *assert = NULL;
 	fido_dev_t *dev = NULL;
 	struct sk_sign_response *response = NULL;
+	fido_dev_info_t *devlist = NULL;
+	size_t i, devlist_len = 0;
 	int ret = -1;
 	int r;
-	char *device = NULL;
+	const char *device;
 
 #ifdef SK_DEBUG
 	fido_init(FIDO_DEBUG);
 #endif
 
-	if ((device = pick_first_device()) == NULL)
+	if (sign_response == NULL) {
+		skdebug(__func__, "sign_response == NULL");
 		goto out;
-	if (sign_response == NULL)
-		goto out;
+	}
 	*sign_response = NULL;
 	if ((assert = fido_assert_new()) == NULL) {
 		skdebug(__func__, "fido_assert_new failed");
@@ -522,16 +526,53 @@ sk_sign(int alg, const uint8_t *message, size_t message_len,
 		skdebug(__func__, "fido_assert_set_up: %s", fido_strerr(r));
 		goto out;
 	}
-	if ((dev = fido_dev_new()) == NULL) {
-		skdebug(__func__, "fido_dev_new failed");
+
+	if ((devlist = fido_dev_info_new(MAX_FIDO_DEVICES)) == NULL) {
+		skdebug(__func__, "fido_dev_info_new failed");
 		goto out;
 	}
-	if ((r = fido_dev_open(dev, device)) != FIDO_OK) {
-		skdebug(__func__, "fido_dev_open: %s", fido_strerr(r));
+	if ((r = fido_dev_info_manifest(devlist, MAX_FIDO_DEVICES,
+	    &devlist_len)) != FIDO_OK) {
+		skdebug(__func__, "fido_dev_info_manifest: %s", fido_strerr(r));
 		goto out;
 	}
-	if ((r = fido_dev_get_assert(dev, assert, NULL)) != FIDO_OK) {
-		skdebug(__func__, "fido_dev_get_assert: %s", fido_strerr(r));
+	for (i = 0; i < devlist_len; i++) {
+		const fido_dev_info_t *di = fido_dev_info_ptr(devlist, i);
+
+		if ((device = fido_dev_info_path(di)) == NULL) {
+			skdebug(__func__, "fido_dev_info_path failed");
+			goto out;
+		}
+		skdebug(__func__, "using device %s", device);
+		if ((dev = fido_dev_new()) == NULL) {
+			skdebug(__func__, "fido_dev_new failed");
+			goto out;
+		}
+		if ((r = fido_dev_open(dev, device)) != FIDO_OK) {
+			skdebug(__func__, "fido_dev_open: %s", fido_strerr(r));
+			fido_dev_free(&dev);
+			continue;
+		}
+		if ((r = fido_dev_get_assert(dev, assert, NULL)) == FIDO_OK) {
+			skdebug(__func__, "got assertion from device %s",
+			    device);
+			/* token owns this key handle */
+			break;
+		} else {
+			if (r != FIDO_ERR_NO_CREDENTIALS) {
+				skdebug(__func__, "device %s does not own this "
+				    "key handle", device);
+			} else {
+				skdebug(__func__, "fido_dev_get_assert: %s",
+				    fido_strerr(r));
+			}
+			fido_dev_close(dev);
+			fido_dev_free(&dev);
+			continue;
+		}
+	}
+	if (i >= devlist_len) {
+		skdebug(__func__, "no token matched key handle");
 		goto out;
 	}
 	if ((response = calloc(1, sizeof(*response))) == NULL) {
@@ -548,7 +589,7 @@ sk_sign(int alg, const uint8_t *message, size_t message_len,
 	response = NULL;
 	ret = 0;
  out:
-	free(device);
+	fido_dev_info_free(&devlist, MAX_FIDO_DEVICES);
 	if (response != NULL) {
 		free(response->sig_r);
 		free(response->sig_s);
