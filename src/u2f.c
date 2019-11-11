@@ -720,5 +720,8 @@ u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
 
 	fa->stmt_len = nauth_ok;
 
+	if (nauth_ok == 0)
+		return (FIDO_ERR_NO_CREDENTIALS);
+
 	return (FIDO_OK);
 }
