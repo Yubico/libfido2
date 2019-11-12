@@ -16,7 +16,13 @@
 #include "fido/es256.h"
 
 #if defined(_MSC_VER)
-#define usleep(x)	Sleep((x)/1000)
+static int
+usleep(unsigned int usec)
+{
+	Sleep(usec / 1000);
+
+	return (0);
+}
 #endif
 
 static int
@@ -151,7 +157,11 @@ send_dummy_register(fido_dev_t *dev, int ms)
 			goto fail;
 		}
 #ifndef FIDO_FUZZ
-		usleep((ms == -1 ? 100 : ms) * 1000);
+		if (usleep((ms == -1 ? 100 : ms) * 1000) < 0) {
+			log_debug("%s: usleep", __func__);
+			r = FIDO_ERR_RX;
+			goto fail;
+		}
 #endif
 	} while (((reply[0] << 8) | reply[1]) == SW_CONDITIONS_NOT_SATISFIED);
 
@@ -320,7 +330,11 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 			goto fail;
 		}
 #ifndef FIDO_FUZZ
-		usleep((ms == -1 ? 100 : ms) * 1000);
+		if (usleep((ms == -1 ? 100 : ms) * 1000) < 0) {
+			log_debug("%s: usleep", __func__);
+			r = FIDO_ERR_RX;
+			goto fail;
+		}
 #endif
 	} while (((reply[0] << 8) | reply[1]) == SW_CONDITIONS_NOT_SATISFIED);
 
@@ -618,7 +632,11 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 			goto fail;
 		}
 #ifndef FIDO_FUZZ
-		usleep((ms == -1 ? 100 : ms) * 1000);
+		if (usleep((ms == -1 ? 100 : ms) * 1000) < 0) {
+			log_debug("%s: usleep", __func__);
+			r = FIDO_ERR_RX;
+			goto fail;
+		}
 #endif
 	} while (((reply[0] << 8) | reply[1]) == SW_CONDITIONS_NOT_SATISFIED);
 
