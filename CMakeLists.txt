@@ -267,12 +267,13 @@ else()
 endif()
 
 # usable sigaction
-set(CMAKE_EXTRA_INCLUDE_FILES "signal.h")
+set(CMAKE_EXTRA_INCLUDE_FILES signal.h)
 check_function_exists(sigaction HAVE_SIGACTION)
 check_type_size("sig_atomic_t" HAVE_SIG_ATOMIC_T)
 if(HAVE_SIGACTION AND (NOT HAVE_SIG_ATOMIC_T STREQUAL ""))
 	add_definitions(-DSIGNAL_EXAMPLE)
 endif()
+set(CMAKE_EXTRA_INCLUDE_FILES)
 
 # export list
 if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
