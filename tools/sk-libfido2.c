@@ -338,9 +338,19 @@ sk_enroll(int alg, const uint8_t *challenge, size_t challenge_len,
 		skdebug(__func__, "fido_dev_make_cred: %s", fido_strerr(r));
 		goto out;
 	}
-	if ((r = fido_cred_verify(cred)) != FIDO_OK) {
-		skdebug(__func__, "fido_cred_verify: %s", fido_strerr(r));
-		goto out;
+	if (fido_cred_x5c_ptr(cred) != NULL) {
+		if ((r = fido_cred_verify(cred)) != FIDO_OK) {
+			skdebug(__func__, "fido_cred_verify: %s",
+			    fido_strerr(r));
+			goto out;
+		}
+	} else {
+		skdebug(__func__, "self-attested credential");
+		if ((r = fido_cred_verify_self(cred)) != FIDO_OK) {
+			skdebug(__func__, "fido_cred_verify_self: %s",
+			    fido_strerr(r));
+			goto out;
+		}
 	}
 	if ((response = calloc(1, sizeof(*response))) == NULL) {
 		skdebug(__func__, "calloc response failed");
