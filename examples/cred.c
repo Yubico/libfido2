@@ -7,6 +7,7 @@
 #include <openssl/ec.h>
 #include <openssl/pem.h>
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,7 +43,7 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: cred [-t ecdsa|rsa|eddsa] [-k pubkey] "
-	    "[-ei cred_id] [-P pin] [-hruv] <device>\n");
+	    "[-ei cred_id] [-P pin] [-T seconds] [-hruv] <device>\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -150,6 +151,7 @@ main(int argc, char **argv)
 	const char	*key_out = NULL;
 	const char	*id_out = NULL;
 	unsigned char	*body = NULL;
+	long long	 seconds = 0;
 	size_t		 len;
 	int		 type = COSE_ES256;
 	int		 ext = 0;
@@ -159,10 +161,19 @@ main(int argc, char **argv)
 	if ((cred = fido_cred_new()) == NULL)
 		errx(1, "fido_cred_new");
 
-	while ((ch = getopt(argc, argv, "P:e:hi:k:rt:uv")) != -1) {
+	while ((ch = getopt(argc, argv, "P:T:e:hi:k:rt:uv")) != -1) {
 		switch (ch) {
 		case 'P':
 			pin = optarg;
+			break;
+		case 'T':
+#ifndef SIGNAL_EXAMPLE
+			errx(1, "-T not supported");
+#endif
+			if (base10(optarg, &seconds) < 0)
+				errx(1, "base10: %s", optarg);
+			if (seconds <= 0 || seconds > 30)
+				errx(1, "-T: %s must be in (0,30]", optarg);
 			break;
 		case 'e':
 			if (read_blob(optarg, &body, &len) < 0)
@@ -260,6 +271,10 @@ main(int argc, char **argv)
 
 #ifdef SIGNAL_EXAMPLE
 	prepare_signal_handler(SIGINT);
+	if (seconds) {
+		prepare_signal_handler(SIGALRM);
+		alarm((unsigned)seconds);
+	}
 #endif
 
 	r = fido_dev_make_cred(dev, cred, pin);

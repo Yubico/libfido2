@@ -11,6 +11,7 @@
 #include <openssl/evp.h>
 #include <openssl/pem.h>
 
+#include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -57,6 +58,22 @@ prepare_signal_handler(int signo)
 		err(1, "sigaction");
 }
 #endif
+
+int
+base10(const char *str, long long *ll)
+{
+	char *ep;
+
+	*ll = strtoll(str, &ep, 10);
+	if (str == ep || *ep != '\0')
+		return (-1);
+	else if (*ll == LLONG_MIN && errno == ERANGE)
+		return (-1);
+	else if (*ll == LLONG_MAX && errno == ERANGE)
+		return (-1);
+
+	return (0);
+}
 
 int
 write_blob(const char *path, const unsigned char *ptr, size_t len)

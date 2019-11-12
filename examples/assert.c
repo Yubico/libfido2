@@ -37,8 +37,8 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: assert [-t ecdsa|rsa|eddsa] [-a cred_id] "
-	    "[-h hmac_secret] [-s hmac_salt] [-P pin] [-puv] <pubkey> "
-	    "<device>\n");
+	    "[-h hmac_secret] [-s hmac_salt] [-P pin] [-T seconds] [-puv] "
+	    "<pubkey> <device>\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -171,6 +171,7 @@ main(int argc, char **argv)
 	const char	*pin = NULL;
 	const char	*hmac_out = NULL;
 	unsigned char	*body = NULL;
+	long long	 seconds = 0;
 	size_t		 len;
 	int		 type = COSE_ES256;
 	int		 ext = 0;
@@ -180,10 +181,19 @@ main(int argc, char **argv)
 	if ((assert = fido_assert_new()) == NULL)
 		errx(1, "fido_assert_new");
 
-	while ((ch = getopt(argc, argv, "P:a:h:ps:t:uv")) != -1) {
+	while ((ch = getopt(argc, argv, "P:T:a:h:ps:t:uv")) != -1) {
 		switch (ch) {
 		case 'P':
 			pin = optarg;
+			break;
+		case 'T':
+#ifndef SIGNAL_EXAMPLE
+			errx(1, "-T not supported");
+#endif
+			if (base10(optarg, &seconds) < 0)
+				errx(1, "base10: %s", optarg);
+			if (seconds <= 0 || seconds > 30)
+				errx(1, "-T: %s must be in (0,30]", optarg);
 			break;
 		case 'a':
 			if (read_blob(optarg, &body, &len) < 0)
@@ -277,6 +287,10 @@ main(int argc, char **argv)
 
 #ifdef SIGNAL_EXAMPLE
 	prepare_signal_handler(SIGINT);
+	if (seconds) {
+		prepare_signal_handler(SIGALRM);
+		alarm((unsigned)seconds);
+	}
 #endif
 
 	r = fido_dev_get_assert(dev, assert, pin);
