@@ -409,3 +409,11 @@ WRAP(int,
 	(d, cmd, buf, count),
 	1
 )
+
+WRAP(int,
+	usleep,
+	(unsigned int usec),
+	-1,
+	(usec),
+	1
+)

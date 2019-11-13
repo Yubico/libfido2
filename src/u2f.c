@@ -132,6 +132,10 @@ send_dummy_register(fido_dev_t *dev, int ms)
 	unsigned char	 reply[2048];
 	int		 r;
 
+#ifdef FIDO_FUZZ
+	ms = 0; /* XXX */
+#endif
+
 	/* dummy challenge & application */
 	memset(&challenge, 0xff, sizeof(challenge));
 	memset(&application, 0xff, sizeof(application));
@@ -156,13 +160,11 @@ send_dummy_register(fido_dev_t *dev, int ms)
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-#ifndef FIDO_FUZZ
 		if (usleep((ms == -1 ? 100 : ms) * 1000) < 0) {
 			log_debug("%s: usleep", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-#endif
 	} while (((reply[0] << 8) | reply[1]) == SW_CONDITIONS_NOT_SATISFIED);
 
 	r = FIDO_OK;
@@ -290,6 +292,10 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 	uint8_t		 key_id_len;
 	int		 r;
 
+#ifdef FIDO_FUZZ
+	ms = 0; /* XXX */
+#endif
+
 	if (cdh->len != SHA256_DIGEST_LENGTH || key_id->len > UINT8_MAX ||
 	    rp_id == NULL) {
 		r = FIDO_ERR_INVALID_ARGUMENT;
@@ -329,13 +335,11 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-#ifndef FIDO_FUZZ
 		if (usleep((ms == -1 ? 100 : ms) * 1000) < 0) {
 			log_debug("%s: usleep", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-#endif
 	} while (((reply[0] << 8) | reply[1]) == SW_CONDITIONS_NOT_SATISFIED);
 
 	if ((r = parse_auth_reply(sig, ad, rp_id, reply,
@@ -576,6 +580,10 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 	int		 found;
 	int		 r;
 
+#ifdef FIDO_FUZZ
+	ms = 0; /* XXX */
+#endif
+
 	if (cred->rk == FIDO_OPT_TRUE || cred->uv == FIDO_OPT_TRUE) {
 		log_debug("%s: rk=%d, uv=%d", __func__, cred->rk, cred->uv);
 		return (FIDO_ERR_UNSUPPORTED_OPTION);
@@ -631,13 +639,11 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-#ifndef FIDO_FUZZ
 		if (usleep((ms == -1 ? 100 : ms) * 1000) < 0) {
 			log_debug("%s: usleep", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-#endif
 	} while (((reply[0] << 8) | reply[1]) == SW_CONDITIONS_NOT_SATISFIED);
 
 	if ((r = parse_register_reply(cred, reply,
