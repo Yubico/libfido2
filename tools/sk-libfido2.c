@@ -84,13 +84,13 @@ int sk_sign(int alg, const uint8_t *message, size_t message_len,
 
 /* #define SK_DEBUG 1 */
 
+#ifdef SK_DEBUG
 static void skdebug(const char *func, const char *fmt, ...)
     __attribute__((__format__ (printf, 2, 3)));
 
 static void
 skdebug(const char *func, const char *fmt, ...)
 {
-#ifdef SK_DEBUG
 	va_list ap;
 
 	va_start(ap, fmt);
@@ -98,11 +98,10 @@ skdebug(const char *func, const char *fmt, ...)
 	vfprintf(stderr, fmt, ap);
 	fputc('\n', stderr);
 	va_end(ap);
-#else /* SK_DEBUG */
-	(void)func; /* XXX */
-	(void)fmt; /* XXX */
-#endif /* SK_DEBUG */
 }
+#else
+#define skdebug(...) do { /* nothing */ } while (0)
+#endif /* SK_DEBUG */
 
 uint32_t
 sk_api_version(void)
