@@ -18,7 +18,7 @@ file for the full license text.
 
 === Supported Platforms
 
-*libfido2* is known to work on Linux, MacOS, and Windows.
+*libfido2* is known to work on Linux, MacOS, Windows, and OpenBSD.
 
 === Documentation
 
