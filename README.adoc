@@ -57,12 +57,31 @@ https://www.freedesktop.org/wiki/Software/systemd[systemd]) is also required.
 For complete, OS-specific installation instructions, please refer to the
 `.travis/` (Linux, MacOS) and `windows/` directories.
 
-Under Linux you will need to add a Udev rule to be able to access the FIDO
-device, or run as root. For example, the Udev rule may contain the following:
+On Linux, you will need to add a udev rule to be able to access the FIDO
+device, or run as root. For example, the udev rule may contain the following:
 
 ----
-#Udev rule for allowing HID access to Yubico devices for FIDO support.
+#udev rule for allowing HID access to Yubico devices for FIDO support.
 
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", \
   MODE="0664", GROUP="plugdev", ATTRS{idVendor}=="1050"
 ----
+
+On Windows 1903 and newer versions, access to FIDO devices has been restricted
+to applications using the operating system's native API. Use of *libfido2*
+is still possible in privileged applications.
+
+=== OpenSSH Integration
+
+*libfido2* includes middleware allowing https://www.openssh.org[OpenSSH] to
+talk to U2F/FIDO2 devices. Note that server support is required for
+authentication. In a nutshell:
+
+==== Key Generation
+
+  $ ssh-keygen -t [ecdsa-sk|ed25519-sk] -w /path/to/libsk-libfido2.so
+
+==== Authentication
+
+  $ ssh-agent -P /path/to/libsk-libfido2.so
+  $ ssh-add -S /path/to/libsk-libfido2.so
