@@ -128,4 +128,15 @@ int verify_sig_rs256(const fido_blob_t *, const rs256_pk_t *,
 int verify_sig_eddsa(const fido_blob_t *, const eddsa_pk_t *,
     const fido_blob_t *);
 
+/* OS specific dev_info_manifest */
+#if defined(LINUX)
+int fido_dev_info_manifest_linux(fido_dev_info_t *, size_t, size_t *);
+#elif defined(WIN)
+int fido_dev_info_manifest_win(fido_dev_info_t *, size_t, size_t *);
+#elif defined(OSX)
+int fido_dev_info_manifest_osx(fido_dev_info_t *, size_t, size_t *);
+#elif defined(OPENBSD)
+int fido_dev_info_manifest_openbsd(fido_dev_info_t *, size_t, size_t *);
+#endif
+
 #endif /* !_EXTERN_H */

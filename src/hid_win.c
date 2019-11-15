@@ -172,7 +172,7 @@ fail:
 }
 
 int
-fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
+fido_dev_info_manifest_win(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
 	GUID					 hid_guid = GUID_DEVINTERFACE_HID;
 	HDEVINFO				 devinfo = INVALID_HANDLE_VALUE;

@@ -51,6 +51,7 @@
 #define FIDO_ERR_UP_REQUIRED		0x3b
 #define FIDO_ERR_ERR_OTHER		0x7f
 #define FIDO_ERR_SPEC_LAST		0xdf
+#define FIDO_ERR_TOO_MANY_DEV_MANIFEST	0xef
 
 /* defined internally */
 #define FIDO_OK				FIDO_ERR_SUCCESS

@@ -64,6 +64,13 @@ fail:
 #error "please provide an implementation of obtain_nonce() for your platform"
 #endif /* _WIN32 */
 
+#ifndef MAX_NUM_DEV_MANIFEST
+#define MAX_NUM_DEV_MANIFEST 16
+#endif
+
+static dev_manifest_func_t manifest_funcs[MAX_NUM_DEV_MANIFEST];
+static int num_dev_manifest_func = 0;
+
 static int
 fido_dev_open_tx(fido_dev_t *dev, const char *path)
 {
@@ -142,6 +149,43 @@ fido_dev_open_wait(fido_dev_t *dev, const char *path, int ms)
 }
 
 int
+fido_dev_register_manifest_func(const dev_manifest_func_t func)
+{
+	if (num_dev_manifest_func == MAX_NUM_DEV_MANIFEST)
+	{
+		return (FIDO_ERR_TOO_MANY_DEV_MANIFEST);
+	}
+	manifest_funcs[num_dev_manifest_func++] = func;
+	return (FIDO_OK);
+}
+
+int
+fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
+{
+	int i;
+	*olen = 0;
+	dev_manifest_func_t m_func;
+	for (i = 0; i < num_dev_manifest_func; i++)
+	{
+		size_t curr_olen;
+		int r;
+		m_func = manifest_funcs[i];
+		r = m_func(devlist + *olen, ilen - *olen, &curr_olen);
+		if (r == FIDO_OK)
+		{
+			*olen += curr_olen;
+		} else {
+			return r;
+		}
+		if (*olen == ilen)
+		{
+			break;
+		}
+	}
+	return FIDO_OK;
+}
+
+int
 fido_dev_open(fido_dev_t *dev, const char *path)
 {
 	return (fido_dev_open_wait(dev, path, -1));
@@ -195,6 +239,15 @@ fido_init(int flags)
 {
 	if (flags & FIDO_DEBUG || getenv("FIDO_DEBUG") != NULL)
 		log_init();
+#if defined(LINUX)
+	fido_dev_register_manifest_func(fido_dev_info_manifest_linux);
+#elif defined(OSX)
+	fido_dev_register_manifest_func(fido_dev_info_manifest_osx);
+#elif defined(WIN)
+	fido_dev_register_manifest_func(fido_dev_info_manifest_win);
+#elif defined(OPENBSD)
+	fido_dev_register_manifest_func(fido_dev_info_manifest_openbsd);
+#endif
 }
 
 fido_dev_t *

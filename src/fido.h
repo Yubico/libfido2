@@ -57,6 +57,7 @@ typedef struct es256_sk es256_sk_t;
 typedef struct rs256_pk rs256_pk_t;
 typedef struct eddsa_pk eddsa_pk_t;
 #endif
+typedef int (*dev_manifest_func_t)(fido_dev_info_t *dev_infos, size_t ilen, size_t *olen);
 
 fido_assert_t *fido_assert_new(void);
 fido_cred_t *fido_cred_new(void);
@@ -151,6 +152,7 @@ int fido_dev_get_assert(fido_dev_t *, fido_assert_t *, const char *);
 int fido_dev_get_cbor_info(fido_dev_t *, fido_cbor_info_t *);
 int fido_dev_get_retry_count(fido_dev_t *, int *);
 int fido_dev_info_manifest(fido_dev_info_t *, size_t, size_t *);
+int fido_dev_register_manifest_func(const dev_manifest_func_t func);
 int fido_dev_make_cred(fido_dev_t *, fido_cred_t *, const char *);
 int fido_dev_open(fido_dev_t *, const char *);
 int fido_dev_reset(fido_dev_t *);

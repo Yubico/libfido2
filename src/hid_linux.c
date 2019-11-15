@@ -240,7 +240,7 @@ fail:
 }
 
 int
-fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
+fido_dev_info_manifest_linux(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
 	struct udev		*udev = NULL;
 	struct udev_enumerate	*udev_enum = NULL;

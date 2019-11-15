@@ -29,7 +29,7 @@ struct hid_openbsd {
 };
 
 int
-fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
+fido_dev_info_manifest_openbsd(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
 	size_t i;
 	char path[64];
