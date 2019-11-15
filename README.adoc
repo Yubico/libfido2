@@ -73,7 +73,7 @@ is still possible in privileged applications.
 
 === OpenSSH Integration
 
-*libfido2* includes middleware allowing https://www.openssh.org[OpenSSH] to
+*libfido2* includes middleware allowing https://www.openssh.com[OpenSSH] to
 talk to U2F/FIDO2 devices. Note that server support is required for
 authentication. In a nutshell:
 
