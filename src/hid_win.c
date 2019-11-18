@@ -29,18 +29,18 @@ is_fido(HANDLE dev)
 	uint16_t		usage_page = 0;
 
 	if (HidD_GetPreparsedData(dev, &data) == false) {
-		log_debug("%s: HidD_GetPreparsedData", __func__);
+		fido_log_debug("%s: HidD_GetPreparsedData", __func__);
 		goto fail;
 	}
 
 	if (HidP_GetCaps(data, &caps) != HIDP_STATUS_SUCCESS) {
-		log_debug("%s: HidP_GetCaps", __func__);
+		fido_log_debug("%s: HidP_GetCaps", __func__);
 		goto fail;
 	}
 
 	if (caps.OutputReportByteLength != REPORT_LEN ||
 	    caps.InputReportByteLength != REPORT_LEN) {
-		log_debug("%s: unsupported report len", __func__);
+		fido_log_debug("%s: unsupported report len", __func__);
 		goto fail;
 	}
 
@@ -60,7 +60,7 @@ get_int(HANDLE dev, int16_t *vendor_id, int16_t *product_id)
 	attr.Size = sizeof(attr);
 
 	if (HidD_GetAttributes(dev, &attr) == false) {
-		log_debug("%s: HidD_GetAttributes", __func__);
+		fido_log_debug("%s: HidD_GetAttributes", __func__);
 		return (-1);
 	}
 
@@ -81,46 +81,46 @@ get_str(HANDLE dev, char **manufacturer, char **product)
 	*product = NULL;
 
 	if (HidD_GetManufacturerString(dev, &buf, sizeof(buf)) == false) {
-		log_debug("%s: HidD_GetManufacturerString", __func__);
+		fido_log_debug("%s: HidD_GetManufacturerString", __func__);
 		goto fail;
 	}
 
 	if ((utf8_len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, buf,
 	    -1, NULL, 0, NULL, NULL)) <= 0 || utf8_len > 128) {
-		log_debug("%s: WideCharToMultiByte", __func__);
+		fido_log_debug("%s: WideCharToMultiByte", __func__);
 		goto fail;
 	}
 
 	if ((*manufacturer = malloc(utf8_len)) == NULL) {
-		log_debug("%s: malloc", __func__);
+		fido_log_debug("%s: malloc", __func__);
 		goto fail;
 	}
 
 	if (WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, buf, -1,
 	    *manufacturer, utf8_len, NULL, NULL) != utf8_len) {
-		log_debug("%s: WideCharToMultiByte", __func__);
+		fido_log_debug("%s: WideCharToMultiByte", __func__);
 		goto fail;
 	}
 
 	if (HidD_GetProductString(dev, &buf, sizeof(buf)) == false) {
-		log_debug("%s: HidD_GetProductString", __func__);
+		fido_log_debug("%s: HidD_GetProductString", __func__);
 		goto fail;
 	}
 
 	if ((utf8_len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, buf,
 	    -1, NULL, 0, NULL, NULL)) <= 0 || utf8_len > 128) {
-		log_debug("%s: WideCharToMultiByte", __func__);
+		fido_log_debug("%s: WideCharToMultiByte", __func__);
 		goto fail;
 	}
 
 	if ((*product = malloc(utf8_len)) == NULL) {
-		log_debug("%s: malloc", __func__);
+		fido_log_debug("%s: malloc", __func__);
 		goto fail;
 	}
 
 	if (WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, buf, -1,
 	    *product, utf8_len, NULL, NULL) != utf8_len) {
-		log_debug("%s: WideCharToMultiByte", __func__);
+		fido_log_debug("%s: WideCharToMultiByte", __func__);
 		goto fail;
 	}
 
@@ -193,7 +193,7 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 	devinfo = SetupDiGetClassDevsA(&hid_guid, NULL, NULL,
 	    DIGCF_DEVICEINTERFACE | DIGCF_PRESENT);
 	if (devinfo == INVALID_HANDLE_VALUE) {
-		log_debug("%s: SetupDiGetClassDevsA", __func__);
+		fido_log_debug("%s: SetupDiGetClassDevsA", __func__);
 		goto fail;
 	}
 
@@ -214,13 +214,13 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 		if (SetupDiGetDeviceInterfaceDetailA(devinfo, &ifdata, NULL, 0,
 		    &len, NULL) != false ||
 		    GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-			log_debug("%s: SetupDiGetDeviceInterfaceDetailA 1",
+			fido_log_debug("%s: SetupDiGetDeviceInterfaceDetailA 1",
 			    __func__);
 			goto fail;
 		}
 
 		if ((ifdetail = malloc(len)) == NULL) {
-			log_debug("%s: malloc", __func__);
+			fido_log_debug("%s: malloc", __func__);
 			goto fail;
 		}
 
@@ -228,7 +228,7 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 		if (SetupDiGetDeviceInterfaceDetailA(devinfo, &ifdata, ifdetail,
 		    len, NULL, NULL) == false) {
-			log_debug("%s: SetupDiGetDeviceInterfaceDetailA 2",
+			fido_log_debug("%s: SetupDiGetDeviceInterfaceDetailA 2",
 			    __func__);
 			goto fail;
 		}
@@ -285,13 +285,13 @@ hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 	memset(report, 0, sizeof(report));
 
 	if (len != sizeof(report) - 1) {
-		log_debug("%s: invalid len", __func__);
+		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
 
 	if (ReadFile(handle, report, sizeof(report), &n, NULL) == false ||
 	    n != sizeof(report)) {
-		log_debug("%s: ReadFile", __func__);
+		fido_log_debug("%s: ReadFile", __func__);
 		goto fail;
 	}
 
@@ -310,13 +310,13 @@ hid_write(void *handle, const unsigned char *buf, size_t len)
 	DWORD n;
 
 	if (len != REPORT_LEN) {
-		log_debug("%s: invalid len", __func__);
+		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
 
 	if (WriteFile(handle, buf, (DWORD)len, &n, NULL) == false ||
 	    n != REPORT_LEN) {
-		log_debug("%s: WriteFile", __func__);
+		fido_log_debug("%s: WriteFile", __func__);
 		return (-1);
 	}
 

@@ -87,18 +87,19 @@ int fido_tx(fido_dev_t *, uint8_t, const void *, size_t);
 
 /* log */
 #ifdef FIDO_NO_DIAGNOSTIC
-#define log_init(...)	do { /* nothing */ } while (0)
-#define log_debug(...)	do { /* nothing */ } while (0)
-#define log_xxd(...)	do { /* nothing */ } while (0)
+#define fido_log_init(...)	do { /* nothing */ } while (0)
+#define fido_log_debug(...)	do { /* nothing */ } while (0)
+#define fido_log_xxd(...)	do { /* nothing */ } while (0)
 #else
 #ifdef __GNUC__
-void log_init(void);
-void log_debug(const char *, ...) __attribute__((__format__ (printf, 1, 2)));
-void log_xxd(const void *, size_t);
+void fido_log_init(void);
+void fido_log_debug(const char *, ...)
+    __attribute__((__format__ (printf, 1, 2)));
+void fido_log_xxd(const void *, size_t);
 #else
-void log_init(void);
-void log_debug(const char *, ...);
-void log_xxd(const void *, size_t);
+void fido_log_init(void);
+void fido_log_debug(const char *, ...);
+void fido_log_xxd(const void *, size_t);
 #endif /* __GNUC__ */
 #endif /* FIDO_NO_DIAGNOSTIC */
 

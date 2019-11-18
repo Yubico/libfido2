@@ -50,27 +50,27 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 		snprintf(path, sizeof(path), "/dev/uhid%zu", i);
 		if ((fd = open(path, O_RDWR)) == -1) {
 			if (errno != ENOENT && errno != ENXIO) {
-				log_debug("%s: open %s: %s", __func__, path,
-				    strerror(errno));
+				fido_log_debug("%s: open %s: %s", __func__,
+				    path, strerror(errno));
 			}
 			continue;
 		}
 		memset(&udi, 0, sizeof(udi));
 		if (ioctl(fd, USB_GET_DEVICEINFO, &udi) != 0) {
-			log_debug("%s: get device info %s: %s", __func__,
+			fido_log_debug("%s: get device info %s: %s", __func__,
 			    path, strerror(errno));
 			close(fd);
 			continue;
 		}
 		if ((rdesc = hid_get_report_desc(fd)) == NULL) {
-			log_debug("%s: failed to get report descriptor: %s",
+			fido_log_debug("%s: failed to get report descriptor: %s",
 			    __func__, path);
 			close(fd);
 			continue;
 		}
 		if ((hdata = hid_start_parse(rdesc,
 		    1<<hid_collection, -1)) == NULL) {
-			log_debug("%s: failed to parse report descriptor: %s",
+			fido_log_debug("%s: failed to parse report descriptor: %s",
 			    __func__, path);
 			hid_dispose_report_desc(rdesc);
 			close(fd);
@@ -91,11 +91,11 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 		if (!is_fido)
 			continue;
 
-		log_debug("%s: %s: bus = 0x%02x, addr = 0x%02x",
+		fido_log_debug("%s: %s: bus = 0x%02x, addr = 0x%02x",
 		    __func__, path, udi.udi_bus, udi.udi_addr);
-		log_debug("%s: %s: vendor = \"%s\", product = \"%s\"",
+		fido_log_debug("%s: %s: vendor = \"%s\", product = \"%s\"",
 		    __func__, path, udi.udi_vendor, udi.udi_product);
-		log_debug("%s: %s: productNo = 0x%04x, vendorNo = 0x%04x, "
+		fido_log_debug("%s: %s: productNo = 0x%04x, vendorNo = 0x%04x, "
 		    "releaseNo = 0x%04x", __func__, path, udi.udi_productNo,
 		    udi.udi_vendorNo, udi.udi_releaseNo);
 
@@ -145,18 +145,18 @@ terrible_ping_kludge(struct hid_openbsd *ctx)
 		/* One byte ping only, Vasili */
 		data[6] = 0;
 		data[7] = 1;
-		log_debug("%s: send ping %d", __func__, i);
+		fido_log_debug("%s: send ping %d", __func__, i);
 		if (hid_write(ctx, data, ctx->report_out_len + 1) == -1)
 			return -1;
-		log_debug("%s: wait reply", __func__);
+		fido_log_debug("%s: wait reply", __func__);
 		memset(&pfd, 0, sizeof(pfd));
 		pfd.fd = ctx->fd;
 		pfd.events = POLLIN;
 		if ((n = poll(&pfd, 1, 100)) == -1) {
-			log_debug("%s: poll: %s", __func__, strerror(errno));
+			fido_log_debug("%s: poll: %s", __func__, strerror(errno));
 			return -1;
 		} else if (n == 0) {
-			log_debug("%s: timed out", __func__);
+			fido_log_debug("%s: timed out", __func__);
 			continue;
 		}
 		if (hid_read(ctx, data, ctx->report_out_len, 250) == -1)
@@ -166,11 +166,11 @@ terrible_ping_kludge(struct hid_openbsd *ctx)
 		 * so we might get an error, but we don't care - we're
 		 * synched now.
 		 */
-		log_debug("%s: got reply", __func__);
-		log_xxd(data, ctx->report_out_len);
+		fido_log_debug("%s: got reply", __func__);
+		fido_log_xxd(data, ctx->report_out_len);
 		return 0;
 	}
-	log_debug("%s: no response", __func__);
+	fido_log_debug("%s: no response", __func__);
 	return -1;
 }
 
@@ -187,23 +187,23 @@ hid_open(const char *path)
 		return (NULL);
 	}
 	if (ioctl(ret->fd, USB_GET_REPORT_ID, &usb_report_id) != 0) {
-		log_debug("%s: failed to get report ID: %s", __func__,
+		fido_log_debug("%s: failed to get report ID: %s", __func__,
 		    strerror(errno));
 		goto fail;
 	}
 	if ((rdesc = hid_get_report_desc(ret->fd)) == NULL) {
-		log_debug("%s: failed to get report descriptor", __func__);
+		fido_log_debug("%s: failed to get report descriptor", __func__);
 		goto fail;
 	}
 	if ((len = hid_report_size(rdesc, hid_input, usb_report_id)) <= 0 ||
 	    (size_t)len > MAX_REPORT_LEN) {
-		log_debug("%s: bad input report size %d", __func__, len);
+		fido_log_debug("%s: bad input report size %d", __func__, len);
 		goto fail;
 	}
 	ret->report_in_len = (size_t)len;
 	if ((len = hid_report_size(rdesc, hid_output, usb_report_id)) <= 0 ||
 	    (size_t)len > MAX_REPORT_LEN) {
-		log_debug("%s: bad output report size %d", __func__, len);
+		fido_log_debug("%s: bad output report size %d", __func__, len);
  fail:
 		hid_dispose_report_desc(rdesc);
 		close(ret->fd);
@@ -212,8 +212,8 @@ hid_open(const char *path)
 	}	
 	ret->report_out_len = (size_t)len;
 	hid_dispose_report_desc(rdesc);
-	log_debug("%s: USB report ID %d, inlen = %zu outlen = %zu", __func__,
-	    usb_report_id, ret->report_in_len, ret->report_out_len);
+	fido_log_debug("%s: USB report ID %d, inlen = %zu outlen = %zu",
+	    __func__, usb_report_id, ret->report_in_len, ret->report_out_len);
 
 	/*
 	 * OpenBSD (as of 201910) has a bug that causes it to lose
@@ -246,12 +246,12 @@ hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 	(void)ms; /* XXX */
 
 	if (len != ctx->report_in_len) {
-		log_debug("%s: invalid len: got %zu, want %zu", __func__,
+		fido_log_debug("%s: invalid len: got %zu, want %zu", __func__,
 		    len, ctx->report_in_len);
 		return (-1);
 	}
 	if ((r = read(ctx->fd, buf, len)) == -1 || (size_t)r != len) {
-		log_debug("%s: read: %s", __func__, strerror(errno));
+		fido_log_debug("%s: read: %s", __func__, strerror(errno));
 		return (-1);
 	}
 	return ((int)len);
@@ -264,13 +264,13 @@ hid_write(void *handle, const unsigned char *buf, size_t len)
 	ssize_t r;
 
 	if (len != ctx->report_out_len + 1) {
-		log_debug("%s: invalid len: got %zu, want %zu", __func__,
+		fido_log_debug("%s: invalid len: got %zu, want %zu", __func__,
 		    len, ctx->report_out_len);
 		return (-1);
 	}
 	if ((r = write(ctx->fd, buf + 1, len - 1)) == -1 ||
 	    (size_t)r != len - 1) {
-		log_debug("%s: write: %s", __func__, strerror(errno));
+		fido_log_debug("%s: write: %s", __func__, strerror(errno));
 		return (-1);
 	}
 	return ((int)len);

@@ -70,27 +70,27 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 	const uint8_t cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;
 
 	if (dev->io_handle != NULL) {
-		log_debug("%s: handle=%p", __func__, dev->io_handle);
+		fido_log_debug("%s: handle=%p", __func__, dev->io_handle);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
 	if (dev->io.open == NULL || dev->io.close == NULL) {
-		log_debug("%s: NULL open/close", __func__);
+		fido_log_debug("%s: NULL open/close", __func__);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
 	if (obtain_nonce(&dev->nonce) < 0) {
-		log_debug("%s: obtain_nonce", __func__);
+		fido_log_debug("%s: obtain_nonce", __func__);
 		return (FIDO_ERR_INTERNAL);
 	}
 
 	if ((dev->io_handle = dev->io.open(path)) == NULL) {
-		log_debug("%s: dev->io.open", __func__);
+		fido_log_debug("%s: dev->io.open", __func__);
 		return (FIDO_ERR_INTERNAL);
 	}
 
 	if (fido_tx(dev, cmd, &dev->nonce, sizeof(dev->nonce)) < 0) {
-		log_debug("%s: fido_tx", __func__);
+		fido_log_debug("%s: fido_tx", __func__);
 		dev->io.close(dev->io_handle);
 		dev->io_handle = NULL;
 		return (FIDO_ERR_TX);
@@ -106,7 +106,7 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 	int		n;
 
 	if ((n = fido_rx(dev, cmd, &dev->attr, sizeof(dev->attr), ms)) < 0) {
-		log_debug("%s: fido_rx", __func__);
+		fido_log_debug("%s: fido_rx", __func__);
 		goto fail;
 	}
 
@@ -115,7 +115,7 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 #endif
 
 	if ((size_t)n != sizeof(dev->attr) || dev->attr.nonce != dev->nonce) {
-		log_debug("%s: invalid nonce", __func__);
+		fido_log_debug("%s: invalid nonce", __func__);
 		goto fail;
 	}
 
@@ -172,13 +172,13 @@ int
 fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 {
 	if (dev->io_handle != NULL) {
-		log_debug("%s: NULL handle", __func__);
+		fido_log_debug("%s: NULL handle", __func__);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
 	if (io == NULL || io->open == NULL || io->close == NULL ||
 	    io->read == NULL || io->write == NULL) {
-		log_debug("%s: NULL function", __func__);
+		fido_log_debug("%s: NULL function", __func__);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
@@ -194,7 +194,7 @@ void
 fido_init(int flags)
 {
 	if (flags & FIDO_DEBUG || getenv("FIDO_DEBUG") != NULL)
-		log_init();
+		fido_log_init();
 }
 
 fido_dev_t *
@@ -214,7 +214,7 @@ fido_dev_new(void)
 	io.write = hid_write;
 
 	if (fido_dev_set_io_functions(dev, &io) != FIDO_OK) {
-		log_debug("%s: fido_dev_set_io_functions", __func__);
+		fido_log_debug("%s: fido_dev_set_io_functions", __func__);
 		fido_dev_free(&dev);
 		return (NULL);
 	}

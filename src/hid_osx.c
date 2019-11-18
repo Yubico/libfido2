@@ -33,18 +33,18 @@ get_int32(IOHIDDeviceRef dev, CFStringRef key, int32_t *v)
 
 	if ((ref = IOHIDDeviceGetProperty(dev, key)) == NULL ||
 	    CFGetTypeID(ref) != CFNumberGetTypeID()) {
-		log_debug("%s: IOHIDDeviceGetProperty", __func__);
+		fido_log_debug("%s: IOHIDDeviceGetProperty", __func__);
 		return (-1);
 	}
 
 	if (CFNumberGetType(ref) != kCFNumberSInt32Type &&
 	    CFNumberGetType(ref) != kCFNumberSInt64Type) {
-		log_debug("%s: CFNumberGetType", __func__);
+		fido_log_debug("%s: CFNumberGetType", __func__);
 		return (-1);
 	}
 
 	if (CFNumberGetValue(ref, kCFNumberSInt32Type, v) == false) {
-		log_debug("%s: CFNumberGetValue", __func__);
+		fido_log_debug("%s: CFNumberGetValue", __func__);
 		return (-1);
 	}
 
@@ -60,12 +60,12 @@ get_utf8(IOHIDDeviceRef dev, CFStringRef key, void *buf, size_t len)
 
 	if ((ref = IOHIDDeviceGetProperty(dev, key)) == NULL ||
 	    CFGetTypeID(ref) != CFStringGetTypeID()) {
-		log_debug("%s: IOHIDDeviceGetProperty", __func__);
+		fido_log_debug("%s: IOHIDDeviceGetProperty", __func__);
 		return (-1);
 	}
 
 	if (CFStringGetCString(ref, buf, len, kCFStringEncodingUTF8) == false) {
-		log_debug("%s: CFStringGetCString", __func__);
+		fido_log_debug("%s: CFStringGetCString", __func__);
 		return (-1);
 	}
 
@@ -84,7 +84,7 @@ is_fido(IOHIDDeviceRef dev)
 
 	if (get_int32(dev, CFSTR(kIOHIDMaxInputReportSizeKey),
 	    &report_len) < 0 || report_len != REPORT_LEN - 1) {
-		log_debug("%s: unsupported report len", __func__);
+		fido_log_debug("%s: unsupported report len", __func__);
 		return (false);
 	}
 
@@ -99,13 +99,13 @@ get_id(IOHIDDeviceRef dev, int16_t *vendor_id, int16_t *product_id)
 
 	if (get_int32(dev, CFSTR(kIOHIDVendorIDKey), &vendor) < 0 ||
 	    vendor > UINT16_MAX) {
-		log_debug("%s: get_int32 vendor", __func__);
+		fido_log_debug("%s: get_int32 vendor", __func__);
 		return (-1);
 	}
 
 	if (get_int32(dev, CFSTR(kIOHIDProductIDKey), &product) < 0 ||
 	    product > UINT16_MAX) {
-		log_debug("%s: get_int32 product", __func__);
+		fido_log_debug("%s: get_int32 product", __func__);
 		return (-1);
 	}
 
@@ -125,22 +125,22 @@ get_str(IOHIDDeviceRef dev, char **manufacturer, char **product)
 	*product = NULL;
 
 	if (get_utf8(dev, CFSTR(kIOHIDManufacturerKey), buf, sizeof(buf)) < 0) {
-		log_debug("%s: get_utf8 manufacturer", __func__);
+		fido_log_debug("%s: get_utf8 manufacturer", __func__);
 		goto fail;
 	}
 
 	if ((*manufacturer = strdup(buf)) == NULL) {
-		log_debug("%s: strdup manufacturer", __func__);
+		fido_log_debug("%s: strdup manufacturer", __func__);
 		goto fail;
 	}
 
 	if (get_utf8(dev, CFSTR(kIOHIDProductKey), buf, sizeof(buf)) < 0) {
-		log_debug("%s: get_utf8 product", __func__);
+		fido_log_debug("%s: get_utf8 product", __func__);
 		goto fail;
 	}
 
 	if ((*product = strdup(buf)) == NULL) {
-		log_debug("%s: strdup product", __func__);
+		fido_log_debug("%s: strdup product", __func__);
 		goto fail;
 	}
 
@@ -163,12 +163,12 @@ get_path(IOHIDDeviceRef dev)
 	io_string_t	path;
 
 	if ((s = IOHIDDeviceGetService(dev)) == MACH_PORT_NULL) {
-		log_debug("%s: IOHIDDeviceGetService", __func__);
+		fido_log_debug("%s: IOHIDDeviceGetService", __func__);
 		return (NULL);
 	}
 
 	if (IORegistryEntryGetPath(s, kIOServicePlane, path) != KERN_SUCCESS) {
-		log_debug("%s: IORegistryEntryGetPath", __func__);
+		fido_log_debug("%s: IORegistryEntryGetPath", __func__);
 		return (NULL);
 	}
 
@@ -215,24 +215,24 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 	if ((manager = IOHIDManagerCreate(kCFAllocatorDefault,
 	    kIOHIDManagerOptionNone)) == NULL) {
-		log_debug("%s: IOHIDManagerCreate", __func__);
+		fido_log_debug("%s: IOHIDManagerCreate", __func__);
 		goto fail;
 	}
 
 	IOHIDManagerSetDeviceMatching(manager, NULL);
 
 	if ((devset = IOHIDManagerCopyDevices(manager)) == NULL) {
-		log_debug("%s: IOHIDManagerCopyDevices", __func__);
+		fido_log_debug("%s: IOHIDManagerCopyDevices", __func__);
 		goto fail;
 	}
 
 	if ((devcnt = CFSetGetCount(devset)) < 0) {
-		log_debug("%s: CFSetGetCount", __func__);
+		fido_log_debug("%s: CFSetGetCount", __func__);
 		goto fail;
 	}
 
 	if ((devs = calloc(devcnt, sizeof(*devs))) == NULL) {
-		log_debug("%s: calloc", __func__);
+		fido_log_debug("%s: calloc", __func__);
 		goto fail;
 	}
 
@@ -267,37 +267,37 @@ hid_open(const char *path)
 	char			 loop_id[32];
 
 	if ((dev = calloc(1, sizeof(*dev))) == NULL) {
-		log_debug("%s: calloc", __func__);
+		fido_log_debug("%s: calloc", __func__);
 		goto fail;
 	}
 
 	if ((entry = IORegistryEntryFromPath(kIOMasterPortDefault,
 	    path)) == MACH_PORT_NULL) {
-		log_debug("%s: IORegistryEntryFromPath", __func__);
+		fido_log_debug("%s: IORegistryEntryFromPath", __func__);
 		goto fail;
 	}
 
 	if ((dev->ref = IOHIDDeviceCreate(kCFAllocatorDefault,
 	    entry)) == NULL) {
-		log_debug("%s: IOHIDDeviceCreate", __func__);
+		fido_log_debug("%s: IOHIDDeviceCreate", __func__);
 		goto fail;
 	}
 
 	if (IOHIDDeviceOpen(dev->ref,
 	    kIOHIDOptionsTypeSeizeDevice) != kIOReturnSuccess) {
-		log_debug("%s: IOHIDDeviceOpen", __func__);
+		fido_log_debug("%s: IOHIDDeviceOpen", __func__);
 		goto fail;
 	}
 
 	if ((r = snprintf(loop_id, sizeof(loop_id), "fido2-%p",
 	    (void *)dev->ref)) < 0 || (size_t)r >= sizeof(loop_id)) {
-		log_debug("%s: snprintf", __func__);
+		fido_log_debug("%s: snprintf", __func__);
 		goto fail;
 	}
 
 	if ((dev->loop_id = CFStringCreateWithCString(NULL, loop_id,
 	    kCFStringEncodingASCII)) == NULL) {
-		log_debug("%s: CFStringCreateWithCString", __func__);
+		fido_log_debug("%s: CFStringCreateWithCString", __func__);
 		goto fail;
 	}
 
@@ -325,7 +325,7 @@ hid_close(void *handle)
 
 	if (IOHIDDeviceClose(dev->ref,
 	    kIOHIDOptionsTypeSeizeDevice) != kIOReturnSuccess)
-		log_debug("%s: IOHIDDeviceClose", __func__);
+		fido_log_debug("%s: IOHIDDeviceClose", __func__);
 
 	CFRelease(dev->ref);
 	CFRelease(dev->loop_id);
@@ -343,7 +343,7 @@ read_callback(void *context, IOReturn result, void *dev, IOHIDReportType type,
 
 	if (result != kIOReturnSuccess || type != kIOHIDReportTypeInput ||
 	    report_id != 0 || report_len != REPORT_LEN - 1) {
-		log_debug("%s: io error", __func__);
+		fido_log_debug("%s: io error", __func__);
 	}
 }
 
@@ -366,7 +366,7 @@ hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 	(void)ms; /* XXX */
 
 	if (len != REPORT_LEN - 1) {
-		log_debug("%s: invalid len", __func__);
+		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
 
@@ -396,13 +396,13 @@ hid_write(void *handle, const unsigned char *buf, size_t len)
 	struct dev *dev = handle;
 
 	if (len != REPORT_LEN) {
-		log_debug("%s: invalid len", __func__);
+		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
 
 	if (IOHIDDeviceSetReport(dev->ref, kIOHIDReportTypeOutput, 0, buf + 1,
 	    len - 1) != kIOReturnSuccess) {
-		log_debug("%s: IOHIDDeviceSetReport", __func__);
+		fido_log_debug("%s: IOHIDDeviceSetReport", __func__);
 		return (-1);
 	}
 

@@ -18,13 +18,13 @@
 static TLS int logging;
 
 void
-log_init()
+fido_log_init(void)
 {
 	logging = 1;
 }
 
 void
-log_xxd(const void *buf, size_t count)
+fido_log_xxd(const void *buf, size_t count)
 {
 	const uint8_t	*ptr = buf;
 	size_t		 i;
@@ -45,7 +45,7 @@ log_xxd(const void *buf, size_t count)
 }
 
 void
-log_debug(const char *fmt, ...)
+fido_log_debug(const char *fmt, ...)
 {
 	va_list	 ap;
 
