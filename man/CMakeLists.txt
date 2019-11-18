@@ -11,25 +11,25 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 list(APPEND MAN_SOURCES
-	eddsa_pk.3
-	es256_pk.3
+	eddsa_pk_new.3
+	es256_pk_new.3
 	fido2-assert.1
 	fido2-cred.1
 	fido2-token.1
-	fido.3
-	fido_assert.3
+	fido_init.3
+	fido_assert_new.3
 	fido_assert_allow_cred.3
-	fido_assert_set.3
+	fido_assert_set_authdata.3
 	fido_assert_verify.3
-	fido_bio_dev.3
-	fido_bio_enroll.3
-	fido_bio_info.3
+	fido_bio_dev_get_info.3
+	fido_bio_enroll_new.3
+	fido_bio_info_new.3
 	fido_bio_template.3
-	fido_cbor_info.3
-	fido_cred.3
+	fido_cbor_info_new.3
+	fido_cred_new.3
 	fido_cred_exclude.3
-	fido_credman.3
-	fido_cred_set.3
+	fido_credman_metadata_new.3
+	fido_cred_set_authdata.3
 	fido_cred_verify.3
 	fido_dev_get_assert.3
 	fido_dev_info_manifest.3
@@ -38,60 +38,53 @@ list(APPEND MAN_SOURCES
 	fido_dev_set_io_functions.3
 	fido_dev_set_pin.3
 	fido_strerr.3
-	rs256_pk.3
+	rs256_pk_new.3
 )
 
 list(APPEND MAN_ALIAS
-	eddsa_pk eddsa_pk_free
-	eddsa_pk eddsa_pk_from_ptr
-	eddsa_pk eddsa_pk_new
-	eddsa_pk eddsa_pk_to_EVP_PKEY
-	es256_pk es256_pk_free
-	es256_pk es256_pk_from_EC_KEY
-	es256_pk es256_pk_from_ptr
-	es256_pk es256_pk_new
-	es256_pk es256_pk_to_EVP_PKEY
-	fido_assert fido_assert_authdata_len
-	fido_assert fido_assert_authdata_ptr
-	fido_assert fido_assert_clientdata_hash_len
-	fido_assert fido_assert_clientdata_hash_ptr
-	fido_assert fido_assert_count
-	fido_assert fido_assert_free
-	fido_assert fido_assert_hmac_secret_len
-	fido_assert fido_assert_hmac_secret_ptr
-	fido_assert fido_assert_new
-	fido_assert fido_assert_sigcount
-	fido_assert fido_assert_sig_len
-	fido_assert fido_assert_sig_ptr
-	fido_assert fido_assert_user_display_name
-	fido_assert fido_assert_user_icon
-	fido_assert fido_assert_user_id_len
-	fido_assert fido_assert_user_id_ptr
-	fido_assert fido_assert_user_name
-	fido_assert_set fido_assert_set_authdata
-	fido_assert_set fido_assert_set_clientdata_hash
-	fido_assert_set fido_assert_set_count
-	fido_assert_set fido_assert_set_extensions
-	fido_assert_set fido_assert_set_hmac_salt
-	fido_assert_set fido_assert_set_rp
-	fido_assert_set fido_assert_set_sig
-	fido_assert_set fido_assert_set_up
-	fido_assert_set fido_assert_set_uv
-	fido_bio_dev fido_bio_dev_enroll_begin
-	fido_bio_dev fido_bio_dev_enroll_cancel
-	fido_bio_dev fido_bio_dev_enroll_continue
-	fido_bio_dev fido_bio_dev_enroll_remove
-	fido_bio_dev fido_bio_dev_get_info
-	fido_bio_dev fido_bio_dev_get_template_array
-	fido_bio_dev fido_bio_dev_set_template_name
-	fido_bio_enroll fido_bio_enroll_free
-	fido_bio_enroll fido_bio_enroll_last_status
-	fido_bio_enroll fido_bio_enroll_new
-	fido_bio_enroll fido_bio_enroll_remaining_samples
-	fido_bio_info fido_bio_info_free
-	fido_bio_info fido_bio_info_max_samples
-	fido_bio_info fido_bio_info_new
-	fido_bio_info fido_bio_info_type
+	eddsa_pk_new eddsa_pk_free
+	eddsa_pk_new eddsa_pk_from_ptr
+	eddsa_pk_new eddsa_pk_to_EVP_PKEY
+	es256_pk_new es256_pk_free
+	es256_pk_new es256_pk_from_EC_KEY
+	es256_pk_new es256_pk_from_ptr
+	es256_pk_new es256_pk_to_EVP_PKEY
+	fido_assert_new fido_assert_authdata_len
+	fido_assert_new fido_assert_authdata_ptr
+	fido_assert_new fido_assert_clientdata_hash_len
+	fido_assert_new fido_assert_clientdata_hash_ptr
+	fido_assert_new fido_assert_count
+	fido_assert_new fido_assert_free
+	fido_assert_new fido_assert_hmac_secret_len
+	fido_assert_new fido_assert_hmac_secret_ptr
+	fido_assert_new fido_assert_sigcount
+	fido_assert_new fido_assert_sig_len
+	fido_assert_new fido_assert_sig_ptr
+	fido_assert_new fido_assert_user_display_name
+	fido_assert_new fido_assert_user_icon
+	fido_assert_new fido_assert_user_id_len
+	fido_assert_new fido_assert_user_id_ptr
+	fido_assert_new fido_assert_user_name
+	fido_assert_set_authdata fido_assert_set_clientdata_hash
+	fido_assert_set_authdata fido_assert_set_count
+	fido_assert_set_authdata fido_assert_set_extensions
+	fido_assert_set_authdata fido_assert_set_hmac_salt
+	fido_assert_set_authdata fido_assert_set_rp
+	fido_assert_set_authdata fido_assert_set_sig
+	fido_assert_set_authdata fido_assert_set_up
+	fido_assert_set_authdata fido_assert_set_uv
+	fido_bio_dev_get_info fido_bio_dev_enroll_begin
+	fido_bio_dev_get_info fido_bio_dev_enroll_cancel
+	fido_bio_dev_get_info fido_bio_dev_enroll_continue
+	fido_bio_dev_get_info fido_bio_dev_enroll_remove
+	fido_bio_dev_get_info fido_bio_dev_get_template_array
+	fido_bio_dev_get_info fido_bio_dev_set_template_name
+	fido_bio_enroll_new fido_bio_enroll_free
+	fido_bio_enroll_new fido_bio_enroll_last_status
+	fido_bio_enroll_new fido_bio_enroll_remaining_samples
+	fido_bio_info_new fido_bio_info_free
+	fido_bio_info_new fido_bio_info_max_samples
+	fido_bio_info_new fido_bio_info_type
 	fido_bio_template fido_bio_template_array_count
 	fido_bio_template fido_bio_template_array_free
 	fido_bio_template fido_bio_template_array_new
@@ -102,52 +95,63 @@ list(APPEND MAN_ALIAS
 	fido_bio_template fido_bio_template_new
 	fido_bio_template fido_bio_template_set_id
 	fido_bio_template fido_bio_template_set_name
-	fido_cred fido_cred_authdata_len
-	fido_cred fido_cred_authdata_ptr
-	fido_cred fido_cred_clientdata_hash_len
-	fido_cred fido_cred_clientdata_hash_ptr
-	fido_cred fido_cred_fmt
-	fido_cred fido_cred_free
-	fido_cred fido_cred_id_len
-	fido_cred fido_cred_id_ptr
-	fido_cred fido_cred_new
-	fido_cred fido_cred_pubkey_len
-	fido_cred fido_cred_pubkey_ptr
-	fido_cred fido_cred_sig_len
-	fido_cred fido_cred_sig_ptr
-	fido_cred fido_cred_x5c_len
-	fido_cred fido_cred_x5c_ptr
-	fido_credman fido_credman_del_dev_rk
-	fido_credman fido_credman_get_dev_metadata
-	fido_credman fido_credman_get_dev_rk
-	fido_credman fido_credman_get_dev_rp
-	fido_credman fido_credman_metadata_free
-	fido_credman fido_credman_metadata_new
-	fido_credman fido_credman_rk
-	fido_credman fido_credman_rk_count
-	fido_credman fido_credman_rk_existing
-	fido_credman fido_credman_rk_free
-	fido_credman fido_credman_rk_new
-	fido_credman fido_credman_rk_remaining
-	fido_credman fido_credman_rp_count
-	fido_credman fido_credman_rp_free
-	fido_credman fido_credman_rp_id
-	fido_credman fido_credman_rp_id_hash_len
-	fido_credman fido_credman_rp_id_hash_ptr
-	fido_credman fido_credman_rp_name
-	fido_credman fido_credman_rp_new
-	fido_cred_set fido_cred_set_authdata
-	fido_cred_set fido_cred_set_authdata_raw
-	fido_cred_set fido_cred_set_clientdata_hash
-	fido_cred_set fido_cred_set_extensions
-	fido_cred_set fido_cred_set_fmt
-	fido_cred_set fido_cred_set_rk
-	fido_cred_set fido_cred_set_rp
-	fido_cred_set fido_cred_set_sig
-	fido_cred_set fido_cred_set_type
-	fido_cred_set fido_cred_set_user
-	fido_cred_set fido_cred_set_uv
-	fido_cred_set fido_cred_set_x509
+	fido_cbor_info_new fido_cbor_info_aaguid_len 
+	fido_cbor_info_new fido_cbor_info_aaguid_ptr 
+	fido_cbor_info_new fido_cbor_info_extensions_len 
+	fido_cbor_info_new fido_cbor_info_extensions_ptr 
+	fido_cbor_info_new fido_cbor_info_free 
+	fido_cbor_info_new fido_cbor_info_maxmsgsiz
+	fido_cbor_info_new fido_cbor_info_options_len 
+	fido_cbor_info_new fido_cbor_info_options_name_ptr 
+	fido_cbor_info_new fido_cbor_info_options_value_ptr 
+	fido_cbor_info_new fido_cbor_info_protocols_len 
+	fido_cbor_info_new fido_cbor_info_protocols_ptr 
+	fido_cbor_info_new fido_cbor_info_versions_len 
+	fido_cbor_info_new fido_cbor_info_versions_ptr 
+	fido_cbor_info_new fido_dev_get_cbor_info 
+	fido_cred_new fido_cred_authdata_len
+	fido_cred_new fido_cred_authdata_ptr
+	fido_cred_new fido_cred_clientdata_hash_len
+	fido_cred_new fido_cred_clientdata_hash_ptr
+	fido_cred_new fido_cred_fmt
+	fido_cred_new fido_cred_free
+	fido_cred_new fido_cred_id_len
+	fido_cred_new fido_cred_id_ptr
+	fido_cred_new fido_cred_pubkey_len
+	fido_cred_new fido_cred_pubkey_ptr
+	fido_cred_new fido_cred_sig_len
+	fido_cred_new fido_cred_sig_ptr
+	fido_cred_new fido_cred_x5c_len
+	fido_cred_new fido_cred_x5c_ptr
+	fido_credman_metadata_new fido_credman_del_dev_rk
+	fido_credman_metadata_new fido_credman_get_dev_metadata
+	fido_credman_metadata_new fido_credman_get_dev_rk
+	fido_credman_metadata_new fido_credman_get_dev_rp
+	fido_credman_metadata_new fido_credman_metadata_free
+	fido_credman_metadata_new fido_credman_rk
+	fido_credman_metadata_new fido_credman_rk_count
+	fido_credman_metadata_new fido_credman_rk_existing
+	fido_credman_metadata_new fido_credman_rk_free
+	fido_credman_metadata_new fido_credman_rk_new
+	fido_credman_metadata_new fido_credman_rk_remaining
+	fido_credman_metadata_new fido_credman_rp_count
+	fido_credman_metadata_new fido_credman_rp_free
+	fido_credman_metadata_new fido_credman_rp_id
+	fido_credman_metadata_new fido_credman_rp_id_hash_len
+	fido_credman_metadata_new fido_credman_rp_id_hash_ptr
+	fido_credman_metadata_new fido_credman_rp_name
+	fido_credman_metadata_new fido_credman_rp_new
+	fido_cred_set_authdata fido_cred_set_authdata_raw
+	fido_cred_set_authdata fido_cred_set_clientdata_hash
+	fido_cred_set_authdata fido_cred_set_extensions
+	fido_cred_set_authdata fido_cred_set_fmt
+	fido_cred_set_authdata fido_cred_set_rk
+	fido_cred_set_authdata fido_cred_set_rp
+	fido_cred_set_authdata fido_cred_set_sig
+	fido_cred_set_authdata fido_cred_set_type
+	fido_cred_set_authdata fido_cred_set_user
+	fido_cred_set_authdata fido_cred_set_uv
+	fido_cred_set_authdata fido_cred_set_x509
 	fido_dev_info_manifest fido_dev_info_free
 	fido_dev_info_manifest fido_dev_info_manufacturer_string
 	fido_dev_info_manifest fido_dev_info_new
@@ -170,12 +174,10 @@ list(APPEND MAN_ALIAS
 	fido_dev_open fido_dev_protocol
 	fido_dev_set_pin fido_dev_get_retry_count
 	fido_dev_set_pin fido_dev_reset
-	fido fido_init
-	rs256_pk rs256_pk_free
-	rs256_pk rs256_pk_from_ptr
-	rs256_pk rs256_pk_from_RSA
-	rs256_pk rs256_pk_new
-	rs256_pk rs256_pk_to_EVP_PKEY
+	rs256_pk_new rs256_pk_free
+	rs256_pk_new rs256_pk_from_ptr
+	rs256_pk_new rs256_pk_from_RSA
+	rs256_pk_new rs256_pk_to_EVP_PKEY
 )
 
 list(LENGTH MAN_ALIAS MAN_ALIAS_LEN)
