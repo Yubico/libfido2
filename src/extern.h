@@ -71,8 +71,8 @@ void cbor_vector_free(cbor_item_t **, size_t);
 #endif
 
 /* buf */
-int buf_read(const unsigned char **, size_t *, void *, size_t);
-int buf_write(unsigned char **, size_t *, const void *, size_t);
+int fido_buf_read(const unsigned char **, size_t *, void *, size_t);
+int fido_buf_write(unsigned char **, size_t *, const void *, size_t);
 
 /* hid i/o */
 void *hid_open(const char *);

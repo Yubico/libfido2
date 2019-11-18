@@ -30,8 +30,8 @@ sig_get(fido_blob_t *sig, const unsigned char **buf, size_t *len)
 {
 	sig->len = *len; /* consume the whole buffer */
 	if ((sig->ptr = calloc(1, sig->len)) == NULL ||
-	    buf_read(buf, len, sig->ptr, sig->len) < 0) {
-		log_debug("%s: buf_read", __func__);
+	    fido_buf_read(buf, len, sig->ptr, sig->len) < 0) {
+		log_debug("%s: fido_buf_read", __func__);
 		if (sig->ptr != NULL) {
 			explicit_bzero(sig->ptr, sig->len);
 			free(sig->ptr);
@@ -65,8 +65,8 @@ x5c_get(fido_blob_t *x5c, const unsigned char **buf, size_t *len)
 
 	/* read accordingly */
 	if ((x5c->ptr = calloc(1, x5c->len)) == NULL ||
-	    buf_read(buf, len, x5c->ptr, x5c->len) < 0) {
-		log_debug("%s: buf_read", __func__);
+	    fido_buf_read(buf, len, x5c->ptr, x5c->len) < 0) {
+		log_debug("%s: fido_buf_read", __func__);
 		goto fail;
 	}
 
@@ -262,9 +262,9 @@ parse_auth_reply(fido_blob_t *sig, fido_blob_t *ad, const char *rp_id,
 
 	len -= 2;
 
-	if (buf_read(&reply, &len, &flags, sizeof(flags)) < 0 ||
-	    buf_read(&reply, &len, &sigcount, sizeof(sigcount)) < 0) {
-		log_debug("%s: buf_read", __func__);
+	if (fido_buf_read(&reply, &len, &flags, sizeof(flags)) < 0 ||
+	    fido_buf_read(&reply, &len, &sigcount, sizeof(sigcount)) < 0) {
+		log_debug("%s: fido_buf_read", __func__);
 		return (FIDO_ERR_RX);
 	}
 
@@ -450,11 +450,11 @@ encode_cred_authdata(const char *rp_id, const uint8_t *kh, uint8_t kh_len,
 	if (authdata_blob.ptr == NULL)
 		goto fail;
 
-	if (buf_write(&ptr, &len, &authdata, sizeof(authdata)) < 0 ||
-	    buf_write(&ptr, &len, &attcred_raw, sizeof(attcred_raw)) < 0 ||
-	    buf_write(&ptr, &len, kh, kh_len) < 0 ||
-	    buf_write(&ptr, &len, pk_blob.ptr, pk_blob.len) < 0) {
-		log_debug("%s: buf_write", __func__);
+	if (fido_buf_write(&ptr, &len, &authdata, sizeof(authdata)) < 0 ||
+	    fido_buf_write(&ptr, &len, &attcred_raw, sizeof(attcred_raw)) < 0 ||
+	    fido_buf_write(&ptr, &len, kh, kh_len) < 0 ||
+	    fido_buf_write(&ptr, &len, pk_blob.ptr, pk_blob.len) < 0) {
+		log_debug("%s: fido_buf_write", __func__);
 		goto fail;
 	}
 
@@ -512,18 +512,18 @@ parse_register_reply(fido_cred_t *cred, const unsigned char *reply, size_t len)
 	len -= 2;
 
 	/* reserved byte */
-	if (buf_read(&reply, &len, &dummy, sizeof(dummy)) < 0 ||
+	if (fido_buf_read(&reply, &len, &dummy, sizeof(dummy)) < 0 ||
 	    dummy != 0x05) {
 		log_debug("%s: reserved byte", __func__);
 		goto fail;
 	}
 
 	/* pubkey + key handle */
-	if (buf_read(&reply, &len, &pubkey, sizeof(pubkey)) < 0 ||
-	    buf_read(&reply, &len, &kh_len, sizeof(kh_len)) < 0 ||
+	if (fido_buf_read(&reply, &len, &pubkey, sizeof(pubkey)) < 0 ||
+	    fido_buf_read(&reply, &len, &kh_len, sizeof(kh_len)) < 0 ||
 	    (kh = calloc(1, kh_len)) == NULL ||
-	    buf_read(&reply, &len, kh, kh_len) < 0) {
-		log_debug("%s: buf_read", __func__);
+	    fido_buf_read(&reply, &len, kh, kh_len) < 0) {
+		log_debug("%s: fido_buf_read", __func__);
 		goto fail;
 	}
 

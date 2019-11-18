@@ -1026,13 +1026,14 @@ decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
 
 	log_debug("%s: buf=%p, len=%zu", __func__, (const void *)*buf, *len);
 
-	if (buf_read(buf, len, &attcred->aaguid, sizeof(attcred->aaguid)) < 0) {
-		log_debug("%s: buf_read aaguid", __func__);
+	if (fido_buf_read(buf, len, &attcred->aaguid,
+	    sizeof(attcred->aaguid)) < 0) {
+		log_debug("%s: fido_buf_read aaguid", __func__);
 		return (-1);
 	}
 
-	if (buf_read(buf, len, &id_len, sizeof(id_len)) < 0) {
-		log_debug("%s: buf_read id_len", __func__);
+	if (fido_buf_read(buf, len, &id_len, sizeof(id_len)) < 0) {
+		log_debug("%s: fido_buf_read id_len", __func__);
 		return (-1);
 	}
 
@@ -1042,8 +1043,8 @@ decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
 
 	log_debug("%s: attcred->id.len=%zu", __func__, attcred->id.len);
 
-	if (buf_read(buf, len, attcred->id.ptr, attcred->id.len) < 0) {
-		log_debug("%s: buf_read id", __func__);
+	if (fido_buf_read(buf, len, attcred->id.ptr, attcred->id.len) < 0) {
+		log_debug("%s: fido_buf_read id", __func__);
 		return (-1);
 	}
 
@@ -1222,8 +1223,8 @@ decode_cred_authdata(const cbor_item_t *item, int cose_alg,
 
 	log_debug("%s: buf=%p, len=%zu", __func__, (const void *)buf, len);
 
-	if (buf_read(&buf, &len, authdata, sizeof(*authdata)) < 0) {
-		log_debug("%s: buf_read", __func__);
+	if (fido_buf_read(&buf, &len, authdata, sizeof(*authdata)) < 0) {
+		log_debug("%s: fido_buf_read", __func__);
 		return (-1);
 	}
 
@@ -1272,8 +1273,8 @@ decode_assert_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
 
 	log_debug("%s: buf=%p, len=%zu", __func__, (const void *)buf, len);
 
-	if (buf_read(&buf, &len, authdata, sizeof(*authdata)) < 0) {
-		log_debug("%s: buf_read", __func__);
+	if (fido_buf_read(&buf, &len, authdata, sizeof(*authdata)) < 0) {
+		log_debug("%s: fido_buf_read", __func__);
 		return (-1);
 	}
 
