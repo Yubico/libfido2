@@ -33,17 +33,17 @@ cbor_item_t *encode_user_entity(const fido_user_t *);
 cbor_item_t *es256_pk_encode(const es256_pk_t *, int);
 
 /* cbor decoding functions */
-int decode_attstmt(const cbor_item_t *, fido_attstmt_t *);
-int decode_cred_authdata(const cbor_item_t *, int, fido_blob_t *,
+int cbor_decode_attstmt(const cbor_item_t *, fido_attstmt_t *);
+int cbor_decode_cred_authdata(const cbor_item_t *, int, fido_blob_t *,
     fido_authdata_t *, fido_attcred_t *, int *);
-int decode_assert_authdata(const cbor_item_t *, fido_blob_t *,
+int cbor_decode_assert_authdata(const cbor_item_t *, fido_blob_t *,
     fido_authdata_t *, int *, fido_blob_t *);
-int decode_cred_id(const cbor_item_t *, fido_blob_t *);
-int decode_fmt(const cbor_item_t *, char **);
-int decode_pubkey(const cbor_item_t *, int *, void *);
-int decode_rp_entity(const cbor_item_t *, fido_rp_t *);
-int decode_uint64(const cbor_item_t *, uint64_t *);
-int decode_user(const cbor_item_t *, fido_user_t *);
+int cbor_decode_cred_id(const cbor_item_t *, fido_blob_t *);
+int cbor_decode_fmt(const cbor_item_t *, char **);
+int cbor_decode_pubkey(const cbor_item_t *, int *, void *);
+int cbor_decode_rp_entity(const cbor_item_t *, fido_rp_t *);
+int cbor_decode_uint64(const cbor_item_t *, uint64_t *);
+int cbor_decode_user(const cbor_item_t *, fido_user_t *);
 int es256_pk_decode(const cbor_item_t *, es256_pk_t *);
 int rs256_pk_decode(const cbor_item_t *, rs256_pk_t *);
 int eddsa_pk_decode(const cbor_item_t *, eddsa_pk_t *);
@@ -60,7 +60,7 @@ int cbor_bytestring_copy(const cbor_item_t *, unsigned char **, size_t *);
 int cbor_map_iter(const cbor_item_t *, void *, int(*)(const cbor_item_t *,
     const cbor_item_t *, void *));
 int cbor_string_copy(const cbor_item_t *, char **);
-int parse_cbor_reply(const unsigned char *, size_t, void *,
+int cbor_parse_reply(const unsigned char *, size_t, void *,
     int(*)(const cbor_item_t *, const cbor_item_t *, void *));
 int cbor_add_pin_params(fido_dev_t *, const fido_blob_t *, const es256_pk_t *,
     const fido_blob_t *,const char *, cbor_item_t **, cbor_item_t **);

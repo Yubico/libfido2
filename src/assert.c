@@ -29,8 +29,8 @@ adjust_assert_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (0); /* ignore */
 	}
 
-	if (decode_uint64(val, &n) < 0 || n > SIZE_MAX) {
-		fido_log_debug("%s: decode_uint64", __func__);
+	if (cbor_decode_uint64(val, &n) < 0 || n > SIZE_MAX) {
+		fido_log_debug("%s: cbor_decode_uint64", __func__);
 		return (-1);
 	}
 
@@ -64,15 +64,15 @@ parse_assert_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	switch (cbor_get_uint8(key)) {
 	case 1: /* credential id */
-		return (decode_cred_id(val, &stmt->id));
+		return (cbor_decode_cred_id(val, &stmt->id));
 	case 2: /* authdata */
-		return (decode_assert_authdata(val, &stmt->authdata_cbor,
+		return (cbor_decode_assert_authdata(val, &stmt->authdata_cbor,
 		    &stmt->authdata, &stmt->authdata_ext,
 		    &stmt->hmac_secret_enc));
 	case 3: /* signature */
 		return (fido_blob_decode(val, &stmt->sig));
 	case 4: /* user attributes */
-		return (decode_user(val, &stmt->user));
+		return (cbor_decode_user(val, &stmt->user));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type", __func__);
 		return (0);
@@ -189,14 +189,14 @@ fido_dev_get_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
 	assert->stmt_cnt = 1;
 
 	/* adjust as needed */
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len, assert,
+	if ((r = cbor_parse_reply(reply, (size_t)reply_len, assert,
 	    adjust_assert_count)) != FIDO_OK) {
 		fido_log_debug("%s: adjust_assert_count", __func__);
 		return (r);
 	}
 
 	/* parse the first assertion */
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len,
+	if ((r = cbor_parse_reply(reply, (size_t)reply_len,
 	    &assert->stmt[assert->stmt_len], parse_assert_reply)) != FIDO_OK) {
 		fido_log_debug("%s: parse_assert_reply", __func__);
 		return (r);
@@ -241,7 +241,7 @@ fido_get_next_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
 		return (FIDO_ERR_INTERNAL);
 	}
 
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len,
+	if ((r = cbor_parse_reply(reply, (size_t)reply_len,
 	    &assert->stmt[assert->stmt_len], parse_assert_reply)) != FIDO_OK) {
 		fido_log_debug("%s: parse_assert_reply", __func__);
 		return (r);
@@ -977,9 +977,9 @@ fido_assert_set_authdata(fido_assert_t *assert, size_t idx,
 		goto fail;
 	}
 
-	if (decode_assert_authdata(item, &stmt->authdata_cbor, &stmt->authdata,
-	    &stmt->authdata_ext, &stmt->hmac_secret_enc) < 0) {
-		fido_log_debug("%s: decode_assert_authdata", __func__);
+	if (cbor_decode_assert_authdata(item, &stmt->authdata_cbor,
+	    &stmt->authdata, &stmt->authdata_ext, &stmt->hmac_secret_enc) < 0) {
+		fido_log_debug("%s: cbor_decode_assert_authdata", __func__);
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
@@ -1015,9 +1015,9 @@ fido_assert_set_authdata_raw(fido_assert_t *assert, size_t idx,
 		goto fail;
 	}
 
-	if (decode_assert_authdata(item, &stmt->authdata_cbor, &stmt->authdata,
-	    &stmt->authdata_ext, &stmt->hmac_secret_enc) < 0) {
-		fido_log_debug("%s: decode_assert_authdata", __func__);
+	if (cbor_decode_assert_authdata(item, &stmt->authdata_cbor,
+	    &stmt->authdata, &stmt->authdata_ext, &stmt->hmac_secret_enc) < 0) {
+		fido_log_debug("%s: cbor_decode_assert_authdata", __func__);
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}

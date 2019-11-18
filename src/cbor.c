@@ -120,7 +120,7 @@ cbor_array_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
 }
 
 int
-parse_cbor_reply(const unsigned char *blob, size_t blob_len, void *arg,
+cbor_parse_reply(const unsigned char *blob, size_t blob_len, void *arg,
     int(*parser)(const cbor_item_t *, const cbor_item_t *, void *))
 {
 	cbor_item_t		*item = NULL;
@@ -862,7 +862,7 @@ fail:
 }
 
 int
-decode_fmt(const cbor_item_t *item, char **fmt)
+cbor_decode_fmt(const cbor_item_t *item, char **fmt)
 {
 	char	*type = NULL;
 
@@ -983,7 +983,7 @@ get_cose_alg(const cbor_item_t *item, int *cose_alg)
 }
 
 int
-decode_pubkey(const cbor_item_t *item, int *type, void *key)
+cbor_decode_pubkey(const cbor_item_t *item, int *type, void *key)
 {
 	if (get_cose_alg(item, type) < 0) {
 		fido_log_debug("%s: get_cose_alg", __func__);
@@ -1057,8 +1057,8 @@ decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
 		goto fail;
 	}
 
-	if (decode_pubkey(item, &attcred->type, &attcred->pubkey) < 0) {
-		fido_log_debug("%s: decode_pubkey", __func__);
+	if (cbor_decode_pubkey(item, &attcred->type, &attcred->pubkey) < 0) {
+		fido_log_debug("%s: cbor_decode_pubkey", __func__);
 		goto fail;
 	}
 
@@ -1202,7 +1202,7 @@ fail:
 }
 
 int
-decode_cred_authdata(const cbor_item_t *item, int cose_alg,
+cbor_decode_cred_authdata(const cbor_item_t *item, int cose_alg,
     fido_blob_t *authdata_cbor, fido_authdata_t *authdata,
     fido_attcred_t *attcred, int *authdata_ext)
 {
@@ -1253,7 +1253,7 @@ decode_cred_authdata(const cbor_item_t *item, int cose_alg,
 }
 
 int
-decode_assert_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
+cbor_decode_assert_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
     fido_authdata_t *authdata, int *authdata_ext, fido_blob_t *hmac_secret_enc)
 {
 	const unsigned char	*buf = NULL;
@@ -1354,7 +1354,7 @@ out:
 }
 
 int
-decode_attstmt(const cbor_item_t *item, fido_attstmt_t *attstmt)
+cbor_decode_attstmt(const cbor_item_t *item, fido_attstmt_t *attstmt)
 {
 	if (cbor_isa_map(item) == false ||
 	    cbor_map_is_definite(item) == false ||
@@ -1367,7 +1367,7 @@ decode_attstmt(const cbor_item_t *item, fido_attstmt_t *attstmt)
 }
 
 int
-decode_uint64(const cbor_item_t *item, uint64_t *n)
+cbor_decode_uint64(const cbor_item_t *item, uint64_t *n)
 {
 	if (cbor_isa_uint(item) == false) {
 		fido_log_debug("%s: cbor type", __func__);
@@ -1406,7 +1406,7 @@ out:
 }
 
 int
-decode_cred_id(const cbor_item_t *item, fido_blob_t *id)
+cbor_decode_cred_id(const cbor_item_t *item, fido_blob_t *id)
 {
 	if (cbor_isa_map(item) == false ||
 	    cbor_map_is_definite(item) == false ||
@@ -1461,7 +1461,7 @@ out:
 }
 
 int
-decode_user(const cbor_item_t *item, fido_user_t *user)
+cbor_decode_user(const cbor_item_t *item, fido_user_t *user)
 {
 	if (cbor_isa_map(item) == false ||
 	    cbor_map_is_definite(item) == false ||
@@ -1507,7 +1507,7 @@ out:
 }
 
 int
-decode_rp_entity(const cbor_item_t *item, fido_rp_t *rp)
+cbor_decode_rp_entity(const cbor_item_t *item, fido_rp_t *rp)
 {
 	if (cbor_isa_map(item) == false ||
 	    cbor_map_is_definite(item) == false ||

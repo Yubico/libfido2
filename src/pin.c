@@ -88,7 +88,7 @@ fido_dev_get_pin_token_rx(fido_dev_t *dev, const fido_blob_t *ecdh,
 		goto fail;
 	}
 
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len, aes_token,
+	if ((r = cbor_parse_reply(reply, (size_t)reply_len, aes_token,
 	    parse_pintoken)) != FIDO_OK) {
 		fido_log_debug("%s: parse_pintoken", __func__);
 		goto fail;
@@ -312,8 +312,8 @@ parse_retry_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (0); /* ignore */
 	}
 
-	if (decode_uint64(val, &n) < 0 || n > INT_MAX) {
-		fido_log_debug("%s: decode_uint64", __func__);
+	if (cbor_decode_uint64(val, &n) < 0 || n > INT_MAX) {
+		fido_log_debug("%s: cbor_decode_uint64", __func__);
 		return (-1);
 	}
 
@@ -368,7 +368,7 @@ fido_dev_get_retry_count_rx(fido_dev_t *dev, int *retries, int ms)
 		return (FIDO_ERR_RX);
 	}
 
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len, retries,
+	if ((r = cbor_parse_reply(reply, (size_t)reply_len, retries,
 	    parse_retry_count)) != FIDO_OK) {
 		fido_log_debug("%s: parse_retry_count", __func__);
 		return (r);

@@ -247,7 +247,7 @@ bio_rx_template_array(fido_dev_t *dev, fido_bio_template_array_t *ta, int ms)
 		return (FIDO_ERR_RX);
 	}
 
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len, ta,
+	if ((r = cbor_parse_reply(reply, (size_t)reply_len, ta,
 	    bio_parse_template_array)) != FIDO_OK) {
 		fido_log_debug("%s: bio_parse_template_array" , __func__);
 		return (r);
@@ -342,15 +342,15 @@ bio_parse_enroll_status(const cbor_item_t *key, const cbor_item_t *val,
 
 	switch (cbor_get_uint8(key)) {
 	case 5:
-		if (decode_uint64(val, &x) < 0 || x > UINT8_MAX) {
-			fido_log_debug("%s: decode_uint64", __func__);
+		if (cbor_decode_uint64(val, &x) < 0 || x > UINT8_MAX) {
+			fido_log_debug("%s: cbor_decode_uint64", __func__);
 			return (-1);
 		}
 		e->last_status = (uint8_t)x;
 		break;
 	case 6:
-		if (decode_uint64(val, &x) < 0 || x > UINT8_MAX) {
-			fido_log_debug("%s: decode_uint64", __func__);
+		if (cbor_decode_uint64(val, &x) < 0 || x > UINT8_MAX) {
+			fido_log_debug("%s: cbor_decode_uint64", __func__);
 			return (-1);
 		}
 		e->remaining_samples = (uint8_t)x;
@@ -397,12 +397,12 @@ bio_rx_enroll_begin(fido_dev_t *dev, fido_bio_template_t *t,
 		return (FIDO_ERR_RX);
 	}
 
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len, e,
+	if ((r = cbor_parse_reply(reply, (size_t)reply_len, e,
 	    bio_parse_enroll_status)) != FIDO_OK) {
 		fido_log_debug("%s: bio_parse_enroll_status", __func__);
 		return (r);
 	}
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len, &t->id,
+	if ((r = cbor_parse_reply(reply, (size_t)reply_len, &t->id,
 	    bio_parse_template_id)) != FIDO_OK) {
 		fido_log_debug("%s: bio_parse_template_id", __func__);
 		return (r);
@@ -495,7 +495,7 @@ bio_rx_enroll_continue(fido_dev_t *dev, fido_bio_enroll_t *e, int ms)
 		return (FIDO_ERR_RX);
 	}
 
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len, e,
+	if ((r = cbor_parse_reply(reply, (size_t)reply_len, e,
 	    bio_parse_enroll_status)) != FIDO_OK) {
 		fido_log_debug("%s: bio_parse_enroll_status", __func__);
 		return (r);
@@ -620,15 +620,15 @@ bio_parse_info(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	switch (cbor_get_uint8(key)) {
 	case 2:
-		if (decode_uint64(val, &x) < 0 || x > UINT8_MAX) {
-			fido_log_debug("%s: decode_uint64", __func__);
+		if (cbor_decode_uint64(val, &x) < 0 || x > UINT8_MAX) {
+			fido_log_debug("%s: cbor_decode_uint64", __func__);
 			return (-1);
 		}
 		i->type = (uint8_t)x;
 		break;
 	case 3:
-		if (decode_uint64(val, &x) < 0 || x > UINT8_MAX) {
-			fido_log_debug("%s: decode_uint64", __func__);
+		if (cbor_decode_uint64(val, &x) < 0 || x > UINT8_MAX) {
+			fido_log_debug("%s: cbor_decode_uint64", __func__);
 			return (-1);
 		}
 		i->max_samples = (uint8_t)x;
@@ -655,7 +655,7 @@ bio_rx_info(fido_dev_t *dev, fido_bio_info_t *i, int ms)
 		return (FIDO_ERR_RX);
 	}
 
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len, i,
+	if ((r = cbor_parse_reply(reply, (size_t)reply_len, i,
 	    bio_parse_info)) != FIDO_OK) {
 		fido_log_debug("%s: bio_parse_info" , __func__);
 		return (r);

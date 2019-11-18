@@ -26,13 +26,13 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	switch (cbor_get_uint8(key)) {
 	case 1: /* fmt */
-		return (decode_fmt(val, &cred->fmt));
+		return (cbor_decode_fmt(val, &cred->fmt));
 	case 2: /* authdata */
-		return (decode_cred_authdata(val, cred->type,
+		return (cbor_decode_cred_authdata(val, cred->type,
 		    &cred->authdata_cbor, &cred->authdata, &cred->attcred,
 		    &cred->authdata_ext));
 	case 3: /* attestation statement */
-		return (decode_attstmt(val, &cred->attstmt));
+		return (cbor_decode_attstmt(val, &cred->attstmt));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type", __func__);
 		return (0);
@@ -137,7 +137,7 @@ fido_dev_make_cred_rx(fido_dev_t *dev, fido_cred_t *cred, int ms)
 		return (FIDO_ERR_RX);
 	}
 
-	if ((r = parse_cbor_reply(reply, (size_t)reply_len, cred,
+	if ((r = cbor_parse_reply(reply, (size_t)reply_len, cred,
 	    parse_makecred_reply)) != FIDO_OK) {
 		fido_log_debug("%s: parse_makecred_reply", __func__);
 		return (r);
@@ -586,9 +586,9 @@ fido_cred_set_authdata(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 		goto fail;
 	}
 
-	if (decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
+	if (cbor_decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
 	    &cred->authdata, &cred->attcred, &cred->authdata_ext) < 0) {
-		fido_log_debug("%s: decode_cred_authdata", __func__);
+		fido_log_debug("%s: cbor_decode_cred_authdata", __func__);
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
@@ -625,9 +625,9 @@ fido_cred_set_authdata_raw(fido_cred_t *cred, const unsigned char *ptr,
 		goto fail;
 	}
 
-	if (decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
+	if (cbor_decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
 	    &cred->authdata, &cred->attcred, &cred->authdata_ext) < 0) {
-		fido_log_debug("%s: decode_cred_authdata", __func__);
+		fido_log_debug("%s: cbor_decode_cred_authdata", __func__);
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}

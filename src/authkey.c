@@ -75,7 +75,7 @@ fido_dev_authkey_rx(fido_dev_t *dev, es256_pk_t *authkey, int ms)
 		return (FIDO_ERR_RX);
 	}
 
-	return (parse_cbor_reply(reply, (size_t)reply_len, authkey,
+	return (cbor_parse_reply(reply, (size_t)reply_len, authkey,
 	    parse_authkey));
 }
 

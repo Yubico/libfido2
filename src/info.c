@@ -214,7 +214,7 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	case 4: /* options */
 		return (decode_options(val, &ci->options));
 	case 5: /* maxMsgSize */
-		return (decode_uint64(val, &ci->maxmsgsiz));
+		return (cbor_decode_uint64(val, &ci->maxmsgsiz));
 	case 6: /* pinProtocols */
 		return (decode_protocols(val, &ci->protocols));
 	default: /* ignore */
@@ -256,7 +256,7 @@ fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 		return (FIDO_ERR_RX);
 	}
 
-	return (parse_cbor_reply(reply, (size_t)reply_len, ci,
+	return (cbor_parse_reply(reply, (size_t)reply_len, ci,
 	    parse_reply_element));
 }
 
