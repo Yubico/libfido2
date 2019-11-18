@@ -61,7 +61,7 @@ fido_blob_free(fido_blob_t **bp)
 }
 
 void
-free_blob_array(fido_blob_array_t *array)
+fido_free_blob_array(fido_blob_array_t *array)
 {
 	if (array->ptr == NULL)
 		return;

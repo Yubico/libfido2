@@ -510,7 +510,7 @@ fido_cred_reset_tx(fido_cred_t *cred)
 	free(cred->user.icon);
 	free(cred->user.name);
 	free(cred->user.display_name);
-	free_blob_array(&cred->excl);
+	fido_free_blob_array(&cred->excl);
 
 	memset(&cred->cdh, 0, sizeof(cred->cdh));
 	memset(&cred->rp, 0, sizeof(cred->rp));

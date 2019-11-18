@@ -742,7 +742,7 @@ fido_assert_reset_tx(fido_assert_t *assert)
 	free(assert->rp_id);
 	free(assert->cdh.ptr);
 	free(assert->hmac_salt.ptr);
-	free_blob_array(&assert->allow_list);
+	fido_free_blob_array(&assert->allow_list);
 
 	memset(&assert->cdh, 0, sizeof(assert->cdh));
 	memset(&assert->hmac_salt, 0, sizeof(assert->hmac_salt));
