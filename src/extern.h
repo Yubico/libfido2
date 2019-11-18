@@ -122,11 +122,11 @@ int check_rp_id(const char *, const unsigned char *);
 int check_flags(uint8_t, fido_opt_t, fido_opt_t);
 
 /* crypto */
-int verify_sig_es256(const fido_blob_t *, const es256_pk_t *,
+int fido_verify_sig_es256(const fido_blob_t *, const es256_pk_t *,
     const fido_blob_t *);
-int verify_sig_rs256(const fido_blob_t *, const rs256_pk_t *,
+int fido_verify_sig_rs256(const fido_blob_t *, const rs256_pk_t *,
     const fido_blob_t *);
-int verify_sig_eddsa(const fido_blob_t *, const eddsa_pk_t *,
+int fido_verify_sig_eddsa(const fido_blob_t *, const eddsa_pk_t *,
     const fido_blob_t *);
 
 #endif /* !_EXTERN_H */

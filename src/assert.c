@@ -413,7 +413,7 @@ fail:
 }
 
 int
-verify_sig_es256(const fido_blob_t *dgst, const es256_pk_t *pk,
+fido_verify_sig_es256(const fido_blob_t *dgst, const es256_pk_t *pk,
     const fido_blob_t *sig)
 {
 	EVP_PKEY	*pkey = NULL;
@@ -448,7 +448,7 @@ fail:
 }
 
 int
-verify_sig_rs256(const fido_blob_t *dgst, const rs256_pk_t *pk,
+fido_verify_sig_rs256(const fido_blob_t *dgst, const rs256_pk_t *pk,
     const fido_blob_t *sig)
 {
 	EVP_PKEY	*pkey = NULL;
@@ -483,7 +483,7 @@ fail:
 }
 
 int
-verify_sig_eddsa(const fido_blob_t *dgst, const eddsa_pk_t *pk,
+fido_verify_sig_eddsa(const fido_blob_t *dgst, const eddsa_pk_t *pk,
     const fido_blob_t *sig)
 {
 	EVP_PKEY	*pkey = NULL;
@@ -586,13 +586,13 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 
 	switch (cose_alg) {
 	case COSE_ES256:
-		ok = verify_sig_es256(&dgst, pk, &stmt->sig);
+		ok = fido_verify_sig_es256(&dgst, pk, &stmt->sig);
 		break;
 	case COSE_RS256:
-		ok = verify_sig_rs256(&dgst, pk, &stmt->sig);
+		ok = fido_verify_sig_rs256(&dgst, pk, &stmt->sig);
 		break;
 	case COSE_EDDSA:
-		ok = verify_sig_eddsa(&dgst, pk, &stmt->sig);
+		ok = fido_verify_sig_eddsa(&dgst, pk, &stmt->sig);
 		break;
 	default:
 		fido_log_debug("%s: unsupported cose_alg %d", __func__,
