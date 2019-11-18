@@ -208,10 +208,10 @@ fido_dev_new(void)
 
 	dev->cid = CTAP_CID_BROADCAST;
 
-	io.open = hid_open;
-	io.close = hid_close;
-	io.read = hid_read;
-	io.write = hid_write;
+	io.open = fido_hid_open;
+	io.close = fido_hid_close;
+	io.read = fido_hid_read;
+	io.write = fido_hid_write;
 
 	if (fido_dev_set_io_functions(dev, &io) != FIDO_OK) {
 		fido_log_debug("%s: fido_dev_set_io_functions", __func__);

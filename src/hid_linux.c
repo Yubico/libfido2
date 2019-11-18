@@ -283,7 +283,7 @@ fail:
 }
 
 void *
-hid_open(const char *path)
+fido_hid_open(const char *path)
 {
 	int *fd;
 
@@ -297,7 +297,7 @@ hid_open(const char *path)
 }
 
 void
-hid_close(void *handle)
+fido_hid_close(void *handle)
 {
 	int *fd = handle;
 
@@ -306,7 +306,7 @@ hid_close(void *handle)
 }
 
 int
-hid_read(void *handle, unsigned char *buf, size_t len, int ms)
+fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	int	*fd = handle;
 	ssize_t	 r;
@@ -325,7 +325,7 @@ hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 }
 
 int
-hid_write(void *handle, const unsigned char *buf, size_t len)
+fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	int	*fd = handle;
 	ssize_t	 r;

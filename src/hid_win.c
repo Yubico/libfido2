@@ -253,7 +253,7 @@ fail:
 }
 
 void *
-hid_open(const char *path)
+fido_hid_open(const char *path)
 {
 	HANDLE dev;
 
@@ -268,13 +268,13 @@ hid_open(const char *path)
 }
 
 void
-hid_close(void *handle)
+fido_hid_close(void *handle)
 {
 	CloseHandle(handle);
 }
 
 int
-hid_read(void *handle, unsigned char *buf, size_t len, int ms)
+fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	DWORD	n;
 	int	r = -1;
@@ -305,7 +305,7 @@ fail:
 }
 
 int
-hid_write(void *handle, const unsigned char *buf, size_t len)
+fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	DWORD n;
 

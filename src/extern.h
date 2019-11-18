@@ -75,10 +75,10 @@ int fido_buf_read(const unsigned char **, size_t *, void *, size_t);
 int fido_buf_write(unsigned char **, size_t *, const void *, size_t);
 
 /* hid i/o */
-void *hid_open(const char *);
-void  hid_close(void *);
-int   hid_read(void *, unsigned char *, size_t, int);
-int   hid_write(void *, const unsigned char *, size_t);
+void *fido_hid_open(const char *);
+void  fido_hid_close(void *);
+int   fido_hid_read(void *, unsigned char *, size_t, int);
+int   fido_hid_write(void *, const unsigned char *, size_t);
 
 /* generic i/o */
 int fido_rx_cbor_status(fido_dev_t *, int);

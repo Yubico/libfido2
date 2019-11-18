@@ -258,7 +258,7 @@ fail:
 }
 
 void *
-hid_open(const char *path)
+fido_hid_open(const char *path)
 {
 	io_registry_entry_t	 entry = MACH_PORT_NULL;
 	struct dev		*dev = NULL;
@@ -319,7 +319,7 @@ fail:
 }
 
 void
-hid_close(void *handle)
+fido_hid_close(void *handle)
 {
 	struct dev *dev = handle;
 
@@ -358,7 +358,7 @@ removal_callback(void *context, IOReturn result, void *sender)
 }
 
 int
-hid_read(void *handle, unsigned char *buf, size_t len, int ms)
+fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct dev		*dev = handle;
 	CFRunLoopRunResult	 r;
@@ -391,7 +391,7 @@ hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 }
 
 int
-hid_write(void *handle, const unsigned char *buf, size_t len)
+fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	struct dev *dev = handle;
 

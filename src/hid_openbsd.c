@@ -146,7 +146,7 @@ terrible_ping_kludge(struct hid_openbsd *ctx)
 		data[6] = 0;
 		data[7] = 1;
 		fido_log_debug("%s: send ping %d", __func__, i);
-		if (hid_write(ctx, data, ctx->report_out_len + 1) == -1)
+		if (fido_hid_write(ctx, data, ctx->report_out_len + 1) == -1)
 			return -1;
 		fido_log_debug("%s: wait reply", __func__);
 		memset(&pfd, 0, sizeof(pfd));
@@ -159,7 +159,7 @@ terrible_ping_kludge(struct hid_openbsd *ctx)
 			fido_log_debug("%s: timed out", __func__);
 			continue;
 		}
-		if (hid_read(ctx, data, ctx->report_out_len, 250) == -1)
+		if (fido_hid_read(ctx, data, ctx->report_out_len, 250) == -1)
 			return -1;
 		/*
 		 * Ping isn't always supported on the broadcast channel,
@@ -175,7 +175,7 @@ terrible_ping_kludge(struct hid_openbsd *ctx)
 }
 
 void *
-hid_open(const char *path)
+fido_hid_open(const char *path)
 {
 	struct hid_openbsd *ret = NULL;
 	report_desc_t rdesc = NULL;
@@ -221,7 +221,7 @@ hid_open(const char *path)
 	 * open and close. This is a terrible hack to work around it.
 	 */
 	if (terrible_ping_kludge(ret) != 0) {
-		hid_close(ret);
+		fido_hid_close(ret);
 		return NULL;
 	}
 
@@ -229,7 +229,7 @@ hid_open(const char *path)
 }
 
 void
-hid_close(void *handle)
+fido_hid_close(void *handle)
 {
 	struct hid_openbsd *ctx = (struct hid_openbsd *)handle;
 
@@ -238,7 +238,7 @@ hid_close(void *handle)
 }
 
 int
-hid_read(void *handle, unsigned char *buf, size_t len, int ms)
+fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct hid_openbsd *ctx = (struct hid_openbsd *)handle;
 	ssize_t r;
@@ -258,7 +258,7 @@ hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 }
 
 int
-hid_write(void *handle, const unsigned char *buf, size_t len)
+fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	struct hid_openbsd *ctx = (struct hid_openbsd *)handle;
 	ssize_t r;
