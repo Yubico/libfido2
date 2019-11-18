@@ -331,7 +331,7 @@ fail:
 }
 
 int
-check_flags(uint8_t flags, fido_opt_t up, fido_opt_t uv)
+fido_check_flags(uint8_t flags, fido_opt_t up, fido_opt_t uv)
 {
 	fido_log_debug("%s: flags=%02x", __func__, flags);
 	fido_log_debug("%s: up=%d, uv=%d", __func__, up, uv);
@@ -560,8 +560,9 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 		goto out;
 	}
 
-	if (check_flags(stmt->authdata.flags, assert->up, assert->uv) < 0) {
-		fido_log_debug("%s: check_flags", __func__);
+	if (fido_check_flags(stmt->authdata.flags, assert->up,
+	    assert->uv) < 0) {
+		fido_log_debug("%s: fido_check_flags", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
 		goto out;
 	}
@@ -572,8 +573,8 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 		goto out;
 	}
 
-	if (check_rp_id(assert->rp_id, stmt->authdata.rp_id_hash) != 0) {
-		fido_log_debug("%s: check_rp_id", __func__);
+	if (fido_check_rp_id(assert->rp_id, stmt->authdata.rp_id_hash) != 0) {
+		fido_log_debug("%s: fido_check_rp_id", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
 		goto out;
 	}

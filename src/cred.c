@@ -191,7 +191,7 @@ check_extensions(int authdata_ext, int ext)
 }
 
 int
-check_rp_id(const char *id, const unsigned char *obtained_hash)
+fido_check_rp_id(const char *id, const unsigned char *obtained_hash)
 {
 	unsigned char expected_hash[SHA256_DIGEST_LENGTH];
 
@@ -343,14 +343,15 @@ fido_cred_verify(const fido_cred_t *cred)
 		goto out;
 	}
 
-	if (check_rp_id(cred->rp.id, cred->authdata.rp_id_hash) != 0) {
-		fido_log_debug("%s: check_rp_id", __func__);
+	if (fido_check_rp_id(cred->rp.id, cred->authdata.rp_id_hash) != 0) {
+		fido_log_debug("%s: fido_check_rp_id", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
 		goto out;
 	}
 
-	if (check_flags(cred->authdata.flags, FIDO_OPT_TRUE, cred->uv) < 0) {
-		fido_log_debug("%s: check_flags", __func__);
+	if (fido_check_flags(cred->authdata.flags, FIDO_OPT_TRUE,
+	    cred->uv) < 0) {
+		fido_log_debug("%s: fido_check_flags", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
 		goto out;
 	}
@@ -417,14 +418,15 @@ fido_cred_verify_self(const fido_cred_t *cred)
 		goto out;
 	}
 
-	if (check_rp_id(cred->rp.id, cred->authdata.rp_id_hash) != 0) {
-		fido_log_debug("%s: check_rp_id", __func__);
+	if (fido_check_rp_id(cred->rp.id, cred->authdata.rp_id_hash) != 0) {
+		fido_log_debug("%s: fido_check_rp_id", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
 		goto out;
 	}
 
-	if (check_flags(cred->authdata.flags, FIDO_OPT_TRUE, cred->uv) < 0) {
-		fido_log_debug("%s: check_flags", __func__);
+	if (fido_check_flags(cred->authdata.flags, FIDO_OPT_TRUE,
+	    cred->uv) < 0) {
+		fido_log_debug("%s: fido_check_flags", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
 		goto out;
 	}
