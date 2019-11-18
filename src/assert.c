@@ -143,9 +143,9 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 			r = FIDO_ERR_INVALID_ARGUMENT;
 			goto fail;
 		}
-		if ((r = add_cbor_pin_params(dev, &assert->cdh, pk, ecdh, pin,
+		if ((r = cbor_add_pin_params(dev, &assert->cdh, pk, ecdh, pin,
 		    &argv[5], &argv[6])) != FIDO_OK) {
-			fido_log_debug("%s: add_cbor_pin_params", __func__);
+			fido_log_debug("%s: cbor_add_pin_params", __func__);
 			goto fail;
 		}
 	}

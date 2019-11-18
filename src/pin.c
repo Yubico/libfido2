@@ -396,7 +396,7 @@ fido_dev_get_retry_count(fido_dev_t *dev, int *retries)
 }
 
 int
-add_cbor_pin_params(fido_dev_t *dev, const fido_blob_t *hmac_data,
+cbor_add_pin_params(fido_dev_t *dev, const fido_blob_t *hmac_data,
     const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin,
     cbor_item_t **auth, cbor_item_t **opt)
 {

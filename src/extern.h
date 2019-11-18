@@ -62,7 +62,7 @@ int cbor_map_iter(const cbor_item_t *, void *, int(*)(const cbor_item_t *,
 int cbor_string_copy(const cbor_item_t *, char **);
 int parse_cbor_reply(const unsigned char *, size_t, void *,
     int(*)(const cbor_item_t *, const cbor_item_t *, void *));
-int add_cbor_pin_params(fido_dev_t *, const fido_blob_t *, const es256_pk_t *,
+int cbor_add_pin_params(fido_dev_t *, const fido_blob_t *, const es256_pk_t *,
     const fido_blob_t *,const char *, cbor_item_t **, cbor_item_t **);
 void cbor_vector_free(cbor_item_t **, size_t);
 

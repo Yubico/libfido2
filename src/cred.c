@@ -97,9 +97,9 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
-		if ((r = add_cbor_pin_params(dev, &cred->cdh, pk, ecdh, pin,
+		if ((r = cbor_add_pin_params(dev, &cred->cdh, pk, ecdh, pin,
 		    &argv[7], &argv[8])) != FIDO_OK) {
-			fido_log_debug("%s: add_cbor_pin_params", __func__);
+			fido_log_debug("%s: cbor_add_pin_params", __func__);
 			goto fail;
 		}
 	}

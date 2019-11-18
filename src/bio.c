@@ -95,9 +95,9 @@ bio_tx(fido_dev_t *dev, uint8_t cmd, cbor_item_t **sub_argv, size_t sub_argc,
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
-		if ((r = add_cbor_pin_params(dev, &hmac, pk, ecdh, pin,
+		if ((r = cbor_add_pin_params(dev, &hmac, pk, ecdh, pin,
 		    &argv[4], &argv[3])) != FIDO_OK) {
-			fido_log_debug("%s: add_cbor_pin_params", __func__);
+			fido_log_debug("%s: cbor_add_pin_params", __func__);
 			goto fail;
 		}
 	} else if (token) {
