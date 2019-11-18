@@ -89,8 +89,8 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 		return (FIDO_ERR_INTERNAL);
 	}
 
-	if (tx(dev, cmd, &dev->nonce, sizeof(dev->nonce)) < 0) {
-		log_debug("%s: tx", __func__);
+	if (fido_tx(dev, cmd, &dev->nonce, sizeof(dev->nonce)) < 0) {
+		log_debug("%s: fido_tx", __func__);
 		dev->io.close(dev->io_handle);
 		dev->io_handle = NULL;
 		return (FIDO_ERR_TX);
@@ -105,8 +105,8 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;
 	int		n;
 
-	if ((n = rx(dev, cmd, &dev->attr, sizeof(dev->attr), ms)) < 0) {
-		log_debug("%s: rx", __func__);
+	if ((n = fido_rx(dev, cmd, &dev->attr, sizeof(dev->attr), ms)) < 0) {
+		log_debug("%s: fido_rx", __func__);
 		goto fail;
 	}
 
@@ -162,7 +162,7 @@ fido_dev_close(fido_dev_t *dev)
 int
 fido_dev_cancel(fido_dev_t *dev)
 {
-	if (tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CANCEL, NULL, 0) < 0)
+	if (fido_tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CANCEL, NULL, 0) < 0)
 		return (FIDO_ERR_TX);
 
 	return (FIDO_OK);

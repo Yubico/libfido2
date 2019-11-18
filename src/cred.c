@@ -106,8 +106,8 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 
 	/* framing and transmission */
 	if (cbor_build_frame(CTAP_CBOR_MAKECRED, argv, 9, &f) < 0 ||
-	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
-		log_debug("%s: tx", __func__);
+	    fido_tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+		log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
 	}
@@ -132,8 +132,8 @@ fido_dev_make_cred_rx(fido_dev_t *dev, fido_cred_t *cred, int ms)
 
 	fido_cred_reset_rx(cred);
 
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
-		log_debug("%s: rx", __func__);
+	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
 

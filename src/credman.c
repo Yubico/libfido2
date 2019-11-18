@@ -138,8 +138,8 @@ credman_tx(fido_dev_t *dev, uint8_t cmd, const fido_blob_t *param,
 
 	/* framing and transmission */
 	if (cbor_build_frame(CTAP_CBOR_CRED_MGMT_PRE, argv, 4, &f) < 0 ||
-	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
-		log_debug("%s: tx", __func__);
+	    fido_tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+		log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
 	}
@@ -188,8 +188,8 @@ credman_rx_metadata(fido_dev_t *dev, fido_credman_metadata_t *metadata, int ms)
 
 	memset(metadata, 0, sizeof(*metadata));
 
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
-		log_debug("%s: rx", __func__);
+	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
 
@@ -307,8 +307,8 @@ credman_rx_rk(fido_dev_t *dev, fido_credman_rk_t *rk, int ms)
 
 	credman_reset_rk(rk);
 
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
-		log_debug("%s: rx", __func__);
+	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
 
@@ -344,8 +344,8 @@ credman_rx_next_rk(fido_dev_t *dev, fido_credman_rk_t *rk, int ms)
 	int		reply_len;
 	int		r;
 
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
-		log_debug("%s: rx", __func__);
+	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
 
@@ -420,7 +420,7 @@ credman_del_rk_wait(fido_dev_t *dev, const unsigned char *cred_id,
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	if ((r = credman_tx(dev, CMD_DELETE_CRED, &cred, pin)) != FIDO_OK ||
-	    (r = rx_cbor_status(dev, ms)) != FIDO_OK)
+	    (r = fido_rx_cbor_status(dev, ms)) != FIDO_OK)
 		goto fail;
 
 	r = FIDO_OK;
@@ -521,8 +521,8 @@ credman_rx_rp(fido_dev_t *dev, fido_credman_rp_t *rp, int ms)
 
 	credman_reset_rp(rp);
 
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
-		log_debug("%s: rx", __func__);
+	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
 
@@ -558,8 +558,8 @@ credman_rx_next_rp(fido_dev_t *dev, fido_credman_rp_t *rp, int ms)
 	int		reply_len;
 	int		r;
 
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
-		log_debug("%s: rx", __func__);
+	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
 

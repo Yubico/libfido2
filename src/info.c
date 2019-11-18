@@ -231,8 +231,8 @@ fido_dev_get_cbor_info_tx(fido_dev_t *dev)
 
 	log_debug("%s: dev=%p", __func__, (void *)dev);
 
-	if (tx(dev, cmd, cbor, sizeof(cbor)) < 0) {
-		log_debug("%s: tx", __func__);
+	if (fido_tx(dev, cmd, cbor, sizeof(cbor)) < 0) {
+		log_debug("%s: fido_tx", __func__);
 		return (FIDO_ERR_TX);
 	}
 
@@ -251,8 +251,8 @@ fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 
 	memset(ci, 0, sizeof(*ci));
 
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
-		log_debug("%s: rx", __func__);
+	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
 

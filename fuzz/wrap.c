@@ -403,7 +403,7 @@ WRAP(size_t,
 )
 
 WRAP(int,
-	tx,
+	fido_tx,
 	(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count),
 	-1,
 	(d, cmd, buf, count),

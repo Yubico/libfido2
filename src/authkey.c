@@ -44,8 +44,8 @@ fido_dev_authkey_tx(fido_dev_t *dev)
 
 	/* frame and transmit */
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 2, &f) < 0 ||
-	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
-		log_debug("%s: tx", __func__);
+	    fido_tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+		log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
 	}
@@ -70,8 +70,8 @@ fido_dev_authkey_rx(fido_dev_t *dev, es256_pk_t *authkey, int ms)
 
 	memset(authkey, 0, sizeof(*authkey));
 
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
-		log_debug("%s: rx", __func__);
+	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
 

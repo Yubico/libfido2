@@ -52,8 +52,8 @@ fido_dev_get_pin_token_tx(fido_dev_t *dev, const char *pin,
 	}
 
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 6, &f) < 0 ||
-	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
-		log_debug("%s: tx", __func__);
+	    fido_tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+		log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
 	}
@@ -82,8 +82,8 @@ fido_dev_get_pin_token_rx(fido_dev_t *dev, const fido_blob_t *ecdh,
 		goto fail;
 	}
 
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
-		log_debug("%s: rx", __func__);
+	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		log_debug("%s: fido_rx", __func__);
 		r = FIDO_ERR_RX;
 		goto fail;
 	}
@@ -197,8 +197,8 @@ fido_dev_change_pin_tx(fido_dev_t *dev, const char *pin, const char *oldpin)
 	}
 
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 6, &f) < 0 ||
-	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
-		log_debug("%s: tx", __func__);
+	    fido_tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+		log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
 	}
@@ -250,8 +250,8 @@ fido_dev_set_pin_tx(fido_dev_t *dev, const char *pin)
 	}
 
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 5, &f) < 0 ||
-	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
-		log_debug("%s: tx", __func__);
+	    fido_tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+		log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
 	}
@@ -285,8 +285,8 @@ fido_dev_set_pin_wait(fido_dev_t *dev, const char *pin, const char *oldpin,
 		}
 	}
 
-	if ((r = rx_cbor_status(dev, ms)) != FIDO_OK) {
-		log_debug("%s: rx_cbor_status", __func__);
+	if ((r = fido_rx_cbor_status(dev, ms)) != FIDO_OK) {
+		log_debug("%s: fido_rx_cbor_status", __func__);
 		return (r);
 	}
 
@@ -339,8 +339,8 @@ fido_dev_get_retry_count_tx(fido_dev_t *dev)
 	}
 
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 2, &f) < 0 ||
-	    tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
-		log_debug("%s: tx", __func__);
+	    fido_tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+		log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
 	}
@@ -363,8 +363,8 @@ fido_dev_get_retry_count_rx(fido_dev_t *dev, int *retries, int ms)
 
 	*retries = 0;
 
-	if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
-		log_debug("%s: rx", __func__);
+	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
 

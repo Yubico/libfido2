@@ -150,13 +150,14 @@ send_dummy_register(fido_dev_t *dev, int ms)
 	}
 
 	do {
-		if (tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
-			log_debug("%s: tx", __func__);
+		if (fido_tx(dev, cmd, iso7816_ptr(apdu),
+		    iso7816_len(apdu)) < 0) {
+			log_debug("%s: fido_tx", __func__);
 			r = FIDO_ERR_TX;
 			goto fail;
 		}
-		if (rx(dev, cmd, &reply, sizeof(reply), ms) < 2) {
-			log_debug("%s: rx", __func__);
+		if (fido_rx(dev, cmd, &reply, sizeof(reply), ms) < 2) {
+			log_debug("%s: fido_rx", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
@@ -216,13 +217,13 @@ key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
 		goto fail;
 	}
 
-	if (tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
-		log_debug("%s: tx", __func__);
+	if (fido_tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
+		log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
 	}
-	if (rx(dev, cmd, &reply, sizeof(reply), ms) != 2) {
-		log_debug("%s: rx", __func__);
+	if (fido_rx(dev, cmd, &reply, sizeof(reply), ms) != 2) {
+		log_debug("%s: fido_rx", __func__);
 		r = FIDO_ERR_RX;
 		goto fail;
 	}
@@ -325,13 +326,15 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 	}
 
 	do {
-		if (tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
-			log_debug("%s: tx", __func__);
+		if (fido_tx(dev, cmd, iso7816_ptr(apdu),
+		    iso7816_len(apdu)) < 0) {
+			log_debug("%s: fido_tx", __func__);
 			r = FIDO_ERR_TX;
 			goto fail;
 		}
-		if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 2) {
-			log_debug("%s: rx", __func__);
+		if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply),
+		    ms)) < 2) {
+			log_debug("%s: fido_rx", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
@@ -629,13 +632,15 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 	}
 
 	do {
-		if (tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
-			log_debug("%s: tx", __func__);
+		if (fido_tx(dev, cmd, iso7816_ptr(apdu),
+		    iso7816_len(apdu)) < 0) {
+			log_debug("%s: fido_tx", __func__);
 			r = FIDO_ERR_TX;
 			goto fail;
 		}
-		if ((reply_len = rx(dev, cmd, &reply, sizeof(reply), ms)) < 2) {
-			log_debug("%s: rx", __func__);
+		if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply),
+		    ms)) < 2) {
+			log_debug("%s: fido_rx", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
 		}

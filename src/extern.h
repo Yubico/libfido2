@@ -81,9 +81,9 @@ int   hid_read(void *, unsigned char *, size_t, int);
 int   hid_write(void *, const unsigned char *, size_t);
 
 /* generic i/o */
-int rx(fido_dev_t *, uint8_t, void *, size_t, int);
-int tx(fido_dev_t *, uint8_t, const void *, size_t);
-int rx_cbor_status(fido_dev_t *, int);
+int fido_rx_cbor_status(fido_dev_t *, int);
+int fido_rx(fido_dev_t *, uint8_t, void *, size_t, int);
+int fido_tx(fido_dev_t *, uint8_t, const void *, size_t);
 
 /* log */
 #ifdef FIDO_NO_DIAGNOSTIC

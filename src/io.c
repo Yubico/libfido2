@@ -85,7 +85,7 @@ tx_frame(fido_dev_t *d, int seq, const void *buf, size_t count)
 }
 
 int
-tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
+fido_tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 {
 	int	seq = 0;
 	size_t	sent;
@@ -153,7 +153,7 @@ rx_preamble(fido_dev_t *d, struct frame *fp, int ms)
 }
 
 int
-rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
+fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 {
 	struct frame	f;
 	uint16_t	r;
@@ -240,15 +240,15 @@ rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 }
 
 int
-rx_cbor_status(fido_dev_t *d, int ms)
+fido_rx_cbor_status(fido_dev_t *d, int ms)
 {
 	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
 	unsigned char	reply[2048];
 	int		reply_len;
 
-	if ((reply_len = rx(d, cmd, &reply, sizeof(reply), ms)) < 0 ||
+	if ((reply_len = fido_rx(d, cmd, &reply, sizeof(reply), ms)) < 0 ||
 	    (size_t)reply_len < 1) {
-		log_debug("%s: rx", __func__);
+		log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
 
