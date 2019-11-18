@@ -101,8 +101,8 @@ bio_tx(fido_dev_t *dev, uint8_t cmd, cbor_item_t **sub_argv, size_t sub_argc,
 			goto fail;
 		}
 	} else if (token) {
-		if ((argv[3] = encode_pin_opt()) == NULL ||
-		    (argv[4] = encode_pin_auth(token, &hmac)) == NULL) {
+		if ((argv[3] = cbor_encode_pin_opt()) == NULL ||
+		    (argv[4] = cbor_encode_pin_auth(token, &hmac)) == NULL) {
 			fido_log_debug("%s: encode pin", __func__);
 			goto fail;
 		}

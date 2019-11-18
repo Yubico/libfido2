@@ -13,23 +13,23 @@ int aes256_cbc_enc(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 
 /* cbor encoding functions */
 cbor_item_t *cbor_flatten_vector(cbor_item_t **, size_t);
-cbor_item_t *encode_assert_options(fido_opt_t, fido_opt_t);
-cbor_item_t *encode_change_pin_auth(const fido_blob_t *, const fido_blob_t *,
-    const fido_blob_t *);
-cbor_item_t *encode_extensions(int);
-cbor_item_t *encode_hmac_secret_param(const fido_blob_t *, const es256_pk_t *,
-    const fido_blob_t *);
-cbor_item_t *encode_options(fido_opt_t, fido_opt_t);
-cbor_item_t *encode_pin_auth(const fido_blob_t *, const fido_blob_t *);
-cbor_item_t *encode_pin_enc(const fido_blob_t *, const fido_blob_t *);
-cbor_item_t *encode_pin_hash_enc(const fido_blob_t *, const fido_blob_t *);
-cbor_item_t *encode_pin_opt(void);
-cbor_item_t *encode_pubkey(const fido_blob_t *);
-cbor_item_t *encode_pubkey_list(const fido_blob_array_t *);
-cbor_item_t *encode_pubkey_param(int);
-cbor_item_t *encode_rp_entity(const fido_rp_t *);
-cbor_item_t *encode_set_pin_auth(const fido_blob_t *, const fido_blob_t *);
-cbor_item_t *encode_user_entity(const fido_user_t *);
+cbor_item_t *cbor_encode_assert_options(fido_opt_t, fido_opt_t);
+cbor_item_t *cbor_encode_change_pin_auth(const fido_blob_t *,
+    const fido_blob_t *, const fido_blob_t *);
+cbor_item_t *cbor_encode_extensions(int);
+cbor_item_t *cbor_encode_hmac_secret_param(const fido_blob_t *,
+    const es256_pk_t *, const fido_blob_t *);
+cbor_item_t *cbor_encode_options(fido_opt_t, fido_opt_t);
+cbor_item_t *cbor_encode_pin_auth(const fido_blob_t *, const fido_blob_t *);
+cbor_item_t *cbor_encode_pin_enc(const fido_blob_t *, const fido_blob_t *);
+cbor_item_t *cbor_encode_pin_hash_enc(const fido_blob_t *, const fido_blob_t *);
+cbor_item_t *cbor_encode_pin_opt(void);
+cbor_item_t *cbor_encode_pubkey(const fido_blob_t *);
+cbor_item_t *cbor_encode_pubkey_list(const fido_blob_array_t *);
+cbor_item_t *cbor_encode_pubkey_param(int);
+cbor_item_t *cbor_encode_rp_entity(const fido_rp_t *);
+cbor_item_t *cbor_encode_set_pin_auth(const fido_blob_t *, const fido_blob_t *);
+cbor_item_t *cbor_encode_user_entity(const fido_user_t *);
 cbor_item_t *es256_pk_encode(const es256_pk_t *, int);
 
 /* cbor decoding functions */

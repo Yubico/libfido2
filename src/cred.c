@@ -59,9 +59,9 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 	}
 
 	if ((argv[0] = fido_blob_encode(&cred->cdh)) == NULL ||
-	    (argv[1] = encode_rp_entity(&cred->rp)) == NULL ||
-	    (argv[2] = encode_user_entity(&cred->user)) == NULL ||
-	    (argv[3] = encode_pubkey_param(cred->type)) == NULL) {
+	    (argv[1] = cbor_encode_rp_entity(&cred->rp)) == NULL ||
+	    (argv[2] = cbor_encode_user_entity(&cred->user)) == NULL ||
+	    (argv[3] = cbor_encode_pubkey_param(cred->type)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -69,24 +69,25 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 
 	/* excluded credentials */
 	if (cred->excl.len)
-		if ((argv[4] = encode_pubkey_list(&cred->excl)) == NULL) {
-			fido_log_debug("%s: encode_pubkey_list", __func__);
+		if ((argv[4] = cbor_encode_pubkey_list(&cred->excl)) == NULL) {
+			fido_log_debug("%s: cbor_encode_pubkey_list", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
 
 	/* extensions */
 	if (cred->ext)
-		if ((argv[5] = encode_extensions(cred->ext)) == NULL) {
-			fido_log_debug("%s: encode_extensions", __func__);
+		if ((argv[5] = cbor_encode_extensions(cred->ext)) == NULL) {
+			fido_log_debug("%s: cbor_encode_extensions", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
 
 	/* options */
 	if (cred->rk != FIDO_OPT_OMIT || cred->uv != FIDO_OPT_OMIT)
-		if ((argv[6] = encode_options(cred->rk, cred->uv)) == NULL) {
-			fido_log_debug("%s: encode_options", __func__);
+		if ((argv[6] = cbor_encode_options(cred->rk,
+		    cred->uv)) == NULL) {
+			fido_log_debug("%s: cbor_encode_options", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}

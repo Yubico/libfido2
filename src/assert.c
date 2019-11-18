@@ -108,8 +108,8 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 	/* allowed credentials */
 	if (assert->allow_list.len) {
 		const fido_blob_array_t *cl = &assert->allow_list;
-		if ((argv[2] = encode_pubkey_list(cl)) == NULL) {
-			fido_log_debug("%s: encode_pubkey_list", __func__);
+		if ((argv[2] = cbor_encode_pubkey_list(cl)) == NULL) {
+			fido_log_debug("%s: cbor_encode_pubkey_list", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
@@ -117,9 +117,9 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 
 	/* hmac-secret extension */
 	if (assert->ext & FIDO_EXT_HMAC_SECRET)
-		if ((argv[3] = encode_hmac_secret_param(ecdh, pk,
+		if ((argv[3] = cbor_encode_hmac_secret_param(ecdh, pk,
 		    &assert->hmac_salt)) == NULL) {
-			fido_log_debug("%s: encode_hmac_secret_param",
+			fido_log_debug("%s: cbor_encode_hmac_secret_param",
 			    __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
@@ -127,9 +127,10 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 
 	/* options */
 	if (assert->up != FIDO_OPT_OMIT || assert->uv != FIDO_OPT_OMIT)
-		if ((argv[4] = encode_assert_options(assert->up,
+		if ((argv[4] = cbor_encode_assert_options(assert->up,
 		    assert->uv)) == NULL) {
-			fido_log_debug("%s: encode_assert_options", __func__);
+			fido_log_debug("%s: cbor_encode_assert_options",
+			    __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}

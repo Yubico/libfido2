@@ -71,7 +71,7 @@ credman_prepare_hmac(uint8_t cmd, const fido_blob_t *body, cbor_item_t **param,
 		break;
 	case CMD_DELETE_CRED:
 		n = 2;
-		param_cbor[n - 1] = encode_pubkey(body);
+		param_cbor[n - 1] = cbor_encode_pubkey(body);
 		break;
 	default:
 		fido_log_debug("%s: unknown cmd=0x%02x", __func__, cmd);

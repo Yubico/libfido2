@@ -404,7 +404,7 @@ fail:
 }
 
 cbor_item_t *
-encode_rp_entity(const fido_rp_t *rp)
+cbor_encode_rp_entity(const fido_rp_t *rp)
 {
 	cbor_item_t *item = NULL;
 
@@ -421,7 +421,7 @@ encode_rp_entity(const fido_rp_t *rp)
 }
 
 cbor_item_t *
-encode_user_entity(const fido_user_t *user)
+cbor_encode_user_entity(const fido_user_t *user)
 {
 	cbor_item_t		*item = NULL;
 	const fido_blob_t	*id = &user->id;
@@ -442,7 +442,7 @@ encode_user_entity(const fido_user_t *user)
 }
 
 cbor_item_t *
-encode_pubkey_param(int cose_alg)
+cbor_encode_pubkey_param(int cose_alg)
 {
 	cbor_item_t		*item = NULL;
 	cbor_item_t		*body = NULL;
@@ -493,7 +493,7 @@ fail:
 }
 
 cbor_item_t *
-encode_pubkey(const fido_blob_t *pubkey)
+cbor_encode_pubkey(const fido_blob_t *pubkey)
 {
 	cbor_item_t *cbor_key = NULL;
 
@@ -509,7 +509,7 @@ encode_pubkey(const fido_blob_t *pubkey)
 }
 
 cbor_item_t *
-encode_pubkey_list(const fido_blob_array_t *list)
+cbor_encode_pubkey_list(const fido_blob_array_t *list)
 {
 	cbor_item_t	*array = NULL;
 	cbor_item_t	*key = NULL;
@@ -518,7 +518,7 @@ encode_pubkey_list(const fido_blob_array_t *list)
 		goto fail;
 
 	for (size_t i = 0; i < list->len; i++) {
-		if ((key = encode_pubkey(&list->ptr[i])) == NULL ||
+		if ((key = cbor_encode_pubkey(&list->ptr[i])) == NULL ||
 		    cbor_array_push(array, key) == false)
 			goto fail;
 		cbor_decref(&key);
@@ -535,7 +535,7 @@ fail:
 }
 
 cbor_item_t *
-encode_extensions(int ext)
+cbor_encode_extensions(int ext)
 {
 	cbor_item_t *item = NULL;
 
@@ -554,7 +554,7 @@ encode_extensions(int ext)
 }
 
 cbor_item_t *
-encode_options(fido_opt_t rk, fido_opt_t uv)
+cbor_encode_options(fido_opt_t rk, fido_opt_t uv)
 {
 	cbor_item_t *item = NULL;
 
@@ -571,7 +571,7 @@ encode_options(fido_opt_t rk, fido_opt_t uv)
 }
 
 cbor_item_t *
-encode_assert_options(fido_opt_t up, fido_opt_t uv)
+cbor_encode_assert_options(fido_opt_t up, fido_opt_t uv)
 {
 	cbor_item_t *item = NULL;
 
@@ -588,7 +588,7 @@ encode_assert_options(fido_opt_t up, fido_opt_t uv)
 }
 
 cbor_item_t *
-encode_pin_auth(const fido_blob_t *hmac_key, const fido_blob_t *data)
+cbor_encode_pin_auth(const fido_blob_t *hmac_key, const fido_blob_t *data)
 {
 	const EVP_MD	*md = NULL;
 	unsigned char	 dgst[SHA256_DIGEST_LENGTH];
@@ -603,13 +603,13 @@ encode_pin_auth(const fido_blob_t *hmac_key, const fido_blob_t *data)
 }
 
 cbor_item_t *
-encode_pin_opt(void)
+cbor_encode_pin_opt(void)
 {
 	return (cbor_build_uint8(1));
 }
 
 cbor_item_t *
-encode_pin_enc(const fido_blob_t *key, const fido_blob_t *pin)
+cbor_encode_pin_enc(const fido_blob_t *key, const fido_blob_t *pin)
 {
 	fido_blob_t	 pe;
 	cbor_item_t	*item = NULL;
@@ -642,7 +642,7 @@ sha256(const unsigned char *data, size_t data_len, fido_blob_t *digest)
 }
 
 cbor_item_t *
-encode_change_pin_auth(const fido_blob_t *key, const fido_blob_t *new_pin,
+cbor_encode_change_pin_auth(const fido_blob_t *key, const fido_blob_t *new_pin,
     const fido_blob_t *pin)
 {
 	unsigned char	 dgst[SHA256_DIGEST_LENGTH];
@@ -731,7 +731,7 @@ fail:
 }
 
 cbor_item_t *
-encode_set_pin_auth(const fido_blob_t *key, const fido_blob_t *pin)
+cbor_encode_set_pin_auth(const fido_blob_t *key, const fido_blob_t *pin)
 {
 	const EVP_MD	*md = NULL;
 	unsigned char	 dgst[SHA256_DIGEST_LENGTH];
@@ -762,7 +762,7 @@ fail:
 }
 
 cbor_item_t *
-encode_pin_hash_enc(const fido_blob_t *shared, const fido_blob_t *pin)
+cbor_encode_pin_hash_enc(const fido_blob_t *shared, const fido_blob_t *pin)
 {
 	cbor_item_t	*item = NULL;
 	fido_blob_t	*ph = NULL;
@@ -792,7 +792,7 @@ fail:
 }
 
 cbor_item_t *
-encode_hmac_secret_param(const fido_blob_t *ecdh, const es256_pk_t *pk,
+cbor_encode_hmac_secret_param(const fido_blob_t *ecdh, const es256_pk_t *pk,
     const fido_blob_t *hmac_salt)
 {
 	cbor_item_t		*item = NULL;
@@ -818,8 +818,8 @@ encode_hmac_secret_param(const fido_blob_t *ecdh, const es256_pk_t *pk,
 
 	/* XXX not pin, but salt */
 	if ((argv[0] = es256_pk_encode(pk, 1)) == NULL ||
-	    (argv[1] = encode_pin_enc(ecdh, hmac_salt)) == NULL ||
-	    (argv[2] = encode_set_pin_auth(ecdh, hmac_salt)) == NULL) {
+	    (argv[1] = cbor_encode_pin_enc(ecdh, hmac_salt)) == NULL ||
+	    (argv[2] = cbor_encode_set_pin_auth(ecdh, hmac_salt)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		goto fail;
 	}
