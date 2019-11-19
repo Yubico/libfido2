@@ -5,7 +5,7 @@ param(
 	[string]$GPGPath = "C:\Program Files (x86)\GnuPG\bin\gpg.exe"
 )
 
-$ErrorActionPreference = "SilentlyContinue"
+$ErrorActionPreference = "Continue"
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
