@@ -1,11 +1,11 @@
-$ErrorActionPreference = "SilentlyContinue"
-
 param(
 	[string]$CMakePath = "C:\Program Files\CMake\bin\cmake.exe",
 	[string]$GitPath = "C:\Program Files\Git\bin\git.exe",
 	[string]$SevenZPath = "C:\Program Files\7-Zip\7z.exe",
 	[string]$GPGPath = "C:\Program Files (x86)\GnuPG\bin\gpg.exe"
 )
+
+$ErrorActionPreference = "SilentlyContinue"
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
