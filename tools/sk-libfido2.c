@@ -21,7 +21,9 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdarg.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
@@ -30,6 +32,14 @@
 #include <openssl/ecdsa.h>
 
 #include <fido.h>
+
+#if defined(_WIN32)
+#include <windows.h>
+#include <winternl.h>
+#include <winerror.h>
+#include <bcrypt.h>
+#include <sal.h>
+#endif 
 
 #define MAX_FIDO_DEVICES	256
 
@@ -144,19 +154,29 @@ pick_first_device(void)
 	return ret;
 }
 
+#if defined(HAVE_ARC4RANDOM_BUF)
 static int
 get_random_challenge(uint8_t *ptr, size_t len)
 {
-#if defined(HAVE_ARC4RANDOM_BUF)
 	arc4random_buf(ptr, len);
+
 	return 0;
+}
 #elif defined(HAVE_GETENTROPY)
+static int
+get_random_challenge(uint8_t *ptr, size_t len)
+{
 	if (getentropy(ptr, len) == -1) {
 		skdebug(__func__, "getentropy failed");
 		return -1;
 	}
+
 	return 0;
-#else
+}
+#elif defined(HAS_DEV_URANDOM)
+static int
+get_random_challenge(uint8_t *ptr, size_t len)
+{
 	int fd;
 	ssize_t n;
 
@@ -174,8 +194,23 @@ get_random_challenge(uint8_t *ptr, size_t len)
 	}
 
 	return 0;
-#endif
 }
+#elif defined(_WIN32)
+static int
+get_random_challenge(uint8_t *ptr, size_t len)
+{
+	NTSTATUS status;
+
+	status = BCryptGenRandom(NULL, ptr, len,
+	    BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+	if (!NT_SUCCESS(status))
+		return -1;
+
+	return 0;
+}
+#else
+#error "please provide an implementation of get_random_challenge() for your platform"
+#endif
 
 /* Check if the specified key handle exists on a given device. */
 static int
