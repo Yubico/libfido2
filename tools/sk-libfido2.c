@@ -14,12 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <fcntl.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
@@ -31,7 +33,7 @@
 
 #define MAX_FIDO_DEVICES	256
 
-/* Compatibility with OpenSSH 1.0.x */
+/* Compatibility with OpenSSL 1.0.x */
 #if (OPENSSL_VERSION_NUMBER < 0x10100000L)
 #define ECDSA_SIG_get0(sig, pr, ps) \
 	do { \
@@ -142,20 +144,59 @@ pick_first_device(void)
 	return ret;
 }
 
+static int
+get_random_challenge(uint8_t *ptr, size_t len)
+{
+#if defined(HAVE_ARC4RANDOM_BUF)
+	arc4random_buf(ptr, len);
+	return 0;
+#elif defined(HAVE_GETENTROPY)
+	if (getentropy(ptr, len) == -1) {
+		skdebug(__func__, "getentropy failed");
+		return -1;
+	}
+	return 0;
+#else
+	int fd;
+	ssize_t n;
+
+	if ((fd = open(FIDO_RANDOM_DEV, O_RDONLY)) < 0) {
+		skdebug(__func__, "open %s failed", FIDO_RANDOM_DEV);
+		return -1;
+	}
+
+	n = read(fd, ptr, len);
+	close(fd);
+
+	if (n < 0 || (size_t)n != len) {
+		skdebug(__func__, "read from %s failed", FIDO_RANDOM_DEV);
+		return -1;
+	}
+
+	return 0;
+#endif
+}
+
 /* Check if the specified key handle exists on a given device. */
 static int
-try_device(fido_dev_t *dev, const uint8_t *message, size_t message_len,
-    const char *application, const uint8_t *key_handle, size_t key_handle_len)
+try_device(fido_dev_t *dev, const char *application,
+    const uint8_t *key_handle, size_t key_handle_len)
 {
 	fido_assert_t *assert = NULL;
+	uint8_t challenge[32];
 	int r = FIDO_ERR_INTERNAL;
+
+	if (get_random_challenge(challenge, sizeof(challenge)) == -1) {
+		skdebug(__func__, "get_random_challenge failed");
+		goto out;
+	}
 
 	if ((assert = fido_assert_new()) == NULL) {
 		skdebug(__func__, "fido_assert_new failed");
 		goto out;
 	}
-	if ((r = fido_assert_set_clientdata_hash(assert, message,
-	    message_len)) != FIDO_OK) {
+	if ((r = fido_assert_set_clientdata_hash(assert, challenge,
+	    sizeof(challenge))) != FIDO_OK) {
 		skdebug(__func__, "fido_assert_set_clientdata_hash: %s",
 		    fido_strerr(r));
 		goto out;
@@ -187,8 +228,8 @@ try_device(fido_dev_t *dev, const uint8_t *message, size_t message_len,
 
 /* Iterate over configured devices looking for a specific key handle */
 static fido_dev_t *
-find_device(const uint8_t *message, size_t message_len, const char *application,
-    const uint8_t *key_handle, size_t key_handle_len)
+find_device(const char *application, const uint8_t *key_handle,
+    size_t key_handle_len)
 {
 	fido_dev_info_t *devlist = NULL;
 	fido_dev_t *dev = NULL;
@@ -229,8 +270,8 @@ find_device(const uint8_t *message, size_t message_len, const char *application,
 			fido_dev_free(&dev);
 			continue;
 		}
-		if (try_device(dev, message, message_len, application,
-		    key_handle, key_handle_len) == 0) {
+		if (try_device(dev, application, key_handle,
+		    key_handle_len) == 0) {
 			skdebug(__func__, "found key");
 			break;
 		}
@@ -610,7 +651,7 @@ sk_sign(int alg, const uint8_t *message, size_t message_len,
 		goto out;
 	}
 	*sign_response = NULL;
-	if ((dev = find_device(message, message_len, application, key_handle,
+	if ((dev = find_device(application, key_handle,
 	    key_handle_len)) == NULL) {
 		skdebug(__func__, "couldn't find device for key handle");
 		goto out;

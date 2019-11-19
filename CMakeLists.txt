@@ -275,6 +275,18 @@ if(HAVE_SIGACTION AND (NOT HAVE_SIG_ATOMIC_T STREQUAL ""))
 endif()
 set(CMAKE_EXTRA_INCLUDE_FILES)
 
+# arc4random_buf
+check_function_exists(arc4random_buf HAVE_ARC4RANDOM_BUF)
+if(HAVE_ARC4RANDOM_BUF)
+	add_definitions(-DHAVE_ARC4RANDOM_BUF)
+endif()
+
+# getentropy
+check_function_exists(getentropy HAVE_GETENTROPY)
+if(HAVE_GETENTROPY)
+	add_definitions(-DHAVE_GETENTROPY)
+endif()
+
 # export list
 if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
 	# clang + lld
