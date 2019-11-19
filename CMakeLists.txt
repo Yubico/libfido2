@@ -36,6 +36,11 @@ if(APPLE)
 		"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 endif()
 
+# /dev/urandom
+if(UNIX)
+	add_definitions(-DHAS_DEV_URANDOM)
+endif()
+
 # Observe OpenBSD's library versioning scheme.
 if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
 	set(LIB_VERSION ${FIDO_MAJOR}.${FIDO_MINOR})

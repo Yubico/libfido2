@@ -53,11 +53,6 @@ list(APPEND COMPAT_SOURCES
 	../openbsd-compat/timingsafe_bcmp.c
 )
 
-# /dev/urandom
-if(UNIX)
-	add_definitions(-DHAS_DEV_URANDOM)
-endif()
-
 # static library
 add_library(fido2 STATIC ${FIDO_SOURCES} ${COMPAT_SOURCES})
 target_link_libraries(fido2 ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
