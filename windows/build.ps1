@@ -1,3 +1,5 @@
+$ErrorActionPreference = "SilentlyContinue"
+
 param(
 	[string]$CMakePath = "C:\Program Files\CMake\bin\cmake.exe",
 	[string]$GitPath = "C:\Program Files\Git\bin\git.exe",
