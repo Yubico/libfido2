@@ -2,6 +2,7 @@
 
 image:https://api.travis-ci.org/Yubico/libfido2.svg?branch=master["Build Status (Travis)", link="https://travis-ci.org/Yubico/libfido2"]
 image:https://img.shields.io/badge/license-BSD-blue.svg["License", link="https://raw.githubusercontent.com/Yubico/libfido2/master/LICENSE"]
+image:https://github.com/yubico/libfido2/workflows/windows%20build/badge.svg["windows build status (github actions)", link="https://github.com/Yubico/libfido2/actions"]
 
 *libfido2* provides library functionality and command-line tools to
 communicate with a FIDO device over USB, and to verify attestation and
