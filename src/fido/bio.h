@@ -14,7 +14,7 @@
 #include "blob.h"
 #include "fido/err.h"
 #include "fido/param.h"
-#include "types.h"
+#include "fido/types.h"
 #else
 #include <fido.h>
 #include <fido/err.h>

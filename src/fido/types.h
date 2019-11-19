@@ -163,11 +163,12 @@ typedef struct fido_cbor_info {
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {
-	char    *path;         /* device path */
-	int16_t  vendor_id;    /* 2-byte vendor id */
-	int16_t  product_id;   /* 2-byte product id */
-	char    *manufacturer; /* manufacturer string */
-	char    *product;      /* product string */
+	char          *path;         /* device path */
+	int16_t        vendor_id;    /* 2-byte vendor id */
+	int16_t        product_id;   /* 2-byte product id */
+	char          *manufacturer; /* manufacturer string */
+	char          *product;      /* product string */
+	fido_dev_io_t  io;           /* device i/o functions */
 } fido_dev_info_t;
 
 PACKED_TYPE(fido_ctap_info_t,
@@ -186,8 +187,8 @@ typedef struct fido_dev {
 	uint64_t          nonce;     /* issued nonce */
 	fido_ctap_info_t  attr;      /* device attributes */
 	uint32_t          cid;       /* assigned channel id */
-	void		 *io_handle; /* abstract i/o handle */
-	fido_dev_io_t	  io;        /* i/o functions & data */
+	void             *io_handle; /* abstract i/o handle */
+	fido_dev_info_t  *dev_info;  /* dev infos */
 } fido_dev_t;
 
 #else

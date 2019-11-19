@@ -17,6 +17,7 @@ int aes256_cbc_dec(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 int aes256_cbc_enc(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 
 /* cbor encoding functions */
+void cbor_vector_free(cbor_item_t **, size_t);
 cbor_item_t *cbor_flatten_vector(cbor_item_t **, size_t);
 cbor_item_t *cbor_encode_assert_options(fido_opt_t, fido_opt_t);
 cbor_item_t *cbor_encode_change_pin_auth(const fido_blob_t *,
@@ -36,6 +37,23 @@ cbor_item_t *cbor_encode_rp_entity(const fido_rp_t *);
 cbor_item_t *cbor_encode_set_pin_auth(const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *cbor_encode_user_entity(const fido_user_t *);
 cbor_item_t *es256_pk_encode(const es256_pk_t *, int);
+
+int cbor_add_bool(cbor_item_t *, const char *, fido_opt_t);
+int cbor_add_bytestring(cbor_item_t *, const char *, const unsigned char *,
+                        size_t);
+int cbor_add_string(cbor_item_t *, const char *, const char *);
+int cbor_array_iter(const cbor_item_t *, void *,
+                    int (*)(const cbor_item_t *, void *));
+int cbor_build_frame(uint8_t, cbor_item_t *[], size_t, fido_blob_t *);
+int cbor_bytestring_copy(const cbor_item_t *, unsigned char **, size_t *);
+int cbor_map_iter(const cbor_item_t *, void *,
+                  int (*)(const cbor_item_t *, const cbor_item_t *, void *));
+int cbor_string_copy(const cbor_item_t *, char **);
+int parse_cbor_reply(const unsigned char *, size_t, void *,
+                     int (*)(const cbor_item_t *, const cbor_item_t *, void *));
+int add_cbor_pin_params(fido_dev_t *, const fido_blob_t *, const es256_pk_t *,
+                        const fido_blob_t *, const char *, cbor_item_t **,
+                        cbor_item_t **);
 
 /* cbor decoding functions */
 int cbor_decode_attstmt(const cbor_item_t *, fido_attstmt_t *);
@@ -134,4 +152,21 @@ int fido_verify_sig_rs256(const fido_blob_t *, const rs256_pk_t *,
 int fido_verify_sig_eddsa(const fido_blob_t *, const eddsa_pk_t *,
     const fido_blob_t *);
 
+/* OS specific dev_info_manifest */
+int fido_dev_info_manifest_linux(fido_dev_info_t *, size_t, size_t *);
+int fido_dev_info_manifest_win(fido_dev_info_t *, size_t, size_t *);
+int fido_dev_info_manifest_osx(fido_dev_info_t *, size_t, size_t *);
+int fido_dev_info_manifest_openbsd(fido_dev_info_t *, size_t, size_t *);
+int hidapi_dev_info_manifest(fido_dev_info_t *, size_t, size_t *);
+
+/* hid i/o */
+void *fido_hid_open(const char *);
+void fido_hid_close(void *);
+int fido_hid_read(void *, unsigned char *, size_t, int);
+int fido_hid_write(void *, const unsigned char *, size_t);
+
+/* device manifest registration */
+typedef int (*dev_manifest_func_t)(fido_dev_info_t *dev_infos, size_t ilen,
+                                   size_t *olen);
+int fido_dev_register_manifest_func(const dev_manifest_func_t func);
 #endif /* !_EXTERN_H */

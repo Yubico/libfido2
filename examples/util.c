@@ -4,6 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
+#include <err.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -26,8 +28,6 @@
 #ifdef _MSC_VER
 #include "../openbsd-compat/posix_win.h"
 #endif
-
-#include "../openbsd-compat/openbsd-compat.h"
 
 #include "fido.h"
 #include "fido/es256.h"

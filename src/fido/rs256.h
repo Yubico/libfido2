@@ -8,7 +8,6 @@
 #define _FIDO_RS256_H
 
 #include <openssl/rsa.h>
-
 #include <stdint.h>
 #include <stdlib.h>
 

@@ -8,7 +8,6 @@
 #define _FIDO_ES256_H
 
 #include <openssl/ec.h>
-
 #include <stdint.h>
 #include <stdlib.h>
 

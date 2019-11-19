@@ -40,7 +40,7 @@ tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 	unsigned char	pkt[sizeof(*fp) + 1];
 	int		n;
 
-	if (d->io.write == NULL || (cmd & 0x80) == 0)
+	if (d->dev_info->io.write == NULL || (cmd & 0x80) == 0)
 		return (0);
 
 	memset(&pkt, 0, sizeof(pkt));
@@ -53,7 +53,7 @@ tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 	if (count)
 		memcpy(&fp->body.init.data, buf, count);
 
-	n = d->io.write(d->io_handle, pkt, sizeof(pkt));
+	n = d->dev_info->io.write(d->io_handle, pkt, sizeof(pkt));
 	if (n < 0 || (size_t)n != sizeof(pkt))
 		return (0);
 
@@ -67,7 +67,7 @@ tx_frame(fido_dev_t *d, int seq, const void *buf, size_t count)
 	unsigned char	 pkt[sizeof(*fp) + 1];
 	int		 n;
 
-	if (d->io.write == NULL || seq < 0 || seq > UINT8_MAX)
+	if (d->dev_info->io.write == NULL || seq < 0 || seq > UINT8_MAX)
 		return (0);
 
 	memset(&pkt, 0, sizeof(pkt));
@@ -77,7 +77,7 @@ tx_frame(fido_dev_t *d, int seq, const void *buf, size_t count)
 	count = MIN(count, sizeof(fp->body.cont.data));
 	memcpy(&fp->body.cont.data, buf, count);
 
-	n = d->io.write(d->io_handle, pkt, sizeof(pkt));
+	n = d->dev_info->io.write(d->io_handle, pkt, sizeof(pkt));
 	if (n < 0 || (size_t)n != sizeof(pkt))
 		return (0);
 
@@ -127,10 +127,10 @@ rx_frame(fido_dev_t *d, struct frame *fp, int ms)
 {
 	int n;
 
-	if (d->io.read == NULL)
+	if (d->dev_info->io.read == NULL)
 		return (-1);
 
-	n = d->io.read(d->io_handle, (unsigned char *)fp, sizeof(*fp), ms);
+	n = d->dev_info->io.read(d->io_handle, (unsigned char *)fp, sizeof(*fp), ms);
 	if (n < 0 || (size_t)n != sizeof(*fp))
 		return (-1);
 
