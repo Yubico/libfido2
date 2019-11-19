@@ -172,7 +172,7 @@ fail:
 }
 
 int
-fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
+fido_dev_info_manifest_win(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
 	GUID					 hid_guid = GUID_DEVINTERFACE_HID;
 	HDEVINFO				 devinfo = INVALID_HANDLE_VALUE;
@@ -234,6 +234,12 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 		}
 
 		if (copy_info(&devlist[*olen], ifdetail->DevicePath) == 0) {
+			devlist[*olen].io = (fido_dev_io_t) {
+				fido_hid_open,
+				fido_hid_close,
+				fido_hid_read,
+				fido_hid_write
+			};
 			if (++(*olen) == ilen)
 				break;
 		}

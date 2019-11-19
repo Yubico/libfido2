@@ -197,7 +197,7 @@ copy_info(fido_dev_info_t *di, IOHIDDeviceRef dev)
 }
 
 int
-fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
+fido_dev_info_manifest_osx(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
 	IOHIDManagerRef	manager = NULL;
 	CFSetRef	devset = NULL;
@@ -240,6 +240,12 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 	for (CFIndex i = 0; i < devcnt; i++) {
 		if (copy_info(&devlist[*olen], devs[i]) == 0) {
+			devlist[*olen].io = (fido_dev_io_t){
+				fido_hid_open,
+				fido_hid_close,
+				fido_hid_read,
+				fido_hid_write
+			};
 			if (++(*olen) == ilen)
 				break;
 		}

@@ -65,37 +65,42 @@ fido_hid_open(const char *path)
 	return hid_open_path(path);
 }
 
-void
-fido_hid_close(void *hid_dev_handle)
+void fido_hid_close(void *hid_dev_handle)
 {
-	hid_close(hid_dev_handle);
+	hid_close((hid_device*) hid_dev_handle);
+}
+
+int fido_hid_read(void *hid_dev_handle, unsigned char *buf, size_t len, int ms)
+{
+	return hid_read_timeout((hid_device*) hid_dev_handle, buf, len, ms);
+}
+
+int fido_hid_write(void *hid_dev_handle, const unsigned char *buf, size_t len)
+{
+	return hid_write((hid_device*) hid_dev_handle, buf, len);
 }
 
 int
-fido_hid_read(void *hid_dev_handle, unsigned char *buf, size_t len, int ms)
-{
-	return hid_read_timeout(hid_dev_handle, buf, len, ms);
-}
-
-int
-fido_hid_write(void *hid_dev_handle, const unsigned char *buf, size_t len)
-{
-	return hid_write(hid_dev_handle, buf, len);
-}
-
-int
-fido_dev_info_manifest(fido_dev_info_t *dev_infos, size_t ilen, size_t *olen)
+hidapi_dev_info_manifest(fido_dev_info_t *dev_infos, size_t ilen, size_t *olen)
 {
 	struct hid_device_info *hid_devs = hid_enumerate(0, 0);
 	*olen = 0;
-	if (hid_devs != NULL) {
-		struct hid_device_info *curr_hid_dev = hid_devs;
-		while (curr_hid_dev != NULL && *olen < ilen) {
+	if (hid_devs != NULL)
+	{
+		struct hid_device_info *curr = hid_devs;
+		while (curr != NULL && *olen < ilen)
+		{
 			fido_dev_info_t *curr_dev_info = &dev_infos[*olen];
-			if (copy_info(curr_dev_info, curr_hid_dev) != 0)
-				break;
+			curr_dev_info->path = strdup(curr->path);
+			fido_dev_io_t hidapi_io = {
+				&fido_hid_open,
+				&fido_hid_close,
+				&fido_hid_read,
+				&fido_hid_write
+			};
+			curr_dev_info->io = hidapi_io;
 			(*olen)++;
-			curr_hid_dev = curr_hid_dev->next;
+			curr = curr->next;
 		}
 		hid_free_enumeration(hid_devs);
 	}

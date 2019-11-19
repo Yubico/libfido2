@@ -9,7 +9,6 @@
 
 #include <openssl/ec.h>
 #include <openssl/evp.h>
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -31,6 +30,7 @@
 fido_assert_t *fido_assert_new(void);
 fido_cred_t *fido_cred_new(void);
 fido_dev_t *fido_dev_new(void);
+fido_dev_t *fido_dev_new_with_info(const fido_dev_info_t *);
 fido_dev_info_t *fido_dev_info_new(size_t);
 fido_cbor_info_t *fido_cbor_info_new(void);
 
@@ -46,6 +46,7 @@ void fido_dev_info_free(fido_dev_info_t **, size_t);
 #define FIDO_DEBUG	0x01
 
 void fido_init(int);
+void fido_exit(void);
 
 const unsigned char *fido_assert_authdata_ptr(const fido_assert_t *, size_t);
 const unsigned char *fido_assert_clientdata_hash_ptr(const fido_assert_t *);
@@ -124,6 +125,7 @@ int fido_dev_get_cbor_info(fido_dev_t *, fido_cbor_info_t *);
 int fido_dev_get_retry_count(fido_dev_t *, int *);
 int fido_dev_info_manifest(fido_dev_info_t *, size_t, size_t *);
 int fido_dev_make_cred(fido_dev_t *, fido_cred_t *, const char *);
+int fido_dev_open_with_info(fido_dev_t *);
 int fido_dev_open(fido_dev_t *, const char *);
 int fido_dev_reset(fido_dev_t *);
 int fido_dev_set_io_functions(fido_dev_t *, const fido_dev_io_t *);
