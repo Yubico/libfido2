@@ -122,7 +122,7 @@ else()
 
 	if(FUZZ)
 		if(LIBFUZZER)
-			set(FUZZ_LDFLAGS "${FUZZ_LDFLAGS} -fsanitize=fuzzer")
+			set(FUZZ_LDFLAGS "-fsanitize=fuzzer")
 		endif()
 		add_definitions(-DFIDO_FUZZ)
 	endif()
