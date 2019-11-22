@@ -121,12 +121,10 @@ else()
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer")
 
 	if(FUZZ)
-		add_definitions(-DFIDO_FUZZ)
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-trap=undefined")
 		if(LIBFUZZER)
-			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=fuzzer-no-link")
+			set(FUZZ_LDFLAGS "${FUZZ_LDFLAGS} -fsanitize=fuzzer")
 		endif()
+		add_definitions(-DFIDO_FUZZ)
 	endif()
 
 	if(ASAN)
@@ -136,6 +134,11 @@ else()
 	if(MSAN)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=memory")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-memory-track-origins")
+	endif()
+
+	if(UBSAN)
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-trap=undefined")
 	endif()
 
 	if(COVERAGE)
@@ -308,7 +311,7 @@ elseif(NOT MSVC)
 		string(CONCAT CMAKE_EXE_LINKER_FLAGS
 		    ${CMAKE_EXE_LINKER_FLAGS}
 		    " -Wl,-z,noexecstack -Wl,-z,relro,-z,now")
-		if(LIBFUZZER)
+		if(FUZZ)
 			file(STRINGS fuzz/wrapped.sym WRAPPED_SYMBOLS)
 			foreach(s ${WRAPPED_SYMBOLS})
 				string(CONCAT CMAKE_SHARED_LINKER_FLAGS

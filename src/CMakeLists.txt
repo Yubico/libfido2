@@ -30,7 +30,7 @@ list(APPEND FIDO_SOURCES
 	u2f.c
 )
 
-if(LIBFUZZER)
+if(FUZZ)
 	list(APPEND FIDO_SOURCES ../fuzz/uniform_random.c)
 	list(APPEND FIDO_SOURCES ../fuzz/wrap.c)
 endif()

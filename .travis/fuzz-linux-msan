@@ -35,7 +35,7 @@ cd ..
 mkdir build
 cd build
 export PKG_CONFIG_PATH=/fakeroot/lib/pkgconfig
-cmake -DFUZZ=1 -DLIBFUZZER=1 -DMSAN=1 -DCMAKE_C_COMPILER=clang \
+cmake -DFUZZ=1 -DLIBFUZZER=1 -DMSAN=1 -DUBSAN=1 -DCMAKE_C_COMPILER=clang \
 	-DCRYPTO_INCLUDE_DIRS=${FAKEROOT}/include \
         -DCRYPTO_LIBRARY_DIRS=${FAKEROOT}/lib \
         -DCBOR_INCLUDE_DIRS=${FAKEROOT}/include \
