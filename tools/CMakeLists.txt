@@ -50,7 +50,10 @@ add_executable(fido2-token
 )
 
 add_library(sk-libfido2 MODULE sk-libfido2.c)
-set_target_properties(sk-libfido2 PROPERTIES OUTPUT_NAME sk-libfido2)
+set_target_properties(sk-libfido2 PROPERTIES
+	COMPILE_FLAGS "-DSK_STANDALONE -DWITH_OPENSSL"
+	OUTPUT_NAME sk-libfido2
+)
 
 target_link_libraries(fido2-cred ${CRYPTO_LIBRARIES} fido2_shared)
 target_link_libraries(fido2-assert ${CRYPTO_LIBRARIES} fido2_shared)

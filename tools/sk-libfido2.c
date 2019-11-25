@@ -25,13 +25,22 @@
 #include <unistd.h>
 #endif
 
+#ifdef WITH_OPENSSL
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 #include <openssl/bn.h>
 #include <openssl/ec.h>
 #include <openssl/ecdsa.h>
+#endif /* WITH_OPENSSL */
 
 #include <fido.h>
+
+#ifndef SK_STANDALONE
+#include "log.h"
+#include "xmalloc.h"
+#endif
+
+/* #define SK_DEBUG 1 */
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -81,6 +90,13 @@ struct sk_sign_response {
 	size_t sig_s_len;
 };
 
+/* If building as part of OpenSSH, then rename exported functions */
+#if !defined(SK_STANDALONE)
+#define sk_api_version	ssh_sk_api_version
+#define sk_enroll	ssh_sk_enroll
+#define sk_sign		ssh_sk_sign
+#endif
+
 /* Return the version of the middleware API */
 uint32_t sk_api_version(void);
 
@@ -94,8 +110,6 @@ int sk_sign(int alg, const uint8_t *message, size_t message_len,
     const char *application, const uint8_t *key_handle, size_t key_handle_len,
     uint8_t flags, struct sk_sign_response **sign_response);
 
-/* #define SK_DEBUG 1 */
-
 #ifdef SK_DEBUG
 static void skdebug(const char *func, const char *fmt, ...)
     __attribute__((__format__ (printf, 2, 3)));
@@ -103,6 +117,16 @@ static void skdebug(const char *func, const char *fmt, ...)
 static void
 skdebug(const char *func, const char *fmt, ...)
 {
+#if !defined(SK_STANDALONE)
+	char *msg;
+	va_list ap;
+
+	va_start(ap, fmt);
+	xvasprintf(&msg, fmt, ap);
+	va_end(ap);
+	debug("%s: %s", func, msg);
+	free(msg);
+#else
 	va_list ap;
 
 	va_start(ap, fmt);
@@ -110,6 +134,7 @@ skdebug(const char *func, const char *fmt, ...)
 	vfprintf(stderr, fmt, ap);
 	fputc('\n', stderr);
 	va_end(ap);
+#endif /* !SK_STANDALONE */
 }
 #else
 #define skdebug(...) do { /* nothing */ } while (0)
@@ -268,7 +293,7 @@ find_device(const char *application, const uint8_t *key_handle,
 {
 	fido_dev_info_t *devlist = NULL;
 	fido_dev_t *dev = NULL;
-	size_t devlist_len = 0;
+	size_t devlist_len = 0, i;
 	const char *path;
 	int r;
 
@@ -284,7 +309,7 @@ find_device(const char *application, const uint8_t *key_handle,
 
 	skdebug(__func__, "found %zu device(s)", devlist_len);
 
-	for (size_t i = 0; i < devlist_len; i++) {
+	for (i = 0; i < devlist_len; i++) {
 		const fido_dev_info_t *di = fido_dev_info_ptr(devlist, i);
 
 		if (di == NULL) {
@@ -321,6 +346,7 @@ find_device(const char *application, const uint8_t *key_handle,
 	return dev;
 }
 
+#ifdef WITH_OPENSSL
 /*
  * The key returned via fido_cred_pubkey_ptr() is in affine coordinates,
  * but the API expects a SEC1 octet string.
@@ -332,15 +358,13 @@ pack_public_key_ecdsa(fido_cred_t *cred, struct sk_enroll_response *response)
 	BIGNUM *x = NULL, *y = NULL;
 	EC_POINT *q = NULL;
 	EC_GROUP *g = NULL;
-	BN_CTX *bn_ctx = NULL;
 	int ret = -1;
 
 	response->public_key = NULL;
 	response->public_key_len = 0;
 
-	if ((bn_ctx = BN_CTX_new()) == NULL ||
-	    (x = BN_CTX_get(bn_ctx)) == NULL ||
-	    (y = BN_CTX_get(bn_ctx)) == NULL ||
+	if ((x = BN_new()) == NULL ||
+	    (y = BN_new()) == NULL ||
 	    (g = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1)) == NULL ||
 	    (q = EC_POINT_new(g)) == NULL) {
 		skdebug(__func__, "libcrypto setup failed");
@@ -361,12 +385,12 @@ pack_public_key_ecdsa(fido_cred_t *cred, struct sk_enroll_response *response)
 		skdebug(__func__, "BN_bin2bn failed");
 		goto out;
 	}
-	if (EC_POINT_set_affine_coordinates_GFp(g, q, x, y, bn_ctx) != 1) {
+	if (EC_POINT_set_affine_coordinates_GFp(g, q, x, y, NULL) != 1) {
 		skdebug(__func__, "EC_POINT_set_affine_coordinates_GFp failed");
 		goto out;
 	}
 	response->public_key_len = EC_POINT_point2oct(g, q,
-	    POINT_CONVERSION_UNCOMPRESSED, NULL, 0, bn_ctx);
+	    POINT_CONVERSION_UNCOMPRESSED, NULL, 0, NULL);
 	if (response->public_key_len == 0 || response->public_key_len > 2048) {
 		skdebug(__func__, "bad pubkey length %zu",
 		    response->public_key_len);
@@ -377,7 +401,7 @@ pack_public_key_ecdsa(fido_cred_t *cred, struct sk_enroll_response *response)
 		goto out;
 	}
 	if (EC_POINT_point2oct(g, q, POINT_CONVERSION_UNCOMPRESSED,
-	    response->public_key, response->public_key_len, bn_ctx) == 0) {
+	    response->public_key, response->public_key_len, NULL) == 0) {
 		skdebug(__func__, "EC_POINT_point2oct failed");
 		goto out;
 	}
@@ -391,9 +415,11 @@ pack_public_key_ecdsa(fido_cred_t *cred, struct sk_enroll_response *response)
 	}
 	EC_POINT_free(q);
 	EC_GROUP_free(g);
-	BN_CTX_free(bn_ctx);
+	BN_clear_free(x);
+	BN_clear_free(y);
 	return ret;
 }
+#endif /* WITH_OPENSSL */
 
 static int
 pack_public_key_ed25519(fido_cred_t *cred, struct sk_enroll_response *response)
@@ -430,8 +456,10 @@ static int
 pack_public_key(int alg, fido_cred_t *cred, struct sk_enroll_response *response)
 {
 	switch(alg) {
+#ifdef WITH_OPENSSL
 	case SK_ECDSA:
 		return pack_public_key_ecdsa(cred, response);
+#endif /* WITH_OPENSSL */
 	case SK_ED25519:
 		return pack_public_key_ed25519(cred, response);
 	default:
@@ -465,9 +493,11 @@ sk_enroll(int alg, const uint8_t *challenge, size_t challenge_len,
 	}
 	*enroll_response = NULL;
 	switch(alg) {
+#ifdef WITH_OPENSSL
 	case SK_ECDSA:
 		cose_alg = COSE_ES256;
 		break;
+#endif /* WITH_OPENSSL */
 	case SK_ED25519:
 		cose_alg = COSE_EDDSA;
 		break;
@@ -587,6 +617,7 @@ sk_enroll(int alg, const uint8_t *challenge, size_t challenge_len,
 	return ret;
 }
 
+#ifdef WITH_OPENSSL
 static int
 pack_sig_ecdsa(fido_assert_t *assert, struct sk_sign_response *response)
 {
@@ -623,6 +654,7 @@ pack_sig_ecdsa(fido_assert_t *assert, struct sk_sign_response *response)
 	}
 	return ret;
 }
+#endif /* WITH_OPENSSL */
 
 static int
 pack_sig_ed25519(fido_assert_t *assert, struct sk_sign_response *response)
@@ -656,8 +688,10 @@ static int
 pack_sig(int alg, fido_assert_t *assert, struct sk_sign_response *response)
 {
 	switch(alg) {
+#ifdef WITH_OPENSSL
 	case SK_ECDSA:
 		return pack_sig_ecdsa(assert, response);
+#endif /* WITH_OPENSSL */
 	case SK_ED25519:
 		return pack_sig_ed25519(assert, response);
 	default:
