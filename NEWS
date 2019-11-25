@@ -1,3 +1,19 @@
+* Version 1.3.0 (unreleased)
+ ** assert/hmac: encode public key as per spec, gh#60.
+ ** fido2-cred: fix creation of resident keys.
+ ** fido2-{assert,cred}: support for hmac-secret extension.
+ ** hid_osx: detect device removal, gh#56.
+ ** hid_osx: fix device detection in MacOS Catalina.
+ ** New API calls:
+  - fido_assert_set_authdata_raw;
+  - fido_assert_sigcount;
+  - fido_cred_set_authdata_raw;
+  - fido_dev_cancel.
+ ** Middleware library for use by OpenSSH.
+ ** Support for biometric enrollment.
+ ** Support for OpenBSD.
+ ** Support for self-attestation.
+
 * Version 1.2.0 (released 2019-07-26)
  ** Credential management support.
  ** New API reflecting FIDO's 3-state booleans (true, false, absent):
