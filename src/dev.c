@@ -303,6 +303,7 @@ fido_exit(void)
 		free(curr);
 		curr = next;
 	}
+	manifest_funcs = NULL;
 }
 
 fido_dev_t *
