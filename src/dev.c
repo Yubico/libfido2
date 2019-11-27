@@ -102,19 +102,28 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 static int
 fido_dev_open_rx(fido_dev_t *dev, int ms)
 {
+	uint8_t		data[17];
 	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;
 	int		n;
 
-	if ((n = fido_rx(dev, cmd, &dev->attr, sizeof(dev->attr), ms)) < 0) {
+	if ((n = fido_rx(dev, cmd, data, sizeof(data), ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		goto fail;
 	}
+
+	memcpy(&dev->attr.nonce, &data[0], 8);
+	memcpy(&dev->attr.cid, &data[8], 4);
+	dev->attr.protocol = data[12];
+	dev->attr.major = data[13];
+	dev->attr.minor = data[14];
+	dev->attr.build = data[15];
+	dev->attr.flags = data[16];
 
 #ifdef FIDO_FUZZ
 	dev->attr.nonce = dev->nonce;
 #endif
 
-	if ((size_t)n != sizeof(dev->attr) || dev->attr.nonce != dev->nonce) {
+	if ((size_t)n != sizeof(data) || dev->attr.nonce != dev->nonce) {
 		fido_log_debug("%s: invalid nonce", __func__);
 		goto fail;
 	}

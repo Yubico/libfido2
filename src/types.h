@@ -148,9 +148,8 @@ typedef struct fido_dev_info {
 	char    *product;      /* product string */
 } fido_dev_info_t;
 
-PACKED_TYPE(fido_ctap_info_t,
 /* defined in section 8.1.9.1.3 (CTAPHID_INIT) of the fido2 ctap spec */
-struct fido_ctap_info {
+typedef struct fido_ctap_info {
 	uint64_t nonce;    /* echoed nonce */
 	uint32_t cid;      /* channel id */
 	uint8_t  protocol; /* ctaphid protocol id */
@@ -158,7 +157,7 @@ struct fido_ctap_info {
 	uint8_t  minor;    /* minor version number */
 	uint8_t  build;    /* build version number */
 	uint8_t  flags;    /* capabilities flags; see FIDO_CAP_* */
-})
+} fido_ctap_info_t;
 
 typedef struct fido_dev {
 	uint64_t          nonce;     /* issued nonce */
