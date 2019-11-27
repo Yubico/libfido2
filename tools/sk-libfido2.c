@@ -37,6 +37,7 @@
 
 #ifndef SK_STANDALONE
 #include "log.h"
+#include "xmalloc.h"
 #endif
 
 /* #define SK_DEBUG 1 */
