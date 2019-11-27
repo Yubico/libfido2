@@ -15,6 +15,29 @@
 #include "fido.h"
 #include "fido/es256.h"
 
+/*
+ * Web Authentication section 6.1
+ * https://www.w3.org/TR/webauthn/#authenticator-data
+ */
+enum {
+	AUTHDATA_RP_ID_HASH = 0,
+	AUTHDATA_FLAGS = 32,
+	AUTHDATA_SIGN_COUNT = 33,
+
+	AUTHDATA_BASE_SIZE = 37
+};
+
+/*
+ * Web Authentication section 6.4.1
+ * https://www.w3.org/TR/webauthn/#sec-attested-credential-data
+ */
+enum {
+	ATTCRED_AAGUID = 0,
+	ATTCRED_CREDENTIAL_ID_LENGTH = 16,
+
+	ATTCRED_BASE_SIZE = 18
+};
+
 #if defined(_MSC_VER)
 static int
 usleep(unsigned int usec)
@@ -88,23 +111,24 @@ static int
 authdata_fake(const char *rp_id, uint8_t flags, uint32_t sigcount,
     fido_blob_t *fake_cbor_ad)
 {
-	fido_authdata_t	 ad;
+	uint8_t		 authdata[AUTHDATA_BASE_SIZE] = {0};
+	unsigned char	*rp_id_hash;
 	cbor_item_t	*item = NULL;
 	size_t		 alloc_len;
 
-	memset(&ad, 0, sizeof(ad));
+	rp_id_hash = (unsigned char *)&authdata[AUTHDATA_RP_ID_HASH];
 
 	if (SHA256((const void *)rp_id, strlen(rp_id),
-	    ad.rp_id_hash) != ad.rp_id_hash) {
+	    rp_id_hash) != rp_id_hash) {
 		fido_log_debug("%s: sha256", __func__);
 		return (-1);
 	}
 
-	ad.flags = flags; /* XXX translate? */
-	ad.sigcount = sigcount;
+	authdata[AUTHDATA_FLAGS] = flags; /* XXX translate? */
+	memcpy(&authdata[AUTHDATA_SIGN_COUNT], &sigcount, 4);
 
-	if ((item = cbor_build_bytestring((const unsigned char *)&ad,
-	    sizeof(ad))) == NULL) {
+	if ((item = cbor_build_bytestring((cbor_data)authdata,
+	    sizeof(authdata))) == NULL) {
 		fido_log_debug("%s: cbor_build_bytestring", __func__);
 		return (-1);
 	}
@@ -404,18 +428,18 @@ static int
 encode_cred_authdata(const char *rp_id, const uint8_t *kh, uint8_t kh_len,
     const uint8_t *pubkey, size_t pubkey_len, fido_blob_t *out)
 {
-	fido_authdata_t	 	 authdata;
-	fido_attcred_raw_t	 attcred_raw;
-	fido_blob_t		 pk_blob;
-	fido_blob_t		 authdata_blob;
-	cbor_item_t		*authdata_cbor = NULL;
-	unsigned char		*ptr;
-	size_t			 len;
-	size_t			 alloc_len;
-	int			 ok = -1;
+	uint8_t		 authdata[AUTHDATA_BASE_SIZE] = {0};
+	unsigned char	*rp_id_hash;
+	uint8_t		 attcred_raw[ATTCRED_BASE_SIZE] = {0};
+	fido_blob_t	 pk_blob;
+	fido_blob_t	 authdata_blob;
+	cbor_item_t	*authdata_cbor = NULL;
+	unsigned char	*ptr;
+	size_t		 len;
+	size_t		 alloc_len;
+	int		 ok = -1;
 
 	memset(&pk_blob, 0, sizeof(pk_blob));
-	memset(&authdata, 0, sizeof(authdata));
 	memset(&authdata_blob, 0, sizeof(authdata_blob));
 	memset(out, 0, sizeof(*out));
 
@@ -429,17 +453,19 @@ encode_cred_authdata(const char *rp_id, const uint8_t *kh, uint8_t kh_len,
 		goto fail;
 	}
 
+	rp_id_hash = (unsigned char *)&authdata[AUTHDATA_RP_ID_HASH];
+
 	if (SHA256((const void *)rp_id, strlen(rp_id),
-	    authdata.rp_id_hash) != authdata.rp_id_hash) {
+	    rp_id_hash) != rp_id_hash) {
 		fido_log_debug("%s: sha256", __func__);
 		goto fail;
 	}
 
-	authdata.flags = (CTAP_AUTHDATA_ATT_CRED | CTAP_AUTHDATA_USER_PRESENT);
-	authdata.sigcount = 0;
+	authdata[AUTHDATA_FLAGS] = (CTAP_AUTHDATA_ATT_CRED |
+	    CTAP_AUTHDATA_USER_PRESENT);
 
-	memset(&attcred_raw.aaguid, 0, sizeof(attcred_raw.aaguid));
-	attcred_raw.id_len = (uint16_t)(kh_len << 8); /* XXX */
+	/* big-endian, so second byte is LSB */
+	attcred_raw[ATTCRED_CREDENTIAL_ID_LENGTH + 1] = kh_len;
 
 	len = authdata_blob.len = sizeof(authdata) + sizeof(attcred_raw) +
 	    kh_len + pk_blob.len;

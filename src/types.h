@@ -7,8 +7,6 @@
 #ifndef _TYPES_H
 #define _TYPES_H
 
-#include "packed.h"
-
 /* COSE ES256 (ECDSA over P-256 with SHA-256) public key */
 typedef struct es256_pk {
 	unsigned char	x[32];
@@ -31,20 +29,12 @@ typedef struct eddsa_pk {
 	unsigned char x[32];
 } eddsa_pk_t;
 
-PACKED_TYPE(fido_authdata_t,
-struct fido_authdata {
+typedef struct fido_authdata {
 	unsigned char rp_id_hash[32]; /* sha256 of fido_rp.id */
 	uint8_t       flags;          /* user present/verified */
 	uint32_t      sigcount;       /* signature counter */
 	/* actually longer */
-})
-
-PACKED_TYPE(fido_attcred_raw_t,
-struct fido_attcred_raw {
-	unsigned char aaguid[16]; /* credential's aaguid */
-	uint16_t      id_len;     /* credential id length */
-	uint8_t       body[];     /* credential id + pubkey */
-})
+} fido_authdata_t;
 
 typedef struct fido_attcred {
 	unsigned char aaguid[16]; /* credential's aaguid */
