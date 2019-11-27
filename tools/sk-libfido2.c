@@ -37,7 +37,6 @@
 
 #ifndef SK_STANDALONE
 #include "log.h"
-#include "xmalloc.h"
 #endif
 
 /* #define SK_DEBUG 1 */
@@ -50,6 +49,8 @@
 #include <sal.h>
 #endif 
 
+#include "sk-libfido2.h"
+
 #define MAX_FIDO_DEVICES	256
 
 /* Compatibility with OpenSSL 1.0.x */
@@ -60,55 +61,6 @@
 		(*ps) = sig->s; \
 	} while (0)
 #endif
-
-#define SK_VERSION_MAJOR	0x00020000 /* current API version */
-
-/* Flags */
-#define SK_USER_PRESENCE_REQD	0x01
-
-/* Algs */
-#define	SK_ECDSA		0x00
-#define	SK_ED25519		0x01
-
-struct sk_enroll_response {
-	uint8_t *public_key;
-	size_t public_key_len;
-	uint8_t *key_handle;
-	size_t key_handle_len;
-	uint8_t *signature;
-	size_t signature_len;
-	uint8_t *attestation_cert;
-	size_t attestation_cert_len;
-};
-
-struct sk_sign_response {
-	uint8_t flags;
-	uint32_t counter;
-	uint8_t *sig_r;
-	size_t sig_r_len;
-	uint8_t *sig_s;
-	size_t sig_s_len;
-};
-
-/* If building as part of OpenSSH, then rename exported functions */
-#if !defined(SK_STANDALONE)
-#define sk_api_version	ssh_sk_api_version
-#define sk_enroll	ssh_sk_enroll
-#define sk_sign		ssh_sk_sign
-#endif
-
-/* Return the version of the middleware API */
-uint32_t sk_api_version(void);
-
-/* Enroll a U2F key (private key generation) */
-int sk_enroll(int alg, const uint8_t *challenge, size_t challenge_len,
-    const char *application, uint8_t flags,
-    struct sk_enroll_response **enroll_response);
-
-/* Sign a challenge */
-int sk_sign(int alg, const uint8_t *message, size_t message_len,
-    const char *application, const uint8_t *key_handle, size_t key_handle_len,
-    uint8_t flags, struct sk_sign_response **sign_response);
 
 #ifdef SK_DEBUG
 static void skdebug(const char *func, const char *fmt, ...)
@@ -468,7 +420,7 @@ pack_public_key(int alg, fido_cred_t *cred, struct sk_enroll_response *response)
 }
 
 int
-sk_enroll(int alg, const uint8_t *challenge, size_t challenge_len,
+sk_enroll(int alg, const uint8_t *challenge_hash, size_t challenge_hash_len,
     const char *application, uint8_t flags,
     struct sk_enroll_response **enroll_response)
 {
@@ -519,8 +471,8 @@ sk_enroll(int alg, const uint8_t *challenge, size_t challenge_len,
 		skdebug(__func__, "fido_cred_set_type: %s", fido_strerr(r));
 		goto out;
 	}
-	if ((r = fido_cred_set_clientdata_hash(cred, challenge,
-	    challenge_len)) != FIDO_OK) {
+	if ((r = fido_cred_set_clientdata_hash(cred, challenge_hash,
+	    challenge_hash_len)) != FIDO_OK) {
 		skdebug(__func__, "fido_cred_set_clientdata_hash: %s",
 		    fido_strerr(r));
 		goto out;
@@ -700,7 +652,7 @@ pack_sig(int alg, fido_assert_t *assert, struct sk_sign_response *response)
 }
 
 int
-sk_sign(int alg, const uint8_t *message, size_t message_len,
+sk_sign(int alg, const uint8_t *message_hash, size_t message_hash_len,
     const char *application,
     const uint8_t *key_handle, size_t key_handle_len,
     uint8_t flags, struct sk_sign_response **sign_response)
@@ -729,8 +681,8 @@ sk_sign(int alg, const uint8_t *message, size_t message_len,
 		skdebug(__func__, "fido_assert_new failed");
 		goto out;
 	}
-	if ((r = fido_assert_set_clientdata_hash(assert, message,
-	    message_len)) != FIDO_OK) {
+	if ((r = fido_assert_set_clientdata_hash(assert, message_hash,
+	    message_hash_len)) != FIDO_OK) {
 		skdebug(__func__, "fido_assert_set_clientdata_hash: %s",
 		    fido_strerr(r));
 		goto out;
