@@ -19,10 +19,10 @@
 #include <hidapi/hidapi.h>
 #endif
 
-#include <err.h>
+#include "../openbsd-compat/openbsd-compat.h"
 
-#include "extern.h"
 #include "fido.h"
+#include "extern.h"
 
 #ifdef SIGNAL_EXAMPLE
 extern volatile sig_atomic_t got_signal;
