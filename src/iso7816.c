@@ -7,24 +7,39 @@
 #include <string.h>
 #include "fido.h"
 
+struct iso7816_apdu {
+	size_t max_len;
+	size_t len;
+	uint8_t buf[];
+};
+
 iso7816_apdu_t *
 iso7816_new(uint8_t ins, uint8_t p1, uint16_t payload_len)
 {
 	iso7816_apdu_t	*apdu;
-	size_t		 alloc_len;
+	size_t		 max_len;
+	enum {
+		CLA,
+		INS,
+		P1,
+		P2,
+		LC1,
+		LC2,
+		LC3,
+		DATA,
+	};
 
-	alloc_len = sizeof(iso7816_apdu_t) + payload_len;
+	max_len = DATA + payload_len;
 
-	if ((apdu = calloc(1, alloc_len)) == NULL)
+	if ((apdu = calloc(1, sizeof(*apdu) + max_len)) == NULL)
 		return (NULL);
 
-	apdu->alloc_len = alloc_len;
-	apdu->payload_len = payload_len;
-	apdu->payload_ptr = apdu->payload;
-	apdu->header.ins = ins;
-	apdu->header.p1 = p1;
-	apdu->header.lc2 = (payload_len >> 8) & 0xff;
-	apdu->header.lc3 = payload_len & 0xff;
+	apdu->max_len = max_len;
+	apdu->buf[INS] = ins;
+	apdu->buf[P1] = p1;
+	apdu->buf[LC2] = (payload_len >> 8) & 0xff;
+	apdu->buf[LC3] = payload_len & 0xff;
+	apdu->len = DATA;
 
 	return (apdu);
 }
@@ -37,7 +52,7 @@ iso7816_free(iso7816_apdu_t **apdu_p)
 	if (apdu_p == NULL || (apdu = *apdu_p) == NULL)
 		return;
 
-	explicit_bzero(apdu, apdu->alloc_len);
+	explicit_bzero(apdu, sizeof(*apdu) + apdu->max_len);
 	free(apdu);
 
 	*apdu_p = NULL;
@@ -46,12 +61,11 @@ iso7816_free(iso7816_apdu_t **apdu_p)
 int
 iso7816_add(iso7816_apdu_t *apdu, const void *buf, size_t cnt)
 {
-	if (cnt > apdu->payload_len || cnt > UINT16_MAX)
+	if (cnt > apdu->max_len - apdu->len)
 		return (-1);
 
-	memcpy(apdu->payload_ptr, buf, cnt);
-	apdu->payload_ptr += cnt;
-	apdu->payload_len -= (uint16_t)cnt;
+	memcpy(apdu->buf + apdu->len, buf, cnt);
+	apdu->len += cnt;
 
 	return (0);
 }
@@ -59,12 +73,11 @@ iso7816_add(iso7816_apdu_t *apdu, const void *buf, size_t cnt)
 const unsigned char *
 iso7816_ptr(const iso7816_apdu_t *apdu)
 {
-	return ((const unsigned char *)&apdu->header);
+	return ((const unsigned char *)&apdu->buf);
 }
 
 size_t
 iso7816_len(const iso7816_apdu_t *apdu)
 {
-	return (apdu->alloc_len - sizeof(apdu->alloc_len) -
-	    sizeof(apdu->payload_len) - sizeof(apdu->payload_ptr));
+	return (apdu->len);
 }
