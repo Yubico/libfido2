@@ -1,4 +1,4 @@
-* Version 1.3.0 (unreleased)
+* Version 1.3.0 (2019-11-28)
  ** assert/hmac: encode public key as per spec, gh#60.
  ** fido2-cred: fix creation of resident keys.
  ** fido2-{assert,cred}: support for hmac-secret extension.
