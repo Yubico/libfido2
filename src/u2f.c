@@ -439,7 +439,7 @@ encode_cred_authdata(const char *rp_id, const uint8_t *kh, uint8_t kh_len,
 	authdata.sigcount = 0;
 
 	memset(&attcred_raw.aaguid, 0, sizeof(attcred_raw.aaguid));
-	attcred_raw.id_len = (uint16_t)(kh_len << 8); /* XXX */
+	attcred_raw.id_len = htobe16(kh_len);
 
 	len = authdata_blob.len = sizeof(authdata) + sizeof(attcred_raw) +
 	    kh_len + pk_blob.len;
