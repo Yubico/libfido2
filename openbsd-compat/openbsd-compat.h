@@ -18,6 +18,7 @@
 #if defined(__APPLE__) && !defined(HAVE_ENDIAN_H)
 #include <libkern/OSByteOrder.h>
 #define be16toh(x) OSSwapBigToHostInt16((x))
+#define htobe16(x) OSSwapHostToBigInt16((x))
 #define be32toh(x) OSSwapBigToHostInt32((x))
 #endif /* __APPLE__ && !HAVE_ENDIAN_H */
 
@@ -27,6 +28,7 @@
 #include <sys/param.h>
 #endif
 #define be16toh(x) ntohs((x))
+#define htobe16(x) htons((x))
 #define be32toh(x) ntohl((x))
 #endif /* _WIN32 && !HAVE_ENDIAN_H */
 
