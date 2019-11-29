@@ -291,7 +291,7 @@ fido_init(int flags)
 }
 
 void
-fido_exit(void)
+fido_exit()
 {
 #ifdef USE_HIDAPI
 	hid_exit();
