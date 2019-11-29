@@ -49,7 +49,7 @@ add_executable(fido2-token
 	${COMPAT_SOURCES}
 )
 
-add_library(sk-libfido2 MODULE sk-libfido2.c sk-libfido2.h)
+add_library(sk-libfido2 MODULE sk-libfido2.c)
 set_target_properties(sk-libfido2 PROPERTIES
 	COMPILE_FLAGS "-DSK_STANDALONE -DWITH_OPENSSL"
 	OUTPUT_NAME sk-libfido2
