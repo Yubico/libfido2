@@ -6,10 +6,6 @@
 
 #define SK_VERSION_MAJOR	0x00020000 /* current API version */
 
-/* Return values */
-#define SK_SUCCESS 0
-#define SK_FAIL    1
-
 /* Flags */
 #define TUP_FLAG             0x01
 #define INDIVIDUAL_CERT_FLAG 0x80
