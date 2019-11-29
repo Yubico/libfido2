@@ -1,5 +1,21 @@
-#ifndef THIRD_PARTY_LIBFIDO2_TOOLS_SK_LIBFIDO2_H_
-#define THIRD_PARTY_LIBFIDO2_TOOLS_SK_LIBFIDO2_H_
+/*
+ * Copyright (c) 2019 Markus Friedl
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#ifndef _SK_LIBFIDO2_H_
+#define _SK_LIBFIDO2_H_
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -48,4 +64,4 @@ int sk_sign(int alg, const uint8_t *message_hash, size_t message_hash_len,
     const char *application, const uint8_t *key_handle, size_t key_handle_len,
     uint8_t flags, struct sk_sign_response **sign_response);
 
-#endif  // THIRD_PARTY_LIBFIDO2_TOOLS_SK_LIBFIDO2_H_
+#endif  // _SK_LIBFIDO2_H_
