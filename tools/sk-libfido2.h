@@ -23,8 +23,6 @@
 #define SK_VERSION_MAJOR	0x00020000 /* current API version */
 
 /* Flags */
-#define TUP_FLAG             0x01
-#define INDIVIDUAL_CERT_FLAG 0x80
 #define SK_USER_PRESENCE_REQD	0x01
 
 /* Algs */
@@ -64,4 +62,4 @@ int sk_sign(int alg, const uint8_t *message_hash, size_t message_hash_len,
     const char *application, const uint8_t *key_handle, size_t key_handle_len,
     uint8_t flags, struct sk_sign_response **sign_response);
 
-#endif  // _SK_LIBFIDO2_H_
+#endif /* !_SK_LIBFIDO2_H_ */
