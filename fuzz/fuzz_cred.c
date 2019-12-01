@@ -738,10 +738,8 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	fido_cred_t	*cred;
 	uint8_t		 flags;
 
-	if ((cred = fido_cred_new()) == NULL) {
-		warnx("%s: fido_cred_new", __func__);
+	if ((cred = fido_cred_new()) == NULL)
 		return;
-	}
 
 	fido_cred_set_type(cred, type);
 	fido_cred_set_clientdata_hash(cred, cdh_ptr, cdh_len);
