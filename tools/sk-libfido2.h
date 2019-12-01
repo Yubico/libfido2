@@ -53,13 +53,11 @@ struct sk_sign_response {
 uint32_t sk_api_version(void);
 
 /* Enroll a U2F key (private key generation) */
-int sk_enroll(int alg, const uint8_t *challenge_hash, size_t challenge_hash_len,
-    const char *application, uint8_t flags,
-    struct sk_enroll_response **enroll_response);
+int sk_enroll(int, const uint8_t *, size_t, const char *, uint8_t,
+    struct sk_enroll_response **);
 
 /* Sign a challenge */
-int sk_sign(int alg, const uint8_t *message_hash, size_t message_hash_len,
-    const char *application, const uint8_t *key_handle, size_t key_handle_len,
-    uint8_t flags, struct sk_sign_response **sign_response);
+int sk_sign(int, const uint8_t *, size_t, const char *, const uint8_t *,
+    size_t, uint8_t, struct sk_sign_response **);
 
 #endif /* !_SK_LIBFIDO2_H_ */
