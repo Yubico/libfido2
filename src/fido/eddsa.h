@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 eddsa_pk_t *eddsa_pk_new(void);
 void eddsa_pk_free(eddsa_pk_t **);
 EVP_PKEY *eddsa_pk_to_EVP_PKEY(const eddsa_pk_t *);

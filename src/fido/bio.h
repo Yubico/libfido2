@@ -12,6 +12,8 @@
 
 #include "fido/err.h"
 #include "fido/param.h"
+#include "blob.h"
+#include "types.h"
 
 #ifdef _FIDO_INTERNAL
 struct fido_bio_template {
