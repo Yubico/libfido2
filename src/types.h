@@ -7,8 +7,11 @@
 #ifndef _TYPES_H
 #define _TYPES_H
 
+#include "common.h"
 #include "packed.h"
+#include "blob.h"
 
+#ifdef _FIDO_INTERNAL
 /* COSE ES256 (ECDSA over P-256 with SHA-256) public key */
 typedef struct es256_pk {
 	unsigned char	x[32];
@@ -168,4 +171,5 @@ typedef struct fido_dev {
 	fido_dev_io_t	  io;        /* i/o functions & data */
 } fido_dev_t;
 
+#endif /* _FIDO_INTERNAL */
 #endif /* !_TYPES_H */

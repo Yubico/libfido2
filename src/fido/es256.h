@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 es256_pk_t *es256_pk_new(void);
 void es256_pk_free(es256_pk_t **);
 EVP_PKEY *es256_pk_to_EVP_PKEY(const es256_pk_t *);

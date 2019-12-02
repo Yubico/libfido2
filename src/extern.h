@@ -7,6 +7,12 @@
 #ifndef _EXTERN_H
 #define _EXTERN_H
 
+#include <stdint.h>
+
+#include "common.h"
+#include "blob.h"
+#include "types.h"
+
 /* aes256 */
 int aes256_cbc_dec(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 int aes256_cbc_enc(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
