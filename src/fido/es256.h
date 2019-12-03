@@ -12,7 +12,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#ifdef _FIDO_INTERNAL
 #include "types.h"
+#else
+#include <fido.h>
+#endif
 
 es256_pk_t *es256_pk_new(void);
 void es256_pk_free(es256_pk_t **);

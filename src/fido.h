@@ -14,7 +14,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "common.h"
+#ifdef _FIDO_INTERNAL
+#include "fido/common.h"
+#else
+#include <fido/common.h>
+#endif
 
 #ifdef _FIDO_INTERNAL
 #include <cbor.h>
