@@ -76,6 +76,7 @@ void fido_dev_info_free(fido_dev_info_t **, size_t);
 #define FIDO_DEBUG	0x01
 
 void fido_init(int);
+void fido_exit(void);
 
 const unsigned char *fido_assert_authdata_ptr(const fido_assert_t *, size_t);
 const unsigned char *fido_assert_clientdata_hash_ptr(const fido_assert_t *);
