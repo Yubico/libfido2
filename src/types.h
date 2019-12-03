@@ -7,7 +7,7 @@
 #ifndef _TYPES_H
 #define _TYPES_H
 
-#include "common.h"
+#include "fido/common.h"
 #include "packed.h"
 #include "blob.h"
 

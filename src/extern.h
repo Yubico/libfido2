@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#include "common.h"
+#include "fido/common.h"
 #include "blob.h"
 #include "types.h"
 
