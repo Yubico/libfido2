@@ -79,12 +79,6 @@ void cbor_vector_free(cbor_item_t **, size_t);
 int fido_buf_read(const unsigned char **, size_t *, void *, size_t);
 int fido_buf_write(unsigned char **, size_t *, const void *, size_t);
 
-/* hid i/o */
-void *fido_hid_open(const char *);
-void  fido_hid_close(void *);
-int   fido_hid_read(void *, unsigned char *, size_t, int);
-int   fido_hid_write(void *, const unsigned char *, size_t);
-
 /* generic i/o */
 int fido_rx_cbor_status(fido_dev_t *, int);
 int fido_rx(fido_dev_t *, uint8_t, void *, size_t, int);
@@ -136,6 +130,10 @@ int fido_verify_sig_eddsa(const fido_blob_t *, const eddsa_pk_t *,
 
 /* hid device manifest */
 int fido_hid_manifest(fido_dev_info_t *, size_t, size_t *);
+
+/* abstract hid tx/rx functions, implemented by io.c */
+int fido_default_hid_rx(uint8_t, unsigned char *, size_t, int, fido_dev_t *);
+int fido_default_hid_tx(uint8_t, const unsigned char *, size_t, fido_dev_t *);
 
 /* hid i/o */
 void *fido_hid_open(const char *);
