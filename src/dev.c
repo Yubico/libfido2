@@ -302,7 +302,8 @@ fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 	}
 
 	if (io == NULL || io->open == NULL || io->close == NULL ||
-	    io->read == NULL || io->write == NULL) {
+	    io->read == NULL || io->write == NULL || io->rx == NULL ||
+	    io->tx == NULL) {
 		fido_log_debug("%s: NULL function", __func__);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
@@ -339,7 +340,9 @@ fido_dev_new(void)
 		&fido_hid_open,
 		&fido_hid_close,
 		&fido_hid_read,
-		&fido_hid_write
+		&fido_hid_write,
+		&fido_default_hid_rx,
+		&fido_default_hid_tx
 	};
 
 	return (dev);
@@ -356,7 +359,8 @@ fido_dev_new_with_info(const fido_dev_info_t *dev_info)
 	dev->cid = CTAP_CID_BROADCAST;
 
 	if (dev_info->io.open == NULL || dev_info->io.close == NULL ||
-	    dev_info->io.read == NULL || dev_info->io.write == NULL) {
+	    dev_info->io.read == NULL || dev_info->io.write == NULL ||
+			dev_info->io.rx == NULL || dev_info->io.tx == NULL) {
 		fido_log_debug("%s: NULL function", __func__);
 		fido_dev_free(&dev);
 		return (NULL);

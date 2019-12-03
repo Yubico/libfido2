@@ -85,33 +85,33 @@ tx_frame(fido_dev_t *d, int seq, const void *buf, size_t count)
 }
 
 int
-fido_tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
+fido_default_hid_tx(uint8_t cmd, const unsigned char *payload, size_t len,
+                    fido_dev_t *d)
 {
-	int	seq = 0;
-	size_t	sent;
+	int seq = 0;
+	size_t sent;
+	fido_log_debug("%s: d=%p, cmd=0x%02x, payload=%p, len=%zu", __func__,
+	               (void *)d, cmd, (const void*) payload, len);
+	fido_log_xxd(payload, len);
 
-	fido_log_debug("%s: d=%p, cmd=0x%02x, buf=%p, count=%zu", __func__,
-	    (void *)d, cmd, buf, count);
-	fido_log_xxd(buf, count);
-
-	if (d->io_handle == NULL || count > UINT16_MAX) {
+	if (d->io_handle == NULL || len > UINT16_MAX) {
 		fido_log_debug("%s: invalid argument (%p, %zu)", __func__,
-		    d->io_handle, count);
+		    d->io_handle, len);
 		return (-1);
 	}
 
-	if ((sent = tx_preamble(d, cmd, buf, count)) == 0) {
+	if ((sent = tx_preamble(d, cmd, payload, len)) == 0) {
 		fido_log_debug("%s: tx_preamble", __func__);
 		return (-1);
 	}
 
-	while (sent < count) {
+	while (sent < len) {
 		if (seq & 0x80) {
 			fido_log_debug("%s: seq & 0x80", __func__);
 			return (-1);
 		}
-		const uint8_t *p = (const uint8_t *)buf + sent;
-		size_t n = tx_frame(d, seq++, p, count - sent);
+		const uint8_t *p = (const uint8_t *)payload + sent;
+		size_t n = tx_frame(d, seq++, p, len - sent);
 		if (n == 0) {
 			fido_log_debug("%s: tx_frame", __func__);
 			return (-1);
@@ -121,6 +121,17 @@ fido_tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 
 	return (0);
 }
+
+int
+fido_tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
+{
+	if (d->dev_info == NULL || d->dev_info->io.tx == NULL) {
+		return (FIDO_ERR_INTERNAL);
+	}
+	return d->dev_info->io.tx(cmd, buf, count, d);
+}
+
+
 
 static int
 rx_frame(fido_dev_t *d, struct frame *fp, int ms)
@@ -153,7 +164,8 @@ rx_preamble(fido_dev_t *d, struct frame *fp, int ms)
 }
 
 int
-fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
+fido_default_hid_rx(uint8_t cmd, unsigned char *buf, size_t count, int ms,
+	                   fido_dev_t *d)
 {
 	struct frame	f;
 	uint16_t	r;
@@ -233,10 +245,20 @@ fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 		}
 	}
 
-	fido_log_debug("%s: payload at %p, len %zu", __func__, buf, (size_t)r);
+	fido_log_debug("%s: payload at %p, len %zu", __func__, (void*)buf, (size_t)r);
 	fido_log_xxd(buf, r);
 
 	return (r);
+}
+
+int
+fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
+{
+  if (d->dev_info == NULL || d->dev_info->io.rx == NULL) {
+		fido_log_debug("%s: no rx function for device %p", __func__, (void*)d);
+		return (FIDO_ERR_INTERNAL);
+  }
+  return d->dev_info->io.rx(cmd, buf, count, ms, d);
 }
 
 int
