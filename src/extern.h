@@ -131,15 +131,15 @@ int fido_verify_sig_eddsa(const fido_blob_t *, const eddsa_pk_t *,
 /* hid device manifest */
 int fido_hid_manifest(fido_dev_info_t *, size_t, size_t *);
 
-/* abstract hid tx/rx functions, implemented by io.c */
-int fido_default_hid_rx(uint8_t, unsigned char *, size_t, int, fido_dev_t *);
-int fido_default_hid_tx(uint8_t, const unsigned char *, size_t, fido_dev_t *);
-
 /* hid i/o */
+// implemented in hid_*.c files
 void *fido_hid_open(const char *);
 void  fido_hid_close(void *);
 int fido_hid_read(void *, unsigned char *, size_t, int);
 int fido_hid_write(void *, const unsigned char *, size_t);
+// implemented in io.c
+int fido_default_hid_rx(uint8_t, unsigned char *, size_t, int, fido_dev_t *);
+int fido_default_hid_tx(uint8_t, const unsigned char *, size_t, fido_dev_t *);
 
 /* device manifest registration */
 typedef int (*dev_manifest_func_t)(fido_dev_info_t *, size_t, size_t *);
