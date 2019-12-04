@@ -1,0 +1,16 @@
+#!/bin/bash
+
+check() {
+	for f in $(find $1 -maxdepth 1 -name '*.h'); do
+		echo "#include \"$f\"" | \
+			cc $CFLAGS -Isrc -xc -c - -o /dev/null 2>&1
+		echo $f $CFLAGS $?
+	done
+}
+
+check examples
+check fuzz
+check openbsd-compat
+CFLAGS=-D_FIDO_INTERNAL check src
+check src/fido.h
+check tools
