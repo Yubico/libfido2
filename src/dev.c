@@ -198,18 +198,6 @@ fido_init(int flags)
 {
 	if (flags & FIDO_DEBUG || getenv("FIDO_DEBUG") != NULL)
 		fido_log_init();
-#ifdef USE_HIDAPI
-	if (hid_init() != 0)
-		errx(1, "hid_init failed");
-#endif
-}
-
-void
-fido_exit(void)
-{
-#ifdef USE_HIDAPI
-	hid_exit();
-#endif
 }
 
 fido_dev_t *
