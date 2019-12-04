@@ -15,36 +15,18 @@
 #include <stdlib.h>
 
 #ifdef _FIDO_INTERNAL
-#include "fido/common.h"
-#else
-#include <fido/common.h>
-#endif
-
-#ifdef _FIDO_INTERNAL
 #include <cbor.h>
 #include <limits.h>
 
 #include "blob.h"
 #include "../openbsd-compat/openbsd-compat.h"
 #include "iso7816.h"
-#include "types.h"
 #include "extern.h"
 #endif
 
 #include "fido/err.h"
 #include "fido/param.h"
-
-#ifndef _FIDO_INTERNAL
-typedef struct fido_assert fido_assert_t;
-typedef struct fido_cbor_info fido_cbor_info_t;
-typedef struct fido_cred fido_cred_t;
-typedef struct fido_dev fido_dev_t;
-typedef struct fido_dev_info fido_dev_info_t;
-typedef struct es256_pk es256_pk_t;
-typedef struct es256_sk es256_sk_t;
-typedef struct rs256_pk rs256_pk_t;
-typedef struct eddsa_pk eddsa_pk_t;
-#endif
+#include "fido/types.h"
 
 fido_assert_t *fido_assert_new(void);
 fido_cred_t *fido_cred_new(void);
