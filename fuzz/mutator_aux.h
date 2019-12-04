@@ -7,6 +7,9 @@
 #ifndef _MUTATOR_AUX_H
 #define _MUTATOR_AUX_H
 
+#include <stddef.h>
+#include <stdint.h>
+
 /*
  * As of LLVM 7.0.1, MSAN support in libFuzzer was still experimental.
  * We therefore have to be careful when using our custom mutator, or
