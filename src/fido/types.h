@@ -4,14 +4,33 @@
  * license that can be found in the LICENSE file.
  */
 
-#ifndef _TYPES_H
-#define _TYPES_H
+#ifndef _FIDO_TYPES_H
+#define _FIDO_TYPES_H
 
-#include "fido/common.h"
+#include <stddef.h>
+
+typedef void *fido_dev_io_open_t(const char *);
+typedef void  fido_dev_io_close_t(void *);
+typedef int   fido_dev_io_read_t(void *, unsigned char *, size_t, int);
+typedef int   fido_dev_io_write_t(void *, const unsigned char *, size_t);
+
+typedef struct fido_dev_io {
+	fido_dev_io_open_t  *open;
+	fido_dev_io_close_t *close;
+	fido_dev_io_read_t  *read;
+	fido_dev_io_write_t *write;
+} fido_dev_io_t;
+
+typedef enum {
+	FIDO_OPT_OMIT = 0, /* use authenticator's default */
+	FIDO_OPT_FALSE,    /* explicitly set option to false */
+	FIDO_OPT_TRUE,     /* explicitly set option to true */
+} fido_opt_t;
+
+#ifdef _FIDO_INTERNAL
 #include "packed.h"
 #include "blob.h"
 
-#ifdef _FIDO_INTERNAL
 /* COSE ES256 (ECDSA over P-256 with SHA-256) public key */
 typedef struct es256_pk {
 	unsigned char	x[32];
@@ -171,5 +190,16 @@ typedef struct fido_dev {
 	fido_dev_io_t	  io;        /* i/o functions & data */
 } fido_dev_t;
 
+#else
+typedef struct fido_assert fido_assert_t;
+typedef struct fido_cbor_info fido_cbor_info_t;
+typedef struct fido_cred fido_cred_t;
+typedef struct fido_dev fido_dev_t;
+typedef struct fido_dev_info fido_dev_info_t;
+typedef struct es256_pk es256_pk_t;
+typedef struct es256_sk es256_sk_t;
+typedef struct rs256_pk rs256_pk_t;
+typedef struct eddsa_pk eddsa_pk_t;
 #endif /* _FIDO_INTERNAL */
-#endif /* !_TYPES_H */
+
+#endif /* !_FIDO_TYPES_H */

@@ -9,9 +9,8 @@
 
 #include <stdint.h>
 
-#include "fido/common.h"
+#include "fido/types.h"
 #include "blob.h"
-#include "types.h"
 
 /* aes256 */
 int aes256_cbc_dec(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
