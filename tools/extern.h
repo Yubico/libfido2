@@ -7,6 +7,12 @@
 #ifndef _EXTERN_H_
 #define _EXTERN_H_
 
+#include <stddef.h>
+#include <stdio.h>
+
+#include <openssl/ec.h>
+#include <fido.h>
+
 struct blob {
 	unsigned char *ptr;
 	size_t len;
