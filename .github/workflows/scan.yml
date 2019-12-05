@@ -1,0 +1,31 @@
+name: static code analysis
+
+on: [push]
+env:
+  SCAN_IMG:
+    yes-docker-local.artifactory.in.yubico.org/static-code-analysis/c:v1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Prep scan
+      run: |
+        docker login yes-docker-local.artifactory.in.yubico.org/ \
+             -u svc-static-code-analysis-reader \
+             -p ${{ secrets.ARTIFACTORY_READER_TOKEN }}
+        docker pull ${SCAN_IMG}
+
+    - name: Scan and fail if warnings
+      run: |
+        docker run -v${PWD}:/k -e COMPILE_DEPS="${COMPILE_DEPS}" \
+          -e PROJECT_NAME=${GITHUB_REPOSITORY#Yubico/} -t ${SCAN_IMG}
+
+    - uses: actions/upload-artifact@master
+      if: failure()
+      with:
+        name: suppression_files
+        path: suppression_files
