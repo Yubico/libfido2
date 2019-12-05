@@ -35,7 +35,7 @@ if(FUZZ)
 	list(APPEND FIDO_SOURCES ../fuzz/wrap.c)
 endif()
 
-if (HIDAPI_FOUND)
+if(USE_HIDAPI)
 	list(APPEND COMPAT_SOURCES hid_hidapi.c)
 elseif(WIN32)
 	list(APPEND COMPAT_SOURCES hid_win.c)
