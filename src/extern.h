@@ -169,4 +169,5 @@ int fido_hid_write(void *, const unsigned char *, size_t);
 typedef int (*dev_manifest_func_t)(fido_dev_info_t *dev_infos, size_t ilen,
                                    size_t *olen);
 int fido_dev_register_manifest_func(const dev_manifest_func_t func);
+void fido_dev_unregister_manifest_func(const dev_manifest_func_t func);
 #endif /* !_EXTERN_H */

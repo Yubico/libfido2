@@ -170,7 +170,6 @@ _fido_dev_reset
 _fido_dev_set_io_functions
 _fido_dev_set_pin
 _fido_init
-_fido_exit
 _fido_strerr
 _rs256_pk_free
 _rs256_pk_from_ptr

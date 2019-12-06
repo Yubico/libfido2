@@ -324,7 +324,5 @@ main(int argc, char **argv)
 
 	fido_cred_free(&cred);
 
-	fido_exit();
-
 	exit(0);
 }
