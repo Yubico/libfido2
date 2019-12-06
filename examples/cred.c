@@ -15,9 +15,6 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef USE_HIDAPI
-#include <hidapi/hidapi.h>
-#endif
 
 #include "../openbsd-compat/openbsd-compat.h"
 

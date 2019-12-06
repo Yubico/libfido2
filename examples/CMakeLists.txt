@@ -29,11 +29,7 @@ target_link_libraries(reset fido2)
 
 # cred
 add_executable(cred cred.c util.c ${COMPAT_SOURCES})
-if (HIDAPI_FOUND)
-	target_link_libraries(cred fido2 hidapi-hidraw)
-else()
-	target_link_libraries(cred fido2)
-endif()
+target_link_libraries(cred fido2)
 
 # assert
 add_executable(assert assert.c util.c ${COMPAT_SOURCES})
