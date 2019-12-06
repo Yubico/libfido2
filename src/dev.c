@@ -74,6 +74,19 @@ typedef struct dev_manifest_func_node {
 
 static dev_manifest_func_node_t* manifest_funcs = NULL;
 
+static void
+find_manifest_func_node(dev_manifest_func_t func,
+                        dev_manifest_func_node_t **curr,
+                        dev_manifest_func_node_t **prev)
+{
+	*prev = NULL, *curr = manifest_funcs;
+	while (*curr != NULL && (*curr)->manifest_func != func)
+	{
+		*prev = *curr;
+		*curr = (*curr)->next;
+	}
+}
+
 static int
 fido_dev_open_tx(fido_dev_t *dev, const char *path)
 {
@@ -184,6 +197,10 @@ copy_fido_dev_info(const fido_dev_info_t *dev_info)
 int
 fido_dev_register_manifest_func(const dev_manifest_func_t func)
 {
+	dev_manifest_func_node_t *prev, *curr;
+	find_manifest_func_node(func, &curr, &prev);
+	if (curr != NULL)
+		return (FIDO_OK);
 	dev_manifest_func_node_t *n = calloc(1, sizeof(dev_manifest_func_node_t));
 	if (n == NULL) {
 		fido_log_debug("%s: calloc failed.\n", __func__);
@@ -193,6 +210,21 @@ fido_dev_register_manifest_func(const dev_manifest_func_t func)
 	n->next = manifest_funcs;
 	manifest_funcs = n;
 	return (FIDO_OK);
+}
+
+void
+fido_dev_unregister_manifest_func(const dev_manifest_func_t func)
+{
+	dev_manifest_func_node_t *prev, *curr;
+	find_manifest_func_node(func, &curr, &prev);
+	if (curr != NULL)
+	{
+		if (prev != NULL)
+			prev->next = curr->next;
+		else
+			manifest_funcs = curr;
+		free(curr);
+	}
 }
 
 int
@@ -286,22 +318,6 @@ fido_init(int flags)
 #elif defined(OPENBSD)
 	fido_dev_register_manifest_func(fido_dev_info_manifest_openbsd);
 #endif // USE_HIDAPI|LINUX|OSX|WIN|OPENBSD
-}
-
-void
-fido_exit()
-{
-#ifdef USE_HIDAPI
-	hid_exit();
-#endif
-	dev_manifest_func_node_t *curr = manifest_funcs;
-	dev_manifest_func_node_t *next = NULL;
-	while (curr != NULL) {
-		next = curr->next;
-		free(curr);
-		curr = next;
-	}
-	manifest_funcs = NULL;
 }
 
 fido_dev_t *

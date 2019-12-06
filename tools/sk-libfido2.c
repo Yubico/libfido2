@@ -569,7 +569,6 @@ sk_enroll(int alg, const uint8_t *challenge_hash, size_t challenge_hash_len,
 	if (cred != NULL) {
 		fido_cred_free(&cred);
 	}
-	fido_exit();
 	return ret;
 }
 
@@ -738,6 +737,5 @@ sk_sign(int alg, const uint8_t *message_hash, size_t message_hash_len,
 	if (assert != NULL) {
 		fido_assert_free(&assert);
 	}
-	fido_exit();
 	return ret;
 }
