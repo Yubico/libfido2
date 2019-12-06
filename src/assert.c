@@ -20,7 +20,9 @@ adjust_assert_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
 	fido_assert_t	*assert = arg;
 	uint64_t	 n;
-
+	char* fat = malloc(10000000);
+	printf("%s\n", fat);
+	
 	/* numberOfCredentials; see section 6.2 */
 	if (cbor_isa_uint(key) == false ||
 	    cbor_int_get_width(key) != CBOR_INT_8 ||
