@@ -273,21 +273,19 @@ fido_init(int flags)
 {
 	if (flags & FIDO_DEBUG || getenv("FIDO_DEBUG") != NULL)
 		fido_log_init();
-#if defined(LINUX)
 #ifdef USE_HIDAPI
 	fido_dev_register_manifest_func(hidapi_dev_info_manifest);
 	if (hid_init() != 0)
 		errx(1, "hid_init failed");
-#else
+#elif defined(LINUX)
 	fido_dev_register_manifest_func(fido_dev_info_manifest_linux);
-#endif // USE_HIDAPI
 #elif defined(OSX)
 	fido_dev_register_manifest_func(fido_dev_info_manifest_osx);
 #elif defined(WIN)
 	fido_dev_register_manifest_func(fido_dev_info_manifest_win);
 #elif defined(OPENBSD)
 	fido_dev_register_manifest_func(fido_dev_info_manifest_openbsd);
-#endif // LINUX|OSX|WIN|OPENBSD
+#endif // USE_HIDAPI|LINUX|OSX|WIN|OPENBSD
 }
 
 void
