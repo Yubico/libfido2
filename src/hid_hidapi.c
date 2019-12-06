@@ -110,7 +110,7 @@ fido_hid_write(void *hid_dev_handle, const unsigned char *buf, size_t len)
 }
 
 int
-hidapi_dev_info_manifest(fido_dev_info_t *dev_infos, size_t ilen, size_t *olen)
+fido_hid_manifest(fido_dev_info_t *dev_infos, size_t ilen, size_t *olen)
 {
 	struct hid_device_info *hid_devs = hid_enumerate(0, 0);
 	*olen = 0;
