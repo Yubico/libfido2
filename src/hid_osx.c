@@ -197,7 +197,7 @@ copy_info(fido_dev_info_t *di, IOHIDDeviceRef dev)
 }
 
 int
-fido_dev_info_manifest_osx(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
+fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
 	IOHIDManagerRef	manager = NULL;
 	CFSetRef	devset = NULL;
