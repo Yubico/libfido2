@@ -36,6 +36,7 @@ if(FUZZ)
 endif()
 
 if(HIDAPI_FOUND)
+	add_definitions(-DUSE_HIDAPI)
 	list(APPEND COMPAT_SOURCES hid_hidapi.c)
 elseif(WIN32)
 	add_definitions(-DWIN)

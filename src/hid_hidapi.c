@@ -12,15 +12,26 @@
 
 #include "fido.h"
 
+static size_t
+fido_wcslen(const wchar_t *wcs)
+{
+	size_t l = 0;
+	while (*wcs++ != L'\0')
+		l++;
+	return l;
+}
+
 static char *
 wcs_to_cs(const wchar_t *wcs)
 {
+	if (wcs == NULL)
+		return NULL;
 	char *cs;
 	size_t i;
-	cs = calloc(wcslen(wcs) + 1, 1);
+	cs = calloc(fido_wcslen(wcs) + 1, 1);
 	if (cs == NULL)
 		return NULL;
-	for (i = 0; i < wcslen(wcs); i++) {
+	for (i = 0; i < fido_wcslen(wcs); i++) {
 		if (wcs[i] >= 128) {
 			// give up on parsing non-ASCII text
 			free(cs);
@@ -36,14 +47,29 @@ static int
 copy_info(fido_dev_info_t *fido_dev_info,
     const struct hid_device_info *hid_dev_info)
 {
-	fido_dev_info->path = strdup(hid_dev_info->path);
+	if (hid_dev_info->path != NULL)
+	{
+		fido_dev_info->path = strdup(hid_dev_info->path);
+	} else {
+		fido_dev_info->path = strdup("");
+	}
 	if (fido_dev_info->path == NULL)
 		goto finish;
-	if ((fido_dev_info->manufacturer =
-	    wcs_to_cs(hid_dev_info->manufacturer_string)) == NULL)
+	if (hid_dev_info->manufacturer_string != NULL)
+	{
+		fido_dev_info->manufacturer = wcs_to_cs(hid_dev_info->manufacturer_string);
+	} else {
+		fido_dev_info->manufacturer = strdup("");
+	}
+	if (fido_dev_info->manufacturer == NULL)
 		goto finish;
-	if ((fido_dev_info->product =
-	    wcs_to_cs(hid_dev_info->product_string)) == NULL)
+	if (hid_dev_info->product_string != NULL)
+	{
+		fido_dev_info->product = wcs_to_cs(hid_dev_info->product_string);
+	} else {
+		fido_dev_info->product = strdup("");
+	}
+	if (fido_dev_info->product == NULL)
 		goto finish;
 	fido_dev_info->product_id = hid_dev_info->product_id;
 	fido_dev_info->vendor_id = hid_dev_info->vendor_id;
@@ -84,7 +110,7 @@ fido_hid_write(void *hid_dev_handle, const unsigned char *buf, size_t len)
 }
 
 int
-fido_dev_info_manifest(fido_dev_info_t *dev_infos, size_t ilen, size_t *olen)
+hidapi_dev_info_manifest(fido_dev_info_t *dev_infos, size_t ilen, size_t *olen)
 {
 	struct hid_device_info *hid_devs = hid_enumerate(0, 0);
 	*olen = 0;
@@ -94,6 +120,12 @@ fido_dev_info_manifest(fido_dev_info_t *dev_infos, size_t ilen, size_t *olen)
 			fido_dev_info_t *curr_dev_info = &dev_infos[*olen];
 			if (copy_info(curr_dev_info, curr_hid_dev) != 0)
 				break;
+			curr_dev_info->io = (fido_dev_io_t) {
+				&fido_hid_open,
+				&fido_hid_close,
+				&fido_hid_read,
+				&fido_hid_write
+			};
 			(*olen)++;
 			curr_hid_dev = curr_hid_dev->next;
 		}
