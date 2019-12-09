@@ -25,8 +25,6 @@
 #ifndef _READPASSPHRASE_H_
 #define _READPASSPHRASE_H_
 
-#include <stdlib.h>
-
 #ifndef HAVE_READPASSPHRASE
 
 #include <stdlib.h>
