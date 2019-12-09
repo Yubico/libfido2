@@ -9,6 +9,7 @@
 
 #include <openssl/ec.h>
 #include <openssl/evp.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
