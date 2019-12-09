@@ -139,13 +139,13 @@ int fido_hid_manifest(fido_dev_info_t *, size_t, size_t *);
 
 /* hid i/o */
 void *fido_hid_open(const char *);
-void fido_hid_close(void *);
+void  fido_hid_close(void *);
 int fido_hid_read(void *, unsigned char *, size_t, int);
 int fido_hid_write(void *, const unsigned char *, size_t);
 
 /* device manifest registration */
-typedef int (*dev_manifest_func_t)(fido_dev_info_t *dev_infos, size_t ilen,
-                                   size_t *olen);
-int fido_dev_register_manifest_func(const dev_manifest_func_t func);
-void fido_dev_unregister_manifest_func(const dev_manifest_func_t func);
+typedef int (*dev_manifest_func_t)(fido_dev_info_t *, size_t, size_t *);
+int fido_dev_register_manifest_func(const dev_manifest_func_t);
+void fido_dev_unregister_manifest_func(const dev_manifest_func_t);
+
 #endif /* !_EXTERN_H */
