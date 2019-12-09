@@ -47,24 +47,21 @@ static int
 copy_info(fido_dev_info_t *fido_dev_info,
     const struct hid_device_info *hid_dev_info)
 {
-	if (hid_dev_info->path != NULL)
-	{
+	if (hid_dev_info->path != NULL) {
 		fido_dev_info->path = strdup(hid_dev_info->path);
 	} else {
 		fido_dev_info->path = strdup("");
 	}
 	if (fido_dev_info->path == NULL)
 		goto finish;
-	if (hid_dev_info->manufacturer_string != NULL)
-	{
+	if (hid_dev_info->manufacturer_string != NULL) {
 		fido_dev_info->manufacturer = wcs_to_cs(hid_dev_info->manufacturer_string);
 	} else {
 		fido_dev_info->manufacturer = strdup("");
 	}
 	if (fido_dev_info->manufacturer == NULL)
 		goto finish;
-	if (hid_dev_info->product_string != NULL)
-	{
+	if (hid_dev_info->product_string != NULL) {
 		fido_dev_info->product = wcs_to_cs(hid_dev_info->product_string);
 	} else {
 		fido_dev_info->product = strdup("");
