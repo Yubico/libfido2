@@ -64,21 +64,24 @@ fail:
 #error "please provide an implementation of obtain_nonce() for your platform"
 #endif /* _WIN32 */
 
+#ifndef TLS
+#define TLS
+#endif
+
 typedef struct dev_manifest_func_node {
 	dev_manifest_func_t manifest_func;
 	struct dev_manifest_func_node *next;
 } dev_manifest_func_node_t;
 
-static dev_manifest_func_node_t* manifest_funcs = NULL;
+static TLS dev_manifest_func_node_t *manifest_funcs = NULL;
 
 static void
 find_manifest_func_node(dev_manifest_func_t func,
-                        dev_manifest_func_node_t **curr,
-                        dev_manifest_func_node_t **prev)
+    dev_manifest_func_node_t **curr, dev_manifest_func_node_t **prev)
 {
-	*prev = NULL, *curr = manifest_funcs;
-	while (*curr != NULL && (*curr)->manifest_func != func)
-	{
+	*prev = NULL;
+	*curr = manifest_funcs;
+	while (*curr != NULL && (*curr)->manifest_func != func) {
 		*prev = *curr;
 		*curr = (*curr)->next;
 	}
@@ -178,8 +181,8 @@ copy_fido_dev_info(const fido_dev_info_t *dev_info)
 {
 	fido_dev_info_t *copied_dev_info = calloc(1, sizeof(fido_dev_info_t));
 	if (copied_dev_info == NULL) {
-		fido_log_debug("%s: calloc failed.\n", __func__);
-		return NULL;
+		fido_log_debug("%s: calloc", __func__);
+		return (NULL);
 	}
 	*copied_dev_info = *dev_info;
 	if (dev_info->path != NULL)
@@ -200,7 +203,7 @@ fido_dev_register_manifest_func(const dev_manifest_func_t func)
 		return (FIDO_OK);
 	dev_manifest_func_node_t *n = calloc(1, sizeof(dev_manifest_func_node_t));
 	if (n == NULL) {
-		fido_log_debug("%s: calloc failed.\n", __func__);
+		fido_log_debug("%s: calloc", __func__);
 		return (FIDO_ERR_INTERNAL);
 	}
 	n->manifest_func = func;
@@ -214,8 +217,7 @@ fido_dev_unregister_manifest_func(const dev_manifest_func_t func)
 {
 	dev_manifest_func_node_t *prev, *curr;
 	find_manifest_func_node(func, &curr, &prev);
-	if (curr != NULL)
-	{
+	if (curr != NULL) {
 		if (prev != NULL)
 			prev->next = curr->next;
 		else
@@ -248,13 +250,13 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 int
 fido_dev_open_with_info(fido_dev_t *dev)
 {
-	return fido_dev_open_wait_with_info(dev, -1);
+	return (fido_dev_open_wait_with_info(dev, -1));
 }
 
 int
 fido_dev_open(fido_dev_t *dev, const char *path)
 {
-	return fido_dev_open_wait(dev, path, -1);
+	return (fido_dev_open_wait(dev, path, -1));
 }
 
 int
@@ -306,19 +308,17 @@ fido_init(int flags)
 }
 
 fido_dev_t *
-fido_dev_new()
+fido_dev_new(void)
 {
-	fido_dev_t	*dev;
+	fido_dev_t *dev;
 
 	if ((dev = calloc(1, sizeof(*dev))) == NULL)
 		return (NULL);
 
 	dev->cid = CTAP_CID_BROADCAST;
 
-	dev->dev_info = fido_dev_info_new(1);
-
-	if (dev->dev_info == NULL) {
-		fido_log_debug("%s: dev_info cannot be allocated", __func__);
+	if ((dev->dev_info = fido_dev_info_new(1)) == NULL) {
+		fido_log_debug("%s: fido_dev_info_new", __func__);
 		fido_dev_free(&dev);
 		return (NULL);
 	}
@@ -336,7 +336,7 @@ fido_dev_new()
 fido_dev_t *
 fido_dev_new_with_info(const fido_dev_info_t *dev_info)
 {
-	fido_dev_t	*dev;
+	fido_dev_t *dev;
 
 	if ((dev = calloc(1, sizeof(*dev))) == NULL)
 		return (NULL);
@@ -349,10 +349,9 @@ fido_dev_new_with_info(const fido_dev_info_t *dev_info)
 		fido_dev_free(&dev);
 		return (NULL);
 	}
-	dev->dev_info = copy_fido_dev_info(dev_info);
 
-	if (dev->dev_info == NULL) {
-		fido_log_debug("%s: dev_info not copied correctly", __func__);
+	if ((dev->dev_info = copy_fido_dev_info(dev_info)) == NULL) {
+		fido_log_debug("%s: copy_fido_dev_info", __func__);
 		fido_dev_free(&dev);
 		return (NULL);
 	}
@@ -368,7 +367,7 @@ fido_dev_free(fido_dev_t **dev_p)
 	if (dev_p == NULL || (dev = *dev_p) == NULL)
 		return;
 
-	fido_dev_info_free((fido_dev_info_t**) &dev->dev_info, 1);
+	fido_dev_info_free(&dev->dev_info, 1);
 	free(dev);
 
 	*dev_p = NULL;
