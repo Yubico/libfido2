@@ -139,23 +139,24 @@ verify_cred(int type, const char *fmt, const unsigned char *authdata_ptr,
 	fido_cred_free(&cred);
 }
 
-static fido_dev_t*
+static fido_dev_t *
 open_from_manifest(const fido_dev_info_t *dev_infos, size_t len,
-                   const char *path)
+    const char *path)
 {
 	size_t i;
 	fido_dev_t *dev;
-	for (i = 0; i < len; i++)
-	{
+
+	for (i = 0; i < len; i++) {
 		const fido_dev_info_t *curr = fido_dev_info_ptr(dev_infos, i);
-		if (path == NULL || strcmp(path, fido_dev_info_path(curr)) == 0)
-		{
+		if (path == NULL ||
+		    strcmp(path, fido_dev_info_path(curr)) == 0) {
 			dev = fido_dev_new_with_info(curr);
 			if (fido_dev_open_with_info(dev) == FIDO_OK)
 				return (dev);
 			fido_dev_free(&dev);
 		}
 	}
+
 	return (NULL);
 }
 
