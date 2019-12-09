@@ -171,7 +171,7 @@ main(int argc, char **argv)
 	const char	*pin = NULL;
 	const char	*key_out = NULL;
 	const char	*id_out = NULL;
-	const char  *path = NULL;
+	const char	*path = NULL;
 	unsigned char	*body = NULL;
 	long long	 seconds = 0;
 	size_t		 len;
@@ -179,8 +179,8 @@ main(int argc, char **argv)
 	int		 ext = 0;
 	int		 ch;
 	int		 r;
-	fido_dev_info_t *dev_infos = NULL;
-	size_t dev_infos_len = 0;
+	fido_dev_info_t	*dev_infos = NULL;
+	size_t		 dev_infos_len = 0;
 
 	if ((cred = fido_cred_new()) == NULL)
 		errx(1, "fido_cred_new");
