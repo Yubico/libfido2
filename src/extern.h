@@ -37,12 +37,6 @@ cbor_item_t *cbor_encode_set_pin_auth(const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *cbor_encode_user_entity(const fido_user_t *);
 cbor_item_t *es256_pk_encode(const es256_pk_t *, int);
 
-int parse_cbor_reply(const unsigned char *, size_t, void *,
-                     int (*)(const cbor_item_t *, const cbor_item_t *, void *));
-int add_cbor_pin_params(fido_dev_t *, const fido_blob_t *, const es256_pk_t *,
-                        const fido_blob_t *, const char *, cbor_item_t **,
-                        cbor_item_t **);
-
 /* cbor decoding functions */
 int cbor_decode_attstmt(const cbor_item_t *, fido_attstmt_t *);
 int cbor_decode_cred_authdata(const cbor_item_t *, int, fido_blob_t *,
