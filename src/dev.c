@@ -221,7 +221,7 @@ fido_dev_unregister_manifest_func(const dev_manifest_func_t func)
 		if (prev != NULL)
 			prev->next = curr->next;
 		else
-			manifest_funcs = curr;
+			manifest_funcs = curr->next;
 		free(curr);
 	}
 }
