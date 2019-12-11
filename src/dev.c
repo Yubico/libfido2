@@ -81,6 +81,7 @@ find_manifest_func_node(dev_manifest_func_t func,
 {
 	*prev = NULL;
 	*curr = manifest_funcs;
+
 	while (*curr != NULL && (*curr)->manifest_func != func) {
 		*prev = *curr;
 		*curr = (*curr)->next;
@@ -197,18 +198,21 @@ copy_fido_dev_info(const fido_dev_info_t *dev_info)
 int
 fido_dev_register_manifest_func(const dev_manifest_func_t func)
 {
-	dev_manifest_func_node_t *prev, *curr;
+	dev_manifest_func_node_t *prev, *curr, *n;
+
 	find_manifest_func_node(func, &curr, &prev);
 	if (curr != NULL)
 		return (FIDO_OK);
-	dev_manifest_func_node_t *n = calloc(1, sizeof(dev_manifest_func_node_t));
-	if (n == NULL) {
+
+	if ((n = calloc(1, sizeof(*n))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
 		return (FIDO_ERR_INTERNAL);
 	}
+
 	n->manifest_func = func;
 	n->next = manifest_funcs;
 	manifest_funcs = n;
+
 	return (FIDO_OK);
 }
 
@@ -216,34 +220,40 @@ void
 fido_dev_unregister_manifest_func(const dev_manifest_func_t func)
 {
 	dev_manifest_func_node_t *prev, *curr;
+
 	find_manifest_func_node(func, &curr, &prev);
-	if (curr != NULL) {
-		if (prev != NULL)
-			prev->next = curr->next;
-		else
-			manifest_funcs = curr->next;
-		free(curr);
-	}
+	if (curr == NULL)
+		return;
+
+	if (prev != NULL)
+		prev->next = curr->next;
+	else
+		manifest_funcs = curr->next;
+
+	free(curr);
 }
 
 int
 fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
-	dev_manifest_func_node_t *curr = NULL;
+	dev_manifest_func_node_t	*curr = NULL;
+	dev_manifest_func_t		 m_func;
+	size_t				 curr_olen;
+	int				 r;
+
 	*olen = 0;
-	dev_manifest_func_t m_func;
+
 	for (curr = manifest_funcs; curr != NULL; curr = curr->next) {
-		size_t curr_olen;
-		int r;
+		curr_olen = 0;
 		m_func = curr->manifest_func;
 		r = m_func(devlist + *olen, ilen - *olen, &curr_olen);
-		if (r == FIDO_OK)
-			*olen += curr_olen;
-		else
+		if (r != FIDO_OK)
 			return (r);
+		*olen += curr_olen;
 		if (*olen == ilen)
 			break;
 	}
+
 	return (FIDO_OK);
 }
 
