@@ -122,8 +122,8 @@ fido_hid_manifest(fido_dev_info_t *dev_infos, size_t ilen, size_t *olen)
 				&fido_hid_close,
 				&fido_hid_read,
 				&fido_hid_write,
-				&fido_default_hid_rx,
-				&fido_default_hid_tx
+				NULL,
+				NULL,
 			};
 			(*olen)++;
 			curr_hid_dev = curr_hid_dev->next;

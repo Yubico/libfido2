@@ -240,13 +240,13 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 	for (CFIndex i = 0; i < devcnt; i++) {
 		if (copy_info(&devlist[*olen], devs[i]) == 0) {
-			devlist[*olen].io = (fido_dev_io_t){
+			devlist[*olen].io = (fido_dev_io_t) {
 				fido_hid_open,
 				fido_hid_close,
 				fido_hid_read,
 				fido_hid_write,
-				fido_default_hid_rx,
-				fido_default_hid_tx
+				NULL,
+				NULL,
 			};
 			if (++(*olen) == ilen)
 				break;

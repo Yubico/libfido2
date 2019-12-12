@@ -354,12 +354,12 @@ get_assert(fido_assert_t *assert, uint8_t u2f, const struct blob *cdh,
 	fido_dev_t	*dev;
 	fido_dev_io_t	 io;
 
+	memset(&io, 0, sizeof(io));
+
 	io.open = dev_open;
 	io.close = dev_close;
 	io.read = dev_read;
 	io.write = dev_write;
-	io.rx = NULL;
-	io.tx = NULL;
 
 	if ((dev = fido_dev_new()) == NULL || fido_dev_set_io_functions(dev,
 	    &io) != FIDO_OK || fido_dev_open(dev, "nodev") != FIDO_OK) {

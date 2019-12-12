@@ -16,25 +16,16 @@ typedef void *fido_dev_io_open_t(const char *);
 typedef void  fido_dev_io_close_t(void *);
 typedef int   fido_dev_io_read_t(void *, unsigned char *, size_t, int);
 typedef int   fido_dev_io_write_t(void *, const unsigned char *, size_t);
-// an rx function should return number of bytes received on success,
-// -1 on error. Upon calling, the io_handle of fido_dev_t argument
-// would be set to the returned value of fido_dev_io_open_t (after calling
-// fido_dev_open_with_info or fido_dev_open)
-typedef int fido_dev_io_rx_t(uint8_t, unsigned char *, size_t, int,
-                             struct fido_dev *);
-// a tx function should return 0 on success, -1 on error. Upon calling, the
-// io_handle of fido_dev_t argument would be set to the returned value of
-// fido_dev_io_open_t (after calling fido_dev_open_with_info or fido_dev_open)
-typedef int fido_dev_io_tx_t(uint8_t, const unsigned char *, size_t,
-                             struct fido_dev *);
+typedef int   fido_dev_io_rx_t(struct fido_dev *, uint8_t, unsigned char *, size_t, int);
+typedef int   fido_dev_io_tx_t(struct fido_dev *, uint8_t, const unsigned char *, size_t);
 
 typedef struct fido_dev_io {
 	fido_dev_io_open_t  *open;
 	fido_dev_io_close_t *close;
 	fido_dev_io_read_t  *read;
 	fido_dev_io_write_t *write;
-	fido_dev_io_rx_t *rx;
-	fido_dev_io_tx_t *tx;
+	fido_dev_io_rx_t    *rx;
+	fido_dev_io_tx_t    *tx;
 } fido_dev_io_t;
 
 typedef enum {
@@ -184,7 +175,7 @@ typedef struct fido_dev_info {
 	int16_t        product_id;   /* 2-byte product id */
 	char          *manufacturer; /* manufacturer string */
 	char          *product;      /* product string */
-	fido_dev_io_t  io;           /* device i/o functions */
+	fido_dev_io_t  io;           /* i/o functions */
 } fido_dev_info_t;
 
 PACKED_TYPE(fido_ctap_info_t,
@@ -203,8 +194,9 @@ typedef struct fido_dev {
 	uint64_t          nonce;     /* issued nonce */
 	fido_ctap_info_t  attr;      /* device attributes */
 	uint32_t          cid;       /* assigned channel id */
+	char             *path;      /* device path */
 	void             *io_handle; /* abstract i/o handle */
-	fido_dev_info_t  *dev_info;  /* dev infos */
+	fido_dev_io_t     io;        /* i/o functions */
 } fido_dev_t;
 
 #else

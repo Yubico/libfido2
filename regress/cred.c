@@ -271,31 +271,6 @@ dummy_write(void *handle, const unsigned char *buf, size_t len)
 	/* NOTREACHED */
 }
 
-static int
-dummy_rx(uint8_t cmd, unsigned char *buf, size_t len, int ms, fido_dev_t *dev)
-{
-	(void)cmd;
-	(void)buf;
-	(void)len;
-	(void)ms;
-	(void)dev;
-
-	abort();
-	/* NOTREACHED */
-}
-
-static int
-dummy_tx(uint8_t cmd, const unsigned char *buf, size_t len, fido_dev_t *dev)
-{
-	(void)cmd;
-	(void)buf;
-	(void)len;
-	(void)dev;
-
-	abort();
-	/* NOTREACHED */
-}
-
 static fido_cred_t *
 alloc_cred(void)
 {
@@ -358,12 +333,13 @@ empty_cred(void)
 	assert(fido_cred_x5c_ptr(c) == NULL);
 	assert(fido_cred_verify(c) == FIDO_ERR_INVALID_ARGUMENT);
 
+	memset(&io_f, 0, sizeof(io_f));
+
 	io_f.open = dummy_open;
 	io_f.close = dummy_close;
 	io_f.read = dummy_read;
 	io_f.write = dummy_write;
-	io_f.rx = dummy_rx;
-	io_f.tx = dummy_tx;
+
 	d = alloc_dev();
 
 	fido_dev_force_u2f(d);

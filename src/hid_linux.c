@@ -268,13 +268,13 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 	udev_list_entry_foreach(udev_entry, udev_list) {
 		if (copy_info(&devlist[*olen], udev, udev_entry) == 0) {
-			devlist[*olen].io = (fido_dev_io_t){
+			devlist[*olen].io = (fido_dev_io_t) {
 				fido_hid_open,
 				fido_hid_close,
 				fido_hid_read,
 				fido_hid_write,
-				fido_default_hid_rx,
-				fido_default_hid_tx
+				NULL,
+				NULL,
 			};
 			if (++(*olen) == ilen)
 				break;
