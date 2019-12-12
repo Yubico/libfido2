@@ -40,7 +40,7 @@ tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 	unsigned char	pkt[sizeof(*fp) + 1];
 	int		n;
 
-	if (d->dev_info->io.write == NULL || (cmd & 0x80) == 0)
+	if (d->io.write == NULL || (cmd & 0x80) == 0)
 		return (0);
 
 	memset(&pkt, 0, sizeof(pkt));
@@ -53,7 +53,7 @@ tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 	if (count)
 		memcpy(&fp->body.init.data, buf, count);
 
-	n = d->dev_info->io.write(d->io_handle, pkt, sizeof(pkt));
+	n = d->io.write(d->io_handle, pkt, sizeof(pkt));
 	if (n < 0 || (size_t)n != sizeof(pkt))
 		return (0);
 
@@ -67,7 +67,7 @@ tx_frame(fido_dev_t *d, int seq, const void *buf, size_t count)
 	unsigned char	 pkt[sizeof(*fp) + 1];
 	int		 n;
 
-	if (d->dev_info->io.write == NULL || seq < 0 || seq > UINT8_MAX)
+	if (d->io.write == NULL || seq < 0 || seq > UINT8_MAX)
 		return (0);
 
 	memset(&pkt, 0, sizeof(pkt));
@@ -77,21 +77,21 @@ tx_frame(fido_dev_t *d, int seq, const void *buf, size_t count)
 	count = MIN(count, sizeof(fp->body.cont.data));
 	memcpy(&fp->body.cont.data, buf, count);
 
-	n = d->dev_info->io.write(d->io_handle, pkt, sizeof(pkt));
+	n = d->io.write(d->io_handle, pkt, sizeof(pkt));
 	if (n < 0 || (size_t)n != sizeof(pkt))
 		return (0);
 
 	return (count);
 }
 
-int
-fido_default_hid_tx(uint8_t cmd, const unsigned char *buf, size_t count,
-                    fido_dev_t *d)
+static int
+tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 {
 	int	seq = 0;
 	size_t	sent;
-	fido_log_debug("%s: d=%p, cmd=0x%02x, payload=%p, len=%zu", __func__,
-	               (void *)d, cmd, (const void*) buf, count);
+
+	fido_log_debug("%s: d=%p, cmd=0x%02x, buf=%p, len=%zu", __func__,
+	    (void *)d, cmd, (const void *)buf, count);
 	fido_log_xxd(buf, count);
 
 	if (d->io_handle == NULL || count > UINT16_MAX) {
@@ -125,23 +125,21 @@ fido_default_hid_tx(uint8_t cmd, const unsigned char *buf, size_t count,
 int
 fido_tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 {
-	if (d->dev_info == NULL || d->dev_info->io.tx == NULL) {
-		return (FIDO_ERR_INTERNAL);
-	}
-	return d->dev_info->io.tx(cmd, buf, count, d);
+	if (d->io.tx != NULL)
+		return (d->io.tx(d, cmd, buf, count));
+
+	return (tx(d, cmd, buf, count));
 }
-
-
 
 static int
 rx_frame(fido_dev_t *d, struct frame *fp, int ms)
 {
 	int n;
 
-	if (d->dev_info->io.read == NULL)
+	if (d->io.read == NULL)
 		return (-1);
 
-	n = d->dev_info->io.read(d->io_handle, (unsigned char *)fp, sizeof(*fp), ms);
+	n = d->io.read(d->io_handle, (unsigned char *)fp, sizeof(*fp), ms);
 	if (n < 0 || (size_t)n != sizeof(*fp))
 		return (-1);
 
@@ -163,9 +161,8 @@ rx_preamble(fido_dev_t *d, struct frame *fp, int ms)
 	return (0);
 }
 
-int
-fido_default_hid_rx(uint8_t cmd, unsigned char *buf, size_t count, int ms,
-	                   fido_dev_t *d)
+static int
+rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 {
 	struct frame	f;
 	uint16_t	r;
@@ -245,7 +242,7 @@ fido_default_hid_rx(uint8_t cmd, unsigned char *buf, size_t count, int ms,
 		}
 	}
 
-	fido_log_debug("%s: payload at %p, len %zu", __func__, (void*)buf, (size_t)r);
+	fido_log_debug("%s: buf=%p, len=%zu", __func__, (void *)buf, (size_t)r);
 	fido_log_xxd(buf, r);
 
 	return (r);
@@ -254,11 +251,10 @@ fido_default_hid_rx(uint8_t cmd, unsigned char *buf, size_t count, int ms,
 int
 fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 {
-  if (d->dev_info == NULL || d->dev_info->io.rx == NULL) {
-		fido_log_debug("%s: no rx function for device %p", __func__, (void*)d);
-		return (FIDO_ERR_INTERNAL);
-  }
-  return d->dev_info->io.rx(cmd, buf, count, ms, d);
+	if (d->io.rx != NULL)
+		return (d->io.rx(d, cmd, buf, count, ms));
+
+	return (rx(d, cmd, buf, count, ms));
 }
 
 int

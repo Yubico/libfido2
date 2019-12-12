@@ -101,13 +101,13 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 		di = &devlist[*olen];
 		memset(di, 0, sizeof(*di));
-		di->io = (fido_dev_io_t){
+		di->io = (fido_dev_io_t) {
 			fido_hid_open,
 			fido_hid_close,
 			fido_hid_read,
 			fido_hid_write,
-			fido_default_hid_rx,
-			fido_default_hid_tx
+			NULL,
+			NULL,
 		};
 		if ((di->path = strdup(path)) == NULL ||
 		    (di->manufacturer = strdup(udi.udi_vendor)) == NULL ||

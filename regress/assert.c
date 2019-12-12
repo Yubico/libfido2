@@ -87,31 +87,6 @@ dummy_write(void *handle, const unsigned char *buf, size_t len)
 	/* NOTREACHED */
 }
 
-static int
-dummy_rx(uint8_t cmd, unsigned char *buf, size_t len, int ms, fido_dev_t *dev)
-{
-	(void)cmd;
-	(void)buf;
-	(void)len;
-	(void)ms;
-	(void)dev;
-
-	abort();
-	/* NOTREACHED */
-}
-
-static int
-dummy_tx(uint8_t cmd, const unsigned char *buf, size_t len, fido_dev_t *dev)
-{
-	(void)cmd;
-	(void)buf;
-	(void)len;
-	(void)dev;
-
-	abort();
-	/* NOTREACHED */
-}
-
 static fido_assert_t *
 alloc_assert(void)
 {
@@ -241,14 +216,16 @@ empty_assert_tests(void)
 	fido_dev_io_t io_f;
 	int i;
 
+	memset(&io_f, 0, sizeof(io_f));
+
 	a = alloc_assert();
 	d = alloc_dev();
+
 	io_f.open = dummy_open;
 	io_f.close = dummy_close;
 	io_f.read = dummy_read;
 	io_f.write = dummy_write;
-	io_f.rx = dummy_rx;
-	io_f.tx = dummy_tx;
+
 	assert(fido_dev_set_io_functions(d, &io_f) == FIDO_OK);
 
 	empty_assert(d, a, 0);

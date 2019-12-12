@@ -76,13 +76,13 @@ typedef struct dev_manifest_func_node {
 static TLS dev_manifest_func_node_t *manifest_funcs = NULL;
 
 static void
-find_manifest_func_node(dev_manifest_func_t func,
-    dev_manifest_func_node_t **curr, dev_manifest_func_node_t **prev)
+find_manifest_func_node(dev_manifest_func_t f, dev_manifest_func_node_t **curr,
+    dev_manifest_func_node_t **prev)
 {
 	*prev = NULL;
 	*curr = manifest_funcs;
 
-	while (*curr != NULL && (*curr)->manifest_func != func) {
+	while (*curr != NULL && (*curr)->manifest_func != f) {
 		*prev = *curr;
 		*curr = (*curr)->next;
 	}
@@ -98,7 +98,7 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
-	if (dev->dev_info->io.open == NULL || dev->dev_info->io.close == NULL) {
+	if (dev->io.open == NULL || dev->io.close == NULL) {
 		fido_log_debug("%s: NULL open/close", __func__);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
@@ -108,14 +108,14 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 		return (FIDO_ERR_INTERNAL);
 	}
 
-	if ((dev->io_handle = dev->dev_info->io.open(path)) == NULL) {
+	if ((dev->io_handle = dev->io.open(path)) == NULL) {
 		fido_log_debug("%s: dev->io.open", __func__);
 		return (FIDO_ERR_INTERNAL);
 	}
 
 	if (fido_tx(dev, cmd, &dev->nonce, sizeof(dev->nonce)) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
-		dev->dev_info->io.close(dev->io_handle);
+		dev->io.close(dev->io_handle);
 		dev->io_handle = NULL;
 		return (FIDO_ERR_TX);
 	}
@@ -147,22 +147,10 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 
 	return (FIDO_OK);
 fail:
-	dev->dev_info->io.close(dev->io_handle);
+	dev->io.close(dev->io_handle);
 	dev->io_handle = NULL;
 
 	return (FIDO_ERR_RX);
-}
-
-static int
-fido_dev_open_wait_with_info(fido_dev_t *dev, int ms)
-{
-	int r;
-
-	if ((r = fido_dev_open_tx(dev, dev->dev_info->path)) != FIDO_OK ||
-	    (r = fido_dev_open_rx(dev, ms)) != FIDO_OK)
-		return (r);
-
-	return (FIDO_OK);
 }
 
 static int
@@ -177,30 +165,12 @@ fido_dev_open_wait(fido_dev_t *dev, const char *path, int ms)
 	return (FIDO_OK);
 }
 
-static fido_dev_info_t*
-copy_fido_dev_info(const fido_dev_info_t *dev_info)
-{
-	fido_dev_info_t *copied_dev_info = calloc(1, sizeof(fido_dev_info_t));
-	if (copied_dev_info == NULL) {
-		fido_log_debug("%s: calloc", __func__);
-		return (NULL);
-	}
-	*copied_dev_info = *dev_info;
-	if (dev_info->path != NULL)
-		copied_dev_info->path = strdup(dev_info->path);
-	if (dev_info->manufacturer != NULL)
-		copied_dev_info->manufacturer = strdup(dev_info->manufacturer);
-	if (dev_info->product != NULL)
-		copied_dev_info->product = strdup(dev_info->product);
-	return (copied_dev_info);
-}
-
 int
-fido_dev_register_manifest_func(const dev_manifest_func_t func)
+fido_dev_register_manifest_func(const dev_manifest_func_t f)
 {
 	dev_manifest_func_node_t *prev, *curr, *n;
 
-	find_manifest_func_node(func, &curr, &prev);
+	find_manifest_func_node(f, &curr, &prev);
 	if (curr != NULL)
 		return (FIDO_OK);
 
@@ -209,7 +179,7 @@ fido_dev_register_manifest_func(const dev_manifest_func_t func)
 		return (FIDO_ERR_INTERNAL);
 	}
 
-	n->manifest_func = func;
+	n->manifest_func = f;
 	n->next = manifest_funcs;
 	manifest_funcs = n;
 
@@ -217,14 +187,13 @@ fido_dev_register_manifest_func(const dev_manifest_func_t func)
 }
 
 void
-fido_dev_unregister_manifest_func(const dev_manifest_func_t func)
+fido_dev_unregister_manifest_func(const dev_manifest_func_t f)
 {
 	dev_manifest_func_node_t *prev, *curr;
 
-	find_manifest_func_node(func, &curr, &prev);
+	find_manifest_func_node(f, &curr, &prev);
 	if (curr == NULL)
 		return;
-
 	if (prev != NULL)
 		prev->next = curr->next;
 	else
@@ -263,7 +232,10 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 int
 fido_dev_open_with_info(fido_dev_t *dev)
 {
-	return (fido_dev_open_wait_with_info(dev, -1));
+	if (dev->path == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	return (fido_dev_open_wait(dev, dev->path, -1));
 }
 
 int
@@ -275,10 +247,10 @@ fido_dev_open(fido_dev_t *dev, const char *path)
 int
 fido_dev_close(fido_dev_t *dev)
 {
-	if (dev->io_handle == NULL || dev->dev_info->io.close == NULL)
+	if (dev->io_handle == NULL || dev->io.close == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	dev->dev_info->io.close(dev->io_handle);
+	dev->io.close(dev->io_handle);
 	dev->io_handle = NULL;
 
 	return (FIDO_OK);
@@ -307,11 +279,7 @@ fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
-	dev->dev_info->io = *io;
-	if (dev->dev_info->io.rx == NULL)
-		dev->dev_info->io.rx = fido_default_hid_rx;
-	if (dev->dev_info->io.tx == NULL)
-		dev->dev_info->io.tx = fido_default_hid_tx;
+	dev->io = *io;
 
 	return (FIDO_OK);
 }
@@ -332,27 +300,20 @@ fido_dev_new(void)
 		return (NULL);
 
 	dev->cid = CTAP_CID_BROADCAST;
-
-	if ((dev->dev_info = fido_dev_info_new(1)) == NULL) {
-		fido_log_debug("%s: fido_dev_info_new", __func__);
-		fido_dev_free(&dev);
-		return (NULL);
-	}
-
-	dev->dev_info->io = (fido_dev_io_t) {
+	dev->io = (fido_dev_io_t) {
 		&fido_hid_open,
 		&fido_hid_close,
 		&fido_hid_read,
 		&fido_hid_write,
-		&fido_default_hid_rx,
-		&fido_default_hid_tx
+		NULL,
+		NULL,
 	};
 
 	return (dev);
 }
 
 fido_dev_t *
-fido_dev_new_with_info(const fido_dev_info_t *dev_info)
+fido_dev_new_with_info(const fido_dev_info_t *di)
 {
 	fido_dev_t *dev;
 
@@ -361,16 +322,16 @@ fido_dev_new_with_info(const fido_dev_info_t *dev_info)
 
 	dev->cid = CTAP_CID_BROADCAST;
 
-	if (dev_info->io.open == NULL || dev_info->io.close == NULL ||
-	    dev_info->io.read == NULL || dev_info->io.write == NULL ||
-	    dev_info->io.rx == NULL || dev_info->io.tx == NULL) {
+	if (di->io.open == NULL || di->io.close == NULL ||
+	    di->io.read == NULL || di->io.write == NULL) {
 		fido_log_debug("%s: NULL function", __func__);
 		fido_dev_free(&dev);
 		return (NULL);
 	}
 
-	if ((dev->dev_info = copy_fido_dev_info(dev_info)) == NULL) {
-		fido_log_debug("%s: copy_fido_dev_info", __func__);
+	dev->io = di->io;
+	if ((dev->path = strdup(di->path)) == NULL) {
+		fido_log_debug("%s: strdup", __func__);
 		fido_dev_free(&dev);
 		return (NULL);
 	}
@@ -386,7 +347,7 @@ fido_dev_free(fido_dev_t **dev_p)
 	if (dev_p == NULL || (dev = *dev_p) == NULL)
 		return;
 
-	fido_dev_info_free(&dev->dev_info, 1);
+	free(dev->path);
 	free(dev);
 
 	*dev_p = NULL;

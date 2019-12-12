@@ -53,7 +53,8 @@ open_iff_ok(void)
 {
 	fido_dev_t	*dev = NULL;
 	fido_dev_io_t	 io;
-	memset(&io, 0, sizeof(fido_dev_io_t));
+
+	memset(&io, 0, sizeof(io));
 
 	io.open = dummy_open;
 	io.close = dummy_close;
