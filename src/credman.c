@@ -110,7 +110,12 @@ credman_tx(fido_dev_t *dev, uint8_t cmd, const fido_blob_t *param,
 	int		 r = FIDO_ERR_INTERNAL;
 
 	memset(&f, 0, sizeof(f));
+#ifdef BREAK_MSAN
+	/* XXX pedro: test fuzz_credman + msan */
+	(void)hmac;
+#else
 	memset(&hmac, 0, sizeof(hmac));
+#endif
 	memset(&argv, 0, sizeof(argv));
 
 	/* subCommand */
@@ -424,6 +429,10 @@ credman_del_rk_wait(fido_dev_t *dev, const unsigned char *cred_id,
 		goto fail;
 
 	r = FIDO_OK;
+#ifdef BREAK_ASAN
+	/* XXX pedro: test fuzz_credman + asan */
+	free(cred.ptr);
+#endif
 fail:
 	free(cred.ptr);
 

@@ -48,7 +48,12 @@ bio_prepare_hmac(uint8_t cmd, cbor_item_t **argv, size_t argc,
 	}
 
 	memcpy(hmac_data->ptr, prefix, sizeof(prefix));
+#ifdef BREAK_ASAN
+	/* XXX pedro: test fuzz_bio + asan */
+	memcpy(hmac_data->ptr + sizeof(prefix), cbor, cbor_len + 1);
+#else
 	memcpy(hmac_data->ptr + sizeof(prefix), cbor, cbor_len);
+#endif
 	hmac_data->len = cbor_len + sizeof(prefix);
 
 	ok = 0;
@@ -512,7 +517,12 @@ bio_enroll_continue_wait(fido_dev_t *dev, const fido_bio_template_t *t,
 	const uint8_t	 cmd = CMD_ENROLL_NEXT;
 	int		 r = FIDO_ERR_INTERNAL;
 
+#ifdef BREAK_MSAN
+	/* XXX pedro: test fuzz_bio + msan */
+	memset(&argv, 0, sizeof(argv) - 1);
+#else
 	memset(&argv, 0, sizeof(argv));
+#endif
 
 	if ((argv[0] = fido_blob_encode(&t->id)) == NULL ||
 	    (argv[2] = cbor_build_uint32(timo_ms)) == NULL) {

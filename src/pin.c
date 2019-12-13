@@ -264,7 +264,13 @@ fido_dev_change_pin_tx(fido_dev_t *dev, const char *pin, const char *oldpin)
 	int r;
 
 	memset(&f, 0, sizeof(f));
+
+#ifdef BREAK_MSAN
+	/* XXX pedro: test fuzz_mgmt + msan */
+	memset(argv, 0, sizeof(argv) - 1);
+#else
 	memset(argv, 0, sizeof(argv));
+#endif
 
 	if ((opin = fido_blob_new()) == NULL || fido_blob_set(opin,
 	    (const unsigned char *)oldpin, strlen(oldpin)) < 0) {
@@ -356,7 +362,12 @@ fido_dev_set_pin_tx(fido_dev_t *dev, const char *pin)
 
 	r = FIDO_OK;
 fail:
+#ifdef BREAK_ASAN
+	/* XXX pedro: test fuzz_mgmt + asan */
+	cbor_vector_free(argv, nitems(argv) + 1);
+#else
 	cbor_vector_free(argv, nitems(argv));
+#endif
 	es256_pk_free(&pk);
 	fido_blob_free(&ppin);
 	fido_blob_free(&ecdh);
