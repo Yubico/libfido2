@@ -176,10 +176,15 @@ es256_pk_free(es256_pk_t **pkp)
 int
 es256_pk_from_ptr(es256_pk_t *pk, const void *ptr, size_t len)
 {
+	const uint8_t *p = ptr;
+
 	if (len < sizeof(*pk))
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	memcpy(pk, ptr, sizeof(*pk));
+	if (len == sizeof(*pk) + 1 && *p == 0x04)
+		memcpy(pk, ++p, sizeof(*pk)); /* uncompressed format */
+	else
+		memcpy(pk, ptr, sizeof(*pk)); /* libfido2 x||y format */
 
 	return (FIDO_OK);
 }
