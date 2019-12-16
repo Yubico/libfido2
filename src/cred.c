@@ -49,12 +49,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 	int		 r;
 
 	memset(&f, 0, sizeof(f));
-#ifdef BREAK_MSAN
-	/* XXX pedro: test fuzz_cred + msan */
-	memset(argv, 0, sizeof(argv) - 1);
-#else
 	memset(argv, 0, sizeof(argv));
-#endif
 
 	if (cred->cdh.ptr == NULL || cred->type == 0) {
 		fido_log_debug("%s: cdh=%p, type=%d", __func__,
@@ -709,11 +704,6 @@ fido_cred_exclude(fido_cred_t *cred, const unsigned char *id_ptr, size_t id_len)
 	if ((list_ptr = recallocarray(cred->excl.ptr, cred->excl.len,
 	    cred->excl.len + 1, sizeof(fido_blob_t))) == NULL) {
 		free(id_blob.ptr);
-#ifdef BREAK_ASAN
-		/* XXX pedro: test fuzz_cred + asan */
-		if (!*id_blob.ptr)
-			return (FIDO_OK);
-#endif
 		return (FIDO_ERR_INTERNAL);
 	}
 

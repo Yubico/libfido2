@@ -679,11 +679,6 @@ fido_assert_allow_cred(fido_assert_t *assert, const unsigned char *ptr,
 	return (FIDO_OK);
 fail:
 	free(id.ptr);
-#ifdef BREAK_ASAN
-	/* XXX pedro: test fuzz_assert + asan */
-	if (!*id.ptr)
-		return (FIDO_OK);
-#endif
 
 	return (r);
 
@@ -1062,12 +1057,7 @@ fido_assert_set_sig(fido_assert_t *a, size_t idx, const unsigned char *ptr,
 	if ((sig = malloc(len)) == NULL)
 		return (FIDO_ERR_INTERNAL);
 
-#ifdef BREAK_MSAN
-	/* XXX pedro: test fuzz_assert + msan */
-	memcpy(sig, ptr, len - 1);
-#else
 	memcpy(sig, ptr, len);
-#endif
 	a->stmt[idx].sig.ptr = sig;
 	a->stmt[idx].sig.len = len;
 

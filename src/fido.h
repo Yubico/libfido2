@@ -22,21 +22,6 @@
 #include "../openbsd-compat/openbsd-compat.h"
 #include "iso7816.h"
 #include "extern.h"
-
-/* XXX pedro: remove me */
-#if defined(__clang__)
-#if defined(FIDO_FUZZ) && __has_feature(memory_sanitizer)
-#define BREAK_MSAN
-#endif
-#endif
-
-/* XXX pedro: remove me */
-#if defined(__clang__)
-#if defined(FIDO_FUZZ) && __has_feature(address_sanitizer)
-#define BREAK_ASAN
-#endif
-#endif
-
 #endif
 
 #include "fido/err.h"
