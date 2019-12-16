@@ -145,6 +145,13 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 
 	dev->cid = dev->attr.cid;
 
+	if (fido_dev_is_fido2(dev)) {
+		if (fido_dev_dummy_get_cbor_info_wait(dev, ms) != FIDO_OK) {
+			fido_log_debug("%s: falling back to u2f", __func__);
+			fido_dev_force_u2f(dev);
+		}
+	}
+
 	return (FIDO_OK);
 fail:
 	dev->io.close(dev->io_handle);

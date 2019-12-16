@@ -114,6 +114,7 @@ int u2f_authenticate(fido_dev_t *, fido_assert_t *, int);
 
 /* unexposed fido ops */
 int fido_dev_authkey(fido_dev_t *, es256_pk_t *);
+int fido_dev_dummy_get_cbor_info_wait(fido_dev_t *, int);
 int fido_dev_get_pin_token(fido_dev_t *, const char *, const fido_blob_t *,
     const es256_pk_t *, fido_blob_t *);
 int fido_do_ecdh(fido_dev_t *, es256_pk_t **, fido_blob_t **);

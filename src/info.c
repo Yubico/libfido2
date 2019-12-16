@@ -278,6 +278,35 @@ fido_dev_get_cbor_info(fido_dev_t *dev, fido_cbor_info_t *ci)
 	return (fido_dev_get_cbor_info_wait(dev, ci, -1));
 }
 
+static int
+fido_dev_dummy_get_cbor_info_rx(fido_dev_t *dev, int ms)
+{
+	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	unsigned char	reply[512];
+	int		reply_len;
+
+	fido_log_debug("%s: dev=%p, ms=%d", __func__, (void *)dev, ms);
+
+	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+		fido_log_debug("%s: fido_rx", __func__);
+		return (FIDO_ERR_RX);
+	}
+
+	return (FIDO_OK);
+}
+
+int
+fido_dev_dummy_get_cbor_info_wait(fido_dev_t *dev, int ms)
+{
+	int r;
+
+	if ((r = fido_dev_get_cbor_info_tx(dev)) != FIDO_OK ||
+	    (r = fido_dev_dummy_get_cbor_info_rx(dev, ms)) != FIDO_OK)
+		return (r);
+
+	return (FIDO_OK);
+}
+
 /*
  * get/set functions for fido_cbor_info_t; always at the end of the file
  */
