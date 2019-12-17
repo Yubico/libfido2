@@ -24,22 +24,21 @@ fido_wcslen(const wchar_t *wcs)
 static char *
 wcs_to_cs(const wchar_t *wcs)
 {
-	if (wcs == NULL)
-		return NULL;
 	char *cs;
 	size_t i;
-	cs = calloc(fido_wcslen(wcs) + 1, 1);
-	if (cs == NULL)
+
+	if (wcs == NULL || (cs = calloc(fido_wcslen(wcs) + 1, 1)) == NULL) 
 		return NULL;
+
 	for (i = 0; i < fido_wcslen(wcs); i++) {
 		if (wcs[i] >= 128) {
-			// give up on parsing non-ASCII text
+			/* give up on parsing non-ASCII text */
 			free(cs);
-			cs = strdup("hidapi device");
-			return cs;
+			return strdup("hidapi device");
 		}
-		cs[i] = (char) wcs[i];
+		cs[i] = (char)wcs[i];
 	}
+
 	return cs;
 }
 
@@ -111,6 +110,7 @@ fido_hid_manifest(fido_dev_info_t *dev_infos, size_t ilen, size_t *olen)
 {
 	struct hid_device_info *hid_devs = hid_enumerate(0, 0);
 	*olen = 0;
+
 	if (hid_devs != NULL) {
 		struct hid_device_info *curr_hid_dev = hid_devs;
 		while (curr_hid_dev != NULL && *olen < ilen) {
@@ -130,5 +130,6 @@ fido_hid_manifest(fido_dev_info_t *dev_infos, size_t ilen, size_t *olen)
 		}
 		hid_free_enumeration(hid_devs);
 	}
+
 	return (FIDO_OK);
 }
