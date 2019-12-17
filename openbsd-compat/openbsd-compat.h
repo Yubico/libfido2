@@ -32,6 +32,10 @@
 #define be32toh(x) ntohl((x))
 #endif /* _WIN32 && !HAVE_ENDIAN_H */
 
+#if defined(__FreeBSD__) && !defined(HAVE_ENDIAN_H)
+#include <sys/endian.h>
+#endif
+
 #include <stdlib.h>
 
 #if !defined(HAVE_STRLCAT)
