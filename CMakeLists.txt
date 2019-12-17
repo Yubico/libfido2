@@ -80,13 +80,6 @@ else()
 	include(FindPkgConfig)
 	pkg_search_module(CBOR libcbor)
 	pkg_search_module(CRYPTO libcrypto REQUIRED)
-	if(USE_HIDAPI)
-		add_definitions(-DUSE_HIDAPI)
-		pkg_search_module(HIDAPI hidapi-hidraw)
-		if(HIDAPI_FOUND)
-			set(HIDAPI_LIBRARIES hidapi-hidraw)
-		endif()
-	endif()
 
 	# XXX workaround libcbor's missing .pc file
 	if(NOT CBOR_FOUND)
@@ -102,6 +95,8 @@ else()
 		set(UDEV_NAME "udev")
 		# Define be32toh().
 		add_definitions(-D_GNU_SOURCE)
+		# If using hidapi, use hidapi-hidraw.
+		set(HIDAPI_SUFFIX -hidraw)
 	elseif(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
 		set(BASE_LIBRARIES usbhid)
 	endif()
@@ -110,6 +105,14 @@ else()
 		# MinGW is stuck with a flavour of C89.
 		add_definitions(-DFIDO_NO_DIAGNOSTIC)
 		add_definitions(-DWC_ERR_INVALID_CHARS=0x80)
+	endif()
+
+	if(USE_HIDAPI)
+		add_definitions(-DUSE_HIDAPI)
+		pkg_search_module(HIDAPI hidapi${HIDAPI_SUFFIX} REQUIRED)
+		if(HIDAPI_FOUND)
+			set(HIDAPI_LIBRARIES hidapi${HIDAPI_SUFFIX})
+		endif()
 	endif()
 
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
