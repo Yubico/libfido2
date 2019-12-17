@@ -114,6 +114,7 @@ else()
 		# MinGW is stuck with a flavour of C89.
 		add_definitions(-DFIDO_NO_DIAGNOSTIC)
 		add_definitions(-DWC_ERR_INVALID_CHARS=0x80)
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
 	endif()
 
 	if(USE_HIDAPI)

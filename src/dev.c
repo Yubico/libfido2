@@ -295,7 +295,14 @@ void
 fido_init(int flags)
 {
 	if (flags & FIDO_DEBUG || getenv("FIDO_DEBUG") != NULL)
-		fido_log_init();
+		fido_log_init(NULL);
+}
+
+void
+fido_set_log_handler(int flags, fido_log_handler_t log_fp)
+{
+	if (flags & FIDO_DEBUG || getenv("FIDO_DEBUG") != NULL)
+		fido_log_init(log_fp);
 }
 
 fido_dev_t *
