@@ -79,7 +79,7 @@ if(MSVC)
 else()
 	include(FindPkgConfig)
 	pkg_search_module(CBOR libcbor)
-	pkg_search_module(CRYPTO libcrypto REQUIRED)
+	pkg_search_module(CRYPTO libcrypto)
 
 	# XXX workaround libcbor's missing .pc file
 	if(NOT CBOR_FOUND)
@@ -88,6 +88,15 @@ else()
 			message(FATAL_ERROR "could not find cbor header files")
 		endif()
 		set(CBOR_LIBRARIES "cbor")
+	endif()
+
+	# XXX workaround libcrypto's missing .pc file
+	if(NOT CRYPTO_FOUND)
+		check_include_files(openssl/opensslv.h HAVE_OPENSSLV_H)
+		if(NOT HAVE_OPENSSLV_H)
+			message(FATAL_ERROR "could not find crypto header files")
+		endif()
+		set(CRYPTO_LIBRARIES "crypto")
 	endif()
 
 	if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
