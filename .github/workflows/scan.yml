@@ -19,10 +19,10 @@ jobs:
              -p ${{ secrets.ARTIFACTORY_READER_TOKEN }}
         docker pull ${SCAN_IMG}
 
-    - name: Scan and fail if warnings
+    - name: Scan but do not fail on warnings
       run: |
         docker run -v${PWD}:/k -e COMPILE_DEPS="${COMPILE_DEPS}" \
-          -e PROJECT_NAME=${GITHUB_REPOSITORY#Yubico/} -t ${SCAN_IMG}
+          -e PROJECT_NAME=${GITHUB_REPOSITORY#Yubico/} -t ${SCAN_IMG} || true
 
     - uses: actions/upload-artifact@master
       if: failure()
