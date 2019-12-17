@@ -45,6 +45,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	list(APPEND COMPAT_SOURCES hid_linux.c)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
 	list(APPEND COMPAT_SOURCES hid_openbsd.c)
+else()
+	message(FATAL_ERROR "please define a hid backend for your platform")
 endif()
 
 list(APPEND COMPAT_SOURCES
