@@ -15,12 +15,24 @@
 #define TLS
 #endif
 
-static TLS int logging;
+#define  MAX_SINGLE_LOG_LINE_LENGTH 5000
+
+static TLS fido_log_handler_t logger = NULL;
+
+static void
+default_log(const char *fmt)
+{
+	fprintf(stderr, "%s", fmt);
+	fflush(stderr);
+}
 
 void
-fido_log_init(void)
+fido_log_init(fido_log_handler_t log_fp)
 {
-	logging = 1;
+	if (log_fp != NULL)
+		logger = log_fp;
+	else
+		logger = &default_log;
 }
 
 void
@@ -29,35 +41,31 @@ fido_log_xxd(const void *buf, size_t count)
 	const uint8_t	*ptr = buf;
 	size_t		 i;
 
-	if (!logging)
+	if (logger == NULL)
 		return;
 
-	fprintf(stderr, "  ");
+	fido_log_debug("  ");
 
 	for (i = 0; i < count; i++) {
-		fprintf(stderr, "%02x ", *ptr++);
+		fido_log_debug("%02x ", *ptr++);
 		if ((i + 1) % 16 == 0 && i + 1 < count)
-			fprintf(stderr, "\n  ");
+			fido_log_debug("\n  ");
 	}
 
-	fprintf(stderr, "\n");
-	fflush(stderr);
+	fido_log_debug("\n");
 }
 
 void
 fido_log_debug(const char *fmt, ...)
 {
-	va_list	 ap;
-
-	if (!logging)
+	if (logger == NULL)
 		return;
-
+	char log_line[MAX_SINGLE_LOG_LINE_LENGTH];
+	va_list	 ap;
 	va_start(ap, fmt);
-	vfprintf(stderr, fmt, ap);
+	snprintf(log_line, MAX_SINGLE_LOG_LINE_LENGTH, fmt, ap);
 	va_end(ap);
-
-	fprintf(stderr, "\n");
-	fflush(stderr);
+	logger(log_line);
 }
 
 #endif /* !FIDO_NO_DIAGNOSTIC */
