@@ -124,8 +124,10 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 		return FIDO_OK; /* nothing to do */
 
 	for (struct hid_device_info *d = hdi; d != NULL; d = d->next) {
+#if defined(_WIN32) || defined(__APPLE__)
 		if (d->usage_page != 0xf1d0)
 			continue;
+#endif
 		if (copy_info(&devlist[*olen], d) == 0) {
 			if (++(*olen) == ilen)
 				break;
