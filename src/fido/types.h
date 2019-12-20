@@ -34,9 +34,7 @@ typedef enum {
 	FIDO_OPT_TRUE,     /* explicitly set option to true */
 } fido_opt_t;
 
-// log function pointer type
-// Caller would call va_start and va_end to the va_list argument.
-typedef void (*fido_log_handler_t)(const char *);
+typedef void fido_log_handler_t(const char *);
 
 #ifdef _FIDO_INTERNAL
 #include "packed.h"

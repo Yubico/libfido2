@@ -97,12 +97,12 @@ int fido_tx(fido_dev_t *, uint8_t, const void *, size_t);
 #define fido_log_xxd(...)	do { /* nothing */ } while (0)
 #else
 #ifdef __GNUC__
-void fido_log_init(fido_log_handler_t);
+void fido_log_init(void);
 void fido_log_debug(const char *, ...)
     __attribute__((__format__ (printf, 1, 2)));
 void fido_log_xxd(const void *, size_t);
 #else
-void fido_log_init(fido_log_handler_t);
+void fido_log_init(void);
 void fido_log_debug(const char *, ...);
 void fido_log_xxd(const void *, size_t);
 #endif /* __GNUC__ */

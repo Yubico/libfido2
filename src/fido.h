@@ -47,7 +47,7 @@ void fido_dev_info_free(fido_dev_info_t **, size_t);
 #define FIDO_DEBUG	0x01
 
 void fido_init(int);
-void fido_set_log_handler(int, fido_log_handler_t);
+void fido_set_log_handler(int, fido_log_handler_t *);
 
 const unsigned char *fido_assert_authdata_ptr(const fido_assert_t *, size_t);
 const unsigned char *fido_assert_clientdata_hash_ptr(const fido_assert_t *);
@@ -153,7 +153,7 @@ size_t fido_cred_sig_len(const fido_cred_t *);
 size_t fido_cred_x5c_len(const fido_cred_t *);
 
 uint8_t  fido_assert_flags(const fido_assert_t *, size_t);
-uint32_t  fido_assert_sigcount(const fido_assert_t *, size_t);
+uint32_t fido_assert_sigcount(const fido_assert_t *, size_t);
 uint8_t  fido_cred_flags(const fido_cred_t *);
 uint8_t  fido_dev_protocol(const fido_dev_t *);
 uint8_t  fido_dev_major(const fido_dev_t *);
