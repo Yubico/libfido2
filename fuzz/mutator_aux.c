@@ -37,6 +37,12 @@ consume(const void *body, size_t len)
 		x ^= *ptr++;
 }
 
+void
+consume_str(const char *str)
+{
+	consume(str, strlen(str));
+}
+
 int
 unpack_int(uint8_t t, uint8_t **ptr, size_t *len, int *v) NO_MSAN
 {

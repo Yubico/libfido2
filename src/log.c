@@ -11,7 +11,8 @@
 
 #ifndef FIDO_NO_DIAGNOSTIC
 
-#define MSGBUFSIZ 1024
+#define XXD_LEN	8
+#define FMT_LEN	1024
 
 #ifndef TLS
 #define TLS
@@ -24,7 +25,6 @@ static void
 log_on_stderr(const char *str)
 {
 	fprintf(stderr, "%s", str);
-	fflush(stderr);
 }
 
 void
@@ -38,7 +38,7 @@ void
 fido_log_xxd(const void *buf, size_t count)
 {
 	const uint8_t	*ptr = buf;
-	char		 msgbuf[MSGBUFSIZ];
+	char		 c[XXD_LEN];
 	size_t		 i;
 
 	if (!logging || log_handler == NULL)
@@ -47,8 +47,8 @@ fido_log_xxd(const void *buf, size_t count)
 	log_handler("  ");
 
 	for (i = 0; i < count; i++) {
-		snprintf(msgbuf, sizeof(msgbuf), "%02x ", *ptr++);
-		log_handler(msgbuf);
+		snprintf(c, sizeof(c), "%02x ", *ptr++);
+		log_handler(c);
 		if ((i + 1) % 16 == 0 && i + 1 < count)
 			log_handler("\n  ");
 	}
@@ -59,17 +59,17 @@ fido_log_xxd(const void *buf, size_t count)
 void
 fido_log_debug(const char *fmt, ...)
 {
-	char    msgbuf[MSGBUFSIZ];
+	char    fmtbuf[FMT_LEN];
 	va_list ap;
 
 	if (!logging || log_handler == NULL)
 		return;
 
 	va_start(ap, fmt);
-	vsnprintf(msgbuf, sizeof(msgbuf), fmt, ap);
+	vsnprintf(fmtbuf, sizeof(fmtbuf), fmt, ap);
 	va_end(ap);
 
-	log_handler(msgbuf);
+	log_handler(fmtbuf);
 	log_handler("\n");
 }
 

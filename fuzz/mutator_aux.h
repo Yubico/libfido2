@@ -41,6 +41,7 @@ struct blob {
 
 size_t xstrlen(const char *);
 void consume(const void *, size_t);
+void consume_str(const char *);
 
 int unpack_blob(uint8_t, uint8_t **, size_t *, struct blob *);
 int unpack_byte(uint8_t, uint8_t **, size_t *, uint8_t *);
