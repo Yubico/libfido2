@@ -734,7 +734,7 @@ int
 u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
 {
 	int	nauth_ok = 0;
-	int nauth_ok_with_up = 0;
+	int	nauth_ok_with_up = 0;
 	int	r;
 
 	if (fa->uv == FIDO_OPT_TRUE || fa->allow_list.ptr == NULL) {
