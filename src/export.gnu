@@ -172,6 +172,7 @@
 		fido_dev_set_io_functions;
 		fido_dev_set_pin;
 		fido_init;
+		fido_set_log_handler;
 		fido_strerr;
 		rs256_pk_free;
 		rs256_pk_from_ptr;
