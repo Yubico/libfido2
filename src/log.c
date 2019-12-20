@@ -38,20 +38,22 @@ void
 fido_log_xxd(const void *buf, size_t count)
 {
 	const uint8_t	*ptr = buf;
+	char		 msgbuf[MSGBUFSIZ];
 	size_t		 i;
 
 	if (!logging || log_handler == NULL)
 		return;
 
-	fido_log_debug("  ");
+	log_handler("  ");
 
 	for (i = 0; i < count; i++) {
-		fido_log_debug("%02x ", *ptr++);
+		snprintf(msgbuf, sizeof(msgbuf), "%02x ", *ptr++);
+		log_handler(msgbuf);
 		if ((i + 1) % 16 == 0 && i + 1 < count)
-			fido_log_debug("\n  ");
+			log_handler("\n  ");
 	}
 
-	fido_log_debug("\n");
+	log_handler("\n");
 }
 
 void
@@ -64,14 +66,15 @@ fido_log_debug(const char *fmt, ...)
 		return;
 
 	va_start(ap, fmt);
-	snprintf(msgbuf, sizeof(msgbuf), fmt, ap);
+	vsnprintf(msgbuf, sizeof(msgbuf), fmt, ap);
 	va_end(ap);
 
-	log_handler(log_line);
+	log_handler(msgbuf);
+	log_handler("\n");
 }
 
 void
-fido_set_log_handler(int flags, fido_log_handler_t *handler)
+fido_set_log_handler(fido_log_handler_t *handler)
 {
 	if (handler != NULL)
 		log_handler = handler;
