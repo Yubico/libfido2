@@ -689,6 +689,15 @@ u2f_authenticate_single(fido_dev_t *dev, const fido_blob_t *key_id,
 
 	if (fa->up == FIDO_OPT_FALSE) {
 		fido_log_debug("%s: checking for key existence only", __func__);
+		// key_id is a valid key handle and the sent apdu was
+		// check-only. Count this as a good auth by recording key_id in
+		// fa->stmt[idx], but still return FIDO_ERR_USER_PRESENCE_REQUIRED to keep
+		// the semantics consistent with the upstream.
+		if (fido_blob_set(&fa->stmt[idx].id, key_id->ptr, key_id->len) < 0) {
+			fido_log_debug("%s: fido_blob_set", __func__);
+			r = FIDO_ERR_INTERNAL;
+			goto fail;
+		}
 		r = FIDO_ERR_USER_PRESENCE_REQUIRED;
 		goto fail;
 	}
@@ -725,6 +734,7 @@ int
 u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
 {
 	int	nauth_ok = 0;
+	int nauth_ok_with_up = 0;
 	int	r;
 
 	if (fa->uv == FIDO_OPT_TRUE || fa->allow_list.ptr == NULL) {
@@ -741,6 +751,9 @@ u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
 	for (size_t i = 0; i < fa->allow_list.len; i++) {
 		if ((r = u2f_authenticate_single(dev, &fa->allow_list.ptr[i],
 		    fa, nauth_ok, ms)) == FIDO_OK) {
+			nauth_ok_with_up++;
+			nauth_ok++;
+		} else if (r == FIDO_ERR_USER_PRESENCE_REQUIRED) {
 			nauth_ok++;
 		} else if (r != FIDO_ERR_CREDENTIAL_EXCLUDED) {
 			fido_log_debug("%s: u2f_authenticate_single", __func__);
@@ -753,6 +766,8 @@ u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
 
 	if (nauth_ok == 0)
 		return (FIDO_ERR_NO_CREDENTIALS);
+	if (nauth_ok_with_up == 0)
+		return (FIDO_ERR_USER_PRESENCE_REQUIRED);
 
 	return (FIDO_OK);
 }
