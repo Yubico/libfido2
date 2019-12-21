@@ -729,8 +729,8 @@ fail:
 int
 u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
 {
+	int	nfound = 0;
 	int	nauth_ok = 0;
-	int	nauth_ok_with_up = 0;
 	int	r;
 
 	if (fa->uv == FIDO_OPT_TRUE || fa->allow_list.ptr == NULL) {
@@ -745,24 +745,29 @@ u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
 	}
 
 	for (size_t i = 0; i < fa->allow_list.len; i++) {
-		if ((r = u2f_authenticate_single(dev, &fa->allow_list.ptr[i],
-		    fa, nauth_ok, ms)) == FIDO_OK) {
-			nauth_ok_with_up++;
+		switch ((r = u2f_authenticate_single(dev,
+		    &fa->allow_list.ptr[i], fa, nfound, ms))) {
+		case FIDO_OK:
 			nauth_ok++;
-		} else if (r == FIDO_ERR_USER_PRESENCE_REQUIRED) {
-			nauth_ok++;
-		} else if (r != FIDO_ERR_CREDENTIAL_EXCLUDED) {
-			fido_log_debug("%s: u2f_authenticate_single", __func__);
-			return (r);
+			/* FALLTHROUGH */
+		case FIDO_ERR_USER_PRESENCE_REQUIRED:
+			nfound++;
+			break;
+		default:
+			if (r != FIDO_ERR_CREDENTIAL_EXCLUDED) {
+				fido_log_debug("%s: u2f_authenticate_single",
+				    __func__);
+				return (r);
+			}
+			/* ignore credentials that don't exist */
 		}
-		/* ignore credentials that don't exist */
 	}
 
-	fa->stmt_len = nauth_ok;
+	fa->stmt_len = nfound;
 
-	if (nauth_ok == 0)
+	if (nfound == 0)
 		return (FIDO_ERR_NO_CREDENTIALS);
-	if (nauth_ok_with_up == 0)
+	if (nauth_ok == 0)
 		return (FIDO_ERR_USER_PRESENCE_REQUIRED);
 
 	return (FIDO_OK);
