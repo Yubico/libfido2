@@ -6,6 +6,9 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_RANDOM_H
+#include <sys/random.h>
+#endif
 
 #include <fcntl.h>
 #include <stdint.h>
@@ -39,7 +42,20 @@ obtain_nonce(uint64_t *nonce)
 
 	return (0);
 }
-#elif defined(HAS_DEV_URANDOM)
+#elif defined(HAVE_ARC4RANDOM_BUF)
+static int
+obtain_nonce(uint64_t *nonce)
+{
+	arc4random_buf(nonce, sizeof(*nonce));
+	return (0);
+}
+#elif defined(HAVE_GETRANDOM)
+static int
+obtain_nonce(uint64_t *nonce)
+{
+	return (getrandom(nonce, sizeof(*nonce), 0));
+}
+#elif defined(HAVE_DEV_URANDOM)
 static int
 obtain_nonce(uint64_t *nonce)
 {

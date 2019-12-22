@@ -36,11 +36,6 @@ if(APPLE)
 		"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 endif()
 
-# /dev/urandom
-if(UNIX)
-	add_definitions(-DHAS_DEV_URANDOM)
-endif()
-
 # Observe OpenBSD's library versioning scheme.
 if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
 	set(LIB_VERSION ${FIDO_MAJOR}.${FIDO_MINOR})
@@ -212,6 +207,12 @@ if(HAVE_SIGNAL_H)
 	add_definitions(-DHAVE_SIGNAL_H)
 endif()
 
+# sys/random.h
+check_include_files(sys/random.h HAVE_SYS_RANDOM_H)
+if(HAVE_SYS_RANDOM_H)
+	add_definitions(-DHAVE_SYS_RANDOM_H)
+endif()
+
 # strlcpy
 check_function_exists(strlcpy HAVE_STRLCPY)
 if(HAVE_STRLCPY)
@@ -309,10 +310,15 @@ if(HAVE_ARC4RANDOM_BUF)
 	add_definitions(-DHAVE_ARC4RANDOM_BUF)
 endif()
 
-# getentropy
-check_function_exists(getentropy HAVE_GETENTROPY)
-if(HAVE_GETENTROPY)
-	add_definitions(-DHAVE_GETENTROPY)
+# getrandom
+check_function_exists(getrandom HAVE_GETRANDOM)
+if(HAVE_GETRANDOM)
+	add_definitions(-DHAVE_GETRANDOM)
+endif()
+
+# /dev/urandom
+if(UNIX)
+	add_definitions(-DHAVE_DEV_URANDOM)
 endif()
 
 # export list

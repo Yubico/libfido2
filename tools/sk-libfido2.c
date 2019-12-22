@@ -14,6 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifdef HAVE_SYS_RANDOM_H
+#include <sys/random.h>
+#endif
+
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -140,18 +144,18 @@ get_random_challenge(uint8_t *ptr, size_t len)
 
 	return 0;
 }
-#elif defined(HAVE_GETENTROPY)
+#elif defined(HAVE_GETRANDOM)
 static int
 get_random_challenge(uint8_t *ptr, size_t len)
 {
-	if (getentropy(ptr, len) == -1) {
-		skdebug(__func__, "getentropy failed");
+	if (getrandom(ptr, len, 0) == -1) {
+		skdebug(__func__, "getrandom failed");
 		return -1;
 	}
 
 	return 0;
 }
-#elif defined(HAS_DEV_URANDOM)
+#elif defined(HAVE_DEV_URANDOM)
 static int
 get_random_challenge(uint8_t *ptr, size_t len)
 {
