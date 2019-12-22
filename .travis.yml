@@ -53,7 +53,7 @@ matrix:
       script: /bin/sh -eux .travis/build-osx-clang
     - os: linux
       compiler: clang-7
-      dist: xenial
+      dist: bionic
       sudo: required
       addons:
         apt:
@@ -68,7 +68,7 @@ matrix:
       script: /bin/sh -eux .travis/fuzz-linux-asan
     - os: linux
       compiler: clang-7
-      dist: xenial
+      dist: bionic
       sudo: required
       addons:
         apt:
