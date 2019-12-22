@@ -53,7 +53,9 @@ obtain_nonce(uint64_t *nonce)
 static int
 obtain_nonce(uint64_t *nonce)
 {
-	return (getrandom(nonce, sizeof(*nonce), 0));
+	if (getrandom(nonce, sizeof(*nonce), 0) < 0)
+		return (-1);
+	return (0);
 }
 #elif defined(HAVE_DEV_URANDOM)
 static int
