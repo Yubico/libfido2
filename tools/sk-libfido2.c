@@ -67,14 +67,18 @@
 	} while (0)
 #endif
 
-#ifdef SK_DEBUG
+#ifndef __MINGW32__
 static void skdebug(const char *func, const char *fmt, ...)
     __attribute__((__format__ (printf, 2, 3)));
+#endif
 
 static void
 skdebug(const char *func, const char *fmt, ...)
 {
-#if !defined(SK_STANDALONE)
+#if !defined(SK_DEBUG) || defined(__MINGW32__)
+	(void)func;
+	(void)fmt;
+#elif !defined(SK_STANDALONE)
 	char *msg;
 	va_list ap;
 
@@ -91,11 +95,8 @@ skdebug(const char *func, const char *fmt, ...)
 	vfprintf(stderr, fmt, ap);
 	fputc('\n', stderr);
 	va_end(ap);
-#endif /* !SK_STANDALONE */
+#endif /* !SK_DEBUG */
 }
-#else
-#define skdebug(...) do { /* nothing */ } while (0)
-#endif /* SK_DEBUG */
 
 uint32_t
 sk_api_version(void)
@@ -283,7 +284,7 @@ find_device(const char *application, const uint8_t *key_handle,
 			continue;
 		}
 		if ((r = fido_dev_open(dev, path)) != FIDO_OK) {
-			skdebug(__func__, "fido_dev_open failed");
+			skdebug(__func__, "fido_dev_open: %s", fido_strerr(r));
 			fido_dev_free(&dev);
 			continue;
 		}

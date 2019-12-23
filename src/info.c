@@ -283,11 +283,10 @@ fido_dev_dummy_get_cbor_info_rx(fido_dev_t *dev, int ms)
 {
 	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
 	unsigned char	reply[512];
-	int		reply_len;
 
 	fido_log_debug("%s: dev=%p, ms=%d", __func__, (void *)dev, ms);
 
-	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+	if (fido_rx(dev, cmd, &reply, sizeof(reply), ms) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}

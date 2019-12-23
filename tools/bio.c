@@ -253,11 +253,10 @@ void
 bio_info(fido_dev_t *dev)
 {
 	fido_bio_info_t	*i = NULL;
-	int		 r;
 
 	if ((i = fido_bio_info_new()) == NULL)
 		errx(1, "fido_bio_info_new");
-	if ((r = fido_bio_dev_get_info(dev, i)) != FIDO_OK) {
+	if (fido_bio_dev_get_info(dev, i) != FIDO_OK) {
 		fido_bio_info_free(&i);
 		return;
 	}

@@ -99,7 +99,6 @@ get_usage_info(const struct hidraw_report_descriptor *hrd, uint32_t *usage_page,
 static int
 get_report_descriptor(const char *path, struct hidraw_report_descriptor *hrd)
 {
-	int	r;
 	int	s = -1;
 	int	fd;
 	int	ok = -1;
@@ -109,7 +108,7 @@ get_report_descriptor(const char *path, struct hidraw_report_descriptor *hrd)
 		return (-1);
 	}
 
-	if ((r = ioctl(fd, HIDIOCGRDESCSIZE, &s)) < 0 || s < 0 ||
+	if (ioctl(fd, HIDIOCGRDESCSIZE, &s) < 0 || s < 0 ||
 	    (unsigned)s > HID_MAX_DESCRIPTOR_SIZE) {
 		fido_log_debug("%s: ioctl HIDIOCGRDESCSIZE", __func__);
 		goto fail;
@@ -117,7 +116,7 @@ get_report_descriptor(const char *path, struct hidraw_report_descriptor *hrd)
 
 	hrd->size = s;
 
-	if ((r = ioctl(fd, HIDIOCGRDESC, hrd)) < 0) {
+	if (ioctl(fd, HIDIOCGRDESC, hrd) < 0) {
 		fido_log_debug("%s: ioctl HIDIOCGRDESC", __func__);
 		goto fail;
 	}

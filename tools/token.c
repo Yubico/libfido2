@@ -200,7 +200,7 @@ token_info(int argc, char **argv, char *path)
 	print_byte_array("pin protocols", fido_cbor_info_protocols_ptr(ci),
 	    fido_cbor_info_protocols_len(ci));
 
-	if ((r = fido_dev_get_retry_count(dev, &retrycnt)) != FIDO_OK)
+	if (fido_dev_get_retry_count(dev, &retrycnt) != FIDO_OK)
 		printf("pin retries: undefined\n");
 	else
 		printf("pin retries: %d\n", retrycnt);
