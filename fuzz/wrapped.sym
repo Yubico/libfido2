@@ -32,7 +32,6 @@ EVP_PKEY_new
 EVP_PKEY_new_raw_public_key
 EVP_sha256
 fido_tx
-getrandom
 HMAC
 HMAC_CTX_new
 HMAC_Final
