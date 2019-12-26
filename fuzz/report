@@ -31,17 +31,30 @@ T+=" harnesses/fuzz_mgmt"
 clean() {
 	echo cleaning
 	rm -rf ${OBJ}
-	mkdir ${OBJ}
+	mkdir -p ${OBJ}/build ${OBJ}/libcbor/{src,build,install}
+}
+
+deps() {
+	echo building deps
+	git clone -q https://github.com/pjk/libcbor ${OBJ}/libcbor/src
+	(cd ${OBJ}/libcbor/src && patch -s -p0 < ../../../README)
+	(cd ${OBJ}/libcbor/build && \
+		cmake -DCMAKE_INSTALL_PREFIX=${OBJ}/libcbor/install \
+			${OBJ}/libcbor/src) 2>/dev/null 1>&2
+	make -C ${OBJ}/libcbor/build all install 1>/dev/null
 }
 
 build() {
 	echo building
-	mkdir ${OBJ}/build
-	(cd ${OBJ}/build && cmake -DFUZZ=1 -DLIBFUZZER=1 -DCOVERAGE=1 \
-		-DCMAKE_BUILD_TYPE=Debug ../../..) 2>/dev/null 1>&2
-	make -C ${OBJ}/build 2>/dev/null 1>&2
+	(cd ${OBJ}/build && \
+		cmake -DFUZZ=1 -DLIBFUZZER=1 -DCOVERAGE=1 \
+			-DCMAKE_BUILD_TYPE=Debug \
+			-DCBOR_INCLUDE_DIRS=${OBJ}/libcbor/install/include \
+			-DCBOR_LIBRARY_DIRS=${OBJ}/libcbor/install/lib \
+			../../..) 1>/dev/null
+	make -C ${OBJ}/build 1>/dev/null
 	${CC} -fPIC -D_GNU_SOURCE -shared -o ${OBJ}/preload-fuzz.so \
-		preload-fuzz.c
+		preload-fuzz.c 1>/dev/null
 }
 
 sync() {
@@ -80,6 +93,7 @@ merge() {
 }
 
 clean
+deps
 build
 sync
 run
