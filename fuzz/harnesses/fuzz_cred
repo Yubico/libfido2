@@ -1,17 +1,18 @@
 #!/bin/bash -u
+#
 # Copyright (c) 2019 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-T=fuzz_cred
+T=libfido2_fuzz_cred
 
 sync() {
-	mkdir ${T}
-	ssh "${REMOTE}" "cd ${T} && tar -cf- corpus" | tar -C ${T} -xf-
+	[ -d ${T} ] || mkdir ${T}
+	gsutil -q -m rsync -d -r ${REMOTE}/libFuzzer/${T} ${T}
 }
 
 run() {
-	build/fuzz/fuzz_cred -max_len=17408 -runs=1 ${T}/corpus 2>/dev/null 1>&2
+	build/fuzz/fuzz_cred -max_len=17408 -runs=1 ${T} 2>/dev/null 1>&2
 }
 
 case "$1" in
