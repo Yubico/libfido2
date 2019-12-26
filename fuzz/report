@@ -5,6 +5,8 @@
 #
 # XXX This should really be a Makefile.
 
+OBJ=$(realpath obj)
+
 T=""
 #T+=" harnesses/assert"
 #T+=" harnesses/assert-rsa-h-p"
@@ -25,43 +27,43 @@ T+=" harnesses/fuzz_mgmt"
 
 clean() {
 	echo cleaning
-	rm -rf obj
-	mkdir obj
+	rm -rf ${OBJ}
+	mkdir ${OBJ}
 }
 
 build() {
 	echo building
-	mkdir obj/build
-	(cd obj/build && cmake -DFUZZ=1 -DLIBFUZZER=1 -DCMAKE_C_COMPILER=clang \
+	mkdir ${OBJ}/build
+	(cd ${OBJ}/build && cmake -DFUZZ=1 -DLIBFUZZER=1 -DCMAKE_C_COMPILER=clang \
 		-DCOVERAGE=1 -DCMAKE_BUILD_TYPE=Debug ../../..) 2>/dev/null 1>&2
-	make -C obj/build 2>/dev/null 1>&2
-	cc -fPIC -D_GNU_SOURCE -shared -o obj/preload-fuzz.so preload-fuzz.c
+	make -C ${OBJ}/build 2>/dev/null 1>&2
+	cc -fPIC -D_GNU_SOURCE -shared -o ${OBJ}/preload-fuzz.so preload-fuzz.c
 }
 
 sync() {
 	if [ -n "${REMOTE}" ]; then
 		for t in ${T}; do
 			echo syncing ${t}
-			(cd obj && REMOTE="${REMOTE}" ../${t} sync)
+			(cd ${OBJ} && REMOTE="${REMOTE}" ../${t} sync)
 		done
 	else
-		tar -C obj -zxf corpus.tgz
+		tar -C ${OBJ} -zxf corpus.tgz
 	fi
 }
 
 run() {
 	export LLVM_PROFILE_FILE="profraw/%h-%p.profraw"
-	export PRELOAD=$(realpath obj/preload-fuzz.so)
+	export PRELOAD=$(realpath ${OBJ}/preload-fuzz.so)
 
 	for t in ${T}; do
 		echo running ${t}
-		(cd obj && ../${t} run)
+		(cd ${OBJ} && ../${t} run)
 	done
 }
 
 merge() {
 	echo merging
-	(cd obj && \
+	(cd ${OBJ} && \
 		llvm-profdata merge -sparse profraw/*.profraw \
 			-o libfido2.profdata &&
 		llvm-cov show -format=html -tab-size=8 build/src/libfido2.so \
