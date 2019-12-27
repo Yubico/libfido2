@@ -179,9 +179,10 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 		fido_log_debug("%s: rx_preamble", __func__);
 		return (-1);
 	}
+	flen = (f.body.init.bcnth << 8) | f.body.init.bcntl;	
 
-	fido_log_debug("%s: initiation frame at %p, len %zu", __func__,
-	    (void *)&f, sizeof(f));
+	fido_log_debug("%s: initiation frame at %p, len %u", __func__,
+	    (void *)&f, flen);
 	fido_log_xxd(&f, sizeof(f));
 
 #ifdef FIDO_FUZZ
@@ -195,7 +196,6 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 		return (-1);
 	}
 
-	flen = (f.body.init.bcnth << 8) | f.body.init.bcntl;
 	if (count < (size_t)flen) {
 		fido_log_debug("%s: count < flen (%zu, %zu)", __func__, count,
 		    (size_t)flen);
