@@ -434,6 +434,12 @@ pack(uint8_t *ptr, size_t len, const struct param *p)
 	return (max - len);
 }
 
+static size_t
+input_len(int max)
+{
+	return (2 * len_string(max) + len_int() + 6 * len_blob(max));
+}
+
 static fido_dev_t *
 prepare_dev()
 {
@@ -624,7 +630,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 	memset(&p, 0, sizeof(p));
 
-	if (unpack(data, size, &p) < 0)
+	if (size < input_len(GETLEN_MIN) || size > input_len(GETLEN_MAX) ||
+	    unpack(data, size, &p) < 0)
 		return (0);
 
 	srandom((unsigned int)p.seed);

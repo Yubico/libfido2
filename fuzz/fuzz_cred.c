@@ -561,6 +561,13 @@ pack(uint8_t *ptr, size_t len, const struct param *p)
 	return (max - len);
 }
 
+static size_t
+input_len(int max)
+{
+	return (5 * len_byte() + 6 * len_string(max) + 2 * len_int() +
+	    4 * len_blob(max));
+}
+
 static void
 make_cred(fido_cred_t *cred, uint8_t u2f, int type, const struct blob *cdh,
     const char *rp_id, const char *rp_name, struct blob *user_id,
@@ -664,7 +671,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 	memset(&p, 0, sizeof(p));
 
-	if (unpack(data, size, &p) < 0)
+	if (size < input_len(GETLEN_MIN) || size > input_len(GETLEN_MAX) ||
+	    unpack(data, size, &p) < 0)
 		return (0);
 
 	srandom((unsigned int)p.seed);

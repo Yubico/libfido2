@@ -34,6 +34,9 @@
 #define MAXSTR	1024
 #define MAXBLOB	3072
 
+#define GETLEN_MIN	0
+#define GETLEN_MAX	1
+
 struct blob {
 	uint8_t	body[MAXBLOB];
 	size_t	len;
@@ -52,6 +55,11 @@ int pack_blob(uint8_t, uint8_t **, size_t *, const struct blob *);
 int pack_byte(uint8_t, uint8_t **, size_t *, uint8_t);
 int pack_int(uint8_t, uint8_t **, size_t *, int);
 int pack_string(uint8_t, uint8_t **, size_t *, const char *);
+
+size_t len_int(void);
+size_t len_string(int);
+size_t len_byte(void);
+size_t len_blob(int);
 
 void mutate_byte(uint8_t *);
 void mutate_int(int *);

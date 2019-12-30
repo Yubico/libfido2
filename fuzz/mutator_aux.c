@@ -233,6 +233,30 @@ pack_blob(uint8_t t, uint8_t **ptr, size_t *len, const struct blob *v) NO_MSAN
 	return (0);
 }
 
+size_t
+len_int(void)
+{
+	return (sizeof(uint8_t)	+ sizeof(size_t) + sizeof(int));
+}
+
+size_t
+len_string(int max)
+{
+	return ((sizeof(uint8_t) + sizeof(size_t)) + (max ?  MAXSTR - 1 : 0));
+}
+
+size_t
+len_byte(void)
+{
+	return (sizeof(uint8_t) + sizeof(size_t) + sizeof(uint8_t));
+}
+
+size_t
+len_blob(int max)
+{
+	return (sizeof(uint8_t) + sizeof(size_t) + (max ? MAXBLOB : 0));
+}
+
 void
 mutate_byte(uint8_t *b)
 {

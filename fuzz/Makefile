@@ -4,7 +4,6 @@
 
 IMAGE		:= libfido2-coverage:1.3.0
 RUNNER		:= libfido2-runner
-MAXLEN		:= 17408
 PROFDATA	:= llvm-profdata-6.0
 COV		:= llvm-cov-6.0
 TARGETS		:= fuzz_assert fuzz_bio fuzz_cred fuzz_credman fuzz_mgmt
@@ -31,7 +30,7 @@ corpus: sync
 ${TARGETS}: corpus sync
 	docker exec -e LLVM_PROFILE_FILE=/profraw/$@ ${RUNNER} \
 		/bin/bash -c 'rm -f /profraw/$@ && /libfido2/build/fuzz/$@ \
-		-max_len=${MAXLEN} -runs=1 /libfido2/fuzz/$@'
+		-runs=1 /libfido2/fuzz/$@'
 
 profdata: run
 	docker exec ${RUNNER} /bin/bash -c 'rm -f /$@ && ${PROFDATA} \
