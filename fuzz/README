@@ -129,7 +129,7 @@ When running under ASAN, you may want to set ASAN_OPTIONS to
 The recommended way to run the harnesses is:
 
 $ fuzz_{assert,cred,credman,mgmt} -use_value_profile=1 -reload=30 \
-	-print_pcs=1 -print_funcs=30 -timeout=10 -max_len=17408 CORPUS_DIR
+	-print_pcs=1 -print_funcs=30 -timeout=10 CORPUS_DIR
 
 You may want to use -jobs or -workers depending on the number of logical
 cores available for fuzzing.
