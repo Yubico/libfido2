@@ -141,6 +141,22 @@ WRAP(RSA *,
 	1
 )
 
+WRAP(EC_KEY *,
+	EVP_PKEY_get0_EC_KEY,
+	(EVP_PKEY *pkey),
+	NULL,
+	(pkey),
+	1
+)
+
+WRAP(int,
+	EVP_PKEY_get_raw_public_key,
+	(const EVP_PKEY *pkey, unsigned char *pub, size_t *len),
+	0,
+	(pkey, pub, len),
+	1
+)
+
 WRAP(EVP_MD_CTX *,
 	EVP_MD_CTX_new,
 	(void),
@@ -163,6 +179,14 @@ WRAP(BIGNUM *,
 	(const unsigned char *s, int len, BIGNUM *ret),
 	NULL,
 	(s, len, ret),
+	1
+)
+
+WRAP(int,
+	BN_bn2bin,
+	(const BIGNUM *a, unsigned char *to),
+	-1,
+	(a, to),
 	1
 )
 
@@ -214,11 +238,27 @@ WRAP(const EC_GROUP *,
 	1
 )
 
+WRAP(const BIGNUM *,
+	EC_KEY_get0_private_key,
+	(const EC_KEY *key),
+	NULL,
+	(key),
+	1
+)
+
 WRAP(EC_POINT *,
 	EC_POINT_new,
 	(const EC_GROUP *group),
 	NULL,
 	(group),
+	1
+)
+
+WRAP(int,
+	EC_POINT_get_affine_coordinates_GFp,
+	(const EC_GROUP *group, const EC_POINT *p, BIGNUM *x, BIGNUM *y, BN_CTX *ctx),
+	0,
+	(group, p, x, y, ctx),
 	1
 )
 
@@ -238,6 +278,38 @@ WRAP(int,
 	1
 )
 
+WRAP(int,
+	EVP_PKEY_keygen_init,
+	(EVP_PKEY_CTX *ctx),
+	0,
+	(ctx),
+	1
+)
+
+WRAP(int,
+	EVP_PKEY_keygen,
+	(EVP_PKEY_CTX *ctx, EVP_PKEY **ppkey),
+	0,
+	(ctx, ppkey),
+	1
+)
+
+WRAP(int,
+	EVP_PKEY_paramgen_init,
+	(EVP_PKEY_CTX *ctx),
+	0,
+	(ctx),
+	1
+)
+
+WRAP(int,
+	EVP_PKEY_paramgen,
+	(EVP_PKEY_CTX *ctx, EVP_PKEY **ppkey),
+	0,
+	(ctx, ppkey),
+	1
+)
+
 WRAP(EVP_PKEY *,
 	EVP_PKEY_new_raw_public_key,
 	(int type, ENGINE *e, const unsigned char *key, size_t keylen),
@@ -251,6 +323,14 @@ WRAP(EVP_PKEY_CTX *,
 	(EVP_PKEY *pkey, ENGINE *e),
 	NULL,
 	(pkey, e),
+	1
+)
+
+WRAP(EVP_PKEY_CTX *,
+	EVP_PKEY_CTX_new_id,
+	(int id, ENGINE *e),
+	NULL,
+	(id, e),
 	1
 )
 
@@ -346,6 +426,30 @@ WRAP(cbor_item_t *,
 )
 
 WRAP(cbor_item_t *,
+	cbor_build_bool,
+	(bool value),
+	NULL,
+	(value),
+	1
+)
+
+WRAP(cbor_item_t *,
+	cbor_build_negint8,
+	(uint8_t value),
+	NULL,
+	(value),
+	1
+)
+
+WRAP(cbor_item_t *,
+	cbor_build_negint16,
+	(uint16_t value),
+	NULL,
+	(value),
+	1
+)
+
+WRAP(cbor_item_t *,
 	cbor_load,
 	(cbor_data source, size_t source_size, struct cbor_load_result *result),
 	NULL,
@@ -356,6 +460,14 @@ WRAP(cbor_item_t *,
 WRAP(cbor_item_t *,
 	cbor_build_uint8,
 	(uint8_t value),
+	NULL,
+	(value),
+	1
+)
+
+WRAP(cbor_item_t *,
+	cbor_build_uint32,
+	(uint32_t value),
 	NULL,
 	(value),
 	1
@@ -378,6 +490,14 @@ WRAP(cbor_item_t **,
 )
 
 WRAP(bool,
+	cbor_array_push,
+	(cbor_item_t *array, cbor_item_t *pushee),
+	false,
+	(array, pushee),
+	1
+)
+
+WRAP(bool,
 	cbor_map_add,
 	(cbor_item_t *item, struct cbor_pair pair),
 	false,
@@ -387,6 +507,14 @@ WRAP(bool,
 
 WRAP(cbor_item_t *,
 	cbor_new_definite_map,
+	(size_t size),
+	NULL,
+	(size),
+	1
+)
+
+WRAP(cbor_item_t *,
+	cbor_new_definite_array,
 	(size_t size),
 	NULL,
 	(size),
