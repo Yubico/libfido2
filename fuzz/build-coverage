@@ -7,11 +7,15 @@
 LIBCBOR=$1
 LIBFIDO2=$2
 
-export CC=clang
-export PKG_CONFIG_PATH=${LIBCBOR}/install/lib/pkgconfig
+CC=${CC:-clang}
+PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-${LIBCBOR}/install/lib/pkgconfig}
+export CC PKG_CONFIG_PATH
+
+# Clean up.
+rm -rf ${LIBCBOR}/build ${LIBCBOR}/install ${LIBFIDO2}/build
 
 # Patch, build, and install libcbor.
-(cd ${LIBCBOR} && patch -l -p0 < ${LIBFIDO2}/fuzz/README)
+(cd ${LIBCBOR} && patch -N -l -s -p0 < ${LIBFIDO2}/fuzz/README) || true
 mkdir ${LIBCBOR}/build ${LIBCBOR}/install
 (cd ${LIBCBOR}/build && cmake -DCMAKE_INSTALL_PREFIX=${LIBCBOR}/install ..)
 make -C ${LIBCBOR}/build all install
