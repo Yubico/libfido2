@@ -237,7 +237,7 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 	*olen = 0;
 
-        if (fido_dev_register_manifest_func(fido_hid_manifest) != FIDO_OK)
+	if (fido_dev_register_manifest_func(fido_hid_manifest) != FIDO_OK)
 		return (FIDO_ERR_INTERNAL);
 
 	for (curr = manifest_funcs; curr != NULL; curr = curr->next) {
