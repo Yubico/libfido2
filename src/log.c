@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "fido.h"
 
 #ifndef FIDO_NO_DIAGNOSTIC
@@ -38,22 +39,24 @@ void
 fido_log_xxd(const void *buf, size_t count)
 {
 	const uint8_t	*ptr = buf;
-	char		 c[XXD_LEN];
+	char		 log_line_buf[XXD_LEN * 16] = "  ";
 	size_t		 i;
 
 	if (!logging || log_handler == NULL)
 		return;
 
-	log_handler("  ");
-
 	for (i = 0; i < count; i++) {
+		char c[XXD_LEN] = "\0";
 		snprintf(c, sizeof(c), "%02x ", *ptr++);
-		log_handler(c);
-		if ((i + 1) % 16 == 0 && i + 1 < count)
-			log_handler("\n  ");
+		strcat(log_line_buf, c);
+		if ((i + 1) % 16 == 0 && i + 1 < count) {
+			strcat(log_line_buf, "\n");
+			log_handler(log_line_buf);
+			strcpy(log_line_buf, "  ");
+		}
 	}
-
-	log_handler("\n");
+	strcat(log_line_buf, "\n");
+	log_handler(log_line_buf);
 }
 
 void
@@ -66,11 +69,13 @@ fido_log_debug(const char *fmt, ...)
 		return;
 
 	va_start(ap, fmt);
-	vsnprintf(fmtbuf, sizeof(fmtbuf), fmt, ap);
+	size_t n = vsnprintf(fmtbuf, sizeof(fmtbuf), fmt, ap);
 	va_end(ap);
 
+	if (n + 1 < sizeof(fmtbuf)) {
+		strncpy(fmtbuf + n, "\n", sizeof(fmtbuf) - n);
+	}
 	log_handler(fmtbuf);
-	log_handler("\n");
 }
 
 void
