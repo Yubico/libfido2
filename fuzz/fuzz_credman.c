@@ -537,9 +537,9 @@ get_metadata(struct param *p)
 
 	set_wire_data(p->meta_wire_data.body, p->meta_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL) {
+	if ((dev = prepare_dev()) == NULL)
 		return;
-	}
+
 	if ((metadata = fido_credman_metadata_new()) == NULL) {
 		fido_dev_close(dev);
 		fido_dev_free(&dev);
@@ -566,9 +566,9 @@ get_rp_list(struct param *p)
 
 	set_wire_data(p->rp_wire_data.body, p->rp_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL) {
+	if ((dev = prepare_dev()) == NULL)
 		return;
-	}
+
 	if ((rp = fido_credman_rp_new()) == NULL) {
 		fido_dev_close(dev);
 		fido_dev_free(&dev);
@@ -602,9 +602,9 @@ get_rk_list(struct param *p)
 
 	set_wire_data(p->rk_wire_data.body, p->rk_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL) {
+	if ((dev = prepare_dev()) == NULL)
 		return;
-	}
+
 	if ((rk = fido_credman_rk_new()) == NULL) {
 		fido_dev_close(dev);
 		fido_dev_free(&dev);
@@ -643,9 +643,8 @@ del_rk(struct param *p)
 
 	set_wire_data(p->del_wire_data.body, p->del_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL) {
+	if ((dev = prepare_dev()) == NULL)
 		return;
-	}
 
 	fido_credman_del_dev_rk(dev, p->cred_id.body, p->cred_id.len, p->pin);
 	fido_dev_close(dev);

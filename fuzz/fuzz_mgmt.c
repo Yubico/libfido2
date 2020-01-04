@@ -353,9 +353,8 @@ dev_reset(struct param *p)
 
 	set_wire_data(p->reset_wire_data.body, p->reset_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL) {
+	if ((dev = prepare_dev()) == NULL)
 		return;
-	}
 
 	fido_dev_reset(dev);
 	fido_dev_close(dev);
@@ -376,9 +375,8 @@ dev_get_cbor_info(struct param *p)
 
 	set_wire_data(p->info_wire_data.body, p->info_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL) {
+	if ((dev = prepare_dev()) == NULL)
 		return;
-	}
 
 	proto = fido_dev_protocol(dev);
 	major = fido_dev_major(dev);
@@ -392,15 +390,10 @@ dev_get_cbor_info(struct param *p)
 	consume(&build, sizeof(build));
 	consume(&flags, sizeof(flags));
 
-	if ((ci = fido_cbor_info_new()) == NULL) {
-		fido_dev_close(dev);
-		fido_dev_free(&dev);
-		return;
-	}
+	if ((ci = fido_cbor_info_new()) == NULL)
+		goto out;
 
 	fido_dev_get_cbor_info(dev, ci);
-	fido_dev_close(dev);
-	fido_dev_free(&dev);
 
 	for (size_t i = 0; i < fido_cbor_info_versions_len(ci); i++) {
 		char * const *sa = fido_cbor_info_versions_ptr(ci);
@@ -425,6 +418,10 @@ dev_get_cbor_info(struct param *p)
 	consume(fido_cbor_info_protocols_ptr(ci),
 	    fido_cbor_info_protocols_len(ci));
 
+out:
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+
 	fido_cbor_info_free(&ci);
 }
 
@@ -435,9 +432,8 @@ dev_set_pin(struct param *p)
 
 	set_wire_data(p->set_pin_wire_data.body, p->set_pin_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL) {
+	if ((dev = prepare_dev()) == NULL)
 		return;
-	}
 
 	fido_dev_set_pin(dev, p->pin1, NULL);
 	fido_dev_close(dev);
@@ -451,9 +447,8 @@ dev_change_pin(struct param *p)
 
 	set_wire_data(p->change_pin_wire_data.body, p->change_pin_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL) {
+	if ((dev = prepare_dev()) == NULL)
 		return;
-	}
 
 	fido_dev_set_pin(dev, p->pin2, p->pin1);
 	fido_dev_close(dev);
@@ -468,9 +463,8 @@ dev_get_retry_count(struct param *p)
 
 	set_wire_data(p->retry_wire_data.body, p->retry_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL) {
+	if ((dev = prepare_dev()) == NULL)
 		return;
-	}
 
 	fido_dev_get_retry_count(dev, &n);
 	consume(&n, sizeof(n));
