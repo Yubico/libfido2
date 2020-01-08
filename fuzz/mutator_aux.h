@@ -72,6 +72,9 @@ void set_wire_data(uint8_t *, size_t);
 int dev_read(void *, unsigned char *, size_t, int);
 int dev_write(void *, const unsigned char *, size_t);
 
+void prng_init(unsigned long);
+unsigned long prng_uint32(void);
+
 uint32_t uniform_random(uint32_t);
 
 #endif /* !_MUTATOR_AUX_H */

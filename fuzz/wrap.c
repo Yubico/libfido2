@@ -18,6 +18,8 @@
 
 #include "mutator_aux.h"
 
+extern int prng_up;
+
 /*
  * Build wrappers around functions of interest, and have them fail
  * in a pseudo-random manner.
@@ -27,7 +29,7 @@
 extern type __wrap_##name args;				\
 extern type __real_##name args;				\
 type __wrap_##name args {				\
-	if (uniform_random(400) < (prob)) {		\
+	if (prng_up && uniform_random(400) < (prob)) {	\
 		return (retval);			\
 	}						\
 							\

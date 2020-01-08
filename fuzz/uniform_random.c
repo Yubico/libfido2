@@ -18,6 +18,7 @@
 #include <stdlib.h>
 
 uint32_t uniform_random(uint32_t);
+unsigned long prng_uint32(void);
 
 /*
  * Calculate a uniformly distributed random number less than upper_bound
@@ -47,7 +48,7 @@ uniform_random(uint32_t upper_bound)
 	 * to re-roll.
 	 */
 	for (;;) {
-		r = (uint32_t)random();
+		r = (uint32_t)prng_uint32();
 		if (r >= min)
 			break;
 	}

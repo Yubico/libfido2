@@ -465,7 +465,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    unpack(data, size, &p) < 0)
 		return (0);
 
-	srandom((unsigned int)p.seed);
+	prng_init((unsigned int)p.seed);
 
 	fido_init(FIDO_DEBUG);
 	fido_set_log_handler(consume_str);

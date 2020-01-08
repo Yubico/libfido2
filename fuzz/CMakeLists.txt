@@ -9,7 +9,6 @@ list(APPEND COMPAT_SOURCES
 
 list(APPEND COMMON_SOURCES
 	mutator_aux.c
-	uniform_random.c
 )
 
 # fuzz_cred

@@ -328,8 +328,13 @@ if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
 	    " -exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/src/export.llvm")
 elseif(NOT MSVC)
 	# clang/gcc + gnu ld
-	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-	    " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/src/export.gnu")
+	if(FUZZ)
+		string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
+                    " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/fuzz/export.gnu")
+	else()
+		string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
+                    " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/src/export.gnu")
+	endif()
 	if(NOT WIN32)
 		string(CONCAT CMAKE_SHARED_LINKER_FLAGS
 		    ${CMAKE_SHARED_LINKER_FLAGS}

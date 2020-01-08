@@ -1,6 +1,8 @@
 build/
 cscope.out
 fuzz/build/
+fuzz/fuzz_*/
 fuzz/obj/
+fuzz/report.html
 fuzz/*.so
 output/
