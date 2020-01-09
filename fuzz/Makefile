@@ -25,6 +25,7 @@ sync: run
 	docker exec ${RUNNER} make -C libfido2/build
 
 corpus: sync
+	docker exec ${RUNNER} /bin/bash -c 'cd /libfido2/fuzz && rm -rf ${TARGETS}'
 	docker exec ${RUNNER} tar Czxf /libfido2/fuzz /libfido2/fuzz/corpus.tgz
 
 ${TARGETS}: corpus sync
