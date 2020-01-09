@@ -33,7 +33,7 @@ struct frame {
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
 #endif
 
-static size_t
+static ssize_t
 tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 {
 	struct frame	*fp;
@@ -41,7 +41,7 @@ tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 	int		n;
 
 	if (d->io.write == NULL || (cmd & 0x80) == 0)
-		return (0);
+		return -1;
 
 	memset(&pkt, 0, sizeof(pkt));
 	fp = (struct frame *)(pkt + 1);
@@ -55,7 +55,7 @@ tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 
 	n = d->io.write(d->io_handle, pkt, sizeof(pkt));
 	if (n < 0 || (size_t)n != sizeof(pkt))
-		return (0);
+		return -1;
 
 	return (count);
 }
@@ -88,7 +88,7 @@ static int
 tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 {
 	int	seq = 0;
-	size_t	sent;
+	ssize_t	sent;
 
 	fido_log_debug("%s: d=%p, cmd=0x%02x, buf=%p, len=%zu", __func__,
 	    (void *)d, cmd, (const void *)buf, count);
@@ -100,12 +100,12 @@ tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 		return (-1);
 	}
 
-	if ((sent = tx_preamble(d, cmd, buf, count)) == 0) {
+	if ((sent = tx_preamble(d, cmd, buf, count)) == -1) {
 		fido_log_debug("%s: tx_preamble", __func__);
 		return (-1);
 	}
 
-	while (sent < count) {
+	while ((size_t)sent < count) {
 		if (seq & 0x80) {
 			fido_log_debug("%s: seq & 0x80", __func__);
 			return (-1);
