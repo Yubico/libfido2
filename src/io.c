@@ -33,15 +33,37 @@ struct frame {
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
 #endif
 
-static ssize_t
+static int
+tx_empty(fido_dev_t *d, uint8_t cmd)
+{
+	struct frame	*fp;
+	unsigned char	 pkt[sizeof(*fp) + 1];
+	int		 n;
+
+	if (d->io.write == NULL || (cmd & 0x80) == 0)
+		return (-1);
+
+	memset(&pkt, 0, sizeof(pkt));
+	fp = (struct frame *)(pkt + 1);
+	fp->cid = d->cid;
+	fp->body.init.cmd = 0x80 | cmd;
+
+	n = d->io.write(d->io_handle, pkt, sizeof(pkt));
+	if (n < 0 || (size_t)n != sizeof(pkt))
+		return (-1);
+
+	return (0);
+}
+
+static size_t
 tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 {
 	struct frame	*fp;
-	unsigned char	pkt[sizeof(*fp) + 1];
-	int		n;
+	unsigned char	 pkt[sizeof(*fp) + 1];
+	int		 n;
 
-	if (d->io.write == NULL || (cmd & 0x80) == 0)
-		return -1;
+	if (d->io.write == NULL || (cmd & 0x80) == 0 || count == 0)
+		return (0);
 
 	memset(&pkt, 0, sizeof(pkt));
 	fp = (struct frame *)(pkt + 1);
@@ -50,12 +72,11 @@ tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 	fp->body.init.bcnth = (count >> 8) & 0xff;
 	fp->body.init.bcntl = count & 0xff;
 	count = MIN(count, sizeof(fp->body.init.data));
-	if (count)
-		memcpy(&fp->body.init.data, buf, count);
+	memcpy(&fp->body.init.data, buf, count);
 
 	n = d->io.write(d->io_handle, pkt, sizeof(pkt));
 	if (n < 0 || (size_t)n != sizeof(pkt))
-		return -1;
+		return (0);
 
 	return (count);
 }
@@ -67,7 +88,7 @@ tx_frame(fido_dev_t *d, int seq, const void *buf, size_t count)
 	unsigned char	 pkt[sizeof(*fp) + 1];
 	int		 n;
 
-	if (d->io.write == NULL || seq < 0 || seq > UINT8_MAX)
+	if (d->io.write == NULL || seq < 0 || seq > UINT8_MAX || count == 0)
 		return (0);
 
 	memset(&pkt, 0, sizeof(pkt));
@@ -88,7 +109,7 @@ static int
 tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 {
 	int	seq = 0;
-	ssize_t	sent;
+	size_t	sent;
 
 	fido_log_debug("%s: d=%p, cmd=0x%02x, buf=%p, len=%zu", __func__,
 	    (void *)d, cmd, (const void *)buf, count);
@@ -100,12 +121,15 @@ tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 		return (-1);
 	}
 
-	if ((sent = tx_preamble(d, cmd, buf, count)) == -1) {
+	if (count == 0)
+		return (tx_empty(d, cmd));
+
+	if ((sent = tx_preamble(d, cmd, buf, count)) == 0) {
 		fido_log_debug("%s: tx_preamble", __func__);
 		return (-1);
 	}
 
-	while ((size_t)sent < count) {
+	while (sent < count) {
 		if (seq & 0x80) {
 			fido_log_debug("%s: seq & 0x80", __func__);
 			return (-1);
