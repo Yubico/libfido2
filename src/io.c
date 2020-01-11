@@ -56,7 +56,7 @@ tx_empty(fido_dev_t *d, uint8_t cmd)
 }
 
 static size_t
-tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
+tx_preamble(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 {
 	struct frame	*fp;
 	unsigned char	 pkt[sizeof(*fp) + 1];
@@ -203,7 +203,8 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 		fido_log_debug("%s: rx_preamble", __func__);
 		return (-1);
 	}
-	flen = (f.body.init.bcnth << 8) | f.body.init.bcntl;	
+
+	flen = (f.body.init.bcnth << 8) | f.body.init.bcntl;
 
 	fido_log_debug("%s: initiation frame at %p, len %u", __func__,
 	    (void *)&f, flen);
