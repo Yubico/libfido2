@@ -193,9 +193,9 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 	uint16_t	flen;
 	int		seq;
 
-	if (d->io_handle == NULL || (cmd & 0x80) == 0) {
-		fido_log_debug("%s: invalid argument (%p, 0x%02x)", __func__,
-		    d->io_handle, cmd);
+	if (d->io_handle == NULL) {
+		fido_log_debug("%s: invalid argument (%p)", __func__,
+		    d->io_handle);
 		return (-1);
 	}
 
@@ -211,10 +211,10 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 
 #ifdef FIDO_FUZZ
 	f.cid = d->cid;
-	f.body.init.cmd = cmd;
+	f.body.init.cmd = (CTAP_FRAME_INIT | cmd);
 #endif
 
-	if (f.cid != d->cid || f.body.init.cmd != cmd) {
+	if (f.cid != d->cid || f.body.init.cmd != (CTAP_FRAME_INIT | cmd)) {
 		fido_log_debug("%s: cid (0x%x, 0x%x), cmd (0x%02x, 0x%02x)",
 		    __func__, f.cid, d->cid, f.body.init.cmd, cmd);
 		return (-1);
