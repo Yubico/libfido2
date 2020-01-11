@@ -82,19 +82,19 @@ tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 }
 
 static size_t
-tx_frame(fido_dev_t *d, int seq, const void *buf, size_t count)
+tx_frame(fido_dev_t *d, uint8_t seq, const void *buf, size_t count)
 {
 	struct frame	*fp;
 	unsigned char	 pkt[sizeof(*fp) + 1];
 	int		 n;
 
-	if (d->io.write == NULL || seq < 0 || seq > UINT8_MAX || count == 0)
+	if (d->io.write == NULL || count == 0)
 		return (0);
 
 	memset(&pkt, 0, sizeof(pkt));
 	fp = (struct frame *)(pkt + 1);
 	fp->cid = d->cid;
-	fp->body.cont.seq = (uint8_t)seq;
+	fp->body.cont.seq = seq;
 	count = MIN(count, sizeof(fp->body.cont.data));
 	memcpy(&fp->body.cont.data, buf, count);
 
@@ -108,7 +108,7 @@ tx_frame(fido_dev_t *d, int seq, const void *buf, size_t count)
 static int
 tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 {
-	int	seq = 0;
+	uint8_t	seq = 0;
 	size_t	sent;
 
 	fido_log_debug("%s: d=%p, cmd=0x%02x, buf=%p, len=%zu", __func__,
