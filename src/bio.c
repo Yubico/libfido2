@@ -110,7 +110,7 @@ bio_tx(fido_dev_t *dev, uint8_t cmd, cbor_item_t **sub_argv, size_t sub_argc,
 
 	/* framing and transmission */
 	if (cbor_build_frame(CTAP_CBOR_BIO_ENROLL_PRE, argv, 5, &f) < 0 ||
-	    fido_tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -235,7 +235,7 @@ bio_parse_template_array(const cbor_item_t *key, const cbor_item_t *val,
 static int
 bio_rx_template_array(fido_dev_t *dev, fido_bio_template_array_t *ta, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[2048];
 	int		reply_len;
 	int		r;
@@ -382,7 +382,7 @@ static int
 bio_rx_enroll_begin(fido_dev_t *dev, fido_bio_template_t *t,
     fido_bio_enroll_t *e, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[2048];
 	int		reply_len;
 	int		r;
@@ -482,7 +482,7 @@ fail:
 static int
 bio_rx_enroll_continue(fido_dev_t *dev, fido_bio_enroll_t *e, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[2048];
 	int		reply_len;
 	int		r;
@@ -643,7 +643,7 @@ bio_parse_info(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 static int
 bio_rx_info(fido_dev_t *dev, fido_bio_info_t *i, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[2048];
 	int		reply_len;
 	int		r;

@@ -227,7 +227,7 @@ static int
 fido_dev_get_cbor_info_tx(fido_dev_t *dev)
 {
 	const unsigned char	cbor[] = { CTAP_CBOR_GETINFO };
-	const uint8_t		cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t		cmd = CTAP_CMD_CBOR;
 
 	fido_log_debug("%s: dev=%p", __func__, (void *)dev);
 
@@ -242,7 +242,7 @@ fido_dev_get_cbor_info_tx(fido_dev_t *dev)
 static int
 fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[512];
 	int		reply_len;
 
@@ -281,7 +281,7 @@ fido_dev_get_cbor_info(fido_dev_t *dev, fido_cbor_info_t *ci)
 static int
 fido_dev_dummy_get_cbor_info_rx(fido_dev_t *dev, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[512];
 
 	fido_log_debug("%s: dev=%p, ms=%d", __func__, (void *)dev, ms);

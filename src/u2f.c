@@ -125,7 +125,7 @@ authdata_fake(const char *rp_id, uint8_t flags, uint32_t sigcount,
 static int
 send_dummy_register(fido_dev_t *dev, int ms)
 {
-	const uint8_t	 cmd = CTAP_FRAME_INIT | CTAP_CMD_MSG;
+	const uint8_t	 cmd = CTAP_CMD_MSG;
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 challenge[SHA256_DIGEST_LENGTH];
 	unsigned char	 application[SHA256_DIGEST_LENGTH];
@@ -179,7 +179,7 @@ static int
 key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
     int *found, int ms)
 {
-	const uint8_t	 cmd = CTAP_FRAME_INIT | CTAP_CMD_MSG;
+	const uint8_t	 cmd = CTAP_CMD_MSG;
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 challenge[SHA256_DIGEST_LENGTH];
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
@@ -285,7 +285,7 @@ static int
 do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
     const fido_blob_t *key_id, fido_blob_t *sig, fido_blob_t *ad, int ms)
 {
-	const uint8_t	 cmd = CTAP_FRAME_INIT | CTAP_CMD_MSG;
+	const uint8_t	 cmd = CTAP_CMD_MSG;
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
 	unsigned char	 reply[128];
@@ -575,7 +575,7 @@ fail:
 int
 u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 {
-	const uint8_t	 cmd = CTAP_FRAME_INIT | CTAP_CMD_MSG;
+	const uint8_t	 cmd = CTAP_CMD_MSG;
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
 	unsigned char	 reply[2048];

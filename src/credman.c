@@ -138,7 +138,7 @@ credman_tx(fido_dev_t *dev, uint8_t cmd, const fido_blob_t *param,
 
 	/* framing and transmission */
 	if (cbor_build_frame(CTAP_CBOR_CRED_MGMT_PRE, argv, 4, &f) < 0 ||
-	    fido_tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -181,7 +181,7 @@ credman_parse_metadata(const cbor_item_t *key, const cbor_item_t *val,
 static int
 credman_rx_metadata(fido_dev_t *dev, fido_credman_metadata_t *metadata, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[512];
 	int		reply_len;
 	int		r;
@@ -300,7 +300,7 @@ credman_parse_rk_count(const cbor_item_t *key, const cbor_item_t *val,
 static int
 credman_rx_rk(fido_dev_t *dev, fido_credman_rk_t *rk, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[2048];
 	int		reply_len;
 	int		r;
@@ -339,7 +339,7 @@ credman_rx_rk(fido_dev_t *dev, fido_credman_rk_t *rk, int ms)
 static int
 credman_rx_next_rk(fido_dev_t *dev, fido_credman_rk_t *rk, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[2048];
 	int		reply_len;
 	int		r;
@@ -514,7 +514,7 @@ credman_parse_rp_count(const cbor_item_t *key, const cbor_item_t *val,
 static int
 credman_rx_rp(fido_dev_t *dev, fido_credman_rp_t *rp, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[2048];
 	int		reply_len;
 	int		r;
@@ -553,7 +553,7 @@ credman_rx_rp(fido_dev_t *dev, fido_credman_rp_t *rp, int ms)
 static int
 credman_rx_next_rp(fido_dev_t *dev, fido_credman_rp_t *rp, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[2048];
 	int		reply_len;
 	int		r;

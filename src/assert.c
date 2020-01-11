@@ -153,7 +153,7 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 
 	/* frame and transmit */
 	if (cbor_build_frame(CTAP_CBOR_ASSERT, argv, 7, &f) < 0 ||
-	    fido_tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -170,7 +170,7 @@ fail:
 static int
 fido_dev_get_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[2048];
 	int		reply_len;
 	int		r;
@@ -212,7 +212,7 @@ static int
 fido_get_next_assert_tx(fido_dev_t *dev)
 {
 	const unsigned char	cbor[] = { CTAP_CBOR_NEXT_ASSERT };
-	const uint8_t		cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t		cmd = CTAP_CMD_CBOR;
 
 	if (fido_tx(dev, cmd, cbor, sizeof(cbor)) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
@@ -225,7 +225,7 @@ fido_get_next_assert_tx(fido_dev_t *dev)
 static int
 fido_get_next_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[2048];
 	int		reply_len;
 	int		r;

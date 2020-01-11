@@ -11,7 +11,7 @@ static int
 fido_dev_reset_tx(fido_dev_t *dev)
 {
 	const unsigned char	cbor[] = { CTAP_CBOR_RESET };
-	const uint8_t		cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t		cmd = CTAP_CMD_CBOR;
 
 	if (fido_tx(dev, cmd, cbor, sizeof(cbor)) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);

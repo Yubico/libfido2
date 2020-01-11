@@ -109,7 +109,7 @@ find_manifest_func_node(dev_manifest_func_t f, dev_manifest_func_node_t **curr,
 static int
 fido_dev_open_tx(fido_dev_t *dev, const char *path)
 {
-	const uint8_t cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;
+	const uint8_t cmd = CTAP_CMD_INIT;
 
 	if (dev->io_handle != NULL) {
 		fido_log_debug("%s: handle=%p", __func__, dev->io_handle);
@@ -144,7 +144,7 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 static int
 fido_dev_open_rx(fido_dev_t *dev, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_INIT;
+	const uint8_t	cmd = CTAP_CMD_INIT;
 	int		n;
 
 	if ((n = fido_rx(dev, cmd, &dev->attr, sizeof(dev->attr), ms)) < 0) {
@@ -284,7 +284,7 @@ fido_dev_close(fido_dev_t *dev)
 int
 fido_dev_cancel(fido_dev_t *dev)
 {
-	if (fido_tx(dev, CTAP_FRAME_INIT | CTAP_CMD_CANCEL, NULL, 0) < 0)
+	if (fido_tx(dev, CTAP_CMD_CANCEL, NULL, 0) < 0)
 		return (FIDO_ERR_TX);
 
 	return (FIDO_OK);

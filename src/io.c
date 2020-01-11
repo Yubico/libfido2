@@ -284,7 +284,7 @@ fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 int
 fido_rx_cbor_status(fido_dev_t *d, int ms)
 {
-	const uint8_t	cmd = CTAP_FRAME_INIT | CTAP_CMD_CBOR;
+	const uint8_t	cmd = CTAP_CMD_CBOR;
 	unsigned char	reply[2048];
 	int		reply_len;
 
