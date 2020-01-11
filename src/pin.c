@@ -60,8 +60,8 @@ fido_dev_get_pin_token_tx(fido_dev_t *dev, const char *pin,
 		goto fail;
 	}
 
-	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 6, &f) < 0 ||
-	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, nitems(argv),
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -95,8 +95,8 @@ fido_dev_get_uv_token_tx(fido_dev_t *dev, const es256_pk_t *pk)
 		goto fail;
 	}
 
-	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 3, &f) < 0 ||
-	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, nitems(argv),
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s:  fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -294,8 +294,8 @@ fido_dev_change_pin_tx(fido_dev_t *dev, const char *pin, const char *oldpin)
 		goto fail;
 	}
 
-	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 6, &f) < 0 ||
-	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, nitems(argv),
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -347,8 +347,8 @@ fido_dev_set_pin_tx(fido_dev_t *dev, const char *pin)
 		goto fail;
 	}
 
-	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 5, &f) < 0 ||
-	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, nitems(argv),
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -436,8 +436,8 @@ fido_dev_get_retry_count_tx(fido_dev_t *dev)
 		goto fail;
 	}
 
-	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 2, &f) < 0 ||
-	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, nitems(argv),
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;

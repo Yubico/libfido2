@@ -43,8 +43,8 @@ fido_dev_authkey_tx(fido_dev_t *dev)
 	}
 
 	/* frame and transmit */
-	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, 2, &f) < 0 ||
-	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, nitems(argv),
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;

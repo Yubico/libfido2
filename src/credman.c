@@ -137,8 +137,8 @@ credman_tx(fido_dev_t *dev, uint8_t cmd, const fido_blob_t *param,
 	}
 
 	/* framing and transmission */
-	if (cbor_build_frame(CTAP_CBOR_CRED_MGMT_PRE, argv, 4, &f) < 0 ||
-	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	if (cbor_build_frame(CTAP_CBOR_CRED_MGMT_PRE, argv, nitems(argv),
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;

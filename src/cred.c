@@ -106,7 +106,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 	}
 
 	/* framing and transmission */
-	if (cbor_build_frame(CTAP_CBOR_MAKECRED, argv, 9, &f) < 0 ||
+	if (cbor_build_frame(CTAP_CBOR_MAKECRED, argv, nitems(argv), &f) < 0 ||
 	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
