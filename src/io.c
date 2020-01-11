@@ -40,13 +40,13 @@ tx_empty(fido_dev_t *d, uint8_t cmd)
 	unsigned char	 pkt[sizeof(*fp) + 1];
 	int		 n;
 
-	if (d->io.write == NULL || (cmd & 0x80) == 0)
+	if (d->io.write == NULL)
 		return (-1);
 
 	memset(&pkt, 0, sizeof(pkt));
 	fp = (struct frame *)(pkt + 1);
 	fp->cid = d->cid;
-	fp->body.init.cmd = 0x80 | cmd;
+	fp->body.init.cmd = CTAP_FRAME_INIT | cmd;
 
 	n = d->io.write(d->io_handle, pkt, sizeof(pkt));
 	if (n < 0 || (size_t)n != sizeof(pkt))
@@ -62,13 +62,13 @@ tx_preamble(fido_dev_t *d,  uint8_t cmd, const void *buf, size_t count)
 	unsigned char	 pkt[sizeof(*fp) + 1];
 	int		 n;
 
-	if (d->io.write == NULL || (cmd & 0x80) == 0 || count == 0)
+	if (d->io.write == NULL || count == 0)
 		return (0);
 
 	memset(&pkt, 0, sizeof(pkt));
 	fp = (struct frame *)(pkt + 1);
 	fp->cid = d->cid;
-	fp->body.init.cmd = 0x80 | cmd;
+	fp->body.init.cmd = CTAP_FRAME_INIT | cmd;
 	fp->body.init.bcnth = (count >> 8) & 0xff;
 	fp->body.init.bcntl = count & 0xff;
 	count = MIN(count, sizeof(fp->body.init.data));
