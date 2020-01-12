@@ -99,26 +99,22 @@ tx_frame(fido_dev_t *d, uint8_t seq, const void *buf, size_t count)
 static int
 tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 {
-	uint8_t	seq = 0;
-	size_t	sent;
+	size_t n, sent;
 
 	if ((sent = tx_preamble(d, cmd, buf, count)) == 0) {
 		fido_log_debug("%s: tx_preamble", __func__);
 		return (-1);
 	}
 
-	while (sent < count) {
+	for (uint8_t seq = 0; sent < count; sent += n) {
 		if (seq & 0x80) {
 			fido_log_debug("%s: seq & 0x80", __func__);
 			return (-1);
 		}
-		const uint8_t *p = (const uint8_t *)buf + sent;
-		size_t n = tx_frame(d, seq++, p, count - sent);
-		if (n == 0) {
+		if ((n = tx_frame(d, seq++, buf + sent, count - sent)) == 0) {
 			fido_log_debug("%s: tx_frame", __func__);
 			return (-1);
 		}
-		sent += n;
 	}
 
 	return (0);
@@ -158,7 +154,7 @@ rx_frame(fido_dev_t *d, struct frame *fp, int ms)
 }
 
 static int
-rx_preamble(fido_dev_t *d, struct frame *fp, int ms)
+rx_preamble(fido_dev_t *d, uint8_t cmd, struct frame *fp, int ms)
 {
 	do {
 		if (rx_frame(d, fp, ms) < 0)
@@ -172,52 +168,47 @@ rx_preamble(fido_dev_t *d, struct frame *fp, int ms)
 	fido_log_debug("%s: initiation frame at %p", __func__, (void *)fp);
 	fido_log_xxd(fp, sizeof(*fp));
 
+#ifdef FIDO_FUZZ
+	fp->body.init.cmd = (CTAP_FRAME_INIT | cmd);
+#endif
+
+	if (fp->cid != d->cid || fp->body.init.cmd != (CTAP_FRAME_INIT | cmd)) {
+		fido_log_debug("%s: cid (0x%x, 0x%x), cmd (0x%02x, 0x%02x)",
+		    __func__, fp->cid, d->cid, fp->body.init.cmd, cmd);
+		return (-1);
+	}
+
 	return (0);
 }
 
 static int
 rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 {
-	struct frame	f;
-	uint16_t	r;
-	uint16_t	flen;
-	int		seq;
+	struct frame f;
+	uint16_t r, payload_len;
 
-	if (rx_preamble(d, &f, ms) < 0) {
+	if (rx_preamble(d, cmd, &f, ms) < 0) {
 		fido_log_debug("%s: rx_preamble", __func__);
 		return (-1);
 	}
 
-#ifdef FIDO_FUZZ
-	f.cid = d->cid;
-	f.body.init.cmd = (CTAP_FRAME_INIT | cmd);
-#endif
+	payload_len = (f.body.init.bcnth << 8) | f.body.init.bcntl;
+	fido_log_debug("%s: payload_len=%zu", __func__, (size_t)payload_len);
 
-	if (f.cid != d->cid || f.body.init.cmd != (CTAP_FRAME_INIT | cmd)) {
-		fido_log_debug("%s: cid (0x%x, 0x%x), cmd (0x%02x, 0x%02x)",
-		    __func__, f.cid, d->cid, f.body.init.cmd, cmd);
+	if (count < (size_t)payload_len) {
+		fido_log_debug("%s: count < payload_len", __func__);
 		return (-1);
 	}
 
-	flen = (f.body.init.bcnth << 8) | f.body.init.bcntl;
-
-	fido_log_debug("%s: flen=%zu", __func__, (size_t)flen);
-
-	if (count < (size_t)flen) {
-		fido_log_debug("%s: count < flen", __func__);
-		return (-1);
-	}
-
-	if (flen < sizeof(f.body.init.data)) {
-		memcpy(buf, f.body.init.data, flen);
-		return (flen);
+	if (payload_len < sizeof(f.body.init.data)) {
+		memcpy(buf, f.body.init.data, payload_len);
+		return (payload_len);
 	}
 
 	memcpy(buf, f.body.init.data, sizeof(f.body.init.data));
 	r = sizeof(f.body.init.data);
-	seq = 0;
 
-	while ((size_t)r < flen) {
+	for (int seq = 0; (size_t)r < payload_len; seq++) {
 		if (rx_frame(d, &f, ms) < 0) {
 			fido_log_debug("%s: rx_frame", __func__);
 			return (-1);
@@ -232,20 +223,19 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 		f.body.cont.seq = seq;
 #endif
 
-		if (f.cid != d->cid || f.body.cont.seq != seq++) {
+		if (f.cid != d->cid || f.body.cont.seq != seq) {
 			fido_log_debug("%s: cid (0x%x, 0x%x), seq (%d, %d)",
 			    __func__, f.cid, d->cid, f.body.cont.seq, seq);
 			return (-1);
 		}
 
-		uint8_t *p = (uint8_t *)buf + r;
-
-		if ((size_t)(flen - r) > sizeof(f.body.cont.data)) {
-			memcpy(p, f.body.cont.data, sizeof(f.body.cont.data));
+		if ((size_t)(payload_len - r) > sizeof(f.body.cont.data)) {
+			memcpy(buf + r, f.body.cont.data,
+			    sizeof(f.body.cont.data));
 			r += sizeof(f.body.cont.data);
 		} else {
-			memcpy(p, f.body.cont.data, flen - r);
-			r += (flen - r); /* break */
+			memcpy(buf + r, f.body.cont.data, payload_len - r);
+			r += (payload_len - r); /* break */
 		}
 	}
 
@@ -279,12 +269,11 @@ fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 int
 fido_rx_cbor_status(fido_dev_t *d, int ms)
 {
-	const uint8_t	cmd = CTAP_CMD_CBOR;
-	unsigned char	reply[2048];
-	int		reply_len;
+	unsigned char reply[64];
+	int reply_len;
 
-	if ((reply_len = fido_rx(d, cmd, &reply, sizeof(reply), ms)) < 0 ||
-	    (size_t)reply_len < 1) {
+	if ((reply_len = fido_rx(d, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0 || (size_t)reply_len < 1) {
 		fido_log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
