@@ -40,9 +40,6 @@ tx_empty(fido_dev_t *d, uint8_t cmd)
 	unsigned char	 pkt[sizeof(*fp) + 1];
 	int		 n;
 
-	if (d->io.write == NULL)
-		return (-1);
-
 	memset(&pkt, 0, sizeof(pkt));
 	fp = (struct frame *)(pkt + 1);
 	fp->cid = d->cid;
@@ -61,9 +58,6 @@ tx_preamble(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 	struct frame	*fp;
 	unsigned char	 pkt[sizeof(*fp) + 1];
 	int		 n;
-
-	if (d->io.write == NULL || count == 0)
-		return (0);
 
 	memset(&pkt, 0, sizeof(pkt));
 	fp = (struct frame *)(pkt + 1);
@@ -88,9 +82,6 @@ tx_frame(fido_dev_t *d, uint8_t seq, const void *buf, size_t count)
 	unsigned char	 pkt[sizeof(*fp) + 1];
 	int		 n;
 
-	if (d->io.write == NULL || count == 0)
-		return (0);
-
 	memset(&pkt, 0, sizeof(pkt));
 	fp = (struct frame *)(pkt + 1);
 	fp->cid = d->cid;
@@ -110,19 +101,6 @@ tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 {
 	uint8_t	seq = 0;
 	size_t	sent;
-
-	fido_log_debug("%s: d=%p, cmd=0x%02x, buf=%p, len=%zu", __func__,
-	    (void *)d, cmd, (const void *)buf, count);
-	fido_log_xxd(buf, count);
-
-	if (d->io_handle == NULL || count > UINT16_MAX) {
-		fido_log_debug("%s: invalid argument (%p, %zu)", __func__,
-		    d->io_handle, count);
-		return (-1);
-	}
-
-	if (count == 0)
-		return (tx_empty(d, cmd));
 
 	if ((sent = tx_preamble(d, cmd, buf, count)) == 0) {
 		fido_log_debug("%s: tx_preamble", __func__);
@@ -149,8 +127,21 @@ tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 int
 fido_tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 {
+	fido_log_debug("%s: d=%p, cmd=0x%02x, buf=%p, count=%zu", __func__,
+	    (void *)d, cmd, (const void *)buf, count);
+	fido_log_xxd(buf, count);
+
 	if (d->io.tx != NULL)
 		return (d->io.tx(d, cmd, buf, count));
+
+	if (d->io_handle == NULL || d->io.write == NULL || count > UINT16_MAX) {
+		fido_log_debug("%s: invalid argument (%p, %p, %zu)", __func__,
+		    d->io_handle, (const void *)d->io.write, count);
+		return (-1);
+	}
+
+	if (count == 0)
+		return (tx_empty(d, cmd));
 
 	return (tx(d, cmd, buf, count));
 }
@@ -159,9 +150,6 @@ static int
 rx_frame(fido_dev_t *d, struct frame *fp, int ms)
 {
 	int n;
-
-	if (d->io.read == NULL)
-		return (-1);
 
 	n = d->io.read(d->io_handle, (unsigned char *)fp, sizeof(*fp), ms);
 	if (n < 0 || (size_t)n != sizeof(*fp))
@@ -192,12 +180,6 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 	uint16_t	r;
 	uint16_t	flen;
 	int		seq;
-
-	if (d->io_handle == NULL) {
-		fido_log_debug("%s: invalid argument (%p)", __func__,
-		    d->io_handle);
-		return (-1);
-	}
 
 	if (rx_preamble(d, &f, ms) < 0) {
 		fido_log_debug("%s: rx_preamble", __func__);
@@ -267,19 +249,32 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 		}
 	}
 
-	fido_log_debug("%s: buf=%p, len=%zu", __func__, (void *)buf, (size_t)r);
-	fido_log_xxd(buf, r);
-
 	return (r);
 }
 
 int
 fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 {
+	int n;
+
+	fido_log_debug("%s: d=%p, cmd=0x%02x, buf=%p, count=%zu, ms=%d",
+	    __func__, (void *)d, cmd, (const void *)buf, count, ms);
+
 	if (d->io.rx != NULL)
 		return (d->io.rx(d, cmd, buf, count, ms));
 
-	return (rx(d, cmd, buf, count, ms));
+	if (d->io_handle == NULL || d->io.read == NULL) {
+		fido_log_debug("%s: invalid argument (%p, %p)", __func__,
+		    d->io_handle, (const void *)d->io.read);
+		return (-1);
+	}
+
+	if ((n = rx(d, cmd, buf, count, ms)) >= 0) {
+		fido_log_debug("%s: buf=%p, len=%d", __func__, (void *)buf, n);
+		fido_log_xxd(buf, n);
+	}
+
+	return (n);
 }
 
 int
