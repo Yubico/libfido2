@@ -169,6 +169,9 @@ rx_preamble(fido_dev_t *d, struct frame *fp, int ms)
 	} while (fp->cid == d->cid &&
 	    fp->body.init.cmd == (CTAP_FRAME_INIT | CTAP_KEEPALIVE));
 
+	fido_log_debug("%s: initiation frame at %p", __func__, (void *)fp);
+	fido_log_xxd(fp, sizeof(*fp));
+
 	return (0);
 }
 
@@ -185,12 +188,6 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 		return (-1);
 	}
 
-	flen = (f.body.init.bcnth << 8) | f.body.init.bcntl;
-
-	fido_log_debug("%s: initiation frame at %p, len %u", __func__,
-	    (void *)&f, flen);
-	fido_log_xxd(&f, sizeof(f));
-
 #ifdef FIDO_FUZZ
 	f.cid = d->cid;
 	f.body.init.cmd = (CTAP_FRAME_INIT | cmd);
@@ -202,11 +199,15 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 		return (-1);
 	}
 
+	flen = (f.body.init.bcnth << 8) | f.body.init.bcntl;
+
+	fido_log_debug("%s: flen=%zu", __func__, (size_t)flen);
+
 	if (count < (size_t)flen) {
-		fido_log_debug("%s: count < flen (%zu, %zu)", __func__, count,
-		    (size_t)flen);
+		fido_log_debug("%s: count < flen", __func__);
 		return (-1);
 	}
+
 	if (flen < sizeof(f.body.init.data)) {
 		memcpy(buf, f.body.init.data, flen);
 		return (flen);
@@ -222,8 +223,8 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 			return (-1);
 		}
 
-		fido_log_debug("%s: continuation frame at %p, len %zu",
-		    __func__, (void *)&f, sizeof(f));
+		fido_log_debug("%s: continuation frame at %p", __func__,
+		    (void *)&f);
 		fido_log_xxd(&f, sizeof(f));
 
 #ifdef FIDO_FUZZ
