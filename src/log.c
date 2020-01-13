@@ -13,9 +13,9 @@
 
 #ifndef FIDO_NO_DIAGNOSTIC
 
-#define XXDLEN	8
-#define XXDROW	256
-#define LINELEN	1024
+#define XXDLEN	16
+#define XXDROW	128
+#define LINELEN	256
 
 #ifndef TLS
 #define TLS
@@ -62,19 +62,20 @@ fido_log_xxd(const void *buf, size_t count)
 	const uint8_t *ptr = buf;
 	char row[XXDROW];
 	char xxd[XXDLEN];
-	size_t i;
 
 	if (!logging || log_handler == NULL || count == 0)
 		return;
 
 	*row = '\0';
 
-	for (i = 0; i < count; i++) {
+	for (size_t i = 0; i < count; i++) {
 		*xxd = '\0';
-		snprintf(xxd, sizeof(xxd), "%s%02x", (i % 16) ? " " : "  ",
-		    *ptr++);
+		if (i % 16 == 0)
+			snprintf(xxd, sizeof(xxd), "%04zu: %02x", i, *ptr++);
+		else
+			snprintf(xxd, sizeof(xxd), " %02x", *ptr++);
 		strlcat(row, xxd, sizeof(row));
-		if ((i % 16) == 15 || i == count - 1) {
+		if (i % 16 == 15 || i == count - 1) {
 			fido_log_debug("%s", row);
 			*row = '\0';
 		}
