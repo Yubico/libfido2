@@ -13,7 +13,7 @@
 
 #ifndef FIDO_NO_DIAGNOSTIC
 
-#define XXDLEN	16
+#define XXDLEN	32
 #define XXDROW	128
 #define LINELEN	256
 
