@@ -115,9 +115,8 @@ static int
 fido_dev_get_pin_token_rx(fido_dev_t *dev, const fido_blob_t *ecdh,
     fido_blob_t *token, int ms)
 {
-	const uint8_t	 cmd = CTAP_CMD_CBOR;
 	fido_blob_t	*aes_token = NULL;
-	unsigned char	 reply[2048];
+	unsigned char	 reply[FIDO_MAXMSG];
 	int		 reply_len;
 	int		 r;
 
@@ -126,7 +125,8 @@ fido_dev_get_pin_token_rx(fido_dev_t *dev, const fido_blob_t *ecdh,
 		goto fail;
 	}
 
-	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		r = FIDO_ERR_RX;
 		goto fail;
@@ -156,9 +156,8 @@ static int
 fido_dev_get_uv_token_rx(fido_dev_t *dev, const  fido_blob_t *ecdh,
     fido_blob_t *token, int ms)
 {
-	const uint8_t	 cmd = CTAP_CMD_CBOR;
 	fido_blob_t	*aes_token = NULL;
-	unsigned char	 reply[2048];
+	unsigned char	 reply[FIDO_MAXMSG];
 	int		 reply_len;
 	int		 r;
 
@@ -167,7 +166,8 @@ fido_dev_get_uv_token_rx(fido_dev_t *dev, const  fido_blob_t *ecdh,
 		goto fail;
 	}
 
-	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		r = FIDO_ERR_RX;
 		goto fail;
@@ -454,14 +454,14 @@ fail:
 static int
 fido_dev_get_retry_count_rx(fido_dev_t *dev, int *retries, int ms)
 {
-	const uint8_t	cmd = CTAP_CMD_CBOR;
-	unsigned char	reply[512];
+	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
 	int		r;
 
 	*retries = 0;
 
-	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}

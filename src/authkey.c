@@ -61,8 +61,7 @@ fail:
 static int
 fido_dev_authkey_rx(fido_dev_t *dev, es256_pk_t *authkey, int ms)
 {
-	const uint8_t	cmd = CTAP_CMD_CBOR;
-	unsigned char	reply[2048];
+	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
 
 	fido_log_debug("%s: dev=%p, authkey=%p, ms=%d", __func__, (void *)dev,
@@ -70,7 +69,8 @@ fido_dev_authkey_rx(fido_dev_t *dev, es256_pk_t *authkey, int ms)
 
 	memset(authkey, 0, sizeof(*authkey));
 
-	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}

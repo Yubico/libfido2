@@ -170,14 +170,14 @@ fail:
 static int
 fido_dev_get_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
 {
-	const uint8_t	cmd = CTAP_CMD_CBOR;
-	unsigned char	reply[2048];
+	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
 	int		r;
 
 	fido_assert_reset_rx(assert);
 
-	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
@@ -211,10 +211,9 @@ fido_dev_get_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
 static int
 fido_get_next_assert_tx(fido_dev_t *dev)
 {
-	const unsigned char	cbor[] = { CTAP_CBOR_NEXT_ASSERT };
-	const uint8_t		cmd = CTAP_CMD_CBOR;
+	const unsigned char cbor[] = { CTAP_CBOR_NEXT_ASSERT };
 
-	if (fido_tx(dev, cmd, cbor, sizeof(cbor)) < 0) {
+	if (fido_tx(dev, CTAP_CMD_CBOR, cbor, sizeof(cbor)) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		return (FIDO_ERR_TX);
 	}
@@ -225,12 +224,12 @@ fido_get_next_assert_tx(fido_dev_t *dev)
 static int
 fido_get_next_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
 {
-	const uint8_t	cmd = CTAP_CMD_CBOR;
-	unsigned char	reply[2048];
+	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
 	int		r;
 
-	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
@@ -534,7 +533,7 @@ int
 fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
     const void *pk)
 {
-	unsigned char		 buf[1024];
+	unsigned char		 buf[1024]; /* XXX */
 	fido_blob_t		 dgst;
 	const fido_assert_stmt	*stmt = NULL;
 	int			 ok = -1;

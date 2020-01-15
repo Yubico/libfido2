@@ -235,14 +235,14 @@ bio_parse_template_array(const cbor_item_t *key, const cbor_item_t *val,
 static int
 bio_rx_template_array(fido_dev_t *dev, fido_bio_template_array_t *ta, int ms)
 {
-	const uint8_t	cmd = CTAP_CMD_CBOR;
-	unsigned char	reply[2048];
+	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
 	int		r;
 
 	bio_reset_template_array(ta);
 
-	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
@@ -382,8 +382,7 @@ static int
 bio_rx_enroll_begin(fido_dev_t *dev, fido_bio_template_t *t,
     fido_bio_enroll_t *e, int ms)
 {
-	const uint8_t	cmd = CTAP_CMD_CBOR;
-	unsigned char	reply[2048];
+	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
 	int		r;
 
@@ -392,7 +391,8 @@ bio_rx_enroll_begin(fido_dev_t *dev, fido_bio_template_t *t,
 	e->remaining_samples = 0;
 	e->last_status = 0;
 
-	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
@@ -482,15 +482,15 @@ fail:
 static int
 bio_rx_enroll_continue(fido_dev_t *dev, fido_bio_enroll_t *e, int ms)
 {
-	const uint8_t	cmd = CTAP_CMD_CBOR;
-	unsigned char	reply[2048];
+	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
 	int		r;
 
 	e->remaining_samples = 0;
 	e->last_status = 0;
 
-	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
@@ -643,14 +643,14 @@ bio_parse_info(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 static int
 bio_rx_info(fido_dev_t *dev, fido_bio_info_t *i, int ms)
 {
-	const uint8_t	cmd = CTAP_CMD_CBOR;
-	unsigned char	reply[2048];
+	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
 	int		r;
 
 	bio_reset_info(i);
 
-	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}

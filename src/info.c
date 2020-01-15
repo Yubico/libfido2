@@ -226,12 +226,11 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 static int
 fido_dev_get_cbor_info_tx(fido_dev_t *dev)
 {
-	const unsigned char	cbor[] = { CTAP_CBOR_GETINFO };
-	const uint8_t		cmd = CTAP_CMD_CBOR;
+	const unsigned char cbor[] = { CTAP_CBOR_GETINFO };
 
 	fido_log_debug("%s: dev=%p", __func__, (void *)dev);
 
-	if (fido_tx(dev, cmd, cbor, sizeof(cbor)) < 0) {
+	if (fido_tx(dev, CTAP_CMD_CBOR, cbor, sizeof(cbor)) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		return (FIDO_ERR_TX);
 	}
@@ -242,8 +241,7 @@ fido_dev_get_cbor_info_tx(fido_dev_t *dev)
 static int
 fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 {
-	const uint8_t	cmd = CTAP_CMD_CBOR;
-	unsigned char	reply[512];
+	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
 
 	fido_log_debug("%s: dev=%p, ci=%p, ms=%d", __func__, (void *)dev,
@@ -251,7 +249,8 @@ fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 
 	memset(ci, 0, sizeof(*ci));
 
-	if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply), ms)) < 0) {
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
 		return (FIDO_ERR_RX);
 	}
@@ -260,7 +259,7 @@ fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 	    parse_reply_element));
 }
 
-static int
+int
 fido_dev_get_cbor_info_wait(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 {
 	int r;
@@ -276,34 +275,6 @@ int
 fido_dev_get_cbor_info(fido_dev_t *dev, fido_cbor_info_t *ci)
 {
 	return (fido_dev_get_cbor_info_wait(dev, ci, -1));
-}
-
-static int
-fido_dev_dummy_get_cbor_info_rx(fido_dev_t *dev, int ms)
-{
-	const uint8_t	cmd = CTAP_CMD_CBOR;
-	unsigned char	reply[512];
-
-	fido_log_debug("%s: dev=%p, ms=%d", __func__, (void *)dev, ms);
-
-	if (fido_rx(dev, cmd, &reply, sizeof(reply), ms) < 0) {
-		fido_log_debug("%s: fido_rx", __func__);
-		return (FIDO_ERR_RX);
-	}
-
-	return (FIDO_OK);
-}
-
-int
-fido_dev_dummy_get_cbor_info_wait(fido_dev_t *dev, int ms)
-{
-	int r;
-
-	if ((r = fido_dev_get_cbor_info_tx(dev)) != FIDO_OK ||
-	    (r = fido_dev_dummy_get_cbor_info_rx(dev, ms)) != FIDO_OK)
-		return (r);
-
-	return (FIDO_OK);
 }
 
 /*

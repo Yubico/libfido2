@@ -144,11 +144,14 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 static int
 fido_dev_open_rx(fido_dev_t *dev, int ms)
 {
-	const uint8_t	cmd = CTAP_CMD_INIT;
-	int		n;
+	fido_cbor_info_t	*info = NULL;
+	int			 reply_len;
+	int			 r;
 
-	if ((n = fido_rx(dev, cmd, &dev->attr, sizeof(dev->attr), ms)) < 0) {
+	if ((reply_len = fido_rx(dev, CTAP_CMD_INIT, &dev->attr,
+	    sizeof(dev->attr), ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
+		r = FIDO_ERR_RX;
 		goto fail;
 	}
 
@@ -156,26 +159,42 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 	dev->attr.nonce = dev->nonce;
 #endif
 
-	if ((size_t)n != sizeof(dev->attr) || dev->attr.nonce != dev->nonce) {
+	if ((size_t)reply_len != sizeof(dev->attr) ||
+	    dev->attr.nonce != dev->nonce) {
 		fido_log_debug("%s: invalid nonce", __func__);
+		r = FIDO_ERR_RX;
 		goto fail;
 	}
 
 	dev->cid = dev->attr.cid;
 
 	if (fido_dev_is_fido2(dev)) {
-		if (fido_dev_dummy_get_cbor_info_wait(dev, ms) != FIDO_OK) {
+		if ((info = fido_cbor_info_new()) == NULL) {
+			fido_log_debug("%s: fido_cbor_info_new", __func__);
+			r = FIDO_ERR_INTERNAL;
+			goto fail;
+		}
+		if (fido_dev_get_cbor_info_wait(dev, info, ms) != FIDO_OK) {
 			fido_log_debug("%s: falling back to u2f", __func__);
 			fido_dev_force_u2f(dev);
 		}
 	}
 
-	return (FIDO_OK);
-fail:
-	dev->io.close(dev->io_handle);
-	dev->io_handle = NULL;
+	if (fido_dev_is_fido2(dev) && info != NULL) {
+		fido_log_debug("%s: FIDO_MAXMSG=%d, maxmsgsiz=%lu", __func__,
+		    FIDO_MAXMSG, (unsigned long)fido_cbor_info_maxmsgsiz(info));
+	}
 
-	return (FIDO_ERR_RX);
+	r = FIDO_OK;
+fail:
+	fido_cbor_info_free(&info);
+
+	if (r != FIDO_OK) {
+		dev->io.close(dev->io_handle);
+		dev->io_handle = NULL;
+	}
+
+	return (r);
 }
 
 static int

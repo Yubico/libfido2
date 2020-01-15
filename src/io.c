@@ -269,8 +269,8 @@ fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 int
 fido_rx_cbor_status(fido_dev_t *d, int ms)
 {
-	unsigned char reply[64];
-	int reply_len;
+	unsigned char	reply[FIDO_MAXMSG];
+	int		reply_len;
 
 	if ((reply_len = fido_rx(d, CTAP_CMD_CBOR, &reply, sizeof(reply),
 	    ms)) < 0 || (size_t)reply_len < 1) {

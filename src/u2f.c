@@ -125,11 +125,10 @@ authdata_fake(const char *rp_id, uint8_t flags, uint32_t sigcount,
 static int
 send_dummy_register(fido_dev_t *dev, int ms)
 {
-	const uint8_t	 cmd = CTAP_CMD_MSG;
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 challenge[SHA256_DIGEST_LENGTH];
 	unsigned char	 application[SHA256_DIGEST_LENGTH];
-	unsigned char	 reply[2048];
+	unsigned char	 reply[FIDO_MAXMSG];
 	int		 r;
 
 #ifdef FIDO_FUZZ
@@ -150,13 +149,13 @@ send_dummy_register(fido_dev_t *dev, int ms)
 	}
 
 	do {
-		if (fido_tx(dev, cmd, iso7816_ptr(apdu),
+		if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
 		    iso7816_len(apdu)) < 0) {
 			fido_log_debug("%s: fido_tx", __func__);
 			r = FIDO_ERR_TX;
 			goto fail;
 		}
-		if (fido_rx(dev, cmd, &reply, sizeof(reply), ms) < 2) {
+		if (fido_rx(dev, CTAP_CMD_MSG, &reply, sizeof(reply), ms) < 2) {
 			fido_log_debug("%s: fido_rx", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
@@ -179,11 +178,10 @@ static int
 key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
     int *found, int ms)
 {
-	const uint8_t	 cmd = CTAP_CMD_MSG;
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 challenge[SHA256_DIGEST_LENGTH];
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
-	unsigned char	 reply[8];
+	unsigned char	 reply[FIDO_MAXMSG];
 	uint8_t		 key_id_len;
 	int		 r;
 
@@ -217,12 +215,13 @@ key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
 		goto fail;
 	}
 
-	if (fido_tx(dev, cmd, iso7816_ptr(apdu), iso7816_len(apdu)) < 0) {
+	if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
+	    iso7816_len(apdu)) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
 	}
-	if (fido_rx(dev, cmd, &reply, sizeof(reply), ms) != 2) {
+	if (fido_rx(dev, CTAP_CMD_MSG, &reply, sizeof(reply), ms) != 2) {
 		fido_log_debug("%s: fido_rx", __func__);
 		r = FIDO_ERR_RX;
 		goto fail;
@@ -285,10 +284,9 @@ static int
 do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
     const fido_blob_t *key_id, fido_blob_t *sig, fido_blob_t *ad, int ms)
 {
-	const uint8_t	 cmd = CTAP_CMD_MSG;
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
-	unsigned char	 reply[128];
+	unsigned char	 reply[FIDO_MAXMSG];
 	int		 reply_len;
 	uint8_t		 key_id_len;
 	int		 r;
@@ -326,14 +324,14 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 	}
 
 	do {
-		if (fido_tx(dev, cmd, iso7816_ptr(apdu),
+		if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
 		    iso7816_len(apdu)) < 0) {
 			fido_log_debug("%s: fido_tx", __func__);
 			r = FIDO_ERR_TX;
 			goto fail;
 		}
-		if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply),
-		    ms)) < 2) {
+		if ((reply_len = fido_rx(dev, CTAP_CMD_MSG, &reply,
+		    sizeof(reply), ms)) < 2) {
 			fido_log_debug("%s: fido_rx", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
@@ -575,10 +573,9 @@ fail:
 int
 u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 {
-	const uint8_t	 cmd = CTAP_CMD_MSG;
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
-	unsigned char	 reply[2048];
+	unsigned char	 reply[FIDO_MAXMSG];
 	int		 reply_len;
 	int		 found;
 	int		 r;
@@ -634,14 +631,14 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 	}
 
 	do {
-		if (fido_tx(dev, cmd, iso7816_ptr(apdu),
+		if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
 		    iso7816_len(apdu)) < 0) {
 			fido_log_debug("%s: fido_tx", __func__);
 			r = FIDO_ERR_TX;
 			goto fail;
 		}
-		if ((reply_len = fido_rx(dev, cmd, &reply, sizeof(reply),
-		    ms)) < 2) {
+		if ((reply_len = fido_rx(dev, CTAP_CMD_MSG, &reply,
+		    sizeof(reply), ms)) < 2) {
 			fido_log_debug("%s: fido_rx", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
