@@ -71,18 +71,3 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", \
 On Windows 1903 and newer versions, access to FIDO devices has been restricted
 to applications using the operating system's native API. Use of *libfido2*
 is still possible in privileged applications.
-
-=== OpenSSH Integration
-
-*libfido2* includes middleware allowing https://www.openssh.com[OpenSSH] to
-talk to U2F/FIDO2 devices. Note that server support is required for
-authentication. In a nutshell:
-
-==== Key Generation
-
-  $ ssh-keygen -t [ecdsa-sk|ed25519-sk] -w /path/to/libsk-libfido2.so
-
-==== Authentication
-
-  $ ssh-agent -P /path/to/libsk-libfido2.so
-  $ ssh-add -S /path/to/libsk-libfido2.so
