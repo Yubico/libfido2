@@ -4,10 +4,11 @@
 
 IMAGE		:= libfido2-coverage:1.3.0
 RUNNER		:= libfido2-runner
-PROFDATA	:= llvm-profdata-6.0
-COV		:= llvm-cov-6.0
+PROFDATA	:= llvm-profdata-9
+COV		:= llvm-cov-9
 TARGETS		:= fuzz_assert fuzz_bio fuzz_cred fuzz_credman fuzz_mgmt
 CORPORA		:= $(foreach f,${TARGETS},${f}/corpus)
+MINIFY		:= $(foreach f,${TARGETS},/minify/${f}/corpus)
 REMOTE		:= gs://libfido2-corpus.clusterfuzz-external.appspot.com
 .DEFAULT_GOAL	:= all
 
@@ -32,6 +33,14 @@ ${TARGETS}: corpus sync
 	docker exec -e LLVM_PROFILE_FILE=/profraw/$@ ${RUNNER} \
 		/bin/bash -c 'rm -f /profraw/$@ && /libfido2/build/fuzz/$@ \
 		-runs=1 /libfido2/fuzz/$@'
+
+${MINIFY}: /minify/%/corpus: %
+	docker exec ${RUNNER} /bin/bash -c 'rm -rf $@ && mkdir -p $@ && \
+		/libfido2/build/fuzz/$< -use_value_profile=1 -merge=1 $@ \
+		/libfido2/fuzz/$</corpus'
+
+corpus.tgz-: ${MINIFY}
+	docker exec -i ${RUNNER} tar Czcf /minify - ${TARGETS} > $@
 
 profdata: run
 	docker exec ${RUNNER} /bin/bash -c 'rm -f /$@ && ${PROFDATA} \
