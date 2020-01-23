@@ -85,5 +85,11 @@
 
 /* Supported extensions. */
 #define FIDO_EXT_HMAC_SECRET	0x01
+#define FIDO_EXT_CRED_PROTECT	0x02
+
+/* Supported credential protection policies. */
+#define FIDO_CRED_PROT_UV_OPTIONAL		0x01
+#define FIDO_CRED_PROT_UV_OPTIONAL_WITH_ID	0x02
+#define FIDO_CRED_PROT_UV_REQUIRED		0x03
 
 #endif /* !_FIDO_PARAM_H */

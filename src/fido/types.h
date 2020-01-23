@@ -105,6 +105,11 @@ typedef struct fido_user {
 	char        *display_name; /* required */
 } fido_user_t;
 
+typedef struct fido_cred_ext {
+	int mask; /* enabled extensions */
+	int prot; /* protection policy */
+} fido_cred_ext_t;
+
 typedef struct fido_cred {
 	fido_blob_t       cdh;           /* client data hash */
 	fido_rp_t         rp;            /* relying party */
@@ -112,10 +117,10 @@ typedef struct fido_cred {
 	fido_blob_array_t excl;          /* list of credential ids to exclude */
 	fido_opt_t        rk;            /* resident key */
 	fido_opt_t        uv;            /* user verification */
-	int               ext;           /* enabled extensions */
+	fido_cred_ext_t   ext;           /* extensions */
 	int               type;          /* cose algorithm */
 	char             *fmt;           /* credential format */
-	int               authdata_ext;  /* decoded extensions */
+	fido_cred_ext_t   authdata_ext;  /* decoded extensions */
 	fido_blob_t       authdata_cbor; /* raw cbor payload */
 	fido_authdata_t   authdata;      /* decoded authdata payload */
 	fido_attcred_t    attcred;       /* returned credential (key + id) */

@@ -117,6 +117,7 @@ list(APPEND MAN_ALIAS
 	fido_cred_new fido_cred_free
 	fido_cred_new fido_cred_id_len
 	fido_cred_new fido_cred_id_ptr
+	fido_cred_new fido_cred_prot
 	fido_cred_new fido_cred_pubkey_len
 	fido_cred_new fido_cred_pubkey_ptr
 	fido_cred_new fido_cred_sig_len
@@ -145,6 +146,7 @@ list(APPEND MAN_ALIAS
 	fido_cred_set_authdata fido_cred_set_clientdata_hash
 	fido_cred_set_authdata fido_cred_set_extensions
 	fido_cred_set_authdata fido_cred_set_fmt
+	fido_cred_set_authdata fido_cred_set_prot
 	fido_cred_set_authdata fido_cred_set_rk
 	fido_cred_set_authdata fido_cred_set_rp
 	fido_cred_set_authdata fido_cred_set_sig

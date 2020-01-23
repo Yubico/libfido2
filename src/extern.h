@@ -21,7 +21,7 @@ cbor_item_t *cbor_flatten_vector(cbor_item_t **, size_t);
 cbor_item_t *cbor_encode_assert_options(fido_opt_t, fido_opt_t);
 cbor_item_t *cbor_encode_change_pin_auth(const fido_blob_t *,
     const fido_blob_t *, const fido_blob_t *);
-cbor_item_t *cbor_encode_extensions(int);
+cbor_item_t *cbor_encode_extensions(const fido_cred_ext_t *);
 cbor_item_t *cbor_encode_hmac_secret_param(const fido_blob_t *,
     const es256_pk_t *, const fido_blob_t *);
 cbor_item_t *cbor_encode_options(fido_opt_t, fido_opt_t);
@@ -40,7 +40,7 @@ cbor_item_t *es256_pk_encode(const es256_pk_t *, int);
 /* cbor decoding functions */
 int cbor_decode_attstmt(const cbor_item_t *, fido_attstmt_t *);
 int cbor_decode_cred_authdata(const cbor_item_t *, int, fido_blob_t *,
-    fido_authdata_t *, fido_attcred_t *, int *);
+    fido_authdata_t *, fido_attcred_t *, fido_cred_ext_t *);
 int cbor_decode_assert_authdata(const cbor_item_t *, fido_blob_t *,
     fido_authdata_t *, int *, fido_blob_t *);
 int cbor_decode_cred_id(const cbor_item_t *, fido_blob_t *);

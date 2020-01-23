@@ -314,6 +314,35 @@ fail:
 }
 
 static int
+cbor_add_uint8(cbor_item_t *item, const char *key, uint8_t value)
+{
+	struct cbor_pair pair;
+	int ok = -1;
+
+	memset(&pair, 0, sizeof(pair));
+
+	if ((pair.key = cbor_build_string(key)) == NULL ||
+	    (pair.value = cbor_build_uint8(value)) == NULL) {
+		fido_log_debug("%s: cbor_build", __func__);
+		goto fail;
+	}
+
+	if (!cbor_map_add(item, pair)) {
+		fido_log_debug("%s: cbor_map_add", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	if (pair.key)
+		cbor_decref(&pair.key);
+	if (pair.value)
+		cbor_decref(&pair.value);
+
+	return (ok);
+}
+
+static int
 cbor_add_arg(cbor_item_t *item, uint8_t n, cbor_item_t *arg)
 {
 	struct cbor_pair pair;
@@ -535,19 +564,29 @@ fail:
 }
 
 cbor_item_t *
-cbor_encode_extensions(int ext)
+cbor_encode_extensions(const fido_cred_ext_t *ext)
 {
 	cbor_item_t *item = NULL;
+	size_t size = 0;
 
-	if (ext == 0 || ext != FIDO_EXT_HMAC_SECRET)
+	if (ext->mask & FIDO_EXT_HMAC_SECRET)
+		size++;
+	if (ext->mask & FIDO_EXT_CRED_PROTECT)
+		size++;
+	if (size == 0 || (item = cbor_new_definite_map(size)) == NULL)
 		return (NULL);
 
-	if ((item = cbor_new_definite_map(1)) == NULL)
-		return (NULL);
-
-	if (cbor_add_bool(item, "hmac-secret", FIDO_OPT_TRUE) < 0) {
-		cbor_decref(&item);
-		return (NULL);
+	if (ext->mask & FIDO_EXT_HMAC_SECRET) {
+		if (cbor_add_bool(item, "hmac-secret", FIDO_OPT_TRUE) < 0) {
+			cbor_decref(&item);
+			return (NULL);
+		}
+	}
+	if (ext->mask & FIDO_EXT_CRED_PROTECT) {
+		if (cbor_add_uint8(item, "credProtect", ext->prot) < 0) {
+			cbor_decref(&item);
+			return (NULL);
+		}
 	}
 
 	return (item);
@@ -1082,25 +1121,34 @@ fail:
 static int
 decode_extension(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
-	int	*authdata_ext = arg;
-	char	*type = NULL;
-	int	 ok = -1;
+	fido_cred_ext_t	*authdata_ext = arg;
+	char		*type = NULL;
+	int		 ok = -1;
 
-	if (cbor_string_copy(key, &type) < 0 || strcmp(type, "hmac-secret")) {
+	if (cbor_string_copy(key, &type) < 0) {
 		fido_log_debug("%s: cbor type", __func__);
 		ok = 0; /* ignore */
 		goto out;
 	}
 
-	if (cbor_isa_float_ctrl(val) == false ||
-	    cbor_float_get_width(val) != CBOR_FLOAT_0 ||
-	    cbor_is_bool(val) == false || *authdata_ext != 0) {
-		fido_log_debug("%s: cbor type", __func__);
-		goto out;
+	if (strcmp(type, "hmac-secret") == 0) {
+		if (cbor_isa_float_ctrl(val) == false ||
+		    cbor_float_get_width(val) != CBOR_FLOAT_0 ||
+		    cbor_is_bool(val) == false) {
+			fido_log_debug("%s: cbor type", __func__);
+			goto out;
+		}
+		if (cbor_ctrl_value(val) == CBOR_CTRL_TRUE)
+			authdata_ext->mask |= FIDO_EXT_HMAC_SECRET;
+	} else if (strcmp(type, "credProtect") == 0) {
+		if (cbor_isa_uint(val) == false ||
+		    cbor_int_get_width(val) != CBOR_INT_8) {
+			fido_log_debug("%s: cbor type", __func__);
+			goto out;
+		}
+		authdata_ext->mask |= FIDO_EXT_CRED_PROTECT;
+		authdata_ext->prot = cbor_get_uint8(val);
 	}
-
-	if (cbor_ctrl_value(val) == CBOR_CTRL_TRUE)
-		*authdata_ext |= FIDO_EXT_HMAC_SECRET;
 
 	ok = 0;
 out:
@@ -1110,7 +1158,8 @@ out:
 }
 
 static int
-decode_extensions(const unsigned char **buf, size_t *len, int *authdata_ext)
+decode_extensions(const unsigned char **buf, size_t *len,
+    fido_cred_ext_t *authdata_ext)
 {
 	cbor_item_t		*item = NULL;
 	struct cbor_load_result	 cbor;
@@ -1118,8 +1167,9 @@ decode_extensions(const unsigned char **buf, size_t *len, int *authdata_ext)
 
 	fido_log_debug("%s: buf=%p, len=%zu", __func__, (const void *)*buf,
 	    *len);
+	fido_log_xxd(*buf, *len);
 
-	*authdata_ext = 0;
+	memset(authdata_ext, 0, sizeof(*authdata_ext));
 
 	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
@@ -1129,7 +1179,6 @@ decode_extensions(const unsigned char **buf, size_t *len, int *authdata_ext)
 
 	if (cbor_isa_map(item) == false ||
 	    cbor_map_is_definite(item) == false ||
-	    cbor_map_size(item) != 1 ||
 	    cbor_map_iter(item, authdata_ext, decode_extension) < 0) {
 		fido_log_debug("%s: cbor type", __func__);
 		goto fail;
@@ -1204,7 +1253,7 @@ fail:
 int
 cbor_decode_cred_authdata(const cbor_item_t *item, int cose_alg,
     fido_blob_t *authdata_cbor, fido_authdata_t *authdata,
-    fido_attcred_t *attcred, int *authdata_ext)
+    fido_attcred_t *attcred, fido_cred_ext_t *authdata_ext)
 {
 	const unsigned char	*buf = NULL;
 	size_t			 len;
@@ -1227,6 +1276,7 @@ cbor_decode_cred_authdata(const cbor_item_t *item, int cose_alg,
 	len = cbor_bytestring_length(item);
 
 	fido_log_debug("%s: buf=%p, len=%zu", __func__, (const void *)buf, len);
+	fido_log_xxd(buf, len);
 
 	if (fido_buf_read(&buf, &len, authdata, sizeof(*authdata)) < 0) {
 		fido_log_debug("%s: fido_buf_read", __func__);

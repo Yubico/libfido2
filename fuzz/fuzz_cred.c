@@ -189,6 +189,8 @@ make_cred(fido_cred_t *cred, uint8_t u2f, int type, const struct blob *cdh,
 		fido_cred_set_rk(cred, FIDO_OPT_TRUE);
 	if (uv & 1)
 		fido_cred_set_uv(cred, FIDO_OPT_TRUE);
+	if (user_id->len)
+		fido_cred_set_prot(cred, user_id->body[0] & 0x03);
 
 	fido_dev_make_cred(dev, cred, u2f & 1 ? NULL : pin);
 
@@ -202,7 +204,7 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
     const char *rp_id, const char *rp_name, const unsigned char *authdata_ptr,
     size_t authdata_len, int ext, uint8_t rk, uint8_t uv,
     const unsigned char *x5c_ptr, size_t x5c_len, const unsigned char *sig_ptr,
-    size_t sig_len, const char *fmt)
+    size_t sig_len, const char *fmt, int prot)
 {
 	fido_cred_t	*cred;
 	uint8_t		 flags;
@@ -218,6 +220,7 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	fido_cred_set_extensions(cred, ext);
 	fido_cred_set_x509(cred, x5c_ptr, x5c_len);
 	fido_cred_set_sig(cred, sig_ptr, sig_len);
+	fido_cred_set_prot(cred, prot);
 
 	if (rk & 1)
 		fido_cred_set_rk(cred, FIDO_OPT_TRUE);
@@ -290,7 +293,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    fido_cred_authdata_len(cred), p.ext, p.rk, p.uv,
 	    fido_cred_x5c_ptr(cred), fido_cred_x5c_len(cred),
 	    fido_cred_sig_ptr(cred), fido_cred_sig_len(cred),
-	    fido_cred_fmt(cred));
+	    fido_cred_fmt(cred), fido_cred_prot(cred));
 
 	fido_cred_free(&cred);
 
