@@ -46,9 +46,11 @@ profdata: run
 	docker exec ${RUNNER} /bin/bash -c 'rm -f /$@ && ${PROFDATA} \
 		merge -sparse profraw/* -o $@'
 
-report.html: profdata
-	docker exec ${RUNNER} ${COV} show -format=html -tab-size=8 \
-		/libfido2/build/src/libfido2.so -instr-profile=/$< > $@
+report.tgz: profdata
+	docker exec ${RUNNER} /bin/bash -c 'rm -rf /report && mkdir /report && \
+		${COV} show -format=html -tab-size=8 -instr-profile=/$< \
+		-output-dir=/report /libfido2/build/src/libfido2.so'
+	docker exec -i ${RUNNER} tar Czcf / - report > $@
 
 summary.txt: profdata
 	docker exec ${RUNNER} ${COV} report -use-color=false \
@@ -73,4 +75,4 @@ corpus.tgz: ${CORPORA}
 	tar zcf $@ ${TARGETS}
 
 .PHONY: build run sync corpus ${TARGETS} ${CORPORA}
-.PHONY: report.html summary.txt functions.txt
+.PHONY: report.tgz summary.txt functions.txt

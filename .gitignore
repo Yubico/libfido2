@@ -4,6 +4,6 @@ fuzz/build/
 fuzz/corpus.tgz-
 fuzz/fuzz_*/
 fuzz/obj/
-fuzz/report.html
+fuzz/report
 fuzz/*.so
 output/
