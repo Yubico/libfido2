@@ -1,6 +1,10 @@
 name: static code analysis
 
-on: [push]
+on:
+  push:
+  schedule:
+    - cron: '0 0 * * 1'
+
 env:
   SCAN_IMG:
     yes-docker-local.artifactory.in.yubico.org/static-code-analysis/c:v1
