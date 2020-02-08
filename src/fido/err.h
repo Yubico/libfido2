@@ -64,6 +64,14 @@
 #define FIDO_ERR_USER_PRESENCE_REQUIRED	-8
 #define FIDO_ERR_INTERNAL		-9
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 const char *fido_strerr(int);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* __cplusplus */
 
 #endif /* _FIDO_ERR_H */

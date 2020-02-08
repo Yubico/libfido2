@@ -28,6 +28,10 @@
 #include "fido/param.h"
 #include "fido/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 fido_assert_t *fido_assert_new(void);
 fido_cred_t *fido_cred_new(void);
 fido_dev_t *fido_dev_new(void);
@@ -167,5 +171,9 @@ int16_t  fido_dev_info_product(const fido_dev_info_t *);
 uint64_t fido_cbor_info_maxmsgsiz(const fido_cbor_info_t *);
 
 bool fido_dev_is_fido2(const fido_dev_t *);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif // __cplusplus
 
 #endif /* !_FIDO_H */

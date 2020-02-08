@@ -10,6 +10,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 struct fido_dev;
 
 typedef void *fido_dev_io_open_t(const char *);
@@ -217,5 +221,9 @@ typedef struct es256_sk es256_sk_t;
 typedef struct rs256_pk rs256_pk_t;
 typedef struct eddsa_pk eddsa_pk_t;
 #endif /* _FIDO_INTERNAL */
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* __cplusplus */
 
 #endif /* !_FIDO_TYPES_H */
