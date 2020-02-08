@@ -12,6 +12,10 @@
 #include "fido/types.h"
 #include "blob.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /* aes256 */
 int aes256_cbc_dec(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 int aes256_cbc_enc(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
@@ -142,5 +146,9 @@ int fido_hid_manifest(fido_dev_info_t *, size_t, size_t *);
 typedef int (*dev_manifest_func_t)(fido_dev_info_t *, size_t, size_t *);
 int fido_dev_register_manifest_func(const dev_manifest_func_t);
 void fido_dev_unregister_manifest_func(const dev_manifest_func_t);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* __cplusplus */
 
 #endif /* !_EXTERN_H */

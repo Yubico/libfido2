@@ -18,6 +18,10 @@
 #include <fido.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 eddsa_pk_t *eddsa_pk_new(void);
 void eddsa_pk_free(eddsa_pk_t **);
 EVP_PKEY *eddsa_pk_to_EVP_PKEY(const eddsa_pk_t *);
@@ -40,6 +44,10 @@ int EVP_DigestVerify(EVP_MD_CTX *, const unsigned char *, size_t,
 EVP_MD_CTX *EVP_MD_CTX_new(void);
 void EVP_MD_CTX_free(EVP_MD_CTX *);
 #endif
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* __cplusplus */
 
 #endif /* _FIDO_INTERNAL */
 
