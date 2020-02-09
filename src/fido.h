@@ -173,7 +173,7 @@ uint64_t fido_cbor_info_maxmsgsiz(const fido_cbor_info_t *);
 bool fido_dev_is_fido2(const fido_dev_t *);
 
 #ifdef __cplusplus
-} // extern "C"
-#endif // __cplusplus
+} /* extern "C" */
+#endif /* __cplusplus */
 
 #endif /* !_FIDO_H */
