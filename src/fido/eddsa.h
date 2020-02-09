@@ -45,10 +45,10 @@ EVP_MD_CTX *EVP_MD_CTX_new(void);
 void EVP_MD_CTX_free(EVP_MD_CTX *);
 #endif
 
+#endif /* _FIDO_INTERNAL */
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */
-
-#endif /* _FIDO_INTERNAL */
 
 #endif /* !_FIDO_EDDSA_H */
