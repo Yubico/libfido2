@@ -1,3 +1,7 @@
+* Version 1.3.1 (2020-02-19)
+ ** fix zero-ing of le1 and le2 when talking to a U2F device.
+ ** dropping sk-libfido2 middleware, please find it in the openssh tree.
+
 * Version 1.3.0 (2019-11-28)
  ** assert/hmac: encode public key as per spec, gh#60.
  ** fido2-cred: fix creation of resident keys.
