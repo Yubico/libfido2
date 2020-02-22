@@ -171,6 +171,7 @@ _fido_dev_protocol
 _fido_dev_reset
 _fido_dev_set_io_functions
 _fido_dev_set_pin
+_fido_dev_set_transport_functions
 _fido_init
 _fido_set_log_handler
 _fido_strerr

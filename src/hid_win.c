@@ -239,8 +239,6 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 				fido_hid_close,
 				fido_hid_read,
 				fido_hid_write,
-				NULL,
-				NULL,
 			};
 			if (++(*olen) == ilen)
 				break;

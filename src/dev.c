@@ -313,7 +313,7 @@ int
 fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 {
 	if (dev->io_handle != NULL) {
-		fido_log_debug("%s: NULL handle", __func__);
+		fido_log_debug("%s: non-NULL handle", __func__);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
@@ -324,6 +324,19 @@ fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 	}
 
 	dev->io = *io;
+
+	return (FIDO_OK);
+}
+
+int
+fido_dev_set_transport_functions(fido_dev_t *dev, const fido_dev_transport_t *t)
+{
+	if (dev->io_handle != NULL) {
+		fido_log_debug("%s: non-NULL handle", __func__);
+		return (FIDO_ERR_INVALID_ARGUMENT);
+	}
+
+	dev->transport = *t;
 
 	return (FIDO_OK);
 }
@@ -349,8 +362,6 @@ fido_dev_new(void)
 		&fido_hid_close,
 		&fido_hid_read,
 		&fido_hid_write,
-		NULL,
-		NULL,
 	};
 
 	return (dev);
@@ -374,6 +385,8 @@ fido_dev_new_with_info(const fido_dev_info_t *di)
 	}
 
 	dev->io = di->io;
+	dev->transport = di->transport;
+
 	if ((dev->path = strdup(di->path)) == NULL) {
 		fido_log_debug("%s: strdup", __func__);
 		fido_dev_free(&dev);

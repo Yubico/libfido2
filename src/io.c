@@ -127,8 +127,8 @@ fido_tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 	    (void *)d, cmd, (const void *)buf, count);
 	fido_log_xxd(buf, count);
 
-	if (d->io.tx != NULL)
-		return (d->io.tx(d, cmd, buf, count));
+	if (d->transport.tx != NULL)
+		return (d->transport.tx(d, cmd, buf, count));
 
 	if (d->io_handle == NULL || d->io.write == NULL || count > UINT16_MAX) {
 		fido_log_debug("%s: invalid argument", __func__);
@@ -250,8 +250,8 @@ fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 	fido_log_debug("%s: d=%p, cmd=0x%02x, buf=%p, count=%zu, ms=%d",
 	    __func__, (void *)d, cmd, (const void *)buf, count, ms);
 
-	if (d->io.rx != NULL)
-		return (d->io.rx(d, cmd, buf, count, ms));
+	if (d->transport.rx != NULL)
+		return (d->transport.rx(d, cmd, buf, count, ms));
 
 	if (d->io_handle == NULL || d->io.read == NULL || count > UINT16_MAX) {
 		fido_log_debug("%s: invalid argument", __func__);

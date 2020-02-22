@@ -78,8 +78,6 @@ copy_info(fido_dev_info_t *di, const struct hid_device_info *d)
 		&fido_hid_close,
 		&fido_hid_read,
 		&fido_hid_write,
-		NULL,
-		NULL,
 	};
 
 	return 0;
