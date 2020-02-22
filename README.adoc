@@ -71,3 +71,40 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", \
 On Windows 1903 and newer versions, access to FIDO devices has been restricted
 to applications using the operating system's native API. Use of *libfido2*
 is still possible in privileged applications.
+
+==== MACOSX
+
+You will have to install libcbor:
+	
+	git clone https://github.com/PJK/libcbor.git
+	cd libcbor
+	make && sudo make install
+
+As well as the usual libusb/hid (below assumes macports):
+
+	sudo port install hidapi
+	sudo port install usbutils
+
+On MacOS one may want to use the HID api; and may need to provide a path to libcbor 
+and the USB utils (the example below assumes a libcbor from git
+
+	(rm -rf build && mkdir build && cd build && CFLAGS="-I/opt/local/include -I/usr/local/include" LDFLAGS="-L/opt/local/lib -L/usr/local/lib" cmake -DUSE_HIDAPI=1 ..)
+	make -C build
+	sudo make -C build install
+
+Once this is done - check that you can find your FIDO2 token with
+
+	fido2-token -L
+
+Which will typically give you an output like:
+
+	IOService:/AppleACPIPlatformExpert/PCI0@0/AppleACPIPCI/XHC1@14/XHC1@14000000/HS02@14200000/Solo 3.0.0@14200000/Solo 3.0.0@0/AppleUserUSBHostHIDDevice: vendor=0x0483, product=0xa2ca (SoloKeys Solo 3.0.0)
+
+The path is the bit (including the spaces!) until the ':'. So do (for convenience)
+
+	DEV="IOService:/AppleACPIPlatformExpert/PCI0@0/AppleACPIPCI/XHC1@14/XHC1@14000000/HS02@14200000/Solo 3.0.0@14200000/Solo 3.0.0@0/AppleUserUSBHostHIDDevice"
+
+and you can now use this for commands such as
+
+	fido2-cred -M -i cred_param.txt "$DEV" ....
+
