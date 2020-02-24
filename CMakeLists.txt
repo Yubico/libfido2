@@ -326,7 +326,8 @@ if(UNIX)
 endif()
 
 # export list
-if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
+if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
+   CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
 	# clang + lld
 	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
 	    " -exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/src/export.llvm")
