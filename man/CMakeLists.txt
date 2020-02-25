@@ -5,7 +5,7 @@
 find_program(MANDOC_PATH mandoc)
 message(STATUS "MANDOC_PATH: ${MANDOC_PATH}")
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	find_program(GZIP_PATH gzip)
 	message(STATUS "GZIP_PATH: ${GZIP_PATH}")
 endif()
