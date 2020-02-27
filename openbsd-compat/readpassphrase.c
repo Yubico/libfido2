@@ -52,7 +52,7 @@
 #  define _POSIX_VDISABLE       VDISABLE
 #endif
 
-static volatile sig_atomic_t signo[_NSIG];
+static volatile sig_atomic_t signo[NSIG];
 
 static void handler(int);
 
@@ -73,7 +73,7 @@ readpassphrase(const char *prompt, char *buf, size_t bufsiz, int flags)
 	}
 
 restart:
-	for (i = 0; i < _NSIG; i++)
+	for (i = 0; i < NSIG; i++)
 		signo[i] = 0;
 	need_restart = 0;
 	/*
@@ -177,7 +177,7 @@ restart:
 	 * If we were interrupted by a signal, resend it to ourselves
 	 * now that we have restored the signal handlers.
 	 */
-	for (i = 0; i < _NSIG; i++) {
+	for (i = 0; i < NSIG; i++) {
 		if (signo[i]) {
 			kill(getpid(), i);
 			switch (i) {

@@ -8,7 +8,7 @@ list(APPEND COMPAT_SOURCES
 	../openbsd-compat/strlcat.c
 )
 
-if(WIN32)
+if(WIN32 AND NOT CYGWIN AND NOT MSYS)
 	list(APPEND COMPAT_SOURCES
 		../openbsd-compat/bsd-getline.c
 		../openbsd-compat/explicit_bzero_win32.c

@@ -27,6 +27,11 @@ add_definitions(-D_FIDO_MAJOR=${FIDO_MAJOR})
 add_definitions(-D_FIDO_MINOR=${FIDO_MINOR})
 add_definitions(-D_FIDO_PATCH=${FIDO_PATCH})
 
+if(CYGWIN OR MSYS)
+	set(WIN32 1)
+	add_definitions(-DWINVER=0x0a00)
+endif()
+
 if(WIN32)
 	add_definitions(-DWIN32_LEAN_AND_MEAN)
 endif()
@@ -133,6 +138,8 @@ else()
 	if(HAVE_STACK_PROTECTOR_ALL)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-all")
 	endif()
+
+	add_definitions(-D_DEFAULT_SOURCE)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g2")
