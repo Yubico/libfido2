@@ -72,7 +72,9 @@ The credential management API of
 .Em libfido2
 allows resident credentials on a FIDO2 authenticator to be listed,
 inspected, and removed.
-Please note that not all authenticators support credential management.
+Please note that not all FIDO2 authenticators support credential management 
+as it uses a draft specification of the credentials management API.
+The functions and structures may be subject to future changes.
 To obtain information on what an authenticator supports, please
 refer to
 .Xr fido_cbor_info_new 3 .
