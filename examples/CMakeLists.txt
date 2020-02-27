@@ -8,7 +8,7 @@ list(APPEND COMPAT_SOURCES
 	../openbsd-compat/strlcpy.c
 )
 
-if(WIN32)
+if(WIN32 AND NOT CYGWIN AND NOT MSYS)
 	list(APPEND COMPAT_SOURCES ../openbsd-compat/posix_win.c)
 endif()
 
