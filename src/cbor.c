@@ -1366,6 +1366,7 @@ decode_attstmt_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
 	fido_attstmt_t	*attstmt = arg;
 	char		*name = NULL;
+	int		 cose_alg = 0;
 	int		 ok = -1;
 
 	if (cbor_string_copy(key, &name) < 0) {
@@ -1376,9 +1377,15 @@ decode_attstmt_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	if (!strcmp(name, "alg")) {
 		if (cbor_isa_negint(val) == false ||
-		    cbor_int_get_width(val) != CBOR_INT_8 ||
-		    cbor_get_uint8(val) != -COSE_ES256 - 1) {
+		    cbor_int_get_width(val) != CBOR_INT_8) {
 			fido_log_debug("%s: alg", __func__);
+			goto out;
+		}
+
+		cose_alg = -(int)cbor_get_int(val) - 1;
+		if (cose_alg != COSE_ES256 && cose_alg != COSE_RS256 &&
+		    cose_alg != COSE_EDDSA) {
+			fido_log_debug("%s: unsupported algorithm", __func__);
 			goto out;
 		}
 	} else if (!strcmp(name, "sig")) {
