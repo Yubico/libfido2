@@ -348,7 +348,7 @@ out:
 int
 fido_cred_verify_self(const fido_cred_t *cred)
 {
-	unsigned char	buf[1024];
+	unsigned char	buf[1024]; /* XXX */
 	fido_blob_t	dgst;
 	int		ok = -1;
 	int		r;

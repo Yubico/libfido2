@@ -1381,11 +1381,11 @@ decode_attstmt_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			fido_log_debug("%s: alg", __func__);
 			goto out;
 		}
-
-		cose_alg = -(int)cbor_get_int(val) - 1;
+		cose_alg = -(int)cbor_get_uint8(val) - 1;
 		if (cose_alg != COSE_ES256 && cose_alg != COSE_RS256 &&
 		    cose_alg != COSE_EDDSA) {
-			fido_log_debug("%s: unsupported algorithm", __func__);
+			fido_log_debug("%s: unsupported cose_alg=%d", __func__,
+			    cose_alg);
 			goto out;
 		}
 	} else if (!strcmp(name, "sig")) {
