@@ -106,7 +106,8 @@ else()
 		add_definitions(-D_GNU_SOURCE)
 		# If using hidapi, use hidapi-hidraw.
 		set(HIDAPI_SUFFIX -hidraw)
-	elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
+	elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
+	       CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
 		set(BASE_LIBRARIES usbhid)
 	endif()
 
