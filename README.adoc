@@ -51,8 +51,7 @@ Depending on the platform, the PKG_CONFIG_PATH environment variable may need to
 be set.
 
 *libfido2* depends on https://github.com/pjk/libcbor[libcbor] and
-https://github.com/libressl-portable/portable[LibreSSL] (alternatively,
-https://www.openssl.org[OpenSSL] may be used). On Linux, libudev (part of
+https://www.openssl.org[OpenSSL]. On Linux, libudev (part of
 https://www.freedesktop.org/wiki/Software/systemd[systemd]) is also required.
 
 For complete, OS-specific installation instructions, please refer to the
