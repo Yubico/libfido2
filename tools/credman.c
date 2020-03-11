@@ -37,7 +37,7 @@ credman_get_metadata(fido_dev_t *dev, const char *path)
 
 	printf("existing rk(s): %u\n",
 	    (unsigned)fido_credman_rk_existing(metadata));
-	printf("possible rk(s): %u\n",
+	printf("remaining rk(s): %u\n",
 	    (unsigned)fido_credman_rk_remaining(metadata));
 
 	fido_credman_metadata_free(&metadata);
