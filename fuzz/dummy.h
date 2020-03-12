@@ -7,6 +7,8 @@
 #ifndef _DUMMY_H
 #define _DUMMY_H
 
+#include <stdint.h>
+
 const char dummy_name[] = "finger1";
 const char dummy_pin[] = "9}4gT:8d=A37Dh}U";
 const char dummy_rp_id[] = "localhost";
