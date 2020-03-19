@@ -384,14 +384,17 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 	IOHIDDeviceScheduleWithRunLoop(dev->ref, CFRunLoopGetCurrent(),
 	    dev->loop_id);
 
-	do
-		r = CFRunLoopRunInMode(dev->loop_id, 0.003, true);
-	while (r != kCFRunLoopRunHandledSource);
+	r = CFRunLoopRunInMode(dev->loop_id, 0.3, true);
 
 	IOHIDDeviceRegisterInputReportCallback(dev->ref, buf, len, NULL, NULL);
 	IOHIDDeviceRegisterRemovalCallback(dev->ref, NULL, NULL);
 	IOHIDDeviceUnscheduleFromRunLoop(dev->ref, CFRunLoopGetCurrent(),
 	    dev->loop_id);
+
+	if (r != kCFRunLoopRunHandledSource) {
+		fido_log_debug("%s: CFRunLoopRunInMode=%d", __func__, (int)r);
+		return (-1);
+	}
 
 	return (REPORT_LEN - 1);
 }
