@@ -37,9 +37,14 @@ and binary releases.
 
 ==== Ubuntu
 
+  $ sudo apt install software-properties-common
   $ sudo apt-add-repository ppa:yubico/stable
   $ sudo apt update
   $ sudo apt install libfido2-dev
+
+==== MacOS
+
+  $ brew install libfido2
 
 Or from source, on UNIX-like systems:
 
