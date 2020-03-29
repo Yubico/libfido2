@@ -136,7 +136,7 @@ print_maxmsgsiz(uint64_t maxmsgsiz)
 static void
 print_fwversion(uint64_t fwversion)
 {
-	printf("fwversion: %d\n", (int)fwversion);
+	printf("fwversion: 0x%x\n", (int)fwversion);
 }
 
 /*
