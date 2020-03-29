@@ -131,6 +131,15 @@ print_maxmsgsiz(uint64_t maxmsgsiz)
 }
 
 /*
+ * Auxiliary function to print an authenticator's firmware version on stdout.
+ */
+static void
+print_fwversion(uint64_t fwversion)
+{
+	printf("fwversion: %d\n", (int)fwversion);
+}
+
+/*
  * Auxiliary function to print an array of bytes on stdout.
  */
 static void
@@ -189,6 +198,9 @@ getinfo(const char *path)
 
 	/* print maximum message size */
 	print_maxmsgsiz(fido_cbor_info_maxmsgsiz(ci));
+
+	/* print firmware version */
+	print_fwversion(fido_cbor_info_fwversion(ci));
 
 	/* print supported pin protocols */
 	print_byte_array("pin protocols", fido_cbor_info_protocols_ptr(ci),

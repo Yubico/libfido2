@@ -181,6 +181,7 @@ typedef struct fido_cbor_info {
 	fido_opt_array_t  options;    /* list of supported options */
 	uint64_t          maxmsgsiz;  /* maximum message size */
 	fido_byte_array_t protocols;  /* supported pin protocols */
+	uint64_t          fwversion;  /* firmware version */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {

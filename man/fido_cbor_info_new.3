@@ -20,7 +20,8 @@
 .Nm fido_cbor_info_protocols_len ,
 .Nm fido_cbor_info_versions_len ,
 .Nm fido_cbor_info_options_len ,
-.Nm fido_cbor_info_maxmsgsiz
+.Nm fido_cbor_info_maxmsgsiz ,
+.Nm fido_cbor_info_fwversion
 .Nd FIDO 2 CBOR Info API
 .Sh SYNOPSIS
 .In fido.h
@@ -54,6 +55,8 @@
 .Fn fido_cbor_info_options_len "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_maxmsgsiz "const fido_cbor_info_t *ci"
+.Ft uint64_t
+.Fn fido_cbor_info_fwversion "const fido_cbor_info_t *ci"
 .Sh DESCRIPTION
 The
 .Fn fido_cbor_info_new
@@ -125,6 +128,10 @@ The length of the options array is returned by
 The
 .Fn fido_cbor_info_maxmsgsiz
 function returns the maximum message size of
+.Fa ci .
+The
+.Fn fido_cbor_info_fwversion
+function returns the firmware version associated with this
 .Fa ci .
 .Pp
 A complete example of how to use these functions can be found in the
