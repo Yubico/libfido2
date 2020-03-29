@@ -112,6 +112,12 @@ print_maxmsgsiz(uint64_t maxmsgsiz)
 }
 
 static void
+print_fwversion(uint64_t fwversion)
+{
+	printf("fwversion: %x\n", (int)fwversion);
+}
+
+static void
 print_byte_array(const char *label, const uint8_t *ba, size_t len)
 {
 	if (len == 0)
@@ -166,7 +172,7 @@ token_info(int argc, char **argv, char *path)
 		return (credman_print_rk(dev, path, rp_id, cred_id));
 	if (cred_id || rp_id)
 		usage();
-		
+
 	print_attr(dev);
 
 	if (fido_dev_is_fido2(dev) == false)
@@ -195,6 +201,9 @@ token_info(int argc, char **argv, char *path)
 
 	/* print maximum message size */
 	print_maxmsgsiz(fido_cbor_info_maxmsgsiz(ci));
+
+	/* print firmware version */
+	print_fwversion(fido_cbor_info_fwversion(ci));
 
 	/* print supported pin protocols */
 	print_byte_array("pin protocols", fido_cbor_info_protocols_ptr(ci),

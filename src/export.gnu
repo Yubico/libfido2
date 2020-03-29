@@ -76,6 +76,7 @@
 		fido_cbor_info_extensions_ptr;
 		fido_cbor_info_free;
 		fido_cbor_info_maxmsgsiz;
+		fido_cbor_info_fwversion;
 		fido_cbor_info_new;
 		fido_cbor_info_options_len;
 		fido_cbor_info_options_name_ptr;
