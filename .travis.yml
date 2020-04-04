@@ -35,6 +35,7 @@ matrix:
             - libcbor-dev
             - libssl-dev
             - libudev-dev
+            - original-awk
       script: /bin/sh -eux .travis/build-linux-gcc
     - name: "Ubuntu 18.04 (Bionic) + mingw32-gcc-7.3"
       os: linux
