@@ -232,22 +232,6 @@ WRAP(EC_KEY *,
 	1
 )
 
-WRAP(const EC_GROUP *,
-	EC_KEY_get0_group,
-	(const EC_KEY *key),
-	NULL,
-	(key),
-	1
-)
-
-WRAP(const BIGNUM *,
-	EC_KEY_get0_private_key,
-	(const EC_KEY *key),
-	NULL,
-	(key),
-	1
-)
-
 WRAP(EC_POINT *,
 	EC_POINT_new,
 	(const EC_GROUP *group),
@@ -472,22 +456,6 @@ WRAP(cbor_item_t *,
 	(uint32_t value),
 	NULL,
 	(value),
-	1
-)
-
-WRAP(struct cbor_pair *,
-	cbor_map_handle,
-	(const cbor_item_t *item),
-	NULL,
-	(item),
-	1
-)
-
-WRAP(cbor_item_t **,
-	cbor_array_handle,
-	(const cbor_item_t *item),
-	NULL,
-	(item),
 	1
 )
 
