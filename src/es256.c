@@ -10,8 +10,8 @@
 #include <openssl/obj_mac.h>
 
 #include <string.h>
-#include "fido.h"
-#include "fido/es256.h"
+#include <fido.h>
+#include <fido/es256.h>
 
 static int
 decode_coord(const cbor_item_t *item, void *xy, size_t xy_len)
@@ -267,8 +267,10 @@ es256_pk_to_EVP_PKEY(const es256_pk_t *k)
 	const int	 nid = NID_X9_62_prime256v1;
 	int		 ok = -1;
 
-	if ((bnctx = BN_CTX_new()) == NULL ||
-	    (x = BN_CTX_get(bnctx)) == NULL ||
+	if ((bnctx = BN_CTX_new()) == NULL)
+		goto fail;
+	BN_CTX_start(bnctx);
+	if ((x = BN_CTX_get(bnctx)) == NULL ||
 	    (y = BN_CTX_get(bnctx)) == NULL)
 		goto fail;
 
@@ -301,8 +303,10 @@ es256_pk_to_EVP_PKEY(const es256_pk_t *k)
 
 	ok = 0;
 fail:
-	if (bnctx != NULL)
+	if (bnctx != NULL) {
+		BN_CTX_end(bnctx);
 		BN_CTX_free(bnctx);
+	}
 	if (ec != NULL)
 		EC_KEY_free(ec);
 	if (q != NULL)
@@ -330,8 +334,10 @@ es256_pk_from_EC_KEY(es256_pk_t *pk, const EC_KEY *ec)
 	    (g = EC_KEY_get0_group(ec)) == NULL)
 		goto fail;
 
-	if ((ctx = BN_CTX_new()) == NULL ||
-	    (x = BN_CTX_get(ctx)) == NULL ||
+	if ((ctx = BN_CTX_new()) == NULL)
+		goto fail;
+	BN_CTX_start(ctx);
+	if ((x = BN_CTX_get(ctx)) == NULL ||
 	    (y = BN_CTX_get(ctx)) == NULL)
 		goto fail;
 
@@ -351,8 +357,10 @@ es256_pk_from_EC_KEY(es256_pk_t *pk, const EC_KEY *ec)
 
 	ok = FIDO_OK;
 fail:
-	if (ctx != NULL)
+	if (ctx != NULL) {
+		BN_CTX_end(ctx);
 		BN_CTX_free(ctx);
+	}
 
 	return (ok);
 }
@@ -367,7 +375,12 @@ es256_sk_to_EVP_PKEY(const es256_sk_t *k)
 	const int	 nid = NID_X9_62_prime256v1;
 	int		 ok = -1;
 
-	if ((bnctx = BN_CTX_new()) == NULL || (d = BN_CTX_get(bnctx)) == NULL ||
+	if ((bnctx = BN_CTX_new()) == NULL) {
+		fido_log_debug("%s: BN_CTX_new", __func__);
+		goto fail;
+	}
+	BN_CTX_start(bnctx);
+	if ((d = BN_CTX_get(bnctx)) == NULL ||
 	    BN_bin2bn(k->d, sizeof(k->d), d) == NULL) {
 		fido_log_debug("%s: BN_bin2bn", __func__);
 		goto fail;
@@ -389,8 +402,10 @@ es256_sk_to_EVP_PKEY(const es256_sk_t *k)
 
 	ok = 0;
 fail:
-	if (bnctx != NULL)
+	if (bnctx != NULL) {
+		BN_CTX_end(bnctx);
 		BN_CTX_free(bnctx);
+	}
 	if (ec != NULL)
 		EC_KEY_free(ec);
 	if (ok < 0 && pkey != NULL) {
