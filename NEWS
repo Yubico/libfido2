@@ -1,7 +1,7 @@
 * Version 1.4.0 (unreleased)
  ** hid_hidapi: hidapi backend; enable with -DUSE_HIDAPI=1.
  ** Fall back to U2F if the key claims to, but does not support FIDO2.
- ** Credential protection (credprot) support;
+ ** FIDO2 credential protection (credprot) support.
  ** New API calls:
   - fido_cbor_info_fwversion;
   - fido_cred_prot;
