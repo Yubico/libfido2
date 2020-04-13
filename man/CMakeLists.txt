@@ -54,9 +54,13 @@ list(APPEND MAN_ALIAS
 	fido_assert_new fido_assert_clientdata_hash_len
 	fido_assert_new fido_assert_clientdata_hash_ptr
 	fido_assert_new fido_assert_count
+	fido_assert_new fido_assert_flags
 	fido_assert_new fido_assert_free
 	fido_assert_new fido_assert_hmac_secret_len
 	fido_assert_new fido_assert_hmac_secret_ptr
+	fido_assert_new fido_assert_id_len
+	fido_assert_new fido_assert_id_ptr
+	fido_assert_new fido_assert_rp_id
 	fido_assert_new fido_assert_sigcount
 	fido_assert_new fido_assert_sig_len
 	fido_assert_new fido_assert_sig_ptr
@@ -116,6 +120,8 @@ list(APPEND MAN_ALIAS
 	fido_cred_new fido_cred_authdata_ptr
 	fido_cred_new fido_cred_clientdata_hash_len
 	fido_cred_new fido_cred_clientdata_hash_ptr
+	fido_cred_new fido_cred_display_name
+	fido_cred_new fido_cred_flags
 	fido_cred_new fido_cred_fmt
 	fido_cred_new fido_cred_free
 	fido_cred_new fido_cred_id_len
@@ -125,8 +131,14 @@ list(APPEND MAN_ALIAS
 	fido_cred_new fido_cred_prot
 	fido_cred_new fido_cred_pubkey_len
 	fido_cred_new fido_cred_pubkey_ptr
+	fido_cred_new fido_cred_rp_id
+	fido_cred_new fido_cred_rp_name
 	fido_cred_new fido_cred_sig_len
 	fido_cred_new fido_cred_sig_ptr
+	fido_cred_new fido_cred_type
+	fido_cred_new fido_cred_user_name
+	fido_cred_new fido_cred_user_id_len
+	fido_cred_new fido_cred_user_id_ptr
 	fido_cred_new fido_cred_x5c_len
 	fido_cred_new fido_cred_x5c_ptr
 	fido_credman_metadata_new fido_credman_del_dev_rk
