@@ -2,38 +2,44 @@ language: c
 
 matrix:
   include:
-    - os: linux
-      compiler: clang-7
-      dist: xenial
+    - name: "Ubuntu 18.04 (Bionic) + clang-9 + scan-build-9"
+      os: linux
+      compiler: clang-9
+      dist: bionic
       sudo: required
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-xenial-7
+            - llvm-toolchain-bionic-9
           packages:
-            - clang-7
+            - clang-9
+            - clang-tools-9
             - cmake
+            - libcbor-dev
             - libssl-dev
             - libudev-dev
       script: /bin/sh -eux .travis/build-linux-clang
-    - os: linux
-      compiler: gcc-7
-      dist: xenial
+    - name: "Ubuntu 18.04 (Bionic) + gcc-8"
+      os: linux
+      compiler: gcc-8
+      dist: bionic
       sudo: required
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - gcc-7
             - cmake
+            - gcc-8
+            - libcbor-dev
             - libssl-dev
             - libudev-dev
       script: /bin/sh -eux .travis/build-linux-gcc
-    - os: linux
-      compiler: i686-w64-mingw32-gcc-4.8
-      dist: xenial
+    - name: "Ubuntu 18.04 (Bionic) + mingw32-gcc-7.3"
+      os: linux
+      compiler: i686-w64-mingw32-gcc-7.3
+      dist: bionic
       sudo: required
       addons:
         apt:
@@ -46,37 +52,40 @@ matrix:
             - mingw-w64-i686-dev
             - cmake
       script: /bin/sh -eux .travis/build-linux-mingw
-    - os: osx
-      osx_image: xcode10.2
+    - name: "macOS 10.14 (Mojave) + Xcode 11.3.1"
+      os: osx
+      osx_image: xcode11.3
       compiler: clang
       sudo: required
       script: /bin/sh -eux .travis/build-osx-clang
-    - os: linux
-      compiler: clang-7
+    - name: "Ubuntu 18.04 (Bionic) + clang-9-asan + fuzz"
+      os: linux
+      compiler: clang-9
       dist: bionic
       sudo: required
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-xenial-7
+            - llvm-toolchain-bionic-9
           packages:
-            - clang-7
+            - clang-9
             - cmake
             - libssl-dev
             - libudev-dev
       script: /bin/sh -eux .travis/fuzz-linux-asan
-    - os: linux
-      compiler: clang-7
+    - name: "Ubuntu 18.04 (Bionic) + clang-9-msan + fuzz"
+      os: linux
+      compiler: clang-9
       dist: bionic
       sudo: required
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-xenial-7
+            - llvm-toolchain-bionic-9
           packages:
-            - clang-7
+            - clang-9
             - cmake
             - libssl-dev
             - libudev-dev
