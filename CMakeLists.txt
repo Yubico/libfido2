@@ -108,7 +108,7 @@ else()
 		set(HIDAPI_SUFFIX -hidraw)
 	elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
 	       CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
-		set(BASE_LIBRARIES usbhid)
+		set(BASE_LIBRARIES)
 	endif()
 
 	if(MINGW)
