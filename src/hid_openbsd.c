@@ -8,13 +8,11 @@
 
 #include <sys/ioctl.h>
 #include <dev/usb/usb.h>
-#include <dev/usb/usbhid.h>
 
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
-#include <usbhid.h>
 #include <poll.h>
 
 #include "fido.h"
