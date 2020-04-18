@@ -224,7 +224,7 @@ endforeach()
 # man_gzip
 foreach(f ${MAN_SOURCES})
 	add_custom_command(OUTPUT ${f}.gz
-		COMMAND gzip -c ${f} > ${f}.gz
+		COMMAND gzip -cn ${f} > ${f}.gz
 		DEPENDS ${f})
 	list(APPEND GZ_FILES ${f}.gz)
 endforeach()
