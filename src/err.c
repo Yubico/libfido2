@@ -94,6 +94,8 @@ fido_strerr(int n)
 		return "FIDO_ERR_ACTION_TIMEOUT";
 	case FIDO_ERR_UP_REQUIRED:
 		return "FIDO_ERR_UP_REQUIRED";
+	case FIDO_ERR_UV_BLOCKED:
+		return "FIDO_ERR_UV_BLOCKED";
 	case FIDO_ERR_ERR_OTHER:
 		return "FIDO_ERR_ERR_OTHER";
 	case FIDO_ERR_SPEC_LAST:
