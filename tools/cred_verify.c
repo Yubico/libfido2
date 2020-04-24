@@ -109,11 +109,15 @@ cred_verify(int argc, char **argv)
 	FILE *out_f = NULL;
 	int type = COSE_ES256;
 	int flags = 0;
+	int cred_prot = -1;
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "dhi:o:v")) != -1) {
+	while ((ch = getopt(argc, argv, "c:dhi:o:v")) != -1) {
 		switch (ch) {
+		case 'c':
+			cred_prot = atoi(optarg);
+			break;
 		case 'd':
 			flags |= FLAG_DEBUG;
 			break;
@@ -156,6 +160,13 @@ cred_verify(int argc, char **argv)
 
 	fido_init((flags & FLAG_DEBUG) ? FIDO_DEBUG : 0);
 	cred = prepare_cred(in_f, type, flags);
+
+	if (cred_prot > 0) {
+		r = fido_cred_set_prot(cred, cred_prot);
+		if (r != FIDO_OK) {
+			errx(1, "fido_cred_set_prot");
+		}
+	}
 
 	if (fido_cred_x5c_ptr(cred) == NULL) {
 		if ((r = fido_cred_verify_self(cred)) != FIDO_OK)

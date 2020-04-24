@@ -130,11 +130,15 @@ cred_make(int argc, char **argv)
 	FILE *out_f = NULL;
 	int type = COSE_ES256;
 	int flags = 0;
+	int cred_protect = -1;
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "dhi:o:qruv")) != -1) {
+	while ((ch = getopt(argc, argv, "c:dhi:o:qruv")) != -1) {
 		switch (ch) {
+        case 'c':
+            cred_protect = atoi(optarg);
+			break;
 		case 'd':
 			flags |= FLAG_DEBUG;
 			break;
@@ -191,6 +195,13 @@ cred_make(int argc, char **argv)
 	dev = open_dev(argv[0]);
 	if (flags & FLAG_U2F)
 		fido_dev_force_u2f(dev);
+
+	if (cred_protect > 0) {
+		r = fido_cred_set_prot(cred, cred_protect);
+		if (r < 0) {
+			errx(1, "fido_cred_set_prot");
+		}
+	}
 
 	r = fido_dev_make_cred(dev, cred, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED && !(flags & FLAG_QUIET)) {
