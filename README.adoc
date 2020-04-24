@@ -35,7 +35,13 @@ The current release of *libfido2* is 1.4.0. Please consult Yubico's
 https://developers.yubico.com/libfido2/Releases[release page] for source
 and binary releases.
 
-==== Ubuntu
+==== Ubuntu 20.04 (Focal)
+
+  $ sudo apt install libfido2-1
+  $ sudo apt install libfido2-dev
+  $ sudo apt install libfido2-doc
+
+==== Ubuntu 18.04 (Bionic) and 16.04 (Xenial)
 
   $ sudo apt install software-properties-common
   $ sudo apt-add-repository ppa:yubico/stable
