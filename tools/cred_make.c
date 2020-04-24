@@ -136,8 +136,9 @@ cred_make(int argc, char **argv)
 
 	while ((ch = getopt(argc, argv, "c:dhi:o:qruv")) != -1) {
 		switch (ch) {
-        case 'c':
-            cred_protect = atoi(optarg);
+		case 'c':
+			if ((cred_protect = base10(optarg)) < 0)
+				errx(1, "-c: invalid argument '%s'", optarg);
 			break;
 		case 'd':
 			flags |= FLAG_DEBUG;
@@ -198,8 +199,8 @@ cred_make(int argc, char **argv)
 
 	if (cred_protect > 0) {
 		r = fido_cred_set_prot(cred, cred_protect);
-		if (r < 0) {
-			errx(1, "fido_cred_set_prot");
+		if (r != FIDO_OK) {
+			errx(1, "fido_cred_set_prot: %s", fido_strerr(r));
 		}
 	}
 

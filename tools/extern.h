@@ -66,5 +66,6 @@ void print_cred(FILE *, int, const fido_cred_t *);
 void read_pin(const char *, char *, size_t);
 void usage(void);
 void xxd(const void *, size_t);
+int base10(const char *);
 
 #endif /* _EXTERN_H_ */

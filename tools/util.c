@@ -16,6 +16,7 @@
 #include <fido/rs256.h>
 #include <fido/eddsa.h>
 
+#include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -76,6 +77,25 @@ open_read(const char *file)
 		err(1, "fdopen %s", file);
 
 	return (f);
+}
+
+int
+base10(const char *str)
+{
+	char *ep;
+	long long ll;
+
+	ll = strtoll(str, &ep, 10);
+	if (str == ep || *ep != '\0')
+		return (-1);
+	else if (ll == LLONG_MIN && errno == ERANGE)
+		return (-1);
+	else if (ll == LLONG_MAX && errno == ERANGE)
+		return (-1);
+	else if (ll < 0 || ll > INT_MAX)
+		return (-1);
+
+	return ((int)ll);
 }
 
 void

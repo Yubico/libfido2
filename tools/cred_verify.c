@@ -116,7 +116,8 @@ cred_verify(int argc, char **argv)
 	while ((ch = getopt(argc, argv, "c:dhi:o:v")) != -1) {
 		switch (ch) {
 		case 'c':
-			cred_prot = atoi(optarg);
+			if ((cred_prot = base10(optarg)) < 0)
+				errx(1, "-c: invalid argument '%s'", optarg);
 			break;
 		case 'd':
 			flags |= FLAG_DEBUG;
@@ -164,7 +165,7 @@ cred_verify(int argc, char **argv)
 	if (cred_prot > 0) {
 		r = fido_cred_set_prot(cred, cred_prot);
 		if (r != FIDO_OK) {
-			errx(1, "fido_cred_set_prot");
+			errx(1, "fido_cred_set_prot: %s", fido_strerr(r));
 		}
 	}
 
