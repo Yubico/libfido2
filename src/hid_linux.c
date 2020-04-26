@@ -261,9 +261,13 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 		goto fail;
 
 	if (udev_enumerate_add_match_subsystem(udev_enum, "hidraw") < 0 ||
-	    udev_enumerate_scan_devices(udev_enum) < 0 ||
-	    (udev_list = udev_enumerate_get_list_entry(udev_enum)) == NULL)
+	    udev_enumerate_scan_devices(udev_enum) < 0)
 		goto fail;
+
+	if ((udev_list = udev_enumerate_get_list_entry(udev_enum)) == NULL) {
+		r = FIDO_OK; /* zero hidraw devices */
+		goto fail;
+	}
 
 	udev_list_entry_foreach(udev_entry, udev_list) {
 		if (copy_info(&devlist[*olen], udev, udev_entry) == 0) {
