@@ -26,6 +26,8 @@ jobs:
           docker pull ${SCAN_IMG}
           docker run -v${PWD}:/k -e COMPILE_DEPS="${COMPILE_DEPS}" \
              -e PROJECT_NAME=${GITHUB_REPOSITORY#Yubico/} -t ${SCAN_IMG}
+        else
+          echo "No docker registry credentials, not scanning"
         fi
       continue-on-error: true
 
