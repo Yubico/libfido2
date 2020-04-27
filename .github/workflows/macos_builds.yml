@@ -1,0 +1,25 @@
+name: macOS builds
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest]
+        cc: [clang]
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Dependencies
+      run: |
+        brew install libcbor pkg-config
+
+    - name: Build
+      env:
+        CC: ${{ matrix.cc }}
+      run: |
+        /bin/sh -eux .travis/build-osx-clang

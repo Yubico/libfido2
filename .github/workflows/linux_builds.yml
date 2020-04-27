@@ -1,0 +1,31 @@
+name: Linux default builds
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-18.04]
+        cc: [gcc-7, gcc-8, gcc-9, clang-8, clang-9]
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Dependencies
+      env:
+        CC: ${{ matrix.cc }}
+      run: |
+        sudo apt -q update
+        sudo apt install -q -y libcbor-dev libudev-dev original-awk
+        if [ "${CC%-*}" == "clang" ]; then
+          sudo apt install -q -y ${CC%-*}-tools-${CC#clang-}
+        fi
+
+    - name: Build
+      env:
+        CC: ${{ matrix.cc }}
+      run: |
+        /bin/sh -eux .travis/build-linux-${CC%-*}
