@@ -12,6 +12,7 @@
 .Nm
 .Fl G
 .Op Fl dhpruv
+.Op Fl t Ar option
 .Op Fl i Ar input_file
 .Op Fl o Ar output_file
 .Ar device
@@ -110,6 +111,25 @@ is specified,
 .Nm
 will not expect a credential id in its input, and may output
 multiple assertions.
+.It Fl t Ar option
+Toggles a key/value
+.Ar option ,
+where
+.Ar option
+is a string of the form
+.Dq key=value .
+The options supported at present are:
+.Bl -tag -width Ds
+.It Cm up Ns = Ns Ar true|false
+Asks the authenticator for user presence to be enabled or disabled.
+.It Cm uv Ns = Ns Ar true|false
+Asks the authenticator for user verification to be enabled or
+disabled.
+.El
+.Pp
+The
+.Fl t
+option may be specified multiple times.
 .It Fl u
 Obtain an assertion using U2F.
 By default,
