@@ -118,6 +118,8 @@ list(APPEND MAN_ALIAS
 	fido_cred_new fido_cred_free
 	fido_cred_new fido_cred_id_len
 	fido_cred_new fido_cred_id_ptr
+	fido_cred_new fido_cred_aaguid_len
+	fido_cred_new fido_cred_aaguid_ptr
 	fido_cred_new fido_cred_prot
 	fido_cred_new fido_cred_pubkey_len
 	fido_cred_new fido_cred_pubkey_ptr

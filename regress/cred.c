@@ -231,6 +231,16 @@ const unsigned char id[64] = {
 	0x34, 0xe3, 0x83, 0xe7, 0xd1, 0xbd, 0x9f, 0x25,
 };
 
+/*
+ * Security Key By Yubico
+ * 5.1.X
+ * f8a011f3-8c0a-4d15-8006-17111f9edc7d
+*/
+const unsigned char aaguid[16] = {
+	0xf8, 0xa0, 0x11, 0xf3, 0x8c, 0x0a, 0x4d, 0x15,
+	0x80, 0x06, 0x17, 0x11, 0x1f, 0x9e, 0xdc, 0x7d,
+};
+
 const char rp_id[] = "localhost";
 const char rp_name[] = "sweet home localhost";
 
@@ -378,6 +388,8 @@ valid_cred(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 }
 
@@ -400,6 +412,8 @@ no_cdh(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 }
 
@@ -422,6 +436,8 @@ no_rp_id(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 }
 
@@ -445,6 +461,8 @@ no_rp_name(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 }
 
@@ -452,6 +470,10 @@ static void
 no_authdata(void)
 {
 	fido_cred_t *c;
+	unsigned char *unset;
+
+	unset = calloc(1, sizeof(aaguid));
+	assert(unset != NULL);
 
 	c = alloc_cred();
 	assert(fido_cred_set_type(c, COSE_ES256) == FIDO_OK);
@@ -467,7 +489,10 @@ no_authdata(void)
 	assert(fido_cred_pubkey_ptr(c) == NULL);
 	assert(fido_cred_id_len(c) == 0);
 	assert(fido_cred_id_ptr(c) == NULL);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), unset, sizeof(aaguid)) == 0);
 	free_cred(c);
+	free(unset);
 }
 
 static void
@@ -489,6 +514,8 @@ no_x509(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 }
 
@@ -511,6 +538,8 @@ no_sig(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 }
 
@@ -533,6 +562,8 @@ no_fmt(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 }
 
@@ -556,6 +587,8 @@ wrong_options(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 }
 
@@ -585,6 +618,8 @@ junk_cdh(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 	free(junk);
 }
@@ -609,6 +644,8 @@ junk_rp_id(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 }
 
@@ -632,6 +669,8 @@ junk_rp_name(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 }
 
@@ -640,11 +679,15 @@ junk_authdata(void)
 {
 	fido_cred_t *c;
 	unsigned char *junk;
+	unsigned char *unset;
 
 	junk = malloc(sizeof(authdata));
 	assert(junk != NULL);
 	memcpy(junk, authdata, sizeof(authdata));
 	junk[0] = ~junk[0];
+
+	unset = calloc(1, sizeof(aaguid));
+	assert(unset != NULL);
 
 	c = alloc_cred();
 	assert(fido_cred_set_authdata(c, junk,
@@ -663,9 +706,12 @@ junk_authdata(void)
 	assert(fido_cred_sig_ptr(c) == NULL);
 	assert(fido_cred_x5c_len(c) == 0);
 	assert(fido_cred_x5c_ptr(c) == NULL);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), unset, sizeof(aaguid)) == 0);
 	assert(fido_cred_verify(c) == FIDO_ERR_INVALID_ARGUMENT);
 	free_cred(c);
 	free(junk);
+	free(unset);
 }
 
 static void
@@ -694,6 +740,8 @@ junk_sig(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 	free(junk);
 }
@@ -724,6 +772,8 @@ junk_x509(void)
 	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
 	assert(fido_cred_id_len(c) == sizeof(id));
 	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
 	free_cred(c);
 	free(junk);
 }
@@ -733,6 +783,10 @@ static void
 invalid_type(void)
 {
 	fido_cred_t *c;
+	unsigned char *unset;
+
+	unset = calloc(1, sizeof(aaguid));
+	assert(unset != NULL);
 
 	c = alloc_cred();
 	assert(fido_cred_set_type(c, COSE_RS256) == FIDO_OK);
@@ -749,7 +803,10 @@ invalid_type(void)
 	assert(fido_cred_pubkey_ptr(c) == NULL);
 	assert(fido_cred_id_len(c) == 0);
 	assert(fido_cred_id_ptr(c) == NULL);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), unset, sizeof(aaguid)) == 0);
 	free_cred(c);
+	free(unset);
 }
 
 /* cbor_serialize_alloc misuse */

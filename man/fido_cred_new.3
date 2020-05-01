@@ -13,12 +13,14 @@
 .Nm fido_cred_authdata_ptr ,
 .Nm fido_cred_clientdata_hash_ptr ,
 .Nm fido_cred_id_ptr ,
+.Nm fido_cred_aaguid_ptr ,
 .Nm fido_cred_pubkey_ptr ,
 .Nm fido_cred_sig_ptr ,
 .Nm fido_cred_x5c_ptr ,
 .Nm fido_cred_authdata_len ,
 .Nm fido_cred_clientdata_hash_len ,
 .Nm fido_cred_id_len ,
+.Nm fido_cred_aaguid_len ,
 .Nm fido_cred_pubkey_len ,
 .Nm fido_cred_sig_len ,
 .Nm fido_cred_x5c_len
@@ -40,6 +42,8 @@
 .Ft const unsigned char *
 .Fn fido_cred_id_ptr "const fido_cred_t *cred"
 .Ft const unsigned char *
+.Fn fido_cred_aaguid_ptr "const fido_cred_t *cred"
+.Ft const unsigned char *
 .Fn fido_cred_pubkey_ptr "const fido_cred_t *cred"
 .Ft const unsigned char *
 .Fn fido_cred_sig_ptr "const fido_cred_t *cred"
@@ -51,6 +55,8 @@
 .Fn fido_cred_clientdata_hash_len "const fido_cred_t *cred"
 .Ft size_t
 .Fn fido_cred_id_len "const fido_cred_t *cred"
+.Ft size_t
+.Fn fido_cred_aaguid_len "const fido_cred_t *cred"
 .Ft size_t
 .Fn fido_cred_pubkey_len "const fido_cred_t *cred"
 .Ft size_t
@@ -123,12 +129,14 @@ The
 .Fn fido_cred_authdata_ptr ,
 .Fn fido_cred_clientdata_hash_ptr ,
 .Fn fido_cred_id_ptr ,
+.Fn fido_cred_aaguid_ptr ,
 .Fn fido_cred_pubkey_ptr ,
 .Fn fido_cred_sig_ptr ,
 and
 .Fn fido_cred_x5c_ptr
 functions return pointers to the authenticator data, client data
-hash, ID, public key, signature and x509 certificate parts of
+hash, ID, authenticator attestation GUID, public key, signature and
+x509 certificate parts of
 .Fa cred ,
 or NULL if the respective entry is not set.
 .Pp
@@ -136,6 +144,7 @@ The corresponding length can be obtained by
 .Fn fido_cred_authdata_len ,
 .Fn fido_cred_clientdata_hash_len ,
 .Fn fido_cred_id_len ,
+.Fn fido_cred_aaguid_len ,
 .Fn fido_cred_pubkey_len ,
 and
 .Fn fido_cred_sig_len .
@@ -152,6 +161,7 @@ If not NULL, pointers returned by
 .Fn fido_cred_authdata_ptr ,
 .Fn fido_cred_clientdata_hash_ptr ,
 .Fn fido_cred_id_ptr ,
+.Fn fido_cred_aaguid_ptr ,
 .Fn fido_cred_pubkey_ptr ,
 .Fn fido_cred_sig_ptr ,
 and
