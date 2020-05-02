@@ -970,13 +970,13 @@ fido_cred_id_len(const fido_cred_t *cred)
 const unsigned char *
 fido_cred_aaguid_ptr(const fido_cred_t *cred)
 {
-	return cred->attcred.aaguid;
+	return (cred->attcred.aaguid);
 }
 
 size_t
 fido_cred_aaguid_len(const fido_cred_t *cred)
 {
-	return sizeof(cred->attcred.aaguid);
+	return (sizeof(cred->attcred.aaguid));
 }
 
 int
