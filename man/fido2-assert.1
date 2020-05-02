@@ -125,6 +125,10 @@ Asks the authenticator for user presence to be enabled or disabled.
 .It Cm uv Ns = Ns Ar true|false
 Asks the authenticator for user verification to be enabled or
 disabled.
+.It Cm pin Ns = Ns Ar true|false
+Tells
+.Nm
+whether to prompt for a PIN and request user verification.
 .El
 .Pp
 The
@@ -139,6 +143,10 @@ U2F otherwise.
 .It Fl v
 If obtaining an assertion, prompt the user for a PIN and request
 user verification from the authenticator.
+If verifying an assertion, check whether the user verification bit
+was signed by the authenticator.
+.El
+.Pp
 If a
 .Em tty
 is available,
@@ -147,9 +155,6 @@ will use it to obtain the PIN.
 Otherwise,
 .Em stdin
 is used.
-If verifying an assertion, check whether the user verification bit
-was signed by the authenticator.
-.El
 .Sh INPUT FORMAT
 The input of
 .Nm

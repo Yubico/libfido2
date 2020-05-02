@@ -15,6 +15,12 @@
 #include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"
 
+struct toggle {
+	fido_opt_t up;
+	fido_opt_t uv;
+	fido_opt_t pin;
+};
+
 static const char *
 opt2str(fido_opt_t v)
 {
@@ -31,7 +37,7 @@ opt2str(fido_opt_t v)
 }
 
 static void
-parse_toggle(const char *str, fido_opt_t *up, fido_opt_t *uv)
+parse_toggle(const char *str, struct toggle *opt)
 {
 	fido_opt_t *k;
 	fido_opt_t  v;
@@ -55,9 +61,11 @@ parse_toggle(const char *str, fido_opt_t *up, fido_opt_t *uv)
 		errx(1, "unknown value '%s'", val);
 
 	if (!strcmp(key, "up"))
-		k = up;
+		k = &opt->up;
 	else if (!strcmp(key, "uv"))
-		k = uv;
+		k = &opt->uv;
+	else if (!strcmp(key, "pin"))
+		k = &opt->pin;
 	else
 		errx(1, "unknown key '%s'", key);
 
@@ -67,7 +75,7 @@ parse_toggle(const char *str, fido_opt_t *up, fido_opt_t *uv)
 }
 
 static fido_assert_t *
-prepare_assert(FILE *in_f, int flags, fido_opt_t up, fido_opt_t uv)
+prepare_assert(FILE *in_f, int flags, const struct toggle *opt)
 {
 	fido_assert_t *assert = NULL;
 	struct blob cdh;
@@ -97,8 +105,9 @@ prepare_assert(FILE *in_f, int flags, fido_opt_t up, fido_opt_t uv)
 			fprintf(stderr, "credential id:\n");
 			xxd(id.ptr, id.len);
 		}
-		fprintf(stderr, "uv=%s\n", opt2str(uv));
-		fprintf(stderr, "up=%s\n", opt2str(up));
+		fprintf(stderr, "up=%s\n", opt2str(opt->up));
+		fprintf(stderr, "uv=%s\n", opt2str(opt->uv));
+		fprintf(stderr, "pin=%s\n", opt2str(opt->pin));
 	}
 
 	if ((assert = fido_assert_new()) == NULL)
@@ -108,9 +117,9 @@ prepare_assert(FILE *in_f, int flags, fido_opt_t up, fido_opt_t uv)
 	    cdh.len)) != FIDO_OK ||
 	    (r = fido_assert_set_rp(assert, rpid)) != FIDO_OK)
 		errx(1, "fido_assert_set: %s", fido_strerr(r));
-	if ((r = fido_assert_set_up(assert, up)) != FIDO_OK)
+	if ((r = fido_assert_set_up(assert, opt->up)) != FIDO_OK)
 		errx(1, "fido_assert_set_up: %s", fido_strerr(r));
-	if ((r = fido_assert_set_uv(assert, uv)) != FIDO_OK)
+	if ((r = fido_assert_set_uv(assert, opt->uv)) != FIDO_OK)
 		errx(1, "fido_assert_set_uv: %s", fido_strerr(r));
 
 	if (flags & FLAG_HMAC) {
@@ -185,8 +194,7 @@ assert_get(int argc, char **argv)
 {
 	fido_dev_t *dev = NULL;
 	fido_assert_t *assert = NULL;
-	fido_opt_t up = FIDO_OPT_OMIT;
-	fido_opt_t uv = FIDO_OPT_OMIT;
+	struct toggle opt;
 	char pin[1024];
 	char prompt[1024];
 	char *in_path = NULL;
@@ -196,6 +204,8 @@ assert_get(int argc, char **argv)
 	int flags = 0;
 	int ch;
 	int r;
+
+	opt.up = opt.uv = opt.pin = FIDO_OPT_OMIT;
 
 	while ((ch = getopt(argc, argv, "dhi:o:prt:uv")) != -1) {
 		switch (ch) {
@@ -212,19 +222,21 @@ assert_get(int argc, char **argv)
 			out_path = optarg;
 			break;
 		case 'p':
-			up = FIDO_OPT_TRUE;
+			opt.up = FIDO_OPT_TRUE;
 			break;
 		case 'r':
 			flags |= FLAG_RK;
 			break;
 		case 't' :
-			parse_toggle(optarg, &up, &uv);
+			parse_toggle(optarg, &opt);
 			break;
 		case 'u':
 			flags |= FLAG_U2F;
 			break;
 		case 'v':
-			uv = FIDO_OPT_TRUE;
+			/* -v implies both pin and uv for historical reasons */
+			opt.pin = FIDO_OPT_TRUE;
+			opt.uv = FIDO_OPT_TRUE;
 			break;
 		default:
 			usage();
@@ -242,13 +254,13 @@ assert_get(int argc, char **argv)
 
 	fido_init((flags & FLAG_DEBUG) ? FIDO_DEBUG : 0);
 
-	assert = prepare_assert(in_f, flags, up, uv);
+	assert = prepare_assert(in_f, flags, &opt);
 
 	dev = open_dev(argv[0]);
 	if (flags & FLAG_U2F)
 		fido_dev_force_u2f(dev);
 
-	if (uv == FIDO_OPT_TRUE) {
+	if (opt.pin == FIDO_OPT_TRUE) {
 		r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ",
 		    argv[0]);
 		if (r < 0 || (size_t)r >= sizeof(prompt))
