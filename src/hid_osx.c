@@ -384,7 +384,7 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 	IOHIDDeviceScheduleWithRunLoop(dev->ref, CFRunLoopGetCurrent(),
 	    dev->loop_id);
 
-	r = CFRunLoopRunInMode(dev->loop_id, 0.3, true);
+	r = CFRunLoopRunInMode(dev->loop_id, 5, true);
 
 	IOHIDDeviceRegisterInputReportCallback(dev->ref, buf, len, NULL, NULL);
 	IOHIDDeviceRegisterRemovalCallback(dev->ref, NULL, NULL);
