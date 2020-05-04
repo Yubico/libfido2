@@ -19,11 +19,11 @@
 
 #include "fido.h"
 
-#define REPORT_LEN	65
-
-struct dev {
+struct ctx_osx {
 	IOHIDDeviceRef	ref;
 	CFStringRef	loop_id;
+	uint16_t	report_in_len;
+	uint16_t	report_out_len;
 };
 
 static int
@@ -83,7 +83,7 @@ is_fido(IOHIDDeviceRef dev)
 		return (false);
 
 	if (get_int32(dev, CFSTR(kIOHIDMaxInputReportSizeKey),
-	    &report_len) < 0 || report_len != REPORT_LEN - 1) {
+	    &report_len) < 0 || report_len != CTAP_MAX_REPORT_LEN) {
 		fido_log_debug("%s: unsupported report len", __func__);
 		return (false);
 	}
@@ -267,12 +267,12 @@ void *
 fido_hid_open(const char *path)
 {
 	io_registry_entry_t	 entry = MACH_PORT_NULL;
-	struct dev		*dev = NULL;
+	struct ctx_osx		*ctx;
 	int			 ok = -1;
 	int			 r;
 	char			 loop_id[32];
 
-	if ((dev = calloc(1, sizeof(*dev))) == NULL) {
+	if ((ctx = calloc(1, sizeof(*ctx))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
 		goto fail;
 	}
@@ -283,72 +283,78 @@ fido_hid_open(const char *path)
 		goto fail;
 	}
 
-	if ((dev->ref = IOHIDDeviceCreate(kCFAllocatorDefault,
+	if ((ctx->ref = IOHIDDeviceCreate(kCFAllocatorDefault,
 	    entry)) == NULL) {
 		fido_log_debug("%s: IOHIDDeviceCreate", __func__);
 		goto fail;
 	}
 
-	if (IOHIDDeviceOpen(dev->ref,
+	if (IOHIDDeviceOpen(ctx->ref,
 	    kIOHIDOptionsTypeSeizeDevice) != kIOReturnSuccess) {
 		fido_log_debug("%s: IOHIDDeviceOpen", __func__);
 		goto fail;
 	}
 
 	if ((r = snprintf(loop_id, sizeof(loop_id), "fido2-%p",
-	    (void *)dev->ref)) < 0 || (size_t)r >= sizeof(loop_id)) {
+	    (void *)ctx->ref)) < 0 || (size_t)r >= sizeof(loop_id)) {
 		fido_log_debug("%s: snprintf", __func__);
 		goto fail;
 	}
 
-	if ((dev->loop_id = CFStringCreateWithCString(NULL, loop_id,
+	if ((ctx->loop_id = CFStringCreateWithCString(NULL, loop_id,
 	    kCFStringEncodingASCII)) == NULL) {
 		fido_log_debug("%s: CFStringCreateWithCString", __func__);
 		goto fail;
 	}
+
+	ctx->report_in_len = CTAP_MAX_REPORT_LEN;
+	ctx->report_out_len = CTAP_MAX_REPORT_LEN;
 
 	ok = 0;
 fail:
 	if (entry != MACH_PORT_NULL)
 		IOObjectRelease(entry);
 
-	if (ok < 0 && dev != NULL) {
-		if (dev->ref != NULL)
-			CFRelease(dev->ref);
-		if (dev->loop_id != NULL)
-			CFRelease(dev->loop_id);
-		free(dev);
-		dev = NULL;
+	if (ctx != NULL) {
+		if (ctx->ref != NULL)
+			CFRelease(ctx->ref);
+		if (ctx->loop_id != NULL)
+			CFRelease(ctx->loop_id);
+		free(ctx);
+		ctx = NULL;
 	}
 
-	return (dev);
+	return (ctx);
 }
 
 void
 fido_hid_close(void *handle)
 {
-	struct dev *dev = handle;
+	struct ctx_osx *ctx = handle;
 
-	if (IOHIDDeviceClose(dev->ref,
+	if (IOHIDDeviceClose(ctx->ref,
 	    kIOHIDOptionsTypeSeizeDevice) != kIOReturnSuccess)
 		fido_log_debug("%s: IOHIDDeviceClose", __func__);
 
-	CFRelease(dev->ref);
-	CFRelease(dev->loop_id);
+	CFRelease(ctx->ref);
+	CFRelease(ctx->loop_id);
 
-	free(dev);
+	free(ctx);
 }
 
 static void
-read_callback(void *context, IOReturn result, void *dev, IOHIDReportType type,
-    uint32_t report_id, uint8_t *report, CFIndex report_len)
+read_callback(void *context, IOReturn result, void *handle,
+    IOHIDReportType type, uint32_t report_id, uint8_t *report,
+    CFIndex report_len)
 {
+	struct ctx_osx *ctx = handle;
+
 	(void)context;
-	(void)dev;
+	(void)ctx;
 	(void)report;
 
 	if (result != kIOReturnSuccess || type != kIOHIDReportTypeInput ||
-	    report_id != 0 || report_len != REPORT_LEN - 1) {
+	    report_id != 0 || report_len != ctx->report_in_len) {
 		fido_log_debug("%s: io error", __func__);
 	}
 }
@@ -366,54 +372,70 @@ removal_callback(void *context, IOReturn result, void *sender)
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
-	struct dev		*dev = handle;
+	struct ctx_osx		*ctx = handle;
 	CFRunLoopRunResult	 r;
 
 	(void)ms; /* XXX */
 
-	if (len != REPORT_LEN - 1) {
+	if (len != ctx->report_in_len) {
 		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
 
 	explicit_bzero(buf, len);
 
-	IOHIDDeviceRegisterInputReportCallback(dev->ref, buf, len,
+	IOHIDDeviceRegisterInputReportCallback(ctx->ref, buf, len,
 	    &read_callback, NULL);
-	IOHIDDeviceRegisterRemovalCallback(dev->ref, &removal_callback, dev);
-	IOHIDDeviceScheduleWithRunLoop(dev->ref, CFRunLoopGetCurrent(),
-	    dev->loop_id);
+	IOHIDDeviceRegisterRemovalCallback(ctx->ref, &removal_callback, ctx);
+	IOHIDDeviceScheduleWithRunLoop(ctx->ref, CFRunLoopGetCurrent(),
+	    ctx->loop_id);
 
-	r = CFRunLoopRunInMode(dev->loop_id, 5, true);
+	r = CFRunLoopRunInMode(ctx->loop_id, 5, true);
 
-	IOHIDDeviceRegisterInputReportCallback(dev->ref, buf, len, NULL, NULL);
-	IOHIDDeviceRegisterRemovalCallback(dev->ref, NULL, NULL);
-	IOHIDDeviceUnscheduleFromRunLoop(dev->ref, CFRunLoopGetCurrent(),
-	    dev->loop_id);
+	IOHIDDeviceRegisterInputReportCallback(ctx->ref, buf, len, NULL, NULL);
+	IOHIDDeviceRegisterRemovalCallback(ctx->ref, NULL, NULL);
+	IOHIDDeviceUnscheduleFromRunLoop(ctx->ref, CFRunLoopGetCurrent(),
+	    ctx->loop_id);
 
 	if (r != kCFRunLoopRunHandledSource) {
 		fido_log_debug("%s: CFRunLoopRunInMode=%d", __func__, (int)r);
 		return (-1);
 	}
 
-	return (REPORT_LEN - 1);
+	return ((int)len);
 }
 
 int
 fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
-	struct dev *dev = handle;
+	struct ctx_osx *ctx = handle;
 
-	if (len != REPORT_LEN) {
+	if (len != ctx->report_out_len) {
 		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
 
-	if (IOHIDDeviceSetReport(dev->ref, kIOHIDReportTypeOutput, 0, buf + 1,
+	if (IOHIDDeviceSetReport(ctx->ref, kIOHIDReportTypeOutput, 0, buf + 1,
 	    len - 1) != kIOReturnSuccess) {
 		fido_log_debug("%s: IOHIDDeviceSetReport", __func__);
 		return (-1);
 	}
 
-	return (REPORT_LEN);
+	return ((int)len);
+}
+
+uint16_t
+fido_hid_report_in_len(void *handle)
+{
+	struct ctx_osx *ctx = handle;
+
+	return (ctx->report_in_len);
+}
+
+uint16_t
+fido_hid_report_out_len(void *handle)
+{
+	struct ctx_osx *ctx = handle;
+
+	return (ctx->report_out_len);
 }

@@ -19,7 +19,11 @@
 
 #include "fido.h"
 
-#define REPORT_LEN	65
+struct ctx_win {
+	HANDLE		dev;
+	uint16_t	report_in_len;
+	uint16_t	report_out_len;
+};
 
 static bool
 is_fido(HANDLE dev)
@@ -38,8 +42,8 @@ is_fido(HANDLE dev)
 		goto fail;
 	}
 
-	if (caps.OutputReportByteLength != REPORT_LEN ||
-	    caps.InputReportByteLength != REPORT_LEN) {
+	if (caps.OutputReportByteLength != CTAP_MAX_REPORT_LEN + 1||
+	    caps.InputReportByteLength != CTAP_MAX_REPORT_LEN + 1) {
 		fido_log_debug("%s: unsupported report len", __func__);
 		goto fail;
 	}
@@ -261,48 +265,63 @@ fail:
 void *
 fido_hid_open(const char *path)
 {
-	HANDLE dev;
+	struct ctx_win *ctx;
 
-	dev = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
+	if ((ctx = malloc(sizeof(*ctx))) == NULL) {
+		return (NULL);
+	}
+
+	ctx->dev = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
 	    FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
 	    FILE_ATTRIBUTE_NORMAL, NULL);
 
-	if (dev == INVALID_HANDLE_VALUE)
+	if (ctx->dev == INVALID_HANDLE_VALUE) {
+		free(ctx);
 		return (NULL);
+	}
 
-	return (dev);
+	ctx->report_in_len = CTAP_MAX_REPORT_LEN;
+	ctx->report_out_len = CTAP_MAX_REPORT_LEN;
+
+	return (ctx);
 }
 
 void
 fido_hid_close(void *handle)
 {
-	CloseHandle(handle);
+	struct ctx_win *ctx = handle;
+
+	CloseHandle(ctx->dev);
+	free(ctx);
 }
 
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
-	DWORD	n;
-	int	r = -1;
-	uint8_t	report[REPORT_LEN];
+	struct ctx_win *ctx = handle;
+	DWORD		n;
+	int		r = -1;
+	/* First report byte contains the report ID. */
+	uint8_t	report[1 + CTAP_MAX_REPORT_LEN];
 
 	(void)ms; /* XXX */
 
 	memset(report, 0, sizeof(report));
 
-	if (len != sizeof(report) - 1) {
+	if (len != ctx->report_in_len || len > sizeof(report) - 1) {
 		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
 
-	if (ReadFile(handle, report, sizeof(report), &n, NULL) == false ||
-	    n != sizeof(report)) {
+	if (ReadFile(ctx->dev, report, len + 1, &n, NULL) == false ||
+	    n != len + 1) {
 		fido_log_debug("%s: ReadFile", __func__);
 		goto fail;
 	}
 
-	r = sizeof(report) - 1;
+	/* Skip the report ID. */
 	memcpy(buf, report + 1, len);
+	r = len;
 
 fail:
 	explicit_bzero(report, sizeof(report));
@@ -313,18 +332,35 @@ fail:
 int
 fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
-	DWORD n;
+	struct ctx_win *ctx = handle;
+	DWORD		n;
 
-	if (len != REPORT_LEN) {
+	if (len != ctx->report_out_len + 1u) {
 		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
 
-	if (WriteFile(handle, buf, (DWORD)len, &n, NULL) == false ||
-	    n != REPORT_LEN) {
+	if (WriteFile(ctx->dev, buf, (DWORD)len, &n, NULL) == false ||
+	    n != len) {
 		fido_log_debug("%s: WriteFile", __func__);
 		return (-1);
 	}
 
-	return (REPORT_LEN);
+	return (len);
+}
+
+uint16_t
+fido_hid_report_in_len(void *handle)
+{
+	struct ctx_win *ctx = handle;
+
+	return (ctx->report_in_len);
+}
+
+uint16_t
+fido_hid_report_out_len(void *handle)
+{
+	struct ctx_win *ctx = handle;
+
+	return (ctx->report_out_len);
 }

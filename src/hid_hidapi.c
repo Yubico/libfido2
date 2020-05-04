@@ -12,6 +12,12 @@
 
 #include "fido.h"
 
+struct ctx_hidapi {
+	void	*handle;
+	uint16_t report_in_len;
+	uint16_t report_out_len;
+};
+
 static size_t
 fido_wcslen(const wchar_t *wcs)
 {
@@ -86,25 +92,46 @@ copy_info(fido_dev_info_t *di, const struct hid_device_info *d)
 void *
 fido_hid_open(const char *path)
 {
-	return hid_open_path(path);
+	struct ctx_hidapi *ctx;
+
+	if ((ctx = malloc(sizeof(*ctx))) == NULL) {
+		return (NULL);
+	}
+
+	if ((ctx->handle = hid_open_path(path)) == NULL) {
+		free(ctx);
+		return (NULL);
+	}
+
+	ctx->report_in_len = CTAP_MAX_REPORT_LEN;
+	ctx->report_out_len = CTAP_MAX_REPORT_LEN;
+
+	return ctx;
 }
 
 void
-fido_hid_close(void *hid_dev_handle)
+fido_hid_close(void *handle)
 {
-	hid_close(hid_dev_handle);
+	struct ctx_hidapi *ctx = handle;
+
+	hid_close(ctx->handle);
+	free(ctx);
 }
 
 int
-fido_hid_read(void *hid_dev_handle, unsigned char *buf, size_t len, int ms)
+fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
-	return hid_read_timeout(hid_dev_handle, buf, len, ms);
+	struct ctx_hidapi *ctx = handle;
+
+	return hid_read_timeout(ctx->handle, buf, len, ms);
 }
 
 int
-fido_hid_write(void *hid_dev_handle, const unsigned char *buf, size_t len)
+fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
-	return hid_write(hid_dev_handle, buf, len);
+	struct ctx_hidapi *ctx = handle;
+
+	return hid_write(ctx->handle, buf, len);
 }
 
 int
@@ -135,4 +162,20 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 	hid_free_enumeration(hdi);
 
 	return FIDO_OK;
+}
+
+uint16_t
+fido_hid_report_in_len(void *handle)
+{
+	struct ctx_hidapi *ctx = handle;
+
+	return (ctx->report_in_len);
+}
+
+uint16_t
+fido_hid_report_out_len(void *handle)
+{
+	struct ctx_hidapi *ctx = handle;
+
+	return (ctx->report_out_len);
 }

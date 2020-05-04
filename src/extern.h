@@ -88,6 +88,8 @@ void *fido_hid_open(const char *);
 void  fido_hid_close(void *);
 int fido_hid_read(void *, unsigned char *, size_t, int);
 int fido_hid_write(void *, const unsigned char *, size_t);
+uint16_t fido_hid_report_in_len(void *);
+uint16_t fido_hid_report_out_len(void *);
 
 /* generic i/o */
 int fido_rx_cbor_status(fido_dev_t *, int);
