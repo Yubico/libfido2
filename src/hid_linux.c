@@ -94,6 +94,50 @@ get_usage_info(const struct hidraw_report_descriptor *hrd, uint32_t *usage_page,
 	return (0);
 }
 
+static void
+get_report_lengths(const struct hidraw_report_descriptor *hrd,
+    uint16_t *report_in_len, uint16_t *report_out_len)
+{
+	const uint8_t	*ptr;
+	size_t		 len;
+	uint16_t	 cur_report_count = 0;
+
+	ptr = hrd->value;
+	len = hrd->size;
+
+	*report_in_len = 0;
+	*report_out_len = 0;
+
+	while (len > 0) {
+		const uint8_t tag = ptr[0];
+		ptr++;
+		len--;
+
+		uint8_t  key;
+		size_t   key_len;
+		uint32_t key_val;
+
+		if (get_key_len(tag, &key, &key_len) < 0 || key_len > len ||
+		    get_key_val(ptr, key_len, &key_val) < 0) {
+			return;
+		}
+
+		if (key == 0x94) {
+			cur_report_count = key_val;
+			fido_log_debug("%s: ReportCount(%d)", __func__, cur_report_count);
+		} else if (key == 0x80) {
+			*report_in_len = cur_report_count;
+			fido_log_debug("%s: Input", __func__);
+		} else if (key == 0x90) {
+			*report_out_len = cur_report_count;
+			fido_log_debug("%s: Output", __func__);
+		}
+
+		ptr += key_len;
+		len -= key_len;
+	}
+}
+
 static int
 get_report_descriptor(const char *path, struct hidraw_report_descriptor *hrd)
 {
@@ -293,22 +337,28 @@ fail:
 void *
 fido_hid_open(const char *path)
 {
-	fido_dev_io_info_t	*io_info;
-	int			*fd;
+	fido_dev_io_info_t		*io_info;
+	int				*fd;
+	struct hidraw_report_descriptor	 hrd;
 
 	if ((io_info = malloc(sizeof(*io_info))) == NULL)
 		return (NULL);
 
 	if ((fd = malloc(sizeof(*fd))) == NULL ||
 	    (*fd = open(path, O_RDWR)) < 0) {
-		free(io_info);
 		free(fd);
+		free(io_info);
 		return (NULL);
 	}
-
 	io_info->io_handle = fd;
-	io_info->report_in_len = MAX_CTAP_REPORT_LEN;
-	io_info->report_out_len = MAX_CTAP_REPORT_LEN;
+
+	/*
+	 * Don't fail when report sizes can't be extracted in order to maintain
+	 * backwards compatibility.
+	 */
+	if (get_report_descriptor(path, &hrd) >= 0)
+		get_report_lengths(&hrd, &io_info->report_in_len,
+		    &io_info->report_out_len);
 
 	return (io_info);
 }
