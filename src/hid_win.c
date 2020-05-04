@@ -36,8 +36,10 @@ is_fido(HANDLE dev)
 		goto fail;
 	}
 
-	if (caps.OutputReportByteLength != MAX_CTAP_REPORT_LEN + 1||
-	    caps.InputReportByteLength != MAX_CTAP_REPORT_LEN + 1) {
+	if (caps.OutputReportByteLength - 1 > MAX_CTAP_REPORT_LEN ||
+	    caps.OutputReportByteLength - 1 <= CTAP_INIT_HEADER_LEN ||
+	    caps.InputReportByteLength - 1 > MAX_CTAP_REPORT_LEN ||
+	    caps.InputReportByteLength - 1 <= CTAP_CONT_HEADER_LEN) {
 		fido_log_debug("%s: unsupported report len", __func__);
 		goto fail;
 	}
@@ -48,6 +50,31 @@ fail:
 		HidD_FreePreparsedData(data);
 
 	return (usage_page == 0xf1d0);
+}
+
+static void
+set_report_lengths(fido_dev_io_info_t *io_info)
+{
+	HANDLE			dev = io_info->io_handle;
+	PHIDP_PREPARSED_DATA	data = NULL;
+	HIDP_CAPS		caps;
+
+	if (HidD_GetPreparsedData(dev, &data) == false) {
+		fido_log_debug("%s: HidD_GetPreparsedData", __func__);
+		goto fail;
+	}
+
+	if (HidP_GetCaps(data, &caps) != HIDP_STATUS_SUCCESS) {
+		fido_log_debug("%s: HidP_GetCaps", __func__);
+		goto fail;
+	}
+
+	io_info->report_in_len = (uint16_t)(caps.InputReportByteLength - 1);
+	io_info->report_out_len = (uint16_t)(caps.OutputReportByteLength - 1);
+
+fail:
+	if (data != NULL)
+		HidD_FreePreparsedData(data);
 }
 
 static int
@@ -262,9 +289,8 @@ fido_hid_open(const char *path)
 	fido_dev_io_info_t	*io_info;
 	HANDLE			 dev;
 
-	if ((io_info = malloc(sizeof(*io_info))) == NULL) {
+	if ((io_info = calloc(1, sizeof(*io_info))) == NULL)
 		return (NULL);
-	}
 
 	dev = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
 	    FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
@@ -276,8 +302,7 @@ fido_hid_open(const char *path)
 	}
 
 	io_info->io_handle = dev;
-	io_info->report_in_len = MAX_CTAP_REPORT_LEN;
-	io_info->report_out_len = MAX_CTAP_REPORT_LEN;
+	set_report_lengths(io_info);
 
 	return (io_info);
 }
