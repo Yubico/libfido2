@@ -30,7 +30,7 @@ is_fido(HANDLE dev)
 {
 	PHIDP_PREPARSED_DATA	data = NULL;
 	HIDP_CAPS		caps;
-	uint16_t		usage_page = 0;
+	int			fido = 0;
 
 	if (HidD_GetPreparsedData(dev, &data) == false) {
 		fido_log_debug("%s: HidD_GetPreparsedData", __func__);
@@ -42,18 +42,53 @@ is_fido(HANDLE dev)
 		goto fail;
 	}
 
-	if (caps.OutputReportByteLength != CTAP_MAX_REPORT_LEN + 1||
-	    caps.InputReportByteLength != CTAP_MAX_REPORT_LEN + 1) {
-		fido_log_debug("%s: unsupported report len", __func__);
+	if ((uint16_t)caps.UsagePage != 0xf1d0)
+		goto fail;
+
+	if (caps.OutputReportByteLength > CTAP_MAX_REPORT_LEN + 1 ||
+	    caps.OutputReportByteLength < CTAP_MIN_REPORT_LEN + 1) {
+		fido_log_debug("%s: invalid output report len: %d", __func__,
+		    (int)caps.OutputReportByteLength - 1);
+		goto fail;
+	}
+	if (caps.InputReportByteLength > CTAP_MAX_REPORT_LEN + 1 ||
+	    caps.InputReportByteLength < CTAP_MIN_REPORT_LEN + 1) {
+		fido_log_debug("%s: invalid input report len: %d", __func__,
+		    (int)caps.InputReportByteLength - 1);
 		goto fail;
 	}
 
-	usage_page = caps.UsagePage;
+	fido = 1;
 fail:
 	if (data != NULL)
 		HidD_FreePreparsedData(data);
 
-	return (usage_page == 0xf1d0);
+	return (fido == 1);
+}
+
+static void
+set_report_lengths(struct ctx_win *ctx)
+{
+	HANDLE			dev = ctx->dev;
+	PHIDP_PREPARSED_DATA	data = NULL;
+	HIDP_CAPS		caps;
+
+	if (HidD_GetPreparsedData(dev, &data) == false) {
+		fido_log_debug("%s: HidD_GetPreparsedData", __func__);
+		goto fail;
+	}
+
+	if (HidP_GetCaps(data, &caps) != HIDP_STATUS_SUCCESS) {
+		fido_log_debug("%s: HidP_GetCaps", __func__);
+		goto fail;
+	}
+
+	ctx->report_in_len = (uint16_t)(caps.InputReportByteLength - 1);
+	ctx->report_out_len = (uint16_t)(caps.OutputReportByteLength - 1);
+
+fail:
+	if (data != NULL)
+		HidD_FreePreparsedData(data);
 }
 
 static int
@@ -267,9 +302,8 @@ fido_hid_open(const char *path)
 {
 	struct ctx_win *ctx;
 
-	if ((ctx = malloc(sizeof(*ctx))) == NULL) {
+	if ((ctx = calloc(1, sizeof(*ctx))) == NULL)
 		return (NULL);
-	}
 
 	ctx->dev = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
 	    FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
@@ -280,8 +314,7 @@ fido_hid_open(const char *path)
 		return (NULL);
 	}
 
-	ctx->report_in_len = CTAP_MAX_REPORT_LEN;
-	ctx->report_out_len = CTAP_MAX_REPORT_LEN;
+	set_report_lengths(ctx);
 
 	return (ctx);
 }
