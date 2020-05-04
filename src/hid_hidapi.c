@@ -99,6 +99,10 @@ fido_hid_open(const char *path)
 	}
 
 	io_info->io_handle = hid_dev_handle;
+	/*
+	 * hidapi does not provide access to the report descriptor, hence the
+	 * default report sizes are used.
+	 */
 	io_info->report_in_len = MAX_CTAP_REPORT_LEN;
 	io_info->report_out_len = MAX_CTAP_REPORT_LEN;
 
