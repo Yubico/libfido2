@@ -271,6 +271,11 @@ fido_hid_open(const char *path)
 	int			 ok = -1;
 	int			 r;
 	char			 loop_id[32];
+	fido_dev_io_info_t	*io_info;
+
+	if ((io_info = malloc(sizeof(*io_info))) == NULL) {
+		goto fail;
+	}
 
 	if ((dev = calloc(1, sizeof(*dev))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
@@ -312,22 +317,30 @@ fail:
 	if (entry != MACH_PORT_NULL)
 		IOObjectRelease(entry);
 
-	if (ok < 0 && dev != NULL) {
-		if (dev->ref != NULL)
-			CFRelease(dev->ref);
-		if (dev->loop_id != NULL)
-			CFRelease(dev->loop_id);
-		free(dev);
-		dev = NULL;
+	if (ok < 0) {
+		free(io_info);
+		if (dev != NULL) {
+			if (dev->ref != NULL)
+				CFRelease(dev->ref);
+			if (dev->loop_id != NULL)
+				CFRelease(dev->loop_id);
+			free(dev);
+			dev = NULL;
+		}
 	}
 
-	return (dev);
+	io_info->io_handle = dev;
+	io_info->report_in_len = MAX_CTAP_REPORT_LEN;
+	io_info->report_out_len = MAX_CTAP_REPORT_LEN;
+
+	return (io_info);
 }
 
 void
-fido_hid_close(void *handle)
+fido_hid_close(void *opaque_io_info)
 {
-	struct dev *dev = handle;
+	fido_dev_io_info_t	*io_info = opaque_io_info;
+	struct dev		*dev = io_info->io_handle;
 
 	if (IOHIDDeviceClose(dev->ref,
 	    kIOHIDOptionsTypeSeizeDevice) != kIOReturnSuccess)
@@ -337,6 +350,7 @@ fido_hid_close(void *handle)
 	CFRelease(dev->loop_id);
 
 	free(dev);
+	free(io_info);
 }
 
 static void
@@ -364,14 +378,15 @@ removal_callback(void *context, IOReturn result, void *sender)
 }
 
 int
-fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
+fido_hid_read(void *opaque_io_info, unsigned char *buf, size_t len, int ms)
 {
-	struct dev		*dev = handle;
+	fido_dev_io_info_t	*io_info = opaque_io_info;
+	struct dev		*dev = io_info->io_handle;
 	CFRunLoopRunResult	 r;
 
 	(void)ms; /* XXX */
 
-	if (len != REPORT_LEN - 1) {
+	if (len != io_info->report_in_len) {
 		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
@@ -396,15 +411,16 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 
-	return (REPORT_LEN - 1);
+	return ((int)len);
 }
 
 int
-fido_hid_write(void *handle, const unsigned char *buf, size_t len)
+fido_hid_write(void *opaque_io_info, const unsigned char *buf, size_t len)
 {
-	struct dev *dev = handle;
+	fido_dev_io_info_t	*io_info = opaque_io_info;
+	struct dev		*dev = io_info->io_handle;
 
-	if (len != REPORT_LEN) {
+	if (len != io_info->report_out_len) {
 		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
@@ -415,5 +431,5 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 		return (-1);
 	}
 
-	return (REPORT_LEN);
+	return ((int)len);
 }

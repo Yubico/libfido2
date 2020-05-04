@@ -86,25 +86,47 @@ copy_info(fido_dev_info_t *di, const struct hid_device_info *d)
 void *
 fido_hid_open(const char *path)
 {
-	return hid_open_path(path);
+	fido_dev_io_info_t	*io_info;
+	void			*hid_dev_handle;
+
+	if ((io_info = malloc(sizeof(*io_info))) == NULL) {
+		return (NULL);
+	}
+
+	if ((hid_dev_handle = hid_open_path(path)) == NULL) {
+		free(io_info);
+		return (NULL);
+	}
+
+	io_info->io_handle = hid_dev_handle;
+	io_info->report_in_len = MAX_CTAP_REPORT_LEN;
+	io_info->report_out_len = MAX_CTAP_REPORT_LEN;
+
+	return io_info;
 }
 
 void
-fido_hid_close(void *hid_dev_handle)
+fido_hid_close(void *opaque_io_info)
 {
-	hid_close(hid_dev_handle);
+	fido_dev_io_info_t *io_info = opaque_io_info;
+
+	hid_close(io_info->io_handle);
 }
 
 int
-fido_hid_read(void *hid_dev_handle, unsigned char *buf, size_t len, int ms)
+fido_hid_read(void *opaque_io_info, unsigned char *buf, size_t len, int ms)
 {
-	return hid_read_timeout(hid_dev_handle, buf, len, ms);
+	fido_dev_io_info_t *io_info = opaque_io_info;
+
+	return hid_read_timeout(io_info->io_handle, buf, len, ms);
 }
 
 int
-fido_hid_write(void *hid_dev_handle, const unsigned char *buf, size_t len)
+fido_hid_write(void *opaque_io_info, const unsigned char *buf, size_t len)
 {
-	return hid_write(hid_dev_handle, buf, len);
+	fido_dev_io_info_t *io_info = opaque_io_info;
+
+	return hid_write(io_info->io_handle, buf, len);
 }
 
 int

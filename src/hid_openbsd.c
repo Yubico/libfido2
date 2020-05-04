@@ -20,12 +20,6 @@
 #define MAX_UHID	64
 #define MAX_U2FHID_LEN	64
 
-struct hid_openbsd {
-	int fd;
-	size_t report_in_len;
-	size_t report_out_len;
-};
-
 int
 fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
@@ -100,13 +94,13 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
  * sequence bits will be ignored as duplicate packets by the device.
  */
 static int
-terrible_ping_kludge(struct hid_openbsd *ctx)
+terrible_ping_kludge(fido_dev_io_info_t *io_info)
 {
 	u_char data[256];
 	int i, n;
 	struct pollfd pfd;
 
-	if (sizeof(data) < ctx->report_out_len + 1)
+	if (sizeof(data) < io_info->report_out_len + 1)
 		return -1;
 	for (i = 0; i < 4; i++) {
 		memset(data, 0, sizeof(data));
@@ -121,11 +115,12 @@ terrible_ping_kludge(struct hid_openbsd *ctx)
 		data[6] = 0;
 		data[7] = 1;
 		fido_log_debug("%s: send ping %d", __func__, i);
-		if (fido_hid_write(ctx, data, ctx->report_out_len + 1) == -1)
+		if (fido_hid_write(io_info, data, io_info->report_out_len
+		    + 1) == -1)
 			return -1;
 		fido_log_debug("%s: wait reply", __func__);
 		memset(&pfd, 0, sizeof(pfd));
-		pfd.fd = ctx->fd;
+		pfd.fd = io_info->io_handle;
 		pfd.events = POLLIN;
 		if ((n = poll(&pfd, 1, 100)) == -1) {
 			fido_log_debug("%s: poll: %s", __func__, strerror(errno));
@@ -134,7 +129,8 @@ terrible_ping_kludge(struct hid_openbsd *ctx)
 			fido_log_debug("%s: timed out", __func__);
 			continue;
 		}
-		if (fido_hid_read(ctx, data, ctx->report_out_len, 250) == -1)
+		if (fido_hid_read(io_info, data, io_info->report_out_len,
+		    250) == -1)
 			return -1;
 		/*
 		 * Ping isn't always supported on the broadcast channel,
@@ -142,7 +138,7 @@ terrible_ping_kludge(struct hid_openbsd *ctx)
 		 * synched now.
 		 */
 		fido_log_debug("%s: got reply", __func__);
-		fido_log_xxd(data, ctx->report_out_len);
+		fido_log_xxd(data, io_info->report_out_len);
 		return 0;
 	}
 	fido_log_debug("%s: no response", __func__);
@@ -152,7 +148,7 @@ terrible_ping_kludge(struct hid_openbsd *ctx)
 void *
 fido_hid_open(const char *path)
 {
-	struct hid_openbsd *ret = NULL;
+	fido_dev_io_info_t *ret = NULL;
 
 	if ((ret = calloc(1, sizeof(*ret))) == NULL ||
 	    (ret->fd = open(path, O_RDWR)) < 0) {
@@ -177,28 +173,29 @@ fido_hid_open(const char *path)
 }
 
 void
-fido_hid_close(void *handle)
+fido_hid_close(void *opaque_io_info)
 {
-	struct hid_openbsd *ctx = (struct hid_openbsd *)handle;
+	fido_dev_io_info_t *io_info = opaque_io_info;
 
-	close(ctx->fd);
-	free(ctx);
+	close((int)io_info->io_handle);
+	free(io_info);
 }
 
 int
-fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
+fido_hid_read(void *opaque_io_info, unsigned char *buf, size_t len, int ms)
 {
-	struct hid_openbsd *ctx = (struct hid_openbsd *)handle;
-	ssize_t r;
+	fido_dev_io_info_t	*io_info = opaque_io_info;
+	ssize_t			 r;
 
 	(void)ms; /* XXX */
 
-	if (len != ctx->report_in_len) {
+	if (len != io_info->report_in_len) {
 		fido_log_debug("%s: invalid len: got %zu, want %zu", __func__,
-		    len, ctx->report_in_len);
+		    len, io_info->report_in_len);
 		return (-1);
 	}
-	if ((r = read(ctx->fd, buf, len)) == -1 || (size_t)r != len) {
+	if ((r = read((int)io_info->io_handle, buf, len)) == -1 ||
+	    (size_t)r != len) {
 		fido_log_debug("%s: read: %s", __func__, strerror(errno));
 		return (-1);
 	}
@@ -206,18 +203,18 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 }
 
 int
-fido_hid_write(void *handle, const unsigned char *buf, size_t len)
+fido_hid_write(void *opaque_io_info, const unsigned char *buf, size_t len)
 {
-	struct hid_openbsd *ctx = (struct hid_openbsd *)handle;
-	ssize_t r;
+	fido_dev_io_info_t	*io_info = opaque_io_info;
+	ssize_t			 r;
 
-	if (len != ctx->report_out_len + 1) {
+	if (len != io_info->report_out_len + 1) {
 		fido_log_debug("%s: invalid len: got %zu, want %zu", __func__,
-		    len, ctx->report_out_len);
+		    len, io_info->report_out_len);
 		return (-1);
 	}
-	if ((r = write(ctx->fd, buf + 1, len - 1)) == -1 ||
-	    (size_t)r != len - 1) {
+	if ((r = write((int)io_info->io_handle, buf + 1, len - 1)) == -1
+	    || (size_t)r != len - 1) {
 		fido_log_debug("%s: write: %s", __func__, strerror(errno));
 		return (-1);
 	}

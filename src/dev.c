@@ -106,13 +106,50 @@ find_manifest_func_node(dev_manifest_func_t f, dev_manifest_func_node_t **curr,
 	}
 }
 
+static fido_dev_io_info_t *
+fido_dev_io_open_wrapper(fido_dev_t *dev, const char *path) {
+	fido_dev_io_info_t *io_info;
+
+	if (dev->legacy_io) {
+		if ((io_info = malloc(sizeof(*io_info))) == NULL)
+			return (NULL);
+
+		if ((io_info->io_handle = dev->io.open(path)) == NULL) {
+			fido_log_debug("%s: dev->io.open", __func__);
+			free(io_info);
+			return (NULL);
+		}
+
+		/*
+		 * Use standard report lengths for backwards compatibility with
+		 * custom IO functions enabled with fido_dev_set_io_functions.
+		 */
+		io_info->report_in_len = MAX_CTAP_REPORT_LEN;
+		io_info->report_out_len = MAX_CTAP_REPORT_LEN;
+
+		return io_info;
+	} else {
+		return dev->io.open(path);
+	}
+}
+
+static void
+fido_dev_io_close_wrapper(fido_dev_t *dev) {
+	if (dev->legacy_io) {
+		dev->io.close(dev->io_info->io_handle);
+		free(dev->io_info);
+	} else {
+		dev->io.close(dev->io_info);
+	}
+}
+
 static int
 fido_dev_open_tx(fido_dev_t *dev, const char *path)
 {
 	const uint8_t cmd = CTAP_CMD_INIT;
 
-	if (dev->io_handle != NULL) {
-		fido_log_debug("%s: handle=%p", __func__, dev->io_handle);
+	if (dev->io_info != NULL) {
+		fido_log_debug("%s: handle=%p", __func__, (void *)dev->io_info);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
@@ -126,15 +163,29 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 		return (FIDO_ERR_INTERNAL);
 	}
 
-	if ((dev->io_handle = dev->io.open(path)) == NULL) {
+	if ((dev->io_info = fido_dev_io_open_wrapper(dev, path)) == NULL) {
 		fido_log_debug("%s: dev->io.open", __func__);
 		return (FIDO_ERR_INTERNAL);
+	}
+	if (dev->io_info->report_in_len <= CTAP_INIT_HEADER_LEN ||
+	    dev->io_info->report_in_len > MAX_CTAP_REPORT_LEN) {
+		fido_log_debug("%s: invalid report_in_len %d", __func__,
+		    dev->io_info->report_in_len);
+		/* Fall back to default USB transfer report length. */
+		dev->io_info->report_in_len = MAX_CTAP_REPORT_LEN;
+	}
+	if (dev->io_info->report_out_len <= CTAP_INIT_HEADER_LEN ||
+	    dev->io_info->report_out_len > MAX_CTAP_REPORT_LEN) {
+		fido_log_debug("%s: invalid report_out_len %d", __func__,
+		    dev->io_info->report_out_len);
+		/* Fall back to default USB transfer report length. */
+		dev->io_info->report_out_len = MAX_CTAP_REPORT_LEN;
 	}
 
 	if (fido_tx(dev, cmd, &dev->nonce, sizeof(dev->nonce)) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
-		dev->io.close(dev->io_handle);
-		dev->io_handle = NULL;
+		fido_dev_io_close_wrapper(dev);
+		dev->io_info = NULL;
 		return (FIDO_ERR_TX);
 	}
 
@@ -190,8 +241,8 @@ fail:
 	fido_cbor_info_free(&info);
 
 	if (r != FIDO_OK) {
-		dev->io.close(dev->io_handle);
-		dev->io_handle = NULL;
+		fido_dev_io_close_wrapper(dev);
+		dev->io_info = NULL;
 	}
 
 	return (r);
@@ -291,11 +342,11 @@ fido_dev_open(fido_dev_t *dev, const char *path)
 int
 fido_dev_close(fido_dev_t *dev)
 {
-	if (dev->io_handle == NULL || dev->io.close == NULL)
+	if (dev->io_info == NULL || dev->io.close == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	dev->io.close(dev->io_handle);
-	dev->io_handle = NULL;
+	fido_dev_io_close_wrapper(dev);
+	dev->io_info = NULL;
 
 	return (FIDO_OK);
 }
@@ -312,7 +363,7 @@ fido_dev_cancel(fido_dev_t *dev)
 int
 fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 {
-	if (dev->io_handle != NULL) {
+	if (dev->io_info != NULL) {
 		fido_log_debug("%s: non-NULL handle", __func__);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
@@ -324,6 +375,7 @@ fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 	}
 
 	dev->io = *io;
+	dev->legacy_io = true;
 
 	return (FIDO_OK);
 }
@@ -331,7 +383,7 @@ fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 int
 fido_dev_set_transport_functions(fido_dev_t *dev, const fido_dev_transport_t *t)
 {
-	if (dev->io_handle != NULL) {
+	if (dev->io_info != NULL) {
 		fido_log_debug("%s: non-NULL handle", __func__);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}

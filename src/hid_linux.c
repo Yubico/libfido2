@@ -17,8 +17,6 @@
 
 #include "fido.h"
 
-#define REPORT_LEN	65
-
 static int
 get_key_len(uint8_t tag, uint8_t *key, size_t *key_len)
 {
@@ -295,60 +293,76 @@ fail:
 void *
 fido_hid_open(const char *path)
 {
-	int *fd;
+	fido_dev_io_info_t	*io_info;
+	int			*fd;
+
+	if ((io_info = malloc(sizeof(*io_info))) == NULL)
+		return (NULL);
 
 	if ((fd = malloc(sizeof(*fd))) == NULL ||
 	    (*fd = open(path, O_RDWR)) < 0) {
+		free(io_info);
 		free(fd);
 		return (NULL);
 	}
 
-	return (fd);
+	io_info->io_handle = fd;
+	io_info->report_in_len = MAX_CTAP_REPORT_LEN;
+	io_info->report_out_len = MAX_CTAP_REPORT_LEN;
+
+	return (io_info);
 }
 
 void
-fido_hid_close(void *handle)
+fido_hid_close(void *opaque_io_info)
 {
-	int *fd = handle;
+	fido_dev_io_info_t	*io_info = opaque_io_info;
+	int			*fd = io_info->io_handle;
 
 	close(*fd);
 	free(fd);
+
+	free(io_info);
 }
 
 int
-fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
+fido_hid_read(void *opaque_io_info, unsigned char *buf, size_t len, int ms)
 {
-	int	*fd = handle;
-	ssize_t	 r;
+	fido_dev_io_info_t	*io_info = opaque_io_info;
+	int			*fd = io_info->io_handle;
+	ssize_t			 r;
 
 	(void)ms; /* XXX */
 
-	if (len != REPORT_LEN - 1) {
+	if (len != io_info->report_in_len) {
 		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
 
-	if ((r = read(*fd, buf, len)) < 0 || r != REPORT_LEN - 1)
+	if ((r = read(*fd, buf, len)) < 0 || (size_t) r != len)
 		return (-1);
 
-	return (REPORT_LEN - 1);
+	return ((int) r);
 }
 
 int
-fido_hid_write(void *handle, const unsigned char *buf, size_t len)
+fido_hid_write(void *opaque_io_info, const unsigned char *buf, size_t len)
 {
-	int	*fd = handle;
-	ssize_t	 r;
+	fido_dev_io_info_t	*io_info = opaque_io_info;
+	int			*fd = io_info->io_handle;
+	ssize_t			 r;
 
-	if (len != REPORT_LEN) {
-		fido_log_debug("%s: invalid len", __func__);
+	if (len != 1u + io_info->report_out_len) {
+		fido_log_debug("%s: invalid len %zu/%d", __func__, len,
+		    io_info->report_out_len);
 		return (-1);
 	}
 
-	if ((r = write(*fd, buf, len)) < 0 || r != REPORT_LEN) {
+	if ((r = write(*fd, buf, len)) < 0 ||
+	    (size_t) r != 1u + io_info->report_out_len) {
 		fido_log_debug("%s: write", __func__);
 		return (-1);
 	}
 
-	return (REPORT_LEN);
+	return ((int) r);
 }
