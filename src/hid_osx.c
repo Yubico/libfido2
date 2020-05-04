@@ -19,8 +19,6 @@
 
 #include "fido.h"
 
-#define REPORT_LEN	65
-
 struct dev {
 	IOHIDDeviceRef	ref;
 	CFStringRef	loop_id;
@@ -76,19 +74,51 @@ static bool
 is_fido(IOHIDDeviceRef dev)
 {
 	uint32_t	usage_page;
-	int32_t		report_len;
+	int32_t		report_in_len;
+	int32_t		report_out_len;
 
 	if (get_int32(dev, CFSTR(kIOHIDPrimaryUsagePageKey),
 	    (int32_t *)&usage_page) != 0 || usage_page != 0xf1d0)
 		return (false);
 
 	if (get_int32(dev, CFSTR(kIOHIDMaxInputReportSizeKey),
-	    &report_len) < 0 || report_len != REPORT_LEN - 1) {
-		fido_log_debug("%s: unsupported report len", __func__);
+	    &report_in_len) < 0 || report_in_len <= CTAP_INIT_HEADER_LEN ||
+	    report_in_len > MAX_CTAP_REPORT_LEN) {
+		fido_log_debug("%s: unsupported input report len", __func__);
+		return (false);
+	}
+
+	if (get_int32(dev, CFSTR(kIOHIDMaxOutputReportSizeKey),
+	    &report_out_len) < 0 || report_out_len <= CTAP_INIT_HEADER_LEN ||
+	    report_out_len > MAX_CTAP_REPORT_LEN) {
+		fido_log_debug("%s: unsupported output report len", __func__);
 		return (false);
 	}
 
 	return (true);
+}
+
+static void
+set_report_lengths(fido_dev_io_info_t *io_info)
+{
+	struct dev	*dev = io_info->io_handle;
+	int32_t		 report_in_len;
+	int32_t		 report_out_len;
+
+	if (get_int32(dev->ref, CFSTR(kIOHIDMaxInputReportSizeKey),
+	    &report_in_len) < 0) {
+		fido_log_debug("%s: failed to read input report len", __func__);
+		return;
+	}
+
+	if (get_int32(dev->ref, CFSTR(kIOHIDMaxOutputReportSizeKey),
+	    &report_out_len) < 0) {
+		fido_log_debug("%s: failed to read output report len", __func__);
+		return;
+	}
+
+	io_info->report_in_len = (uint16_t) report_in_len;
+	io_info->report_out_len = (uint16_t) report_out_len;
 }
 
 static int
@@ -312,6 +342,8 @@ fido_hid_open(const char *path)
 		goto fail;
 	}
 
+	set_report_lengths(io_info);
+
 	ok = 0;
 fail:
 	if (entry != MACH_PORT_NULL)
@@ -357,12 +389,14 @@ static void
 read_callback(void *context, IOReturn result, void *dev, IOHIDReportType type,
     uint32_t report_id, uint8_t *report, CFIndex report_len)
 {
+	fido_dev_io_info_t *io_info = context;
+
 	(void)context;
 	(void)dev;
 	(void)report;
 
 	if (result != kIOReturnSuccess || type != kIOHIDReportTypeInput ||
-	    report_id != 0 || report_len != REPORT_LEN - 1) {
+	    report_id != 0 || report_len != io_info->report_in_len) {
 		fido_log_debug("%s: io error", __func__);
 	}
 }
@@ -394,8 +428,8 @@ fido_hid_read(void *opaque_io_info, unsigned char *buf, size_t len, int ms)
 	explicit_bzero(buf, len);
 
 	IOHIDDeviceRegisterInputReportCallback(dev->ref, buf, len,
-	    &read_callback, NULL);
-	IOHIDDeviceRegisterRemovalCallback(dev->ref, &removal_callback, dev);
+	    &read_callback, io_info);
+	IOHIDDeviceRegisterRemovalCallback(dev->ref, &removal_callback, NULL);
 	IOHIDDeviceScheduleWithRunLoop(dev->ref, CFRunLoopGetCurrent(),
 	    dev->loop_id);
 
