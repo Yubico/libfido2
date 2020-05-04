@@ -76,19 +76,51 @@ static bool
 is_fido(IOHIDDeviceRef dev)
 {
 	uint32_t	usage_page;
-	int32_t		report_len;
+	int32_t		report_in_len;
+	int32_t		report_out_len;
 
 	if (get_int32(dev, CFSTR(kIOHIDPrimaryUsagePageKey),
 	    (int32_t *)&usage_page) != 0 || usage_page != 0xf1d0)
 		return (false);
 
 	if (get_int32(dev, CFSTR(kIOHIDMaxInputReportSizeKey),
-	    &report_len) < 0 || report_len != CTAP_MAX_REPORT_LEN) {
-		fido_log_debug("%s: unsupported report len", __func__);
+	    &report_in_len) < 0 || report_in_len < CTAP_MIN_REPORT_LEN ||
+	    report_in_len > CTAP_MAX_REPORT_LEN) {
+		fido_log_debug("%s: unsupported input report len", __func__);
+		return (false);
+	}
+
+	if (get_int32(dev, CFSTR(kIOHIDMaxOutputReportSizeKey),
+	    &report_out_len) < 0 || report_out_len < CTAP_MIN_REPORT_LEN ||
+	    report_out_len > CTAP_MAX_REPORT_LEN) {
+		fido_log_debug("%s: unsupported output report len", __func__);
 		return (false);
 	}
 
 	return (true);
+}
+
+static void
+set_report_lengths(struct ctx_osx *ctx)
+{
+	int32_t	report_in_len;
+	int32_t	report_out_len;
+
+	if (get_int32(ctx->ref, CFSTR(kIOHIDMaxInputReportSizeKey),
+	    &report_in_len) < 0) {
+		fido_log_debug("%s: failed to read input report len", __func__);
+		return;
+	}
+
+	if (get_int32(ctx->ref, CFSTR(kIOHIDMaxOutputReportSizeKey),
+	    &report_out_len) < 0) {
+		fido_log_debug("%s: failed to read output report len",
+		    __func__);
+		return;
+	}
+
+	ctx->report_in_len = (uint16_t)report_in_len;
+	ctx->report_out_len = (uint16_t)report_out_len;
 }
 
 static int
@@ -307,8 +339,7 @@ fido_hid_open(const char *path)
 		goto fail;
 	}
 
-	ctx->report_in_len = CTAP_MAX_REPORT_LEN;
-	ctx->report_out_len = CTAP_MAX_REPORT_LEN;
+	set_report_lengths(ctx);
 
 	ok = 0;
 fail:
