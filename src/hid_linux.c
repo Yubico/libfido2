@@ -17,7 +17,11 @@
 
 #include "fido.h"
 
-#define REPORT_LEN	65
+struct ctx_linux {
+	int		fd;
+	uint16_t	report_in_len;
+	uint16_t	report_out_len;
+};
 
 static int
 get_key_len(uint8_t tag, uint8_t *key, size_t *key_len)
@@ -295,60 +299,87 @@ fail:
 void *
 fido_hid_open(const char *path)
 {
-	int *fd;
+	struct ctx_linux *ctx;
 
-	if ((fd = malloc(sizeof(*fd))) == NULL ||
-	    (*fd = open(path, O_RDWR)) < 0) {
-		free(fd);
+	if ((ctx = calloc(1, sizeof(*ctx))) == NULL)
+		return (NULL);
+
+	if ((ctx->fd = open(path, O_RDWR)) < 0) {
+		free(ctx);
 		return (NULL);
 	}
 
-	return (fd);
+	ctx->report_in_len = CTAP_MAX_REPORT_LEN;
+	ctx->report_out_len = CTAP_MAX_REPORT_LEN;
+
+	return (ctx);
 }
 
 void
 fido_hid_close(void *handle)
 {
-	int *fd = handle;
+	struct ctx_linux *ctx = handle;
 
-	close(*fd);
-	free(fd);
+	close(ctx->fd);
+	free(ctx);
 }
 
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
-	int	*fd = handle;
-	ssize_t	 r;
+	struct ctx_linux *ctx = handle;
+	ssize_t	r;
 
 	(void)ms; /* XXX */
 
-	if (len != REPORT_LEN - 1) {
-		fido_log_debug("%s: invalid len", __func__);
+	if (len != ctx->report_in_len) {
+		fido_log_debug("%s: invalid len %zu/%hu", __func__, len,
+		    ctx->report_in_len);
 		return (-1);
 	}
 
-	if ((r = read(*fd, buf, len)) < 0 || r != REPORT_LEN - 1)
+	if ((r = read(ctx->fd, buf, len)) < 0 ||
+	    (size_t)r != ctx->report_in_len) {
+		fido_log_debug("%s: read", __func__);
 		return (-1);
+	}
 
-	return (REPORT_LEN - 1);
+	return ((int)r);
 }
 
 int
 fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
-	int	*fd = handle;
-	ssize_t	 r;
+	struct ctx_linux *ctx = handle;
+	ssize_t r;
 
-	if (len != REPORT_LEN) {
-		fido_log_debug("%s: invalid len", __func__);
+	if (len != ctx->report_out_len + 1u) {
+		fido_log_debug("%s: invalid len %zu/%hu", __func__, len,
+		    ctx->report_out_len);
 		return (-1);
 	}
 
-	if ((r = write(*fd, buf, len)) < 0 || r != REPORT_LEN) {
+	if ((r = write(ctx->fd, buf, len)) < 0 ||
+	    (size_t)r != ctx->report_out_len + 1u) {
 		fido_log_debug("%s: write", __func__);
 		return (-1);
 	}
 
-	return (REPORT_LEN);
+	return ((int)r);
+}
+
+uint16_t
+fido_hid_report_in_len(void *handle)
+{
+	struct ctx_linux *ctx = handle;
+
+	return (ctx->report_in_len);
+}
+
+uint16_t
+fido_hid_report_out_len(void *handle)
+{
+	struct ctx_linux *ctx = handle;
+
+	return (ctx->report_out_len);
 }

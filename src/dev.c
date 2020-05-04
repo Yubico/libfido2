@@ -131,6 +131,30 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 		return (FIDO_ERR_INTERNAL);
 	}
 
+	if (dev->fixed_rpt_size) {
+		dev->report_in_len = CTAP_MAX_REPORT_LEN;
+		dev->report_out_len = CTAP_MAX_REPORT_LEN;
+	} else {
+		dev->report_in_len = fido_hid_report_in_len(dev->io_handle);
+		dev->report_out_len = fido_hid_report_out_len(dev->io_handle);
+	}
+
+	if (dev->report_in_len < CTAP_MIN_REPORT_LEN ||
+	    dev->report_in_len > CTAP_MAX_REPORT_LEN) {
+		fido_log_debug("%s: invalid report_in_len %hu", __func__,
+		    dev->report_in_len);
+		/* Fall back to default USB transfer report length. */
+		dev->report_in_len = CTAP_MAX_REPORT_LEN;
+	}
+
+	if (dev->report_out_len < CTAP_MIN_REPORT_LEN ||
+	    dev->report_out_len > CTAP_MAX_REPORT_LEN) {
+		fido_log_debug("%s: invalid report_out_len %hu", __func__,
+		    dev->report_out_len);
+		/* Fall back to default USB transfer report length. */
+		dev->report_out_len = CTAP_MAX_REPORT_LEN;
+	}
+
 	if (fido_tx(dev, cmd, &dev->nonce, sizeof(dev->nonce)) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		dev->io.close(dev->io_handle);
@@ -324,6 +348,7 @@ fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 	}
 
 	dev->io = *io;
+	dev->fixed_rpt_size = true;
 
 	return (FIDO_OK);
 }

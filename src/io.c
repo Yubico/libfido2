@@ -20,11 +20,13 @@ struct frame {
 			uint8_t cmd;
 			uint8_t bcnth;
 			uint8_t bcntl;
-			uint8_t data[CTAP_RPT_SIZE - 7];
+			uint8_t data[CTAP_MAX_REPORT_LEN -
+			    CTAP_INIT_HEADER_LEN];
 		} init;
 		struct {
 			uint8_t seq;
-			uint8_t data[CTAP_RPT_SIZE - 5];
+			uint8_t data[CTAP_MAX_REPORT_LEN -
+			    CTAP_CONT_HEADER_LEN];
 		} cont;
 	} body;
 })
@@ -45,8 +47,8 @@ tx_empty(fido_dev_t *d, uint8_t cmd)
 	fp->cid = d->cid;
 	fp->body.init.cmd = CTAP_FRAME_INIT | cmd;
 
-	n = d->io.write(d->io_handle, pkt, sizeof(pkt));
-	if (n < 0 || (size_t)n != sizeof(pkt))
+	n = d->io.write(d->io_handle, pkt, d->report_out_len + 1u);
+	if (n < 0 || (size_t)n != d->report_out_len + 1u)
 		return (-1);
 
 	return (0);
@@ -65,11 +67,11 @@ tx_preamble(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 	fp->body.init.cmd = CTAP_FRAME_INIT | cmd;
 	fp->body.init.bcnth = (count >> 8) & 0xff;
 	fp->body.init.bcntl = count & 0xff;
-	count = MIN(count, sizeof(fp->body.init.data));
+	count = MIN(count, (size_t)d->report_out_len - CTAP_INIT_HEADER_LEN);
 	memcpy(&fp->body.init.data, buf, count);
 
-	n = d->io.write(d->io_handle, pkt, sizeof(pkt));
-	if (n < 0 || (size_t)n != sizeof(pkt))
+	n = d->io.write(d->io_handle, pkt, d->report_out_len + 1u);
+	if (n < 0 || (size_t)n != d->report_out_len + 1u)
 		return (0);
 
 	return (count);
@@ -86,11 +88,11 @@ tx_frame(fido_dev_t *d, uint8_t seq, const void *buf, size_t count)
 	fp = (struct frame *)(pkt + 1);
 	fp->cid = d->cid;
 	fp->body.cont.seq = seq;
-	count = MIN(count, sizeof(fp->body.cont.data));
+	count = MIN(count, (size_t)d->report_out_len - CTAP_CONT_HEADER_LEN);
 	memcpy(&fp->body.cont.data, buf, count);
 
-	n = d->io.write(d->io_handle, pkt, sizeof(pkt));
-	if (n < 0 || (size_t)n != sizeof(pkt))
+	n = d->io.write(d->io_handle, pkt, d->report_out_len + 1u);
+	if (n < 0 || (size_t)n != d->report_out_len + 1u)
 		return (0);
 
 	return (count);
@@ -145,9 +147,15 @@ static int
 rx_frame(fido_dev_t *d, struct frame *fp, int ms)
 {
 	int n;
+	size_t len;
 
-	n = d->io.read(d->io_handle, (unsigned char *)fp, sizeof(*fp), ms);
-	if (n < 0 || (size_t)n != sizeof(*fp))
+	memset(fp, 0, sizeof(*fp));
+
+	if ((len = d->report_in_len) > sizeof(*fp))
+		return (-1);
+
+	n = d->io.read(d->io_handle, (unsigned char *)fp, len, ms);
+	if (n < 0 || (size_t)n != len)
 		return (-1);
 
 	return (0);
@@ -166,7 +174,7 @@ rx_preamble(fido_dev_t *d, uint8_t cmd, struct frame *fp, int ms)
 	    fp->body.init.cmd == (CTAP_FRAME_INIT | CTAP_KEEPALIVE));
 
 	fido_log_debug("%s: initiation frame at %p", __func__, (void *)fp);
-	fido_log_xxd(fp, sizeof(*fp));
+	fido_log_xxd(fp, d->report_in_len);
 
 #ifdef FIDO_FUZZ
 	fp->body.init.cmd = (CTAP_FRAME_INIT | cmd);
@@ -186,6 +194,10 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 {
 	struct frame f;
 	uint16_t r, payload_len;
+	const uint16_t max_init_data_len = d->report_in_len -
+	    CTAP_INIT_HEADER_LEN;
+	const uint16_t max_cont_data_len = d->report_in_len -
+	    CTAP_CONT_HEADER_LEN;
 
 	if (rx_preamble(d, cmd, &f, ms) < 0) {
 		fido_log_debug("%s: rx_preamble", __func__);
@@ -200,13 +212,13 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 		return (-1);
 	}
 
-	if (payload_len < sizeof(f.body.init.data)) {
+	if (payload_len < max_init_data_len) {
 		memcpy(buf, f.body.init.data, payload_len);
 		return (payload_len);
 	}
 
-	memcpy(buf, f.body.init.data, sizeof(f.body.init.data));
-	r = sizeof(f.body.init.data);
+	memcpy(buf, f.body.init.data, max_init_data_len);
+	r = max_init_data_len;
 
 	for (int seq = 0; (size_t)r < payload_len; seq++) {
 		if (rx_frame(d, &f, ms) < 0) {
@@ -216,7 +228,7 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 
 		fido_log_debug("%s: continuation frame at %p", __func__,
 		    (void *)&f);
-		fido_log_xxd(&f, sizeof(f));
+		fido_log_xxd(&f, d->report_in_len);
 
 #ifdef FIDO_FUZZ
 		f.cid = d->cid;
@@ -229,10 +241,9 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 			return (-1);
 		}
 
-		if ((size_t)(payload_len - r) > sizeof(f.body.cont.data)) {
-			memcpy(buf + r, f.body.cont.data,
-			    sizeof(f.body.cont.data));
-			r += sizeof(f.body.cont.data);
+		if ((size_t)(payload_len - r) > max_cont_data_len) {
+			memcpy(buf + r, f.body.cont.data, max_cont_data_len);
+			r += max_cont_data_len;
 		} else {
 			memcpy(buf + r, f.body.cont.data, payload_len - r);
 			r += (payload_len - r); /* break */
