@@ -8,6 +8,7 @@
 
 #include <sys/ioctl.h>
 #include <linux/hidraw.h>
+#include <linux/input.h>
 
 #include <fcntl.h>
 #include <libudev.h>
@@ -195,15 +196,18 @@ is_fido(const char *path)
 }
 
 static int
-parse_uevent(struct udev_device *dev, int16_t *vendor_id, int16_t *product_id)
+parse_uevent(struct udev_device *dev, uint8_t *bus, int16_t *vendor_id,
+    int16_t *product_id, char **product_name)
 {
 	const char		*uevent;
 	char			*cp;
 	char			*p;
 	char			*s;
-	int			 ok = -1;
-	short unsigned int	 x;
+	int			 ids_ok = -1;
+	int 			 product_name_ok = -1;
+	unsigned int		 x;
 	short unsigned int	 y;
+	short unsigned int	 z;
 
 	if ((uevent = udev_device_get_sysattr_value(dev, "uevent")) == NULL)
 		return (-1);
@@ -213,18 +217,24 @@ parse_uevent(struct udev_device *dev, int16_t *vendor_id, int16_t *product_id)
 
 	for ((p = strsep(&cp, "\n")); p && *p != '\0'; (p = strsep(&cp, "\n"))) {
 		if (strncmp(p, "HID_ID=", 7) == 0) {
-			if (sscanf(p + 7, "%*x:%hx:%hx", &x, &y) == 2) {
-				*vendor_id = (int16_t)x;
-				*product_id = (int16_t)y;
-				ok = 0;
+			if (sscanf(p + 7, "%x:%hx:%hx", &x, &y, &z) == 3) {
+				*bus = (uint8_t)x;
+				*vendor_id = (int16_t)y;
+				*product_id = (int16_t)z;
+				ids_ok = 0;
 			}
-			break;
+		} else if (strncmp(p, "HID_NAME=", 9) == 0) {
+			*product_name = strdup(p + 9);
+			product_name_ok = 0;
 		}
 	}
 
 	free(s);
 
-	return (ok);
+	if (ids_ok != 0 || (*bus == BUS_BLUETOOTH && product_name_ok == -1))
+		return (-1);
+	else
+		return (0);
 }
 
 static int
@@ -234,8 +244,10 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 	const char		*name;
 	const char		*path;
 	const char		*manufacturer;
-	const char		*product;
+	char 			*product_bluetooth;
+	const char		*product_usb;
 	struct udev_device	*dev = NULL;
+	uint8_t 		 bus;
 	struct udev_device	*hid_parent;
 	struct udev_device	*usb_parent;
 	int			 ok = -1;
@@ -252,20 +264,29 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 	    "hid", NULL)) == NULL)
 		goto fail;
 
-	if ((usb_parent = udev_device_get_parent_with_subsystem_devtype(dev,
-	    "usb", "usb_device")) == NULL)
+	if (parse_uevent(hid_parent, &bus, &di->vendor_id, &di->product_id,
+	    &product_bluetooth) < 0)
 		goto fail;
 
-	if (parse_uevent(hid_parent, &di->vendor_id, &di->product_id) < 0 ||
-	    (manufacturer = udev_device_get_sysattr_value(usb_parent,
-	    "manufacturer")) == NULL ||
-	    (product = udev_device_get_sysattr_value(usb_parent,
-	    "product")) == NULL)
-		goto fail;
+	if (bus == BUS_BLUETOOTH) {
+		di->manufacturer = strdup("Bluetooth HID");
+		di->product = strdup(product_bluetooth);
+	} else {
+		if ((usb_parent = udev_device_get_parent_with_subsystem_devtype(
+		    dev,"usb", "usb_device")) == NULL)
+			goto fail;
+
+		if ((manufacturer = udev_device_get_sysattr_value(usb_parent,
+		    "manufacturer")) == NULL || (product_usb =
+		    udev_device_get_sysattr_value(usb_parent,"product"))
+		    == NULL)
+			goto fail;
+
+		di->manufacturer = strdup(manufacturer);
+		di->product = strdup(product_usb);
+	}
 
 	di->path = strdup(path);
-	di->manufacturer = strdup(manufacturer);
-	di->product = strdup(product);
 
 	if (di->path == NULL ||
 	    di->manufacturer == NULL ||
