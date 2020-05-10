@@ -151,6 +151,11 @@ typedef int (*dev_manifest_func_t)(fido_dev_info_t *, size_t, size_t *);
 int fido_dev_register_manifest_func(const dev_manifest_func_t);
 void fido_dev_unregister_manifest_func(const dev_manifest_func_t);
 
+/* fuzzing instrumentation */
+#ifdef FIDO_FUZZ
+uint32_t uniform_random(uint32_t);
+#endif
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */

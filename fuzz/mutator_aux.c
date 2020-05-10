@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "fido.h"
 #include "mutator_aux.h"
 
 size_t LLVMFuzzerMutate(uint8_t *, size_t, size_t);
@@ -307,7 +308,7 @@ dev_read(void *handle, unsigned char *ptr, size_t len, int ms)
 	(void)ms;
 
 	assert(handle == (void *)0xdeadbeef);
-	assert(len == 64);
+	assert(len >= CTAP_MIN_REPORT_LEN && len <= CTAP_MAX_REPORT_LEN);
 
 	if (wire_data_len < len)
 		n = wire_data_len;
@@ -326,7 +327,8 @@ int
 dev_write(void *handle, const unsigned char *ptr, size_t len)
 {
 	assert(handle == (void *)0xdeadbeef);
-	assert(len == 64 + 1);
+	assert(len >= CTAP_MIN_REPORT_LEN + 1 &&
+	    len <= CTAP_MAX_REPORT_LEN + 1);
 
 	consume(ptr, len);
 
