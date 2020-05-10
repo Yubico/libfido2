@@ -411,7 +411,7 @@ subdirs(man)
 
 if(NOT WIN32)
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		if(NOT MSAN AND NOT LIBFUZZER)
+		if(NOT MSAN AND NOT LIBFUZZER AND NOT FUZZ)
 			subdirs(regress)
 		endif()
 	endif()
