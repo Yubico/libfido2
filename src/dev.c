@@ -106,6 +106,17 @@ find_manifest_func_node(dev_manifest_func_t f, dev_manifest_func_node_t **curr,
 	}
 }
 
+#ifdef FIDO_FUZZ
+static void
+set_random_report_len(fido_dev_t *dev)
+{
+	dev->report_in_len = CTAP_MIN_REPORT_LEN +
+	    uniform_random(CTAP_MAX_REPORT_LEN - CTAP_MIN_REPORT_LEN + 1);
+	dev->report_out_len = CTAP_MIN_REPORT_LEN +
+	    uniform_random(CTAP_MAX_REPORT_LEN - CTAP_MIN_REPORT_LEN + 1);
+}
+#endif
+
 static int
 fido_dev_open_tx(fido_dev_t *dev, const char *path)
 {
@@ -132,8 +143,12 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 	}
 
 	if (dev->fixed_rpt_size) {
+#ifdef FIDO_FUZZ
+		set_random_report_len(dev);
+#else
 		dev->report_in_len = CTAP_MAX_REPORT_LEN;
 		dev->report_out_len = CTAP_MAX_REPORT_LEN;
+#endif
 	} else {
 		dev->report_in_len = fido_hid_report_in_len(dev->io_handle);
 		dev->report_out_len = fido_hid_report_out_len(dev->io_handle);
