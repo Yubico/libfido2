@@ -175,13 +175,15 @@ typedef struct fido_byte_array {
 } fido_byte_array_t;
 
 typedef struct fido_cbor_info {
-	fido_str_array_t  versions;   /* supported versions: fido2|u2f */
-	fido_str_array_t  extensions; /* list of supported extensions */
-	unsigned char     aaguid[16]; /* aaguid */
-	fido_opt_array_t  options;    /* list of supported options */
-	uint64_t          maxmsgsiz;  /* maximum message size */
-	fido_byte_array_t protocols;  /* supported pin protocols */
-	uint64_t          fwversion;  /* firmware version */
+	fido_str_array_t  versions;      /* supported versions: fido2|u2f */
+	fido_str_array_t  extensions;    /* list of supported extensions */
+	unsigned char     aaguid[16];    /* aaguid */
+	fido_opt_array_t  options;       /* list of supported options */
+	uint64_t          maxmsgsiz;     /* maximum message size */
+	fido_byte_array_t protocols;     /* supported pin protocols */
+	uint64_t          maxcredcntlst; /* max number of credentials in list */
+	uint64_t          maxcredidlen;  /* max credential ID length */
+	uint64_t          fwversion;     /* firmware version */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {

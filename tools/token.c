@@ -112,6 +112,18 @@ print_maxmsgsiz(uint64_t maxmsgsiz)
 }
 
 static void
+print_maxcredcntlst(uint64_t maxcredcntlst)
+{
+	printf("maxcredcntlst: %d\n", (int)maxcredcntlst);
+}
+
+static void
+print_maxcredidlen(uint64_t maxcredidlen)
+{
+	printf("maxcredlen: %d\n", (int)maxcredidlen);
+}
+
+static void
 print_fwversion(uint64_t fwversion)
 {
 	printf("fwversion: 0x%x\n", (int)fwversion);
@@ -201,6 +213,12 @@ token_info(int argc, char **argv, char *path)
 
 	/* print maximum message size */
 	print_maxmsgsiz(fido_cbor_info_maxmsgsiz(ci));
+
+	/* print maximum number of credentials allowed in credential lists */
+	print_maxcredcntlst(fido_cbor_info_maxcredcntlst(ci));
+
+	/* print maximum length of a credential ID */
+	print_maxcredidlen(fido_cbor_info_maxcredidlen(ci));
 
 	/* print firmware version */
 	print_fwversion(fido_cbor_info_fwversion(ci));

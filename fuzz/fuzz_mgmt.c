@@ -207,6 +207,12 @@ dev_get_cbor_info(struct param *p)
 	n = fido_cbor_info_maxmsgsiz(ci);
 	consume(&n, sizeof(n));
 
+	n = fido_cbor_info_maxcredcntlst(ci);
+	consume(&n, sizeof(n));
+
+	n = fido_cbor_info_maxcredidlen(ci);
+	consume(&n, sizeof(n));
+
 	n = fido_cbor_info_fwversion(ci);
 	consume(&n, sizeof(n));
 
