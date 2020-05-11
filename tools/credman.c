@@ -101,6 +101,7 @@ print_rk(const fido_credman_rk_t *rk, size_t idx)
 	char *id = NULL;
 	char *user_id = NULL;
 	const char *type;
+	const char *prot;
 
 	if ((cred = fido_credman_rk(rk, idx)) == NULL)
 		errx(1, "fido_credman_rk");
@@ -124,8 +125,23 @@ print_rk(const fido_credman_rk_t *rk, size_t idx)
 		break;
 	}
 
-	printf("%02u: %s %s (%s) %s\n", (unsigned)idx, id,
-	    fido_cred_display_name(cred), user_id, type);
+	switch (fido_cred_prot(cred)) {
+	case FIDO_CRED_PROT_UV_OPTIONAL:
+		prot = "PROT_UV_OPTIONAL";
+		break;
+	case FIDO_CRED_PROT_UV_OPTIONAL_WITH_ID:
+		prot = "PROT_UV_OPTIONAL_WITH_ID";
+		break;
+	case FIDO_CRED_PROT_UV_REQUIRED:
+		prot = "PROT_UV_REQUIRED";
+		break;
+	default:
+		prot = "PROT_UNKNOWN";
+		break;
+	}
+
+	printf("%02u: %s %s (%s) %s %s\n", (unsigned)idx, id,
+	    fido_cred_display_name(cred), user_id, type, prot);
 
 	free(user_id);
 	free(id);
