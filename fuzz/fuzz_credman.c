@@ -226,7 +226,7 @@ get_rk_list(struct param *p)
 	fido_dev_t *dev;
 	fido_credman_rk_t *rk;
 	const fido_cred_t *cred;
-	int type;
+	int val;
 
 	set_wire_data(p->rk_wire_data.body, p->rk_wire_data.len);
 
@@ -247,8 +247,8 @@ get_rk_list(struct param *p)
 			assert(i >= fido_credman_rk_count(rk));
 			continue;
 		}
-		type = fido_cred_type(cred);
-		consume(&type, sizeof(type));
+		val = fido_cred_type(cred);
+		consume(&val, sizeof(val));
 		consume(fido_cred_id_ptr(cred), fido_cred_id_len(cred));
 		consume(fido_cred_pubkey_ptr(cred), fido_cred_pubkey_len(cred));
 		consume(fido_cred_user_id_ptr(cred),
@@ -257,6 +257,8 @@ get_rk_list(struct param *p)
 		    xstrlen(fido_cred_user_name(cred)));
 		consume(fido_cred_display_name(cred),
 		    xstrlen(fido_cred_display_name(cred)));
+		val = fido_cred_prot(cred);
+		consume(&val, sizeof(val));
 	}
 
 	fido_credman_rk_free(&rk);
