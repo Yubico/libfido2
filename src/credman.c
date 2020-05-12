@@ -251,9 +251,8 @@ credman_parse_rk(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		cred->type = cred->attcred.type; /* XXX */
 		return (0);
 	case 10:
-		if (cbor_decode_uint64(val, &prot) < 0 || prot > INT_MAX)
-			return (-1);
-		if (fido_cred_set_prot(cred, (int)prot) < 0)
+		if (cbor_decode_uint64(val, &prot) < 0 || prot > INT_MAX ||
+		    fido_cred_set_prot(cred, (int)prot) != FIDO_OK)
 			return (-1);
 		return (0);
 	default:
