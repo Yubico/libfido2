@@ -72,7 +72,7 @@
 
 /* Maximum message size in bytes. */
 #ifndef FIDO_MAXMSG
-#define FIDO_MAXMSG	1200
+#define FIDO_MAXMSG	2048
 #endif
 
 /* CTAP capability bits. */
