@@ -1,7 +1,10 @@
 == libfido2
 
 image:https://api.travis-ci.org/Yubico/libfido2.svg?branch=master["Build Status (Travis)", link="https://travis-ci.org/Yubico/libfido2"]
-image:https://github.com/yubico/libfido2/workflows/windows/badge.svg["windows build status (github actions)", link="https://github.com/Yubico/libfido2/actions"]
+image:https://github.com/yubico/libfido2/workflows/windows/badge.svg["Windows Build Status (github actions)", link="https://github.com/Yubico/libfido2/actions"]
+image:https://github.com/yubico/libfido2/workflows/macos/badge.svg["macOS Build Status (github actions)", link="https://github.com/Yubico/libfido2/actions"]
+image:https://github.com/yubico/libfido2/workflows/linux/badge.svg["Linux Build Status (github actions)", link="https://github.com/Yubico/libfido2/actions"]
+image:https://github.com/yubico/libfido2/workflows/fuzzer/badge.svg["Fuzz Status (github actions)", link="https://github.com/Yubico/libfido2/actions"]
 image:https://img.shields.io/badge/license-BSD-blue.svg["License", link="https://raw.githubusercontent.com/Yubico/libfido2/master/LICENSE"]
 
 *libfido2* provides library functionality and command-line tools to

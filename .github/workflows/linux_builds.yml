@@ -1,4 +1,4 @@
-name: Linux default builds
+name: linux
 
 on: [push, pull_request]
 
