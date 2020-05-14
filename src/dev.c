@@ -158,16 +158,18 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 	    dev->report_in_len > CTAP_MAX_REPORT_LEN) {
 		fido_log_debug("%s: invalid report_in_len %hu", __func__,
 		    dev->report_in_len);
-		/* Fall back to default USB transfer report length. */
-		dev->report_in_len = CTAP_MAX_REPORT_LEN;
+		dev->io.close(dev->io_handle);
+		dev->io_handle = NULL;
+		return (FIDO_ERR_RX);
 	}
 
 	if (dev->report_out_len < CTAP_MIN_REPORT_LEN ||
 	    dev->report_out_len > CTAP_MAX_REPORT_LEN) {
 		fido_log_debug("%s: invalid report_out_len %hu", __func__,
 		    dev->report_out_len);
-		/* Fall back to default USB transfer report length. */
-		dev->report_out_len = CTAP_MAX_REPORT_LEN;
+		dev->io.close(dev->io_handle);
+		dev->io_handle = NULL;
+		return (FIDO_ERR_TX);
 	}
 
 	if (fido_tx(dev, cmd, &dev->nonce, sizeof(dev->nonce)) < 0) {
