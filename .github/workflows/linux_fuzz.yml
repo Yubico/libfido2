@@ -1,4 +1,4 @@
-name: Linux fuzzer runs
+name: fuzzer
 
 on: [push, pull_request]
 
