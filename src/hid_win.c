@@ -48,13 +48,13 @@ is_fido(HANDLE dev)
 	if (caps.OutputReportByteLength > CTAP_MAX_REPORT_LEN + 1 ||
 	    caps.OutputReportByteLength < CTAP_MIN_REPORT_LEN + 1) {
 		fido_log_debug("%s: invalid output report len: %d", __func__,
-		    (int)caps.OutputReportByteLength - 1);
+		    (int)caps.OutputReportByteLength);
 		goto fail;
 	}
 	if (caps.InputReportByteLength > CTAP_MAX_REPORT_LEN + 1 ||
 	    caps.InputReportByteLength < CTAP_MIN_REPORT_LEN + 1) {
 		fido_log_debug("%s: invalid input report len: %d", __func__,
-		    (int)caps.InputReportByteLength - 1);
+		    (int)caps.InputReportByteLength);
 		goto fail;
 	}
 
@@ -63,7 +63,7 @@ fail:
 	if (data != NULL)
 		HidD_FreePreparsedData(data);
 
-	return (fido == 1);
+	return (fido);
 }
 
 static void
