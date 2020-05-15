@@ -5,7 +5,7 @@ ${CC} --version
 # Build and install libcbor.
 git clone git://github.com/pjk/libcbor
 cd libcbor
-git checkout v0.6.1
+git checkout v0.7.0
 mkdir build
 (cd build && cmake ..)
 make -C build

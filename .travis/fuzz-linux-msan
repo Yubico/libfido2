@@ -9,7 +9,7 @@ sudo chmod 755 ${FAKEROOT}
 # Build and install libcbor.
 git clone git://github.com/pjk/libcbor
 cd libcbor
-git checkout v0.6.1
+git checkout v0.7.0
 patch -p0 < ../fuzz/README
 mkdir build
 cd build
@@ -21,10 +21,10 @@ make
 sudo make install
 cd ../..
 
-# Build and install OpenSSL 1.1.1f.
+# Build and install OpenSSL 1.1.1g.
 git clone git://github.com/openssl/openssl
 cd openssl
-git checkout OpenSSL_1_1_1f
+git checkout OpenSSL_1_1_1g
 ./Configure linux-x86_64-clang enable-msan --prefix=${FAKEROOT} \
 	 --openssldir=${FAKEROOT}/openssl
 make clean

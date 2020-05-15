@@ -20,7 +20,7 @@ EOF
 # Build and install libcbor.
 git clone git://github.com/pjk/libcbor
 cd libcbor
-git checkout v0.6.1
+git checkout v0.7.0
 mkdir build
 (cd build && cmake -DCMAKE_TOOLCHAIN_FILE=/tmp/mingw.cmake \
 	-DCMAKE_INSTALL_PREFIX=/fakeroot ..)
@@ -28,10 +28,10 @@ make -C build
 sudo make -C build install
 cd ..
 
-# Build and install OpenSSL 1.1.1f.
+# Build and install OpenSSL 1.1.1g.
 git clone git://github.com/openssl/openssl
 cd openssl
-git checkout OpenSSL_1_1_1f
+git checkout OpenSSL_1_1_1g
 ./Configure mingw --prefix=/fakeroot --openssldir=/fakeroot/openssl \
 	--cross-compile-prefix=i686-w64-mingw32-
 make
