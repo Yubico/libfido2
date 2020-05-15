@@ -1,11 +1,10 @@
 == libfido2
 
-image:https://api.travis-ci.org/Yubico/libfido2.svg?branch=master["Build Status (Travis)", link="https://travis-ci.org/Yubico/libfido2"]
-image:https://github.com/yubico/libfido2/workflows/windows/badge.svg["Windows Build Status (github actions)", link="https://github.com/Yubico/libfido2/actions"]
-image:https://github.com/yubico/libfido2/workflows/macos/badge.svg["macOS Build Status (github actions)", link="https://github.com/Yubico/libfido2/actions"]
 image:https://github.com/yubico/libfido2/workflows/linux/badge.svg["Linux Build Status (github actions)", link="https://github.com/Yubico/libfido2/actions"]
+image:https://github.com/yubico/libfido2/workflows/macos/badge.svg["macOS Build Status (github actions)", link="https://github.com/Yubico/libfido2/actions"]
+image:https://github.com/yubico/libfido2/workflows/windows/badge.svg["Windows Build Status (github actions)", link="https://github.com/Yubico/libfido2/actions"]
 image:https://github.com/yubico/libfido2/workflows/fuzzer/badge.svg["Fuzz Status (github actions)", link="https://github.com/Yubico/libfido2/actions"]
-image:https://img.shields.io/badge/license-BSD-blue.svg["License", link="https://raw.githubusercontent.com/Yubico/libfido2/master/LICENSE"]
+image:https://oss-fuzz-build-logs.storage.googleapis.com/badges/libfido2.svg["Fuzz Status (oss-fuzz)", link="https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:libfido2"]
 
 *libfido2* provides library functionality and command-line tools to
 communicate with a FIDO device over USB, and to verify attestation and
@@ -17,7 +16,7 @@ For usage, see the `examples/` directory.
 
 === License
 
-*libfido2* is licensed under the BSD 2-clause license.  See the _LICENSE_
+*libfido2* is licensed under the BSD 2-clause license. See the LICENSE
 file for the full license text.
 
 === Supported Platforms
