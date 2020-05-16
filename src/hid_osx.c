@@ -315,7 +315,7 @@ fail:
 	if (entry != MACH_PORT_NULL)
 		IOObjectRelease(entry);
 
-	if (ctx != NULL) {
+	if (ok < 0 && ctx != NULL) {
 		if (ctx->ref != NULL)
 			CFRelease(ctx->ref);
 		if (ctx->loop_id != NULL)
@@ -410,7 +410,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	struct ctx_osx *ctx = handle;
 
-	if (len != ctx->report_out_len) {
+	if (len != ctx->report_out_len + 1) {
 		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
