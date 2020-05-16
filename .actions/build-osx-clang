@@ -1,24 +1,11 @@
 #!/bin/sh -eux
 
-${CC} --version
+export PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig"
+SCAN="$(brew --prefix llvm)/bin/scan-build"
 
-# Build and install libcbor.
-git clone git://github.com/pjk/libcbor
-cd libcbor
-git checkout v0.7.0
+# Build, analyze, and install libfido2.
 mkdir build
-(cd build && cmake ..)
-make -C build
-sudo make -C build install
-cd ..
-
-# Install mandoc from Homebrew.
-brew install mandoc
-
-# Build and install libfido2.
-export PKG_CONFIG_PATH=/usr/local/opt/openssl@1.1/lib/pkgconfig
-mkdir build
-(cd build && cmake -DCMAKE_BUILD_TYPE=Debug ..)
-make -C build
+(cd build && ${SCAN} cmake -DCMAKE_BUILD_TYPE=Debug ..)
+${SCAN} --status-bugs make -C build
 make -C build man_symlink_html
 sudo make -C build install
