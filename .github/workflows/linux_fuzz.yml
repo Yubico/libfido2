@@ -28,4 +28,4 @@ jobs:
         CC: ${{ matrix.cc }}
         SANITIZER: ${{ matrix.sanitizer }}
       run: |
-        /bin/sh -eux .travis/fuzz-linux-${SANITIZER}
+        /bin/sh -eux .actions/fuzz-linux-${SANITIZER}

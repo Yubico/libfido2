@@ -68,7 +68,7 @@ https://www.openssl.org[OpenSSL]. On Linux, libudev (part of
 https://www.freedesktop.org/wiki/Software/systemd[systemd]) is also required.
 
 For complete, OS-specific installation instructions, please refer to the
-`.travis/` (Linux, MacOS) and `windows/` directories.
+`.actions/` (Linux, MacOS) and `windows/` directories.
 
 On Linux, you will need to add a udev rule to be able to access the FIDO
 device, or run as root. For example, the udev rule may contain the following:

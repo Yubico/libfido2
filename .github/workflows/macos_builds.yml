@@ -22,4 +22,4 @@ jobs:
       env:
         CC: ${{ matrix.cc }}
       run: |
-        /bin/sh -eux .travis/build-osx-clang
+        /bin/sh -eux .actions/build-osx-clang
