@@ -19,7 +19,7 @@
 
 #include "fido.h"
 
-struct ctx_osx {
+struct hid_osx {
 	IOHIDDeviceRef	ref;
 	CFStringRef	loop_id;
 	uint16_t	report_in_len;
@@ -101,7 +101,7 @@ is_fido(IOHIDDeviceRef dev)
 }
 
 static void
-set_report_lengths(struct ctx_osx *ctx)
+set_report_lengths(struct hid_osx *ctx)
 {
 	int32_t	report_in_len;
 	int32_t	report_out_len;
@@ -299,7 +299,7 @@ void *
 fido_hid_open(const char *path)
 {
 	io_registry_entry_t	 entry = MACH_PORT_NULL;
-	struct ctx_osx		*ctx;
+	struct hid_osx		*ctx;
 	int			 ok = -1;
 	int			 r;
 	char			 loop_id[32];
@@ -361,7 +361,7 @@ fail:
 void
 fido_hid_close(void *handle)
 {
-	struct ctx_osx *ctx = handle;
+	struct hid_osx *ctx = handle;
 
 	if (IOHIDDeviceClose(ctx->ref,
 	    kIOHIDOptionsTypeSeizeDevice) != kIOReturnSuccess)
@@ -378,7 +378,7 @@ read_callback(void *context, IOReturn result, void *handle,
     IOHIDReportType type, uint32_t report_id, uint8_t *report,
     CFIndex report_len)
 {
-	struct ctx_osx *ctx = handle;
+	struct hid_osx *ctx = handle;
 
 	(void)context;
 	(void)ctx;
@@ -403,7 +403,7 @@ removal_callback(void *context, IOReturn result, void *sender)
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
-	struct ctx_osx		*ctx = handle;
+	struct hid_osx		*ctx = handle;
 	CFRunLoopRunResult	 r;
 
 	(void)ms; /* XXX */
@@ -439,7 +439,7 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 int
 fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
-	struct ctx_osx *ctx = handle;
+	struct hid_osx *ctx = handle;
 
 	if (len != ctx->report_out_len + 1) {
 		fido_log_debug("%s: invalid len", __func__);
@@ -458,7 +458,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 uint16_t
 fido_hid_report_in_len(void *handle)
 {
-	struct ctx_osx *ctx = handle;
+	struct hid_osx *ctx = handle;
 
 	return (ctx->report_in_len);
 }
@@ -466,7 +466,7 @@ fido_hid_report_in_len(void *handle)
 uint16_t
 fido_hid_report_out_len(void *handle)
 {
-	struct ctx_osx *ctx = handle;
+	struct hid_osx *ctx = handle;
 
 	return (ctx->report_out_len);
 }
