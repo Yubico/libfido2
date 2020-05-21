@@ -12,8 +12,8 @@
 
 #include "fido.h"
 
-struct ctx_hidapi {
-	void	*handle;
+struct hid_hidapi {
+	void *handle;
 	uint16_t report_in_len;
 	uint16_t report_out_len;
 };
@@ -92,9 +92,9 @@ copy_info(fido_dev_info_t *di, const struct hid_device_info *d)
 void *
 fido_hid_open(const char *path)
 {
-	struct ctx_hidapi *ctx;
+	struct hid_hidapi *ctx;
 
-	if ((ctx = malloc(sizeof(*ctx))) == NULL) {
+	if ((ctx = calloc(1, sizeof(*ctx))) == NULL) {
 		return (NULL);
 	}
 
@@ -112,7 +112,7 @@ fido_hid_open(const char *path)
 void
 fido_hid_close(void *handle)
 {
-	struct ctx_hidapi *ctx = handle;
+	struct hid_hidapi *ctx = handle;
 
 	hid_close(ctx->handle);
 	free(ctx);
@@ -121,7 +121,7 @@ fido_hid_close(void *handle)
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
-	struct ctx_hidapi *ctx = handle;
+	struct hid_hidapi *ctx = handle;
 
 	return hid_read_timeout(ctx->handle, buf, len, ms);
 }
@@ -129,7 +129,7 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 int
 fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
-	struct ctx_hidapi *ctx = handle;
+	struct hid_hidapi *ctx = handle;
 
 	return hid_write(ctx->handle, buf, len);
 }
@@ -167,7 +167,7 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 uint16_t
 fido_hid_report_in_len(void *handle)
 {
-	struct ctx_hidapi *ctx = handle;
+	struct hid_hidapi *ctx = handle;
 
 	return (ctx->report_in_len);
 }
@@ -175,7 +175,7 @@ fido_hid_report_in_len(void *handle)
 uint16_t
 fido_hid_report_out_len(void *handle)
 {
-	struct ctx_hidapi *ctx = handle;
+	struct hid_hidapi *ctx = handle;
 
 	return (ctx->report_out_len);
 }
