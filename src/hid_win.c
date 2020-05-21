@@ -42,10 +42,7 @@ is_fido(HANDLE dev)
 		goto fail;
 	}
 
-	if ((uint16_t)caps.UsagePage != 0xf1d0)
-		goto fail;
-
-	fido = 1;
+	fido = (uint16_t)caps.UsagePage == 0xf1d0;
 fail:
 	if (data != NULL)
 		HidD_FreePreparsedData(data);
