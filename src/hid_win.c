@@ -45,19 +45,6 @@ is_fido(HANDLE dev)
 	if ((uint16_t)caps.UsagePage != 0xf1d0)
 		goto fail;
 
-	if (caps.OutputReportByteLength > CTAP_MAX_REPORT_LEN + 1 ||
-	    caps.OutputReportByteLength < CTAP_MIN_REPORT_LEN + 1) {
-		fido_log_debug("%s: invalid output report len: %d", __func__,
-		    (int)caps.OutputReportByteLength);
-		goto fail;
-	}
-	if (caps.InputReportByteLength > CTAP_MAX_REPORT_LEN + 1 ||
-	    caps.InputReportByteLength < CTAP_MIN_REPORT_LEN + 1) {
-		fido_log_debug("%s: invalid input report len: %d", __func__,
-		    (int)caps.InputReportByteLength);
-		goto fail;
-	}
-
 	fido = 1;
 fail:
 	if (data != NULL)
@@ -66,29 +53,42 @@ fail:
 	return (fido);
 }
 
-static void
-set_report_lengths(struct ctx_win *ctx)
+static int
+get_report_len(HANDLE dev, int dir, uint16_t *report_len)
 {
-	HANDLE			dev = ctx->dev;
-	PHIDP_PREPARSED_DATA	data = NULL;
-	HIDP_CAPS		caps;
+	PHIDP_PREPARSED_DATA data = NULL;
+	HIDP_CAPS caps;
+	USHORT v;
+	int ok = -1;
 
 	if (HidD_GetPreparsedData(dev, &data) == false) {
-		fido_log_debug("%s: HidD_GetPreparsedData", __func__);
+		fido_log_debug("%s: HidD_GetPreparsedData/%d", __func__, dir);
 		goto fail;
 	}
 
 	if (HidP_GetCaps(data, &caps) != HIDP_STATUS_SUCCESS) {
-		fido_log_debug("%s: HidP_GetCaps", __func__);
+		fido_log_debug("%s: HidP_GetCaps/%d", __func__, dir);
 		goto fail;
 	}
 
-	ctx->report_in_len = (uint16_t)(caps.InputReportByteLength - 1);
-	ctx->report_out_len = (uint16_t)(caps.OutputReportByteLength - 1);
+	if (dir == 0)
+		v = caps.InputReportByteLength;
+	else
+		v = caps.OutputReportByteLength;
 
+	if (v < CTAP_MIN_REPORT_LEN + 1 || v > CTAP_MAX_REPORT_LEN + 1) {
+		fido_log_debug("%s: v/%d=%d", __func__, dir, (int)v);
+		goto fail;
+	}
+
+	*report_len = (uint16_t)v;
+
+	ok = 0;
 fail:
 	if (data != NULL)
 		HidD_FreePreparsedData(data);
+
+	return (ok);
 }
 
 static int
@@ -314,7 +314,12 @@ fido_hid_open(const char *path)
 		return (NULL);
 	}
 
-	set_report_lengths(ctx);
+	if (get_report_len(ctx->dev, 0, &ctx->report_in_len) < 0 ||
+	    get_report_len(ctx->dev, 1, &ctx->report_out_len) < 0) {
+		fido_log_debug("%s: get_report_len", __func__);
+		fido_hid_close(ctx);
+		return (NULL);
+	}
 
 	return (ctx);
 }
