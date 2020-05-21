@@ -19,18 +19,18 @@
 
 #include "fido.h"
 
-struct ctx_win {
-	HANDLE		dev;
-	uint16_t	report_in_len;
-	uint16_t	report_out_len;
+struct hid_win {
+	HANDLE dev;
+	uint16_t report_in_len;
+	uint16_t report_out_len;
 };
 
 static bool
 is_fido(HANDLE dev)
 {
-	PHIDP_PREPARSED_DATA	data = NULL;
-	HIDP_CAPS		caps;
-	int			fido = 0;
+	PHIDP_PREPARSED_DATA data = NULL;
+	HIDP_CAPS caps;
+	int fido = 0;
 
 	if (HidD_GetPreparsedData(dev, &data) == false) {
 		fido_log_debug("%s: HidD_GetPreparsedData", __func__);
@@ -109,9 +109,9 @@ get_int(HANDLE dev, int16_t *vendor_id, int16_t *product_id)
 static int
 get_str(HANDLE dev, char **manufacturer, char **product)
 {
-	wchar_t	buf[512];
-	int	utf8_len;
-	int	ok = -1;
+	wchar_t buf[512];
+	int utf8_len;
+	int ok = -1;
 
 	*manufacturer = NULL;
 	*product = NULL;
@@ -175,8 +175,8 @@ fail:
 static int
 copy_info(fido_dev_info_t *di, const char *path)
 {
-	HANDLE	dev = INVALID_HANDLE_VALUE;
-	int	ok = -1;
+	HANDLE dev = INVALID_HANDLE_VALUE;
+	int ok = -1;
 
 	memset(di, 0, sizeof(*di));
 
@@ -210,13 +210,13 @@ fail:
 int
 fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
-	GUID					 hid_guid = GUID_DEVINTERFACE_HID;
-	HDEVINFO				 devinfo = INVALID_HANDLE_VALUE;
-	SP_DEVICE_INTERFACE_DATA		 ifdata;
-	SP_DEVICE_INTERFACE_DETAIL_DATA_A	*ifdetail = NULL;
-	DWORD					 len = 0;
-	DWORD					 idx = 0;
-	int					 r = FIDO_ERR_INTERNAL;
+	GUID hid_guid = GUID_DEVINTERFACE_HID;
+	HDEVINFO devinfo = INVALID_HANDLE_VALUE;
+	SP_DEVICE_INTERFACE_DATA ifdata;
+	SP_DEVICE_INTERFACE_DETAIL_DATA_A *ifdetail = NULL;
+	DWORD len = 0;
+	DWORD idx = 0;
+	int r = FIDO_ERR_INTERNAL;
 
 	*olen = 0;
 
@@ -297,7 +297,7 @@ fail:
 void *
 fido_hid_open(const char *path)
 {
-	struct ctx_win *ctx;
+	struct hid_win *ctx;
 
 	if ((ctx = calloc(1, sizeof(*ctx))) == NULL)
 		return (NULL);
@@ -324,7 +324,7 @@ fido_hid_open(const char *path)
 void
 fido_hid_close(void *handle)
 {
-	struct ctx_win *ctx = handle;
+	struct hid_win *ctx = handle;
 
 	CloseHandle(ctx->dev);
 	free(ctx);
@@ -333,11 +333,10 @@ fido_hid_close(void *handle)
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
-	struct ctx_win *ctx = handle;
-	DWORD		n;
-	int		r = -1;
-	/* First report byte contains the report ID. */
 	uint8_t	report[1 + CTAP_MAX_REPORT_LEN];
+	struct hid_win *ctx = handle;
+	int r = -1;
+	DWORD n;
 
 	(void)ms; /* XXX */
 
@@ -354,10 +353,9 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		goto fail;
 	}
 
-	/* Skip the report ID. */
+	/* trim the report id */
 	memcpy(buf, report + 1, len);
 	r = len;
-
 fail:
 	explicit_bzero(report, sizeof(report));
 
@@ -367,10 +365,10 @@ fail:
 int
 fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
-	struct ctx_win *ctx = handle;
-	DWORD		n;
+	struct hid_win *ctx = handle;
+	DWORD n;
 
-	if (len != ctx->report_out_len + 1u) {
+	if (len == 0 || len - 1 != ctx->report_out_len) {
 		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
@@ -387,7 +385,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 uint16_t
 fido_hid_report_in_len(void *handle)
 {
-	struct ctx_win *ctx = handle;
+	struct hid_win *ctx = handle;
 
 	return (ctx->report_in_len);
 }
@@ -395,7 +393,7 @@ fido_hid_report_in_len(void *handle)
 uint16_t
 fido_hid_report_out_len(void *handle)
 {
-	struct ctx_win *ctx = handle;
+	struct hid_win *ctx = handle;
 
 	return (ctx->report_out_len);
 }
