@@ -19,10 +19,10 @@
 
 #define MAX_UHID	64
 
-struct ctx_openbsd {
-	int		fd;
-	uint16_t	report_in_len;
-	uint16_t	report_out_len;
+struct hid_openbsd {
+	int fd;
+	uint16_t report_in_len;
+	uint16_t report_out_len;
 };
 
 int
@@ -99,13 +99,13 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
  * sequence bits will be ignored as duplicate packets by the device.
  */
 static int
-terrible_ping_kludge(struct ctx_openbsd *ctx)
+terrible_ping_kludge(struct hid_openbsd *ctx)
 {
 	u_char data[256];
 	int i, n;
 	struct pollfd pfd;
 
-	if (sizeof(data) < ctx->report_out_len + 1u)
+	if (sizeof(data) < ctx->report_out_len + 1)
 		return -1;
 	for (i = 0; i < 4; i++) {
 		memset(data, 0, sizeof(data));
@@ -120,7 +120,7 @@ terrible_ping_kludge(struct ctx_openbsd *ctx)
 		data[6] = 0;
 		data[7] = 1;
 		fido_log_debug("%s: send ping %d", __func__, i);
-		if (fido_hid_write(ctx, data, ctx->report_out_len + 1u) == -1)
+		if (fido_hid_write(ctx, data, ctx->report_out_len + 1) == -1)
 			return -1;
 		fido_log_debug("%s: wait reply", __func__);
 		memset(&pfd, 0, sizeof(pfd));
@@ -151,7 +151,7 @@ terrible_ping_kludge(struct ctx_openbsd *ctx)
 void *
 fido_hid_open(const char *path)
 {
-	struct ctx_openbsd *ret = NULL;
+	struct hid_openbsd *ret = NULL;
 
 	if ((ret = calloc(1, sizeof(*ret))) == NULL ||
 	    (ret->fd = open(path, O_RDWR)) < 0) {
@@ -178,7 +178,7 @@ fido_hid_open(const char *path)
 void
 fido_hid_close(void *handle)
 {
-	struct ctx_openbsd *ctx = (struct ctx_openbsd *)handle;
+	struct hid_openbsd *ctx = (struct hid_openbsd *)handle;
 
 	close(ctx->fd);
 	free(ctx);
@@ -187,7 +187,7 @@ fido_hid_close(void *handle)
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
-	struct ctx_openbsd *ctx = (struct ctx_openbsd *)handle;
+	struct hid_openbsd *ctx = (struct hid_openbsd *)handle;
 	ssize_t r;
 
 	(void)ms; /* XXX */
@@ -207,10 +207,10 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 int
 fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
-	struct ctx_openbsd *ctx = (struct ctx_openbsd *)handle;
+	struct hid_openbsd *ctx = (struct hid_openbsd *)handle;
 	ssize_t r;
 
-	if (len != ctx->report_out_len + 1u) {
+	if (len != ctx->report_out_len + 1) {
 		fido_log_debug("%s: invalid len: got %zu, want %zu", __func__,
 		    len, ctx->report_out_len);
 		return (-1);
@@ -226,7 +226,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 uint16_t
 fido_hid_report_in_len(void *handle)
 {
-	struct ctx_openbsd *ctx = handle;
+	struct hid_openbsd *ctx = handle;
 
 	return (ctx->report_in_len);
 }
@@ -234,7 +234,7 @@ fido_hid_report_in_len(void *handle)
 uint16_t
 fido_hid_report_out_len(void *handle)
 {
-	struct ctx_openbsd *ctx = handle;
+	struct hid_openbsd *ctx = handle;
 
 	return (ctx->report_out_len);
 }
