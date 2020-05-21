@@ -72,55 +72,30 @@ get_utf8(IOHIDDeviceRef dev, CFStringRef key, void *buf, size_t len)
 	return (0);
 }
 
-static bool
-is_fido(IOHIDDeviceRef dev)
+static int
+get_report_len(IOHIDDeviceRef dev, int dir, uint16_t *report_len)
 {
-	uint32_t	usage_page;
-	int32_t		report_in_len;
-	int32_t		report_out_len;
+	CFStringRef key;
+	int32_t v;
 
-	if (get_int32(dev, CFSTR(kIOHIDPrimaryUsagePageKey),
-	    (int32_t *)&usage_page) != 0 || usage_page != 0xf1d0)
-		return (false);
+	if (dir == 0)
+		key = CFSTR(kIOHIDMaxInputReportSizeKey);
+	else 
+		key = CFSTR(kIOHIDMaxOutputReportSizeKey);
 
-	if (get_int32(dev, CFSTR(kIOHIDMaxInputReportSizeKey),
-	    &report_in_len) < 0 || report_in_len < CTAP_MIN_REPORT_LEN ||
-	    report_in_len > CTAP_MAX_REPORT_LEN) {
-		fido_log_debug("%s: unsupported input report len", __func__);
-		return (false);
+	if (get_int32(dev, key, &v) < 0) {
+		fido_log_debug("%s: get_int32/%d", __func__, dir);
+		return (-1);
 	}
 
-	if (get_int32(dev, CFSTR(kIOHIDMaxOutputReportSizeKey),
-	    &report_out_len) < 0 || report_out_len < CTAP_MIN_REPORT_LEN ||
-	    report_out_len > CTAP_MAX_REPORT_LEN) {
-		fido_log_debug("%s: unsupported output report len", __func__);
-		return (false);
+	if (v < CTAP_MIN_REPORT_LEN || v > CTAP_MAX_REPORT_LEN) {
+		fido_log_debug("%s: v/%d=%d", __func__, dir, (int)v);
+		return (-1);
 	}
 
-	return (true);
-}
+	*report_len = (uint16_t)v;
 
-static void
-set_report_lengths(struct hid_osx *ctx)
-{
-	int32_t	report_in_len;
-	int32_t	report_out_len;
-
-	if (get_int32(ctx->ref, CFSTR(kIOHIDMaxInputReportSizeKey),
-	    &report_in_len) < 0) {
-		fido_log_debug("%s: failed to read input report len", __func__);
-		return;
-	}
-
-	if (get_int32(ctx->ref, CFSTR(kIOHIDMaxOutputReportSizeKey),
-	    &report_out_len) < 0) {
-		fido_log_debug("%s: failed to read output report len",
-		    __func__);
-		return;
-	}
-
-	ctx->report_in_len = (uint16_t)report_in_len;
-	ctx->report_out_len = (uint16_t)report_out_len;
+	return (0);
 }
 
 static int
@@ -205,6 +180,18 @@ get_path(IOHIDDeviceRef dev)
 	}
 
 	return (strdup(path));
+}
+
+static bool
+is_fido(IOHIDDeviceRef dev)
+{
+	uint32_t usage_page;
+
+	if (get_int32(dev, CFSTR(kIOHIDPrimaryUsagePageKey),
+	    (int32_t *)&usage_page) != 0 || usage_page != 0xf1d0)
+		return (false);
+
+	return (true);
 }
 
 static int
@@ -321,6 +308,12 @@ fido_hid_open(const char *path)
 		goto fail;
 	}
 
+	if (get_report_len(ctx->ref, 0, &ctx->report_in_len) < 0 ||
+	    get_report_len(ctx->ref, 1, &ctx->report_out_len) < 0) {
+		fido_log_debug("%s: get_report_len", __func__);
+		goto fail;
+	}
+
 	if (IOHIDDeviceOpen(ctx->ref,
 	    kIOHIDOptionsTypeSeizeDevice) != kIOReturnSuccess) {
 		fido_log_debug("%s: IOHIDDeviceOpen", __func__);
@@ -338,8 +331,6 @@ fido_hid_open(const char *path)
 		fido_log_debug("%s: CFStringCreateWithCString", __func__);
 		goto fail;
 	}
-
-	set_report_lengths(ctx);
 
 	ok = 0;
 fail:
