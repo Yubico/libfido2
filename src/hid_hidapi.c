@@ -74,6 +74,7 @@ copy_info(fido_dev_info_t *di, const struct hid_device_info *d)
 		free(di->path);
 		free(di->manufacturer);
 		free(di->product);
+		explicit_bzero(di, sizeof(*di));
 		return -1;
 	}
 
