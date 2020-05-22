@@ -22,8 +22,8 @@
 struct hid_osx {
 	IOHIDDeviceRef ref;
 	CFStringRef loop_id;
-	uint16_t report_in_len;
-	uint16_t report_out_len;
+	size_t report_in_len;
+	size_t report_out_len;
 };
 
 static int
@@ -73,7 +73,7 @@ get_utf8(IOHIDDeviceRef dev, CFStringRef key, void *buf, size_t len)
 }
 
 static int
-get_report_len(IOHIDDeviceRef dev, int dir, uint16_t *report_len)
+get_report_len(IOHIDDeviceRef dev, int dir, size_t *report_len)
 {
 	CFStringRef key;
 	int32_t v;
@@ -93,7 +93,7 @@ get_report_len(IOHIDDeviceRef dev, int dir, uint16_t *report_len)
 		return (-1);
 	}
 
-	*report_len = (uint16_t)v;
+	*report_len = (size_t)v;
 
 	return (0);
 }
@@ -375,7 +375,8 @@ read_callback(void *context, IOReturn result, void *handle,
 	(void)report;
 
 	if (result != kIOReturnSuccess || type != kIOHIDReportTypeInput ||
-	    report_id != 0 || report_len != ctx->report_in_len) {
+	    report_id != 0 || report_len < 0 ||
+	    (size_t)report_len != ctx->report_in_len) {
 		fido_log_debug("%s: io error", __func__);
 	}
 }
@@ -445,7 +446,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 	return ((int)len);
 }
 
-uint16_t
+size_t
 fido_hid_report_in_len(void *handle)
 {
 	struct hid_osx *ctx = handle;
@@ -453,7 +454,7 @@ fido_hid_report_in_len(void *handle)
 	return (ctx->report_in_len);
 }
 
-uint16_t
+size_t
 fido_hid_report_out_len(void *handle)
 {
 	struct hid_osx *ctx = handle;

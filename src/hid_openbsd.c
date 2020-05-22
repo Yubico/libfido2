@@ -21,8 +21,8 @@
 
 struct hid_openbsd {
 	int fd;
-	uint16_t report_in_len;
-	uint16_t report_out_len;
+	size_t report_in_len;
+	size_t report_out_len;
 };
 
 int
@@ -223,7 +223,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 	return ((int)len);
 }
 
-uint16_t
+size_t
 fido_hid_report_in_len(void *handle)
 {
 	struct hid_openbsd *ctx = handle;
@@ -231,7 +231,7 @@ fido_hid_report_in_len(void *handle)
 	return (ctx->report_in_len);
 }
 
-uint16_t
+size_t
 fido_hid_report_out_len(void *handle)
 {
 	struct hid_openbsd *ctx = handle;

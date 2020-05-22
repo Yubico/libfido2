@@ -19,9 +19,9 @@
 #include "fido.h"
 
 struct ctx_linux {
-	int		fd;
-	uint16_t	report_in_len;
-	uint16_t	report_out_len;
+	int fd;
+	size_t report_in_len;
+	size_t report_out_len;
 };
 
 static int
@@ -103,7 +103,7 @@ get_usage_info(const struct hidraw_report_descriptor *hrd, uint32_t *usage_page,
 
 static void
 get_report_lengths(const struct hidraw_report_descriptor *hrd,
-    uint16_t *report_in_len, uint16_t *report_out_len)
+    size_t *report_in_len, size_t *report_out_len)
 {
 	const uint8_t	*ptr;
 	size_t		 len;
@@ -112,8 +112,7 @@ get_report_lengths(const struct hidraw_report_descriptor *hrd,
 	ptr = hrd->value;
 	len = hrd->size;
 
-	*report_in_len = 0;
-	*report_out_len = 0;
+	*report_in_len = *report_out_len = 0;
 
 	while (len > 0) {
 		const uint8_t tag = ptr[0];
@@ -131,12 +130,13 @@ get_report_lengths(const struct hidraw_report_descriptor *hrd,
 
 		if (key == 0x94) {
 			cur_report_count = key_val;
-			fido_log_debug("%s: ReportCount(%d)", __func__, cur_report_count);
+			fido_log_debug("%s: ReportCount(%d)", __func__,
+			    cur_report_count);
 		} else if (key == 0x80) {
-			*report_in_len = cur_report_count;
+			*report_in_len = (size_t)cur_report_count;
 			fido_log_debug("%s: Input", __func__);
 		} else if (key == 0x90) {
-			*report_out_len = cur_report_count;
+			*report_out_len = (size_t)cur_report_count;
 			fido_log_debug("%s: Output", __func__);
 		}
 
@@ -382,8 +382,7 @@ fido_hid_open(const char *path)
 		return (NULL);
 	}
 
-	ctx->report_in_len = CTAP_MAX_REPORT_LEN;
-	ctx->report_out_len = CTAP_MAX_REPORT_LEN;
+	ctx->report_in_len = ctx->report_out_len = CTAP_MAX_REPORT_LEN;
 
 	/*
 	 * Don't fail when report sizes can't be extracted in order to maintain
@@ -414,13 +413,12 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 	(void)ms; /* XXX */
 
 	if (len != ctx->report_in_len) {
-		fido_log_debug("%s: invalid len %zu/%hu", __func__, len,
+		fido_log_debug("%s: invalid len %zu/%zu", __func__, len,
 		    ctx->report_in_len);
 		return (-1);
 	}
 
-	if ((r = read(ctx->fd, buf, len)) < 0 ||
-	    (size_t)r != ctx->report_in_len) {
+	if ((r = read(ctx->fd, buf, len)) < 0 || (size_t)r != len) {
 		fido_log_debug("%s: read", __func__);
 		return (-1);
 	}
@@ -434,14 +432,13 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 	struct ctx_linux *ctx = handle;
 	ssize_t r;
 
-	if (len != ctx->report_out_len + 1u) {
-		fido_log_debug("%s: invalid len %zu/%hu", __func__, len,
+	if (len != ctx->report_out_len + 1) {
+		fido_log_debug("%s: invalid len %zu/%zu", __func__, len,
 		    ctx->report_out_len);
 		return (-1);
 	}
 
-	if ((r = write(ctx->fd, buf, len)) < 0 ||
-	    (size_t)r != ctx->report_out_len + 1u) {
+	if ((r = write(ctx->fd, buf, len)) < 0 || (size_t)r != len) {
 		fido_log_debug("%s: write", __func__);
 		return (-1);
 	}
@@ -449,7 +446,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 	return ((int)r);
 }
 
-uint16_t
+size_t
 fido_hid_report_in_len(void *handle)
 {
 	struct ctx_linux *ctx = handle;
@@ -457,7 +454,7 @@ fido_hid_report_in_len(void *handle)
 	return (ctx->report_in_len);
 }
 
-uint16_t
+size_t
 fido_hid_report_out_len(void *handle)
 {
 	struct ctx_linux *ctx = handle;

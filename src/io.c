@@ -47,8 +47,8 @@ tx_empty(fido_dev_t *d, uint8_t cmd)
 	fp->cid = d->cid;
 	fp->body.init.cmd = CTAP_FRAME_INIT | cmd;
 
-	n = d->io.write(d->io_handle, pkt, d->report_out_len + 1u);
-	if (n < 0 || (size_t)n != d->report_out_len + 1u)
+	n = d->io.write(d->io_handle, pkt, d->report_out_len + 1);
+	if (n < 0 || (size_t)n != d->report_out_len + 1)
 		return (-1);
 
 	return (0);
@@ -70,8 +70,8 @@ tx_preamble(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 	count = MIN(count, (size_t)d->report_out_len - CTAP_INIT_HEADER_LEN);
 	memcpy(&fp->body.init.data, buf, count);
 
-	n = d->io.write(d->io_handle, pkt, d->report_out_len + 1u);
-	if (n < 0 || (size_t)n != d->report_out_len + 1u)
+	n = d->io.write(d->io_handle, pkt, d->report_out_len + 1);
+	if (n < 0 || (size_t)n != d->report_out_len + 1)
 		return (0);
 
 	return (count);
@@ -91,8 +91,8 @@ tx_frame(fido_dev_t *d, uint8_t seq, const void *buf, size_t count)
 	count = MIN(count, (size_t)d->report_out_len - CTAP_CONT_HEADER_LEN);
 	memcpy(&fp->body.cont.data, buf, count);
 
-	n = d->io.write(d->io_handle, pkt, d->report_out_len + 1u);
-	if (n < 0 || (size_t)n != d->report_out_len + 1u)
+	n = d->io.write(d->io_handle, pkt, d->report_out_len + 1);
+	if (n < 0 || (size_t)n != d->report_out_len + 1)
 		return (0);
 
 	return (count);

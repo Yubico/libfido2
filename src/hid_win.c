@@ -21,8 +21,8 @@
 
 struct hid_win {
 	HANDLE dev;
-	uint16_t report_in_len;
-	uint16_t report_out_len;
+	size_t report_in_len;
+	size_t report_out_len;
 };
 
 static bool
@@ -51,7 +51,7 @@ fail:
 }
 
 static int
-get_report_len(HANDLE dev, int dir, uint16_t *report_len)
+get_report_len(HANDLE dev, int dir, size_t *report_len)
 {
 	PHIDP_PREPARSED_DATA data = NULL;
 	HIDP_CAPS caps;
@@ -78,7 +78,7 @@ get_report_len(HANDLE dev, int dir, uint16_t *report_len)
 		goto fail;
 	}
 
-	*report_len = (uint16_t)v;
+	*report_len = (size_t)v;
 
 	ok = 0;
 fail:
@@ -368,7 +368,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 	struct hid_win *ctx = handle;
 	DWORD n;
 
-	if (len == 0 || len - 1 != ctx->report_out_len) {
+	if (len != ctx->report_out_len + 1) {
 		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
@@ -382,7 +382,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 	return (len);
 }
 
-uint16_t
+size_t
 fido_hid_report_in_len(void *handle)
 {
 	struct hid_win *ctx = handle;
@@ -390,7 +390,7 @@ fido_hid_report_in_len(void *handle)
 	return (ctx->report_in_len);
 }
 
-uint16_t
+size_t
 fido_hid_report_out_len(void *handle)
 {
 	struct hid_win *ctx = handle;

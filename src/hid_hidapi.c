@@ -14,8 +14,8 @@
 
 struct hid_hidapi {
 	void *handle;
-	uint16_t report_in_len;
-	uint16_t report_out_len;
+	size_t report_in_len;
+	size_t report_out_len;
 };
 
 static size_t
@@ -103,8 +103,7 @@ fido_hid_open(const char *path)
 		return (NULL);
 	}
 
-	ctx->report_in_len = CTAP_MAX_REPORT_LEN;
-	ctx->report_out_len = CTAP_MAX_REPORT_LEN;
+	ctx->report_in_len = ctx->report_out_len = CTAP_MAX_REPORT_LEN;
 
 	return ctx;
 }
@@ -164,7 +163,7 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 	return FIDO_OK;
 }
 
-uint16_t
+size_t
 fido_hid_report_in_len(void *handle)
 {
 	struct hid_hidapi *ctx = handle;
@@ -172,7 +171,7 @@ fido_hid_report_in_len(void *handle)
 	return (ctx->report_in_len);
 }
 
-uint16_t
+size_t
 fido_hid_report_out_len(void *handle)
 {
 	struct hid_hidapi *ctx = handle;

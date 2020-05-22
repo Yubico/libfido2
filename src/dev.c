@@ -156,7 +156,7 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 
 	if (dev->report_in_len < CTAP_MIN_REPORT_LEN ||
 	    dev->report_in_len > CTAP_MAX_REPORT_LEN) {
-		fido_log_debug("%s: invalid report_in_len %hu", __func__,
+		fido_log_debug("%s: invalid report_in_len %zu", __func__,
 		    dev->report_in_len);
 		dev->io.close(dev->io_handle);
 		dev->io_handle = NULL;
@@ -165,7 +165,7 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 
 	if (dev->report_out_len < CTAP_MIN_REPORT_LEN ||
 	    dev->report_out_len > CTAP_MAX_REPORT_LEN) {
-		fido_log_debug("%s: invalid report_out_len %hu", __func__,
+		fido_log_debug("%s: invalid report_out_len %zu", __func__,
 		    dev->report_out_len);
 		dev->io.close(dev->io_handle);
 		dev->io_handle = NULL;

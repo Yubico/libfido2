@@ -216,8 +216,8 @@ typedef struct fido_dev {
 	void                 *io_handle; /* abstract i/o handle */
 	fido_dev_io_t         io;        /* i/o functions */
 	bool                  fixed_rpt_size; /* i/o uses default report size */
-	uint16_t              report_in_len;  /* length of HID input reports */
-	uint16_t              report_out_len; /* length of HID output reports */
+	size_t                report_in_len;  /* length of HID input reports */
+	size_t                report_out_len; /* length of HID output reports */
 	fido_dev_transport_t  transport; /* transport functions */
 } fido_dev_t;
 
