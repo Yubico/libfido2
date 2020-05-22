@@ -23,6 +23,8 @@ make -C "${LIBCBOR}/build" all install
 
 # Build libfido2.
 mkdir -p "${LIBFIDO2}/build"
-(cd "${LIBFIDO2}/build" && cmake -DFUZZ=1 -DLIBFUZZER=1 -DCOVERAGE=1 \
-	-DCMAKE_BUILD_TYPE=Debug ..)
+export CFLAGS="-fprofile-instr-generate -fcoverage-mapping"
+export LDFLAGS="${CFLAGS}"
+(cd "${LIBFIDO2}/build" && cmake -DFUZZ=1 -DLIBFUZZER=1 \
+    -DCMAKE_BUILD_TYPE=Debug ..)
 make -C "${LIBFIDO2}/build"
