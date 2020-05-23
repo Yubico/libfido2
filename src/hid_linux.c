@@ -18,10 +18,10 @@
 
 #include "fido.h"
 
-struct ctx_linux {
-	int fd;
-	size_t report_in_len;
-	size_t report_out_len;
+struct hid_linux {
+	int	fd;
+	size_t	report_in_len;
+	size_t	report_out_len;
 };
 
 static int
@@ -68,11 +68,8 @@ static int
 get_usage_info(const struct hidraw_report_descriptor *hrd, uint32_t *usage_page,
     uint32_t *usage)
 {
-	const uint8_t	*ptr;
-	size_t		 len;
-
-	ptr = hrd->value;
-	len = hrd->size;
+	const uint8_t	*ptr = hrd->value;
+	size_t		 len = hrd->size;
 
 	while (len > 0) {
 		const uint8_t tag = ptr[0];
@@ -101,18 +98,13 @@ get_usage_info(const struct hidraw_report_descriptor *hrd, uint32_t *usage_page,
 	return (0);
 }
 
-static void
-get_report_lengths(const struct hidraw_report_descriptor *hrd,
+static int
+get_report_sizes(const struct hidraw_report_descriptor *hrd,
     size_t *report_in_len, size_t *report_out_len)
 {
-	const uint8_t	*ptr;
-	size_t		 len;
-	uint16_t	 cur_report_count = 0;
-
-	ptr = hrd->value;
-	len = hrd->size;
-
-	*report_in_len = *report_out_len = 0;
+	const uint8_t	*ptr = hrd->value;
+	size_t		 len = hrd->size;
+	uint32_t	 report_size = 0;
 
 	while (len > 0) {
 		const uint8_t tag = ptr[0];
@@ -125,31 +117,29 @@ get_report_lengths(const struct hidraw_report_descriptor *hrd,
 
 		if (get_key_len(tag, &key, &key_len) < 0 || key_len > len ||
 		    get_key_val(ptr, key_len, &key_val) < 0) {
-			return;
+			return (-1);
 		}
 
 		if (key == 0x94) {
-			cur_report_count = key_val;
-			fido_log_debug("%s: ReportCount(%d)", __func__,
-			    cur_report_count);
+			report_size = key_val;
 		} else if (key == 0x80) {
-			*report_in_len = (size_t)cur_report_count;
-			fido_log_debug("%s: Input", __func__);
+			*report_in_len = (size_t)report_size;
 		} else if (key == 0x90) {
-			*report_out_len = (size_t)cur_report_count;
-			fido_log_debug("%s: Output", __func__);
+			*report_out_len = (size_t)report_size;
 		}
 
 		ptr += key_len;
 		len -= key_len;
 	}
+
+	return (0);
 }
 
 static int
 get_report_descriptor(const char *path, struct hidraw_report_descriptor *hrd)
 {
-	int	s = -1;
 	int	fd;
+	int	s = -1;
 	int	ok = -1;
 
 	if ((fd = open(path, O_RDONLY)) < 0) {
@@ -196,49 +186,79 @@ is_fido(const char *path)
 }
 
 static int
-parse_uevent(struct udev_device *dev, uint8_t *bus, int16_t *vendor_id,
-    int16_t *product_id, char **product_name)
+parse_uevent(const char *uevent, int *bus, int16_t *vendor_id,
+    int16_t *product_id)
 {
-	const char		*uevent;
 	char			*cp;
 	char			*p;
 	char			*s;
-	int			 ids_ok = -1;
-	int 			 product_name_ok = -1;
-	unsigned int		 x;
+	int			 ok = -1;
+	short unsigned int	 x;
 	short unsigned int	 y;
 	short unsigned int	 z;
-
-	*product_name = NULL;
-
-	if ((uevent = udev_device_get_sysattr_value(dev, "uevent")) == NULL)
-		return (-1);
 
 	if ((s = cp = strdup(uevent)) == NULL)
 		return (-1);
 
-	for ((p = strsep(&cp, "\n")); p && *p != '\0'; (p = strsep(&cp, "\n"))) {
+	while ((p = strsep(&cp, "\n")) != NULL && *p != '\0') {
 		if (strncmp(p, "HID_ID=", 7) == 0) {
-			if (sscanf(p + 7, "%x:%hx:%hx", &x, &y, &z) == 3) {
-				*bus = (uint8_t)x;
+			if (sscanf(p + 7, "%hx:%hx:%hx", &x, &y, &z) == 3) {
+				*bus = (int)x;
 				*vendor_id = (int16_t)y;
 				*product_id = (int16_t)z;
-				ids_ok = 0;
+				ok = 0;
+				break;
 			}
-		} else if (strncmp(p, "HID_NAME=", 9) == 0) {
-			if (*product_name)
-				free(*product_name);
-			*product_name = strdup(p + 9);
-			product_name_ok = 0;
 		}
 	}
 
 	free(s);
 
-	if (ids_ok != 0 || (*bus == BUS_BLUETOOTH && product_name_ok == -1))
-		return (-1);
-	else
-		return (0);
+	return (ok);
+}
+
+static char *
+get_hid_name(const char *uevent)
+{
+	char	*cp;
+	char	*p;
+	char	*s;
+	char	*name = NULL;
+
+	if ((s = cp = strdup(uevent)) == NULL)
+		return (NULL);
+
+	while ((p = strsep(&cp, "\n")) != NULL && *p != '\0') {
+		if (strncmp(p, "HID_NAME=", 9) == 0) {
+			name = strdup(p + 9);
+			break;
+		}
+	}
+
+	free(s);
+
+	return (name);
+}
+
+static char *
+get_parent_attr(struct udev_device *dev, const char *subsystem,
+    const char *devtype, const char *attr)
+{
+	struct udev_device	*parent;
+	const char		*value;
+
+	if ((parent = udev_device_get_parent_with_subsystem_devtype(dev,
+	    subsystem, devtype)) == NULL || (value =
+	    udev_device_get_sysattr_value(parent, attr)) == NULL)
+		return (NULL);
+
+	return (strdup(value));
+}
+
+static char *
+get_usb_attr(struct udev_device *dev, const char *attr)
+{
+	return (get_parent_attr(dev, "usb", "usb_device", attr));
 }
 
 static int
@@ -247,13 +267,9 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 {
 	const char		*name;
 	const char		*path;
-	const char		*manufacturer;
-	char 			*product_bluetooth = NULL;
-	const char		*product_usb;
+	char			*uevent = NULL;
 	struct udev_device	*dev = NULL;
-	uint8_t 		 bus;
-	struct udev_device	*hid_parent;
-	struct udev_device	*usb_parent;
+	int			 bus = 0;
 	int			 ok = -1;
 
 	memset(di, 0, sizeof(*di));
@@ -264,46 +280,30 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 	    is_fido(path) == 0)
 		goto fail;
 
-	if ((hid_parent = udev_device_get_parent_with_subsystem_devtype(dev,
-	    "hid", NULL)) == NULL)
+	if ((uevent = get_parent_attr(dev, "hid", NULL, "uevent")) == NULL ||
+	    parse_uevent(uevent, &bus, &di->vendor_id, &di->product_id) < 0) {
+		fido_log_debug("%s: uevent", __func__);
 		goto fail;
-
-	if (parse_uevent(hid_parent, &bus, &di->vendor_id, &di->product_id,
-	    &product_bluetooth) < 0)
-		goto fail;
+	}
 
 	if (bus == BUS_BLUETOOTH) {
 		di->manufacturer = strdup("Bluetooth HID");
-		di->product = product_bluetooth;
-		product_bluetooth = NULL;
+		di->product = get_hid_name(uevent);
 	} else {
-		if ((usb_parent = udev_device_get_parent_with_subsystem_devtype(
-		    dev,"usb", "usb_device")) == NULL)
-			goto fail;
-
-		if ((manufacturer = udev_device_get_sysattr_value(usb_parent,
-		    "manufacturer")) == NULL || (product_usb =
-		    udev_device_get_sysattr_value(usb_parent,"product"))
-		    == NULL)
-			goto fail;
-
-		di->manufacturer = strdup(manufacturer);
-		di->product = strdup(product_usb);
+		di->manufacturer = get_usb_attr(dev, "manufacturer");
+		di->product = get_usb_attr(dev, "product");
 	}
-
 	di->path = strdup(path);
 
-	if (di->path == NULL ||
-	    di->manufacturer == NULL ||
-	    di->product == NULL)
+	if (di->path == NULL || di->manufacturer == NULL || di->product == NULL)
 		goto fail;
 
 	ok = 0;
 fail:
 	if (dev != NULL)
 		udev_device_unref(dev);
-	if (product_bluetooth != NULL)
-		free(product_bluetooth);
+
+	free(uevent);
 
 	if (ok < 0) {
 		free(di->path);
@@ -371,7 +371,7 @@ fail:
 void *
 fido_hid_open(const char *path)
 {
-	struct ctx_linux		*ctx;
+	struct hid_linux		*ctx;
 	struct hidraw_report_descriptor	 hrd;
 
 	if ((ctx = calloc(1, sizeof(*ctx))) == NULL)
@@ -382,15 +382,13 @@ fido_hid_open(const char *path)
 		return (NULL);
 	}
 
-	ctx->report_in_len = ctx->report_out_len = CTAP_MAX_REPORT_LEN;
-
-	/*
-	 * Don't fail when report sizes can't be extracted in order to maintain
-	 * backwards compatibility.
-	 */
-	if (get_report_descriptor(path, &hrd) >= 0)
-		get_report_lengths(&hrd, &ctx->report_in_len,
-		    &ctx->report_out_len);
+	if (get_report_descriptor(path, &hrd) < 0 || get_report_sizes(&hrd,
+	    &ctx->report_in_len, &ctx->report_out_len) < 0 ||
+	    ctx->report_in_len == 0 || ctx->report_out_len == 0) {
+		fido_log_debug("%s: using default report sizes", __func__);
+		ctx->report_in_len = CTAP_MAX_REPORT_LEN;
+		ctx->report_out_len = CTAP_MAX_REPORT_LEN;
+	}
 
 	return (ctx);
 }
@@ -398,7 +396,7 @@ fido_hid_open(const char *path)
 void
 fido_hid_close(void *handle)
 {
-	struct ctx_linux *ctx = handle;
+	struct hid_linux *ctx = handle;
 
 	close(ctx->fd);
 	free(ctx);
@@ -407,16 +405,10 @@ fido_hid_close(void *handle)
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
-	struct ctx_linux *ctx = handle;
-	ssize_t	r;
+	struct hid_linux	*ctx = handle;
+	ssize_t			 r;
 
 	(void)ms; /* XXX */
-
-	if (len != ctx->report_in_len) {
-		fido_log_debug("%s: invalid len %zu/%zu", __func__, len,
-		    ctx->report_in_len);
-		return (-1);
-	}
 
 	if ((r = read(ctx->fd, buf, len)) < 0 || (size_t)r != len) {
 		fido_log_debug("%s: read", __func__);
@@ -429,14 +421,8 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 int
 fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
-	struct ctx_linux *ctx = handle;
-	ssize_t r;
-
-	if (len != ctx->report_out_len + 1) {
-		fido_log_debug("%s: invalid len %zu/%zu", __func__, len,
-		    ctx->report_out_len);
-		return (-1);
-	}
+	struct hid_linux	*ctx = handle;
+	ssize_t			 r;
 
 	if ((r = write(ctx->fd, buf, len)) < 0 || (size_t)r != len) {
 		fido_log_debug("%s: write", __func__);
@@ -449,7 +435,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 size_t
 fido_hid_report_in_len(void *handle)
 {
-	struct ctx_linux *ctx = handle;
+	struct hid_linux *ctx = handle;
 
 	return (ctx->report_in_len);
 }
@@ -457,7 +443,7 @@ fido_hid_report_in_len(void *handle)
 size_t
 fido_hid_report_out_len(void *handle)
 {
-	struct ctx_linux *ctx = handle;
+	struct hid_linux *ctx = handle;
 
 	return (ctx->report_out_len);
 }
