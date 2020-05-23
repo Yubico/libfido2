@@ -393,6 +393,11 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 
 	explicit_bzero(buf, len);
 
+	if (len != ctx->report_in_len) {
+		fido_log_debug("%s: len %zu", __func__, len);
+		return (-1);
+	}
+
 	IOHIDDeviceRegisterInputReportCallback(ctx->ref, buf, len,
 	    &read_callback, NULL);
 	IOHIDDeviceRegisterRemovalCallback(ctx->ref, &removal_callback, ctx);
@@ -419,8 +424,8 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	struct hid_osx *ctx = handle;
 
-	if (len == 0) {
-		fido_log_debug("%s: invalid len", __func__);
+	if (len != ctx->report_out_len + 1) {
+		fido_log_debug("%s: len %zu", __func__, len);
 		return (-1);
 	}
 

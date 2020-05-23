@@ -123,6 +123,11 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct hid_hidapi *ctx = handle;
 
+	if (len != ctx->report_in_len) {
+		fido_log_debug("%s: len %zu", __func__, len);
+		return -1;
+	}
+
 	return hid_read_timeout(ctx->handle, buf, len, ms);
 }
 
@@ -130,6 +135,11 @@ int
 fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	struct hid_hidapi *ctx = handle;
+
+	if (len != ctx->report_out_len + 1) {
+		fido_log_debug("%s: len %zu", __func__, len);
+		return -1;
+	}
 
 	return hid_write(ctx->handle, buf, len);
 }

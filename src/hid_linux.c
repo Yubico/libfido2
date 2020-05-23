@@ -410,6 +410,11 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 
 	(void)ms; /* XXX */
 
+	if (len != ctx->report_in_len) {
+		fido_log_debug("%s: len %zu", __func__, len);
+		return (-1);
+	}
+
 	if ((r = read(ctx->fd, buf, len)) < 0 || (size_t)r != len) {
 		fido_log_debug("%s: read", __func__);
 		return (-1);
@@ -423,6 +428,11 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	struct hid_linux	*ctx = handle;
 	ssize_t			 r;
+
+	if (len != ctx->report_out_len + 1) {
+		fido_log_debug("%s: len %zu", __func__, len);
+		return (-1);
+	}
 
 	if ((r = write(ctx->fd, buf, len)) < 0 || (size_t)r != len) {
 		fido_log_debug("%s: write", __func__);

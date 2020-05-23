@@ -337,8 +337,8 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 
 	memset(report, 0, sizeof(report));
 
-	if (len > sizeof(report) - 1) {
-		fido_log_debug("%s: invalid len", __func__);
+	if (len != ctx->report_in_len || len > sizeof(report) - 1) {
+		fido_log_debug("%s: len %zu", __func__, len);
 		return (-1);
 	}
 
@@ -361,6 +361,11 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	struct hid_win *ctx = handle;
 	DWORD n;
+
+	if (len != ctx->report_out_len + 1) {
+		fido_log_debug("%s: len %zu", __func__, len);
+		return (-1);
+	}
 
 	if (WriteFile(ctx->dev, buf, (DWORD)len, &n, NULL) == false ||
 	    n != len) {
