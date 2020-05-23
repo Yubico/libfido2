@@ -47,8 +47,8 @@ tx_empty(fido_dev_t *d, uint8_t cmd)
 	fp->cid = d->cid;
 	fp->body.init.cmd = CTAP_FRAME_INIT | cmd;
 
-	n = d->io.write(d->io_handle, pkt, d->report_out_len + 1);
-	if (n < 0 || (size_t)n != d->report_out_len + 1)
+	n = d->io.write(d->io_handle, pkt, d->tx_len + 1);
+	if (n < 0 || (size_t)n != d->tx_len + 1)
 		return (-1);
 
 	return (0);
@@ -67,11 +67,11 @@ tx_preamble(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 	fp->body.init.cmd = CTAP_FRAME_INIT | cmd;
 	fp->body.init.bcnth = (count >> 8) & 0xff;
 	fp->body.init.bcntl = count & 0xff;
-	count = MIN(count, (size_t)d->report_out_len - CTAP_INIT_HEADER_LEN);
+	count = MIN(count, (size_t)d->tx_len - CTAP_INIT_HEADER_LEN);
 	memcpy(&fp->body.init.data, buf, count);
 
-	n = d->io.write(d->io_handle, pkt, d->report_out_len + 1);
-	if (n < 0 || (size_t)n != d->report_out_len + 1)
+	n = d->io.write(d->io_handle, pkt, d->tx_len + 1);
+	if (n < 0 || (size_t)n != d->tx_len + 1)
 		return (0);
 
 	return (count);
@@ -88,11 +88,11 @@ tx_frame(fido_dev_t *d, uint8_t seq, const void *buf, size_t count)
 	fp = (struct frame *)(pkt + 1);
 	fp->cid = d->cid;
 	fp->body.cont.seq = seq;
-	count = MIN(count, (size_t)d->report_out_len - CTAP_CONT_HEADER_LEN);
+	count = MIN(count, (size_t)d->tx_len - CTAP_CONT_HEADER_LEN);
 	memcpy(&fp->body.cont.data, buf, count);
 
-	n = d->io.write(d->io_handle, pkt, d->report_out_len + 1);
-	if (n < 0 || (size_t)n != d->report_out_len + 1)
+	n = d->io.write(d->io_handle, pkt, d->tx_len + 1);
+	if (n < 0 || (size_t)n != d->tx_len + 1)
 		return (0);
 
 	return (count);
@@ -151,7 +151,7 @@ rx_frame(fido_dev_t *d, struct frame *fp, int ms)
 
 	memset(fp, 0, sizeof(*fp));
 
-	if ((len = d->report_in_len) > sizeof(*fp))
+	if ((len = d->rx_len) > sizeof(*fp))
 		return (-1);
 
 	n = d->io.read(d->io_handle, (unsigned char *)fp, len, ms);
@@ -174,7 +174,7 @@ rx_preamble(fido_dev_t *d, uint8_t cmd, struct frame *fp, int ms)
 	    fp->body.init.cmd == (CTAP_FRAME_INIT | CTAP_KEEPALIVE));
 
 	fido_log_debug("%s: initiation frame at %p", __func__, (void *)fp);
-	fido_log_xxd(fp, d->report_in_len);
+	fido_log_xxd(fp, d->rx_len);
 
 #ifdef FIDO_FUZZ
 	fp->body.init.cmd = (CTAP_FRAME_INIT | cmd);
@@ -194,10 +194,8 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 {
 	struct frame f;
 	uint16_t r, payload_len;
-	const uint16_t max_init_data_len = d->report_in_len -
-	    CTAP_INIT_HEADER_LEN;
-	const uint16_t max_cont_data_len = d->report_in_len -
-	    CTAP_CONT_HEADER_LEN;
+	const uint16_t max_init_data_len = d->rx_len - CTAP_INIT_HEADER_LEN;
+	const uint16_t max_cont_data_len = d->rx_len - CTAP_CONT_HEADER_LEN;
 
 	if (rx_preamble(d, cmd, &f, ms) < 0) {
 		fido_log_debug("%s: rx_preamble", __func__);
@@ -228,7 +226,7 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 
 		fido_log_debug("%s: continuation frame at %p", __func__,
 		    (void *)&f);
-		fido_log_xxd(&f, d->report_in_len);
+		fido_log_xxd(&f, d->rx_len);
 
 #ifdef FIDO_FUZZ
 		f.cid = d->cid;

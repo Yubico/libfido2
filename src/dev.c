@@ -110,9 +110,9 @@ find_manifest_func_node(dev_manifest_func_t f, dev_manifest_func_node_t **curr,
 static void
 set_random_report_len(fido_dev_t *dev)
 {
-	dev->report_in_len = CTAP_MIN_REPORT_LEN +
+	dev->rx_len = CTAP_MIN_REPORT_LEN +
 	    uniform_random(CTAP_MAX_REPORT_LEN - CTAP_MIN_REPORT_LEN + 1);
-	dev->report_out_len = CTAP_MIN_REPORT_LEN +
+	dev->tx_len = CTAP_MIN_REPORT_LEN +
 	    uniform_random(CTAP_MAX_REPORT_LEN - CTAP_MIN_REPORT_LEN + 1);
 }
 #endif
@@ -143,30 +143,28 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 		return (FIDO_ERR_INTERNAL);
 	}
 
-	if (dev->fixed_rpt_size) {
-		dev->report_in_len = CTAP_MAX_REPORT_LEN;
-		dev->report_out_len = CTAP_MAX_REPORT_LEN;
+	if (dev->io_own) {
+		dev->rx_len = CTAP_MAX_REPORT_LEN;
+		dev->tx_len = CTAP_MAX_REPORT_LEN;
 	} else {
-		dev->report_in_len = fido_hid_report_in_len(dev->io_handle);
-		dev->report_out_len = fido_hid_report_out_len(dev->io_handle);
+		dev->rx_len = fido_hid_report_in_len(dev->io_handle);
+		dev->tx_len = fido_hid_report_out_len(dev->io_handle);
 	}
 
 #ifdef FIDO_FUZZ
 	set_random_report_len(dev);
 #endif
 
-	if (dev->report_in_len < CTAP_MIN_REPORT_LEN ||
-	    dev->report_in_len > CTAP_MAX_REPORT_LEN) {
-		fido_log_debug("%s: invalid report_in_len %zu", __func__,
-		    dev->report_in_len);
+	if (dev->rx_len < CTAP_MIN_REPORT_LEN ||
+	    dev->rx_len > CTAP_MAX_REPORT_LEN) {
+		fido_log_debug("%s: invalid rx_len %zu", __func__, dev->rx_len);
 		r = FIDO_ERR_RX;
 		goto fail;
 	}
 
-	if (dev->report_out_len < CTAP_MIN_REPORT_LEN ||
-	    dev->report_out_len > CTAP_MAX_REPORT_LEN) {
-		fido_log_debug("%s: invalid report_out_len %zu", __func__,
-		    dev->report_out_len);
+	if (dev->tx_len < CTAP_MIN_REPORT_LEN ||
+	    dev->tx_len > CTAP_MAX_REPORT_LEN) {
+		fido_log_debug("%s: invalid tx_len %zu", __func__, dev->tx_len);
 		r = FIDO_ERR_TX;
 		goto fail;
 	}
@@ -368,7 +366,7 @@ fido_dev_set_io_functions(fido_dev_t *dev, const fido_dev_io_t *io)
 	}
 
 	dev->io = *io;
-	dev->fixed_rpt_size = true;
+	dev->io_own = true;
 
 	return (FIDO_OK);
 }
@@ -382,6 +380,7 @@ fido_dev_set_transport_functions(fido_dev_t *dev, const fido_dev_transport_t *t)
 	}
 
 	dev->transport = *t;
+	dev->io_own = true;
 
 	return (FIDO_OK);
 }
