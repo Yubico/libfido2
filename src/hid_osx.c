@@ -20,10 +20,10 @@
 #include "fido.h"
 
 struct hid_osx {
-	IOHIDDeviceRef ref;
-	CFStringRef loop_id;
-	size_t report_in_len;
-	size_t report_out_len;
+	IOHIDDeviceRef	ref;
+	CFStringRef	loop_id;
+	size_t		report_in_len;
+	size_t		report_out_len;
 };
 
 static int
@@ -75,8 +75,8 @@ get_utf8(IOHIDDeviceRef dev, CFStringRef key, void *buf, size_t len)
 static int
 get_report_len(IOHIDDeviceRef dev, int dir, size_t *report_len)
 {
-	CFStringRef key;
-	int32_t v;
+	CFStringRef	key;
+	int32_t		v;
 
 	if (dir == 0)
 		key = CFSTR(kIOHIDMaxInputReportSizeKey);
@@ -88,11 +88,6 @@ get_report_len(IOHIDDeviceRef dev, int dir, size_t *report_len)
 		return (-1);
 	}
 
-	if (v < CTAP_MIN_REPORT_LEN || v > CTAP_MAX_REPORT_LEN) {
-		fido_log_debug("%s: v/%d=%d", __func__, dir, (int)v);
-		return (-1);
-	}
-
 	*report_len = (size_t)v;
 
 	return (0);
@@ -101,7 +96,8 @@ get_report_len(IOHIDDeviceRef dev, int dir, size_t *report_len)
 static int
 get_id(IOHIDDeviceRef dev, int16_t *vendor_id, int16_t *product_id)
 {
-	int32_t	vendor, product;
+	int32_t	vendor;
+	int32_t product;
 
 	if (get_int32(dev, CFSTR(kIOHIDVendorIDKey), &vendor) < 0 ||
 	    vendor > UINT16_MAX) {
@@ -124,8 +120,8 @@ get_id(IOHIDDeviceRef dev, int16_t *vendor_id, int16_t *product_id)
 static int
 get_str(IOHIDDeviceRef dev, char **manufacturer, char **product)
 {
-	char buf[512];
-	int ok = -1;
+	char	buf[512];
+	int	ok = -1;
 
 	*manufacturer = NULL;
 	*product = NULL;
@@ -165,8 +161,8 @@ fail:
 static char *
 get_path(IOHIDDeviceRef dev)
 {
-	io_service_t s;
-	io_string_t path;
+	io_service_t	s;
+	io_string_t	path;
 
 	if ((s = IOHIDDeviceGetService(dev)) == MACH_PORT_NULL) {
 		fido_log_debug("%s: IOHIDDeviceGetService", __func__);
@@ -217,11 +213,11 @@ copy_info(fido_dev_info_t *di, IOHIDDeviceRef dev)
 int
 fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
-	IOHIDManagerRef manager = NULL;
-	CFSetRef devset = NULL;
-	CFIndex devcnt;
-	IOHIDDeviceRef *devs = NULL;
-	int r = FIDO_ERR_INTERNAL;
+	IOHIDManagerRef	 manager = NULL;
+	CFSetRef	 devset = NULL;
+	CFIndex		 devcnt;
+	IOHIDDeviceRef	*devs = NULL;
+	int		 r = FIDO_ERR_INTERNAL;
 
 	*olen = 0;
 
@@ -284,11 +280,11 @@ fail:
 void *
 fido_hid_open(const char *path)
 {
-	struct hid_osx *ctx;
-	io_registry_entry_t entry = MACH_PORT_NULL;
-	char loop_id[32];
-	int ok = -1;
-	int r;
+	struct hid_osx		*ctx;
+	io_registry_entry_t	 entry = MACH_PORT_NULL;
+	char			 loop_id[32];
+	int			 ok = -1;
+	int			 r;
 
 	if ((ctx = calloc(1, sizeof(*ctx))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
@@ -364,21 +360,17 @@ fido_hid_close(void *handle)
 }
 
 static void
-read_callback(void *context, IOReturn result, void *handle,
-    IOHIDReportType type, uint32_t report_id, uint8_t *report,
-    CFIndex report_len)
+read_callback(void *context, IOReturn result, void *dev, IOHIDReportType type,
+    uint32_t report_id, uint8_t *report, CFIndex report_len)
 {
-	struct hid_osx *ctx = handle;
-
 	(void)context;
-	(void)ctx;
+	(void)dev;
 	(void)report;
+	(void)report_len;
 
 	if (result != kIOReturnSuccess || type != kIOHIDReportTypeInput ||
-	    report_id != 0 || report_len < 0 ||
-	    (size_t)report_len != ctx->report_in_len) {
+	    report_id != 0)
 		fido_log_debug("%s: io error", __func__);
-	}
 }
 
 static void
@@ -394,15 +386,10 @@ removal_callback(void *context, IOReturn result, void *sender)
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
-	struct hid_osx *ctx = handle;
-	CFRunLoopRunResult r;
+	struct hid_osx		*ctx = handle;
+	CFRunLoopRunResult	 r;
 
 	(void)ms; /* XXX */
-
-	if (len != ctx->report_in_len) {
-		fido_log_debug("%s: invalid len", __func__);
-		return (-1);
-	}
 
 	explicit_bzero(buf, len);
 
@@ -432,7 +419,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	struct hid_osx *ctx = handle;
 
-	if (len != ctx->report_out_len + 1) {
+	if (len == 0) {
 		fido_log_debug("%s: invalid len", __func__);
 		return (-1);
 	}
