@@ -78,7 +78,8 @@ product OPENMOKO	0x60fc	OnlyKey (FIDO2/U2F)
 product NEOWAVE		0xf1ae	Neowave Keydo AES
 product NEOWAVE		0xf1d0	Neowave Keydo
 
-product EXCELSECU	0f025	Thethis Key
+product EXCELSECU	0xf025	Thethis Key
+product EXCELSECU	0xfc25	ExcelSecu FIDO2 Security Key
 
 product NXP		0xf143	GoTrust Idem Key
 
