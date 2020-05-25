@@ -110,37 +110,10 @@ print_rk(const fido_credman_rk_t *rk, size_t idx)
 	    fido_cred_user_id_len(cred), &user_id) < 0)
 		errx(1, "output error");
 
-	switch (fido_cred_type(cred)) {
-	case COSE_EDDSA:
-		type = "eddsa";
-		break;
-	case COSE_ES256:
-		type = "es256";
-		break;
-	case COSE_RS256:
-		type = "rs256";
-		break;
-	default:
-		type = "unknown";
-		break;
-	}
+	type = cose_string(fido_cred_type(cred));
+	prot = prot_string(fido_cred_prot(cred));
 
-	switch (fido_cred_prot(cred)) {
-	case FIDO_CRED_PROT_UV_OPTIONAL:
-		prot = "PROT_UV_OPTIONAL";
-		break;
-	case FIDO_CRED_PROT_UV_OPTIONAL_WITH_ID:
-		prot = "PROT_UV_OPTIONAL_WITH_ID";
-		break;
-	case FIDO_CRED_PROT_UV_REQUIRED:
-		prot = "PROT_UV_REQUIRED";
-		break;
-	default:
-		prot = "PROT_UNKNOWN";
-		break;
-	}
-
-	printf("%02u: %s %s (%s) %s %s\n", (unsigned)idx, id,
+	printf("%02u: %s %s %s %s %s\n", (unsigned)idx, id,
 	    fido_cred_display_name(cred), user_id, type, prot);
 
 	free(user_id);

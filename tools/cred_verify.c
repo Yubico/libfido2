@@ -148,16 +148,8 @@ cred_verify(int argc, char **argv)
 	in_f = open_read(in_path);
 	out_f = open_write(out_path);
 
-	if (argc > 0) {
-		if (strcmp(argv[0], "es256") == 0)
-			type = COSE_ES256;
-		else if (strcmp(argv[0], "rs256") == 0)
-			type = COSE_RS256;
-		else if (strcmp(argv[0], "eddsa") == 0)
-			type = COSE_EDDSA;
-		else
-			errx(1, "unknown type %s", argv[0]);
-	}
+	if (argc > 0 && cose_type(argv[0], &type) < 0)
+		errx(1, "unknown type %s", argv[0]);
 
 	fido_init((flags & FLAG_DEBUG) ? FIDO_DEBUG : 0);
 	cred = prepare_cred(in_f, type, flags);
