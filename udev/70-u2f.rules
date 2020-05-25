@@ -113,7 +113,10 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS={idVendor}=="1e0d", ATTRS{idProduc
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS={idVendor}=="1e0d", ATTRS{idProduct}=="f1d0", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
 # Thethis Key by Shenzhen Excelsecu Data Technology Co., Ltd.
-KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS={idVendor}=="1ea8", ATTRS{idProduct}=="0f025", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS={idVendor}=="1ea8", ATTRS{idProduct}=="f025", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# ExcelSecu FIDO2 Security Key by Shenzhen Excelsecu Data Technology Co., Ltd.
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS={idVendor}=="1ea8", ATTRS{idProduct}=="fc25", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
 # GoTrust Idem Key by NXP Semiconductors
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS={idVendor}=="1fc9", ATTRS{idProduct}=="f143", TAG+="uaccess", GROUP="plugdev", MODE="0660"
