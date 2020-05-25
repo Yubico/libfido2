@@ -120,7 +120,8 @@ set_random_report_len(fido_dev_t *dev)
 static int
 fido_dev_open_tx(fido_dev_t *dev, const char *path)
 {
-	const uint8_t cmd = CTAP_CMD_INIT;
+	const uint8_t	cmd = CTAP_CMD_INIT;
+	int		r;
 
 	if (dev->io_handle != NULL) {
 		fido_log_debug("%s: handle=%p", __func__, dev->io_handle);
@@ -143,43 +144,45 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 	}
 
 	if (dev->fixed_rpt_size) {
-#ifdef FIDO_FUZZ
-		set_random_report_len(dev);
-#else
 		dev->report_in_len = CTAP_MAX_REPORT_LEN;
 		dev->report_out_len = CTAP_MAX_REPORT_LEN;
-#endif
 	} else {
 		dev->report_in_len = fido_hid_report_in_len(dev->io_handle);
 		dev->report_out_len = fido_hid_report_out_len(dev->io_handle);
 	}
 
+#ifdef FIDO_FUZZ
+	set_random_report_len(dev);
+#endif
+
 	if (dev->report_in_len < CTAP_MIN_REPORT_LEN ||
 	    dev->report_in_len > CTAP_MAX_REPORT_LEN) {
 		fido_log_debug("%s: invalid report_in_len %zu", __func__,
 		    dev->report_in_len);
-		dev->io.close(dev->io_handle);
-		dev->io_handle = NULL;
-		return (FIDO_ERR_RX);
+		r = FIDO_ERR_RX;
+		goto fail;
 	}
 
 	if (dev->report_out_len < CTAP_MIN_REPORT_LEN ||
 	    dev->report_out_len > CTAP_MAX_REPORT_LEN) {
 		fido_log_debug("%s: invalid report_out_len %zu", __func__,
 		    dev->report_out_len);
-		dev->io.close(dev->io_handle);
-		dev->io_handle = NULL;
-		return (FIDO_ERR_TX);
+		r = FIDO_ERR_TX;
+		goto fail;
 	}
 
 	if (fido_tx(dev, cmd, &dev->nonce, sizeof(dev->nonce)) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
-		dev->io.close(dev->io_handle);
-		dev->io_handle = NULL;
-		return (FIDO_ERR_TX);
+		r = FIDO_ERR_TX;
+		goto fail;
 	}
 
 	return (FIDO_OK);
+fail:
+	dev->io.close(dev->io_handle);
+	dev->io_handle = NULL;
+
+	return (r);
 }
 
 static int
