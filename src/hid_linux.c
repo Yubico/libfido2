@@ -218,29 +218,6 @@ parse_uevent(const char *uevent, int *bus, int16_t *vendor_id,
 }
 
 static char *
-get_hid_name(const char *uevent)
-{
-	char	*cp;
-	char	*p;
-	char	*s;
-	char	*name = NULL;
-
-	if ((s = cp = strdup(uevent)) == NULL)
-		return (NULL);
-
-	while ((p = strsep(&cp, "\n")) != NULL && *p != '\0') {
-		if (strncmp(p, "HID_NAME=", 9) == 0) {
-			name = strdup(p + 9);
-			break;
-		}
-	}
-
-	free(s);
-
-	return (name);
-}
-
-static char *
 get_parent_attr(struct udev_device *dev, const char *subsystem,
     const char *devtype, const char *attr)
 {
@@ -281,19 +258,15 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 		goto fail;
 
 	if ((uevent = get_parent_attr(dev, "hid", NULL, "uevent")) == NULL ||
-	    parse_uevent(uevent, &bus, &di->vendor_id, &di->product_id) < 0) {
+	    parse_uevent(uevent, &bus, &di->vendor_id, &di->product_id) < 0 ||
+	    bus != BUS_USB) {
 		fido_log_debug("%s: uevent", __func__);
 		goto fail;
 	}
 
-	if (bus == BUS_BLUETOOTH) {
-		di->manufacturer = strdup("Bluetooth HID");
-		di->product = get_hid_name(uevent);
-	} else {
-		di->manufacturer = get_usb_attr(dev, "manufacturer");
-		di->product = get_usb_attr(dev, "product");
-	}
 	di->path = strdup(path);
+	di->manufacturer = get_usb_attr(dev, "manufacturer");
+	di->product = get_usb_attr(dev, "product");
 
 	if (di->path == NULL || di->manufacturer == NULL || di->product == NULL)
 		goto fail;
