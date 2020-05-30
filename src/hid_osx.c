@@ -180,11 +180,22 @@ get_path(IOHIDDeviceRef dev)
 static bool
 is_fido(IOHIDDeviceRef dev)
 {
-	uint32_t usage_page;
+	char		buf[32];
+	uint32_t	usage_page;
 
 	if (get_int32(dev, CFSTR(kIOHIDPrimaryUsagePageKey),
 	    (int32_t *)&usage_page) < 0 || usage_page != 0xf1d0)
 		return (false);
+
+	if (get_utf8(dev, CFSTR(kIOHIDTransportKey), buf, sizeof(buf)) < 0) {
+		fido_log_debug("%s: get_utf8 transport", __func__);
+		return (false);
+	}
+
+	if (strcasecmp(buf, "usb") != 0) {
+		fido_log_debug("%s: transport", __func__);
+		return (false);
+	}
 
 	return (true);
 }
