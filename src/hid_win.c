@@ -14,10 +14,23 @@
 #include <windows.h>
 #include <setupapi.h>
 #include <initguid.h>
+#include <devpkey.h>
+#include <devpropdef.h>
 #include <hidclass.h>
 #include <hidsdi.h>
 
 #include "fido.h"
+
+#if defined(__MINGW32__) &&  __MINGW64_VERSION_MAJOR < 6
+WINSETUPAPI WINBOOL WINAPI SetupDiGetDevicePropertyW(HDEVINFO,
+    PSP_DEVINFO_DATA, const DEVPROPKEY *, DEVPROPTYPE *, PBYTE,
+    DWORD, PDWORD, DWORD);
+#endif
+
+#if defined(__MINGW32__)
+DEFINE_DEVPROPKEY(DEVPKEY_Device_Parent, 0x4340a6c5, 0x93fa, 0x4706, 0x97,
+    0x2c, 0x7b, 0x64, 0x80, 0x08, 0xa5, 0xa7, 8);
+#endif
 
 struct hid_win {
 	HANDLE	dev;
@@ -167,25 +180,134 @@ fail:
 	return (ok);
 }
 
+static char *
+get_path(HDEVINFO devinfo, SP_DEVICE_INTERFACE_DATA *ifdata)
+{
+	SP_DEVICE_INTERFACE_DETAIL_DATA_A	*ifdetail = NULL;
+	char					*path = NULL;
+	DWORD					 len = 0;
+
+	/*
+	 * "Get the required buffer size. Call SetupDiGetDeviceInterfaceDetail
+	 * with a NULL DeviceInterfaceDetailData pointer, a
+	 * DeviceInterfaceDetailDataSize of zero, and a valid RequiredSize
+	 * variable. In response to such a call, this function returns the
+	 * required buffer size at RequiredSize and fails with GetLastError
+	 * returning ERROR_INSUFFICIENT_BUFFER."
+	 */
+	if (SetupDiGetDeviceInterfaceDetailA(devinfo, ifdata, NULL, 0, &len,
+	    NULL) != false || GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+		fido_log_debug("%s: SetupDiGetDeviceInterfaceDetailA 1",
+		    __func__);
+		goto fail;
+	}
+
+	if ((ifdetail = malloc(len)) == NULL) {
+		fido_log_debug("%s: malloc", __func__);
+		goto fail;
+	}
+
+	ifdetail->cbSize = sizeof(*ifdetail);
+
+	if (SetupDiGetDeviceInterfaceDetailA(devinfo, ifdata, ifdetail, len,
+	    NULL, NULL) == false) {
+		fido_log_debug("%s: SetupDiGetDeviceInterfaceDetailA 2",
+		    __func__);
+		goto fail;
+	}
+
+	if ((path = strdup(ifdetail->DevicePath)) == NULL) {
+		fido_log_debug("%s: strdup", __func__);
+		goto fail;
+	}
+
+fail:
+	free(ifdetail);
+
+	return (path);
+}
+
+static bool
+hid_ok(HDEVINFO devinfo, DWORD idx)
+{
+	SP_DEVINFO_DATA	 devinfo_data;
+	wchar_t		*parent = NULL;
+	DWORD		 parent_type = DEVPROP_TYPE_STRING;
+	DWORD		 len = 0;
+	bool		 ok = false;
+
+	memset(&devinfo_data, 0, sizeof(devinfo_data));
+	devinfo_data.cbSize = sizeof(devinfo_data);
+
+	if (SetupDiEnumDeviceInfo(devinfo, idx, &devinfo_data) == false) {
+		fido_log_debug("%s: SetupDiEnumDeviceInfo", __func__);
+		goto fail;
+	}
+
+	if (SetupDiGetDevicePropertyW(devinfo, &devinfo_data,
+	    &DEVPKEY_Device_Parent, &parent_type, NULL, 0, &len, 0) != false ||
+	    GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+		fido_log_debug("%s: SetupDiGetDevicePropertyW 1", __func__);
+		goto fail;
+	}
+
+	if ((parent = malloc(len)) == NULL) {
+		fido_log_debug("%s: malloc", __func__);
+		goto fail;
+	}
+
+	if (SetupDiGetDevicePropertyW(devinfo, &devinfo_data,
+	    &DEVPKEY_Device_Parent, &parent_type, (PBYTE)parent, len, NULL,
+	    0) == false) {
+		fido_log_debug("%s: SetupDiGetDevicePropertyW 2", __func__);
+		goto fail;
+	}
+
+	ok = wcsncmp(parent, L"USB\\", 4) == 0;
+fail:
+	free(parent);
+
+	return (ok);
+}
+
 static int
-copy_info(fido_dev_info_t *di, const char *path)
+copy_info(fido_dev_info_t *di, HDEVINFO devinfo, DWORD idx,
+    SP_DEVICE_INTERFACE_DATA *ifdata)
 {
 	HANDLE	dev = INVALID_HANDLE_VALUE;
 	int	ok = -1;
 
 	memset(di, 0, sizeof(*di));
 
-	dev = CreateFileA(path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-	    OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (dev == INVALID_HANDLE_VALUE || is_fido(dev) == 0)
+	if ((di->path = get_path(devinfo, ifdata)) == NULL) {
+		fido_log_debug("%s: get_path", __func__);
 		goto fail;
+	}
+
+	fido_log_debug("%s: path=%s", __func__, di->path);
+
+	if (hid_ok(devinfo, idx) == false) {
+		fido_log_debug("%s: hid_ok", __func__);
+		goto fail;
+	}
+
+	dev = CreateFileA(di->path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE,
+	    NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (dev == INVALID_HANDLE_VALUE) {
+		fido_log_debug("%s: CreateFileA", __func__);
+		goto fail;
+	}
+
+	if (is_fido(dev) == false) {
+		fido_log_debug("%s: is_fido", __func__);
+		goto fail;
+	}
 
 	if (get_int(dev, &di->vendor_id, &di->product_id) < 0 ||
-	    get_str(dev, &di->manufacturer, &di->product) < 0)
+	    get_str(dev, &di->manufacturer, &di->product) < 0) {
+		fido_log_debug("%s: get_int/get_str", __func__);
 		goto fail;
-
-	if ((di->path = strdup(path)) == NULL)
-		goto fail;
+	}
 
 	ok = 0;
 fail:
@@ -205,66 +327,30 @@ fail:
 int
 fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
-	GUID					 hid_guid = GUID_DEVINTERFACE_HID;
-	HDEVINFO				 devinfo = INVALID_HANDLE_VALUE;
-	SP_DEVICE_INTERFACE_DATA		 ifdata;
-	SP_DEVICE_INTERFACE_DETAIL_DATA_A	*ifdetail = NULL;
-	DWORD					 len = 0;
-	DWORD					 idx = 0;
-	int					 r = FIDO_ERR_INTERNAL;
+	GUID				hid_guid = GUID_DEVINTERFACE_HID;
+	HDEVINFO			devinfo = INVALID_HANDLE_VALUE;
+	SP_DEVICE_INTERFACE_DATA	ifdata;
+	DWORD				idx;
+	int				r = FIDO_ERR_INTERNAL;
 
 	*olen = 0;
 
 	if (ilen == 0)
 		return (FIDO_OK); /* nothing to do */
-
 	if (devlist == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	devinfo = SetupDiGetClassDevsA(&hid_guid, NULL, NULL,
-	    DIGCF_DEVICEINTERFACE | DIGCF_PRESENT);
-	if (devinfo == INVALID_HANDLE_VALUE) {
+	if ((devinfo = SetupDiGetClassDevsA(&hid_guid, NULL, NULL,
+	    DIGCF_DEVICEINTERFACE | DIGCF_PRESENT)) == INVALID_HANDLE_VALUE) {
 		fido_log_debug("%s: SetupDiGetClassDevsA", __func__);
 		goto fail;
 	}
 
 	ifdata.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
 
-	while (SetupDiEnumDeviceInterfaces(devinfo, NULL, &hid_guid, idx++,
-	    &ifdata) == true) {
-		/*
-		 * "Get the required buffer size. Call
-		 * SetupDiGetDeviceInterfaceDetail with a NULL
-		 * DeviceInterfaceDetailData pointer, a
-		 * DeviceInterfaceDetailDataSize of zero, and a valid
-		 * RequiredSize variable. In response to such a call, this
-		 * function returns the required buffer size at RequiredSize
-		 * and fails with GetLastError returning
-		 * ERROR_INSUFFICIENT_BUFFER."
-		 */
-		if (SetupDiGetDeviceInterfaceDetailA(devinfo, &ifdata, NULL, 0,
-		    &len, NULL) != false ||
-		    GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-			fido_log_debug("%s: SetupDiGetDeviceInterfaceDetailA 1",
-			    __func__);
-			goto fail;
-		}
-
-		if ((ifdetail = malloc(len)) == NULL) {
-			fido_log_debug("%s: malloc", __func__);
-			goto fail;
-		}
-
-		ifdetail->cbSize = sizeof(*ifdetail);
-
-		if (SetupDiGetDeviceInterfaceDetailA(devinfo, &ifdata, ifdetail,
-		    len, NULL, NULL) == false) {
-			fido_log_debug("%s: SetupDiGetDeviceInterfaceDetailA 2",
-			    __func__);
-			goto fail;
-		}
-
-		if (copy_info(&devlist[*olen], ifdetail->DevicePath) == 0) {
+	for (idx = 0; SetupDiEnumDeviceInterfaces(devinfo, NULL, &hid_guid,
+	    idx, &ifdata) == true; idx++) {
+		if (copy_info(&devlist[*olen], devinfo, idx, &ifdata) == 0) {
 			devlist[*olen].io = (fido_dev_io_t) {
 				fido_hid_open,
 				fido_hid_close,
@@ -274,17 +360,12 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 			if (++(*olen) == ilen)
 				break;
 		}
-
-		free(ifdetail);
-		ifdetail = NULL;
 	}
 
 	r = FIDO_OK;
 fail:
 	if (devinfo != INVALID_HANDLE_VALUE)
 		SetupDiDestroyDeviceInfoList(devinfo);
-
-	free(ifdetail);
 
 	return (r);
 }
