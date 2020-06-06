@@ -34,7 +34,7 @@ cd ..
 # Build libfido2.
 mkdir build
 cd build
-export PKG_CONFIG_PATH=/fakeroot/lib/pkgconfig
+export PKG_CONFIG_PATH="${FAKEROOT}/lib/pkgconfig"
 export CFLAGS="-fsanitize=address,leak,undefined -fsanitize-trap=undefined"
 export CFLAGS="${CFLAGS} -g2 -fno-omit-frame-pointer -fno-common"
 export LDFLAGS="-fsanitize=address,leak,undefined -fsanitize-trap=undefined"

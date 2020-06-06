@@ -192,13 +192,15 @@ main(int argc, char **argv)
 			break;
 		case 'T':
 #ifndef SIGNAL_EXAMPLE
+			(void)seconds;
 			errx(1, "-T not supported");
-#endif
+#else
 			if (base10(optarg, &seconds) < 0)
 				errx(1, "base10: %s", optarg);
 			if (seconds <= 0 || seconds > 30)
 				errx(1, "-T: %s must be in (0,30]", optarg);
 			break;
+#endif
 		case 'e':
 			if (read_blob(optarg, &body, &len) < 0)
 				errx(1, "read_blob: %s", optarg);
