@@ -423,14 +423,14 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 
-	if (ReadFile(ctx->dev, report, len + 1, &n, NULL) == false ||
+	if (ReadFile(ctx->dev, report, (DWORD)(len + 1), &n, NULL) == false ||
 	    n != len + 1) {
 		fido_log_debug("%s: ReadFile", __func__);
 		goto fail;
 	}
 
 	memcpy(buf, report + 1, len);
-	r = len;
+	r = (int)len;
 fail:
 	explicit_bzero(report, sizeof(report));
 
@@ -454,7 +454,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 		return (-1);
 	}
 
-	return (len);
+	return ((int)len);
 }
 
 size_t
