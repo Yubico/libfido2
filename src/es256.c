@@ -92,7 +92,7 @@ es256_pk_encode(const es256_pk_t *pk, int ecdh)
 
 	/* alg */
 	if ((argv[1].key = cbor_build_uint8(3)) == NULL ||
-	    (argv[1].value = cbor_build_negint8(-alg - 1)) == NULL ||
+	    (argv[1].value = cbor_build_negint8((uint8_t)(-alg - 1))) == NULL ||
 	    !cbor_map_add(item, argv[1]))
 		goto fail;
 
