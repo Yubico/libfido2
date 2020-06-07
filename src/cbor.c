@@ -583,7 +583,9 @@ cbor_encode_extensions(const fido_cred_ext_t *ext)
 		}
 	}
 	if (ext->mask & FIDO_EXT_CRED_PROTECT) {
-		if (cbor_add_uint8(item, "credProtect", ext->prot) < 0) {
+		if (ext->prot < 0 || ext->prot > UINT8_MAX ||
+		    cbor_add_uint8(item, "credProtect",
+		    (uint8_t)ext->prot) < 0) {
 			cbor_decref(&item);
 			return (NULL);
 		}
