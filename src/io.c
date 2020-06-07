@@ -194,11 +194,15 @@ rx_preamble(fido_dev_t *d, uint8_t cmd, struct frame *fp, int ms)
 static int
 rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 {
-	struct frame	f;
-	uint16_t	r;
-	uint16_t	payload_len;
-	const uint16_t	init_data_len = d->rx_len - CTAP_INIT_HEADER_LEN;
-	const uint16_t	cont_data_len = d->rx_len - CTAP_CONT_HEADER_LEN;
+	struct frame f;
+	size_t r, payload_len, init_data_len, cont_data_len;
+
+	if (d->rx_len <= CTAP_INIT_HEADER_LEN ||
+	    d->rx_len <= CTAP_CONT_HEADER_LEN)
+		return (-1);
+
+	init_data_len = d->rx_len - CTAP_INIT_HEADER_LEN;
+	cont_data_len = d->rx_len - CTAP_CONT_HEADER_LEN;
 
 	if (init_data_len > sizeof(f.body.init.data) ||
 	    cont_data_len > sizeof(f.body.cont.data))
@@ -210,22 +214,22 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 	}
 
 	payload_len = (f.body.init.bcnth << 8) | f.body.init.bcntl;
-	fido_log_debug("%s: payload_len=%zu", __func__, (size_t)payload_len);
+	fido_log_debug("%s: payload_len=%zu", __func__, payload_len);
 
-	if (count < (size_t)payload_len) {
+	if (count < payload_len) {
 		fido_log_debug("%s: count < payload_len", __func__);
 		return (-1);
 	}
 
 	if (payload_len < init_data_len) {
 		memcpy(buf, f.body.init.data, payload_len);
-		return (payload_len);
+		return ((int)payload_len);
 	}
 
 	memcpy(buf, f.body.init.data, init_data_len);
 	r = init_data_len;
 
-	for (int seq = 0; (size_t)r < payload_len; seq++) {
+	for (int seq = 0; r < payload_len; seq++) {
 		if (rx_frame(d, &f, ms) < 0) {
 			fido_log_debug("%s: rx_frame", __func__);
 			return (-1);
@@ -246,16 +250,16 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 			return (-1);
 		}
 
-		if ((size_t)(payload_len - r) > cont_data_len) {
+		if (payload_len - r > cont_data_len) {
 			memcpy(buf + r, f.body.cont.data, cont_data_len);
 			r += cont_data_len;
 		} else {
 			memcpy(buf + r, f.body.cont.data, payload_len - r);
-			r += (payload_len - r); /* break */
+			r += payload_len - r; /* break */
 		}
 	}
 
-	return (r);
+	return ((int)r);
 }
 
 int
