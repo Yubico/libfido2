@@ -35,6 +35,10 @@ consume(const void *body, size_t len)
 	const volatile uint8_t *ptr = body;
 	volatile uint8_t x = 0;
 
+#ifdef WITH_MSAN
+	__msan_check_mem_is_initialized(body, len);
+#endif
+
 	while (len--)
 		x ^= *ptr++;
 }

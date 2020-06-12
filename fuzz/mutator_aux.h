@@ -23,6 +23,7 @@
 
 #if defined(__has_feature)
 # if  __has_feature(memory_sanitizer)
+#  include <sanitizer/msan_interface.h>
 #  define NO_MSAN	__attribute__((no_sanitize("memory")))
 #  define WITH_MSAN	1
 # endif

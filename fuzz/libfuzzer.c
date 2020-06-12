@@ -12,10 +12,6 @@
 
 #include "mutator_aux.h"
 
-#ifdef WITH_MSAN
-#include <sanitizer/msan_interface.h>
-#endif
-
 static bool debug;
 static unsigned long long test_fail;
 static unsigned long long test_total;
