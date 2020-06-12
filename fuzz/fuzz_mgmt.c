@@ -329,7 +329,7 @@ static void
 dev_get_retry_count(const struct param *p)
 {
 	fido_dev_t *dev;
-	int n;
+	int n = 0;
 
 	set_wire_data(p->retry_wire_data.body, p->retry_wire_data.len);
 
