@@ -36,7 +36,7 @@ const char *cose_string(int);
 const char *prot_string(int);
 int assert_get(int, char **);
 int assert_verify(int, char **);
-int base64_decode(char *, void **, size_t *);
+int base64_decode(const char *, void **, size_t *);
 int base64_encode(const void *, size_t, char **);
 int base64_read(FILE *, struct blob *);
 int bio_delete(fido_dev_t *, char *, char *);
