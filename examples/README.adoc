@@ -79,3 +79,6 @@ The following examples are provided:
 
 Debugging is possible through the use of the FIDO_DEBUG environment variable.
 If set, libfido2 will produce a log of its transactions with the authenticator.
+
+Additionally, an example of a WebAuthn client using libfido2 is available at
+https://git.sr.ht/~pedro/fido2-webauthn-client.
