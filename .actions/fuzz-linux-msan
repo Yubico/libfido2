@@ -43,7 +43,7 @@ make
 
 # Fuzz with MSAN.
 mkdir corpus
-curl -s https://ambientworks.net/tmp/corpus.tgz | tar -C corpus -zxf -
+curl -s https://ambientworks.net/libfido2/corpus.tgz | tar -C corpus -zxf -
 fuzz/fuzz_cred -use_value_profile=1 -reload=30 -print_pcs=1 \
     -print_funcs=30 -timeout=10 -runs=1 corpus/fuzz_cred
 fuzz/fuzz_assert -use_value_profile=1 -reload=30 -print_pcs=1 \
