@@ -58,7 +58,7 @@ if(MSVC)
 		    "under msvc")
 	endif()
 	set(CBOR_LIBRARIES cbor)
-	set(CRYPTO_LIBRARIES crypto-45)
+	set(CRYPTO_LIBRARIES crypto-46)
 	set(MSVC_DISABLED_WARNINGS_LIST
 		"C4200" # nonstandard extension used: zero-sized array in
 			# struct/union;
