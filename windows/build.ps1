@@ -15,8 +15,8 @@ New-Variable -Name 'LIBRESSL_URL' `
 New-Variable -Name 'LIBRESSL' -Value 'libressl-3.1.3' -Option Constant
 
 # libcbor coordinates.
-New-Variable -Name 'LIBCBOR' -Value 'libcbor-0.5.0' -Option Constant
-New-Variable -Name 'LIBCBOR_BRANCH' -Value 'v0.5.0' -Option Constant
+New-Variable -Name 'LIBCBOR' -Value 'libcbor-0.7.0' -Option Constant
+New-Variable -Name 'LIBCBOR_BRANCH' -Value 'v0.7.0' -Option Constant
 New-Variable -Name 'LIBCBOR_GIT' -Value 'https://github.com/pjk/libcbor' `
 	-Option Constant
 
