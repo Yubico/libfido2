@@ -636,7 +636,7 @@ cbor_encode_pin_auth(const fido_blob_t *hmac_key, const fido_blob_t *data)
 	unsigned int	 dgst_len;
 
 	if ((md = EVP_sha256()) == NULL || HMAC(md, hmac_key->ptr,
-	    (int)hmac_key->len, data->ptr, (int)data->len, dgst,
+	    (int)hmac_key->len, data->ptr, data->len, dgst,
 	    &dgst_len) == NULL || dgst_len != SHA256_DIGEST_LENGTH)
 		return (NULL);
 
@@ -737,8 +737,8 @@ cbor_encode_change_pin_auth(const fido_blob_t *key, const fido_blob_t *new_pin,
 	if ((ctx = HMAC_CTX_new()) == NULL ||
 	    (md = EVP_sha256())  == NULL ||
 	    HMAC_Init_ex(ctx, key->ptr, (int)key->len, md, NULL) == 0 ||
-	    HMAC_Update(ctx, npe->ptr, (int)npe->len) == 0 ||
-	    HMAC_Update(ctx, phe->ptr, (int)phe->len) == 0 ||
+	    HMAC_Update(ctx, npe->ptr, npe->len) == 0 ||
+	    HMAC_Update(ctx, phe->ptr, phe->len) == 0 ||
 	    HMAC_Final(ctx, dgst, &dgst_len) == 0 || dgst_len != 32) {
 		fido_log_debug("%s: HMAC", __func__);
 		goto fail;
@@ -789,7 +789,7 @@ cbor_encode_set_pin_auth(const fido_blob_t *key, const fido_blob_t *pin)
 	}
 
 	if ((md = EVP_sha256()) == NULL || key->len != 32 || HMAC(md, key->ptr,
-	    (int)key->len, pe->ptr, (int)pe->len, dgst, &dgst_len) == NULL ||
+	    (int)key->len, pe->ptr, pe->len, dgst, &dgst_len) == NULL ||
 	    dgst_len != SHA256_DIGEST_LENGTH) {
 		fido_log_debug("%s: HMAC", __func__);
 		goto fail;
