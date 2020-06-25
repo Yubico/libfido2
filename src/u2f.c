@@ -160,7 +160,7 @@ send_dummy_register(fido_dev_t *dev, int ms)
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-		if (usleep((ms == -1 ? 100 : ms) * 1000) < 0) {
+		if (usleep((unsigned)(ms == -1 ? 100 : ms) * 1000) < 0) {
 			fido_log_debug("%s: usleep", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
@@ -336,7 +336,7 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-		if (usleep((ms == -1 ? 100 : ms) * 1000) < 0) {
+		if (usleep((unsigned)(ms == -1 ? 100 : ms) * 1000) < 0) {
 			fido_log_debug("%s: usleep", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
@@ -643,7 +643,7 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-		if (usleep((ms == -1 ? 100 : ms) * 1000) < 0) {
+		if (usleep((unsigned)(ms == -1 ? 100 : ms) * 1000) < 0) {
 			fido_log_debug("%s: usleep", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
@@ -726,8 +726,8 @@ fail:
 int
 u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
 {
-	int	nfound = 0;
-	int	nauth_ok = 0;
+	size_t	nfound = 0;
+	size_t	nauth_ok = 0;
 	int	r;
 
 	if (fa->uv == FIDO_OPT_TRUE || fa->allow_list.ptr == NULL) {
