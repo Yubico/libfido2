@@ -226,7 +226,8 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
 	IOHIDManagerRef	 manager = NULL;
 	CFSetRef	 devset = NULL;
-	CFIndex		 devcnt;
+	size_t		 devcnt;
+	CFIndex		 n;
 	IOHIDDeviceRef	*devs = NULL;
 	int		 r = FIDO_ERR_INTERNAL;
 
@@ -251,10 +252,12 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 		goto fail;
 	}
 
-	if ((devcnt = CFSetGetCount(devset)) < 0) {
+	if ((n = CFSetGetCount(devset)) < 0) {
 		fido_log_debug("%s: CFSetGetCount", __func__);
 		goto fail;
 	}
+
+	devcnt = (size_t)n;
 
 	if ((devs = calloc(devcnt, sizeof(*devs))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
@@ -263,7 +266,7 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 	CFSetGetValues(devset, (void *)devs);
 
-	for (CFIndex i = 0; i < devcnt; i++) {
+	for (size_t i = 0; i < devcnt; i++) {
 		if (copy_info(&devlist[*olen], devs[i]) == 0) {
 			devlist[*olen].io = (fido_dev_io_t) {
 				fido_hid_open,
