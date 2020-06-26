@@ -20,10 +20,6 @@
 #include "fido.h"
 #include "extern.h"
 
-#ifdef SIGNAL_EXAMPLE
-extern volatile sig_atomic_t got_signal;
-#endif
-
 int
 main(int argc, char **argv)
 {
