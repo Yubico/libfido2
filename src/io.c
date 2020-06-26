@@ -213,7 +213,7 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 		return (-1);
 	}
 
-	payload_len = (f.body.init.bcnth << 8) | f.body.init.bcntl;
+	payload_len = (size_t)((f.body.init.bcnth << 8) | f.body.init.bcntl);
 	fido_log_debug("%s: payload_len=%zu", __func__, payload_len);
 
 	if (count < payload_len) {
@@ -278,7 +278,7 @@ fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 	}
 	if ((n = rx(d, cmd, buf, count, ms)) >= 0) {
 		fido_log_debug("%s: buf=%p, len=%d", __func__, (void *)buf, n);
-		fido_log_xxd(buf, n);
+		fido_log_xxd(buf, (size_t)n);
 	}
 
 	return (n);
