@@ -153,7 +153,7 @@ get_report_descriptor(const char *path, struct hidraw_report_descriptor *hrd)
 		goto fail;
 	}
 
-	hrd->size = s;
+	hrd->size = (unsigned)s;
 
 	if (ioctl(fd, HIDIOCGRDESC, hrd) < 0) {
 		fido_log_debug("%s: ioctl HIDIOCGRDESC", __func__);
