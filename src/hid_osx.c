@@ -64,7 +64,8 @@ get_utf8(IOHIDDeviceRef dev, CFStringRef key, void *buf, size_t len)
 		return (-1);
 	}
 
-	if (CFStringGetCString(ref, buf, len, kCFStringEncodingUTF8) == false) {
+	if (CFStringGetCString(ref, buf, (long)len,
+	    kCFStringEncodingUTF8) == false) {
 		fido_log_debug("%s: CFStringGetCString", __func__);
 		return (-1);
 	}
@@ -407,12 +408,12 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 
 	explicit_bzero(buf, len);
 
-	if (len != ctx->report_in_len) {
+	if (len != ctx->report_in_len || len > LONG_MAX) {
 		fido_log_debug("%s: len %zu", __func__, len);
 		return (-1);
 	}
 
-	IOHIDDeviceRegisterInputReportCallback(ctx->ref, buf, len,
+	IOHIDDeviceRegisterInputReportCallback(ctx->ref, buf, (long)len,
 	    &read_callback, NULL);
 	IOHIDDeviceRegisterRemovalCallback(ctx->ref, &removal_callback, ctx);
 	IOHIDDeviceScheduleWithRunLoop(ctx->ref, CFRunLoopGetCurrent(),
@@ -420,7 +421,8 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 
 	r = CFRunLoopRunInMode(ctx->loop_id, 5, true);
 
-	IOHIDDeviceRegisterInputReportCallback(ctx->ref, buf, len, NULL, NULL);
+	IOHIDDeviceRegisterInputReportCallback(ctx->ref, buf, (long)len, NULL,
+	    NULL);
 	IOHIDDeviceRegisterRemovalCallback(ctx->ref, NULL, NULL);
 	IOHIDDeviceUnscheduleFromRunLoop(ctx->ref, CFRunLoopGetCurrent(),
 	    ctx->loop_id);
@@ -438,13 +440,13 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
 	struct hid_osx *ctx = handle;
 
-	if (len != ctx->report_out_len + 1) {
+	if (len != ctx->report_out_len + 1 || len > LONG_MAX) {
 		fido_log_debug("%s: len %zu", __func__, len);
 		return (-1);
 	}
 
 	if (IOHIDDeviceSetReport(ctx->ref, kIOHIDReportTypeOutput, 0, buf + 1,
-	    len - 1) != kIOReturnSuccess) {
+	    (long)(len - 1)) != kIOReturnSuccess) {
 		fido_log_debug("%s: IOHIDDeviceSetReport", __func__);
 		return (-1);
 	}
