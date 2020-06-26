@@ -258,11 +258,17 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 		goto fail;
 
 	if ((uevent = get_parent_attr(dev, "hid", NULL, "uevent")) == NULL ||
-	    parse_uevent(uevent, &bus, &di->vendor_id, &di->product_id) < 0 ||
-	    bus != BUS_USB) {
+	    parse_uevent(uevent, &bus, &di->vendor_id, &di->product_id) < 0) {
 		fido_log_debug("%s: uevent", __func__);
 		goto fail;
 	}
+
+#ifndef FIDO_HID_ANY
+	if (bus != BUS_USB) {
+		fido_log_debug("%s: bus", __func__);
+		goto fail;
+	}
+#endif
 
 	di->path = strdup(path);
 	di->manufacturer = get_usb_attr(dev, "manufacturer");

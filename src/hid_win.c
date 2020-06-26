@@ -227,6 +227,7 @@ fail:
 	return (path);
 }
 
+#ifndef FIDO_HID_ANY
 static bool
 hid_ok(HDEVINFO devinfo, DWORD idx)
 {
@@ -269,6 +270,7 @@ fail:
 
 	return (ok);
 }
+#endif
 
 static int
 copy_info(fido_dev_info_t *di, HDEVINFO devinfo, DWORD idx,
@@ -286,10 +288,12 @@ copy_info(fido_dev_info_t *di, HDEVINFO devinfo, DWORD idx,
 
 	fido_log_debug("%s: path=%s", __func__, di->path);
 
+#ifndef FIDO_HID_ANY
 	if (hid_ok(devinfo, idx) == false) {
 		fido_log_debug("%s: hid_ok", __func__);
 		goto fail;
 	}
+#endif
 
 	dev = CreateFileA(di->path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE,
 	    NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);

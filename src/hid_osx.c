@@ -193,10 +193,12 @@ is_fido(IOHIDDeviceRef dev)
 		return (false);
 	}
 
+#ifndef FIDO_HID_ANY
 	if (strcasecmp(buf, "usb") != 0) {
 		fido_log_debug("%s: transport", __func__);
 		return (false);
 	}
+#endif
 
 	return (true);
 }
