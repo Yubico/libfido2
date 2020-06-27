@@ -38,7 +38,7 @@ endif()
 
 if(APPLE)
 	set(CMAKE_INSTALL_NAME_DIR
-		"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+	    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 endif()
 
 if(MSVC)
@@ -62,7 +62,7 @@ if(MSVC)
 	# The construction in the following 3 lines was taken from LibreSSL's
 	# CMakeLists.txt.
 	string(REPLACE "C" " -wd" MSVC_DISABLED_WARNINGS_STR
-		${MSVC_DISABLED_WARNINGS_LIST})
+	    ${MSVC_DISABLED_WARNINGS_LIST})
 	string(REGEX REPLACE "[/-]W[1234][ ]?" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -MP -W4 -WX ${MSVC_DISABLED_WARNINGS_STR}")
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Z7")
@@ -336,7 +336,7 @@ elseif(NOT MSVC)
 	endif()
 else()
 	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-		" /def:\"${CMAKE_CURRENT_SOURCE_DIR}/src/export.msvc\"")
+	    " /def:\"${CMAKE_CURRENT_SOURCE_DIR}/src/export.msvc\"")
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
