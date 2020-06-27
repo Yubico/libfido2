@@ -3,12 +3,10 @@
 # license that can be found in the LICENSE file.
 
 find_program(MANDOC_PATH mandoc)
-message(STATUS "MANDOC_PATH: ${MANDOC_PATH}")
+find_program(GZIP_PATH gzip)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	find_program(GZIP_PATH gzip)
-	message(STATUS "GZIP_PATH: ${GZIP_PATH}")
-endif()
+message(STATUS "MANDOC_PATH: ${MANDOC_PATH}")
+message(STATUS "GZIP_PATH: ${GZIP_PATH}")
 
 list(APPEND MAN_SOURCES
 	eddsa_pk_new.3
