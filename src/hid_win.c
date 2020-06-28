@@ -103,13 +103,14 @@ get_int(HANDLE dev, int16_t *vendor_id, int16_t *product_id)
 
 	attr.Size = sizeof(attr);
 
-	if (HidD_GetAttributes(dev, &attr) == false) {
+	if (HidD_GetAttributes(dev, &attr) == false ||
+	    attr.VendorID > INT16_MAX || attr.ProductID > INT16_MAX) {
 		fido_log_debug("%s: HidD_GetAttributes", __func__);
 		return (-1);
 	}
 
-	*vendor_id = attr.VendorID;
-	*product_id = attr.ProductID;
+	*vendor_id = (int16_t)attr.VendorID;
+	*product_id = (int16_t)attr.ProductID;
 
 	return (0);
 }
@@ -135,7 +136,7 @@ get_str(HANDLE dev, char **manufacturer, char **product)
 		goto fail;
 	}
 
-	if ((*manufacturer = malloc(utf8_len)) == NULL) {
+	if ((*manufacturer = malloc((size_t)utf8_len)) == NULL) {
 		fido_log_debug("%s: malloc", __func__);
 		goto fail;
 	}
@@ -157,7 +158,7 @@ get_str(HANDLE dev, char **manufacturer, char **product)
 		goto fail;
 	}
 
-	if ((*product = malloc(utf8_len)) == NULL) {
+	if ((*product = malloc((size_t)utf8_len)) == NULL) {
 		fido_log_debug("%s: malloc", __func__);
 		goto fail;
 	}

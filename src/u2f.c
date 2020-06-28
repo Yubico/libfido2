@@ -204,8 +204,8 @@ key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
 
 	key_id_len = (uint8_t)key_id->len;
 
-	if ((apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_CHECK, 2 *
-	    SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len)) == NULL ||
+	if ((apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_CHECK, (uint16_t)(2 *
+	    SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len))) == NULL ||
 	    iso7816_add(apdu, &challenge, sizeof(challenge)) < 0 ||
 	    iso7816_add(apdu, &rp_id_hash, sizeof(rp_id_hash)) < 0 ||
 	    iso7816_add(apdu, &key_id_len, sizeof(key_id_len)) < 0 ||
@@ -312,8 +312,8 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 
 	key_id_len = (uint8_t)key_id->len;
 
-	if ((apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_SIGN, 2 *
-	    SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len)) == NULL ||
+	if ((apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_SIGN, (uint16_t)(2 *
+	    SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len))) == NULL ||
 	    iso7816_add(apdu, cdh->ptr, cdh->len) < 0 ||
 	    iso7816_add(apdu, &rp_id_hash, sizeof(rp_id_hash)) < 0 ||
 	    iso7816_add(apdu, &key_id_len, sizeof(key_id_len)) < 0 ||

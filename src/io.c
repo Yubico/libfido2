@@ -241,7 +241,7 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 
 #ifdef FIDO_FUZZ
 		f.cid = d->cid;
-		f.body.cont.seq = seq;
+		f.body.cont.seq = (uint8_t)seq;
 #endif
 
 		if (f.cid != d->cid || f.body.cont.seq != seq) {

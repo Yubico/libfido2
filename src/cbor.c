@@ -386,7 +386,7 @@ cbor_flatten_vector(cbor_item_t *argv[], size_t argc)
 		return (NULL);
 
 	for (i = 0; i < argc; i++)
-		if (cbor_add_arg(map, i + 1, argv[i]) < 0)
+		if (cbor_add_arg(map, (uint8_t)(i + 1), argv[i]) < 0)
 			break;
 
 	if (i != argc) {

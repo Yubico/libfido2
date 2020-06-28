@@ -493,7 +493,7 @@ fido_dev_is_fido2(const fido_dev_t *dev)
 void
 fido_dev_force_u2f(fido_dev_t *dev)
 {
-	dev->attr.flags &= ~FIDO_CAP_CBOR;
+	dev->attr.flags &= (uint8_t)~FIDO_CAP_CBOR;
 }
 
 void
