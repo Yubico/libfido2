@@ -50,6 +50,11 @@ else()
 	message(FATAL_ERROR "please define a hid backend for your platform")
 endif()
 
+if(NOT MSVC)
+	set_source_files_properties(${FIDO_SOURCES} PROPERTIES COMPILE_FLAGS
+	    "-Wconversion -Wsign-conversion")
+endif()
+
 list(APPEND COMPAT_SOURCES
 	../openbsd-compat/bsd-getpagesize.c
 	../openbsd-compat/explicit_bzero.c

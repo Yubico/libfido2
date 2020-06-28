@@ -15,6 +15,13 @@ endif()
 # drop -rdynamic
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 
+# enable -Wconversion -Wsign-conversion
+if(NOT MSVC)
+	set_source_files_properties(assert.c cred.c info.c manifest.c reset.c
+	    retries.c setpin.c util.c PROPERTIES COMPILE_FLAGS
+	    "-Wconversion -Wsign-conversion")
+endif()
+
 # manifest
 add_executable(manifest manifest.c ${COMPAT_SOURCES})
 target_link_libraries(manifest fido2)
