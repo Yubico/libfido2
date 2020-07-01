@@ -65,7 +65,7 @@ be set.
 
 *libfido2* depends on https://github.com/pjk/libcbor[libcbor] and
 https://www.openssl.org[OpenSSL]. On Linux, libudev (part of
-https://www.freedesktop.org/wiki/Software/systemd[systemd]) is also required.
+https://www.freedesktop.org/wiki/Software/systemd[systemd]) and pkg-config are also required.
 
 For complete, OS-specific installation instructions, please refer to the
 `.actions/` (Linux, MacOS) and `windows/` directories.
