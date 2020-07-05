@@ -11,10 +11,10 @@
  * $ echo relying party >> assert_param
  * $ head -1 cred >> assert_param # credential id
  * $ tail -n +2 cred > pubkey # credential pubkey
- * $ fido2-assert -G -i assert_param /dev/hidraw5 | fido2-assert -V pubkey rs256 
+ * $ fido2-assert -G -i assert_param /dev/hidraw5 | fido2-assert -V pubkey rs256
  *
  * See blurb in fido2-cred.c on how to obtain cred.
- */ 
+ */
 
 #include <fido.h>
 #include <stdio.h>

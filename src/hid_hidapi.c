@@ -33,7 +33,7 @@ wcs_to_cs(const wchar_t *wcs)
 	char *cs;
 	size_t i;
 
-	if (wcs == NULL || (cs = calloc(fido_wcslen(wcs) + 1, 1)) == NULL) 
+	if (wcs == NULL || (cs = calloc(fido_wcslen(wcs) + 1, 1)) == NULL)
 		return NULL;
 
 	for (i = 0; i < fido_wcslen(wcs); i++) {

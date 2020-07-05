@@ -81,7 +81,7 @@ get_report_len(IOHIDDeviceRef dev, int dir, size_t *report_len)
 
 	if (dir == 0)
 		key = CFSTR(kIOHIDMaxInputReportSizeKey);
-	else 
+	else
 		key = CFSTR(kIOHIDMaxOutputReportSizeKey);
 
 	if (get_int32(dev, key, &v) < 0) {

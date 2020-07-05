@@ -160,7 +160,7 @@ mutate_string(char *s)
 	n = LLVMFuzzerMutate((uint8_t *)s, strlen(s), MAXSTR - 1);
 	s[n] = '\0';
 }
- 
+
 void *
 dev_open(const char *path)
 {

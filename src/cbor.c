@@ -1294,7 +1294,7 @@ cbor_decode_cred_authdata(const cbor_item_t *item, int cose_alg,
 	}
 
 	if (authdata_ext != NULL) {
-		if ((authdata->flags & CTAP_AUTHDATA_EXT_DATA) != 0 && 
+		if ((authdata->flags & CTAP_AUTHDATA_EXT_DATA) != 0 &&
 		    decode_extensions(&buf, &len, authdata_ext) < 0)
 			return (-1);
 	}

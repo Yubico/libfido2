@@ -12,7 +12,7 @@
  * $ echo user name >> cred_param
  * $ dd if=/dev/urandom bs=1 count=32 | base64 >> cred_param
  * $ fido2-cred -M -i cred_param /dev/hidraw5 | fido2-cred -V -o cred
- */ 
+ */
 
 #include <fido.h>
 #include <stdio.h>
