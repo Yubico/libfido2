@@ -245,6 +245,9 @@ get_assert(fido_assert_t *assert, uint8_t u2f, const struct blob *cdh,
 	/* XXX reuse cred as hmac salt */
 	fido_assert_set_hmac_salt(assert, cred->body, cred->len);
 
+	if (strlen(pin) == 0)
+		pin = NULL;
+
 	fido_dev_get_assert(dev, assert, u2f & 1 ? NULL : pin);
 
 	fido_dev_cancel(dev);
