@@ -4,11 +4,14 @@
  * license that can be found in the LICENSE file.
  */
 
+#include <err.h>
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "mutator_aux.h"
 
@@ -22,12 +25,62 @@ int LLVMFuzzerInitialize(int *, char ***);
 int LLVMFuzzerTestOneInput(const uint8_t *, size_t);
 size_t LLVMFuzzerCustomMutator(uint8_t *, size_t, size_t, unsigned int);
 
+static int
+save_seed(const char *opt)
+{
+	const char *path;
+	int fd = -1, status = 1;
+	void *buf = NULL;
+	const size_t buflen = 4096;
+	size_t n;
+	struct param *p = NULL;
+
+	if ((path = strchr(opt, '=')) == NULL || strlen(++path) == 0) {
+		warnx("usage: --fido-save-seed=<path>");
+		goto fail;
+	}
+
+	if ((fd = open(path, O_CREAT|O_TRUNC|O_WRONLY, 0644)) == -1) {
+		warn("open %s", path);
+		goto fail;
+	}
+
+	if ((buf = malloc(buflen)) == NULL) {
+		warn("malloc");
+		goto fail;
+	}
+
+	n = pack_dummy(buf, buflen);
+
+	if ((p = unpack(buf, n)) == NULL) {
+		warnx("unpack");
+		goto fail;
+	}
+
+	if (write(fd, buf, n) != (ssize_t)n) {
+		warn("write %s", path);
+		goto fail;
+	}
+
+	status = 0;
+fail:
+	if (fd != -1)
+		close(fd);
+	free(buf);
+	free(p);
+
+	return status;
+}
+
 int
 LLVMFuzzerInitialize(int *argc, char ***argv)
 {
 	for (int i = 0; i < *argc; i++)
-		if (strcmp((*argv)[i], "--fido-debug") == 0)
+		if (strcmp((*argv)[i], "--fido-debug") == 0) {
 			debug = 1;
+		} else if (strncmp((*argv)[i], "--fido-save-seed=", 17) == 0) {
+			exit(save_seed((*argv)[i]));
+		}
 
 	return 0;
 }
