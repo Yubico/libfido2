@@ -138,28 +138,22 @@ get_report_sizes(const struct hidraw_report_descriptor *hrd,
 static int
 get_report_descriptor(int fd, struct hidraw_report_descriptor *hrd)
 {
-	int	s = -1;
-	int	ok = -1;
+	int s = -1;
 
 	if (ioctl(fd, HIDIOCGRDESCSIZE, &s) < 0 || s < 0 ||
 	    (unsigned)s > HID_MAX_DESCRIPTOR_SIZE) {
 		fido_log_debug("%s: ioctl HIDIOCGRDESCSIZE", __func__);
-		goto fail;
+		return (-1);
 	}
 
 	hrd->size = (unsigned)s;
 
 	if (ioctl(fd, HIDIOCGRDESC, hrd) < 0) {
 		fido_log_debug("%s: ioctl HIDIOCGRDESC", __func__);
-		goto fail;
+		return (-1);
 	}
 
-	ok = 0;
-fail:
-	if (fd != -1)
-		close(fd);
-
-	return (ok);
+	return (0);
 }
 
 static bool
