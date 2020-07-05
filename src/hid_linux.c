@@ -136,16 +136,10 @@ get_report_sizes(const struct hidraw_report_descriptor *hrd,
 }
 
 static int
-get_report_descriptor(const char *path, struct hidraw_report_descriptor *hrd)
+get_report_descriptor(int fd, struct hidraw_report_descriptor *hrd)
 {
-	int	fd;
 	int	s = -1;
 	int	ok = -1;
-
-	if ((fd = open(path, O_RDONLY)) < 0) {
-		fido_log_debug("%s: open", __func__);
-		return (-1);
-	}
 
 	if (ioctl(fd, HIDIOCGRDESCSIZE, &s) < 0 || s < 0 ||
 	    (unsigned)s > HID_MAX_DESCRIPTOR_SIZE) {
@@ -171,16 +165,25 @@ fail:
 static bool
 is_fido(const char *path)
 {
+	int				fd;
 	uint32_t			usage = 0;
 	uint32_t			usage_page = 0;
 	struct hidraw_report_descriptor	hrd;
 
 	memset(&hrd, 0, sizeof(hrd));
 
-	if (get_report_descriptor(path, &hrd) < 0 ||
-	    get_usage_info(&hrd, &usage_page, &usage) < 0) {
+	if ((fd = open(path, O_RDONLY)) == -1) {
+		fido_log_debug("%s: open", __func__);
 		return (false);
 	}
+
+	if (get_report_descriptor(fd, &hrd) < 0 ||
+	    get_usage_info(&hrd, &usage_page, &usage) < 0) {
+		close(fd);
+		return (false);
+	}
+
+	close(fd);
 
 	return (usage_page == 0xf1d0);
 }
@@ -361,7 +364,7 @@ fido_hid_open(const char *path)
 		return (NULL);
 	}
 
-	if (get_report_descriptor(path, &hrd) < 0 || get_report_sizes(&hrd,
+	if (get_report_descriptor(ctx->fd, &hrd) < 0 || get_report_sizes(&hrd,
 	    &ctx->report_in_len, &ctx->report_out_len) < 0 ||
 	    ctx->report_in_len == 0 || ctx->report_out_len == 0) {
 		fido_log_debug("%s: using default report sizes", __func__);
