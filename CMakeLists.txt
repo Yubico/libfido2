@@ -93,6 +93,8 @@ else()
 	if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		pkg_search_module(UDEV libudev REQUIRED)
 		set(UDEV_NAME "udev")
+		include_directories(${UDEV_INCLUDE_DIRS})
+		link_directories(${UDEV_LIBRARY_DIRS})
 		# Define be32toh().
 		add_definitions(-D_GNU_SOURCE)
 		# If using hidapi, use hidapi-hidraw.
