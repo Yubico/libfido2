@@ -60,12 +60,11 @@ Or from source, on UNIX-like systems:
   $ make -C build
   $ sudo make -C build install
 
-Depending on the platform, the PKG_CONFIG_PATH environment variable may need to
-be set.
+Depending on the platform, you may need to install `pkg-config` or set the PKG_CONFIG_PATH environment variable.
 
 *libfido2* depends on https://github.com/pjk/libcbor[libcbor] and
 https://www.openssl.org[OpenSSL]. On Linux, libudev (part of
-https://www.freedesktop.org/wiki/Software/systemd[systemd]) and pkg-config are also required.
+https://www.freedesktop.org/wiki/Software/systemd[systemd]) is also required.
 
 For complete, OS-specific installation instructions, please refer to the
 `.actions/` (Linux, MacOS) and `windows/` directories.
