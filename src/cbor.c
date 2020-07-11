@@ -698,7 +698,6 @@ cbor_encode_change_pin_auth(const fido_blob_t *key, const fido_blob_t *new_pin,
 	fido_blob_t	*npe = NULL; /* new pin, encrypted */
 	fido_blob_t	*ph = NULL;  /* pin hash */
 	fido_blob_t	*phe = NULL; /* pin hash, encrypted */
-	int		 ok = -1;
 
 	if ((npe = fido_blob_new()) == NULL ||
 	    (ph = fido_blob_new()) == NULL ||
@@ -750,7 +749,6 @@ cbor_encode_change_pin_auth(const fido_blob_t *key, const fido_blob_t *new_pin,
 		goto fail;
 	}
 
-	ok = 0;
 fail:
 	fido_blob_free(&npe);
 	fido_blob_free(&ph);
@@ -760,13 +758,6 @@ fail:
 	if (ctx != NULL)
 		HMAC_CTX_free(ctx);
 #endif
-
-	if (ok < 0) {
-		if (item != NULL) {
-			cbor_decref(&item);
-			item = NULL;
-		}
-	}
 
 	return (item);
 }
