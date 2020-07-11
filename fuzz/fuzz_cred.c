@@ -252,6 +252,9 @@ make_cred(fido_cred_t *cred, uint8_t u2f, int type, const struct blob *cdh,
 	if (user_id->len)
 		fido_cred_set_prot(cred, user_id->body[0] & 0x03);
 
+	if (strlen(pin) == 0)
+		pin = NULL;
+
 	fido_dev_make_cred(dev, cred, u2f & 1 ? NULL : pin);
 
 	fido_dev_cancel(dev);
