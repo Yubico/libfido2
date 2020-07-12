@@ -16,6 +16,7 @@
 #include "mutator_aux.h"
 
 static bool debug;
+static unsigned int flags = MUTATE_ALL;
 static unsigned long long test_fail;
 static unsigned long long test_total;
 static unsigned long long mutate_fail;
@@ -72,15 +73,40 @@ fail:
 	return status;
 }
 
+static void
+parse_mutate_flags(const char *opt, unsigned int *mutate_flags)
+{
+	const char *f;
+
+	if ((f = strchr(opt, '=')) == NULL || strlen(++f) == 0)
+		errx(1, "usage: --fido-mutate=<flag>");
+
+	if (strcmp(f, "seed") == 0)
+		*mutate_flags |= MUTATE_SEED;
+	else if (strcmp(f, "param") == 0)
+		*mutate_flags |= MUTATE_PARAM;
+	else if (strcmp(f, "wiredata") == 0)
+		*mutate_flags |= MUTATE_WIREDATA;
+	else
+		errx(1, "--fido-mutate: unknown flag '%s'", f);
+}
+
 int
 LLVMFuzzerInitialize(int *argc, char ***argv)
 {
+	unsigned int mutate_flags = 0;
+
 	for (int i = 0; i < *argc; i++)
 		if (strcmp((*argv)[i], "--fido-debug") == 0) {
 			debug = 1;
 		} else if (strncmp((*argv)[i], "--fido-save-seed=", 17) == 0) {
 			exit(save_seed((*argv)[i]));
+		} else if (strncmp((*argv)[i], "--fido-mutate=", 14) == 0) {
+			parse_mutate_flags((*argv)[i], &mutate_flags);
 		}
+
+	if (mutate_flags)
+		flags = mutate_flags;
 
 	return 0;
 }
@@ -131,7 +157,7 @@ LLVMFuzzerCustomMutator(uint8_t *data, size_t size, size_t maxsize,
 		return pack_dummy(data, maxsize);
 	}
 
-	mutate(p, seed);
+	mutate(p, seed, flags);
 
 	if ((blob_len = pack(blob, sizeof(blob), p)) == 0 ||
 	    blob_len > sizeof(blob) || blob_len > maxsize) {

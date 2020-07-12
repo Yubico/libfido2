@@ -33,6 +33,11 @@
 # define NO_MSAN
 #endif
 
+#define MUTATE_SEED	0x01
+#define MUTATE_PARAM	0x02
+#define MUTATE_WIREDATA	0x04
+#define MUTATE_ALL	(MUTATE_SEED | MUTATE_PARAM | MUTATE_WIREDATA)
+
 #define MAXSTR	1024
 #define MAXBLOB	3072
 
@@ -46,7 +51,7 @@ struct param;
 struct param *unpack(const uint8_t *, size_t);
 size_t pack(uint8_t *, size_t, const struct param *);
 size_t pack_dummy(uint8_t *, size_t);
-void mutate(struct param *, unsigned int);
+void mutate(struct param *, unsigned int, unsigned int);
 void test(const struct param *);
 
 size_t xstrlen(const char *);

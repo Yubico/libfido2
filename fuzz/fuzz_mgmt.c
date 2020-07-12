@@ -357,14 +357,21 @@ test(const struct param *p)
 }
 
 void
-mutate(struct param *p, unsigned int seed) NO_MSAN
+mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 {
-	p->seed = (int)seed;
-	mutate_string(p->pin1);
-	mutate_string(p->pin2);
-	mutate_blob(&p->reset_wire_data);
-	mutate_blob(&p->info_wire_data);
-	mutate_blob(&p->set_pin_wire_data);
-	mutate_blob(&p->change_pin_wire_data);
-	mutate_blob(&p->retry_wire_data);
+	if (flags & MUTATE_SEED)
+		p->seed = (int)seed;
+
+	if (flags & MUTATE_PARAM) {
+		mutate_string(p->pin1);
+		mutate_string(p->pin2);
+	}
+
+	if (flags & MUTATE_WIREDATA) {
+		mutate_blob(&p->reset_wire_data);
+		mutate_blob(&p->info_wire_data);
+		mutate_blob(&p->set_pin_wire_data);
+		mutate_blob(&p->change_pin_wire_data);
+		mutate_blob(&p->retry_wire_data);
+	}
 }

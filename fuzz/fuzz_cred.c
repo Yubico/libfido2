@@ -355,34 +355,39 @@ test(const struct param *p)
 }
 
 void
-mutate(struct param *p, unsigned int seed) NO_MSAN
+mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 {
-	p->seed = (int)seed;
-	mutate_byte(&p->rk);
-	mutate_byte(&p->type);
-	mutate_byte(&p->u2f);
-	mutate_byte(&p->uv);
-	mutate_byte(&p->excl_count);
-	mutate_int(&p->ext);
-	mutate_blob(&p->cdh);
-	mutate_blob(&p->user_id);
-	mutate_blob(&p->excl_cred);
-	mutate_string(p->pin);
-	mutate_string(p->user_icon);
-	mutate_string(p->user_name);
-	mutate_string(p->user_nick);
-	mutate_string(p->rp_id);
-	mutate_string(p->rp_name);
+	if (flags & MUTATE_SEED)
+		p->seed = (int)seed;
 
-	if (p->u2f & 1) {
-		p->wire_data.len = sizeof(dummy_wire_data_u2f);
-		memcpy(&p->wire_data.body, &dummy_wire_data_u2f,
-		    p->wire_data.len);
-	} else {
-		p->wire_data.len = sizeof(dummy_wire_data_fido);
-		memcpy(&p->wire_data.body, &dummy_wire_data_fido,
-		    p->wire_data.len);
+	if (flags & MUTATE_PARAM) {
+		mutate_byte(&p->rk);
+		mutate_byte(&p->type);
+		mutate_byte(&p->u2f);
+		mutate_byte(&p->uv);
+		mutate_byte(&p->excl_count);
+		mutate_int(&p->ext);
+		mutate_blob(&p->cdh);
+		mutate_blob(&p->user_id);
+		mutate_blob(&p->excl_cred);
+		mutate_string(p->pin);
+		mutate_string(p->user_icon);
+		mutate_string(p->user_name);
+		mutate_string(p->user_nick);
+		mutate_string(p->rp_id);
+		mutate_string(p->rp_name);
 	}
 
-	mutate_blob(&p->wire_data);
+	if (flags & MUTATE_WIREDATA) {
+		if (p->u2f & 1) {
+			p->wire_data.len = sizeof(dummy_wire_data_u2f);
+			memcpy(&p->wire_data.body, &dummy_wire_data_u2f,
+			    p->wire_data.len);
+		} else {
+			p->wire_data.len = sizeof(dummy_wire_data_fido);
+			memcpy(&p->wire_data.body, &dummy_wire_data_fido,
+			    p->wire_data.len);
+		}
+		mutate_blob(&p->wire_data);
+	}
 }
