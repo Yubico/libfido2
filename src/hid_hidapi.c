@@ -4,8 +4,6 @@
  * license that can be found in the LICENSE file.
  */
 
-#include <hidapi/hidapi.h>
-
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <linux/hidraw.h>
@@ -13,6 +11,7 @@
 #include <fcntl.h>
 #endif
 
+#include <hidapi.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
