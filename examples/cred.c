@@ -316,6 +316,10 @@ main(int argc, char **argv)
 
 	fido_dev_free(&dev);
 
+	/* when verifying, pin implies uv */
+	if (pin)
+		uv = true;
+
 	verify_cred(type, fido_cred_fmt(cred), fido_cred_authdata_ptr(cred),
 	    fido_cred_authdata_len(cred), fido_cred_x5c_ptr(cred),
 	    fido_cred_x5c_len(cred), fido_cred_sig_ptr(cred),

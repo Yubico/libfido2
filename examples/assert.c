@@ -310,6 +310,10 @@ main(int argc, char **argv)
 		errx(1, "fido_assert_count: %d signatures returned",
 		    (int)fido_assert_count(assert));
 
+	/* when verifying, pin implies uv */
+	if (pin)
+		uv = true;
+
 	verify_assert(type, fido_assert_authdata_ptr(assert, 0),
 	    fido_assert_authdata_len(assert, 0), fido_assert_sig_ptr(assert, 0),
 	    fido_assert_sig_len(assert, 0), up, uv, ext, argv[0]);
