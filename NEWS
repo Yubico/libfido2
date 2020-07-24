@@ -1,3 +1,17 @@
+* Version 1.5.0 (unreleased)
+ ** hid_linux: return FIDO_OK if no devices are found.
+ ** hid_osx: repair communication with U2F tokens; gh#166.
+ ** fido2-{assert,cred}: new options to explicitly toggle UP, UV.
+ ** Support for configurable report lengths.
+ ** New API calls:
+  - fido_cbor_info_maxcredcntlst;
+  - fido_cbor_info_maxcredidlen;
+  - fido_cred_aaguid_len;
+  - fido_cred_aaguid_ptr.
+ ** Use COSE_ECDH_ES256 with CTAP_CBOR_CLIENT_PIN; gh#154.
+ ** Allow CTAP messages up to 2048 bytes; gh#171.
+ ** Ensure we only list USB devices by default.
+
 * Version 1.4.0 (2020-04-15)
  ** hid_hidapi: hidapi backend; enable with -DUSE_HIDAPI=1.
  ** Fall back to U2F if the key claims to, but does not support FIDO2.
