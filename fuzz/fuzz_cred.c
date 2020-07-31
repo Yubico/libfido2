@@ -245,12 +245,20 @@ make_cred(fido_cred_t *cred, uint8_t u2f, int type, const struct blob *cdh,
 	fido_cred_set_user(cred, user_id->body, user_id->len, user_name,
 	    user_nick, user_icon);
 	fido_cred_set_extensions(cred, ext);
+
 	if (rk & 1)
 		fido_cred_set_rk(cred, FIDO_OPT_TRUE);
 	if (uv & 1)
 		fido_cred_set_uv(cred, FIDO_OPT_TRUE);
 	if (user_id->len)
 		fido_cred_set_prot(cred, user_id->body[0] & 0x03);
+
+	/* repeat memory operations to trigger reallocation paths */
+	fido_cred_set_type(cred, type);
+	fido_cred_set_clientdata_hash(cred, cdh->body, cdh->len);
+	fido_cred_set_rp(cred, rp_id, rp_name);
+	fido_cred_set_user(cred, user_id->body, user_id->len, user_name,
+	    user_nick, user_icon);
 
 	if (strlen(pin) == 0)
 		pin = NULL;
@@ -291,6 +299,12 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 		fido_cred_set_uv(cred, FIDO_OPT_TRUE);
 	if (fmt)
 		fido_cred_set_fmt(cred, fmt);
+
+	/* repeat memory operations to trigger reallocation paths */
+	if (fido_cred_set_authdata(cred, authdata_ptr, authdata_len) != FIDO_OK)
+		fido_cred_set_authdata_raw(cred, authdata_ptr, authdata_len);
+	fido_cred_set_x509(cred, x5c_ptr, x5c_len);
+	fido_cred_set_sig(cred, sig_ptr, sig_len);
 
 	fido_cred_verify(cred);
 	fido_cred_verify_self(cred);

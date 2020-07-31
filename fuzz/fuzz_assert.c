@@ -247,6 +247,11 @@ get_assert(fido_assert_t *assert, uint8_t u2f, const struct blob *cdh,
 	/* XXX reuse cred as hmac salt */
 	fido_assert_set_hmac_salt(assert, cred->body, cred->len);
 
+	/* repeat memory operations to trigger reallocation paths */
+	fido_assert_set_clientdata_hash(assert, cdh->body, cdh->len);
+	fido_assert_set_rp(assert, rp_id);
+	fido_assert_set_hmac_salt(assert, cred->body, cred->len);
+
 	if (strlen(pin) == 0)
 		pin = NULL;
 
@@ -285,6 +290,15 @@ verify_assert(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 
 	fido_assert_set_extensions(assert, ext);
 	fido_assert_set_sig(assert, 0, sig_ptr, sig_len);
+
+	/* repeat memory operations to trigger reallocation paths */
+	if (fido_assert_set_authdata(assert, 0, authdata_ptr,
+	    authdata_len) != FIDO_OK) {
+		fido_assert_set_authdata_raw(assert, 0, authdata_ptr,
+		    authdata_len);
+	}
+	fido_assert_set_sig(assert, 0, sig_ptr, sig_len);
+
 	fido_assert_verify(assert, 0, type, pk);
 
 	fido_assert_free(&assert);
