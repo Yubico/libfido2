@@ -234,6 +234,8 @@ get_assert(fido_assert_t *assert, uint8_t u2f, const struct blob *cdh,
 		fido_assert_set_extensions(assert, FIDO_EXT_HMAC_SECRET);
 	if (up & 1)
 		fido_assert_set_up(assert, FIDO_OPT_TRUE);
+	else if (u2f &1)
+		fido_assert_set_up(assert, FIDO_OPT_FALSE);
 	if (uv & 1)
 		fido_assert_set_uv(assert, FIDO_OPT_TRUE);
 
@@ -275,6 +277,7 @@ verify_assert(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 		fido_assert_set_authdata_raw(assert, 0, authdata_ptr,
 		    authdata_len);
 	}
+
 	if (up & 1)
 		fido_assert_set_up(assert, FIDO_OPT_TRUE);
 	if (uv & 1)
