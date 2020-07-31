@@ -248,13 +248,15 @@ get_info(const struct param *p)
 	fido_bio_info_t *i = NULL;
 	uint8_t type;
 	uint8_t max_samples;
+	int r;
 
 	set_wire_data(p->info_wire_data.body, p->info_wire_data.len);
 
 	if ((dev = prepare_dev()) == NULL || (i = fido_bio_info_new()) == NULL)
 		goto done;
 
-	fido_bio_dev_get_info(dev, i);
+	r = fido_bio_dev_get_info(dev, i);
+	consume_str(fido_strerr(r));
 
 	type = fido_bio_info_type(i);
 	max_samples = fido_bio_info_max_samples(i);
@@ -382,6 +384,7 @@ del(const struct param *p)
 {
 	fido_dev_t *dev = NULL;
 	fido_bio_template_t *t = NULL;
+	int r;
 
 	set_wire_data(p->remove_wire_data.body, p->remove_wire_data.len);
 
@@ -389,8 +392,9 @@ del(const struct param *p)
 	    (t = fido_bio_template_new()) == NULL)
 		goto done;
 
-	fido_bio_template_set_id(t, p->id.body, p->id.len);
+	r = fido_bio_template_set_id(t, p->id.body, p->id.len);
 	consume_template(t);
+	consume_str(fido_strerr(r));
 
 	fido_bio_dev_enroll_remove(dev, t, p->pin);
 
