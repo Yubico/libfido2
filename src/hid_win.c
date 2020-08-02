@@ -86,7 +86,10 @@ get_report_len(HANDLE dev, int dir, size_t *report_len)
 	else
 		v = caps.OutputReportByteLength;
 
-	*report_len = (size_t)v;
+	if ((*report_len = (size_t)v) == 0) {
+		fido_log_debug("%s: report_len == 0", __func__);
+		goto fail;
+	}
 
 	ok = 0;
 fail:
@@ -423,7 +426,7 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 
 	memset(report, 0, sizeof(report));
 
-	if (len != ctx->report_in_len || len > sizeof(report) - 1) {
+	if (len != ctx->report_in_len - 1 || len > sizeof(report) - 1) {
 		fido_log_debug("%s: len %zu", __func__, len);
 		return (-1);
 	}
@@ -448,7 +451,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 	struct hid_win *ctx = handle;
 	DWORD n;
 
-	if (len != ctx->report_out_len + 1) {
+	if (len != ctx->report_out_len) {
 		fido_log_debug("%s: len %zu", __func__, len);
 		return (-1);
 	}
@@ -467,7 +470,7 @@ fido_hid_report_in_len(void *handle)
 {
 	struct hid_win *ctx = handle;
 
-	return (ctx->report_in_len);
+	return (ctx->report_in_len - 1);
 }
 
 size_t
@@ -475,5 +478,5 @@ fido_hid_report_out_len(void *handle)
 {
 	struct hid_win *ctx = handle;
 
-	return (ctx->report_out_len);
+	return (ctx->report_out_len - 1);
 }
