@@ -33,9 +33,12 @@ DEFINE_DEVPROPKEY(DEVPKEY_Device_Parent, 0x4340a6c5, 0x93fa, 0x4706, 0x97,
 #endif
 
 struct hid_win {
-	HANDLE	dev;
-	size_t	report_in_len;
-	size_t	report_out_len;
+	HANDLE		dev;
+	OVERLAPPED	overlap;
+	int		report_pending;
+	size_t		report_in_len;
+	size_t		report_out_len;
+	unsigned char	report[1 + CTAP_MAX_REPORT_LEN];
 };
 
 static bool
@@ -388,10 +391,17 @@ fido_hid_open(const char *path)
 
 	ctx->dev = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
 	    FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
-	    FILE_ATTRIBUTE_NORMAL, NULL);
+	    FILE_FLAG_OVERLAPPED, NULL);
 
 	if (ctx->dev == INVALID_HANDLE_VALUE) {
 		free(ctx);
+		return (NULL);
+	}
+
+	if ((ctx->overlap.hEvent = CreateEventA(NULL, FALSE, FALSE,
+	    NULL)) == NULL) {
+		fido_log_debug("%s: CreateEventA", __func__);
+		fido_hid_close(ctx);
 		return (NULL);
 	}
 
@@ -410,6 +420,15 @@ fido_hid_close(void *handle)
 {
 	struct hid_win *ctx = handle;
 
+	if (ctx->overlap.hEvent != NULL) {
+		if (ctx->report_pending) {
+			fido_log_debug("%s: report_pending", __func__);
+			CancelIo(ctx->dev);
+		}
+		CloseHandle(ctx->overlap.hEvent);
+	}
+
+	explicit_bzero(ctx->report, sizeof(ctx->report));
 	CloseHandle(ctx->dev);
 	free(ctx);
 }
@@ -418,47 +437,76 @@ int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct hid_win	*ctx = handle;
-	uint8_t		 report[1 + CTAP_MAX_REPORT_LEN];
-	int		 r = -1;
 	DWORD		 n;
 
-	(void)ms; /* XXX */
-
-	memset(report, 0, sizeof(report));
-
-	if (len != ctx->report_in_len - 1 || len > sizeof(report) - 1) {
+	if (len != ctx->report_in_len - 1 || len > sizeof(ctx->report) - 1) {
 		fido_log_debug("%s: len %zu", __func__, len);
 		return (-1);
 	}
 
-	if (ReadFile(ctx->dev, report, (DWORD)(len + 1), &n, NULL) == false ||
-	    n != len + 1) {
-		fido_log_debug("%s: ReadFile", __func__);
-		goto fail;
+	if (ctx->report_pending == 0) {
+		memset(&ctx->report, 0, sizeof(ctx->report));
+		ResetEvent(ctx->overlap.hEvent);
+		if (ReadFile(ctx->dev, ctx->report, (DWORD)(len + 1), &n,
+		    &ctx->overlap) == 0 && GetLastError() != ERROR_IO_PENDING) {
+			CancelIo(ctx->dev);
+			fido_log_debug("%s: ReadFile", __func__);
+			return (-1);
+		}
+		ctx->report_pending = 1;
 	}
 
-	memcpy(buf, report + 1, len);
-	r = (int)len;
-fail:
-	explicit_bzero(report, sizeof(report));
+	if (ms > -1 && WaitForSingleObject(ctx->overlap.hEvent,
+	    (DWORD)ms) != WAIT_OBJECT_0)
+		return (0);
 
-	return (r);
+	ctx->report_pending = 0;
+
+	if (GetOverlappedResult(ctx->dev, &ctx->overlap, &n, TRUE) == 0) {
+		fido_log_debug("%s: GetOverlappedResult", __func__);
+		return (-1);
+	}
+
+	if (n != len + 1) {
+		fido_log_debug("%s: expected %zu, got %zu", __func__,
+		    len + 1, (size_t)n);
+		return (-1);
+	}
+
+	memcpy(buf, ctx->report + 1, len);
+	explicit_bzero(ctx->report, sizeof(ctx->report));
+
+	return ((int)len);
 }
 
 int
 fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 {
-	struct hid_win *ctx = handle;
-	DWORD n;
+	struct hid_win	*ctx = handle;
+	OVERLAPPED	 overlap;
+	DWORD		 n;
+
+	memset(&overlap, 0, sizeof(overlap));
 
 	if (len != ctx->report_out_len) {
 		fido_log_debug("%s: len %zu", __func__, len);
 		return (-1);
 	}
 
-	if (WriteFile(ctx->dev, buf, (DWORD)len, &n, NULL) == false ||
-	    n != len) {
+	if (WriteFile(ctx->dev, buf, (DWORD)len, NULL, &overlap) == 0 &&
+	    GetLastError() != ERROR_IO_PENDING) {
 		fido_log_debug("%s: WriteFile", __func__);
+		return (-1);
+	}
+
+	if (GetOverlappedResult(ctx->dev, &overlap, &n, TRUE) == 0) {
+		fido_log_debug("%s: GetOverlappedResult", __func__);
+		return (-1);
+	}
+
+	if (n != len) {
+		fido_log_debug("%s: expected %zu, got %zu", __func__, len,
+		    (size_t)n);
 		return (-1);
 	}
 
