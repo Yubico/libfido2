@@ -10,11 +10,12 @@
 #include <linux/hidraw.h>
 #include <linux/input.h>
 
+#include <errno.h>
 #include <fcntl.h>
 #include <libudev.h>
+#include <poll.h>
 #include <string.h>
 #include <unistd.h>
-#include <errno.h>
 
 #include "fido.h"
 
@@ -382,13 +383,26 @@ int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct hid_linux	*ctx = handle;
+	struct pollfd		 pfd;
+	int			 nfd;
 	ssize_t			 r;
-
-	(void)ms; /* XXX */
 
 	if (len != ctx->report_in_len) {
 		fido_log_debug("%s: len %zu", __func__, len);
 		return (-1);
+	}
+
+	if (ms > -1) {
+		memset(&pfd, 0, sizeof(pfd));
+		pfd.fd = ctx->fd;
+		pfd.events = POLLIN;
+		if ((nfd = poll(&pfd, 1, ms)) < 1) {
+			if (nfd == -1) {
+				fido_log_debug("%s: poll: %s", __func__,
+				    strerror(errno));
+			}
+			return (-1);
+		}
 	}
 
 	if ((r = read(ctx->fd, buf, len)) < 0 || (size_t)r != len) {
