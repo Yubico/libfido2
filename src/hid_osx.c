@@ -429,8 +429,6 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 	struct hid_osx		*ctx = handle;
 	CFRunLoopRunResult	 r;
 
-	(void)ms; /* XXX */
-
 	explicit_bzero(buf, len);
 	explicit_bzero(ctx->report, sizeof(ctx->report));
 
@@ -439,11 +437,14 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 
+	if (ms == -1)
+		ms = 5000; /* wait 5 seconds by default */
+
 	if (CFRunLoopGetCurrent() != CFRunLoopGetMain())
 		fido_log_debug("%s: CFRunLoopGetCurrent != CFRunLoopGetMain",
 		    __func__);
 
-	if ((r = CFRunLoopRunInMode(ctx->loop_id, 5,
+	if ((r = CFRunLoopRunInMode(ctx->loop_id, (double)ms/1000.0,
 	    true)) != kCFRunLoopRunHandledSource) {
 		fido_log_debug("%s: CFRunLoopRunInMode=%d", __func__, (int)r);
 		return (-1);
