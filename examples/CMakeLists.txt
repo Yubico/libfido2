@@ -49,3 +49,7 @@ target_link_libraries(setpin fido2)
 # retries
 add_executable(retries retries.c ${COMPAT_SOURCES})
 target_link_libraries(retries fido2)
+
+# select
+add_executable(select select.c ${COMPAT_SOURCES})
+target_link_libraries(select fido2)
