@@ -14,13 +14,12 @@
 #include <unistd.h>
 #endif
 
-#include "../openbsd-compat/openbsd-compat.h"
-
 #include "fido.h"
 #include "fido/es256.h"
 #include "fido/rs256.h"
 #include "fido/eddsa.h"
 #include "extern.h"
+#include "../openbsd-compat/openbsd-compat.h"
 
 static const unsigned char cdh[32] = {
 	0xec, 0x8d, 0x8f, 0x78, 0x42, 0x4a, 0x2b, 0xb7,

@@ -16,10 +16,9 @@
 #include <unistd.h>
 #endif
 
-#include "../openbsd-compat/openbsd-compat.h"
-
 #include "fido.h"
 #include "extern.h"
+#include "../openbsd-compat/openbsd-compat.h"
 
 static const unsigned char cdh[32] = {
 	0xf9, 0x64, 0x57, 0xe7, 0x2d, 0x97, 0xf6, 0xbb,
