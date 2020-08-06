@@ -63,7 +63,7 @@ do
     else
         echo "$DEV_PRETTY cannot enumerate credentials"
         echo "Discovering unprotected SSH credentials only..."
-        STUB_HASH=$(echo -n "" | sha256sum)
+        STUB_HASH=$(echo -n "" | openssl sha256 -binary | base64)
         printf "$STUB_HASH\nssh:\n" | ${FIDO_TOOLS_PREFIX}fido2-assert -G -r -t up=false $DEV_PATH 2> /dev/null || ASSERT_EXIT_CODE=$?
         if [ $ASSERT_EXIT_CODE -eq 0 ] ; then
             echo "Found an unprotected SSH credential on $DEV_PRETTY!"
