@@ -137,6 +137,8 @@ int fido_dev_close(fido_dev_t *);
 int fido_dev_get_assert(fido_dev_t *, fido_assert_t *, const char *);
 int fido_dev_get_cbor_info(fido_dev_t *, fido_cbor_info_t *);
 int fido_dev_get_retry_count(fido_dev_t *, int *);
+int fido_dev_get_touch_begin(fido_dev_t *);
+int fido_dev_get_touch_status(fido_dev_t *, int *, int *, int);
 int fido_dev_info_manifest(fido_dev_info_t *, size_t, size_t *);
 int fido_dev_make_cred(fido_dev_t *, fido_cred_t *, const char *);
 int fido_dev_open_with_info(fido_dev_t *);

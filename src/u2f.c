@@ -122,6 +122,7 @@ authdata_fake(const char *rp_id, uint8_t flags, uint32_t sigcount,
 	return (0);
 }
 
+/* TODO: use u2f_get_touch_begin & u2f_get_touch_status instead */
 static int
 send_dummy_register(fido_dev_t *dev, int ms)
 {
@@ -766,6 +767,88 @@ u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
 		return (FIDO_ERR_NO_CREDENTIALS);
 	if (nauth_ok == 0)
 		return (FIDO_ERR_USER_PRESENCE_REQUIRED);
+
+	return (FIDO_OK);
+}
+
+int
+u2f_get_touch_begin(fido_dev_t *dev)
+{
+	iso7816_apdu_t	*apdu = NULL;
+	const char	*clientdata = FIDO_DUMMY_CLIENTDATA;
+	const char	*rp_id = FIDO_DUMMY_RP_ID;
+	unsigned char	 clientdata_hash[SHA256_DIGEST_LENGTH];
+	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
+	unsigned char	 reply[FIDO_MAXMSG];
+	int		 r;
+
+	memset(&clientdata_hash, 0, sizeof(clientdata_hash));
+	memset(&rp_id_hash, 0, sizeof(rp_id_hash));
+
+	if (SHA256((const void *)clientdata, strlen(clientdata),
+	    clientdata_hash) != clientdata_hash || SHA256((const void *)rp_id,
+	    strlen(rp_id), rp_id_hash) != rp_id_hash) {
+		fido_log_debug("%s: sha256", __func__);
+		return (FIDO_ERR_INTERNAL);
+	}
+
+	if ((apdu = iso7816_new(U2F_CMD_REGISTER, 0, 2 *
+	    SHA256_DIGEST_LENGTH)) == NULL ||
+	    iso7816_add(apdu, clientdata_hash, sizeof(clientdata_hash)) < 0 ||
+	    iso7816_add(apdu, rp_id_hash, sizeof(rp_id_hash)) < 0) {
+		fido_log_debug("%s: iso7816", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if (dev->attr.flags & FIDO_CAP_WINK) {
+		fido_tx(dev, CTAP_CMD_WINK, NULL, 0);
+		fido_rx(dev, CTAP_CMD_WINK, &reply, sizeof(reply), 200);
+	}
+
+	if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
+	    iso7816_len(apdu)) < 0) {
+		fido_log_debug("%s: fido_tx", __func__);
+		r = FIDO_ERR_TX;
+		goto fail;
+	}
+
+	r = FIDO_OK;
+fail:
+	iso7816_free(&apdu);
+
+	return (r);
+}
+
+int
+u2f_get_touch_status(fido_dev_t *dev, int *touched, int ms)
+{
+	unsigned char	reply[FIDO_MAXMSG];
+	int		reply_len;
+	int		r;
+
+	if ((reply_len = fido_rx(dev, CTAP_CMD_MSG, &reply, sizeof(reply),
+	    ms)) < 2) {
+		fido_log_debug("%s: fido_rx", __func__);
+		return (FIDO_OK); /* ignore */
+	}
+
+	switch ((reply[reply_len - 2] << 8) | reply[reply_len - 1]) {
+	case SW_CONDITIONS_NOT_SATISFIED:
+		usleep(200 * 1000); /* per spec (Chrome) */
+		if ((r = u2f_get_touch_begin(dev)) != FIDO_OK) {
+			fido_log_debug("%s: u2f_get_touch_begin", __func__);
+			return (r);
+		}
+		*touched = 0;
+		break;
+	case SW_NO_ERROR:
+		*touched = 1;
+		break;
+	default:
+		fido_log_debug("%s: unexpected sw", __func__);
+		return (FIDO_ERR_RX);
+	}
 
 	return (FIDO_OK);
 }

@@ -159,6 +159,8 @@
 		fido_dev_get_assert;
 		fido_dev_get_cbor_info;
 		fido_dev_get_retry_count;
+		fido_dev_get_touch_begin;
+		fido_dev_get_touch_status;
 		fido_dev_info_free;
 		fido_dev_info_manifest;
 		fido_dev_info_manufacturer_string;

@@ -117,6 +117,8 @@ void fido_log_xxd(const void *, size_t);
 /* u2f */
 int u2f_register(fido_dev_t *, fido_cred_t *, int);
 int u2f_authenticate(fido_dev_t *, fido_assert_t *, int);
+int u2f_get_touch_begin(fido_dev_t *);
+int u2f_get_touch_status(fido_dev_t *, int *, int);
 
 /* unexposed fido ops */
 int fido_dev_authkey(fido_dev_t *, es256_pk_t *);
@@ -159,6 +161,12 @@ uint32_t uniform_random(uint32_t);
 /* internal device capability flags */
 #define FIDO_DEV_SUPPORTS_PIN		0x01
 #define FIDO_DEV_SUPPORTS_CRED_PROT	0x02
+
+/* miscellanea */
+#define FIDO_DUMMY_CLIENTDATA	""
+#define FIDO_DUMMY_RP_ID	"localhost"
+#define FIDO_DUMMY_USER_NAME	"dummy"
+#define FIDO_DUMMY_USER_ID	1
 
 #ifdef __cplusplus
 } /* extern "C" */

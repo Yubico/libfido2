@@ -325,15 +325,11 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	fido_cred_free(&cred);
 }
 
-void
-test(const struct param *p)
+static void
+test_cred(const struct param *p)
 {
 	fido_cred_t *cred = NULL;
 	int cose_alg = 0;
-
-	prng_init((unsigned int)p->seed);
-	fido_init(FIDO_DEBUG);
-	fido_set_log_handler(consume_str);
 
 	if ((cred = fido_cred_new()) == NULL)
 		return;
@@ -366,6 +362,56 @@ test(const struct param *p)
 	    fido_cred_fmt(cred), fido_cred_prot(cred));
 
 	fido_cred_free(&cred);
+}
+
+static void
+test_touch(const struct param *p)
+{
+	fido_dev_t *dev;
+	fido_dev_io_t io;
+	int r;
+	int touched;
+	int pin_set;
+
+	memset(&io, 0, sizeof(io));
+
+	io.open = dev_open;
+	io.close = dev_close;
+	io.read = dev_read;
+	io.write = dev_write;
+
+	set_wire_data(p->wire_data.body, p->wire_data.len);
+
+	if ((dev = fido_dev_new()) == NULL || fido_dev_set_io_functions(dev,
+	    &io) != FIDO_OK || fido_dev_open(dev, "nodev") != FIDO_OK) {
+		fido_dev_free(&dev);
+		return;
+	}
+
+	if (p->u2f & 1)
+		fido_dev_force_u2f(dev);
+
+	r = fido_dev_get_touch_begin(dev);
+	consume_str(fido_strerr(r));
+	r = fido_dev_get_touch_status(dev, &touched, &pin_set, -1);
+	consume_str(fido_strerr(r));
+	consume(&touched, sizeof(touched));
+	consume(&pin_set, sizeof(pin_set));
+
+	fido_dev_cancel(dev);
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+}
+
+void
+test(const struct param *p)
+{
+	prng_init((unsigned int)p->seed);
+	fido_init(FIDO_DEBUG);
+	fido_set_log_handler(consume_str);
+
+	test_cred(p);
+	test_touch(p);
 }
 
 void
