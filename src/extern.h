@@ -156,6 +156,10 @@ void fido_dev_unregister_manifest_func(const dev_manifest_func_t);
 uint32_t uniform_random(uint32_t);
 #endif
 
+/* internal device capability flags */
+#define FIDO_DEV_SUPPORTS_PIN		0x01
+#define FIDO_DEV_SUPPORTS_CRED_PROT	0x02
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */

@@ -117,6 +117,36 @@ set_random_report_len(fido_dev_t *dev)
 }
 #endif
 
+static void
+fido_dev_set_flags(fido_dev_t *dev, const fido_cbor_info_t *info)
+{
+	char * const	*ptr;
+	size_t		 len;
+
+	ptr = fido_cbor_info_extensions_ptr(info);
+	len = fido_cbor_info_extensions_len(info);
+
+	for (size_t i = 0; i < len; i++) {
+		if (strcmp(ptr[i], "credProtect") == 0) {
+			dev->flags |= FIDO_DEV_SUPPORTS_CRED_PROT;
+		}
+	}
+
+	ptr = fido_cbor_info_options_name_ptr(info);
+	len = fido_cbor_info_options_len(info);
+
+	for (size_t i = 0; i < len; i++) {
+		/*
+		 * clientPin: PIN supported and set;
+		 * noclientPin: PIN supported but not set.
+		 */
+		if (strcmp(ptr[i], "clientPin") == 0 ||
+		    strcmp(ptr[i], "noclientPin") == 0) {
+			dev->flags |= FIDO_DEV_SUPPORTS_PIN;
+		}
+	}
+}
+
 static int
 fido_dev_open_tx(fido_dev_t *dev, const char *path)
 {
@@ -208,6 +238,7 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 		goto fail;
 	}
 
+	dev->flags = 0;
 	dev->cid = dev->attr.cid;
 
 	if (fido_dev_is_fido2(dev)) {
@@ -219,6 +250,8 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 		if (fido_dev_get_cbor_info_wait(dev, info, ms) != FIDO_OK) {
 			fido_log_debug("%s: falling back to u2f", __func__);
 			fido_dev_force_u2f(dev);
+		} else {
+			fido_dev_set_flags(dev, info);
 		}
 	}
 
@@ -490,10 +523,23 @@ fido_dev_is_fido2(const fido_dev_t *dev)
 	return (dev->attr.flags & FIDO_CAP_CBOR);
 }
 
+bool
+fido_dev_supports_pin(const fido_dev_t *dev)
+{
+	return (dev->flags & FIDO_DEV_SUPPORTS_PIN);
+}
+
+bool
+fido_dev_supports_cred_prot(const fido_dev_t *dev)
+{
+	return (dev->flags & FIDO_DEV_SUPPORTS_CRED_PROT);
+}
+
 void
 fido_dev_force_u2f(fido_dev_t *dev)
 {
 	dev->attr.flags &= (uint8_t)~FIDO_CAP_CBOR;
+	dev->flags = 0;
 }
 
 void

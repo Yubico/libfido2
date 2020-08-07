@@ -218,6 +218,7 @@ typedef struct fido_dev {
 	bool                  io_own;    /* device has own io/transport */
 	size_t                rx_len;    /* length of HID input reports */
 	size_t                tx_len;    /* length of HID output reports */
+	int                   flags;     /* internal flags; see FIDO_DEV_* */
 	fido_dev_transport_t  transport; /* transport functions */
 } fido_dev_t;
 

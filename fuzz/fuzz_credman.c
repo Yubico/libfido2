@@ -208,6 +208,7 @@ prepare_dev(void)
 {
 	fido_dev_t *dev;
 	fido_dev_io_t io;
+	bool x;
 
 	memset(&io, 0, sizeof(io));
 
@@ -221,6 +222,11 @@ prepare_dev(void)
 		fido_dev_free(&dev);
 		return NULL;
 	}
+
+	x = fido_dev_is_fido2(dev);
+	consume(&x, sizeof(x));
+	x = fido_dev_supports_cred_prot(dev);
+	consume(&x, sizeof(x));
 
 	return dev;
 }
