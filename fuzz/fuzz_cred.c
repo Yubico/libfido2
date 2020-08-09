@@ -306,8 +306,8 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	fido_cred_set_x509(cred, x5c_ptr, x5c_len);
 	fido_cred_set_sig(cred, sig_ptr, sig_len);
 
-	fido_cred_verify(cred);
-	fido_cred_verify_self(cred);
+	assert(fido_cred_verify(cred) != FIDO_OK);
+	assert(fido_cred_verify_self(cred) != FIDO_OK);
 
 	consume(fido_cred_pubkey_ptr(cred), fido_cred_pubkey_len(cred));
 	consume(fido_cred_id_ptr(cred), fido_cred_id_len(cred));

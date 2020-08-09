@@ -299,7 +299,7 @@ verify_assert(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	}
 	fido_assert_set_sig(assert, 0, sig_ptr, sig_len);
 
-	fido_assert_verify(assert, 0, type, pk);
+	assert(fido_assert_verify(assert, 0, type, pk) != FIDO_OK);
 
 	fido_assert_free(&assert);
 }
