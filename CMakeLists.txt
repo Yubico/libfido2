@@ -35,7 +35,7 @@ if(CYGWIN OR MSYS)
 endif()
 
 if(WIN32)
-	add_definitions(-DWIN32_LEAN_AND_MEAN)
+	add_definitions(-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600)
 endif()
 
 if(APPLE)
