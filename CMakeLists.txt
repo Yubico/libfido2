@@ -10,6 +10,8 @@ cmake_minimum_required(VERSION 3.0)
 
 include(CheckCCompilerFlag)
 include(CheckFunctionExists)
+include(CheckLibraryExists)
+include(CheckSymbolExists)
 include(CheckIncludeFiles)
 include(CheckTypeSize)
 include(GNUInstallDirs)
@@ -99,6 +101,12 @@ else()
 		add_definitions(-D_GNU_SOURCE)
 		# If using hidapi, use hidapi-hidraw.
 		set(HIDAPI_SUFFIX -hidraw)
+		# Look for clock_gettime in librt.
+		check_library_exists(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)
+		if(HAVE_CLOCK_GETTIME)
+			set(BASE_LIBRARIES ${BASE_LIBRARIES} rt)
+			add_definitions(-DHAVE_CLOCK_GETTIME)
+		endif()
 	endif()
 
 	if(MINGW)
@@ -307,6 +315,20 @@ if(UNIX)
 	add_definitions(-DHAVE_DEV_URANDOM)
 endif()
 
+# clock_gettime
+if(NOT HAVE_CLOCK_GETTIME)
+	check_function_exists(clock_gettime HAVE_CLOCK_GETTIME)
+	if(HAVE_CLOCK_GETTIME)
+		add_definitions(-DHAVE_CLOCK_GETTIME)
+	endif()
+endif()
+
+# timespecsub
+check_symbol_exists(timespecsub sys/time.h HAVE_TIMESPECSUB)
+if(HAVE_TIMESPECSUB)
+	add_definitions(-DHAVE_TIMESPECSUB)
+endif()
+
 # export list
 if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
    CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
@@ -350,6 +372,7 @@ include_directories(${CRYPTO_INCLUDE_DIRS})
 link_directories(${CBOR_LIBRARY_DIRS})
 link_directories(${CRYPTO_LIBRARY_DIRS})
 
+message(STATUS "BASE_LIBRARIES: ${BASE_LIBRARIES}")
 message(STATUS "CBOR_INCLUDE_DIRS: ${CBOR_INCLUDE_DIRS}")
 message(STATUS "CBOR_LIBRARIES: ${CBOR_LIBRARIES}")
 message(STATUS "CBOR_LIBRARY_DIRS: ${CBOR_LIBRARY_DIRS}")
