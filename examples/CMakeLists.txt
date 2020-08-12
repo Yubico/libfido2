@@ -3,6 +3,7 @@
 # license that can be found in the LICENSE file.
 
 list(APPEND COMPAT_SOURCES
+	../openbsd-compat/clock_gettime.c
 	../openbsd-compat/getopt_long.c
 	../openbsd-compat/strlcat.c
 	../openbsd-compat/strlcpy.c

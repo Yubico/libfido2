@@ -12,24 +12,8 @@
 #include "fido.h"
 #include "../openbsd-compat/openbsd-compat.h"
 
-static int
-get_second(time_t *t)
-{
-#ifdef _WIN32
-	*t = time(NULL);
-#else
-	struct timespec tv;
-
-	if (clock_gettime(CLOCK_MONOTONIC, &tv) == -1) {
-		warn("%s: clock_gettime", __func__);
-		return (-1);
-	}
-
-	*t = (time_t)tv.tv_sec;
-#endif
-
-	return (0);
-}
+#define FIDO2_POLL_TIMEOUT	50	/* milliseconds */
+#define U2F_POLL_TIMEOUT	300	/* milliseconds */
 
 static fido_dev_t *
 open_dev(const fido_dev_info_t *di)
@@ -60,14 +44,16 @@ static int
 select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
     size_t *idx, int *pin_set, int secs)
 {
-	const fido_dev_info_t	*di;
+	const fido_dev_info_t	 *di;
 	fido_dev_t		**devtab;
-	time_t			 start;
-	time_t			 curr;
-	size_t			 nopen = 0;
-	int			 touched;
-	int			 r;
-	int			 ms;
+	struct timespec		  ts_start;
+	struct timespec		  ts_now;
+	struct timespec		  ts_delta;
+	size_t			  nopen = 0;
+	int			  touched;
+	int			  r;
+	int			  ms;
+	long			  ms_remain;
 
 	*dev = NULL;
 	*idx = 0;
@@ -112,8 +98,8 @@ select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
 		}
 	}
 
-	if (get_second(&start) < 0) {
-		warnx("%s: get_second", __func__);
+	if (clock_gettime(CLOCK_MONOTONIC, &ts_start) != 0) {
+		warn("%s: clock_gettime", __func__);
 		r = -1;
 		goto out;
 	}
@@ -125,7 +111,10 @@ select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
 				/* failed to open or discarded */
 				continue;
 			}
-			ms = fido_dev_is_fido2(devtab[i]) ? 50 : 300;
+			if (fido_dev_is_fido2(devtab[i]))
+				ms = FIDO2_POLL_TIMEOUT;
+			else
+				ms = U2F_POLL_TIMEOUT;
 			if ((r = fido_dev_get_touch_status(devtab[i], &touched,
 			    pin_set, ms)) != FIDO_OK) {
 				warnx("%s: fido_dev_get_touch_status %s: %s",
@@ -143,12 +132,16 @@ select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
 			}
 		}
 
-		if (get_second(&curr) < 0) {
-			warnx("%s: get_second", __func__);
+		if (clock_gettime(CLOCK_MONOTONIC, &ts_now) != 0) {
+			warn("%s: clock_gettime", __func__);
 			r = -1;
 			goto out;
 		}
-	} while (curr - start < secs);
+
+		timespecsub(&ts_now, &ts_start, &ts_delta);
+		ms_remain = (secs * 1000) - ((long)ts_delta.tv_sec * 1000) +
+		    ((long)ts_delta.tv_nsec / 1000000);
+	} while (ms_remain > U2F_POLL_TIMEOUT);
 
 	printf("timeout after %d seconds\n", secs);
 	r = -1;
