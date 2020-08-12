@@ -379,12 +379,75 @@ fido_hid_close(void *handle)
 	free(ctx);
 }
 
+static int
+timespec_to_ms(const struct timespec *ts, int upper_bound)
+{
+	int64_t x;
+	int64_t y;
+
+	if (ts->tv_sec < 0 || ts->tv_sec > INT64_MAX / 1000LL ||
+	    ts->tv_nsec < 0 || ts->tv_nsec / 1000000LL > INT64_MAX)
+		return (upper_bound);
+
+	x = ts->tv_sec * 1000LL;
+	y = ts->tv_nsec / 1000000LL;
+
+	if (INT64_MAX - x < y || x + y > upper_bound)
+		return (upper_bound);
+
+	return (int)(x + y);
+}
+
+static int
+waitfd(int fd, int ms)
+{
+	struct timespec	ts_start;
+	struct timespec	ts_now;
+	struct timespec	ts_delta;
+	struct pollfd	pfd;
+	int		ms_remain;
+	int		r;
+
+	if (ms < 0)
+		return (0);
+
+	memset(&pfd, 0, sizeof(pfd));
+	pfd.events = POLLIN;
+	pfd.fd = fd;
+
+	if (clock_gettime(CLOCK_MONOTONIC, &ts_start) != 0) {
+		fido_log_debug("%s: clock_gettime: %s", __func__,
+		    strerror(errno));
+		return (-1);
+	}
+
+	for (ms_remain = ms; ms_remain > 0;) {
+		if ((r = poll(&pfd, 1, ms_remain)) > 0)
+			return (0);
+		else if (r == 0)
+			break;
+		else if (errno != EINTR) {
+			fido_log_debug("%s: poll: %s", __func__,
+			    strerror(errno));
+			return (-1);
+		}
+		/* poll interrupted - subtract time already waited */
+		if (clock_gettime(CLOCK_MONOTONIC, &ts_now) != 0) {
+			fido_log_debug("%s: clock_gettime: %s", __func__,
+			    strerror(errno));
+			return (-1);
+		}
+		timespecsub(&ts_now, &ts_start, &ts_delta);
+		ms_remain = ms - timespec_to_ms(&ts_delta, ms);
+	}
+
+	return (-1);
+}
+
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct hid_linux	*ctx = handle;
-	struct pollfd		 pfd;
-	int			 nfd;
 	ssize_t			 r;
 
 	if (len != ctx->report_in_len) {
@@ -392,17 +455,9 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 
-	if (ms > -1) {
-		memset(&pfd, 0, sizeof(pfd));
-		pfd.fd = ctx->fd;
-		pfd.events = POLLIN;
-		if ((nfd = poll(&pfd, 1, ms)) < 1) {
-			if (nfd == -1) {
-				fido_log_debug("%s: poll: %s", __func__,
-				    strerror(errno));
-			}
-			return (-1);
-		}
+	if (waitfd(ctx->fd, ms) < 0) {
+		fido_log_debug("%s: fd not ready", __func__);
+		return (-1);
 	}
 
 	if ((r = read(ctx->fd, buf, len)) < 0 || (size_t)r != len) {
