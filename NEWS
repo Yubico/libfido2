@@ -7,7 +7,9 @@
   - fido_cbor_info_maxcredcntlst;
   - fido_cbor_info_maxcredidlen;
   - fido_cred_aaguid_len;
-  - fido_cred_aaguid_ptr.
+  - fido_cred_aaguid_ptr;
+  - fido_dev_get_touch_begin;
+  - fido_dev_get_touch_status.
  ** Use COSE_ECDH_ES256 with CTAP_CBOR_CLIENT_PIN; gh#154.
  ** Allow CTAP messages up to 2048 bytes; gh#171.
  ** Ensure we only list USB devices by default.
