@@ -138,7 +138,7 @@ print_maxcredcntlst(uint64_t maxcredcntlst)
 }
 
 /*
- * Auxiliary function to print an authenticator's maximal credential ID length
+ * Auxiliary function to print an authenticator's maximum credential ID length
  * on stdout.
  */
 static void
