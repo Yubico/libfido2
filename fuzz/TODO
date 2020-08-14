@@ -1,9 +1,0 @@
-- Use dictionaries. It is unrealistic to expect a fuzzer to come up with
-  arbitrary strings such as "packed" or "fido-u2f" on its own;
-- Fuzz hid.c, hid_linux.c, hid_openbsd.c, hid_osx.c, and hid_win.c. This can be
-  done in a platform-agnostic way;
-- Make API usage in fuzz_assert.c, fuzz_cred.c, and fuzz_credman.c
-  pseudo-random. 
-
-If you're interested in working on any of the above, please contact
-pedro@ambientworks.net.
