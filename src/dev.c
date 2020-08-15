@@ -123,6 +123,7 @@ static void
 fido_dev_set_flags(fido_dev_t *dev, const fido_cbor_info_t *info)
 {
 	char * const	*ptr;
+	const bool	*val;
 	size_t		 len;
 
 	ptr = fido_cbor_info_extensions_ptr(info);
@@ -133,13 +134,16 @@ fido_dev_set_flags(fido_dev_t *dev, const fido_cbor_info_t *info)
 			dev->flags |= FIDO_DEV_CRED_PROT;
 
 	ptr = fido_cbor_info_options_name_ptr(info);
+	val = fido_cbor_info_options_value_ptr(info);
 	len = fido_cbor_info_options_len(info);
 
 	for (size_t i = 0; i < len; i++)
-		if (strcmp(ptr[i], "clientPin") == 0)
-			dev->flags |= FIDO_DEV_PIN_SET;
-		else if (strcmp(ptr[i], "noclientPin") == 0)
-			dev->flags |= FIDO_DEV_PIN_UNSET;
+		if (strcmp(ptr[i], "clientPin") == 0) {
+			if (val[i] == true)
+				dev->flags |= FIDO_DEV_PIN_SET;
+			else
+				dev->flags |= FIDO_DEV_PIN_UNSET;
+		}
 }
 
 static int
