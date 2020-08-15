@@ -42,7 +42,7 @@ open_dev(const fido_dev_info_t *di)
 
 static int
 select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
-    size_t *idx, int *pin_set, int secs)
+    size_t *idx, int secs)
 {
 	const fido_dev_info_t	 *di;
 	fido_dev_t		**devtab;
@@ -57,7 +57,6 @@ select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
 
 	*dev = NULL;
 	*idx = 0;
-	*pin_set = 0;
 
 	printf("%u authenticator(s) detected\n", (unsigned)ndevs);
 
@@ -116,7 +115,7 @@ select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
 			else
 				ms = U2F_POLL_TIMEOUT;
 			if ((r = fido_dev_get_touch_status(devtab[i], &touched,
-			    pin_set, ms)) != FIDO_OK) {
+			    ms)) != FIDO_OK) {
 				warnx("%s: fido_dev_get_touch_status %s: %s",
 				    __func__, fido_dev_info_path(di),
 				    fido_strerr(r));
@@ -149,7 +148,6 @@ out:
 	if (r != 0) {
 		*dev = NULL;
 		*idx = 0;
-		*pin_set = 0;
 	}
 
 	for (size_t i = 0; i < ndevs; i++) {
@@ -173,7 +171,6 @@ main(void)
 	fido_dev_t		*dev;
 	size_t			 idx;
 	size_t			 ndevs;
-	int			 pin_set;
 	int			 r;
 
 	fido_init(0);
@@ -183,7 +180,7 @@ main(void)
 
 	if ((r = fido_dev_info_manifest(devlist, 64, &ndevs)) != FIDO_OK)
 		errx(1, "fido_dev_info_manifest: %s (0x%x)", fido_strerr(r), r);
-	if (select_dev(devlist, ndevs, &dev, &idx, &pin_set, 15) != 0)
+	if (select_dev(devlist, ndevs, &dev, &idx, 15) != 0)
 		errx(1, "select_dev");
 	if (dev == NULL)
 		errx(1, "no authenticator found");
@@ -191,7 +188,8 @@ main(void)
 	di = fido_dev_info_ptr(devlist, idx);
 	printf("%s: %s by %s (PIN %sset)\n", fido_dev_info_path(di),
 	    fido_dev_info_product_string(di),
-	    fido_dev_info_manufacturer_string(di), pin_set ? "" : "un");
+	    fido_dev_info_manufacturer_string(di),
+	    fido_dev_has_pin(dev) ? "" : "un");
 
 	fido_dev_close(dev);
 	fido_dev_free(&dev);

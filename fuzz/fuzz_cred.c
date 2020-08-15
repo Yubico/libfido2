@@ -371,7 +371,6 @@ test_touch(const struct param *p)
 	fido_dev_io_t io;
 	int r;
 	int touched;
-	int pin_set;
 
 	memset(&io, 0, sizeof(io));
 
@@ -393,10 +392,9 @@ test_touch(const struct param *p)
 
 	r = fido_dev_get_touch_begin(dev);
 	consume_str(fido_strerr(r));
-	r = fido_dev_get_touch_status(dev, &touched, &pin_set, -1);
+	r = fido_dev_get_touch_status(dev, &touched, -1);
 	consume_str(fido_strerr(r));
 	consume(&touched, sizeof(touched));
-	consume(&pin_set, sizeof(pin_set));
 
 	fido_dev_cancel(dev);
 	fido_dev_close(dev);
