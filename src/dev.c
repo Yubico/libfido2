@@ -128,25 +128,18 @@ fido_dev_set_flags(fido_dev_t *dev, const fido_cbor_info_t *info)
 	ptr = fido_cbor_info_extensions_ptr(info);
 	len = fido_cbor_info_extensions_len(info);
 
-	for (size_t i = 0; i < len; i++) {
-		if (strcmp(ptr[i], "credProtect") == 0) {
-			dev->flags |= FIDO_DEV_SUPPORTS_CRED_PROT;
-		}
-	}
+	for (size_t i = 0; i < len; i++)
+		if (strcmp(ptr[i], "credProtect") == 0)
+			dev->flags |= FIDO_DEV_CRED_PROT;
 
 	ptr = fido_cbor_info_options_name_ptr(info);
 	len = fido_cbor_info_options_len(info);
 
-	for (size_t i = 0; i < len; i++) {
-		/*
-		 * clientPin: PIN supported and set;
-		 * noclientPin: PIN supported but not set.
-		 */
-		if (strcmp(ptr[i], "clientPin") == 0 ||
-		    strcmp(ptr[i], "noclientPin") == 0) {
-			dev->flags |= FIDO_DEV_SUPPORTS_PIN;
-		}
-	}
+	for (size_t i = 0; i < len; i++)
+		if (strcmp(ptr[i], "clientPin") == 0)
+			dev->flags |= FIDO_DEV_PIN_SET;
+		else if (strcmp(ptr[i], "noclientPin") == 0)
+			dev->flags |= FIDO_DEV_PIN_UNSET;
 }
 
 static int
@@ -632,13 +625,19 @@ fido_dev_is_fido2(const fido_dev_t *dev)
 bool
 fido_dev_supports_pin(const fido_dev_t *dev)
 {
-	return (dev->flags & FIDO_DEV_SUPPORTS_PIN);
+	return (dev->flags & (FIDO_DEV_PIN_SET|FIDO_DEV_PIN_UNSET));
+}
+
+bool
+fido_dev_has_pin(const fido_dev_t *dev)
+{
+	return (dev->flags & FIDO_DEV_PIN_SET);
 }
 
 bool
 fido_dev_supports_cred_prot(const fido_dev_t *dev)
 {
-	return (dev->flags & FIDO_DEV_SUPPORTS_CRED_PROT);
+	return (dev->flags & FIDO_DEV_CRED_PROT);
 }
 
 void

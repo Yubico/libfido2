@@ -243,6 +243,8 @@ prepare_dev(void)
 	consume(&x, sizeof(x));
 	x = fido_dev_supports_pin(dev);
 	consume(&x, sizeof(x));
+	x = fido_dev_has_pin(dev);
+	consume(&x, sizeof(x));
 
 	return dev;
 }

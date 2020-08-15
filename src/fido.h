@@ -184,6 +184,7 @@ uint64_t fido_cbor_info_maxcredcntlst(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_maxcredidlen(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_fwversion(const fido_cbor_info_t *);
 
+bool fido_dev_has_pin(const fido_dev_t *);
 bool fido_dev_is_fido2(const fido_dev_t *);
 bool fido_dev_supports_pin(const fido_dev_t *);
 bool fido_dev_supports_cred_prot(const fido_dev_t *);
