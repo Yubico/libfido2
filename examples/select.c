@@ -4,6 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,8 +13,22 @@
 #include "fido.h"
 #include "../openbsd-compat/openbsd-compat.h"
 
-#define FIDO2_POLL_TIMEOUT	50	/* milliseconds */
-#define U2F_POLL_TIMEOUT	300	/* milliseconds */
+#define U2F_POLL_MS	50
+
+#if defined(_MSC_VER)
+static int
+nanosleep(const struct timespec *rqtp, struct timespec *rmtp)
+{
+	if (rmtp != NULL) {
+		errno = EINVAL;
+		return (-1);
+	}
+
+	Sleep(rqtp->tv_nsec / 1000000);
+
+	return (0);
+}
+#endif
 
 static fido_dev_t *
 open_dev(const fido_dev_info_t *di)
@@ -49,6 +64,7 @@ select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
 	struct timespec		  ts_start;
 	struct timespec		  ts_now;
 	struct timespec		  ts_delta;
+	struct timespec		  ts_pause;
 	size_t			  nopen = 0;
 	int			  touched;
 	int			  r;
@@ -103,17 +119,19 @@ select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
 		goto out;
 	}
 
+	ts_pause.tv_sec = 0;
+	ts_pause.tv_nsec = 200000000; /* 200ms */
+
 	do {
+		nanosleep(&ts_pause, NULL);
+
 		for (size_t i = 0; i < ndevs; i++) {
 			di = fido_dev_info_ptr(devlist, i);
 			if (devtab[i] == NULL) {
 				/* failed to open or discarded */
 				continue;
 			}
-			if (fido_dev_is_fido2(devtab[i]))
-				ms = FIDO2_POLL_TIMEOUT;
-			else
-				ms = U2F_POLL_TIMEOUT;
+			ms = fido_dev_is_fido2(devtab[i]) ? 0 : U2F_POLL_MS;
 			if ((r = fido_dev_get_touch_status(devtab[i], &touched,
 			    ms)) != FIDO_OK) {
 				warnx("%s: fido_dev_get_touch_status %s: %s",
@@ -140,7 +158,7 @@ select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
 		timespecsub(&ts_now, &ts_start, &ts_delta);
 		ms_remain = (secs * 1000) - ((long)ts_delta.tv_sec * 1000) +
 		    ((long)ts_delta.tv_nsec / 1000000);
-	} while (ms_remain > U2F_POLL_TIMEOUT);
+	} while (ms_remain > U2F_POLL_MS);
 
 	printf("timeout after %d seconds\n", secs);
 	r = -1;
