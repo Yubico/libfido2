@@ -22,6 +22,7 @@
 struct hid_osx {
 	IOHIDDeviceRef	ref;
 	CFStringRef	loop_id;
+	int		report_pipe[2];
 	size_t		report_in_len;
 	size_t		report_out_len;
 	unsigned char	report[CTAP_MAX_REPORT_LEN];
@@ -299,17 +300,25 @@ fail:
 }
 
 static void
-read_callback(void *context, IOReturn result, void *dev, IOHIDReportType type,
-    uint32_t report_id, uint8_t *report, CFIndex report_len)
+report_callback(void *context, IOReturn result, void *dev, IOHIDReportType type,
+    uint32_t id, uint8_t *ptr, CFIndex len)
 {
-	(void)context;
+	struct hid_osx	*ctx = context;
+	ssize_t		 r;
+
 	(void)dev;
-	(void)report;
-	(void)report_len;
 
 	if (result != kIOReturnSuccess || type != kIOHIDReportTypeInput ||
-	    report_id != 0)
+	    id != 0 || len < 0 || (size_t)len != ctx->report_in_len) {
 		fido_log_debug("%s: io error", __func__);
+		return;
+	}
+
+	if ((r = write(ctx->report_pipe[1], ptr, (size_t)len)) < 0 ||
+	    (size_t)r != (size_t)len) {
+		fido_log_debug("%s: write", __func__);
+		return;
+	}
 }
 
 static void
@@ -320,6 +329,37 @@ removal_callback(void *context, IOReturn result, void *sender)
 	(void)sender;
 
 	CFRunLoopStop(CFRunLoopGetMain());
+}
+
+static int
+set_nonblock(int fd)
+{
+	int flags;
+
+	if ((flags = fcntl(fd, F_GETFL)) == -1) {
+		fido_log_debug("%s: fcntl F_GETFL", __func__);
+		return (-1);
+	}
+
+	if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+		fido_log_debug("%s: fcntl, F_SETFL", __func__);
+		return (-1);
+	}
+
+	return (0);
+}
+
+static int
+disable_sigpipe(int fd)
+{
+	int disabled = 1;
+
+	if (fcntl(fd, F_SETNOSIGPIPE, &disabled) == -1) {
+		fido_log_debug("%s: fcntl F_SETNOSIGPIPE", __func__);
+		return (-1);
+	}
+
+	return (0);
 }
 
 void *
@@ -333,6 +373,25 @@ fido_hid_open(const char *path)
 
 	if ((ctx = calloc(1, sizeof(*ctx))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
+		goto fail;
+	}
+
+	ctx->report_pipe[0] = -1;
+	ctx->report_pipe[1] = -1;
+
+	if (pipe(ctx->report_pipe) == -1) {
+		fido_log_debug("%s: pipe", __func__);
+		goto fail;
+	}
+
+	if (set_nonblock(ctx->report_pipe[0]) < 0 ||
+	    set_nonblock(ctx->report_pipe[1]) < 0) {
+		fido_log_debug("%s: set_nonblock", __func__);
+		goto fail;
+	}
+
+	if (disable_sigpipe(ctx->report_pipe[1]) < 0) {
+		fido_log_debug("%s: disable_sigpipe", __func__);
 		goto fail;
 	}
 
@@ -379,7 +438,7 @@ fido_hid_open(const char *path)
 	}
 
 	IOHIDDeviceRegisterInputReportCallback(ctx->ref, ctx->report,
-	    (long)ctx->report_in_len, &read_callback, NULL);
+	    (long)ctx->report_in_len, &report_callback, ctx);
 	IOHIDDeviceRegisterRemovalCallback(ctx->ref, &removal_callback, ctx);
 	IOHIDDeviceScheduleWithRunLoop(ctx->ref, CFRunLoopGetMain(),
 	    ctx->loop_id);
@@ -394,6 +453,10 @@ fail:
 			CFRelease(ctx->ref);
 		if (ctx->loop_id != NULL)
 			CFRelease(ctx->loop_id);
+		if (ctx->report_pipe[0] != -1)
+			close(ctx->report_pipe[0]);
+		if (ctx->report_pipe[1] != -1)
+			close(ctx->report_pipe[1]);
 		free(ctx);
 		ctx = NULL;
 	}
@@ -407,7 +470,7 @@ fido_hid_close(void *handle)
 	struct hid_osx *ctx = handle;
 
 	IOHIDDeviceRegisterInputReportCallback(ctx->ref, ctx->report,
-	    (long)ctx->report_in_len, NULL, NULL);
+	    (long)ctx->report_in_len, NULL, ctx);
 	IOHIDDeviceRegisterRemovalCallback(ctx->ref, NULL, NULL);
 	IOHIDDeviceUnscheduleFromRunLoop(ctx->ref, CFRunLoopGetMain(),
 	    ctx->loop_id);
@@ -420,6 +483,9 @@ fido_hid_close(void *handle)
 	CFRelease(ctx->loop_id);
 
 	explicit_bzero(ctx->report, sizeof(ctx->report));
+	close(ctx->report_pipe[0]);
+	close(ctx->report_pipe[1]);
+
 	free(ctx);
 }
 
@@ -427,7 +493,7 @@ int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct hid_osx		*ctx = handle;
-	CFRunLoopRunResult	 r;
+	ssize_t			 r;
 
 	explicit_bzero(buf, len);
 	explicit_bzero(ctx->report, sizeof(ctx->report));
@@ -444,14 +510,12 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		fido_log_debug("%s: CFRunLoopGetCurrent != CFRunLoopGetMain",
 		    __func__);
 
-	if ((r = CFRunLoopRunInMode(ctx->loop_id, (double)ms/1000.0,
-	    true)) != kCFRunLoopRunHandledSource) {
-		fido_log_debug("%s: CFRunLoopRunInMode=%d", __func__, (int)r);
+	CFRunLoopRunInMode(ctx->loop_id, (double)ms/1000.0, true);
+
+	if ((r = read(ctx->report_pipe[0], buf, len)) < 0 || (size_t)r != len) {
+		fido_log_debug("%s: read", __func__);
 		return (-1);
 	}
-
-	memcpy(buf, ctx->report, len);
-	explicit_bzero(ctx->report, sizeof(ctx->report));
 
 	return ((int)len);
 }
