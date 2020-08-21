@@ -65,3 +65,9 @@ in
 source tree.
 .Sh SEE ALSO
 .Xr fido_dev_cancel 3
+.Sh CAVEATS
+The
+.Fn fido_dev_get_touch_status
+function will cause a command to be transmitted to U2F
+authenticators.
+These transmissions should not exceed a frequency of 5Hz.
