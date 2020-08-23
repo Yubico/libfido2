@@ -13,7 +13,7 @@
 #include "fido.h"
 #include "../openbsd-compat/openbsd-compat.h"
 
-#define U2F_POLL_MS	50
+#define FIDO_POLL_MS	50
 
 #if defined(_MSC_VER)
 static int
@@ -68,7 +68,6 @@ select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
 	size_t			  nopen = 0;
 	int			  touched;
 	int			  r;
-	int			  ms;
 	long			  ms_remain;
 
 	*dev = NULL;
@@ -131,9 +130,8 @@ select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
 				/* failed to open or discarded */
 				continue;
 			}
-			ms = fido_dev_is_fido2(devtab[i]) ? 0 : U2F_POLL_MS;
 			if ((r = fido_dev_get_touch_status(devtab[i], &touched,
-			    ms)) != FIDO_OK) {
+			    FIDO_POLL_MS)) != FIDO_OK) {
 				warnx("%s: fido_dev_get_touch_status %s: %s",
 				    __func__, fido_dev_info_path(di),
 				    fido_strerr(r));
@@ -158,7 +156,7 @@ select_dev(const fido_dev_info_t *devlist, size_t ndevs, fido_dev_t **dev,
 		timespecsub(&ts_now, &ts_start, &ts_delta);
 		ms_remain = (secs * 1000) - ((long)ts_delta.tv_sec * 1000) +
 		    ((long)ts_delta.tv_nsec / 1000000);
-	} while (ms_remain > U2F_POLL_MS);
+	} while (ms_remain > FIDO_POLL_MS);
 
 	printf("timeout after %d seconds\n", secs);
 	r = -1;
