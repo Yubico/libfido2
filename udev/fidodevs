@@ -32,6 +32,7 @@ vendor SATOSHI		0x534c	SatoshiLabs
 
 # List of known products. Grouped by vendor; sorted by product ID.
 
+product STMICRO 	0xa2ac	ellipticSecure MIRKey
 product STMICRO 	0xa2ca	Unknown product
 product STMICRO		0xcdab	Unknown product
 
