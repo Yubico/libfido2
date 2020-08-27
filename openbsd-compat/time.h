@@ -27,8 +27,8 @@ typedef int clockid_t;
 int clock_gettime(clockid_t, struct timespec *);
 #endif
 
-#ifdef timespecsub
-#define HAVE_TIMESPECSUB
+#ifdef HAVE_TIMESPECSUB
+#include <sys/time.h>
 #endif
 
 #ifndef HAVE_TIMESPECSUB
