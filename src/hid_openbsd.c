@@ -84,8 +84,8 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 			explicit_bzero(di, sizeof(*di));
 			return FIDO_ERR_INTERNAL;
 		}
-		di->vendor_id = udi.udi_vendorNo;
-		di->product_id = udi.udi_productNo;
+		di->vendor_id = (int16_t)udi.udi_vendorNo;
+		di->product_id = (int16_t)udi.udi_productNo;
 		(*olen)++;
 	}
 
