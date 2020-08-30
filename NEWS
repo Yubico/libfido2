@@ -1,6 +1,8 @@
 * Version 1.5.0 (unreleased)
  ** hid_linux: return FIDO_OK if no devices are found.
- ** hid_osx: repair communication with U2F tokens; gh#166.
+ ** hid_osx:
+  - repair communication with U2F tokens, gh#166;
+  - reliability fixes.
  ** fido2-{assert,cred}: new options to explicitly toggle UP, UV.
  ** Support for configurable report lengths.
  ** New API calls:
