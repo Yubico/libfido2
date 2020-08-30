@@ -41,7 +41,7 @@ $1 == "product" {
 	line = "\n#" name " by" vendors[$2, "name"]"\n"
 	line = line"KERNEL==\"hidraw*\""
 	line = line", SUBSYSTEM==\"hidraw\""
-	line = line", ATTRS={idVendor}==\""vendors[$2, "id"]"\""
+	line = line", ATTRS{idVendor}==\""vendors[$2, "id"]"\""
 	line = line", ATTRS{idProduct}==\""$3"\""
 	line = line", TAG+=\"uaccess\""
 	line = line", GROUP=\"plugdev\""
