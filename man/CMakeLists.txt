@@ -170,6 +170,7 @@ list(APPEND MAN_ALIAS
 	fido_cred_set_authdata fido_cred_set_user
 	fido_cred_set_authdata fido_cred_set_uv
 	fido_cred_set_authdata fido_cred_set_x509
+	fido_dev_get_touch_begin fido_dev_get_touch_status
 	fido_dev_info_manifest fido_dev_info_free
 	fido_dev_info_manifest fido_dev_info_manufacturer_string
 	fido_dev_info_manifest fido_dev_info_new
@@ -186,12 +187,12 @@ list(APPEND MAN_ALIAS
 	fido_dev_open fido_dev_force_u2f
 	fido_dev_open fido_dev_free
 	fido_dev_open fido_dev_is_fido2
-	fido_dev_open fido_dev_supports_cred_prot
-	fido_dev_open fido_dev_supports_pin
 	fido_dev_open fido_dev_major
 	fido_dev_open fido_dev_minor
 	fido_dev_open fido_dev_new
 	fido_dev_open fido_dev_protocol
+	fido_dev_open fido_dev_supports_cred_prot
+	fido_dev_open fido_dev_supports_pin
 	fido_dev_set_pin fido_dev_get_retry_count
 	fido_dev_set_pin fido_dev_reset
 	rs256_pk_new rs256_pk_free
