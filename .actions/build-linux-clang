@@ -8,6 +8,6 @@ SCAN=scan-build-${CC#clang-}
 
 # Build, analyze, and install libfido2.
 mkdir build
-(cd build && ${SCAN} cmake -DCMAKE_BUILD_TYPE=Debug ..)
-${SCAN} --status-bugs make -C build
+(cd build && ${SCAN} --use-cc="${CC}" cmake -DCMAKE_BUILD_TYPE=Debug ..)
+${SCAN} --use-cc="${CC}" --status-bugs make -C build
 sudo make -C build install
