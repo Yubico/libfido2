@@ -128,7 +128,8 @@ typedef struct fido_cred {
 	int               type;          /* cose algorithm */
 	char             *fmt;           /* credential format */
 	fido_cred_ext_t   authdata_ext;  /* decoded extensions */
-	fido_blob_t       authdata_cbor; /* raw cbor payload */
+	fido_blob_t       authdata_cbor; /* cbor-encoded payload */
+	fido_blob_t       authdata_raw;  /* cbor-decoded payload */
 	fido_authdata_t   authdata;      /* decoded authdata payload */
 	fido_attcred_t    attcred;       /* returned credential (key + id) */
 	fido_attstmt_t    attstmt;       /* attestation statement (x509 + sig) */

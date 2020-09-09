@@ -28,6 +28,10 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	case 1: /* fmt */
 		return (cbor_decode_fmt(val, &cred->fmt));
 	case 2: /* authdata */
+		if (fido_blob_decode(val, &cred->authdata_raw) < 0) {
+			fido_log_debug("%s: fido_blob_decode", __func__);
+			return (-1);
+		}
 		return (cbor_decode_cred_authdata(val, cred->type,
 		    &cred->authdata_cbor, &cred->authdata, &cred->attcred,
 		    &cred->authdata_ext));
@@ -448,10 +452,12 @@ static void
 fido_cred_clean_authdata(fido_cred_t *cred)
 {
 	free(cred->authdata_cbor.ptr);
+	free(cred->authdata_raw.ptr);
 	free(cred->attcred.id.ptr);
 
 	memset(&cred->authdata_ext, 0, sizeof(cred->authdata_ext));
 	memset(&cred->authdata_cbor, 0, sizeof(cred->authdata_cbor));
+	memset(&cred->authdata_raw, 0, sizeof(cred->authdata_raw));
 	memset(&cred->authdata, 0, sizeof(cred->authdata));
 	memset(&cred->attcred, 0, sizeof(cred->attcred));
 }
@@ -542,6 +548,12 @@ fido_cred_set_authdata(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 		goto fail;
 	}
 
+	if (fido_blob_decode(item, &cred->authdata_raw) < 0) {
+		fido_log_debug("%s: fido_blob_decode", __func__);
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto fail;
+	}
+
 	if (cbor_decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
 	    &cred->authdata, &cred->attcred, &cred->authdata_ext) < 0) {
 		fido_log_debug("%s: cbor_decode_cred_authdata", __func__);
@@ -572,6 +584,12 @@ fido_cred_set_authdata_raw(fido_cred_t *cred, const unsigned char *ptr,
 
 	if (ptr == NULL || len == 0) {
 		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto fail;
+	}
+
+	if (fido_blob_set(&cred->authdata_raw, ptr, len) < 0) {
+		fido_log_debug("%s: fido_blob_set", __func__);
+		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
 
@@ -907,6 +925,18 @@ size_t
 fido_cred_authdata_len(const fido_cred_t *cred)
 {
 	return (cred->authdata_cbor.len);
+}
+
+const unsigned char *
+fido_cred_authdata_raw_ptr(const fido_cred_t *cred)
+{
+	return (cred->authdata_raw.ptr);
+}
+
+size_t
+fido_cred_authdata_raw_len(const fido_cred_t *cred)
+{
+	return (cred->authdata_raw.len);
 }
 
 const unsigned char *

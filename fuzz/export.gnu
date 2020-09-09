@@ -89,6 +89,8 @@
 		fido_cbor_info_versions_ptr;
 		fido_cred_authdata_len;
 		fido_cred_authdata_ptr;
+		fido_cred_authdata_raw_len;
+		fido_cred_authdata_raw_ptr;
 		fido_cred_clientdata_hash_len;
 		fido_cred_clientdata_hash_ptr;
 		fido_cred_display_name;

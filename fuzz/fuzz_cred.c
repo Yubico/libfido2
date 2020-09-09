@@ -273,7 +273,8 @@ make_cred(fido_cred_t *cred, uint8_t u2f, int type, const struct blob *cdh,
 static void
 verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
     const char *rp_id, const char *rp_name, const unsigned char *authdata_ptr,
-    size_t authdata_len, int ext, uint8_t rk, uint8_t uv,
+    size_t authdata_len, const unsigned char *authdata_raw_ptr,
+    size_t authdata_raw_len, int ext, uint8_t rk, uint8_t uv,
     const unsigned char *x5c_ptr, size_t x5c_len, const unsigned char *sig_ptr,
     size_t sig_len, const char *fmt, int prot)
 {
@@ -286,8 +287,11 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	fido_cred_set_type(cred, type);
 	fido_cred_set_clientdata_hash(cred, cdh_ptr, cdh_len);
 	fido_cred_set_rp(cred, rp_id, rp_name);
+	consume(authdata_ptr, authdata_len);
+	consume(authdata_raw_ptr, authdata_raw_len);
 	if (fido_cred_set_authdata(cred, authdata_ptr, authdata_len) != FIDO_OK)
-		fido_cred_set_authdata_raw(cred, authdata_ptr, authdata_len);
+		fido_cred_set_authdata_raw(cred, authdata_raw_ptr,
+		    authdata_raw_len);
 	fido_cred_set_extensions(cred, ext);
 	fido_cred_set_x509(cred, x5c_ptr, x5c_len);
 	fido_cred_set_sig(cred, sig_ptr, sig_len);
@@ -356,7 +360,8 @@ test_cred(const struct param *p)
 	    fido_cred_clientdata_hash_ptr(cred),
 	    fido_cred_clientdata_hash_len(cred), fido_cred_rp_id(cred),
 	    fido_cred_rp_name(cred), fido_cred_authdata_ptr(cred),
-	    fido_cred_authdata_len(cred), p->ext, p->rk, p->uv,
+	    fido_cred_authdata_len(cred), fido_cred_authdata_raw_ptr(cred),
+	    fido_cred_authdata_raw_len(cred), p->ext, p->rk, p->uv,
 	    fido_cred_x5c_ptr(cred), fido_cred_x5c_len(cred),
 	    fido_cred_sig_ptr(cred), fido_cred_sig_len(cred),
 	    fido_cred_fmt(cred), fido_cred_prot(cred));

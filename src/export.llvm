@@ -87,6 +87,8 @@ _fido_cbor_info_versions_len
 _fido_cbor_info_versions_ptr
 _fido_cred_authdata_len
 _fido_cred_authdata_ptr
+_fido_cred_authdata_raw_len
+_fido_cred_authdata_raw_ptr
 _fido_cred_clientdata_hash_len
 _fido_cred_clientdata_hash_ptr
 _fido_cred_display_name

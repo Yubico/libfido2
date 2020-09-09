@@ -15,6 +15,7 @@
 .Nm fido_cred_user_name ,
 .Nm fido_cred_display_name ,
 .Nm fido_cred_authdata_ptr ,
+.Nm fido_cred_authdata_raw_ptr ,
 .Nm fido_cred_clientdata_hash_ptr ,
 .Nm fido_cred_id_ptr ,
 .Nm fido_cred_aaguid_ptr ,
@@ -23,6 +24,7 @@
 .Nm fido_cred_user_id_ptr ,
 .Nm fido_cred_x5c_ptr ,
 .Nm fido_cred_authdata_len ,
+.Nm fido_cred_authdata_raw_len ,
 .Nm fido_cred_clientdata_hash_len ,
 .Nm fido_cred_id_len ,
 .Nm fido_cred_aaguid_len ,
@@ -54,6 +56,8 @@
 .Ft const unsigned char *
 .Fn fido_cred_authdata_ptr "const fido_cred_t *cred"
 .Ft const unsigned char *
+.Fn fido_cred_authdata_raw_ptr "const fido_cred_t *cred"
+.Ft const unsigned char *
 .Fn fido_cred_clientdata_hash_ptr "const fido_cred_t *cred"
 .Ft const unsigned char *
 .Fn fido_cred_id_ptr "const fido_cred_t *cred"
@@ -69,6 +73,8 @@
 .Fn fido_cred_x5c_ptr "const fido_cred_t *cred"
 .Ft size_t
 .Fn fido_cred_authdata_len "const fido_cred_t *cred"
+.Ft size_t
+.Fn fido_cred_authdata_raw_len "const fido_cred_t *cred"
 .Ft size_t
 .Fn fido_cred_clientdata_hash_len "const fido_cred_t *cred"
 .Ft size_t
@@ -163,6 +169,7 @@ or NULL if the respective entry is not set.
 .Pp
 The
 .Fn fido_cred_authdata_ptr ,
+.Fn fido_cred_authdata_raw_ptr ,
 .Fn fido_cred_clientdata_hash_ptr ,
 .Fn fido_cred_id_ptr ,
 .Fn fido_cred_aaguid_ptr ,
@@ -171,14 +178,15 @@ The
 .Fn fido_cred_user_id_ptr ,
 and
 .Fn fido_cred_x5c_ptr
-functions return pointers to the authenticator data, client data
-hash, ID, authenticator attestation GUID, public key, signature,
-user ID, and x509 certificate parts of
+functions return pointers to the CBOR-encoded and raw authenticator
+data, client data hash, ID, authenticator attestation GUID, public
+key, signature, user ID, and x509 certificate parts of
 .Fa cred ,
 or NULL if the respective entry is not set.
 .Pp
 The corresponding length can be obtained by
 .Fn fido_cred_authdata_len ,
+.Fn fido_cred_authdata_raw_len ,
 .Fn fido_cred_clientdata_hash_len ,
 .Fn fido_cred_id_len ,
 .Fn fido_cred_aaguid_len ,
@@ -204,6 +212,8 @@ function returns the authenticator data flags of
 The authenticator data returned by
 .Fn fido_cred_authdata_ptr
 is a CBOR-encoded byte string, as obtained from the authenticator.
+To obtain the decoded byte string, use
+.Fn fido_cred_authdata_raw_ptr .
 .Pp
 If not NULL, pointers returned by
 .Fn fido_cred_fmt ,
