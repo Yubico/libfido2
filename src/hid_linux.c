@@ -385,8 +385,8 @@ timespec_to_ms(const struct timespec *ts, int upper_bound)
 	int64_t x;
 	int64_t y;
 
-	if (ts->tv_sec < 0 || ts->tv_sec > INT64_MAX / 1000LL ||
-	    ts->tv_nsec < 0 || ts->tv_nsec / 1000000LL > INT64_MAX)
+	if (ts->tv_sec < 0 || (uint64_t)ts->tv_sec > INT64_MAX / 1000LL ||
+	    ts->tv_nsec < 0 || (uint64_t)ts->tv_nsec / 1000000LL > INT64_MAX)
 		return (upper_bound);
 
 	x = ts->tv_sec * 1000LL;
