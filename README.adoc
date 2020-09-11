@@ -29,6 +29,14 @@ Documentation is available in troff and HTML formats. An
 https://developers.yubico.com/libfido2/Manuals/[online mirror of *libfido2*'s documentation]
 is also available.
 
+=== Bindings
+
+* .NET: https://github.com/borrrden/Fido2Net[Fido2Net]
+* Go: https://github.com/keys-pub/go-libfido2[go-libfido2]
+* JavaScript (NodeJS): https://github.com/little-core-labs/fido2-native[fido2-native]
+* Perl: https://github.com/jacquesg/p5-FIDO-Raw[p5-FIDO-Raw]
+* Rust: https://github.com/PvdBerg1998/libfido2[libfido2]
+
 === Installation
 
 ==== Releases
@@ -42,6 +50,9 @@ and binary releases.
   $ sudo apt install libfido2-1
   $ sudo apt install libfido2-dev
   $ sudo apt install libfido2-doc
+
+Alternatively, newer versions of *libfido2* are available in Yubico's PPA.
+Follow the instructions for Ubuntu 18.04 (Bionic) and 16.04 (Xenial) below.
 
 ==== Ubuntu 18.04 (Bionic) and 16.04 (Xenial)
 
