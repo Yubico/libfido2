@@ -533,31 +533,26 @@ fido_cred_set_authdata(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 {
 	cbor_item_t		*item = NULL;
 	struct cbor_load_result	 cbor;
-	int			 r;
+	int			 r = FIDO_ERR_INVALID_ARGUMENT;
 
 	fido_cred_clean_authdata(cred);
 
-	if (ptr == NULL || len == 0) {
-		r = FIDO_ERR_INVALID_ARGUMENT;
+	if (ptr == NULL || len == 0)
 		goto fail;
-	}
 
 	if ((item = cbor_load(ptr, len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
-		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
 
 	if (fido_blob_decode(item, &cred->authdata_raw) < 0) {
 		fido_log_debug("%s: fido_blob_decode", __func__);
-		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
 
 	if (cbor_decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
 	    &cred->authdata, &cred->attcred, &cred->authdata_ext) < 0) {
 		fido_log_debug("%s: cbor_decode_cred_authdata", __func__);
-		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
 
@@ -577,15 +572,13 @@ int
 fido_cred_set_authdata_raw(fido_cred_t *cred, const unsigned char *ptr,
     size_t len)
 {
-	cbor_item_t		*item = NULL;
-	int			 r;
+	cbor_item_t	*item = NULL;
+	int		 r = FIDO_ERR_INVALID_ARGUMENT;
 
 	fido_cred_clean_authdata(cred);
 
-	if (ptr == NULL || len == 0) {
-		r = FIDO_ERR_INVALID_ARGUMENT;
+	if (ptr == NULL || len == 0)
 		goto fail;
-	}
 
 	if (fido_blob_set(&cred->authdata_raw, ptr, len) < 0) {
 		fido_log_debug("%s: fido_blob_set", __func__);
@@ -602,7 +595,6 @@ fido_cred_set_authdata_raw(fido_cred_t *cred, const unsigned char *ptr,
 	if (cbor_decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
 	    &cred->authdata, &cred->attcred, &cred->authdata_ext) < 0) {
 		fido_log_debug("%s: cbor_decode_cred_authdata", __func__);
-		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
 
