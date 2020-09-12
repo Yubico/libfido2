@@ -8,25 +8,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-18.04]
-        cc: [gcc-7, gcc-8, gcc-9, clang-8, clang-9, i686-w64-mingw32-gcc-7.3]
-
+        os: [ubuntu-20.04]
+        cc: [gcc-10, clang-10, i686-w64-mingw32-gcc-9]
     steps:
     - uses: actions/checkout@v1
-
     - name: Dependencies
       env:
         CC: ${{ matrix.cc }}
       run: |
         sudo apt -q update
-        sudo apt install -q -y libcbor-dev libudev-dev original-awk
+        sudo apt install -q -y libcbor-dev libudev-dev original-awk mandoc
         if [ "${CC%-*}" == "clang" ]; then
           sudo apt install -q -y ${CC%-*}-tools-${CC#clang-}
         elif [ "${CC%-*}" == "i686-w64-mingw32-gcc" ]; then
           sudo apt install -q -y binutils-mingw-w64-i686 gcc-mingw-w64 \
            g++-mingw-w64 mingw-w64-i686-dev
+        else
+          sudo apt install -q -y "${CC}"
         fi
-
     - name: Build
       env:
         CC: ${{ matrix.cc }}
