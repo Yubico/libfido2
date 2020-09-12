@@ -328,7 +328,7 @@ removal_callback(void *context, IOReturn result, void *sender)
 	(void)result;
 	(void)sender;
 
-	CFRunLoopStop(CFRunLoopGetMain());
+	CFRunLoopStop(CFRunLoopGetCurrent());
 }
 
 static int
@@ -440,7 +440,7 @@ fido_hid_open(const char *path)
 	IOHIDDeviceRegisterInputReportCallback(ctx->ref, ctx->report,
 	    (long)ctx->report_in_len, &report_callback, ctx);
 	IOHIDDeviceRegisterRemovalCallback(ctx->ref, &removal_callback, ctx);
-	IOHIDDeviceScheduleWithRunLoop(ctx->ref, CFRunLoopGetMain(),
+	IOHIDDeviceScheduleWithRunLoop(ctx->ref, CFRunLoopGetCurrent(),
 	    ctx->loop_id);
 
 	ok = 0;
@@ -472,7 +472,7 @@ fido_hid_close(void *handle)
 	IOHIDDeviceRegisterInputReportCallback(ctx->ref, ctx->report,
 	    (long)ctx->report_in_len, NULL, ctx);
 	IOHIDDeviceRegisterRemovalCallback(ctx->ref, NULL, NULL);
-	IOHIDDeviceUnscheduleFromRunLoop(ctx->ref, CFRunLoopGetMain(),
+	IOHIDDeviceUnscheduleFromRunLoop(ctx->ref, CFRunLoopGetCurrent(),
 	    ctx->loop_id);
 
 	if (IOHIDDeviceClose(ctx->ref,
