@@ -328,7 +328,7 @@ removal_callback(void *context, IOReturn result, void *sender)
 	(void)result;
 	(void)sender;
 
-	CFRunLoopStop(CFRunLoopGetMain());
+	CFRunLoopStop(CFRunLoopGetCurrent());
 }
 
 static int
@@ -505,6 +505,10 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 
 	if (ms == -1)
 		ms = 5000; /* wait 5 seconds by default */
+
+	if (CFRunLoopGetCurrent() != CFRunLoopGetMain())
+		fido_log_debug("%s: CFRunLoopGetCurrent != CFRunLoopGetMain",
+		    __func__);
 
 	CFRunLoopRunInMode(ctx->loop_id, (double)ms/1000.0, true);
 
