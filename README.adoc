@@ -33,7 +33,6 @@ is also available.
 
 * .NET: https://github.com/borrrden/Fido2Net[Fido2Net]
 * Go: https://github.com/keys-pub/go-libfido2[go-libfido2]
-* JavaScript (NodeJS): https://github.com/little-core-labs/fido2-native[fido2-native]
 * Perl: https://github.com/jacquesg/p5-FIDO-Raw[p5-FIDO-Raw]
 * Rust: https://github.com/PvdBerg1998/libfido2[libfido2]
 
