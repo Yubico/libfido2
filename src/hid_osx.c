@@ -328,7 +328,7 @@ removal_callback(void *context, IOReturn result, void *sender)
 	(void)result;
 	(void)sender;
 
-	CFRunLoopStop(CFRunLoopGetMain());
+	CFRunLoopStop(CFRunLoopGetCurrent());
 }
 
 static int
@@ -440,8 +440,6 @@ fido_hid_open(const char *path)
 	IOHIDDeviceRegisterInputReportCallback(ctx->ref, ctx->report,
 	    (long)ctx->report_in_len, &report_callback, ctx);
 	IOHIDDeviceRegisterRemovalCallback(ctx->ref, &removal_callback, ctx);
-	IOHIDDeviceScheduleWithRunLoop(ctx->ref, CFRunLoopGetMain(),
-	    ctx->loop_id);
 
 	ok = 0;
 fail:
@@ -471,9 +469,7 @@ fido_hid_close(void *handle)
 
 	IOHIDDeviceRegisterInputReportCallback(ctx->ref, ctx->report,
 	    (long)ctx->report_in_len, NULL, ctx);
-	IOHIDDeviceRegisterRemovalCallback(ctx->ref, NULL, NULL);
-	IOHIDDeviceUnscheduleFromRunLoop(ctx->ref, CFRunLoopGetMain(),
-	    ctx->loop_id);
+	IOHIDDeviceRegisterRemovalCallback(ctx->ref, NULL, ctx);
 
 	if (IOHIDDeviceClose(ctx->ref,
 	    kIOHIDOptionsTypeSeizeDevice) != kIOReturnSuccess)
@@ -503,14 +499,16 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 
+	IOHIDDeviceScheduleWithRunLoop(ctx->ref, CFRunLoopGetCurrent(),
+	    ctx->loop_id);
+
 	if (ms == -1)
 		ms = 5000; /* wait 5 seconds by default */
 
-	if (CFRunLoopGetCurrent() != CFRunLoopGetMain())
-		fido_log_debug("%s: CFRunLoopGetCurrent != CFRunLoopGetMain",
-		    __func__);
-
 	CFRunLoopRunInMode(ctx->loop_id, (double)ms/1000.0, true);
+
+	IOHIDDeviceUnscheduleFromRunLoop(ctx->ref, CFRunLoopGetCurrent(),
+	    ctx->loop_id);
 
 	if ((r = read(ctx->report_pipe[0], buf, len)) < 0 || (size_t)r != len) {
 		fido_log_debug("%s: read", __func__);
