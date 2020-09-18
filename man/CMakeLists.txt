@@ -123,6 +123,7 @@ list(APPEND MAN_ALIAS
 	fido_cred_new fido_cred_clientdata_hash_ptr
 	fido_cred_new fido_cred_display_name
 	fido_cred_new fido_cred_flags
+	fido_cred_new fido_cred_sigcount
 	fido_cred_new fido_cred_fmt
 	fido_cred_new fido_cred_free
 	fido_cred_new fido_cred_id_len

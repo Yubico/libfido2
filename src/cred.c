@@ -871,6 +871,12 @@ fido_cred_flags(const fido_cred_t *cred)
 	return (cred->authdata.flags);
 }
 
+uint32_t
+fido_cred_sigcount(const fido_cred_t *cred)
+{
+	return (cred->authdata.sigcount);
+}
+
 const unsigned char *
 fido_cred_clientdata_hash_ptr(const fido_cred_t *cred)
 {

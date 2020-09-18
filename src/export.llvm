@@ -94,6 +94,7 @@ _fido_cred_clientdata_hash_ptr
 _fido_cred_display_name
 _fido_cred_exclude
 _fido_cred_flags
+_fido_cred_sigcount
 _fido_cred_fmt
 _fido_cred_free
 _fido_cred_id_len
