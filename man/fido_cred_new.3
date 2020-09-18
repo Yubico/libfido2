@@ -33,7 +33,8 @@
 .Nm fido_cred_user_id_len ,
 .Nm fido_cred_x5c_len ,
 .Nm fido_cred_type ,
-.Nm fido_cred_flags
+.Nm fido_cred_flags ,
+.Nm fido_cred_sigcount
 .Nd FIDO 2 credential API
 .Sh SYNOPSIS
 .In fido.h
@@ -93,6 +94,8 @@
 .Fn fido_cred_type "const fido_cred_t *cred"
 .Ft uint8_t
 .Fn fido_cred_flags "const fido_cred_t *cred"
+.Ft uint32_t
+.Fn fido_cred_sigcount "const fido_cred_t *cred"
 .Sh DESCRIPTION
 FIDO 2 credentials are abstracted in
 .Em libfido2
@@ -207,6 +210,11 @@ function returns the COSE algorithm of
 The
 .Fn fido_cred_flags
 function returns the authenticator data flags of
+.Fa cred .
+.Pp
+The
+.Fn fido_cred_sigcount
+function returns the authenticator data signature counter of
 .Fa cred .
 .Sh RETURN VALUES
 The authenticator data returned by

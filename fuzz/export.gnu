@@ -96,6 +96,7 @@
 		fido_cred_display_name;
 		fido_cred_exclude;
 		fido_cred_flags;
+		fido_cred_sigcount;
 		fido_cred_fmt;
 		fido_cred_free;
 		fido_cred_id_len;

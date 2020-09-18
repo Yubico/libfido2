@@ -280,6 +280,7 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 {
 	fido_cred_t *cred;
 	uint8_t flags;
+	uint32_t sigcount;
 
 	if ((cred = fido_cred_new()) == NULL)
 		return;
@@ -323,6 +324,8 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 
 	flags = fido_cred_flags(cred);
 	consume(&flags, sizeof(flags));
+	sigcount = fido_cred_sigcount(cred);
+	consume(&sigcount, sizeof(sigcount));
 	type = fido_cred_type(cred);
 	consume(&type, sizeof(type));
 
