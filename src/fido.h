@@ -32,12 +32,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef _MSC_VER
-#define FIDO_DEPRECATED(reason) __declspec(deprecated(reason))
-#else
-#define FIDO_DEPRECATED(reason) __attribute__((__deprecated__(reason)))
-#endif
-
 fido_assert_t *fido_assert_new(void);
 fido_cred_t *fido_cred_new(void);
 fido_dev_t *fido_dev_new(void);
@@ -105,7 +99,6 @@ int fido_assert_set_clientdata_hash(fido_assert_t *, const unsigned char *,
 int fido_assert_set_count(fido_assert_t *, size_t);
 int fido_assert_set_extensions(fido_assert_t *, int);
 int fido_assert_set_hmac_salt(fido_assert_t *, const unsigned char *, size_t);
-FIDO_DEPRECATED("use fido_assert_set_up/fido_assert_set_uv")
 int fido_assert_set_options(fido_assert_t *, bool, bool);
 int fido_assert_set_rp(fido_assert_t *, const char *);
 int fido_assert_set_up(fido_assert_t *, fido_opt_t);
@@ -119,7 +112,6 @@ int fido_cred_set_authdata_raw(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_clientdata_hash(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_extensions(fido_cred_t *, int);
 int fido_cred_set_fmt(fido_cred_t *, const char *);
-FIDO_DEPRECATED("use fido_cred_set_rk/fido_cred_set_uv")
 int fido_cred_set_options(fido_cred_t *, bool, bool);
 int fido_cred_set_prot(fido_cred_t *, int);
 int fido_cred_set_rk(fido_cred_t *, fido_opt_t);
