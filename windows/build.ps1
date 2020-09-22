@@ -15,8 +15,8 @@ New-Variable -Name 'LIBRESSL_URL' `
 New-Variable -Name 'LIBRESSL' -Value 'libressl-3.1.4' -Option Constant
 
 # libcbor coordinates.
-New-Variable -Name 'LIBCBOR' -Value 'libcbor-0.7.0' -Option Constant
-New-Variable -Name 'LIBCBOR_BRANCH' -Value 'v0.7.0' -Option Constant
+New-Variable -Name 'LIBCBOR' -Value 'libcbor-0.8.0' -Option Constant
+New-Variable -Name 'LIBCBOR_BRANCH' -Value 'v0.8.0' -Option Constant
 New-Variable -Name 'LIBCBOR_GIT' -Value 'https://github.com/pjk/libcbor' `
 	-Option Constant
 
@@ -135,6 +135,7 @@ Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}) {
 
 	Push-Location .\${LIBCBOR}
 	& $CMake ..\..\${LIBCBOR} -G "${GENERATOR}" -A "${ARCH}" `
+		-DBUILD_SHARED_LIBS=ON `
 		-DCMAKE_C_FLAGS_RELEASE="/Zi" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}"
 	& $CMake --build . --config Release
@@ -170,7 +171,7 @@ Function Package-Libraries(${SRC}, ${DEST}) {
 Function Package-PDBs(${SRC}, ${DEST}) {
 	Copy-Item "${SRC}\${LIBRESSL}\crypto\crypto.dir\Release\vc142.pdb" `
 		"${DEST}\crypto-46.pdb" -ErrorAction Stop
-	Copy-Item "${SRC}\${LIBCBOR}\src\cbor_shared.dir\Release\vc142.pdb" `
+	Copy-Item "${SRC}\${LIBCBOR}\src\cbor.dir\Release\vc142.pdb" `
 		"${DEST}\cbor.pdb" -ErrorAction Stop
 	Copy-Item "${SRC}\src\fido2_shared.dir\Release\vc142.pdb" `
 		"${DEST}\fido2.pdb" -ErrorAction Stop
