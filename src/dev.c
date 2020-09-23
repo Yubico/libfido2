@@ -563,14 +563,8 @@ fido_dev_new_with_info(const fido_dev_info_t *di)
 	}
 
 	dev->io = di->io;
+	dev->io_own = di->transport.tx != NULL || di->transport.rx != NULL;
 	dev->transport = di->transport;
-
-	if (dev->transport.tx != NULL || dev->transport.rx != NULL) {
-		dev->io_own = true;
-	}
-	else {
-		dev->io_own = false;
-	}
 
 	if ((dev->path = strdup(di->path)) == NULL) {
 		fido_log_debug("%s: strdup", __func__);
