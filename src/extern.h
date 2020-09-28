@@ -38,14 +38,11 @@ cbor_item_t *cbor_encode_hmac_secret_param(const fido_blob_t *,
     const es256_pk_t *, const fido_blob_t *);
 cbor_item_t *cbor_encode_options(fido_opt_t, fido_opt_t);
 cbor_item_t *cbor_encode_pin_auth(const fido_blob_t *, const fido_blob_t *);
-cbor_item_t *cbor_encode_pin_enc(const fido_blob_t *, const fido_blob_t *);
-cbor_item_t *cbor_encode_pin_hash_enc(const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *cbor_encode_pin_opt(void);
 cbor_item_t *cbor_encode_pubkey(const fido_blob_t *);
 cbor_item_t *cbor_encode_pubkey_list(const fido_blob_array_t *);
 cbor_item_t *cbor_encode_pubkey_param(int);
 cbor_item_t *cbor_encode_rp_entity(const fido_rp_t *);
-cbor_item_t *cbor_encode_set_pin_auth(const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *cbor_encode_user_entity(const fido_user_t *);
 cbor_item_t *es256_pk_encode(const es256_pk_t *, int);
 

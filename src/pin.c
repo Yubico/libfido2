@@ -3,6 +3,7 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
+#include <openssl/sha.h>
 
 #include <string.h>
 
@@ -33,11 +34,119 @@ parse_uvtoken(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 #endif /* FIDO_UVTOKEN */
 
 static int
+sha256(const unsigned char *data, size_t data_len, fido_blob_t *digest)
+{
+	if ((digest->ptr = calloc(1, SHA256_DIGEST_LENGTH)) == NULL)
+		return (-1);
+
+	digest->len = SHA256_DIGEST_LENGTH;
+
+	if (SHA256(data, data_len, digest->ptr) != digest->ptr) {
+		free(digest->ptr);
+		digest->ptr = NULL;
+		digest->len = 0;
+		return (-1);
+	}
+
+	return (0);
+}
+
+static int
+pad64(const char *pin, fido_blob_t **ppin)
+{
+	size_t	pin_len;
+	size_t	ppin_len;
+
+	pin_len = strlen(pin);
+	if (pin_len < 4 || pin_len > 255) {
+		fido_log_debug("%s: invalid pin length", __func__);
+		return (FIDO_ERR_PIN_POLICY_VIOLATION);
+	}
+
+	if ((*ppin = fido_blob_new()) == NULL)
+		return (FIDO_ERR_INTERNAL);
+
+	ppin_len = (pin_len + 63U) & ~63U;
+	if (ppin_len < pin_len || ((*ppin)->ptr = calloc(1, ppin_len)) == NULL) {
+		fido_blob_free(ppin);
+		return (FIDO_ERR_INTERNAL);
+	}
+
+	memcpy((*ppin)->ptr, pin, pin_len);
+	(*ppin)->len = ppin_len;
+
+	return (FIDO_OK);
+}
+
+static int
+pin_sha256_enc(const fido_blob_t *shared, const fido_blob_t *pin, fido_blob_t **out)
+{
+	fido_blob_t	*ph = NULL;
+	int		 r;
+
+	if ((*out = fido_blob_new()) == NULL ||
+	    (ph = fido_blob_new()) == NULL) {
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if (sha256(pin->ptr, pin->len, ph) < 0 || ph->len < 16) {
+		fido_log_debug("%s: SHA256", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	ph->len = 16; /* first 16 bytes */
+
+	if (aes256_cbc_enc(shared, ph, *out) < 0) {
+		fido_log_debug("%s: aes256_cbc_enc", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	r = FIDO_OK;
+fail:
+	fido_blob_free(&ph);
+
+	return (r);
+}
+
+static int
+pin_pad64_enc(const fido_blob_t *shared, const char *pin, fido_blob_t **out)
+{
+	fido_blob_t *ppin = NULL;
+	int	     r;
+
+	if ((r = pad64(pin, &ppin)) != FIDO_OK) {
+		fido_log_debug("%s: pad64", __func__);
+		    goto fail;
+	}
+
+	if ((*out = fido_blob_new()) == NULL) {
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if (aes256_cbc_enc(shared, ppin, *out) < 0) {
+		fido_log_debug("%s: aes256_cbc_enc", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	r = FIDO_OK;
+fail:
+	fido_blob_free(&ppin);
+
+	return (r);
+}
+
+static int
 fido_dev_get_pin_token_tx(fido_dev_t *dev, const char *pin,
     const fido_blob_t *ecdh, const es256_pk_t *pk)
 {
 	fido_blob_t	 f;
 	fido_blob_t	*p = NULL;
+	fido_blob_t	*phe = NULL;
 	cbor_item_t	*argv[6];
 	int		 r;
 
@@ -51,10 +160,15 @@ fido_dev_get_pin_token_tx(fido_dev_t *dev, const char *pin,
 		goto fail;
 	}
 
+	if ((r = pin_sha256_enc(ecdh, p, &phe)) != FIDO_OK) {
+		fido_log_debug("%s: pin_sha256_enc", __func__);
+		goto fail;
+	}
+
 	if ((argv[0] = cbor_encode_pin_opt()) == NULL ||
 	    (argv[1] = cbor_build_uint8(5)) == NULL ||
 	    (argv[2] = es256_pk_encode(pk, 1)) == NULL ||
-	    (argv[5] = cbor_encode_pin_hash_enc(ecdh, p)) == NULL) {
+	    (argv[5] = cbor_build_bytestring(phe->ptr, phe->len)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -71,6 +185,7 @@ fido_dev_get_pin_token_tx(fido_dev_t *dev, const char *pin,
 fail:
 	cbor_vector_free(argv, nitems(argv));
 	fido_blob_free(&p);
+	fido_blob_free(&phe);
 	free(f.ptr);
 
 	return (r);
@@ -226,39 +341,13 @@ fido_dev_get_pin_token(fido_dev_t *dev, const char *pin,
 }
 
 static int
-pad64(const char *pin, fido_blob_t **ppin)
-{
-	size_t	pin_len;
-	size_t	ppin_len;
-
-	pin_len = strlen(pin);
-	if (pin_len < 4 || pin_len > 255) {
-		fido_log_debug("%s: invalid pin length", __func__);
-		return (FIDO_ERR_PIN_POLICY_VIOLATION);
-	}
-
-	if ((*ppin = fido_blob_new()) == NULL)
-		return (FIDO_ERR_INTERNAL);
-
-	ppin_len = (pin_len + 63U) & ~63U;
-	if (ppin_len < pin_len || ((*ppin)->ptr = calloc(1, ppin_len)) == NULL) {
-		fido_blob_free(ppin);
-		return (FIDO_ERR_INTERNAL);
-	}
-
-	memcpy((*ppin)->ptr, pin, pin_len);
-	(*ppin)->len = ppin_len;
-
-	return (FIDO_OK);
-}
-
-static int
 fido_dev_change_pin_tx(fido_dev_t *dev, const char *pin, const char *oldpin)
 {
 	fido_blob_t	 f;
-	fido_blob_t	*ppin = NULL;
+	fido_blob_t	*ppine = NULL;
 	fido_blob_t	*ecdh = NULL;
 	fido_blob_t	*opin = NULL;
+	fido_blob_t	*opinhe = NULL;
 	cbor_item_t	*argv[6];
 	es256_pk_t	*pk = NULL;
 	int r;
@@ -273,22 +362,29 @@ fido_dev_change_pin_tx(fido_dev_t *dev, const char *pin, const char *oldpin)
 		goto fail;
 	}
 
-	if ((r = pad64(pin, &ppin)) != FIDO_OK) {
-		fido_log_debug("%s: pad64", __func__);
+	if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
+		fido_log_debug("%s: fido_do_ecdh", __func__);
 		goto fail;
 	}
 
-	if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
-		fido_log_debug("%s: fido_do_ecdh", __func__);
+	/* pad and encrypt new pin */
+	if ((r = pin_pad64_enc(ecdh, pin, &ppine)) != FIDO_OK) {
+		fido_log_debug("%s: pin_pad64_enc", __func__);
+		goto fail;
+	}
+
+	/* hash and encrypt old pin */
+	if ((r = pin_sha256_enc(ecdh, opin, &opinhe)) != FIDO_OK) {
+		fido_log_debug("%s: pin_sha256_enc", __func__);
 		goto fail;
 	}
 
 	if ((argv[0] = cbor_encode_pin_opt()) == NULL ||
 	    (argv[1] = cbor_build_uint8(4)) == NULL ||
 	    (argv[2] = es256_pk_encode(pk, 1)) == NULL ||
-	    (argv[3] = cbor_encode_change_pin_auth(ecdh, ppin, opin)) == NULL ||
-	    (argv[4] = cbor_encode_pin_enc(ecdh, ppin)) == NULL ||
-	    (argv[5] = cbor_encode_pin_hash_enc(ecdh, opin)) == NULL) {
+	    (argv[3] = cbor_encode_change_pin_auth(ecdh, ppine, opinhe)) == NULL ||
+	    (argv[4] = cbor_build_bytestring(ppine->ptr, ppine->len)) == NULL ||
+	    (argv[5] = cbor_build_bytestring(opinhe->ptr, opinhe->len)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -305,9 +401,10 @@ fido_dev_change_pin_tx(fido_dev_t *dev, const char *pin, const char *oldpin)
 fail:
 	cbor_vector_free(argv, nitems(argv));
 	es256_pk_free(&pk);
-	fido_blob_free(&ppin);
+	fido_blob_free(&ppine);
 	fido_blob_free(&ecdh);
 	fido_blob_free(&opin);
+	fido_blob_free(&opinhe);
 	free(f.ptr);
 
 	return (r);
@@ -318,7 +415,7 @@ static int
 fido_dev_set_pin_tx(fido_dev_t *dev, const char *pin)
 {
 	fido_blob_t	 f;
-	fido_blob_t	*ppin = NULL;
+	fido_blob_t	*ppine = NULL;
 	fido_blob_t	*ecdh = NULL;
 	cbor_item_t	*argv[5];
 	es256_pk_t	*pk = NULL;
@@ -327,21 +424,21 @@ fido_dev_set_pin_tx(fido_dev_t *dev, const char *pin)
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
 
-	if ((r = pad64(pin, &ppin)) != FIDO_OK) {
-		fido_log_debug("%s: pad64", __func__);
+	if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
+		fido_log_debug("%s: fido_do_ecdh", __func__);
 		goto fail;
 	}
 
-	if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
-		fido_log_debug("%s: fido_do_ecdh", __func__);
+	if ((r = pin_pad64_enc(ecdh, pin, &ppine)) != FIDO_OK) {
+		fido_log_debug("%s: pin_pad64_enc", __func__);
 		goto fail;
 	}
 
 	if ((argv[0] = cbor_encode_pin_opt()) == NULL ||
 	    (argv[1] = cbor_build_uint8(3)) == NULL ||
 	    (argv[2] = es256_pk_encode(pk, 1)) == NULL ||
-	    (argv[3] = cbor_encode_set_pin_auth(ecdh, ppin)) == NULL ||
-	    (argv[4] = cbor_encode_pin_enc(ecdh, ppin)) == NULL) {
+	    (argv[3] = cbor_encode_pin_auth(ecdh, ppine)) == NULL ||
+	    (argv[4] = cbor_build_bytestring(ppine->ptr, ppine->len)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -358,7 +455,7 @@ fido_dev_set_pin_tx(fido_dev_t *dev, const char *pin)
 fail:
 	cbor_vector_free(argv, nitems(argv));
 	es256_pk_free(&pk);
-	fido_blob_free(&ppin);
+	fido_blob_free(&ppine);
 	fido_blob_free(&ecdh);
 	free(f.ptr);
 
