@@ -53,8 +53,11 @@ fido_get_random(void *buf, size_t len)
 int
 fido_get_random(void *buf, size_t len)
 {
-	if (getrandom(buf, len, 0) < 0)
+	ssize_t	r;
+
+	if ((r = getrandom(buf, len, 0)) < 0 || (size_t)r != len)
 		return (-1);
+
 	return (0);
 }
 #elif defined(HAVE_DEV_URANDOM)
@@ -67,8 +70,7 @@ fido_get_random(void *buf, size_t len)
 
 	if ((fd = open(FIDO_RANDOM_DEV, O_RDONLY)) < 0)
 		goto fail;
-	if ((r = read(fd, buf, len)) < 0 ||
-	    (size_t)r != len)
+	if ((r = read(fd, buf, len)) < 0 || (size_t)r != len)
 		goto fail;
 
 	ok = 0;
