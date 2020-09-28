@@ -4,85 +4,14 @@
  * license that can be found in the LICENSE file.
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#ifdef HAVE_SYS_RANDOM_H
-#include <sys/random.h>
-#endif
 
 #include <openssl/sha.h>
 
-#include <fcntl.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #include "fido.h"
-
-#if defined(_WIN32)
-#include <windows.h>
-
-#include <winternl.h>
-#include <winerror.h>
-#include <stdio.h>
-#include <bcrypt.h>
-#include <sal.h>
-
-static int
-obtain_nonce(uint64_t *nonce)
-{
-	NTSTATUS status;
-
-	status = BCryptGenRandom(NULL, (unsigned char *)nonce, sizeof(*nonce),
-	    BCRYPT_USE_SYSTEM_PREFERRED_RNG);
-
-	if (!NT_SUCCESS(status))
-		return (-1);
-
-	return (0);
-}
-#elif defined(HAVE_ARC4RANDOM_BUF)
-static int
-obtain_nonce(uint64_t *nonce)
-{
-	arc4random_buf(nonce, sizeof(*nonce));
-	return (0);
-}
-#elif defined(HAVE_GETRANDOM)
-static int
-obtain_nonce(uint64_t *nonce)
-{
-	if (getrandom(nonce, sizeof(*nonce), 0) < 0)
-		return (-1);
-	return (0);
-}
-#elif defined(HAVE_DEV_URANDOM)
-static int
-obtain_nonce(uint64_t *nonce)
-{
-	int	fd = -1;
-	int	ok = -1;
-	ssize_t	r;
-
-	if ((fd = open(FIDO_RANDOM_DEV, O_RDONLY)) < 0)
-		goto fail;
-	if ((r = read(fd, nonce, sizeof(*nonce))) < 0 ||
-	    (size_t)r != sizeof(*nonce))
-		goto fail;
-
-	ok = 0;
-fail:
-	if (fd != -1)
-		close(fd);
-
-	return (ok);
-}
-#else
-#error "please provide an implementation of obtain_nonce() for your platform"
-#endif /* _WIN32 */
 
 #ifndef TLS
 #define TLS
@@ -162,8 +91,8 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
-	if (obtain_nonce(&dev->nonce) < 0) {
-		fido_log_debug("%s: obtain_nonce", __func__);
+	if (fido_get_random(&dev->nonce, sizeof(dev->nonce)) < 0) {
+		fido_log_debug("%s: fido_get_random", __func__);
 		return (FIDO_ERR_INTERNAL);
 	}
 
