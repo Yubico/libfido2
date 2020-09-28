@@ -646,7 +646,7 @@ cbor_encode_pin_auth(const fido_blob_t *hmac_key, const fido_blob_t *data)
 cbor_item_t *
 cbor_encode_pin_opt(void)
 {
-	return (cbor_build_uint8(1));
+	return (cbor_build_uint8(CTAP_PIN_PROTOCOL1));
 }
 
 cbor_item_t *

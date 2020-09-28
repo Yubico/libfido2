@@ -35,7 +35,7 @@ fido_dev_authkey_tx(fido_dev_t *dev)
 	memset(argv, 0, sizeof(argv));
 
 	/* add command parameters */
-	if ((argv[0] = cbor_build_uint8(1)) == NULL ||
+	if ((argv[0] = cbor_encode_pin_opt()) == NULL ||
 	    (argv[1] = cbor_build_uint8(2)) == NULL) {
 		fido_log_debug("%s: cbor_build", __func__);
 		r = FIDO_ERR_INTERNAL;

@@ -35,6 +35,10 @@
 #define CTAP_CBOR_BIO_ENROLL_PRE	0x40
 #define CTAP_CBOR_CRED_MGMT_PRE		0x41
 
+/* Supported CTAP PIN/UV Auth Protocols. */
+#define CTAP_PIN_PROTOCOL1		1
+#define CTAP_PIN_PROTOCOL2		2
+
 /* U2F command opcodes. */
 #define U2F_CMD_REGISTER		0x01
 #define U2F_CMD_AUTH			0x02
