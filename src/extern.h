@@ -25,20 +25,23 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* aes256 */
-int aes256_cbc_dec(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
-int aes256_cbc_enc(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
+int aes256_cbc_dec(const fido_dev_t *dev, const fido_blob_t *,
+    const fido_blob_t *, fido_blob_t *);
+int aes256_cbc_enc(const fido_dev_t *dev, const fido_blob_t *,
+    const fido_blob_t *, fido_blob_t *);
 
 /* cbor encoding functions */
 cbor_item_t *cbor_flatten_vector(cbor_item_t **, size_t);
 cbor_item_t *cbor_encode_assert_options(fido_opt_t, fido_opt_t);
-cbor_item_t *cbor_encode_change_pin_auth(const fido_blob_t *,
-    const fido_blob_t *, const fido_blob_t *);
+cbor_item_t *cbor_encode_change_pin_auth(const fido_dev_t *,
+    const fido_blob_t *, const fido_blob_t *, const fido_blob_t *);
 cbor_item_t *cbor_encode_extensions(const fido_cred_ext_t *);
-cbor_item_t *cbor_encode_hmac_secret_param(const fido_blob_t *,
-    const es256_pk_t *, const fido_blob_t *);
+cbor_item_t *cbor_encode_hmac_secret_param(const fido_dev_t *,
+    const fido_blob_t *, const es256_pk_t *, const fido_blob_t *);
 cbor_item_t *cbor_encode_options(fido_opt_t, fido_opt_t);
-cbor_item_t *cbor_encode_pin_auth(const fido_blob_t *, const fido_blob_t *);
-cbor_item_t *cbor_encode_pin_opt(void);
+cbor_item_t *cbor_encode_pin_auth(const fido_dev_t *, const fido_blob_t *,
+    const fido_blob_t *);
+cbor_item_t *cbor_encode_pin_opt(const fido_dev_t *);
 cbor_item_t *cbor_encode_pubkey(const fido_blob_t *);
 cbor_item_t *cbor_encode_pubkey_list(const fido_blob_array_t *);
 cbor_item_t *cbor_encode_pubkey_param(int);

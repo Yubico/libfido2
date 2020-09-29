@@ -1,6 +1,6 @@
 #!/bin/sh -eux
 
-export PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig"
+export PKG_CONFIG_PATH="$(brew --prefix openssl@1.1)/lib/pkgconfig"
 SCAN="$(brew --prefix llvm)/bin/scan-build"
 
 # Build, analyze, and install libfido2.

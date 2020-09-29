@@ -117,7 +117,7 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 
 	/* hmac-secret extension */
 	if (assert->ext & FIDO_EXT_HMAC_SECRET)
-		if ((argv[3] = cbor_encode_hmac_secret_param(ecdh, pk,
+		if ((argv[3] = cbor_encode_hmac_secret_param(dev, ecdh, pk,
 		    &assert->hmac_salt)) == NULL) {
 			fido_log_debug("%s: cbor_encode_hmac_secret_param",
 			    __func__);
@@ -271,12 +271,13 @@ fido_dev_get_assert_wait(fido_dev_t *dev, fido_assert_t *assert,
 }
 
 static int
-decrypt_hmac_secrets(fido_assert_t *assert, const fido_blob_t *key)
+decrypt_hmac_secrets(const fido_dev_t *dev, fido_assert_t *assert,
+    const fido_blob_t *key)
 {
 	for (size_t i = 0; i < assert->stmt_cnt; i++) {
 		fido_assert_stmt *stmt = &assert->stmt[i];
 		if (stmt->hmac_secret_enc.ptr != NULL) {
-			if (aes256_cbc_dec(key, &stmt->hmac_secret_enc,
+			if (aes256_cbc_dec(dev, key, &stmt->hmac_secret_enc,
 			    &stmt->hmac_secret) < 0) {
 				fido_log_debug("%s: aes256_cbc_dec %zu",
 				    __func__, i);
@@ -316,7 +317,7 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 
 	r = fido_dev_get_assert_wait(dev, assert, pk, ecdh, pin, -1);
 	if (r == FIDO_OK && assert->ext & FIDO_EXT_HMAC_SECRET)
-		if (decrypt_hmac_secrets(assert, ecdh) < 0) {
+		if (decrypt_hmac_secrets(dev, assert, ecdh) < 0) {
 			fido_log_debug("%s: decrypt_hmac_secrets", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;

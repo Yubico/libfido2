@@ -442,7 +442,7 @@ fido_dev_get_touch_begin(fido_dev_t *dev)
 
 	if (fido_dev_supports_pin(dev)) {
 		if ((argv[7] = cbor_new_definite_bytestring()) == NULL ||
-		    (argv[8] = cbor_encode_pin_opt()) == NULL) {
+		    (argv[8] = cbor_encode_pin_opt(dev)) == NULL) {
 			fido_log_debug("%s: cbor encode", __func__);
 			goto fail;
 		}
