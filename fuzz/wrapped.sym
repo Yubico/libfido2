@@ -48,6 +48,7 @@ EVP_PKEY_paramgen
 EVP_PKEY_paramgen_init
 EVP_sha256
 fido_tx
+getrandom
 HMAC
 HMAC_CTX_new
 HMAC_Final
