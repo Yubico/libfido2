@@ -4,8 +4,6 @@
  * license that can be found in the LICENSE file.
  */
 
-#include <sys/random.h>
-
 #include <openssl/bn.h>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
@@ -547,13 +545,5 @@ WRAP(int,
 	(unsigned int usec),
 	-1,
 	(usec),
-	1
-)
-
-WRAP(ssize_t,
-	getrandom,
-	(void *buf, size_t buflen, unsigned int flags),
-	-1,
-	(buf, buflen, flags),
 	1
 )
