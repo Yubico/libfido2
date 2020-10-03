@@ -183,7 +183,7 @@ cbor_encode_pin_hash_enc                   15       0 100.00%        27       0 
 cbor_encode_hmac_secret_param              41       1  97.56%        66       4  93.94%
 cbor_decode_fmt                             9       0 100.00%        18       0 100.00%
 cbor_decode_pubkey                         21       1  95.24%        32       2  93.75%
-cbor_decode_cred_authdata                  31       0 100.00%        47       0 100.00%
+cbor_decode_cred_authdata                  31       1  96.77%        47       3  93.62%
 cbor_decode_assert_authdata                23       0 100.00%        44       0 100.00%
 cbor_decode_attstmt                         8       0 100.00%        10       0 100.00%
 cbor_decode_uint64                          4       0 100.00%        10       0 100.00%
@@ -208,7 +208,7 @@ cbor.c:decode_cred_id_entry                10       0 100.00%        23       0 
 cbor.c:decode_user_entry                   25       0 100.00%        39       0 100.00%
 cbor.c:decode_rp_entity_entry              15       0 100.00%        29       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     883       6  99.32%      1364      17  98.75%
+TOTAL                                     883       7  99.21%      1364      20  98.53%
 
 File '/libfido2/src/cred.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -221,8 +221,8 @@ fido_cred_new                               1       0 100.00%         3       0 
 fido_cred_reset_tx                          1       0 100.00%        20       0 100.00%
 fido_cred_reset_rx                          1       0 100.00%         8       0 100.00%
 fido_cred_free                              6       1  83.33%        13       0 100.00%
-fido_cred_set_authdata                     22       0 100.00%        36       0 100.00%
-fido_cred_set_authdata_raw                 22       2  90.91%        35       4  88.57%
+fido_cred_set_authdata                     23       0 100.00%        37       0 100.00%
+fido_cred_set_authdata_raw                 25       0 100.00%        38       0 100.00%
 fido_cred_set_x509                         12       0 100.00%        16       0 100.00%
 fido_cred_set_sig                          12       0 100.00%        16       0 100.00%
 fido_cred_exclude                          14       2  85.71%        25       3  88.00%
@@ -238,6 +238,7 @@ fido_cred_set_fmt                          16       4  75.00%        15       1 
 fido_cred_set_type                         17       0 100.00%         9       0 100.00%
 fido_cred_type                              1       0 100.00%         3       0 100.00%
 fido_cred_flags                             1       0 100.00%         3       0 100.00%
+fido_cred_sigcount                          1       0 100.00%         3       0 100.00%
 fido_cred_clientdata_hash_ptr               1       0 100.00%         3       0 100.00%
 fido_cred_clientdata_hash_len               1       0 100.00%         3       0 100.00%
 fido_cred_x5c_ptr                           1       0 100.00%         3       0 100.00%
@@ -246,6 +247,8 @@ fido_cred_sig_ptr                           1       0 100.00%         3       0 
 fido_cred_sig_len                           1       0 100.00%         3       0 100.00%
 fido_cred_authdata_ptr                      1       0 100.00%         3       0 100.00%
 fido_cred_authdata_len                      1       0 100.00%         3       0 100.00%
+fido_cred_authdata_raw_ptr                  1       0 100.00%         3       0 100.00%
+fido_cred_authdata_raw_len                  1       0 100.00%         3       0 100.00%
 fido_cred_pubkey_ptr                        9       0 100.00%        20       0 100.00%
 fido_cred_pubkey_len                        9       0 100.00%        20       0 100.00%
 fido_cred_id_ptr                            1       0 100.00%         3       0 100.00%
@@ -263,15 +266,15 @@ fido_cred_user_id_len                       1       0 100.00%         3       0 
 cred.c:fido_dev_make_cred_wait             10       0 100.00%         9       0 100.00%
 cred.c:fido_dev_make_cred_tx               59       0 100.00%        81       0 100.00%
 cred.c:fido_dev_make_cred_rx               21       0 100.00%        28       0 100.00%
-cred.c:parse_makecred_reply                10       0 100.00%        23       0 100.00%
+cred.c:parse_makecred_reply                13       0 100.00%        27       0 100.00%
 cred.c:check_extensions                     1       0 100.00%         3       0 100.00%
 cred.c:get_signed_hash_u2f                 22       0 100.00%        20       0 100.00%
 cred.c:verify_sig                          27       2  92.59%        40       7  82.50%
-cred.c:fido_cred_clean_authdata             1       0 100.00%         9       0 100.00%
+cred.c:fido_cred_clean_authdata             1       0 100.00%        11       0 100.00%
 cred.c:fido_cred_clean_x509                 1       0 100.00%         5       0 100.00%
 cred.c:fido_cred_clean_sig                  1       0 100.00%         5       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     536      23  95.71%       836      29  96.53%
+TOTAL                                     546      21  96.15%       855      25  97.08%
 
 File '/libfido2/src/credman.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -333,7 +336,7 @@ fido_dev_set_io_functions                  18       4  77.78%        17       6 
 fido_dev_set_transport_functions            6       6   0.00%        11      11   0.00%
 fido_init                                   7       1  85.71%         4       0 100.00%
 fido_dev_new                                5       0 100.00%        16       0 100.00%
-fido_dev_new_with_info                     17      17   0.00%        26      26   0.00%
+fido_dev_new_with_info                     19      19   0.00%        27      27   0.00%
 fido_dev_free                               6       0 100.00%        11       0 100.00%
 fido_dev_protocol                           1       0 100.00%         3       0 100.00%
 fido_dev_major                              1       0 100.00%         3       0 100.00%
@@ -349,12 +352,11 @@ fido_dev_force_fido2                        2       2   0.00%         3       3 
 dev.c:find_manifest_func_node               5       5   0.00%         9       9   0.00%
 dev.c:fido_dev_open_wait                   10       0 100.00%         9       0 100.00%
 dev.c:fido_dev_open_tx                     51      13  74.51%        63      23  63.49%
-dev.c:obtain_nonce                          4       1  75.00%         5       1  80.00%
 dev.c:set_random_report_len                11       0 100.00%         6       0 100.00%
 dev.c:fido_dev_open_rx                     33       0 100.00%        56       0 100.00%
 dev.c:fido_dev_set_flags                   17       0 100.00%        24       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     334      90  73.05%       466     140  69.96%
+TOTAL                                     332      91  72.59%       462     140  69.70%
 
 File '/libfido2/src/ecdh.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -553,6 +555,13 @@ pin.c:fido_dev_get_retry_count_rx          11       0 100.00%        21       0 
 pin.c:parse_retry_count                    13       0 100.00%        20       0 100.00%
 ---------------------------------------------------------------------------------------
 TOTAL                                     248       0 100.00%       365       0 100.00%
+
+File '/libfido2/src/random.c':
+Name                                  Regions    Miss   Cover     Lines    Miss   Cover
+---------------------------------------------------------------------------------------
+fido_get_random                             6       1  83.33%         8       1  87.50%
+---------------------------------------------------------------------------------------
+TOTAL                                       6       1  83.33%         8       1  87.50%
 
 File '/libfido2/src/reset.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
