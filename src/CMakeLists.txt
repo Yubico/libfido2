@@ -66,45 +66,49 @@ list(APPEND COMPAT_SOURCES
 )
 
 # static library
-add_library(fido2 STATIC ${FIDO_SOURCES} ${COMPAT_SOURCES})
-target_link_libraries(fido2 ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
-	${UDEV_LIBRARIES} ${BASE_LIBRARIES} ${HIDAPI_LIBRARIES})
-if(WIN32)
-	if (MINGW)
-		target_link_libraries(fido2 wsock32 ws2_32 bcrypt setupapi hid)
-	else()
-		target_link_libraries(fido2 wsock32 ws2_32 bcrypt SetupAPI hid)
-		set_target_properties(fido2 PROPERTIES OUTPUT_NAME fido2_static)
+if(BUILD_STATIC_LIBS)
+	add_library(fido2 STATIC ${FIDO_SOURCES} ${COMPAT_SOURCES})
+	target_link_libraries(fido2 ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
+		${UDEV_LIBRARIES} ${BASE_LIBRARIES} ${HIDAPI_LIBRARIES})
+	if(WIN32)
+		if (MINGW)
+			target_link_libraries(fido2 wsock32 ws2_32 bcrypt setupapi hid)
+		else()
+			target_link_libraries(fido2 wsock32 ws2_32 bcrypt SetupAPI hid)
+			set_target_properties(fido2 PROPERTIES OUTPUT_NAME fido2_static)
+		endif()
+	elseif(APPLE)
+		target_link_libraries(fido2 "-framework CoreFoundation"
+			"-framework IOKit")
 	endif()
-elseif(APPLE)
-	target_link_libraries(fido2 "-framework CoreFoundation"
-		"-framework IOKit")
+	install(TARGETS fido2 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
-install(TARGETS fido2 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # dynamic library
-add_library(fido2_shared SHARED ${FIDO_SOURCES} ${COMPAT_SOURCES})
-target_link_libraries(fido2_shared ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
-	${UDEV_LIBRARIES} ${BASE_LIBRARIES} ${HIDAPI_LIBRARIES})
-if(WIN32)
-	if (MINGW)
-		target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
-			setupapi hid)
-	else()
-		target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
-			SetupAPI hid)
+if(BUILD_SHARED_LIBS)
+	add_library(fido2_shared SHARED ${FIDO_SOURCES} ${COMPAT_SOURCES})
+	target_link_libraries(fido2_shared ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
+		${UDEV_LIBRARIES} ${BASE_LIBRARIES} ${HIDAPI_LIBRARIES})
+	if(WIN32)
+		if (MINGW)
+			target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
+				setupapi hid)
+		else()
+			target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
+				SetupAPI hid)
+		endif()
+	elseif(APPLE)
+		target_link_libraries(fido2_shared "-framework CoreFoundation"
+			"-framework IOKit")
 	endif()
-elseif(APPLE)
-	target_link_libraries(fido2_shared "-framework CoreFoundation"
-		"-framework IOKit")
+	set_target_properties(fido2_shared PROPERTIES OUTPUT_NAME fido2
+		VERSION ${FIDO_VERSION} SOVERSION ${FIDO_MAJOR})
+	install(TARGETS fido2_shared
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
-set_target_properties(fido2_shared PROPERTIES OUTPUT_NAME fido2
-	VERSION ${FIDO_VERSION} SOVERSION ${FIDO_MAJOR})
-install(TARGETS fido2_shared
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES fido.h DESTINATION include)
 install(DIRECTORY fido DESTINATION include)
