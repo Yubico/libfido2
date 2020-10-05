@@ -38,7 +38,7 @@ export PKG_CONFIG_PATH="${FAKEROOT}/lib/pkgconfig"
 export CFLAGS="-fsanitize=memory,undefined -fsanitize-memory-track-origins"
 export CFLAGS="${CFLAGS} -g2 -fno-omit-frame-pointer"
 export LDFLAGS="-fsanitize=memory,undefined -fsanitize-memory-track-origins"
-cmake -DFUZZ=1 -DLIBFUZZER=1 ..
+cmake -DFUZZ=ON -DLIBFUZZER=ON ..
 make
 
 # Fuzz with MSAN.
