@@ -167,6 +167,7 @@ _fido_dev_get_uv_retry_count
 _fido_dev_get_touch_begin
 _fido_dev_get_touch_status
 _fido_dev_has_pin
+_fido_dev_has_uv
 _fido_dev_info_free
 _fido_dev_info_manifest
 _fido_dev_info_manufacturer_string
@@ -189,9 +190,11 @@ _fido_dev_set_pin
 _fido_dev_set_pin_minlen
 _fido_dev_set_sigmask
 _fido_dev_set_transport_functions
-_fido_dev_supports_credman
 _fido_dev_supports_cred_prot
+_fido_dev_supports_credman
+_fido_dev_supports_permissions
 _fido_dev_supports_pin
+_fido_dev_supports_uv
 _fido_dev_toggle_always_uv
 _fido_init
 _fido_set_log_handler

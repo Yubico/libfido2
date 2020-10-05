@@ -18,6 +18,8 @@
 .Nm fido_dev_supports_cred_prot ,
 .Nm fido_dev_supports_pin ,
 .Nm fido_dev_has_pin ,
+.Nm fido_dev_supports_uv ,
+.Nm fido_dev_has_uv ,
 .Nm fido_dev_protocol ,
 .Nm fido_dev_build ,
 .Nm fido_dev_flags ,
@@ -50,6 +52,10 @@
 .Fn fido_dev_supports_pin "const fido_dev_t *dev"
 .Ft bool
 .Fn fido_dev_has_pin "const fido_dev_t *dev"
+.Ft bool
+.Fn fido_dev_supports_uv "const fido_dev_t *dev"
+.Ft bool
+.Fn fido_dev_has_uv "const fido_dev_t *dev"
 .Ft uint8_t
 .Fn fido_dev_protocol "const fido_dev_t *dev"
 .Ft uint8_t
@@ -159,6 +165,23 @@ function returns
 if
 .Fa dev
 has a FIDO 2.0 Client PIN set.
+.Pp
+The
+.Fn fido_dev_supports_uv
+function returns
+.Dv true
+if
+.Fa dev
+supports a built-in user verification method.
+.Pp
+The
+.Fn fido_dev_has_uv
+function returns
+.Dv true
+if
+.Fa dev
+supports built-in user verification and its user verification
+feature is configured.
 .Pp
 The
 .Fn fido_dev_protocol

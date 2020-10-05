@@ -168,6 +168,7 @@
 		fido_dev_get_touch_begin;
 		fido_dev_get_touch_status;
 		fido_dev_has_pin;
+		fido_dev_has_uv;
 		fido_dev_info_free;
 		fido_dev_info_manifest;
 		fido_dev_info_manufacturer_string;
@@ -189,9 +190,11 @@
 		fido_dev_set_pin;
 		fido_dev_set_pin_minlen;
 		fido_dev_set_transport_functions;
-		fido_dev_supports_credman;
 		fido_dev_supports_cred_prot;
+		fido_dev_supports_credman;
+		fido_dev_supports_permissions;
 		fido_dev_supports_pin;
+		fido_dev_supports_uv;
 		fido_dev_toggle_always_uv;
 		fido_hid_get_report_len;
 		fido_hid_get_usage;

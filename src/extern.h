@@ -148,11 +148,13 @@ int u2f_get_touch_begin(fido_dev_t *);
 int u2f_get_touch_status(fido_dev_t *, int *, int);
 
 /* unexposed fido ops */
+uint8_t fido_dev_get_pin_protocol(const fido_dev_t *);
 int fido_dev_authkey(fido_dev_t *, es256_pk_t *);
 int fido_dev_get_cbor_info_wait(fido_dev_t *, fido_cbor_info_t *, int);
 int fido_dev_get_pin_token(fido_dev_t *, const char *, const fido_blob_t *,
     const es256_pk_t *, fido_blob_t *);
 int fido_do_ecdh(fido_dev_t *, es256_pk_t **, fido_blob_t **);
+bool fido_dev_supports_permissions(const fido_dev_t *);
 
 /* misc */
 void fido_assert_reset_rx(fido_assert_t *);
@@ -188,10 +190,15 @@ uint32_t uniform_random(uint32_t);
 #endif
 
 /* internal device capability flags */
-#define FIDO_DEV_PIN_SET	0x01
-#define FIDO_DEV_PIN_UNSET	0x02
-#define FIDO_DEV_CRED_PROT	0x04
-#define FIDO_DEV_CREDMAN	0x08
+#define FIDO_DEV_PIN_SET	0x001
+#define FIDO_DEV_PIN_UNSET	0x002
+#define FIDO_DEV_CRED_PROT	0x004
+#define FIDO_DEV_CREDMAN	0x008
+#define FIDO_DEV_PIN_PROTOCOL1	0x010
+#define FIDO_DEV_PIN_PROTOCOL2	0x020
+#define FIDO_DEV_UV_SET 	0x040
+#define FIDO_DEV_UV_UNSET	0x080
+#define FIDO_DEV_TOKEN_PERMS	0x100
 
 /* miscellanea */
 #define FIDO_DUMMY_CLIENTDATA	""
