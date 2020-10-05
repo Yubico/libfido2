@@ -38,7 +38,7 @@ export PKG_CONFIG_PATH="${FAKEROOT}/lib/pkgconfig"
 export CFLAGS="-fsanitize=address,leak,undefined -fsanitize-trap=undefined"
 export CFLAGS="${CFLAGS} -g2 -fno-omit-frame-pointer -fno-common"
 export LDFLAGS="-fsanitize=address,leak,undefined -fsanitize-trap=undefined"
-cmake -DFUZZ=1 -DLIBFUZZER=1 ..
+cmake -DFUZZ=ON -DLIBFUZZER=ON ..
 make
 
 # Fuzz with ASAN.
