@@ -79,8 +79,9 @@ int cbor_map_iter(const cbor_item_t *, void *, int(*)(const cbor_item_t *,
 int cbor_string_copy(const cbor_item_t *, char **);
 int cbor_parse_reply(const unsigned char *, size_t, void *,
     int(*)(const cbor_item_t *, const cbor_item_t *, void *));
-int cbor_add_pin_params(fido_dev_t *, const fido_blob_t *, const es256_pk_t *,
-    const fido_blob_t *,const char *, cbor_item_t **, cbor_item_t **);
+int cbor_add_uv_params(fido_dev_t *, uint8_t, const fido_blob_t *,
+    const es256_pk_t *, const fido_blob_t *, const char *, const char *,
+    cbor_item_t **, cbor_item_t **);
 void cbor_vector_free(cbor_item_t **, size_t);
 
 #ifndef nitems
@@ -151,10 +152,11 @@ int u2f_get_touch_status(fido_dev_t *, int *, int);
 uint8_t fido_dev_get_pin_protocol(const fido_dev_t *);
 int fido_dev_authkey(fido_dev_t *, es256_pk_t *);
 int fido_dev_get_cbor_info_wait(fido_dev_t *, fido_cbor_info_t *, int);
-int fido_dev_get_pin_token(fido_dev_t *, const char *, const fido_blob_t *,
-    const es256_pk_t *, fido_blob_t *);
+int fido_dev_get_uv_token(fido_dev_t *, uint8_t, const char *,
+    const fido_blob_t *, const es256_pk_t *, const char *, fido_blob_t *);
 int fido_do_ecdh(fido_dev_t *, es256_pk_t **, fido_blob_t **);
 bool fido_dev_supports_permissions(const fido_dev_t *);
+bool fido_dev_can_get_uv_token(const fido_dev_t *, const char *);
 
 /* misc */
 void fido_assert_reset_rx(fido_assert_t *);

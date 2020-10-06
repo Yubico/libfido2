@@ -85,6 +85,7 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 {
 	fido_blob_t	 f;
 	cbor_item_t	*argv[7];
+	const uint8_t	 cmd = CTAP_CBOR_ASSERT;
 	int		 r;
 
 	memset(argv, 0, sizeof(argv));
@@ -135,24 +136,16 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 			goto fail;
 		}
 
-	/* pin authentication */
-	if (pin) {
-		if (pk == NULL || ecdh == NULL) {
-			fido_log_debug("%s: pin=%p, pk=%p, ecdh=%p", __func__,
-			    (const void *)pin, (const void *)pk,
-			    (const void *)ecdh);
-			r = FIDO_ERR_INVALID_ARGUMENT;
+	/* user verification */
+	if (pk != NULL && ecdh != NULL)
+		if ((r = cbor_add_uv_params(dev, cmd, &assert->cdh, pk, ecdh,
+		    pin, assert->rp_id, &argv[5], &argv[6])) != FIDO_OK) {
+			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
-		if ((r = cbor_add_pin_params(dev, &assert->cdh, pk, ecdh, pin,
-		    &argv[5], &argv[6])) != FIDO_OK) {
-			fido_log_debug("%s: cbor_add_pin_params", __func__);
-			goto fail;
-		}
-	}
 
 	/* frame and transmit */
-	if (cbor_build_frame(CTAP_CBOR_ASSERT, argv, nitems(argv), &f) < 0 ||
+	if (cbor_build_frame(cmd, argv, nitems(argv), &f) < 0 ||
 	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
@@ -308,7 +301,7 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 		return (u2f_authenticate(dev, assert, -1));
 	}
 
-	if (pin != NULL || assert->ext != 0) {
+	if (pin != NULL || assert->uv == FIDO_OPT_TRUE || assert->ext != 0) {
 		if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;

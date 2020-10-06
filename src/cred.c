@@ -50,6 +50,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 	fido_blob_t	*ecdh = NULL;
 	es256_pk_t	*pk = NULL;
 	cbor_item_t	*argv[9];
+	const uint8_t	 cmd = CTAP_CBOR_MAKECRED;
 	int		 r;
 
 	memset(&f, 0, sizeof(f));
@@ -96,21 +97,21 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 			goto fail;
 		}
 
-	/* pin authentication */
-	if (pin) {
+	/* user verification */
+	if (pin != NULL || cred->uv == FIDO_OPT_TRUE) {
 		if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
-		if ((r = cbor_add_pin_params(dev, &cred->cdh, pk, ecdh, pin,
-		    &argv[7], &argv[8])) != FIDO_OK) {
-			fido_log_debug("%s: cbor_add_pin_params", __func__);
+		if ((r = cbor_add_uv_params(dev, cmd, &cred->cdh, pk, ecdh,
+		    pin, cred->rp.id, &argv[7], &argv[8])) != FIDO_OK) {
+			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
 	}
 
 	/* framing and transmission */
-	if (cbor_build_frame(CTAP_CBOR_MAKECRED, argv, nitems(argv), &f) < 0 ||
+	if (cbor_build_frame(cmd, argv, nitems(argv), &f) < 0 ||
 	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;

@@ -59,7 +59,7 @@ fail:
 }
 
 static int
-bio_tx(fido_dev_t *dev, uint8_t cmd, cbor_item_t **sub_argv, size_t sub_argc,
+bio_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **sub_argv, size_t sub_argc,
     const char *pin, const fido_blob_t *token)
 {
 	cbor_item_t	*argv[5];
@@ -67,6 +67,7 @@ bio_tx(fido_dev_t *dev, uint8_t cmd, cbor_item_t **sub_argv, size_t sub_argc,
 	fido_blob_t	*ecdh = NULL;
 	fido_blob_t	 f;
 	fido_blob_t	 hmac;
+	const uint8_t	 cmd = CTAP_CBOR_BIO_ENROLL_PRE;
 	int		 r = FIDO_ERR_INTERNAL;
 
 	memset(&f, 0, sizeof(f));
@@ -75,14 +76,14 @@ bio_tx(fido_dev_t *dev, uint8_t cmd, cbor_item_t **sub_argv, size_t sub_argc,
 
 	/* modality, subCommand */
 	if ((argv[0] = cbor_build_uint8(1)) == NULL ||
-	    (argv[1] = cbor_build_uint8(cmd)) == NULL) {
+	    (argv[1] = cbor_build_uint8(subcmd)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		goto fail;
 	}
 
 	/* subParams */
 	if (pin || token) {
-		if (bio_prepare_hmac(cmd, sub_argv, sub_argc, &argv[2],
+		if (bio_prepare_hmac(subcmd, sub_argv, sub_argc, &argv[2],
 		    &hmac) < 0) {
 			fido_log_debug("%s: bio_prepare_hmac", __func__);
 			goto fail;
@@ -95,9 +96,9 @@ bio_tx(fido_dev_t *dev, uint8_t cmd, cbor_item_t **sub_argv, size_t sub_argc,
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
-		if ((r = cbor_add_pin_params(dev, &hmac, pk, ecdh, pin,
-		    &argv[4], &argv[3])) != FIDO_OK) {
-			fido_log_debug("%s: cbor_add_pin_params", __func__);
+		if ((r = cbor_add_uv_params(dev, cmd, &hmac, pk, ecdh, pin,
+		    NULL, &argv[4], &argv[3])) != FIDO_OK) {
+			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
 	} else if (token) {
@@ -109,8 +110,8 @@ bio_tx(fido_dev_t *dev, uint8_t cmd, cbor_item_t **sub_argv, size_t sub_argc,
 	}
 
 	/* framing and transmission */
-	if (cbor_build_frame(CTAP_CBOR_BIO_ENROLL_PRE, argv, nitems(argv),
-	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	if (cbor_build_frame(cmd, argv, nitems(argv), &f) < 0 ||
+	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -461,8 +462,9 @@ fido_bio_dev_enroll_begin(fido_dev_t *dev, fido_bio_template_t *t,
 		goto fail;
 	}
 
-	if ((r = fido_dev_get_pin_token(dev, pin, ecdh, pk, token)) != FIDO_OK) {
-		fido_log_debug("%s: fido_dev_get_pin_token", __func__);
+	if ((r = fido_dev_get_uv_token(dev, CTAP_CBOR_BIO_ENROLL_PRE, pin, ecdh,
+	    pk, NULL, token)) != FIDO_OK) {
+		fido_log_debug("%s: fido_dev_get_uv_token", __func__);
 		goto fail;
 	}
 

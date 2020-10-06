@@ -62,7 +62,7 @@ config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
 	}
 
 	/* pinProtocol, pinAuth */
-	if (pin) {
+	if (fido_dev_can_get_uv_token(dev, pin)) {
 		if ((argv[1] = cbor_flatten_vector(paramv, paramc)) == NULL) {
 			fido_log_debug("%s: cbor_flatten_vector", __func__);
 			goto fail;
@@ -75,9 +75,9 @@ config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
-		if ((r = cbor_add_pin_params(dev, &hmac, pk, ecdh, pin,
-		    &argv[3], &argv[2])) != FIDO_OK) {
-			fido_log_debug("%s: cbor_add_pin_params", __func__);
+		if ((r = cbor_add_uv_params(dev, subcmd, &hmac, pk, ecdh, pin,
+		    NULL, &argv[3], &argv[2])) != FIDO_OK) {
+			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
 	}

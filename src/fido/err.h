@@ -51,6 +51,7 @@
 #define FIDO_ERR_ACTION_TIMEOUT		0x3a
 #define FIDO_ERR_UP_REQUIRED		0x3b
 #define FIDO_ERR_UV_BLOCKED		0x3c
+#define FIDO_ERR_UV_INVALID		0x3f
 #define FIDO_ERR_ERR_OTHER		0x7f
 #define FIDO_ERR_SPEC_LAST		0xdf
 
