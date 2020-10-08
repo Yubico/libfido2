@@ -11,8 +11,8 @@ jobs:
         include:
           - os: ubuntu-20.04
             cc: gcc-10
-#         - os: ubuntu-20.04
-#           cc: clang-10
+          - os: ubuntu-20.04
+            cc: clang-10
           - os: ubuntu-20.04
             cc: i686-w64-mingw32-gcc-9
           - os: ubuntu-18.04
