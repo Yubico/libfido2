@@ -8,6 +8,7 @@ on:
 
 jobs:
   CodeQL-Build:
+    if: github.repository == 'Yubico/libfido2'
 
     runs-on: ubuntu-latest
 
@@ -23,7 +24,7 @@ jobs:
     # the head of the pull request instead of the merge commit.
     - run: git checkout HEAD^2
       if: ${{ github.event_name == 'pull_request' }}
-      
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
@@ -32,9 +33,9 @@ jobs:
       env:
         CC: gcc
       run: |
-       sudo apt -q update      
+       sudo apt -q update
        sudo apt install -q -y libcbor-dev libudev-dev original-awk
        /bin/sh -eux .actions/build-linux-gcc
-       
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
