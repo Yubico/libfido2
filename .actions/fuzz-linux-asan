@@ -20,10 +20,10 @@ make VERBOSE=1
 sudo make install
 cd ../..
 
-# Build and install OpenSSL 1.1.1g.
+# Build and install OpenSSL 1.1.1h.
 git clone git://github.com/openssl/openssl
 cd openssl
-git checkout OpenSSL_1_1_1g
+git checkout OpenSSL_1_1_1h
 ./Configure linux-x86_64-clang enable-asan --prefix=${FAKEROOT} \
     --openssldir=${FAKEROOT}/openssl
 make clean
