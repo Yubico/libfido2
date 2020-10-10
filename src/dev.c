@@ -91,6 +91,11 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
+	if (dev->cid != CTAP_CID_BROADCAST) {
+		fido_log_debug("%s: cid=0x%x", __func__, dev->cid);
+		return (FIDO_ERR_INVALID_ARGUMENT);
+	}
+
 	if (fido_get_random(&dev->nonce, sizeof(dev->nonce)) < 0) {
 		fido_log_debug("%s: fido_get_random", __func__);
 		return (FIDO_ERR_INTERNAL);
@@ -299,6 +304,7 @@ fido_dev_close(fido_dev_t *dev)
 
 	dev->io.close(dev->io_handle);
 	dev->io_handle = NULL;
+	dev->cid = CTAP_CID_BROADCAST;
 
 	return (FIDO_OK);
 }
@@ -482,8 +488,6 @@ fido_dev_new_with_info(const fido_dev_info_t *di)
 	if ((dev = calloc(1, sizeof(*dev))) == NULL)
 		return (NULL);
 
-	dev->cid = CTAP_CID_BROADCAST;
-
 	if (di->io.open == NULL || di->io.close == NULL ||
 	    di->io.read == NULL || di->io.write == NULL) {
 		fido_log_debug("%s: NULL function", __func__);
@@ -494,6 +498,7 @@ fido_dev_new_with_info(const fido_dev_info_t *di)
 	dev->io = di->io;
 	dev->io_own = di->transport.tx != NULL || di->transport.rx != NULL;
 	dev->transport = di->transport;
+	dev->cid = CTAP_CID_BROADCAST;
 
 	if ((dev->path = strdup(di->path)) == NULL) {
 		fido_log_debug("%s: strdup", __func__);
