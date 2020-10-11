@@ -13,9 +13,10 @@ git checkout v0.8.0
 patch -p0 < ../fuzz/README
 mkdir build
 cd build
-cmake -DCMAKE_C_FLAGS_DEBUG="-g2 -fno-omit-frame-pointer" \
-    -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=${FAKEROOT} \
-    -DBUILD_SHARED_LIBS=ON -DSANITIZE=ON -DCMAKE_INSTALL_LIBDIR=lib ..
+CBOR_CFLAGS="-fsanitize=address,alignment,bounds -g2 -fno-omit-frame-pointer"
+cmake -DCMAKE_C_FLAGS_DEBUG="${CBOR_CFLAGS}" -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_INSTALL_PREFIX=${FAKEROOT} -DBUILD_SHARED_LIBS=ON \
+    -DCMAKE_INSTALL_LIBDIR=lib -DSANITIZE=OFF ..
 make VERBOSE=1
 sudo make install
 cd ../..
@@ -34,14 +35,18 @@ cd ..
 # Build libfido2.
 mkdir build
 cd build
-export PKG_CONFIG_PATH="${FAKEROOT}/lib/pkgconfig"
-export CFLAGS="-fsanitize=address,leak,undefined -fsanitize-trap=undefined"
-export CFLAGS="${CFLAGS} -g2 -fno-omit-frame-pointer -fno-common"
-export LDFLAGS="-fsanitize=address,leak,undefined -fsanitize-trap=undefined"
+SANITIZERS="address,bounds,leak,pointer-compare,pointer-subtract,undefined"
+PKG_CONFIG_PATH="${FAKEROOT}/lib/pkgconfig"
+CFLAGS="-fsanitize=${SANITIZERS} -g2 -fno-omit-frame-pointer -fno-common"
+LDFLAGS="-fsanitize=${SANITIZERS}"
+export PKG_CONFIG_PATH CFLAGS LDFLAGS
 cmake -DFUZZ=ON -DLIBFUZZER=ON ..
 make
 
 # Fuzz with ASAN.
+UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1
+ASAN_OPTIONS=${UBSAN_OPTIONS}:detect_invalid_pointer_pairs=1:detect_leaks=1
+export UBSAN_OPTIONS ASAN_OPTIONS
 mkdir corpus
 curl -s https://ambientworks.net/libfido2/corpus.tgz | tar -C corpus -zxf -
 fuzz/fuzz_cred -use_value_profile=1 -reload=30 -print_pcs=1 \
