@@ -10,7 +10,7 @@ jobs:
       matrix:
         os: [ubuntu-20.04]
         cc: [clang-10]
-        sanitizer: [msan, asan]
+        sanitizer: [asan, msan]
     steps:
     - uses: actions/checkout@v1
     - name: Dependencies
@@ -25,4 +25,4 @@ jobs:
         CC: ${{ matrix.cc }}
         SANITIZER: ${{ matrix.sanitizer }}
       run: |
-        /bin/sh -eux .actions/fuzz-linux-${SANITIZER}
+        /bin/sh -eux .actions/fuzz-linux ${SANITIZER}
