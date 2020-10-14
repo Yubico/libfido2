@@ -145,11 +145,32 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2581", ATTRS{idProduct
 # Bluink Key by Bluink Ltd
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2abe", ATTRS{idProduct}=="1002", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
-# Ledger Nano S by LEDGER
+# Ledger Blue by LEDGER
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0000", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# Ledger Nano S Old firmware by LEDGER
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0001", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
-# Ledger Nano X by LEDGER
+# Ledger Nano X Old firmware by LEDGER
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0004", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# Ledger Blue by LEDGER
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0011", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# Ledger Blue Legacy by LEDGER
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0015", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# Ledger Nano S by LEDGER
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="1011", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# Ledger Nano S Legacy by LEDGER
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="1015", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# Ledger Nano X by LEDGER
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="4011", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# Ledger Nano X Legacy by LEDGER
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="4015", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
 # Hypersecu HyperFIDO by Hypersecu Information Systems, Inc.
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2ccf", ATTRS{idProduct}=="0880", TAG+="uaccess", GROUP="plugdev", MODE="0660"
