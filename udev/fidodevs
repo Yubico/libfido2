@@ -95,8 +95,15 @@ product PLUGUP		0xf1d0	Happlink Security Key
 
 product BLUINK		0x1002	Bluink Key
 
-product LEDGER		0x0001	Ledger Nano S
-product LEDGER		0x0004	Ledger Nano X
+product LEDGER		0x0000  Ledger Blue
+product LEDGER		0x0001	Ledger Nano S Old firmware
+product LEDGER		0x0004	Ledger Nano X Old firmware
+product LEDGER		0x0011  Ledger Blue
+product LEDGER		0x0015  Ledger Blue Legacy
+product LEDGER		0x1011	Ledger Nano S
+product LEDGER		0x1015	Ledger Nano S Legacy
+product LEDGER		0x4011	Ledger Nano X
+product LEDGER		0x4015	Ledger Nano X Legacy
 
 product HYPERSECU	0x0880	Hypersecu HyperFIDO
 
