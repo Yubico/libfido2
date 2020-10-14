@@ -49,6 +49,12 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="096e", ATTRS{idProduct
 # Unknown product by Feitian Technologies Co., Ltd.
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="096e", ATTRS{idProduct}=="085d", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
+# BioPass FIDO2 K33 by Feitian Technologies Co., Ltd.
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="096e", ATTRS{idProduct}=="0866", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# BioPass FIDO2 K43 by Feitian Technologies Co., Ltd.
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="096e", ATTRS{idProduct}=="0867", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
 # Hypersecu HyperFIDO by Feitian Technologies Co., Ltd.
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="096e", ATTRS{idProduct}=="0880", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 

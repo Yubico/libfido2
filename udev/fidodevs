@@ -49,6 +49,8 @@ product FEITIAN		0x0858	Unknown product
 product FEITIAN		0x085a	FS MultiPass FIDO U2F
 product FEITIAN		0x085b	Unknown product
 product FEITIAN		0x085d	Unknown product
+product FEITIAN		0x0866  BioPass FIDO2 K33
+product FEITIAN		0x0867  BioPass FIDO2 K43
 product FEITIAN		0x0880	Hypersecu HyperFIDO
 
 product YUBICO		0x0113	YubiKey NEO FIDO
