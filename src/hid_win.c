@@ -18,6 +18,7 @@
 #include <devpropdef.h>
 #include <hidclass.h>
 #include <hidsdi.h>
+#include <wchar.h>
 
 #include "fido.h"
 
