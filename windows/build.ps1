@@ -125,8 +125,8 @@ Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}) {
 		-DCMAKE_C_FLAGS_RELEASE="/Zi /guard:cf /sdl" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" -DBUILD_SHARED_LIBS=ON `
 		-DLIBRESSL_TESTS=OFF
-	& $CMake --build . --config Release
-	& $CMake --build . --config Release --target install
+	& $CMake --build . --config Release --verbose
+	& $CMake --build . --config Release --target install --verbose
 	Pop-Location
 
 	if(-Not (Test-Path .\${LIBCBOR})) {
@@ -138,8 +138,8 @@ Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}) {
 		-DBUILD_SHARED_LIBS=ON `
 		-DCMAKE_C_FLAGS_RELEASE="/Zi /guard:cf /sdl" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}"
-	& $CMake --build . --config Release
-	& $CMake --build . --config Release --target install
+	& $CMake --build . --config Release --verbose
+	& $CMake --build . --config Release --target install --verbose
 	Pop-Location
 
 	& $CMake ..\.. -G "${GENERATOR}" -A "${ARCH}" `
@@ -148,8 +148,8 @@ Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}) {
 		-DCRYPTO_INCLUDE_DIRS="${OUTPUT}\include" `
 		-DCRYPTO_LIBRARY_DIRS="${OUTPUT}\lib" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}"
-	& $CMake --build . --config Release
-	& $CMake --build . --config Release --target install
+	& $CMake --build . --config Release --verbose
+	& $CMake --build . --config Release --target install --verbose
 	"cbor.dll", "crypto-46.dll" | %{ Copy-Item "${OUTPUT}\bin\$_" `
 		-Destination "examples\Release" }
 }
