@@ -122,7 +122,7 @@ Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}) {
 
 	Push-Location .\${LIBRESSL}
 	& $CMake ..\..\${LIBRESSL} -G "${GENERATOR}" -A "${ARCH}" `
-		-DCMAKE_C_FLAGS_RELEASE="/Zi" `
+		-DCMAKE_C_FLAGS_RELEASE="/Zi /guard:cf /sdl" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" -DBUILD_SHARED_LIBS=ON `
 		-DLIBRESSL_TESTS=OFF
 	& $CMake --build . --config Release
@@ -136,7 +136,7 @@ Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}) {
 	Push-Location .\${LIBCBOR}
 	& $CMake ..\..\${LIBCBOR} -G "${GENERATOR}" -A "${ARCH}" `
 		-DBUILD_SHARED_LIBS=ON `
-		-DCMAKE_C_FLAGS_RELEASE="/Zi" `
+		-DCMAKE_C_FLAGS_RELEASE="/Zi /guard:cf /sdl" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}"
 	& $CMake --build . --config Release
 	& $CMake --build . --config Release --target install
