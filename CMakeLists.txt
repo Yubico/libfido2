@@ -148,6 +148,8 @@ else()
 	if(HAVE_STACK_PROTECTOR_ALL)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-all")
 	endif()
+	# fortify only works with -O2 and higher, so only enable for release builds
+	set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -D_FORTIFY_SOURCE=2")
 
 	add_definitions(-D_DEFAULT_SOURCE)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
