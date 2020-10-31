@@ -114,6 +114,10 @@ void fido_log_xxd(const void *, size_t);
 #endif /* __GNUC__ */
 #endif /* FIDO_NO_DIAGNOSTIC */
 
+/* hid */
+int fido_hid_get_usage(const uint8_t *, size_t, uint32_t *);
+int fido_hid_get_report_len(const uint8_t *, size_t, size_t *, size_t *);
+
 /* u2f */
 int u2f_register(fido_dev_t *, fido_cred_t *, int);
 int u2f_authenticate(fido_dev_t *, fido_assert_t *, int);
