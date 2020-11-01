@@ -187,6 +187,8 @@
 		fido_dev_set_transport_functions;
 		fido_dev_supports_cred_prot;
 		fido_dev_supports_pin;
+		fido_hid_get_report_len;
+		fido_hid_get_usage;
 		fido_init;
 		fido_set_log_handler;
 		fido_strerr;

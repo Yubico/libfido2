@@ -2,11 +2,11 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-IMAGE		:= libfido2-coverage:1.5.1
+IMAGE		:= libfido2-coverage:1.5.2
 RUNNER		:= libfido2-runner
 PROFDATA	:= llvm-profdata-10
 COV		:= llvm-cov-10
-TARGETS		:= fuzz_assert fuzz_bio fuzz_cred fuzz_credman fuzz_mgmt
+TARGETS		:= fuzz_assert fuzz_bio fuzz_cred fuzz_credman fuzz_hid fuzz_mgmt
 CORPORA		:= $(foreach f,${TARGETS},${f}/corpus)
 MINIFY		:= $(foreach f,${TARGETS},/minify/${f}/corpus)
 REMOTE		:= gs://libfido2-corpus.clusterfuzz-external.appspot.com
