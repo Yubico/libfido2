@@ -397,6 +397,91 @@ cbor_flatten_vector(cbor_item_t *argv[], size_t argc)
 	return (map);
 }
 
+#ifndef NDEBUG
+static int ctap_check_map(const cbor_item_t *, const cbor_item_t *, void *);
+
+static int
+ctap_check_int(const cbor_item_t *item)
+{
+	uint64_t	val;
+
+	val = cbor_get_int(item);
+
+	/* integers must be encoded as small as possible */
+	switch (cbor_int_get_width(item)) {
+	case CBOR_INT_16:
+		if (val > UINT8_MAX)
+			return (0);
+		return (-1);
+	case CBOR_INT_32:
+		if (val > UINT16_MAX)
+			return (0);
+		return (-1);
+	case CBOR_INT_64:
+		if (val > UINT32_MAX)
+			return (0);
+		return (-1);
+	default:
+		return (0);
+	}
+}
+
+static int
+ctap_check_item(const cbor_item_t *item, void *arg)
+{
+	(void)arg; /* unused */
+
+	if (cbor_isa_array(item)) {
+		if (cbor_array_is_indefinite(item)) {
+			fido_log_debug("%s: cbor_array_is_indefinite", __func__);
+			return (-1);
+		}
+
+		/* recurse; check all items of the array */
+		return (cbor_array_iter(item, NULL, ctap_check_item));
+	}
+
+	if (cbor_isa_map(item)) {
+		if (cbor_map_is_indefinite(item)) {
+			fido_log_debug("%s: cbor_map_is_indefinite", __func__);
+			return (-1);
+		}
+
+		/* recurse; check all values in the map, cbor_map_iter() calls
+		 * ctap_check_map_keys() which validates keys for us */
+		return (cbor_map_iter(item, NULL, ctap_check_map));
+	}
+
+	if (cbor_isa_string(item) &&
+	    cbor_string_is_indefinite(item)) {
+		fido_log_debug("%s: cbor_string_is_indefinite", __func__);
+		return (-1);
+	}
+
+	if (cbor_isa_bytestring(item) &&
+	    cbor_bytestring_is_indefinite(item)) {
+		fido_log_debug("%s: cbor_bytestring_is_indefinite", __func__);
+		return (-1);
+	}
+
+	if (cbor_is_int(item) &&
+	    ctap_check_int(item) < 0) {
+		fido_log_debug("%s: ctap_check_int", __func__);
+		return (-1);
+	}
+
+	return (0);
+}
+
+static int
+ctap_check_map(const cbor_item_t *key, const cbor_item_t *val, void *arg)
+{
+	(void)key; /* unused, key ordering checked by cbor_map_iter() */
+
+	return (ctap_check_item(val, arg));
+}
+#endif
+
 int
 cbor_build_frame(uint8_t cmd, cbor_item_t *argv[], size_t argc, fido_blob_t *f)
 {
@@ -408,6 +493,12 @@ cbor_build_frame(uint8_t cmd, cbor_item_t *argv[], size_t argc, fido_blob_t *f)
 
 	if ((flat = cbor_flatten_vector(argv, argc)) == NULL)
 		goto fail;
+
+#ifndef NDEBUG
+	/* recursively check the ctap canonical encoding form */
+	if (cbor_map_iter(flat, NULL, ctap_check_map) < 0)
+		goto fail;
+#endif
 
 	cbor_len = cbor_serialize_alloc(flat, &cbor, &cbor_alloc_len);
 	if (cbor_len == 0 || cbor_len == SIZE_MAX) {
