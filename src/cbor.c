@@ -576,16 +576,16 @@ cbor_encode_extensions(const fido_cred_ext_t *ext)
 	if (size == 0 || (item = cbor_new_definite_map(size)) == NULL)
 		return (NULL);
 
-	if (ext->mask & FIDO_EXT_HMAC_SECRET) {
-		if (cbor_add_bool(item, "hmac-secret", FIDO_OPT_TRUE) < 0) {
-			cbor_decref(&item);
-			return (NULL);
-		}
-	}
 	if (ext->mask & FIDO_EXT_CRED_PROTECT) {
 		if (ext->prot < 0 || ext->prot > UINT8_MAX ||
 		    cbor_add_uint8(item, "credProtect",
 		    (uint8_t)ext->prot) < 0) {
+			cbor_decref(&item);
+			return (NULL);
+		}
+	}
+	if (ext->mask & FIDO_EXT_HMAC_SECRET) {
+		if (cbor_add_bool(item, "hmac-secret", FIDO_OPT_TRUE) < 0) {
 			cbor_decref(&item);
 			return (NULL);
 		}
