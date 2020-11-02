@@ -27,7 +27,7 @@ check_key_type(cbor_item_t *item)
  * Validate CTAP2 canonical CBOR encoding rules for maps.
  */
 static int
-ctap_check_cbor(cbor_item_t *prev, cbor_item_t *curr)
+ctap_check_map_keys(cbor_item_t *prev, cbor_item_t *curr)
 {
 	size_t	curr_len;
 	size_t	prev_len;
@@ -81,8 +81,8 @@ cbor_map_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
 			    __func__, (void *)v[i].key, (void *)v[i].value, i);
 			return (-1);
 		}
-		if (i && ctap_check_cbor(v[i - 1].key, v[i].key) < 0) {
-			fido_log_debug("%s: ctap_check_cbor", __func__);
+		if (i && ctap_check_map_keys(v[i - 1].key, v[i].key) < 0) {
+			fido_log_debug("%s: ctap_check_map_keys", __func__);
 			return (-1);
 		}
 		if (f(v[i].key, v[i].value, arg) < 0) {
