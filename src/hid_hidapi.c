@@ -104,8 +104,8 @@ get_report_descriptor(const char *path, struct hidraw_report_descriptor *hrd)
 	int s = -1;
 	int ok = -1;
 
-	if ((fd = open(path, O_RDONLY)) < 0) {
-		fido_log_debug("%s: open", __func__);
+	if ((fd = fido_hid_unix_open(path)) == -1) {
+		fido_log_debug("%s: fido_hid_unix_open", __func__);
 		return -1;
 	}
 

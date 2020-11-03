@@ -42,18 +42,12 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 	for (i = *olen = 0; i < MAX_UHID && *olen < ilen; i++) {
 		snprintf(path, sizeof(path), "/dev/fido/%zu", i);
-		if ((fd = open(path, O_RDWR)) == -1) {
-			if (errno != ENOENT && errno != ENXIO) {
-				fido_log_debug("%s: open %s: %s", __func__,
-				    path, strerror(errno));
-			}
+		if ((fd = fido_hid_unix_open(path)) == -1)
 			continue;
-		}
-
 		memset(&udi, 0, sizeof(udi));
 		if (ioctl(fd, USB_GET_DEVICEINFO, &udi) != 0) {
-			fido_log_debug("%s: get device info %s: %s", __func__,
-			    path, strerror(errno));
+			fido_log_debug("%s: get device info %s: %d", __func__,
+			    path, errno);
 			close(fd);
 			continue;
 		}
@@ -127,7 +121,7 @@ terrible_ping_kludge(struct hid_openbsd *ctx)
 		pfd.fd = ctx->fd;
 		pfd.events = POLLIN;
 		if ((n = poll(&pfd, 1, 100)) == -1) {
-			fido_log_debug("%s: poll: %s", __func__, strerror(errno));
+			fido_log_debug("%s: poll: %d", __func__, errno);
 			return -1;
 		} else if (n == 0) {
 			fido_log_debug("%s: timed out", __func__);
@@ -154,7 +148,7 @@ fido_hid_open(const char *path)
 	struct hid_openbsd *ret = NULL;
 
 	if ((ret = calloc(1, sizeof(*ret))) == NULL ||
-	    (ret->fd = open(path, O_RDWR)) < 0) {
+	    (ret->fd = fido_hid_unix_open(path)) == -1) {
 		free(ret);
 		return (NULL);
 	}
@@ -198,7 +192,7 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 	if ((r = read(ctx->fd, buf, len)) == -1 || (size_t)r != len) {
-		fido_log_debug("%s: read: %s", __func__, strerror(errno));
+		fido_log_debug("%s: read: %d", __func__, errno);
 		return (-1);
 	}
 	return ((int)len);
@@ -217,7 +211,7 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 	}
 	if ((r = write(ctx->fd, buf + 1, len - 1)) == -1 ||
 	    (size_t)r != len - 1) {
-		fido_log_debug("%s: write: %s", __func__, strerror(errno));
+		fido_log_debug("%s: write: %d", __func__, errno);
 		return (-1);
 	}
 	return ((int)len);
