@@ -52,6 +52,8 @@ list(APPEND MAN_ALIAS
 	es256_pk_new es256_pk_to_EVP_PKEY
 	fido_assert_new fido_assert_authdata_len
 	fido_assert_new fido_assert_authdata_ptr
+	fido_assert_new fido_assert_blob_len
+	fido_assert_new fido_assert_blob_ptr
 	fido_assert_new fido_assert_clientdata_hash_len
 	fido_assert_new fido_assert_clientdata_hash_ptr
 	fido_assert_new fido_assert_count
