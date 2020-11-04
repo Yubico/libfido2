@@ -7,6 +7,10 @@ cmake_policy(SET CMP0025 NEW)
 
 project(libfido2 C)
 cmake_minimum_required(VERSION 3.0)
+# Set PIE flags for POSITION_INDEPENDENT_CODE targets, added in CMake 3.14.
+if(POLICY CMP0083)
+  cmake_policy(SET CMP0083 NEW)
+endif()
 
 include(CheckCCompilerFlag)
 include(CheckFunctionExists)
@@ -15,11 +19,14 @@ include(CheckSymbolExists)
 include(CheckIncludeFiles)
 include(CheckTypeSize)
 include(GNUInstallDirs)
+include(CheckPIESupported OPTIONAL RESULT_VARIABLE CHECK_PIE_SUPPORTED)
+if(CHECK_PIE_SUPPORTED)
+  check_pie_supported(LANGUAGES C)
+endif()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_COLOR_MAKEFILE OFF)
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 set(FIDO_MAJOR "1")
 set(FIDO_MINOR "5")
 set(FIDO_PATCH "0")
