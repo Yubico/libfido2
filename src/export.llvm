@@ -77,6 +77,7 @@ _fido_cbor_info_extensions_len
 _fido_cbor_info_extensions_ptr
 _fido_cbor_info_free
 _fido_cbor_info_maxmsgsiz
+_fido_cbor_info_maxcredbloblen
 _fido_cbor_info_maxcredcntlst
 _fido_cbor_info_maxcredidlen
 _fido_cbor_info_fwversion
