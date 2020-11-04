@@ -186,6 +186,7 @@ uint8_t  fido_dev_flags(const fido_dev_t *);
 int16_t  fido_dev_info_vendor(const fido_dev_info_t *);
 int16_t  fido_dev_info_product(const fido_dev_info_t *);
 uint64_t fido_cbor_info_maxmsgsiz(const fido_cbor_info_t *);
+uint64_t fido_cbor_info_maxcredbloblen(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_maxcredcntlst(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_maxcredidlen(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_fwversion(const fido_cbor_info_t *);

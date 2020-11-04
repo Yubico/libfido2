@@ -202,6 +202,7 @@ typedef struct fido_cbor_info {
 	uint64_t          maxcredcntlst; /* max number of credentials in list */
 	uint64_t          maxcredidlen;  /* max credential ID length */
 	uint64_t          fwversion;     /* firmware version */
+	uint64_t          maxcredbloblen; /* max credBlob length */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {
