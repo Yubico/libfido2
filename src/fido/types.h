@@ -148,16 +148,21 @@ typedef struct fido_cred {
 	fido_blob_t       blob;          /* FIDO 2.1 credBlob */
 } fido_cred_t;
 
+typedef struct fido_assert_extattr {
+	int         mask;            /* decoded extensions */
+	fido_blob_t hmac_secret_enc; /* hmac secret, encrypted */
+	fido_blob_t blob;            /* decoded FIDO 2.1 credBlob */
+} fido_assert_extattr_t;
+
 typedef struct _fido_assert_stmt {
-	fido_blob_t     id;              /* credential id */
-	fido_user_t     user;            /* user attributes */
-	fido_blob_t     hmac_secret_enc; /* hmac secret, encrypted */
-	fido_blob_t     hmac_secret;     /* hmac secret */
-	int             authdata_ext;    /* decoded extensions */
-	fido_blob_t     authdata_cbor;   /* raw cbor payload */
-	fido_authdata_t authdata;        /* decoded authdata payload */
-	fido_blob_t     sig;             /* signature of cdh + authdata */
-	fido_blob_t     largeblob_key;   /* decoded large blob key */
+	fido_blob_t           id;            /* credential id */
+	fido_user_t           user;          /* user attributes */
+	fido_blob_t           hmac_secret;   /* hmac secret */
+	fido_assert_extattr_t authdata_ext;  /* decoded extensions */
+	fido_blob_t           authdata_cbor; /* raw cbor payload */
+	fido_authdata_t       authdata;      /* decoded authdata payload */
+	fido_blob_t           sig;           /* signature of cdh + authdata */
+	fido_blob_t           largeblob_key; /* decoded large blob key */
 } fido_assert_stmt;
 
 typedef struct fido_assert_ext {

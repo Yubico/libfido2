@@ -64,8 +64,7 @@ parse_assert_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (cbor_decode_cred_id(val, &stmt->id));
 	case 2: /* authdata */
 		return (cbor_decode_assert_authdata(val, &stmt->authdata_cbor,
-		    &stmt->authdata, &stmt->authdata_ext,
-		    &stmt->hmac_secret_enc));
+		    &stmt->authdata, &stmt->authdata_ext));
 	case 3: /* signature */
 		return (fido_blob_decode(val, &stmt->sig));
 	case 4: /* user attributes */
@@ -265,8 +264,9 @@ decrypt_hmac_secrets(const fido_dev_t *dev, fido_assert_t *assert,
 {
 	for (size_t i = 0; i < assert->stmt_cnt; i++) {
 		fido_assert_stmt *stmt = &assert->stmt[i];
-		if (stmt->hmac_secret_enc.ptr != NULL) {
-			if (aes256_cbc_dec(dev, key, &stmt->hmac_secret_enc,
+		if (stmt->authdata_ext.hmac_secret_enc.ptr != NULL) {
+			if (aes256_cbc_dec(dev, key,
+			    &stmt->authdata_ext.hmac_secret_enc,
 			    &stmt->hmac_secret) < 0) {
 				fido_log_debug("%s: aes256_cbc_dec %zu",
 				    __func__, i);
@@ -559,7 +559,7 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 		goto out;
 	}
 
-	if (check_extensions(stmt->authdata_ext, assert->ext.mask) < 0) {
+	if (check_extensions(stmt->authdata_ext.mask, assert->ext.mask) < 0) {
 		fido_log_debug("%s: check_extensions", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
 		goto out;
@@ -759,6 +759,13 @@ fido_assert_reset_tx(fido_assert_t *assert)
 	assert->uv = FIDO_OPT_OMIT;
 }
 
+static void fido_assert_reset_extattr(fido_assert_extattr_t *ext)
+{
+	fido_blob_reset(&ext->hmac_secret_enc);
+	fido_blob_reset(&ext->blob);
+	memset(ext, 0, sizeof(*ext));
+}
+
 void
 fido_assert_reset_rx(fido_assert_t *assert)
 {
@@ -769,10 +776,10 @@ fido_assert_reset_rx(fido_assert_t *assert)
 		fido_blob_reset(&assert->stmt[i].user.id);
 		fido_blob_reset(&assert->stmt[i].id);
 		fido_blob_reset(&assert->stmt[i].hmac_secret);
-		fido_blob_reset(&assert->stmt[i].hmac_secret_enc);
 		fido_blob_reset(&assert->stmt[i].authdata_cbor);
 		fido_blob_reset(&assert->stmt[i].largeblob_key);
 		fido_blob_reset(&assert->stmt[i].sig);
+		fido_assert_reset_extattr(&assert->stmt[i].authdata_ext);
 		memset(&assert->stmt[i], 0, sizeof(assert->stmt[i]));
 	}
 	free(assert->stmt);
@@ -959,12 +966,29 @@ fido_assert_largeblob_key_len(const fido_assert_t *assert, size_t idx)
 	return (assert->stmt[idx].largeblob_key.len);
 }
 
+const unsigned char *
+fido_assert_blob_ptr(const fido_assert_t *assert, size_t idx)
+{
+	if (idx >= assert->stmt_len)
+		return (NULL);
+
+	return (assert->stmt[idx].authdata_ext.blob.ptr);
+}
+
+size_t
+fido_assert_blob_len(const fido_assert_t *assert, size_t idx)
+{
+	if (idx >= assert->stmt_len)
+		return (0);
+
+	return (assert->stmt[idx].authdata_ext.blob.len);
+}
+
 static void
 fido_assert_clean_authdata(fido_assert_stmt *stmt)
 {
 	fido_blob_reset(&stmt->authdata_cbor);
-	fido_blob_reset(&stmt->hmac_secret_enc);
-	memset(&stmt->authdata_ext, 0, sizeof(stmt->authdata_ext));
+	fido_assert_reset_extattr(&stmt->authdata_ext);
 	memset(&stmt->authdata, 0, sizeof(stmt->authdata));
 }
 
@@ -990,7 +1014,7 @@ fido_assert_set_authdata(fido_assert_t *assert, size_t idx,
 	}
 
 	if (cbor_decode_assert_authdata(item, &stmt->authdata_cbor,
-	    &stmt->authdata, &stmt->authdata_ext, &stmt->hmac_secret_enc) < 0) {
+	    &stmt->authdata, &stmt->authdata_ext) < 0) {
 		fido_log_debug("%s: cbor_decode_assert_authdata", __func__);
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
@@ -1028,7 +1052,7 @@ fido_assert_set_authdata_raw(fido_assert_t *assert, size_t idx,
 	}
 
 	if (cbor_decode_assert_authdata(item, &stmt->authdata_cbor,
-	    &stmt->authdata, &stmt->authdata_ext, &stmt->hmac_secret_enc) < 0) {
+	    &stmt->authdata, &stmt->authdata_ext) < 0) {
 		fido_log_debug("%s: cbor_decode_assert_authdata", __func__);
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
