@@ -170,6 +170,7 @@ list(APPEND MAN_ALIAS
 	fido_credman_metadata_new fido_credman_rp_name
 	fido_credman_metadata_new fido_credman_rp_new
 	fido_cred_set_authdata fido_cred_set_authdata_raw
+	fido_cred_set_authdata fido_cred_set_blob
 	fido_cred_set_authdata fido_cred_set_clientdata_hash
 	fido_cred_set_authdata fido_cred_set_extensions
 	fido_cred_set_authdata fido_cred_set_fmt

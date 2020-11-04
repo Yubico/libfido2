@@ -571,11 +571,13 @@ cbor_encode_largeblob_key_ext(cbor_item_t *map)
 }
 
 cbor_item_t *
-cbor_encode_cred_ext(const fido_cred_ext_t *ext)
+cbor_encode_cred_ext(const fido_cred_ext_t *ext, const fido_blob_t *blob)
 {
 	cbor_item_t *item = NULL;
 	size_t size = 0;
 
+	if (ext->mask & FIDO_EXT_CRED_BLOB)
+		size++;
 	if (ext->mask & FIDO_EXT_HMAC_SECRET)
 		size++;
 	if (ext->mask & FIDO_EXT_CRED_PROTECT)
@@ -586,6 +588,13 @@ cbor_encode_cred_ext(const fido_cred_ext_t *ext)
 	if (size == 0 || (item = cbor_new_definite_map(size)) == NULL)
 		return (NULL);
 
+	if (ext->mask & FIDO_EXT_CRED_BLOB) {
+		if (cbor_add_bytestring(item, "credBlob", blob->ptr,
+		    blob->len) < 0) {
+			cbor_decref(&item);
+			return (NULL);
+		}
+	}
 	if (ext->mask & FIDO_EXT_CRED_PROTECT) {
 		if (ext->prot < 0 || ext->prot > UINT8_MAX ||
 		    cbor_add_uint8(item, "credProtect",
@@ -1114,6 +1123,15 @@ decode_extension(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		}
 		authdata_ext->mask |= FIDO_EXT_CRED_PROTECT;
 		authdata_ext->prot = cbor_get_uint8(val);
+	} else if (strcmp(type, "credBlob") == 0) {
+		if (cbor_isa_float_ctrl(val) == false ||
+		    cbor_float_get_width(val) != CBOR_FLOAT_0 ||
+		    cbor_is_bool(val) == false) {
+			fido_log_debug("%s: cbor type", __func__);
+			goto out;
+		}
+		if (cbor_ctrl_value(val) == CBOR_CTRL_TRUE)
+			authdata_ext->mask |= FIDO_EXT_CRED_BLOB;
 	}
 
 	ok = 0;

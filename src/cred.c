@@ -81,7 +81,8 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 
 	/* extensions */
 	if (cred->ext.mask)
-		if ((argv[5] = cbor_encode_cred_ext(&cred->ext)) == NULL) {
+		if ((argv[5] = cbor_encode_cred_ext(&cred->ext,
+		    &cred->blob)) == NULL) {
 			fido_log_debug("%s: cbor_encode_cred_ext", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
@@ -494,6 +495,9 @@ fido_cred_reset_tx(fido_cred_t *cred)
 	memset(&cred->rp, 0, sizeof(cred->rp));
 	memset(&cred->user, 0, sizeof(cred->user));
 	memset(&cred->excl, 0, sizeof(cred->excl));
+
+	fido_blob_reset(&cred->blob);
+
 	memset(&cred->ext, 0, sizeof(cred->ext));
 
 	cred->type = 0;
@@ -837,6 +841,19 @@ fido_cred_set_prot(fido_cred_t *cred, int prot)
 		cred->ext.mask |= FIDO_EXT_CRED_PROTECT;
 		cred->ext.prot = prot;
 	}
+
+	return (FIDO_OK);
+}
+
+int
+fido_cred_set_blob(fido_cred_t *cred, const unsigned char *ptr, size_t len)
+{
+	if (ptr == NULL || len == 0)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+	if (fido_blob_set(&cred->blob, ptr, len) < 0)
+		return (FIDO_ERR_INTERNAL);
+
+	cred->ext.mask |= FIDO_EXT_CRED_BLOB;
 
 	return (FIDO_OK);
 }

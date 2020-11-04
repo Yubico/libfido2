@@ -145,6 +145,7 @@ typedef struct fido_cred {
 	fido_attcred_t    attcred;       /* returned credential (key + id) */
 	fido_attstmt_t    attstmt;       /* attestation statement (x509 + sig) */
 	fido_blob_t       largeblob_key; /* decoded large blob key */
+	fido_blob_t       blob;          /* FIDO 2.1 credBlob */
 } fido_cred_t;
 
 typedef struct _fido_assert_stmt {
