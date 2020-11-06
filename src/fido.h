@@ -183,6 +183,7 @@ bool fido_dev_has_pin(const fido_dev_t *);
 bool fido_dev_is_fido2(const fido_dev_t *);
 bool fido_dev_supports_pin(const fido_dev_t *);
 bool fido_dev_supports_cred_prot(const fido_dev_t *);
+bool fido_dev_supports_credman(const fido_dev_t *);
 
 #ifdef __cplusplus
 } /* extern "C" */
