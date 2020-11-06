@@ -88,6 +88,7 @@ product NXP		0xf143	GoTrust Idem Key
 
 product FLIRC		0x4287	Nitrokey FIDO U2F
 product FLIRC		0x42b1	Nitrokey FIDO2
+product FLIRC		0x42b2	Nitrokey 3C NFC
 product FLIRC		0x42b3	Safetech SafeKey
 
 product ALLADIN		0x0101	JaCarta U2F
