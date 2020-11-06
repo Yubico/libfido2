@@ -136,6 +136,9 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="20a0", ATTRS{idProduct
 # Nitrokey FIDO2 by Flirc
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="42b1", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
+# Nitrokey 3C NFC by Flirc
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="42b2", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
 # Safetech SafeKey by Flirc
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="42b3", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
