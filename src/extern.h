@@ -167,6 +167,7 @@ uint32_t uniform_random(uint32_t);
 #define FIDO_DEV_PIN_SET	0x01
 #define FIDO_DEV_PIN_UNSET	0x02
 #define FIDO_DEV_CRED_PROT	0x04
+#define FIDO_DEV_CREDMAN	0x08
 
 /* miscellanea */
 #define FIDO_DUMMY_CLIENTDATA	""

@@ -72,6 +72,10 @@ fido_dev_set_flags(fido_dev_t *dev, const fido_cbor_info_t *info)
 				dev->flags |= FIDO_DEV_PIN_SET;
 			else
 				dev->flags |= FIDO_DEV_PIN_UNSET;
+		} else if (strcmp(ptr[i], "credMgmt") == 0 ||
+			   strcmp(ptr[i], "credentialMgmtPreview") == 0) {
+			if (val[i] == true)
+				dev->flags |= FIDO_DEV_CREDMAN;
 		}
 }
 
@@ -575,6 +579,12 @@ bool
 fido_dev_supports_cred_prot(const fido_dev_t *dev)
 {
 	return (dev->flags & FIDO_DEV_CRED_PROT);
+}
+
+bool
+fido_dev_supports_credman(const fido_dev_t *dev)
+{
+	return (dev->flags & FIDO_DEV_CREDMAN);
 }
 
 void

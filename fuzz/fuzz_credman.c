@@ -227,6 +227,8 @@ prepare_dev(void)
 	consume(&x, sizeof(x));
 	x = fido_dev_supports_cred_prot(dev);
 	consume(&x, sizeof(x));
+	x = fido_dev_supports_credman(dev);
+	consume(&x, sizeof(x));
 
 	return dev;
 }
