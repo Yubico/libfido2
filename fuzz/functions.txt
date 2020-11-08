@@ -328,7 +328,7 @@ fido_dev_unregister_manifest_func           7       7   0.00%        13      13 
 fido_dev_info_manifest                     17      17   0.00%        24      24   0.00%
 fido_dev_open_with_info                     5       5   0.00%         6       6   0.00%
 fido_dev_open                               1       0 100.00%         3       0 100.00%
-fido_dev_close                              8       2  75.00%         9       0 100.00%
+fido_dev_close                              9       2  77.78%        10       0 100.00%
 fido_dev_cancel                            11       0 100.00%         9       0 100.00%
 fido_dev_get_touch_begin                   50       0 100.00%        68       0 100.00%
 fido_dev_get_touch_status                  17       0 100.00%        25       0 100.00%
@@ -336,7 +336,7 @@ fido_dev_set_io_functions                  18       4  77.78%        17       6 
 fido_dev_set_transport_functions            6       6   0.00%        11      11   0.00%
 fido_init                                   7       1  85.71%         4       0 100.00%
 fido_dev_new                                5       0 100.00%        16       0 100.00%
-fido_dev_new_with_info                     19      19   0.00%        27      27   0.00%
+fido_dev_new_with_info                     19      19   0.00%        26      26   0.00%
 fido_dev_free                               6       0 100.00%        11       0 100.00%
 fido_dev_protocol                           1       0 100.00%         3       0 100.00%
 fido_dev_major                              1       0 100.00%         3       0 100.00%
@@ -347,16 +347,17 @@ fido_dev_is_fido2                           2       0 100.00%         3       0 
 fido_dev_supports_pin                       3       0 100.00%         3       0 100.00%
 fido_dev_has_pin                            2       0 100.00%         3       0 100.00%
 fido_dev_supports_cred_prot                 2       0 100.00%         3       0 100.00%
+fido_dev_supports_credman                   2       0 100.00%         3       0 100.00%
 fido_dev_force_u2f                          2       0 100.00%         4       0 100.00%
 fido_dev_force_fido2                        2       2   0.00%         3       3   0.00%
 dev.c:find_manifest_func_node               5       5   0.00%         9       9   0.00%
 dev.c:fido_dev_open_wait                   10       0 100.00%         9       0 100.00%
-dev.c:fido_dev_open_tx                     51      13  74.51%        63      23  63.49%
+dev.c:fido_dev_open_tx                     56      15  73.21%        68      26  61.76%
 dev.c:set_random_report_len                11       0 100.00%         6       0 100.00%
 dev.c:fido_dev_open_rx                     33       0 100.00%        56       0 100.00%
-dev.c:fido_dev_set_flags                   17       0 100.00%        24       0 100.00%
+dev.c:fido_dev_set_flags                   25       0 100.00%        28       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     332      91  72.59%       462     140  69.70%
+TOTAL                                     348      93  73.28%       474     142  70.04%
 
 File '/libfido2/src/ecdh.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -420,6 +421,8 @@ Name                                  Regions    Miss   Cover     Lines    Miss 
 File '/libfido2/src/hid.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
 ---------------------------------------------------------------------------------------
+fido_hid_get_usage                         13       0 100.00%        28       0 100.00%
+fido_hid_get_report_len                    19       0 100.00%        33       0 100.00%
 fido_dev_info_new                           1       1   0.00%         3       3   0.00%
 fido_dev_info_free                          9       9   0.00%        17      17   0.00%
 fido_dev_info_ptr                           1       1   0.00%         3       3   0.00%
@@ -428,33 +431,39 @@ fido_dev_info_vendor                        1       1   0.00%         3       3 
 fido_dev_info_product                       1       1   0.00%         3       3   0.00%
 fido_dev_info_manufacturer_string           1       1   0.00%         3       3   0.00%
 fido_dev_info_product_string                1       1   0.00%         3       3   0.00%
+hid.c:get_key_len                           6       0 100.00%        14       0 100.00%
+hid.c:get_key_val                           6       0 100.00%        20       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                      16      16   0.00%        38      38   0.00%
+TOTAL                                      60      16  73.33%       133      38  71.43%
 
 File '/libfido2/src/hid_linux.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
 ---------------------------------------------------------------------------------------
 fido_hid_manifest                          35      35   0.00%        50      50   0.00%
-fido_hid_open                              17      17   0.00%        22      22   0.00%
+fido_hid_open                              17      17   0.00%        23      23   0.00%
 fido_hid_close                              1       1   0.00%         6       6   0.00%
 fido_hid_read                              12      12   0.00%        21      21   0.00%
 fido_hid_write                              9       9   0.00%        16      16   0.00%
 fido_hid_report_in_len                      1       1   0.00%         5       5   0.00%
 fido_hid_report_out_len                     1       1   0.00%         5       5   0.00%
 hid_linux.c:copy_info                      30      30   0.00%        52      52   0.00%
-hid_linux.c:is_fido                         9       9   0.00%        23      23   0.00%
-hid_linux.c:get_usage_info                 16      16   0.00%        30      30   0.00%
-hid_linux.c:get_key_len                     6       6   0.00%        14      14   0.00%
-hid_linux.c:get_key_val                     6       6   0.00%        20      20   0.00%
+hid_linux.c:is_fido                         8       8   0.00%        18      18   0.00%
 hid_linux.c:get_parent_attr                 6       6   0.00%        11      11   0.00%
 hid_linux.c:parse_uevent                   12      12   0.00%        28      28   0.00%
 hid_linux.c:get_usb_attr                    1       1   0.00%         3       3   0.00%
 hid_linux.c:get_report_descriptor          11      11   0.00%        18      18   0.00%
-hid_linux.c:get_report_sizes               19      19   0.00%        33      33   0.00%
-hid_linux.c:waitfd                         28      28   0.00%        43      43   0.00%
-hid_linux.c:timespec_to_ms                 15      15   0.00%        16      16   0.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     235     235   0.00%       416     416   0.00%
+TOTAL                                     144     144   0.00%       256     256   0.00%
+
+File '/libfido2/src/hid_unix.c':
+Name                                  Regions    Miss   Cover     Lines    Miss   Cover
+---------------------------------------------------------------------------------------
+fido_hid_unix_open                         14      14   0.00%        28      28   0.00%
+fido_hid_unix_wait                         28      28   0.00%        44      44   0.00%
+hid_unix.c:xstrerror                        6       6   0.00%         9       9   0.00%
+hid_unix.c:timespec_to_ms                  15      15   0.00%        16      16   0.00%
+---------------------------------------------------------------------------------------
+TOTAL                                      63      63   0.00%        97      97   0.00%
 
 File '/libfido2/src/info.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
