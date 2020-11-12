@@ -52,3 +52,16 @@ jobs:
         CC: ${{ matrix.cc }}
       run: |
         /bin/sh -eux .actions/build-linux-${CC%-*}
+
+    - uses: nevun/action-checksec@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_COMMENT_URL: ${{ github.event.pull_request.comments_url }}
+      with:
+        executables: |
+          "/usr/local/bin/fido2-cred"
+          "/usr/local/bin/fido2-assert"
+          "/usr/local/bin/fido2-token"
+        libraries: |
+          "/usr/local/lib/libfido2.so"
+        print_flag_table: "on"
