@@ -59,14 +59,14 @@ is_fido(int fd)
 	if (usage_page != 0xf1d0)
 		return (false);
 
-        /*
+	/*
 	 * This step is not strictly necessary -- NetBSD puts fido
-         * devices into raw mode automatically by default, but in
-         * principle that might change, and this serves as a test to
-         * verify that we're running on a kernel with support for raw
-         * mode at all so we don't get confused issuing writes that try
-         * to set the report descriptor rather than transfer data on
-         * the output interrupt pipe as we need.
+	 * devices into raw mode automatically by default, but in
+	 * principle that might change, and this serves as a test to
+	 * verify that we're running on a kernel with support for raw
+	 * mode at all so we don't get confused issuing writes that try
+	 * to set the report descriptor rather than transfer data on
+	 * the output interrupt pipe as we need.
 	 */
 	if (ioctl(fd, USB_HID_SET_RAW, &raw) == -1) {
 		fido_log_debug("%s: unable to set raw", __func__);
