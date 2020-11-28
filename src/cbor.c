@@ -881,9 +881,7 @@ cbor_encode_hmac_secret_param(const fido_blob_t *ecdh, const es256_pk_t *pk,
 	}
 
 fail:
-	for (size_t i = 0; i < 3; i++)
-		if (argv[i] != NULL)
-			cbor_decref(&argv[i]);
+	cbor_vector_free(argv, nitems(argv));
 
 	if (param != NULL)
 		cbor_decref(&param);
