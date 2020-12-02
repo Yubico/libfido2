@@ -180,7 +180,7 @@ cbor_encode_pin_enc                         4       0 100.00%        12       0 
 cbor_encode_change_pin_auth                39       0 100.00%        60       0 100.00%
 cbor_encode_set_pin_auth                   17       0 100.00%        28       0 100.00%
 cbor_encode_pin_hash_enc                   15       0 100.00%        27       0 100.00%
-cbor_encode_hmac_secret_param              41       1  97.56%        66       4  93.94%
+cbor_encode_hmac_secret_param              37       1  97.30%        64       4  93.75%
 cbor_decode_fmt                             9       0 100.00%        18       0 100.00%
 cbor_decode_pubkey                         21       1  95.24%        32       2  93.75%
 cbor_decode_cred_authdata                  31       1  96.77%        47       3  93.62%
@@ -208,7 +208,7 @@ cbor.c:decode_cred_id_entry                10       0 100.00%        23       0 
 cbor.c:decode_user_entry                   25       0 100.00%        39       0 100.00%
 cbor.c:decode_rp_entity_entry              15       0 100.00%        29       0 100.00%
 ---------------------------------------------------------------------------------------
-TOTAL                                     883       7  99.21%      1364      20  98.53%
+TOTAL                                     879       7  99.20%      1362      20  98.53%
 
 File '/libfido2/src/cred.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
