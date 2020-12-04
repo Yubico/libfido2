@@ -184,16 +184,22 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2c97", ATTRS{idProduct
 # Hypersecu HyperFIDO by Hypersecu Information Systems, Inc.
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2ccf", ATTRS{idProduct}=="0880", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
-# eWBM FIDO2 Goldengate 310 by eWBM Co., Ltd.
+# Trustkey FIDO2 T110 by Trustkey Solutions
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="311f", ATTRS{idProduct}=="a7f9", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# Trustkey FIDO2 T120 by Trustkey Solutions
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="311f", ATTRS{idProduct}=="a6e9", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# Trustkey/eWBM FIDO2 Goldengate G310 by Trustkey Solutions
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="311f", ATTRS{idProduct}=="4a1a", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
-# eWBM FIDO2 Goldengate 320 by eWBM Co., Ltd.
+# Trustkey/eWBM FIDO2 Goldengate G320 by Trustkey Solutions
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="311f", ATTRS{idProduct}=="4c2a", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
-# eWBM FIDO2 Goldengate 500 by eWBM Co., Ltd.
+# eWBM FIDO2 Goldengate G500 by eWBM Co., Ltd.
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="311f", ATTRS{idProduct}=="5c2f", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
-# eWBM FIDO2 Goldengate 450 by eWBM Co., Ltd.
+# eWBM FIDO2 Goldengate G450 by eWBM Co., Ltd.
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="311f", ATTRS{idProduct}=="f47c", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
 # Longmai mFIDO by Unknown vendor
