@@ -71,10 +71,16 @@ Write-Host "GPG: $GPG"
 
 New-Item -Type Directory ${BUILD}
 New-Item -Type Directory ${BUILD}\32
+New-Item -Type Directory ${BUILD}\32\dynamic
+New-Item -Type Directory ${BUILD}\32\static
 New-Item -Type Directory ${BUILD}\64
+New-Item -Type Directory ${BUILD}\64\dynamic
+New-Item -Type Directory ${BUILD}\64\static
 New-Item -Type Directory ${OUTPUT}
 New-Item -Type Directory ${OUTPUT}\pkg\Win64\Release\v142\dynamic
 New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v142\dynamic
+New-Item -Type Directory ${OUTPUT}\pkg\Win64\Release\v142\static
+New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v142\static
 
 Push-Location ${BUILD}
 
@@ -115,57 +121,68 @@ try {
 	Pop-Location
 }
 
-Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}) {
-	if(-Not (Test-Path .\${LIBRESSL})) {
+Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}, ${SHARED}, ${FLAGS}) {
+	if (-Not (Test-Path .\${LIBRESSL})) {
 		New-Item -Type Directory .\${LIBRESSL} -ErrorAction Stop
 	}
 
 	Push-Location .\${LIBRESSL}
-	& $CMake ..\..\${LIBRESSL} -G "${GENERATOR}" -A "${ARCH}" `
-		-DCMAKE_C_FLAGS_RELEASE="/Zi /guard:cf /sdl" `
-		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" -DBUILD_SHARED_LIBS=ON `
-		-DLIBRESSL_TESTS=OFF
+	& $CMake ..\..\..\${LIBRESSL} -G "${GENERATOR}" -A "${ARCH}" `
+		-DBUILD_SHARED_LIBS="${SHARED}" -DLIBRESSL_TESTS=OFF `
+		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
+		-DCMAKE_INSTALL_PREFIX="${OUTPUT}"
 	& $CMake --build . --config Release --verbose
 	& $CMake --build . --config Release --target install --verbose
 	Pop-Location
 
-	if(-Not (Test-Path .\${LIBCBOR})) {
+	if (-Not (Test-Path .\${LIBCBOR})) {
 		New-Item -Type Directory .\${LIBCBOR} -ErrorAction Stop
 	}
 
 	Push-Location .\${LIBCBOR}
-	& $CMake ..\..\${LIBCBOR} -G "${GENERATOR}" -A "${ARCH}" `
-		-DBUILD_SHARED_LIBS=ON `
-		-DCMAKE_C_FLAGS_RELEASE="/Zi /guard:cf /sdl" `
+	& $CMake ..\..\..\${LIBCBOR} -G "${GENERATOR}" -A "${ARCH}" `
+		-DBUILD_SHARED_LIBS="${SHARED}" `
+		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}"
 	& $CMake --build . --config Release --verbose
 	& $CMake --build . --config Release --target install --verbose
 	Pop-Location
 
-	& $CMake ..\.. -G "${GENERATOR}" -A "${ARCH}" `
+	& $CMake ..\..\.. -G "${GENERATOR}" -A "${ARCH}" `
+		-DBUILD_SHARED_LIBS="${SHARED}" `
 		-DCBOR_INCLUDE_DIRS="${OUTPUT}\include" `
 		-DCBOR_LIBRARY_DIRS="${OUTPUT}\lib" `
 		-DCRYPTO_INCLUDE_DIRS="${OUTPUT}\include" `
 		-DCRYPTO_LIBRARY_DIRS="${OUTPUT}\lib" `
+		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}"
 	& $CMake --build . --config Release --verbose
 	& $CMake --build . --config Release --target install --verbose
-	"cbor.dll", "crypto-46.dll" | %{ Copy-Item "${OUTPUT}\bin\$_" `
-		-Destination "examples\Release" }
+	if ("${SHARED}" -eq "ON") {
+		"cbor.dll", "crypto-46.dll" | %{ Copy-Item "${OUTPUT}\bin\$_" `
+			-Destination "examples\Release" }
+	}
 }
 
 Function Package-Headers() {
-	Copy-Item "${OUTPUT}\64\include" -Destination "${OUTPUT}\pkg" `
+	Copy-Item "${OUTPUT}\64\dynamic\include" -Destination "${OUTPUT}\pkg" `
 		-Recurse -ErrorAction Stop
 }
 
-Function Package-Libraries(${SRC}, ${DEST}) {
+Function Package-Dynamic(${SRC}, ${DEST}) {
 	Copy-Item "${SRC}\bin\cbor.dll" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}\lib\cbor.lib" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}\bin\crypto-46.dll" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}\lib\crypto-46.lib" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}\lib\fido2.dll" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}\lib\fido2.lib" "${DEST}" -ErrorAction Stop
+}
+
+Function Package-Static(${SRC}, ${DEST}) {
+	Copy-Item "${SRC}/lib/cbor.lib" "${DEST}" -ErrorAction Stop
+	Copy-Item "${SRC}/lib/crypto-46.lib" "${DEST}" -ErrorAction Stop
+	Copy-Item "${SRC}/lib/fido2_static.lib" "${DEST}/fido2.lib" `
+		-ErrorAction Stop
 }
 
 Function Package-PDBs(${SRC}, ${DEST}) {
@@ -186,20 +203,29 @@ Function Package-Tools(${SRC}, ${DEST}) {
 		"${DEST}\fido2-token.exe" -ErrorAction stop
 }
 
-Push-Location ${BUILD}\64
-Build ${OUTPUT}\64 "Visual Studio 16 2019" "x64"
+Push-Location ${BUILD}\64\dynamic
+Build ${OUTPUT}\64\dynamic "Visual Studio 16 2019" "x64" "ON" "/MD"
+Pop-Location
+Push-Location ${BUILD}\32\dynamic
+Build ${OUTPUT}\32\dynamic "Visual Studio 16 2019" "Win32" "ON" "/MD"
 Pop-Location
 
-Push-Location ${BUILD}\32
-Build ${OUTPUT}\32 "Visual Studio 16 2019" "Win32"
+Push-Location ${BUILD}\64\static
+Build ${OUTPUT}\64\static "Visual Studio 16 2019" "x64" "OFF" "/MT"
+Pop-Location
+Push-Location ${BUILD}\32\static
+Build ${OUTPUT}\32\static "Visual Studio 16 2019" "Win32" "OFF" "/MT"
 Pop-Location
 
 Package-Headers
 
-Package-Libraries ${OUTPUT}\64 ${OUTPUT}\pkg\Win64\Release\v142\dynamic
-Package-PDBs ${BUILD}\64 ${OUTPUT}\pkg\Win64\Release\v142\dynamic
-Package-Tools ${BUILD}\64 ${OUTPUT}\pkg\Win64\Release\v142\dynamic
+Package-Dynamic ${OUTPUT}\64\dynamic ${OUTPUT}\pkg\Win64\Release\v142\dynamic
+Package-PDBs ${BUILD}\64\dynamic ${OUTPUT}\pkg\Win64\Release\v142\dynamic
+Package-Tools ${BUILD}\64\dynamic ${OUTPUT}\pkg\Win64\Release\v142\dynamic
 
-Package-Libraries ${OUTPUT}\32 ${OUTPUT}\pkg\Win32\Release\v142\dynamic
-Package-PDBs ${BUILD}\32 ${OUTPUT}\pkg\Win32\Release\v142\dynamic
-Package-Tools ${BUILD}\32 ${OUTPUT}\pkg\Win32\Release\v142\dynamic
+Package-Dynamic ${OUTPUT}\32\dynamic ${OUTPUT}\pkg\Win32\Release\v142\dynamic
+Package-PDBs ${BUILD}\32\dynamic ${OUTPUT}\pkg\Win32\Release\v142\dynamic
+Package-Tools ${BUILD}\32\dynamic ${OUTPUT}\pkg\Win32\Release\v142\dynamic
+
+Package-Static ${OUTPUT}\64\static ${OUTPUT}\pkg\Win64\Release\v142\static
+Package-Static ${OUTPUT}\32\static ${OUTPUT}\pkg\Win32\Release\v142\static

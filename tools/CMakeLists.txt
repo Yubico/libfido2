@@ -13,9 +13,11 @@ if(WIN32 AND NOT CYGWIN AND NOT MSYS)
 		../openbsd-compat/bsd-getline.c
 		../openbsd-compat/explicit_bzero_win32.c
 		../openbsd-compat/getopt_long.c
-		../openbsd-compat/posix_win.c
 		../openbsd-compat/readpassphrase_win32.c
 	)
+	if (BUILD_SHARED_LIBS)
+		list(APPEND COMPAT_SOURCES ../openbsd-compat/posix_win.c)
+	endif()
 else()
 	list(APPEND COMPAT_SOURCES ../openbsd-compat/readpassphrase.c)
 endif()
