@@ -232,6 +232,11 @@ token_info(int argc, char **argv, char *path)
 	else
 		printf("pin retries: %d\n", retrycnt);
 
+	if (fido_dev_get_uv_retry_count(dev, &retrycnt) != FIDO_OK)
+		printf("uv retries: undefined\n");
+	else
+		printf("uv retries: %d\n", retrycnt);
+
 	bio_info(dev);
 
 	fido_cbor_info_free(&ci);

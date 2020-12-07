@@ -198,6 +198,7 @@ list(APPEND MAN_ALIAS
 	fido_dev_open fido_dev_supports_cred_prot
 	fido_dev_open fido_dev_supports_pin
 	fido_dev_set_pin fido_dev_get_retry_count
+	fido_dev_set_pin fido_dev_get_uv_retry_count
 	fido_dev_set_pin fido_dev_reset
 	rs256_pk_new rs256_pk_free
 	rs256_pk_new rs256_pk_from_ptr

@@ -342,6 +342,23 @@ dev_get_retry_count(const struct param *p)
 	fido_dev_free(&dev);
 }
 
+static void
+dev_get_uv_retry_count(const struct param *p)
+{
+	fido_dev_t *dev;
+	int n = 0;
+
+	set_wire_data(p->retry_wire_data.body, p->retry_wire_data.len);
+
+	if ((dev = prepare_dev()) == NULL)
+		return;
+
+	fido_dev_get_uv_retry_count(dev, &n);
+	consume(&n, sizeof(n));
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+}
+
 void
 test(const struct param *p)
 {
@@ -354,6 +371,7 @@ test(const struct param *p)
 	dev_set_pin(p);
 	dev_change_pin(p);
 	dev_get_retry_count(p);
+	dev_get_uv_retry_count(p);
 }
 
 void

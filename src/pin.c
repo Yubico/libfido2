@@ -398,14 +398,15 @@ fido_dev_set_pin(fido_dev_t *dev, const char *pin, const char *oldpin)
 }
 
 static int
-parse_retry_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
+parse_retry_count(const uint8_t keyval, const cbor_item_t *key,
+    const cbor_item_t *val, void *arg)
 {
 	int		*retries = arg;
 	uint64_t	 n;
 
 	if (cbor_isa_uint(key) == false ||
 	    cbor_int_get_width(key) != CBOR_INT_8 ||
-	    cbor_get_uint8(key) != 3) {
+	    cbor_get_uint8(key) != keyval) {
 		fido_log_debug("%s: cbor type", __func__);
 		return (0); /* ignore */
 	}
@@ -421,7 +422,19 @@ parse_retry_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 }
 
 static int
-fido_dev_get_retry_count_tx(fido_dev_t *dev)
+parse_pin_retry_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
+{
+	return (parse_retry_count(3, key, val, arg));
+}
+
+static int
+parse_uv_retry_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
+{
+	return (parse_retry_count(5, key, val, arg));
+}
+
+static int
+fido_dev_get_retry_count_tx(fido_dev_t *dev, uint8_t subcmd)
 {
 	fido_blob_t	 f;
 	cbor_item_t	*argv[2];
@@ -431,7 +444,7 @@ fido_dev_get_retry_count_tx(fido_dev_t *dev)
 	memset(argv, 0, sizeof(argv));
 
 	if ((argv[0] = cbor_build_uint8(1)) == NULL ||
-	    (argv[1] = cbor_build_uint8(1)) == NULL) {
+	    (argv[1] = cbor_build_uint8(subcmd)) == NULL) {
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
@@ -452,7 +465,7 @@ fail:
 }
 
 static int
-fido_dev_get_retry_count_rx(fido_dev_t *dev, int *retries, int ms)
+fido_dev_get_pin_retry_count_rx(fido_dev_t *dev, int *retries, int ms)
 {
 	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
@@ -467,8 +480,8 @@ fido_dev_get_retry_count_rx(fido_dev_t *dev, int *retries, int ms)
 	}
 
 	if ((r = cbor_parse_reply(reply, (size_t)reply_len, retries,
-	    parse_retry_count)) != FIDO_OK) {
-		fido_log_debug("%s: parse_retry_count", __func__);
+	    parse_pin_retry_count)) != FIDO_OK) {
+		fido_log_debug("%s: parse_pin_retry_count", __func__);
 		return (r);
 	}
 
@@ -476,12 +489,12 @@ fido_dev_get_retry_count_rx(fido_dev_t *dev, int *retries, int ms)
 }
 
 static int
-fido_dev_get_retry_count_wait(fido_dev_t *dev, int *retries, int ms)
+fido_dev_get_pin_retry_count_wait(fido_dev_t *dev, int *retries, int ms)
 {
 	int r;
 
-	if ((r = fido_dev_get_retry_count_tx(dev)) != FIDO_OK ||
-	    (r = fido_dev_get_retry_count_rx(dev, retries, ms)) != FIDO_OK)
+	if ((r = fido_dev_get_retry_count_tx(dev, 1)) != FIDO_OK ||
+	    (r = fido_dev_get_pin_retry_count_rx(dev, retries, ms)) != FIDO_OK)
 		return (r);
 
 	return (FIDO_OK);
@@ -490,7 +503,49 @@ fido_dev_get_retry_count_wait(fido_dev_t *dev, int *retries, int ms)
 int
 fido_dev_get_retry_count(fido_dev_t *dev, int *retries)
 {
-	return (fido_dev_get_retry_count_wait(dev, retries, -1));
+	return (fido_dev_get_pin_retry_count_wait(dev, retries, -1));
+}
+
+static int
+fido_dev_get_uv_retry_count_rx(fido_dev_t *dev, int *retries, int ms)
+{
+	unsigned char	reply[FIDO_MAXMSG];
+	int		reply_len;
+	int		r;
+
+	*retries = 0;
+
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	    ms)) < 0) {
+		fido_log_debug("%s: fido_rx", __func__);
+		return (FIDO_ERR_RX);
+	}
+
+	if ((r = cbor_parse_reply(reply, (size_t)reply_len, retries,
+	    parse_uv_retry_count)) != FIDO_OK) {
+		fido_log_debug("%s: parse_uv_retry_count", __func__);
+		return (r);
+	}
+
+	return (FIDO_OK);
+}
+
+static int
+fido_dev_get_uv_retry_count_wait(fido_dev_t *dev, int *retries, int ms)
+{
+	int r;
+
+	if ((r = fido_dev_get_retry_count_tx(dev, 7)) != FIDO_OK ||
+	    (r = fido_dev_get_uv_retry_count_rx(dev, retries, ms)) != FIDO_OK)
+		return (r);
+
+	return (FIDO_OK);
+}
+
+int
+fido_dev_get_uv_retry_count(fido_dev_t *dev, int *retries)
+{
+	return (fido_dev_get_uv_retry_count_wait(dev, retries, -1));
 }
 
 int

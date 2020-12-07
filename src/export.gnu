@@ -162,6 +162,7 @@
 		fido_dev_get_assert;
 		fido_dev_get_cbor_info;
 		fido_dev_get_retry_count;
+		fido_dev_get_uv_retry_count;
 		fido_dev_get_touch_begin;
 		fido_dev_get_touch_status;
 		fido_dev_has_pin;
