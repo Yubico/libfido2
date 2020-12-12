@@ -185,10 +185,10 @@ and
 .Fn fido_cred_set_uv
 functions set the
 .Em rk
-(resident key)
+.Pq resident/discoverable key
 and
 .Em uv
-(user verification)
+.Pq user verification
 attributes of
 .Fa cred .
 Both are
@@ -205,10 +205,10 @@ where
 .Fa fmt
 must be either
 .Vt "packed"
-(the format used in FIDO 2)
+.Pq the format used in FIDO2
 or
 .Vt "fido-u2f"
-(the format used by U2F).
+.Pq the format used by U2F .
 A copy of
 .Fa fmt
 is made, and no references to the passed pointer are kept.
