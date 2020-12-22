@@ -7,6 +7,7 @@
 #ifndef _FIDO_TYPES_H
 #define _FIDO_TYPES_H
 
+#include <signal.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -20,6 +21,7 @@ typedef void *fido_dev_io_open_t(const char *);
 typedef void  fido_dev_io_close_t(void *);
 typedef int   fido_dev_io_read_t(void *, unsigned char *, size_t, int);
 typedef int   fido_dev_io_write_t(void *, const unsigned char *, size_t);
+typedef void  fido_dev_io_set_sigmask_t(void *, const sigset_t *);
 typedef int   fido_dev_rx_t(struct fido_dev *, uint8_t, unsigned char *, size_t, int);
 typedef int   fido_dev_tx_t(struct fido_dev *, uint8_t, const unsigned char *, size_t);
 
@@ -28,6 +30,7 @@ typedef struct fido_dev_io {
 	fido_dev_io_close_t *close;
 	fido_dev_io_read_t  *read;
 	fido_dev_io_write_t *write;
+	fido_dev_io_set_sigmask_t *set_sigmask;
 } fido_dev_io_t;
 
 typedef struct fido_dev_transport {

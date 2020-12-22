@@ -183,6 +183,7 @@ _fido_dev_protocol
 _fido_dev_reset
 _fido_dev_set_io_functions
 _fido_dev_set_pin
+_fido_dev_set_sigmask
 _fido_dev_set_transport_functions
 _fido_dev_supports_credman
 _fido_dev_supports_cred_prot

@@ -7,6 +7,7 @@
 #ifndef _EXTERN_H
 #define _EXTERN_H
 
+#include <signal.h>
 #include <stdint.h>
 
 #include "fido/types.h"
@@ -86,12 +87,13 @@ int fido_buf_write(unsigned char **, size_t *, const void *, size_t);
 /* hid i/o */
 void *fido_hid_open(const char *);
 void  fido_hid_close(void *);
+void  fido_hid_set_sigmask(void *, const sigset_t *);
 int fido_hid_read(void *, unsigned char *, size_t, int);
 int fido_hid_write(void *, const unsigned char *, size_t);
 int fido_hid_get_usage(const uint8_t *, size_t, uint32_t *);
 int fido_hid_get_report_len(const uint8_t *, size_t, size_t *, size_t *);
 int fido_hid_unix_open(const char *);
-int fido_hid_unix_wait(int, int);
+int fido_hid_unix_wait(int, int, const sigset_t *);
 size_t fido_hid_report_in_len(void *);
 size_t fido_hid_report_out_len(void *);
 

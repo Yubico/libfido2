@@ -20,6 +20,8 @@ struct hid_linux {
 	int	fd;
 	size_t	report_in_len;
 	size_t	report_out_len;
+	sigset_t sigmask;
+	const sigset_t *sigmaskp;
 };
 
 static int
@@ -210,6 +212,7 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 				fido_hid_close,
 				fido_hid_read,
 				fido_hid_write,
+				fido_hid_set_sigmask,
 			};
 			if (++(*olen) == ilen)
 				break;
@@ -261,6 +264,15 @@ fido_hid_close(void *handle)
 	free(ctx);
 }
 
+void
+fido_hid_set_sigmask(void *handle, const sigset_t *sigmask)
+{
+	struct hid_linux *ctx = handle;
+
+	ctx->sigmask = *sigmask;
+	ctx->sigmaskp = &ctx->sigmask;
+}
+
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
@@ -272,7 +284,7 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 
-	if (fido_hid_unix_wait(ctx->fd, ms) < 0) {
+	if (fido_hid_unix_wait(ctx->fd, ms, ctx->sigmaskp) < 0) {
 		fido_log_debug("%s: fd not ready", __func__);
 		return (-1);
 	}

@@ -185,6 +185,7 @@
 		fido_dev_reset;
 		fido_dev_set_io_functions;
 		fido_dev_set_pin;
+		fido_dev_set_sigmask;
 		fido_dev_set_transport_functions;
 		fido_dev_supports_credman;
 		fido_dev_supports_cred_prot;

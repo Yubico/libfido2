@@ -314,6 +314,17 @@ fido_dev_close(fido_dev_t *dev)
 }
 
 int
+fido_dev_set_sigmask(fido_dev_t *dev, const sigset_t *sigmask)
+{
+	if (dev->io_handle == NULL || dev->io.set_sigmask == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	dev->io.set_sigmask(dev->io_handle, sigmask);
+
+	return (FIDO_OK);
+}
+
+int
 fido_dev_cancel(fido_dev_t *dev)
 {
 	if (fido_dev_is_fido2(dev) == false)
@@ -479,6 +490,7 @@ fido_dev_new(void)
 		&fido_hid_close,
 		&fido_hid_read,
 		&fido_hid_write,
+		&fido_hid_set_sigmask,
 	};
 
 	return (dev);
