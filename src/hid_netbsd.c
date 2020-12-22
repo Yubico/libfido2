@@ -152,10 +152,11 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
  * sequence bits will be ignored as duplicate packets by the device.
  */
 static int
-terrible_ping_kludge(struct hid_netbsd *ctx)
+terrible_ping_kludge(struct hid_netbsd *ctx, const sigset_t *sigmask)
 {
 	u_char data[256];
 	int i, n;
+	const struct timespec waittime = {.tv_sec = 0, .tv_nsec = 100000000};
 	struct pollfd pfd;
 
 	if (sizeof(data) < ctx->report_out_len + 1)
@@ -173,20 +174,22 @@ terrible_ping_kludge(struct hid_netbsd *ctx)
 		data[6] = 0;
 		data[7] = 1;
 		fido_log_debug("%s: send ping %d", __func__, i);
-		if (fido_hid_write(ctx, data, ctx->report_out_len + 1) == -1)
+		if (fido_hid_write(ctx, data, ctx->report_out_len + 1, sigmask)
+		    == -1)
 			return -1;
 		fido_log_debug("%s: wait reply", __func__);
 		memset(&pfd, 0, sizeof(pfd));
 		pfd.fd = ctx->fd;
 		pfd.events = POLLIN;
-		if ((n = poll(&pfd, 1, 100)) == -1) {
+		if ((n = pollts(&pfd, 1, &waittime, sigmask)) == -1) {
 			fido_log_debug("%s: poll: %d", __func__, errno);
 			return -1;
 		} else if (n == 0) {
 			fido_log_debug("%s: timed out", __func__);
 			continue;
 		}
-		if (fido_hid_read(ctx, data, ctx->report_out_len, 250) == -1)
+		if (fido_hid_read(ctx, data, ctx->report_out_len, 250, sigmask)
+		    == -1)
 			return -1;
 		/*
 		 * Ping isn't always supported on the broadcast channel,
@@ -202,7 +205,7 @@ terrible_ping_kludge(struct hid_netbsd *ctx)
 }
 
 void *
-fido_hid_open(const char *path)
+fido_hid_open(const char *path, const sigset_t *sigmask)
 {
 	struct hid_netbsd		*ctx;
 	struct usb_ctl_report_desc	 ucrd;
@@ -230,7 +233,7 @@ fido_hid_open(const char *path)
 	 * track of the DATA0/DATA1 sequence toggle across uhid device
 	 * open and close. This is a terrible hack to work around it.
 	 */
-	if (!is_fido(ctx->fd) || terrible_ping_kludge(ctx) != 0) {
+	if (!is_fido(ctx->fd) || terrible_ping_kludge(ctx, sigmask) != 0) {
 		fido_hid_close(ctx);
 		return NULL;
 	}
@@ -248,7 +251,8 @@ fido_hid_close(void *handle)
 }
 
 int
-fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
+fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms,
+    const sigset_t *sigmask)
 {
 	struct hid_netbsd	*ctx = handle;
 	ssize_t			 r;
@@ -258,7 +262,7 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 
-	if (fido_hid_unix_wait(ctx->fd, ms) < 0) {
+	if (fido_hid_unix_wait(ctx->fd, POLLIN, ms, sigmask) < 0) {
 		fido_log_debug("%s: fd not ready", __func__);
 		return (-1);
 	}
@@ -272,13 +276,19 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 }
 
 int
-fido_hid_write(void *handle, const unsigned char *buf, size_t len)
+fido_hid_write(void *handle, const unsigned char *buf, size_t len,
+    const sigset_t *sigmask)
 {
 	struct hid_netbsd	*ctx = handle;
 	ssize_t			 r;
 
 	if (len != ctx->report_out_len + 1) {
 		fido_log_debug("%s: len %zu", __func__, len);
+		return (-1);
+	}
+
+	if (fido_hid_unix_wait(ctx->fd, POLLOUT, -1, sigmask) < 0) {
+		fido_log_debug("%s: fd not ready", __func__);
 		return (-1);
 	}
 
