@@ -7,6 +7,11 @@
 #ifndef _FIDO_TYPES_H
 #define _FIDO_TYPES_H
 
+#ifdef __MINGW32__
+#include <sys/types.h>
+#endif
+
+#include <signal.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -42,6 +47,12 @@ typedef enum {
 } fido_opt_t;
 
 typedef void fido_log_handler_t(const char *);
+
+#ifdef _WIN32
+typedef int fido_sigset_t;
+#else
+typedef sigset_t fido_sigset_t;
+#endif
 
 #ifdef _FIDO_INTERNAL
 #include "packed.h"

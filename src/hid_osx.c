@@ -7,6 +7,7 @@
 #include <sys/types.h>
 
 #include <fcntl.h>
+#include <signal.h>
 #include <string.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -483,6 +484,15 @@ fido_hid_close(void *handle)
 	close(ctx->report_pipe[1]);
 
 	free(ctx);
+}
+
+int
+fido_hid_set_sigmask(void *handle, const fido_sigset_t *sigmask)
+{
+	(void)handle;
+	(void)sigmask;
+
+	return (FIDO_ERR_INTERNAL);
 }
 
 int

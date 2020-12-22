@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "fido.h"
 
 #ifndef TLS
@@ -338,6 +337,15 @@ fido_dev_close(fido_dev_t *dev)
 	dev->cid = CTAP_CID_BROADCAST;
 
 	return (FIDO_OK);
+}
+
+int
+fido_dev_set_sigmask(fido_dev_t *dev, const fido_sigset_t *sigmask)
+{
+	if (dev->io_own || dev->io_handle == NULL || sigmask == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	return (fido_hid_set_sigmask(dev->io_handle, sigmask));
 }
 
 int
