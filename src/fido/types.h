@@ -7,6 +7,7 @@
 #ifndef _FIDO_TYPES_H
 #define _FIDO_TYPES_H
 
+#include <signal.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -16,12 +17,12 @@ extern "C" {
 
 struct fido_dev;
 
-typedef void *fido_dev_io_open_t(const char *);
+typedef void *fido_dev_io_open_t(const char *, const sigset_t *);
 typedef void  fido_dev_io_close_t(void *);
-typedef int   fido_dev_io_read_t(void *, unsigned char *, size_t, int);
-typedef int   fido_dev_io_write_t(void *, const unsigned char *, size_t);
-typedef int   fido_dev_rx_t(struct fido_dev *, uint8_t, unsigned char *, size_t, int);
-typedef int   fido_dev_tx_t(struct fido_dev *, uint8_t, const unsigned char *, size_t);
+typedef int   fido_dev_io_read_t(void *, unsigned char *, size_t, int, const sigset_t *);
+typedef int   fido_dev_io_write_t(void *, const unsigned char *, size_t, const sigset_t *);
+typedef int   fido_dev_rx_t(struct fido_dev *, uint8_t, unsigned char *, size_t, int, const sigset_t *);
+typedef int   fido_dev_tx_t(struct fido_dev *, uint8_t, const unsigned char *, size_t, const sigset_t *);
 
 typedef struct fido_dev_io {
 	fido_dev_io_open_t  *open;
@@ -221,6 +222,8 @@ typedef struct fido_dev {
 	size_t                tx_len;    /* length of HID output reports */
 	int                   flags;     /* internal flags; see FIDO_DEV_* */
 	fido_dev_transport_t  transport; /* transport functions */
+	sigset_t              sigmask;   /* signal mask while blocking */
+	const sigset_t        *sigmaskp;
 } fido_dev_t;
 
 #else

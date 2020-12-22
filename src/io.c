@@ -47,7 +47,7 @@ tx_empty(fido_dev_t *d, uint8_t cmd)
 	fp->body.init.cmd = CTAP_FRAME_INIT | cmd;
 
 	if (len > sizeof(pkt) || (n = d->io.write(d->io_handle, pkt,
-	    len)) < 0 || (size_t)n != len)
+	    len, d->sigmaskp)) < 0 || (size_t)n != len)
 		return (-1);
 
 	return (0);
@@ -74,7 +74,7 @@ tx_preamble(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 	memcpy(&fp->body.init.data, buf, count);
 
 	if (len > sizeof(pkt) || (n = d->io.write(d->io_handle, pkt,
-	    len)) < 0 || (size_t)n != len)
+	    len, d->sigmaskp)) < 0 || (size_t)n != len)
 		return (0);
 
 	return (count);
@@ -99,7 +99,7 @@ tx_frame(fido_dev_t *d, uint8_t seq, const void *buf, size_t count)
 	memcpy(&fp->body.cont.data, buf, count);
 
 	if (len > sizeof(pkt) || (n = d->io.write(d->io_handle, pkt,
-	    len)) < 0 || (size_t)n != len)
+	    len, d->sigmaskp)) < 0 || (size_t)n != len)
 		return (0);
 
 	return (count);
@@ -137,7 +137,7 @@ fido_tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 	fido_log_xxd(buf, count);
 
 	if (d->transport.tx != NULL)
-		return (d->transport.tx(d, cmd, buf, count));
+		return (d->transport.tx(d, cmd, buf, count, d->sigmaskp));
 	if (d->io_handle == NULL || d->io.write == NULL || count > UINT16_MAX) {
 		fido_log_debug("%s: invalid argument", __func__);
 		return (-1);
@@ -154,7 +154,8 @@ rx_frame(fido_dev_t *d, struct frame *fp, int ms)
 	memset(fp, 0, sizeof(*fp));
 
 	if (d->rx_len > sizeof(*fp) || (n = d->io.read(d->io_handle,
-	    (unsigned char *)fp, d->rx_len, ms)) < 0 || (size_t)n != d->rx_len)
+	    (unsigned char *)fp, d->rx_len, ms, d->sigmaskp)) < 0 ||
+	    (size_t)n != d->rx_len)
 		return (-1);
 
 	return (0);
@@ -271,7 +272,7 @@ fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
 	    __func__, (void *)d, cmd, (const void *)buf, count, ms);
 
 	if (d->transport.rx != NULL)
-		return (d->transport.rx(d, cmd, buf, count, ms));
+		return (d->transport.rx(d, cmd, buf, count, ms, d->sigmaskp));
 	if (d->io_handle == NULL || d->io.read == NULL || count > UINT16_MAX) {
 		fido_log_debug("%s: invalid argument", __func__);
 		return (-1);

@@ -19,9 +19,10 @@ static size_t	 wiredata_len;
 static int	 initialised;
 
 static void *
-dummy_open(const char *path)
+dummy_open(const char *path, const sigset_t *sigmask)
 {
 	(void)path;
+	(void)sigmask;
 
 	return (FAKE_DEV_HANDLE);
 }
@@ -33,11 +34,13 @@ dummy_close(void *handle)
 }
 
 static int
-dummy_read(void *handle, unsigned char *ptr, size_t len, int ms)
+dummy_read(void *handle, unsigned char *ptr, size_t len, int ms,
+    const sigset_t *sigmask)
 {
 	size_t n;
 
 	(void)ms;
+	(void)sigmask;
 
 	assert(handle == FAKE_DEV_HANDLE);
 	assert(ptr != NULL);
@@ -65,11 +68,13 @@ dummy_read(void *handle, unsigned char *ptr, size_t len, int ms)
 }
 
 static int
-dummy_write(void *handle, const unsigned char *ptr, size_t len)
+dummy_write(void *handle, const unsigned char *ptr, size_t len,
+    const sigset_t *sigmask)
 {
 	assert(handle == FAKE_DEV_HANDLE);
 	assert(ptr != NULL);
 	assert(len == REPORT_LEN);
+	(void)sigmask;
 
 	if (!initialised)
 		memcpy(&ctap_nonce, &ptr[8], sizeof(ctap_nonce));

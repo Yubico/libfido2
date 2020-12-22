@@ -105,7 +105,7 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 		return (FIDO_ERR_INTERNAL);
 	}
 
-	if ((dev->io_handle = dev->io.open(path)) == NULL) {
+	if ((dev->io_handle = dev->io.open(path, dev->sigmaskp)) == NULL) {
 		fido_log_debug("%s: dev->io.open", __func__);
 		return (FIDO_ERR_INTERNAL);
 	}
@@ -525,6 +525,14 @@ fido_dev_free(fido_dev_t **dev_p)
 	free(dev);
 
 	*dev_p = NULL;
+}
+
+void
+fido_dev_sigmask(fido_dev_t *dev, const sigset_t *sigmask)
+{
+
+	dev->sigmask = *sigmask;
+	dev->sigmaskp = &dev->sigmask;
 }
 
 uint8_t

@@ -32,25 +32,6 @@ xstrerror(int errnum, char *buf, size_t len)
 		snprintf(buf, len - 1, "error %d", errnum);
 }
 
-static int
-timespec_to_ms(const struct timespec *ts, int upper_bound)
-{
-	int64_t x;
-	int64_t y;
-
-	if (ts->tv_sec < 0 || (uint64_t)ts->tv_sec > INT64_MAX / 1000LL ||
-	    ts->tv_nsec < 0 || (uint64_t)ts->tv_nsec / 1000000LL > INT64_MAX)
-		return (upper_bound);
-
-	x = ts->tv_sec * 1000LL;
-	y = ts->tv_nsec / 1000000LL;
-
-	if (INT64_MAX - x < y || x + y > upper_bound)
-		return (upper_bound);
-
-	return (int)(x + y);
-}
-
 int
 fido_hid_unix_open(const char *path)
 {
@@ -83,47 +64,62 @@ fido_hid_unix_open(const char *path)
 }
 
 int
-fido_hid_unix_wait(int fd, int ms)
+fido_hid_unix_wait(int fd, short events, int ms, const sigset_t *sigmask)
 {
 	char		ebuf[128];
 	struct timespec	ts_start;
 	struct timespec	ts_now;
 	struct timespec	ts_delta;
+	struct timespec	ts_deadline;
 	struct pollfd	pfd;
-	int		ms_remain;
 	int		r;
 
-	if (ms < 0)
-		return (0);
-
 	memset(&pfd, 0, sizeof(pfd));
-	pfd.events = POLLIN;
+	pfd.events = events;
 	pfd.fd = fd;
 
-	if (clock_gettime(CLOCK_MONOTONIC, &ts_start) != 0) {
-		xstrerror(errno, ebuf, sizeof(ebuf));
-		fido_log_debug("%s: clock_gettime: %s", __func__, ebuf);
-		return (-1);
+	if (ms > 0) {
+		if (clock_gettime(CLOCK_MONOTONIC, &ts_start) != 0) {
+			xstrerror(errno, ebuf, sizeof(ebuf));
+			fido_log_debug("%s: clock_gettime: %s", __func__,
+			    ebuf);
+			return (-1);
+		}
+		ts_delta.tv_sec = ms / 1000;
+		ts_delta.tv_nsec = (ms % 1000) * 1000000;
+		timespecadd(&ts_start, &ts_delta, &ts_deadline);
 	}
 
-	for (ms_remain = ms; ms_remain > 0;) {
-		if ((r = poll(&pfd, 1, ms_remain)) > 0)
+	for (;;) {
+		if (ms > 0) {
+			if (clock_gettime(CLOCK_MONOTONIC, &ts_now) != 0) {
+				xstrerror(errno, ebuf, sizeof(ebuf));
+				fido_log_debug("%s: clock_gettime: %s",
+				    __func__, ebuf);
+				return (-1);
+			}
+			if (timespeccmp(&ts_deadline, &ts_now, <=)) {
+				errno = ETIMEDOUT;
+				return (-1);
+			}
+			timespecsub(&ts_deadline, &ts_now, &ts_delta);
+			r = pollts(&pfd, 1, &ts_delta, sigmask);
+		} else if (ms == 0) {
+			ts_delta.tv_sec = 0;
+			ts_delta.tv_nsec = 0;
+			r = pollts(&pfd, 1, &ts_delta, sigmask);
+		} else {
+			r = pollts(&pfd, 1, NULL, sigmask);
+		}
+		if (r > 0)
 			return (0);
 		else if (r == 0)
 			break;
-		else if (errno != EINTR) {
+		else {
 			xstrerror(errno, ebuf, sizeof(ebuf));
 			fido_log_debug("%s: poll: %s", __func__, ebuf);
 			return (-1);
 		}
-		/* poll interrupted - subtract time already waited */
-		if (clock_gettime(CLOCK_MONOTONIC, &ts_now) != 0) {
-			xstrerror(errno, ebuf, sizeof(ebuf));
-			fido_log_debug("%s: clock_gettime: %s", __func__, ebuf);
-			return (-1);
-		}
-		timespecsub(&ts_now, &ts_start, &ts_delta);
-		ms_remain = ms - timespec_to_ms(&ts_delta, ms);
 	}
 
 	return (-1);

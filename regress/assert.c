@@ -52,9 +52,10 @@ static const unsigned char sig[72] = {
 };
 
 static void *
-dummy_open(const char *path)
+dummy_open(const char *path, const sigset_t *sigmask)
 {
 	(void)path;
+	(void)sigmask;
 
 	return (FAKE_DEV_HANDLE);
 }
@@ -66,23 +67,27 @@ dummy_close(void *handle)
 }
 
 static int
-dummy_read(void *handle, unsigned char *buf, size_t len, int ms)
+dummy_read(void *handle, unsigned char *buf, size_t len, int ms,
+    const sigset_t *sigmask)
 {
 	(void)handle;
 	(void)buf;
 	(void)len;
 	(void)ms;
+	(void)sigmask;
 
 	abort();
 	/* NOTREACHED */
 }
 
 static int
-dummy_write(void *handle, const unsigned char *buf, size_t len)
+dummy_write(void *handle, const unsigned char *buf, size_t len,
+    const sigset_t *sigmask)
 {
 	(void)handle;
 	(void)buf;
 	(void)len;
+	(void)sigmask;
 
 	abort();
 	/* NOTREACHED */

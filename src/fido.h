@@ -53,6 +53,8 @@ void fido_dev_info_free(fido_dev_info_t **, size_t);
 void fido_init(int);
 void fido_set_log_handler(fido_log_handler_t *);
 
+void fido_dev_sigmask(fido_dev_t *, const sigset_t *);
+
 const unsigned char *fido_assert_authdata_ptr(const fido_assert_t *, size_t);
 const unsigned char *fido_assert_clientdata_hash_ptr(const fido_assert_t *);
 const unsigned char *fido_assert_hmac_secret_ptr(const fido_assert_t *, size_t);
