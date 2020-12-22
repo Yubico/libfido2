@@ -1,4 +1,4 @@
-* Version 1.6.0 (unreleased)
+* Version 1.6.0 (2020-12-22)
  ** Fix OpenSSL 1.0 and Cygwin builds.
  ** hid_linux: fix build on 32-bit systems.
  ** hid_osx: allow reads from spawned threads.
@@ -7,6 +7,7 @@
   - fido_cred_authdata_raw_len;
   - fido_cred_authdata_raw_ptr;
   - fido_cred_sigcount;
+  - fido_dev_get_uv_retry_count;
   - fido_dev_supports_credman.
  ** Hardened Windows build.
  ** Native FreeBSD and NetBSD support.
