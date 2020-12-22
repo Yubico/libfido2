@@ -435,6 +435,15 @@ fido_hid_close(void *handle)
 }
 
 int
+fido_hid_set_sigmask(void *handle, const fido_sigset_t *sigmask)
+{
+	(void)handle;
+	(void)sigmask;
+
+	return (FIDO_ERR_INTERNAL);
+}
+
+int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct hid_win	*ctx = handle;

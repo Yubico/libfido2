@@ -17,9 +17,11 @@
 #define MAX_UHID	64
 
 struct hid_freebsd {
-	int	fd;
-	size_t	report_in_len;
-	size_t	report_out_len;
+	int             fd;
+	size_t          report_in_len;
+	size_t          report_out_len;
+	sigset_t        sigmask;
+	const sigset_t *sigmaskp;
 };
 
 static bool
@@ -166,6 +168,17 @@ fido_hid_close(void *handle)
 }
 
 int
+fido_hid_set_sigmask(void *handle, const fido_sigset_t *sigmask)
+{
+	struct hid_freebsd *ctx = handle;
+
+	ctx->sigmask = *sigmask;
+	ctx->sigmaskp = &ctx->sigmask;
+
+	return (FIDO_OK);
+}
+
+int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct hid_freebsd	*ctx = handle;
@@ -176,7 +189,7 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 
-	if (fido_hid_unix_wait(ctx->fd, ms) < 0) {
+	if (fido_hid_unix_wait(ctx->fd, ms, ctx->sigmaskp) < 0) {
 		fido_log_debug("%s: fd not ready", __func__);
 		return (-1);
 	}
