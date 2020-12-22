@@ -95,6 +95,14 @@ int fido_hid_unix_wait(int, int);
 size_t fido_hid_report_in_len(void *);
 size_t fido_hid_report_out_len(void *);
 
+/* nfc i/o */
+void *fido_nfc_open(const char *);
+void  fido_nfc_close(void *);
+int fido_nfc_read(void *, unsigned char *, size_t, int);
+int fido_nfc_write(void *, const unsigned char *, size_t);
+int fido_nfc_rx(fido_dev_t *, uint8_t, unsigned char *, size_t, int);
+int fido_nfc_tx(fido_dev_t *, uint8_t, const unsigned char *, size_t);
+
 /* generic i/o */
 int fido_rx_cbor_status(fido_dev_t *, int);
 int fido_rx(fido_dev_t *, uint8_t, void *, size_t, int);
@@ -150,8 +158,9 @@ int fido_verify_sig_eddsa(const fido_blob_t *, const eddsa_pk_t *,
 int fido_get_signed_hash(int, fido_blob_t *, const fido_blob_t *,
     const fido_blob_t *);
 
-/* hid device manifest */
+/* device manifest functions */
 int fido_hid_manifest(fido_dev_info_t *, size_t, size_t *);
+int fido_nfc_manifest(fido_dev_info_t *, size_t, size_t *);
 
 /* device manifest registration */
 typedef int (*dev_manifest_func_t)(fido_dev_info_t *, size_t, size_t *);

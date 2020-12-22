@@ -140,7 +140,7 @@ send_dummy_register(fido_dev_t *dev, int ms)
 	memset(&challenge, 0xff, sizeof(challenge));
 	memset(&application, 0xff, sizeof(application));
 
-	if ((apdu = iso7816_new(U2F_CMD_REGISTER, 0, 2 *
+	if ((apdu = iso7816_new(0, U2F_CMD_REGISTER, 0, 2 *
 	    SHA256_DIGEST_LENGTH)) == NULL ||
 	    iso7816_add(apdu, &challenge, sizeof(challenge)) < 0 ||
 	    iso7816_add(apdu, &application, sizeof(application)) < 0) {
@@ -205,7 +205,7 @@ key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
 
 	key_id_len = (uint8_t)key_id->len;
 
-	if ((apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_CHECK, (uint16_t)(2 *
+	if ((apdu = iso7816_new(0, U2F_CMD_AUTH, U2F_AUTH_CHECK, (uint16_t)(2 *
 	    SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len))) == NULL ||
 	    iso7816_add(apdu, &challenge, sizeof(challenge)) < 0 ||
 	    iso7816_add(apdu, &rp_id_hash, sizeof(rp_id_hash)) < 0 ||
@@ -313,7 +313,7 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 
 	key_id_len = (uint8_t)key_id->len;
 
-	if ((apdu = iso7816_new(U2F_CMD_AUTH, U2F_AUTH_SIGN, (uint16_t)(2 *
+	if ((apdu = iso7816_new(0, U2F_CMD_AUTH, U2F_AUTH_SIGN, (uint16_t)(2 *
 	    SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len))) == NULL ||
 	    iso7816_add(apdu, cdh->ptr, cdh->len) < 0 ||
 	    iso7816_add(apdu, &rp_id_hash, sizeof(rp_id_hash)) < 0 ||
@@ -622,7 +622,7 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 		return (FIDO_ERR_INTERNAL);
 	}
 
-	if ((apdu = iso7816_new(U2F_CMD_REGISTER, 0, 2 *
+	if ((apdu = iso7816_new(0, U2F_CMD_REGISTER, 0, 2 *
 	    SHA256_DIGEST_LENGTH)) == NULL ||
 	    iso7816_add(apdu, cred->cdh.ptr, cred->cdh.len) < 0 ||
 	    iso7816_add(apdu, rp_id_hash, sizeof(rp_id_hash)) < 0) {
@@ -792,7 +792,7 @@ u2f_get_touch_begin(fido_dev_t *dev)
 		return (FIDO_ERR_INTERNAL);
 	}
 
-	if ((apdu = iso7816_new(U2F_CMD_REGISTER, 0, 2 *
+	if ((apdu = iso7816_new(0, U2F_CMD_REGISTER, 0, 2 *
 	    SHA256_DIGEST_LENGTH)) == NULL ||
 	    iso7816_add(apdu, clientdata_hash, sizeof(clientdata_hash)) < 0 ||
 	    iso7816_add(apdu, rp_id_hash, sizeof(rp_id_hash)) < 0) {

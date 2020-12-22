@@ -8,7 +8,7 @@
 #include "fido.h"
 
 iso7816_apdu_t *
-iso7816_new(uint8_t ins, uint8_t p1, uint16_t payload_len)
+iso7816_new(uint8_t cla, uint8_t ins, uint8_t p1, uint16_t payload_len)
 {
 	iso7816_apdu_t	*apdu;
 	size_t		 alloc_len;
@@ -21,6 +21,7 @@ iso7816_new(uint8_t ins, uint8_t p1, uint16_t payload_len)
 	apdu->alloc_len = alloc_len;
 	apdu->payload_len = payload_len;
 	apdu->payload_ptr = apdu->payload;
+	apdu->header.cla = cla;
 	apdu->header.ins = ins;
 	apdu->header.p1 = p1;
 	apdu->header.lc2 = (uint8_t)((payload_len >> 8) & 0xff);

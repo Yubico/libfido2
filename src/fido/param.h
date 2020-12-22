@@ -43,6 +43,7 @@
 #define U2F_AUTH_CHECK			0x07
 
 /* ISO7816-4 status words. */
+#define SW1_MORE_DATA			0x61
 #define SW_CONDITIONS_NOT_SATISFIED	0x6985
 #define SW_WRONG_DATA			0x6a80
 #define SW_NO_ERROR			0x9000
