@@ -4,6 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
+#define	_NETBSD_SOURCE		/* arc4random_buf in stdlib.h */
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifdef HAVE_SYS_RANDOM_H

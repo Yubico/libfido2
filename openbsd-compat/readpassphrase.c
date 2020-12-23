@@ -23,6 +23,8 @@
 
 /* OPENBSD ORIGINAL: lib/libc/gen/readpassphrase.c */
 
+#define	_NETBSD_SOURCE		/* NSIG in signal.h */
+
 #include "openbsd-compat.h"
 
 #ifndef HAVE_READPASSPHRASE

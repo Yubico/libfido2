@@ -4,6 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
+#define	_NETBSD_SOURCE
+
 #include <sys/types.h>
 #include <sys/ioctl.h>
 

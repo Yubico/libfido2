@@ -4,6 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
+#define	_NETBSD_SOURCE		/* be16toh, be32toh */
+
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/sha.h>

@@ -4,6 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
+#define	_NETBSD_SOURCE		/* pollts in poll.h, timespec ops in time.h */
+
 #include <sys/types.h>
 #include <sys/stat.h>
 

@@ -4,6 +4,9 @@
  * license that can be found in the LICENSE file.
  */
 
+#define	_XOPEN_SOURCE		/* usleep -- obsoleted by POSIX */
+#define	_XOPEN_SOURCE_EXTENDED
+
 #include <openssl/sha.h>
 #include <openssl/x509.h>
 

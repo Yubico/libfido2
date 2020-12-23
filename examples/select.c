@@ -4,6 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
+#define	_NETBSD_SOURCE		/* timespec ops in time.h */
+
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>

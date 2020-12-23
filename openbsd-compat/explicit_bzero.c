@@ -5,6 +5,8 @@
  * Written by Ted Unangst
  */
 
+#define	_NETBSD_SOURCE		/* explicit_memset in string.h */
+
 #include "openbsd-compat.h"
 
 #if !defined(HAVE_EXPLICIT_BZERO) && !defined(_WIN32)
@@ -23,6 +25,15 @@ explicit_bzero(void *p, size_t n)
 	if (n == 0)
 		return;
 	(void)memset_s(p, n, 0, n);
+}
+
+#elif defined(HAVE_EXPLICIT_MEMSET)
+
+void
+explicit_bzero(void *p, size_t n)
+{
+
+	(void)explicit_memset(p, 0, n);
 }
 
 #else /* HAVE_MEMSET_S */
