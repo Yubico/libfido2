@@ -10,7 +10,9 @@
 #include <openssl/ec.h>
 #include <openssl/evp.h>
 
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
+#endif
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -126,7 +128,9 @@ int fido_cred_set_user(fido_cred_t *, const unsigned char *, size_t,
 int fido_cred_set_x509(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_verify(const fido_cred_t *);
 int fido_cred_verify_self(const fido_cred_t *);
+#ifdef HAVE_SIGSET_T
 int fido_dev_set_sigmask(fido_dev_t *, const sigset_t *);
+#endif
 int fido_dev_cancel(fido_dev_t *);
 int fido_dev_close(fido_dev_t *);
 int fido_dev_get_assert(fido_dev_t *, fido_assert_t *, const char *);

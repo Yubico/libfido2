@@ -24,10 +24,10 @@
 #define MAX_UHID	64
 
 struct hid_netbsd {
-	int	fd;
-	size_t	report_in_len;
-	size_t	report_out_len;
-	sigset_t sigmask;
+	int             fd;
+	size_t          report_in_len;
+	size_t          report_out_len;
+	sigset_t        sigmask;
 	const sigset_t *sigmaskp;
 };
 
@@ -140,7 +140,6 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 				fido_hid_close,
 				fido_hid_read,
 				fido_hid_write,
-				fido_hid_set_sigmask,
 			};
 			++(*olen);
 		}
@@ -251,13 +250,15 @@ fido_hid_close(void *handle)
 	free(ctx);
 }
 
-void
+int
 fido_hid_set_sigmask(void *handle, const sigset_t *sigmask)
 {
 	struct hid_netbsd *ctx = handle;
 
 	ctx->sigmask = *sigmask;
 	ctx->sigmaskp = &ctx->sigmask;
+
+	return (FIDO_OK);
 }
 
 int

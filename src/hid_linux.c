@@ -17,10 +17,10 @@
 #include "fido.h"
 
 struct hid_linux {
-	int	fd;
-	size_t	report_in_len;
-	size_t	report_out_len;
-	sigset_t sigmask;
+	int             fd;
+	size_t          report_in_len;
+	size_t          report_out_len;
+	sigset_t        sigmask;
 	const sigset_t *sigmaskp;
 };
 
@@ -212,7 +212,6 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 				fido_hid_close,
 				fido_hid_read,
 				fido_hid_write,
-				fido_hid_set_sigmask,
 			};
 			if (++(*olen) == ilen)
 				break;
@@ -264,13 +263,15 @@ fido_hid_close(void *handle)
 	free(ctx);
 }
 
-void
+int
 fido_hid_set_sigmask(void *handle, const sigset_t *sigmask)
 {
 	struct hid_linux *ctx = handle;
 
 	ctx->sigmask = *sigmask;
 	ctx->sigmaskp = &ctx->sigmask;
+
+	return (FIDO_OK);
 }
 
 int

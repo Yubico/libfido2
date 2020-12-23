@@ -11,9 +11,10 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <poll.h>
+#include <signal.h>
 #include <string.h>
 #include <unistd.h>
-#include <poll.h>
 
 #include "fido.h"
 
@@ -176,6 +177,15 @@ fido_hid_close(void *handle)
 
 	close(ctx->fd);
 	free(ctx);
+}
+
+int
+fido_hid_set_sigmask(void *handle, const sigset_t *sigmask)
+{
+	(void)handle;
+	(void)sigmask;
+
+	return (FIDO_ERR_INTERNAL);
 }
 
 int

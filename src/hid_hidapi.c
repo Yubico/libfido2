@@ -189,6 +189,17 @@ fido_hid_close(void *handle)
 	free(ctx);
 }
 
+#ifndef _WIN32
+int
+fido_hid_set_sigmask(void *handle, const sigset_t *sigmask)
+{
+	(void)handle;
+	(void)sigmask;
+
+	return (FIDO_ERR_INTERNAL);
+}
+#endif
+
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {

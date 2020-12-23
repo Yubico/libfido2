@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "fido.h"
 
 #ifndef TLS
@@ -313,16 +312,16 @@ fido_dev_close(fido_dev_t *dev)
 	return (FIDO_OK);
 }
 
+#ifdef HAVE_SIGSET_T
 int
 fido_dev_set_sigmask(fido_dev_t *dev, const sigset_t *sigmask)
 {
-	if (dev->io_handle == NULL || dev->io.set_sigmask == NULL)
+	if (dev->io_handle == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	dev->io.set_sigmask(dev->io_handle, sigmask);
-
-	return (FIDO_OK);
+	return (fido_hid_set_sigmask(dev->io_handle, sigmask));
 }
+#endif
 
 int
 fido_dev_cancel(fido_dev_t *dev)
@@ -490,7 +489,6 @@ fido_dev_new(void)
 		&fido_hid_close,
 		&fido_hid_read,
 		&fido_hid_write,
-		&fido_hid_set_sigmask,
 	};
 
 	return (dev);

@@ -159,7 +159,7 @@ else()
 	set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -D_FORTIFY_SOURCE=2")
 
 	add_definitions(-D_DEFAULT_SOURCE)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+	#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g2")
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer")
@@ -226,13 +226,13 @@ if(HAVE_SYS_RANDOM_H)
 endif()
 
 # strlcpy
-check_function_exists(strlcpy HAVE_STRLCPY)
+check_symbol_exists(strlcpy string.h HAVE_STRLCPY)
 if(HAVE_STRLCPY)
 	add_definitions(-DHAVE_STRLCPY)
 endif()
 
 # strlcat
-check_function_exists(strlcpy HAVE_STRLCAT)
+check_symbol_exists(strlcat string.h HAVE_STRLCAT)
 if(HAVE_STRLCAT)
 	add_definitions(-DHAVE_STRLCAT)
 endif()
@@ -306,6 +306,14 @@ else()
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-incompatible-pointer-types-discards-qualifiers")
 	endif()
 endif()
+
+# sigset_t
+set(CMAKE_EXTRA_INCLUDE_FILES sys/types.h signal.h)
+check_type_size("sigset_t" HAVE_SIGSET_T)
+if(NOT HAVE_SIGSET_T STREQUAL "")
+	add_definitions(-DHAVE_SIGSET_T)
+endif()
+set(CMAKE_EXTRA_INCLUDE_FILES)
 
 # usable sigaction
 set(CMAKE_EXTRA_INCLUDE_FILES signal.h)
