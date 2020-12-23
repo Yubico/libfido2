@@ -232,7 +232,7 @@ if(HAVE_STRLCPY)
 endif()
 
 # strlcat
-check_function_exists(strlcpy HAVE_STRLCAT)
+check_function_exists(strlcat HAVE_STRLCAT)
 if(HAVE_STRLCAT)
 	add_definitions(-DHAVE_STRLCAT)
 endif()
