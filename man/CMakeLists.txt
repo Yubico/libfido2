@@ -194,12 +194,13 @@ list(APPEND MAN_ALIAS
 	fido_dev_open fido_dev_minor
 	fido_dev_open fido_dev_new
 	fido_dev_open fido_dev_protocol
-	fido_dev_open fido_dev_supports_credman
 	fido_dev_open fido_dev_supports_cred_prot
+	fido_dev_open fido_dev_supports_credman
 	fido_dev_open fido_dev_supports_pin
 	fido_dev_set_pin fido_dev_get_retry_count
 	fido_dev_set_pin fido_dev_get_uv_retry_count
 	fido_dev_set_pin fido_dev_reset
+	fido_dev_set_io_functions fido_dev_set_sigmask
 	rs256_pk_new rs256_pk_free
 	rs256_pk_new rs256_pk_from_ptr
 	rs256_pk_new rs256_pk_from_RSA
