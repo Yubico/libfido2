@@ -10,9 +10,11 @@
 #ifdef __MINGW32__
 #include <sys/types.h>
 #endif
+
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
+
 #include <stdint.h>
 
 #include "fido/types.h"
@@ -109,6 +111,7 @@ int fido_nfc_read(void *, unsigned char *, size_t, int);
 int fido_nfc_write(void *, const unsigned char *, size_t);
 int fido_nfc_rx(fido_dev_t *, uint8_t, unsigned char *, size_t, int);
 int fido_nfc_tx(fido_dev_t *, uint8_t, const unsigned char *, size_t);
+int fido_nfc_set_sigmask(void *, const fido_sigset_t *);
 
 /* generic i/o */
 int fido_rx_cbor_status(fido_dev_t *, int);

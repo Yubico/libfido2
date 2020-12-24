@@ -345,6 +345,10 @@ fido_dev_set_sigmask(fido_dev_t *dev, const fido_sigset_t *sigmask)
 	if (dev->io_own || dev->io_handle == NULL || sigmask == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
+#ifdef __linux__
+	if (dev->transport.rx == fido_nfc_rx)
+		return (fido_nfc_set_sigmask(dev->io_handle, sigmask));
+#endif
 	return (fido_hid_set_sigmask(dev->io_handle, sigmask));
 }
 

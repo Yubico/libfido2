@@ -12,6 +12,7 @@
 
 #include <errno.h>
 #include <libudev.h>
+#include <signal.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -27,10 +28,12 @@ static const uint8_t v_u2f[] = { 'U', '2', 'F', '_', 'V', '2' };
 static const uint8_t v_fido[] = { 'F', 'I', 'D', 'O', '_', '2', '_', '0' };
 
 struct nfc_linux {
-    int             fd;
-    uint32_t        dev;
-    uint32_t        target;
-    struct fido_nl *nl;
+	int             fd;
+	uint32_t        dev;
+	uint32_t        target;
+	sigset_t	sigmask;
+	const sigset_t *sigmaskp;
+	struct fido_nl *nl;
 };
 
 static int
@@ -551,6 +554,17 @@ fido_nfc_close(void *handle)
 }
 
 int
+fido_nfc_set_sigmask(void *handle, const fido_sigset_t *sigmask)
+{
+	struct nfc_linux *ctx = handle;
+
+	ctx->sigmask = *sigmask;
+	ctx->sigmaskp = &ctx->sigmask;
+
+	return (FIDO_OK);
+}
+
+int
 fido_nfc_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct nfc_linux *ctx = handle;
@@ -564,7 +578,7 @@ fido_nfc_read(void *handle, unsigned char *buf, size_t len, int ms)
 	iov[1].iov_base = buf;
 	iov[1].iov_len = len;
 
-	if (fido_hid_unix_wait(ctx->fd, ms) < 0) {
+	if (fido_hid_unix_wait(ctx->fd, ms, ctx->sigmaskp) < 0) {
 		fido_log_debug("%s: fido_hid_unix_wait", __func__);
 		return (-1);
 	}
