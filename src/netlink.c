@@ -356,7 +356,7 @@ nlmsg_rx(int fd, unsigned char *ptr, size_t len, int ms)
 		fido_log_debug("%s: len", __func__);
 		return (-1);
 	}
-	if (fido_hid_unix_wait(fd, ms) < 0) {
+	if (fido_hid_unix_wait(fd, ms, NULL) < 0) {
 		fido_log_debug("%s: fido_hid_unix_wait", __func__);
 		return (-1);
 	}
