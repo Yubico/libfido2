@@ -252,7 +252,7 @@ nlmsg_get_status(nlmsgbuf_t *m)
 {
 	int status;
 
-	if (nlmsg_read(m, &status, sizeof(status)) < 0)
+	if (nlmsg_read(m, &status, sizeof(status)) < 0 || status == INT_MIN)
 		return (-1);
 	if (status < 0)
 		status = -status;
