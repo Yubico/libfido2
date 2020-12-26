@@ -89,6 +89,11 @@ fido_hid_unix_wait(int fd, int ms, const fido_sigset_t *sigmask)
 	pfd.events = POLLIN;
 	pfd.fd = fd;
 
+#ifdef FIDO_FUZZ
+	if (ms < 0)
+		return (0);
+#endif
+
 	if (ms > 0) {
 		if (clock_gettime(CLOCK_MONOTONIC, &ts_start) != 0) {
 			xstrerror(errno, ebuf, sizeof(ebuf));
