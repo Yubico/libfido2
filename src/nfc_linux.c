@@ -189,7 +189,9 @@ rx_init(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 		attr->flags = FIDO_CAP_CBOR | FIDO_CAP_NMSG;
 	else {
 		fido_log_debug("%s: unknown version string", __func__);
-#ifndef FIDO_FUZZ
+#ifdef FIDO_FUZZ
+		attr->flags = FIDO_CAP_CBOR | FIDO_CAP_NMSG;
+#else
 		return (-1);
 #endif
 	}
