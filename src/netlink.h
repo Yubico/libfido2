@@ -22,6 +22,11 @@ void fido_nl_free(struct fido_nl **);
 int fido_nl_power_nfc(struct fido_nl *, uint32_t);
 int fido_nl_get_nfc_target(struct fido_nl *, uint32_t , uint32_t *);
 
+#ifdef FIDO_FUZZ
+void set_netlink_io_functions(ssize_t (*)(int, void *, size_t),
+    ssize_t (*)(int, const void *, size_t));
+#endif
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */

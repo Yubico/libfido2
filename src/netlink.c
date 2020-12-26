@@ -21,6 +21,16 @@
 #include "fido.h"
 #include "netlink.h"
 
+#ifdef FIDO_FUZZ
+static ssize_t (*fuzz_read)(int, void *, size_t);
+static ssize_t (*fuzz_write)(int, const void *, size_t);
+# define READ	fuzz_read
+# define WRITE	fuzz_write
+#else
+# define READ	read
+# define WRITE	write
+#endif
+
 #ifndef SOL_NETLINK
 #define SOL_NETLINK	270
 #endif
@@ -335,7 +345,7 @@ nlmsg_tx(int fd, const nlmsgbuf_t *m)
 {
 	ssize_t r;
 
-	if ((r = write(fd, nlmsg_ptr(m), nlmsg_len(m))) < 0 ||
+	if ((r = WRITE(fd, nlmsg_ptr(m), nlmsg_len(m))) < 0 ||
 	    (size_t)r != nlmsg_len(m)) {
 		fido_log_debug("%s: write", __func__);
 		return (-1);
@@ -360,7 +370,7 @@ nlmsg_rx(int fd, unsigned char *ptr, size_t len, int ms)
 		fido_log_debug("%s: fido_hid_unix_wait", __func__);
 		return (-1);
 	}
-	if ((r = read(fd, ptr, len)) < 0) {
+	if ((r = READ(fd, ptr, len)) < 0) {
 		fido_log_debug("%s: read", __func__);
 		return (-1);
 	}
@@ -755,3 +765,13 @@ fail:
 
 	return (nl);
 }
+
+#ifdef FIDO_FUZZ
+void
+set_netlink_io_functions(ssize_t (*read_f)(int, void *, size_t),
+    ssize_t (*write_f)(int, const void *, size_t))
+{
+	fuzz_read = read_f;
+	fuzz_write = write_f;
+}
+#endif
