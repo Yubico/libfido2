@@ -47,3 +47,9 @@ add_executable(fuzz_hid fuzz_hid.c ${COMMON_SOURCES} ${COMPAT_SOURCES})
 target_compile_options(fuzz_hid PRIVATE ${FUZZ_LDFLAGS})
 set_target_properties(fuzz_hid PROPERTIES LINK_FLAGS ${FUZZ_LDFLAGS})
 target_link_libraries(fuzz_hid fido2_shared)
+
+# fuzz_netlink
+add_executable(fuzz_netlink fuzz_netlink.c ${COMMON_SOURCES} ${COMPAT_SOURCES})
+target_compile_options(fuzz_netlink PRIVATE ${FUZZ_LDFLAGS})
+set_target_properties(fuzz_netlink PROPERTIES LINK_FLAGS ${FUZZ_LDFLAGS})
+target_link_libraries(fuzz_netlink fido2_shared)

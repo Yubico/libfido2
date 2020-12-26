@@ -75,6 +75,9 @@ void mutate_int(int *);
 void mutate_blob(struct blob *);
 void mutate_string(char *);
 
+ssize_t fd_read(int, void *, size_t);
+ssize_t fd_write(int, const void *, size_t);
+
 fido_dev_t *open_dev(int);
 void set_wire_data(const uint8_t *, size_t);
 

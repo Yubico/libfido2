@@ -6,7 +6,8 @@ IMAGE		:= libfido2-coverage:1.6.0
 RUNNER		:= libfido2-runner
 PROFDATA	:= llvm-profdata-10
 COV		:= llvm-cov-10
-TARGETS		:= fuzz_assert fuzz_bio fuzz_cred fuzz_credman fuzz_hid fuzz_mgmt
+TARGETS		:= fuzz_assert fuzz_bio fuzz_cred fuzz_credman fuzz_hid \
+		   fuzz_netlink fuzz_mgmt
 CORPORA		:= $(foreach f,${TARGETS},${f}/corpus)
 MINIFY		:= $(foreach f,${TARGETS},/minify/${f}/corpus)
 REMOTE		:= gs://libfido2-corpus.clusterfuzz-external.appspot.com

@@ -194,6 +194,10 @@
 		fido_init;
 		fido_nfc_rx;
 		fido_nfc_tx;
+		fido_nl_free;
+		fido_nl_get_nfc_target;
+		fido_nl_new;
+		fido_nl_power_nfc;
 		fido_set_log_handler;
 		fido_strerr;
 		rs256_pk_free;
@@ -202,6 +206,7 @@
 		rs256_pk_new;
 		rs256_pk_to_EVP_PKEY;
 		prng_init;
+		set_netlink_io_functions;
 		uniform_random;
 	local:
 		*;

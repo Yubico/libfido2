@@ -167,7 +167,7 @@ mutate_string(char *s)
 }
 
 static int
-dev_read(unsigned char *ptr, size_t len, int ms)
+buf_read(unsigned char *ptr, size_t len, int ms)
 {
 	size_t n;
 
@@ -187,7 +187,7 @@ dev_read(unsigned char *ptr, size_t len, int ms)
 }
 
 static int
-dev_write(const unsigned char *ptr, size_t len)
+buf_write(const unsigned char *ptr, size_t len)
 {
 	consume(ptr, len);
 
@@ -217,7 +217,7 @@ hid_read(void *handle, unsigned char *ptr, size_t len, int ms)
 	assert(handle == (void *)HID_DEV_HANDLE);
 	assert(len >= CTAP_MIN_REPORT_LEN && len <= CTAP_MAX_REPORT_LEN);
 
-	return dev_read(ptr, len, ms);
+	return buf_read(ptr, len, ms);
 }
 
 static int
@@ -227,7 +227,7 @@ hid_write(void *handle, const unsigned char *ptr, size_t len)
 	assert(len >= CTAP_MIN_REPORT_LEN + 1 &&
 	    len <= CTAP_MAX_REPORT_LEN + 1);
 
-	return dev_write(ptr, len);
+	return buf_write(ptr, len);
 }
 
 static void *
@@ -250,7 +250,7 @@ nfc_read(void *handle, unsigned char *ptr, size_t len, int ms)
 	assert(handle == (void *)NFC_DEV_HANDLE);
 	assert(len > 0 && len <= 256 + 2);
 
-	return dev_read(ptr, len, ms);
+	return buf_read(ptr, len, ms);
 }
 
 static int
@@ -259,7 +259,23 @@ nfc_write(void *handle, const unsigned char *ptr, size_t len)
 	assert(handle == (void *)NFC_DEV_HANDLE);
 	assert(len > 0 && len <= 256 + 2);
 
-	return dev_write(ptr, len);
+	return buf_write(ptr, len);
+}
+
+ssize_t
+fd_read(int fd, void *ptr, size_t len)
+{
+	assert(fd != -1);
+
+	return buf_read(ptr, len, -1);
+}
+
+ssize_t
+fd_write(int fd, const void *ptr, size_t len)
+{
+	assert(fd != -1);
+
+	return buf_write(ptr, len);
 }
 
 fido_dev_t *
@@ -272,9 +288,9 @@ open_dev(int nfc)
 	memset(&io, 0, sizeof(io));
 	memset(&t, 0, sizeof(t));
 
-	if ((dev = fido_dev_new()) == NULL) {
+	if ((dev = fido_dev_new()) == NULL)
 		return NULL;
-	}
+
 	if (nfc) {
 		io.open = nfc_open;
 		io.close = nfc_close;
@@ -286,24 +302,25 @@ open_dev(int nfc)
 		io.read = hid_read;
 		io.write = hid_write;
 	}
-	if (fido_dev_set_io_functions(dev, &io) != FIDO_OK) {
-		fido_dev_free(&dev);
-		return NULL;
-	}
+
+	if (fido_dev_set_io_functions(dev, &io) != FIDO_OK)
+		goto fail;
+
 	if (nfc) {
 		t.rx = fido_nfc_rx;
 		t.tx = fido_nfc_tx;
-		if (fido_dev_set_transport_functions(dev, &t) != FIDO_OK) {
-			fido_dev_free(&dev);
-			return NULL;
-		}
-	}
-	if (fido_dev_open(dev, "nodev") != FIDO_OK) {
-		fido_dev_free(&dev);
-		return NULL;
+		if (fido_dev_set_transport_functions(dev, &t) != FIDO_OK)
+			goto fail;
 	}
 
+	if (fido_dev_open(dev, "nodev") != FIDO_OK)
+		goto fail;
+
 	return dev;
+fail:
+	fido_dev_free(&dev);
+
+	return NULL;
 }
 
 void
