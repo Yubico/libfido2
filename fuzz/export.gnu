@@ -192,6 +192,8 @@
 		fido_hid_get_report_len;
 		fido_hid_get_usage;
 		fido_init;
+		fido_nfc_rx;
+		fido_nfc_tx;
 		fido_set_log_handler;
 		fido_strerr;
 		rs256_pk_free;

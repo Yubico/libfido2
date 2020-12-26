@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <cbor.h>
 
+#include "fido.h"
+
 /*
  * As of LLVM 10.0.0, MSAN support in libFuzzer was still experimental.
  * We therefore have to be careful when using our custom mutator, or
@@ -73,11 +75,8 @@ void mutate_int(int *);
 void mutate_blob(struct blob *);
 void mutate_string(char *);
 
-void *dev_open(const char *);
-void dev_close(void *);
+fido_dev_t *open_dev(int);
 void set_wire_data(const uint8_t *, size_t);
-int dev_read(void *, unsigned char *, size_t, int);
-int dev_write(void *, const unsigned char *, size_t);
 
 void prng_init(unsigned long);
 unsigned long prng_uint32(void);

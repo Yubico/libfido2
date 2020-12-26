@@ -188,28 +188,6 @@ pack_dummy(uint8_t *ptr, size_t len)
 	return blob_len;
 }
 
-static fido_dev_t *
-prepare_dev(void)
-{
-	fido_dev_t *dev;
-	fido_dev_io_t io;
-
-	memset(&io, 0, sizeof(io));
-
-	io.open = dev_open;
-	io.close = dev_close;
-	io.read = dev_read;
-	io.write = dev_write;
-
-	if ((dev = fido_dev_new()) == NULL || fido_dev_set_io_functions(dev,
-	    &io) != FIDO_OK || fido_dev_open(dev, "nodev") != FIDO_OK) {
-		fido_dev_free(&dev);
-		return NULL;
-	}
-
-	return dev;
-}
-
 static void
 dev_reset(const struct param *p)
 {
@@ -217,7 +195,7 @@ dev_reset(const struct param *p)
 
 	set_wire_data(p->reset_wire_data.body, p->reset_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = open_dev(0)) == NULL)
 		return;
 
 	fido_dev_reset(dev);
@@ -235,7 +213,7 @@ dev_get_cbor_info(const struct param *p)
 
 	set_wire_data(p->info_wire_data.body, p->info_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = open_dev(0)) == NULL)
 		return;
 
 	proto = fido_dev_protocol(dev);
@@ -302,7 +280,7 @@ dev_set_pin(const struct param *p)
 
 	set_wire_data(p->set_pin_wire_data.body, p->set_pin_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = open_dev(0)) == NULL)
 		return;
 
 	fido_dev_set_pin(dev, p->pin1, NULL);
@@ -317,7 +295,7 @@ dev_change_pin(const struct param *p)
 
 	set_wire_data(p->change_pin_wire_data.body, p->change_pin_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = open_dev(0)) == NULL)
 		return;
 
 	fido_dev_set_pin(dev, p->pin2, p->pin1);
@@ -333,7 +311,7 @@ dev_get_retry_count(const struct param *p)
 
 	set_wire_data(p->retry_wire_data.body, p->retry_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = open_dev(0)) == NULL)
 		return;
 
 	fido_dev_get_retry_count(dev, &n);
@@ -350,7 +328,7 @@ dev_get_uv_retry_count(const struct param *p)
 
 	set_wire_data(p->retry_wire_data.body, p->retry_wire_data.len);
 
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = open_dev(0)) == NULL)
 		return;
 
 	fido_dev_get_uv_retry_count(dev, &n);
