@@ -28,6 +28,7 @@ _fido_assert_set_clientdata_hash
 _fido_assert_set_count
 _fido_assert_set_extensions
 _fido_assert_set_hmac_salt
+_fido_assert_set_hmac_secret
 _fido_assert_set_options
 _fido_assert_set_rp
 _fido_assert_set_sig

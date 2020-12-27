@@ -634,6 +634,19 @@ fido_assert_set_hmac_salt(fido_assert_t *assert, const unsigned char *salt,
 }
 
 int
+fido_assert_set_hmac_secret(fido_assert_t *assert, size_t idx,
+    const unsigned char *secret, size_t secret_len)
+{
+	if (idx >= assert->stmt_len ||
+	    (secret_len != 32 && secret_len != 64) ||
+	    (fido_blob_set(&assert->stmt[idx].hmac_secret, secret, secret_len)
+		< 0))
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	return (FIDO_OK);
+}
+
+int
 fido_assert_set_rp(fido_assert_t *assert, const char *id)
 {
 	if (assert->rp_id != NULL) {

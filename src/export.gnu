@@ -30,6 +30,7 @@
 		fido_assert_set_count;
 		fido_assert_set_extensions;
 		fido_assert_set_hmac_salt;
+		fido_assert_set_hmac_secret;
 		fido_assert_set_options;
 		fido_assert_set_rp;
 		fido_assert_set_sig;
