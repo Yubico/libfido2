@@ -225,6 +225,11 @@ test(const struct param *p)
 	if ((nl = fido_nl_new()) == NULL)
 		return;
 
+	consume(&nl->fd, sizeof(nl->fd));
+	consume(&nl->nfc_type, sizeof(nl->nfc_type));
+	consume(&nl->nfc_mcastgrp, sizeof(nl->nfc_mcastgrp));
+	consume(&nl->saddr, sizeof(nl->saddr));
+
 	fido_nl_power_nfc(nl, (uint32_t)p->dev);
 
 	if (fido_nl_get_nfc_target(nl, (uint32_t)p->dev, &target) == 0)
