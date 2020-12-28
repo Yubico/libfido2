@@ -90,6 +90,10 @@ int timingsafe_bcmp(const void *, const void *, size_t);
 ssize_t getline(char **, size_t *, FILE *);
 #endif
 
+#if defined(_MSC_VER)
+#define strerror_r(e, b, l) strerror_s((b), (l), (e))
+#endif
+
 #include "time.h"
 
 #endif /* !_OPENBSD_COMPAT_H */

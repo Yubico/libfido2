@@ -4,6 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
+#undef _GNU_SOURCE /* XSI strerror_r() */
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,6 +82,31 @@ fido_log_xxd(const void *buf, size_t count)
 			*row = '\0';
 		}
 	}
+}
+
+void
+fido_log_error(int errnum, const char *fmt, ...)
+{
+	char msg[128], err[64], line[LINELEN];
+	va_list ap;
+	int r;
+
+	if (!logging || log_handler == NULL)
+		return;
+
+	va_start(ap, fmt);
+	r = vsnprintf(msg, sizeof(msg), fmt, ap);
+	va_end(ap);
+	if (r < 0 || (size_t)r >= sizeof(msg))
+		return;
+	if (strerror_r(errnum, err, sizeof(err)) != 0) {
+		r = snprintf(err, sizeof(err), "error %d", errnum);
+		if (r < 0 || (size_t)r >= sizeof(err))
+			return;
+	}
+	snprintf(line, sizeof(line), "%s: %s\n", msg, err);
+
+	log_handler(line);
 }
 
 void
