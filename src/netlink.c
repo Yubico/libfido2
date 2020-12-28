@@ -699,17 +699,21 @@ fido_nl_get_nfc_target(fido_nl_t *nl, uint32_t dev, uint32_t *target)
 		fido_log_debug("%s: nl_nfc_poll", __func__);
 		return (-1);
 	}
+#ifndef FIDO_FUZZ
 	if (setsockopt(nl->fd, SOL_NETLINK, NETLINK_ADD_MEMBERSHIP,
 	    &nl->nfc_mcastgrp, sizeof(nl->nfc_mcastgrp)) == -1) {
 		fido_log_debug("%s: setsockopt add", __func__);
 		return (-1);
 	}
+#endif
 	r = nlmsg_rx(nl->fd, reply, sizeof(reply), -1);
+#ifndef FIDO_FUZZ
 	if (setsockopt(nl->fd, SOL_NETLINK, NETLINK_DROP_MEMBERSHIP,
 	    &nl->nfc_mcastgrp, sizeof(nl->nfc_mcastgrp)) == -1) {
 		fido_log_debug("%s: setsockopt drop", __func__);
 		return (-1);
 	}
+#endif
 	if (r < 0) {
 		fido_log_debug("%s: nlmsg_rx", __func__);
 		return (-1);
