@@ -479,13 +479,15 @@ nfc_target_connect(struct nfc_linux *ctx)
 	sa.nfc_protocol = NFC_PROTO_ISO14443;
 
 	if ((ctx->fd = socket(AF_NFC, SOCK_SEQPACKET | SOCK_CLOEXEC,
-	    NFC_SOCKPROTO_RAW)) == -1 ||
-	    connect(ctx->fd, (struct sockaddr *)&sa, sizeof(sa)) == -1) {
-		fido_log_debug("%s: connect", __func__);
-		if (ctx->fd != -1) {
-			close(ctx->fd);
-			ctx->fd = -1;
-		}
+	    NFC_SOCKPROTO_RAW)) == -1) {
+		fido_log_error(errno, "%s: socket", __func__);
+		return (-1);
+	}
+	if (connect(ctx->fd, (struct sockaddr *)&sa, sizeof(sa)) == -1) {
+		fido_log_error(errno, "%s: connect", __func__);
+		if (close(ctx->fd) == -1)
+			fido_log_error(errno, "%s: close", __func__);
+		ctx->fd = -1;
 		return (-1);
 	}
 
@@ -499,8 +501,8 @@ nfc_free(struct nfc_linux **ctx_p)
 
 	if (ctx_p == NULL || (ctx = *ctx_p) == NULL)
 		return;
-	if (ctx->fd != -1)
-		close(ctx->fd);
+	if (ctx->fd != -1 && close(ctx->fd) == -1)
+		fido_log_error(errno, "%s: close", __func__);
 	if (ctx->nl != NULL)
 		fido_nl_free(&ctx->nl);
 
@@ -586,8 +588,16 @@ fido_nfc_read(void *handle, unsigned char *buf, size_t len, int ms)
 		fido_log_debug("%s: fido_hid_unix_wait", __func__);
 		return (-1);
 	}
-	if ((r = readv(ctx->fd, iov, nitems(iov))) < 1 || preamble != 0x00) {
-		fido_log_debug("%s: readv", __func__);
+	if ((r = readv(ctx->fd, iov, nitems(iov))) == -1) {
+		fido_log_error(errno, "%s: read", __func__);
+		return (-1);
+	}
+	if (r < 1) {
+		fido_log_debug("%s: %zd < 1", __func__, r);
+		return (-1);
+	}
+	if (preamble != 0x00) {
+		fido_log_debug("%s: preamble", __func__);
 		return (-1);
 	}
 
@@ -611,8 +621,12 @@ fido_nfc_write(void *handle, const unsigned char *buf, size_t len)
 		fido_log_debug("%s: len", __func__);
 		return (-1);
 	}
-	if ((r = write(ctx->fd, buf, len)) < 0 || (size_t)r != len) {
-		fido_log_debug("%s: write", __func__);
+	if ((r = write(ctx->fd, buf, len)) == -1) {
+		fido_log_error(errno, "%s: write", __func__);
+		return (-1);
+	}
+	if (r < 0 || (size_t)r != len) {
+		fido_log_debug("%s: %zd != %zu", __func__, r, len);
 		return (-1);
 	}
 

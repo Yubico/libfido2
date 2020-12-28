@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include <cbor.h>
+#include <errno.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -166,6 +167,7 @@ mutate_string(char *s)
 	s[n] = '\0';
 }
 
+/* XXX should fail, but doesn't */
 static int
 buf_read(unsigned char *ptr, size_t len, int ms)
 {
@@ -191,8 +193,10 @@ buf_write(const unsigned char *ptr, size_t len)
 {
 	consume(ptr, len);
 
-	if (uniform_random(400) < 1)
+	if (uniform_random(400) < 1) {
+		errno = EIO;
 		return -1;
+	}
 
 	return (int)len;
 }

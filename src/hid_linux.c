@@ -10,6 +10,7 @@
 #include <linux/hidraw.h>
 #include <linux/input.h>
 
+#include <errno.h>
 #include <libudev.h>
 #include <string.h>
 #include <unistd.h>
@@ -29,16 +30,20 @@ get_report_descriptor(int fd, struct hidraw_report_descriptor *hrd)
 {
 	int s = -1;
 
-	if (ioctl(fd, HIDIOCGRDESCSIZE, &s) < 0 || s < 0 ||
-	    (unsigned)s > HID_MAX_DESCRIPTOR_SIZE) {
-		fido_log_debug("%s: ioctl HIDIOCGRDESCSIZE", __func__);
+	if (ioctl(fd, HIDIOCGRDESCSIZE, &s) == -1) {
+		fido_log_error(errno, "%s: ioctl HIDIOCGRDESCSIZE", __func__);
+		return (-1);
+	}
+
+	if (s < 0 || (unsigned)s > HID_MAX_DESCRIPTOR_SIZE) {
+		fido_log_debug("%s: HIDIOCGRDESCSIZE %d", __func__, s);
 		return (-1);
 	}
 
 	hrd->size = (unsigned)s;
 
-	if (ioctl(fd, HIDIOCGRDESC, hrd) < 0) {
-		fido_log_debug("%s: ioctl HIDIOCGRDESC", __func__);
+	if (ioctl(fd, HIDIOCGRDESC, hrd) == -1) {
+		fido_log_error(errno, "%s: ioctl HIDIOCGRDESC", __func__);
 		return (-1);
 	}
 
@@ -61,7 +66,8 @@ is_fido(const char *path)
 	    fido_hid_get_usage(hrd.value, hrd.size, &usage_page) < 0)
 		usage_page = 0;
 
-	close(fd);
+	if (close(fd) == -1)
+		fido_log_error(errno, "%s: close", __func__);
 
 	return (usage_page == 0xf1d0);
 }
@@ -259,7 +265,9 @@ fido_hid_close(void *handle)
 {
 	struct hid_linux *ctx = handle;
 
-	close(ctx->fd);
+	if (close(ctx->fd) == -1)
+		fido_log_error(errno, "%s: close", __func__);
+
 	free(ctx);
 }
 
@@ -290,8 +298,13 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 
-	if ((r = read(ctx->fd, buf, len)) < 0 || (size_t)r != len) {
-		fido_log_debug("%s: read", __func__);
+	if ((r = read(ctx->fd, buf, len)) == -1) {
+		fido_log_error(errno, "%s: read", __func__);
+		return (-1);
+	}
+
+	if (r < 0 || (size_t)r != len) {
+		fido_log_debug("%s: %zd != %zu", __func__, r, len);
 		return (-1);
 	}
 
@@ -309,8 +322,13 @@ fido_hid_write(void *handle, const unsigned char *buf, size_t len)
 		return (-1);
 	}
 
-	if ((r = write(ctx->fd, buf, len)) < 0 || (size_t)r != len) {
-		fido_log_debug("%s: write", __func__);
+	if ((r = write(ctx->fd, buf, len)) == -1) {
+		fido_log_error(errno, "%s: write", __func__);
+		return (-1);
+	}
+
+	if (r < 0 || (size_t)r != len) {
+		fido_log_debug("%s: %zd != %zu", __func__, r, len);
 		return (-1);
 	}
 

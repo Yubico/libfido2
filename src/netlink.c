@@ -343,9 +343,12 @@ nlmsg_tx(int fd, const nlmsgbuf_t *m)
 {
 	ssize_t r;
 
-	if ((r = WRITE(fd, nlmsg_ptr(m), nlmsg_len(m))) < 0 ||
-	    (size_t)r != nlmsg_len(m)) {
-		fido_log_debug("%s: write", __func__);
+	if ((r = WRITE(fd, nlmsg_ptr(m), nlmsg_len(m))) == -1) {
+		fido_log_error(errno, "%s: write", __func__);
+		return (-1);
+	}
+	if (r < 0 || (size_t)r != nlmsg_len(m)) {
+		fido_log_debug("%s: %zd != %zu", __func__, r, nlmsg_len(m));
 		return (-1);
 	}
 	fido_log_debug("%s: buf=%p, len=%zu", __func__, nlmsg_ptr(m),
@@ -368,8 +371,8 @@ nlmsg_rx(int fd, unsigned char *ptr, size_t len, int ms)
 		fido_log_debug("%s: fido_hid_unix_wait", __func__);
 		return (-1);
 	}
-	if ((r = READ(fd, ptr, len)) < 0) {
-		fido_log_debug("%s: read", __func__);
+	if ((r = READ(fd, ptr, len)) == -1) {
+		fido_log_error(errno, "%s: read %zd", __func__, r);
 		return (-1);
 	}
 	fido_log_debug("%s: buf=%p, len=%zu", __func__, (void *)ptr, (size_t)r);
@@ -695,7 +698,7 @@ fido_nl_get_nfc_target(fido_nl_t *nl, uint32_t dev, uint32_t *target)
 #ifndef FIDO_FUZZ
 	if (setsockopt(nl->fd, SOL_NETLINK, NETLINK_ADD_MEMBERSHIP,
 	    &nl->nfc_mcastgrp, sizeof(nl->nfc_mcastgrp)) == -1) {
-		fido_log_debug("%s: setsockopt add", __func__);
+		fido_log_error(errno, "%s: setsockopt add", __func__);
 		return (-1);
 	}
 #endif
@@ -703,7 +706,7 @@ fido_nl_get_nfc_target(fido_nl_t *nl, uint32_t dev, uint32_t *target)
 #ifndef FIDO_FUZZ
 	if (setsockopt(nl->fd, SOL_NETLINK, NETLINK_DROP_MEMBERSHIP,
 	    &nl->nfc_mcastgrp, sizeof(nl->nfc_mcastgrp)) == -1) {
-		fido_log_debug("%s: setsockopt drop", __func__);
+		fido_log_error(errno, "%s: setsockopt drop", __func__);
 		return (-1);
 	}
 #endif
@@ -737,8 +740,8 @@ fido_nl_free(fido_nl_t **nlp)
 
 	if (nlp == NULL || (nl = *nlp) == NULL)
 		return;
-	if (nl->fd != -1)
-		close(nl->fd);
+	if (nl->fd != -1 && close(nl->fd) == -1)
+		fido_log_error(errno, "%s: close", __func__);
 
 	free(nl);
 	*nlp = NULL;
@@ -754,13 +757,13 @@ fido_nl_new(void)
 		return (NULL);
 	if ((nl->fd = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC,
 	    NETLINK_GENERIC)) == -1) {
-		fido_log_debug("%s: socket", __func__);
+		fido_log_error(errno, "%s: socket", __func__);
 		goto fail;
 	}
 	nl->saddr.nl_family = AF_NETLINK;
 	if (bind(nl->fd, (struct sockaddr *)&nl->saddr,
 	    sizeof(nl->saddr)) == -1) {
-		fido_log_debug("%s: bind", __func__);
+		fido_log_error(errno, "%s: bind", __func__);
 		goto fail;
 	}
 	if (nl_get_nfc_family(nl->fd, &nl->nfc_type, &nl->nfc_mcastgrp) < 0) {

@@ -45,13 +45,15 @@ fido_hid_unix_open(const char *path)
 
 	if (fstat(fd, &st) == -1) {
 		fido_log_error(errno, "%s: fstat %s", __func__, path);
-		close(fd);
+		if (close(fd) == -1)
+			fido_log_error(errno, "%s: close", __func__);
 		return (-1);
 	}
 
 	if (S_ISCHR(st.st_mode) == 0) {
 		fido_log_debug("%s: S_ISCHR %s", __func__, path);
-		close(fd);
+		if (close(fd) == -1)
+			fido_log_error(errno, "%s: close", __func__);
 		return (-1);
 	}
 
