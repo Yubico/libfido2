@@ -7,6 +7,12 @@
 #ifndef _FIDO_NETLINK_H
 #define _FIDO_NETLINK_H
 
+#include <sys/socket.h>
+
+#include <linux/genetlink.h>
+#include <linux/netlink.h>
+#include <linux/nfc.h>
+
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -14,8 +20,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
-struct fido_nl;
-typedef struct fido_nl fido_nl_t;
+typedef struct fido_nl {
+	int                fd;
+	uint16_t           nfc_type;
+	uint32_t           nfc_mcastgrp;
+	struct sockaddr_nl saddr;
+} fido_nl_t;
 
 fido_nl_t *fido_nl_new(void);
 void fido_nl_free(struct fido_nl **);

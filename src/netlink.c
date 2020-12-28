@@ -83,13 +83,6 @@ typedef struct nl_target {
 	uint32_t *value;
 } nl_target_t;
 
-struct fido_nl {
-	int                fd;
-	uint16_t           nfc_type;
-	uint32_t           nfc_mcastgrp;
-	struct sockaddr_nl saddr;
-};
-
 static const void *
 nlmsg_ptr(const nlmsgbuf_t *m)
 {
