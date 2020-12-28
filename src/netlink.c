@@ -78,6 +78,11 @@ typedef struct nl_poll {
 	unsigned int eventcnt;
 } nl_poll_t;
 
+typedef struct nl_target {
+	int       found;
+	uint32_t *value;
+} nl_target_t;
+
 struct fido_nl {
 	int                fd;
 	uint16_t           nfc_type;
@@ -550,16 +555,17 @@ nl_get_nfc_family(int fd, uint16_t *type, uint32_t *mcastgrp)
 static int
 parse_target(nlamsgbuf_t *a, void *arg)
 {
-	uint32_t *target = arg;
+	nl_target_t *t = arg;
 
-	if (nla_type(a) != NFC_ATTR_TARGET_INDEX) {
+	if (t->found || nla_type(a) != NFC_ATTR_TARGET_INDEX) {
 		fido_log_debug("%s: ignoring nla 0x%x", __func__, nla_type(a));
 		return (0);
 	}
-	if (nla_get_u32(a, target) < 0) {
+	if (nla_get_u32(a, t->value) < 0) {
 		fido_log_debug("%s: target", __func__);
 		return (-1);
 	}
+	t->found = 1;
 
 	return (0);
 }
@@ -627,6 +633,7 @@ static int
 nl_dump_nfc_target(fido_nl_t *nl, uint32_t dev, uint32_t *target, int ms)
 {
 	nlmsgbuf_t *m;
+	nl_target_t t;
 	uint8_t reply[512];
 	ssize_t r;
 	int ok;
@@ -643,9 +650,15 @@ nl_dump_nfc_target(fido_nl_t *nl, uint32_t dev, uint32_t *target, int ms)
 		fido_log_debug("%s: nlmsg_rx", __func__);
 		return (-1);
 	}
+	memset(&t, 0, sizeof(t));
+	t.value = target;
 	if ((ok = nl_parse_reply(reply, (size_t)r, nl->nfc_type,
-	    NFC_CMD_GET_TARGET, target, parse_target)) != 0) {
+	    NFC_CMD_GET_TARGET, &t, parse_target)) != 0) {
 		fido_log_debug("%s: nl_parse_reply: %d", __func__, ok);
+		return (-1);
+	}
+	if (!t.found) {
+		fido_log_debug("%s: target not found", __func__);
 		return (-1);
 	}
 
