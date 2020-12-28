@@ -31,36 +31,20 @@
 #define	ppoll	pollts
 #endif
 
-static void
-xstrerror(int errnum, char *buf, size_t len)
-{
-	if (len < 1)
-		return;
-
-	memset(buf, 0, len);
-
-	if (strerror_r(errnum, buf, len - 1) != 0)
-		snprintf(buf, len - 1, "error %d", errnum);
-}
-
 int
 fido_hid_unix_open(const char *path)
 {
-	char ebuf[128];
 	int fd;
 	struct stat st;
 
 	if ((fd = open(path, O_RDWR)) == -1) {
-		if (errno != ENOENT && errno != ENXIO) {
-			xstrerror(errno, ebuf, sizeof(ebuf));
-			fido_log_debug("%s: open %s: %s", __func__, path, ebuf);
-		}
+		if (errno != ENOENT && errno != ENXIO)
+			fido_log_error(errno, "%s: open %s", __func__, path);
 		return (-1);
 	}
 
 	if (fstat(fd, &st) == -1) {
-		xstrerror(errno, ebuf, sizeof(ebuf));
-		fido_log_debug("%s: fstat %s: %s", __func__, path, ebuf);
+		fido_log_error(errno, "%s: fstat %s", __func__, path);
 		close(fd);
 		return (-1);
 	}
@@ -77,7 +61,6 @@ fido_hid_unix_open(const char *path)
 int
 fido_hid_unix_wait(int fd, int ms, const fido_sigset_t *sigmask)
 {
-	char		ebuf[128];
 	struct timespec	ts_start;
 	struct timespec	ts_now;
 	struct timespec	ts_delta;
@@ -96,9 +79,7 @@ fido_hid_unix_wait(int fd, int ms, const fido_sigset_t *sigmask)
 
 	if (ms > 0) {
 		if (clock_gettime(CLOCK_MONOTONIC, &ts_start) != 0) {
-			xstrerror(errno, ebuf, sizeof(ebuf));
-			fido_log_debug("%s: clock_gettime: %s", __func__,
-			    ebuf);
+			fido_log_error(errno, "%s: clock_gettime", __func__);
 			return (-1);
 		}
 		ts_delta.tv_sec = ms / 1000;
@@ -109,9 +90,8 @@ fido_hid_unix_wait(int fd, int ms, const fido_sigset_t *sigmask)
 	for (;;) {
 		if (ms > 0) {
 			if (clock_gettime(CLOCK_MONOTONIC, &ts_now) != 0) {
-				xstrerror(errno, ebuf, sizeof(ebuf));
-				fido_log_debug("%s: clock_gettime: %s",
-				    __func__, ebuf);
+				fido_log_error(errno, "%s: clock_gettime",
+				    __func__);
 				return (-1);
 			}
 			if (timespeccmp(&ts_deadline, &ts_now, <=)) {
@@ -132,8 +112,7 @@ fido_hid_unix_wait(int fd, int ms, const fido_sigset_t *sigmask)
 		else if (r == 0)
 			break;
 		else {
-			xstrerror(errno, ebuf, sizeof(ebuf));
-			fido_log_debug("%s: poll: %s", __func__, ebuf);
+			fido_log_error(errno, "%s: poll", __func__);
 			return (-1);
 		}
 	}
