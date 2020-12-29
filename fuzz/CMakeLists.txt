@@ -12,6 +12,8 @@ list(APPEND COMMON_SOURCES
 	mutator_aux.c
 )
 
+set(FUZZ_LDFLAGS "-fsanitize=fuzzer")
+
 # fuzz_cred
 add_executable(fuzz_cred fuzz_cred.c ${COMMON_SOURCES} ${COMPAT_SOURCES})
 target_compile_options(fuzz_cred PRIVATE ${FUZZ_LDFLAGS})
