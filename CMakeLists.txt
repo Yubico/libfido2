@@ -41,17 +41,17 @@ option(FUZZ              "Enable fuzzing instrumentation" OFF)
 option(LIBFUZZER         "Build libfuzzer harnesses"      OFF)
 option(USE_HIDAPI        "Use hidapi as the HID backend"  OFF)
 
-add_compile_definitions(_FIDO_MAJOR=${FIDO_MAJOR})
-add_compile_definitions(_FIDO_MINOR=${FIDO_MINOR})
-add_compile_definitions(_FIDO_PATCH=${FIDO_PATCH})
+add_definitions(-D_FIDO_MAJOR=${FIDO_MAJOR})
+add_definitions(-D_FIDO_MINOR=${FIDO_MINOR})
+add_definitions(-D_FIDO_PATCH=${FIDO_PATCH})
 
 if(CYGWIN OR MSYS)
 	set(WIN32 1)
-	add_compile_definitions(WINVER=0x0a00)
+	add_definitions(-DWINVER=0x0a00)
 endif()
 
 if(WIN32)
-	add_compile_definitions(WIN32_LEAN_AND_MEAN _WIN32_WINNT=0x0600)
+	add_definitions(-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600)
 endif()
 
 if(APPLE)
@@ -132,20 +132,20 @@ list(APPEND CHECK_VARIABLES
 
 foreach(v ${CHECK_VARIABLES})
 	if (${v})
-		add_compile_definitions(${v})
+		add_definitions(-D${v})
 	endif()
 endforeach()
 
 if(HAVE_EXPLICIT_BZERO AND NOT LIBFUZZER)
-	add_compile_definitions(HAVE_EXPLICIT_BZERO)
+	add_definitions(-DHAVE_EXPLICIT_BZERO)
 endif()
 
 if(HAVE_SIGACTION AND (NOT HAVE_SIG_ATOMIC_T STREQUAL ""))
-	add_compile_definitions(SIGNAL_EXAMPLE)
+	add_definitions(-DSIGNAL_EXAMPLE)
 endif()
 
 if(UNIX)
-	add_compile_definitions(HAVE_DEV_URANDOM)
+	add_definitions(-DHAVE_DEV_URANDOM)
 endif()
 
 if(MSVC)
@@ -201,7 +201,7 @@ else()
 			check_library_exists(rt clock_gettime "time.h"
 			    HAVE_CLOCK_GETTIME)
 			if (HAVE_CLOCK_GETTIME)
-				add_compile_definitions(HAVE_CLOCK_GETTIME)
+				add_definitions(-DHAVE_CLOCK_GETTIME)
 				set(BASE_LIBRARIES ${BASE_LIBRARIES} rt)
 			endif()
 		endif()
@@ -209,13 +209,13 @@ else()
 
 	if(MINGW)
 		# MinGW is stuck with a flavour of C89.
-		add_compile_definitions(FIDO_NO_DIAGNOSTIC)
-		add_compile_definitions(WC_ERR_INVALID_CHARS=0x80)
+		add_definitions(-DFIDO_NO_DIAGNOSTIC)
+		add_definitions(-DWC_ERR_INVALID_CHARS=0x80)
 		add_compile_options(-Wno-unused-parameter)
 	endif()
 
 	if(USE_HIDAPI)
-		add_compile_definitions(USE_HIDAPI)
+		add_definitions(-DUSE_HIDAPI)
 		pkg_search_module(HIDAPI hidapi${HIDAPI_SUFFIX} REQUIRED)
 		include_directories(${HIDAPI_INCLUDE_DIRS})
 		link_directories(${HIDAPI_LIBRARY_DIRS})
@@ -245,7 +245,7 @@ else()
 	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -D_FORTIFY_SOURCE=2")
 
 	if(FUZZ)
-		add_compile_definitions(FIDO_FUZZ)
+		add_definitions(-DFIDO_FUZZ)
 	endif()
 	if(LIBFUZZER)
 		add_compile_options(-fsanitize=fuzzer-no-link)
@@ -265,7 +265,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR
 elseif(WIN32)
 	set(TLS "__declspec(thread)")
 endif()
-add_compile_definitions(TLS=${TLS})
+add_definitions(-DTLS=${TLS})
 
 # export list
 if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
