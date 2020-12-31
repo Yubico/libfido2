@@ -200,7 +200,7 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 
-	if ((r = read(ctx->fd, buf, len)) == -1)
+	if ((r = read(ctx->fd, buf, len)) == -1) {
 		fido_log_error(errno, "%s: read", __func__);
 		return (-1);
 	}
