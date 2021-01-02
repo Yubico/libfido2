@@ -198,8 +198,8 @@ terrible_ping_kludge(struct hid_netbsd *ctx)
 		 * so we might get an error, but we don't care - we're
 		 * synched now.
 		 */
-		fido_log_debug("%s: got reply", __func__);
-		fido_log_xxd(data, ctx->report_out_len);
+		fido_log_xxd(data, ctx->report_out_len, "%s: got reply",
+		    __func__);
 		return 0;
 	}
 	fido_log_debug("%s: no response", __func__);
