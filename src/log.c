@@ -68,15 +68,19 @@ fido_log_debug(const char *fmt, ...)
 }
 
 void
-fido_log_xxd(const void *buf, size_t count)
+fido_log_xxd(const void *buf, size_t count, const char *fmt, ...)
 {
 	const uint8_t *ptr = buf;
-	char row[XXDROW];
-	char xxd[XXDLEN];
+	char row[XXDROW], xxd[XXDLEN];
+	va_list args;
 
-	if (!logging || log_handler == NULL || count == 0)
+	if (!logging || log_handler == NULL)
 		return;
 
+	snprintf(row, sizeof(row), "buf=%p, len=%zu", buf, count);
+	va_start(args, fmt);
+	do_log(row, fmt, args);
+	va_end(args);
 	*row = '\0';
 
 	for (size_t i = 0; i < count; i++) {

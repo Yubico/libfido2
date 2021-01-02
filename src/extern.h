@@ -129,13 +129,14 @@ int fido_tx(fido_dev_t *, uint8_t, const void *, size_t);
 void fido_log_init(void);
 void fido_log_debug(const char *, ...)
     __attribute__((__format__ (printf, 1, 2)));
-void fido_log_xxd(const void *, size_t);
+void fido_log_xxd(const void *, size_t, const char *, ...)
+    __attribute__((__format__ (printf, 3, 4)));
 void fido_log_error(int, const char *, ...)
     __attribute__((__format__ (printf, 2, 3)));
 #else
 void fido_log_init(void);
 void fido_log_debug(const char *, ...);
-void fido_log_xxd(const void *, size_t);
+void fido_log_xxd(const void *, size_t, const char *, ...);
 void fido_log_error(int, const char *, ...);
 #endif /* __GNUC__ */
 #endif /* FIDO_NO_DIAGNOSTIC */
