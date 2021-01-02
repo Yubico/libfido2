@@ -351,9 +351,7 @@ nlmsg_tx(int fd, const nlmsgbuf_t *m)
 		fido_log_debug("%s: %zd != %zu", __func__, r, nlmsg_len(m));
 		return (-1);
 	}
-	fido_log_debug("%s: buf=%p, len=%zu", __func__, nlmsg_ptr(m),
-	    nlmsg_len(m));
-	fido_log_xxd(nlmsg_ptr(m), nlmsg_len(m));
+	fido_log_xxd(nlmsg_ptr(m), nlmsg_len(m), "%s", __func__);
 
 	return (0);
 }
@@ -375,8 +373,7 @@ nlmsg_rx(int fd, unsigned char *ptr, size_t len, int ms)
 		fido_log_error(errno, "%s: read %zd", __func__, r);
 		return (-1);
 	}
-	fido_log_debug("%s: buf=%p, len=%zu", __func__, (void *)ptr, (size_t)r);
-	fido_log_xxd(ptr, (size_t)r);
+	fido_log_xxd(ptr, (size_t)r, "%s", __func__);
 
 	return (r);
 }

@@ -602,8 +602,7 @@ fido_nfc_read(void *handle, unsigned char *buf, size_t len, int ms)
 	}
 
 	r--;
-	fido_log_debug("%s: buf=%p, r=%zu", __func__, (void *)buf, (size_t)r);
-	fido_log_xxd(buf, (size_t)r);
+	fido_log_xxd(buf, (size_t)r, "%s", __func__);
 
 	return ((int)r);
 }
@@ -614,8 +613,7 @@ fido_nfc_write(void *handle, const unsigned char *buf, size_t len)
 	struct nfc_linux *ctx = handle;
 	ssize_t	r;
 
-	fido_log_debug("%s: buf=%p, len=%zu", __func__, (const void*)buf, len);
-	fido_log_xxd(buf, len);
+	fido_log_xxd(buf, len, "%s", __func__);
 
 	if (len > INT_MAX) {
 		fido_log_debug("%s: len", __func__);
