@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -32,6 +32,21 @@ log_on_stderr(const char *str)
 	fprintf(stderr, "%s", str);
 }
 
+static void
+do_log(const char *suffix, const char *fmt, va_list args)
+{
+	char line[LINELEN], body[LINELEN - 3];
+
+	vsnprintf(body, sizeof(body), fmt, args);
+
+	if (suffix != NULL)
+		snprintf(line, sizeof(line), "%s: %s\n", body, suffix);
+	else
+		snprintf(line, sizeof(line), "%s\n", body);
+
+	log_handler(line);
+}
+
 void
 fido_log_init(void)
 {
@@ -42,20 +57,14 @@ fido_log_init(void)
 void
 fido_log_debug(const char *fmt, ...)
 {
-	char line[LINELEN];
-	va_list ap;
-	int r;
+	va_list args;
 
 	if (!logging || log_handler == NULL)
 		return;
 
-	va_start(ap, fmt);
-	r = vsnprintf(line, sizeof(line) - 1, fmt, ap);
-	va_end(ap);
-	if (r < 0 || (size_t)r >= sizeof(line) - 1)
-		return;
-	strlcat(line, "\n", sizeof(line));
-	log_handler(line);
+	va_start(args, fmt);
+	do_log(NULL, fmt, args);
+	va_end(args);
 }
 
 void
@@ -87,26 +96,17 @@ fido_log_xxd(const void *buf, size_t count)
 void
 fido_log_error(int errnum, const char *fmt, ...)
 {
-	char msg[128], err[64], line[LINELEN];
-	va_list ap;
-	int r;
+	char errstr[LINELEN];
+	va_list args;
 
 	if (!logging || log_handler == NULL)
 		return;
+	if (strerror_r(errnum, errstr, sizeof(errstr)) != 0)
+		snprintf(errstr, sizeof(errstr), "error %d", errnum);
 
-	va_start(ap, fmt);
-	r = vsnprintf(msg, sizeof(msg), fmt, ap);
-	va_end(ap);
-	if (r < 0 || (size_t)r >= sizeof(msg))
-		return;
-	if (strerror_r(errnum, err, sizeof(err)) != 0) {
-		r = snprintf(err, sizeof(err), "error %d", errnum);
-		if (r < 0 || (size_t)r >= sizeof(err))
-			return;
-	}
-	snprintf(line, sizeof(line), "%s: %s\n", msg, err);
-
-	log_handler(line);
+	va_start(args, fmt);
+	do_log(errstr, fmt, args);
+	va_end(args);
 }
 
 void
