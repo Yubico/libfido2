@@ -1056,8 +1056,7 @@ decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
 	uint16_t		 id_len;
 	int			 ok = -1;
 
-	fido_log_debug("%s: buf=%p, len=%zu", __func__, (const void *)*buf,
-	    *len);
+	fido_log_xxd(*buf, *len, "%s", __func__);
 
 	if (fido_buf_read(buf, len, &attcred->aaguid,
 	    sizeof(attcred->aaguid)) < 0) {
@@ -1083,7 +1082,6 @@ decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
 
 	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
-		fido_log_xxd(*buf, *len);
 		goto fail;
 	}
 
@@ -1156,15 +1154,12 @@ decode_extensions(const unsigned char **buf, size_t *len,
 	struct cbor_load_result	 cbor;
 	int			 ok = -1;
 
-	fido_log_debug("%s: buf=%p, len=%zu", __func__, (const void *)*buf,
-	    *len);
-	fido_log_xxd(*buf, *len);
-
 	memset(authdata_ext, 0, sizeof(*authdata_ext));
+
+	fido_log_xxd(*buf, *len, "%s", __func__);
 
 	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
-		fido_log_xxd(*buf, *len);
 		goto fail;
 	}
 
@@ -1213,12 +1208,10 @@ decode_hmac_secret(const unsigned char **buf, size_t *len, fido_blob_t *out)
 	struct cbor_load_result	 cbor;
 	int			 ok = -1;
 
-	fido_log_debug("%s: buf=%p, len=%zu", __func__, (const void *)*buf,
-	    *len);
+	fido_log_xxd(*buf, *len, "%s", __func__);
 
 	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
-		fido_log_xxd(*buf, *len);
 		goto fail;
 	}
 
@@ -1265,9 +1258,7 @@ cbor_decode_cred_authdata(const cbor_item_t *item, int cose_alg,
 
 	buf = cbor_bytestring_handle(item);
 	len = cbor_bytestring_length(item);
-
-	fido_log_debug("%s: buf=%p, len=%zu", __func__, (const void *)buf, len);
-	fido_log_xxd(buf, len);
+	fido_log_xxd(buf, len, "%s", __func__);
 
 	if (fido_buf_read(&buf, &len, authdata, sizeof(*authdata)) < 0) {
 		fido_log_debug("%s: fido_buf_read", __func__);
