@@ -219,7 +219,7 @@ tx_get_response(fido_dev_t *d, uint8_t count)
 }
 
 static int
-rx_apdu(fido_dev_t *d, uint16_t *sw, unsigned char **buf, size_t *count, int ms)
+rx_apdu(fido_dev_t *d, uint8_t sw[2], unsigned char **buf, size_t *count, int ms)
 {
 	uint8_t f[256 + 2];
 	int n, ok = -1;
@@ -246,22 +246,22 @@ fail:
 static int
 rx_msg(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 {
-	uint16_t sw;
+	uint8_t sw[2];
 	const size_t bufsiz = count;
 
-	if (rx_apdu(d, &sw, &buf, &count, ms) < 0) {
+	if (rx_apdu(d, sw, &buf, &count, ms) < 0) {
 		fido_log_debug("%s: preamble", __func__);
 		return (-1);
 	}
 
-	while ((sw & 0xff) == SW1_MORE_DATA)
-		if (tx_get_response(d, (uint8_t)(sw >> 8)) < 0 ||
-		    rx_apdu(d, &sw, &buf, &count, ms) < 0) {
+	while (sw[0] == SW1_MORE_DATA)
+		if (tx_get_response(d, sw[1]) < 0 ||
+		    rx_apdu(d, sw, &buf, &count, ms) < 0) {
 			fido_log_debug("%s: chain", __func__);
 			return (-1);
 		}
 
-	if (fido_buf_write(&buf, &count, &sw, sizeof(sw)) < 0) {
+	if (fido_buf_write(&buf, &count, sw, sizeof(sw)) < 0) {
 		fido_log_debug("%s: sw", __func__);
 		return (-1);
 	}
