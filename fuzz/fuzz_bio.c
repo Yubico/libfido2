@@ -302,7 +302,7 @@ enroll(const struct param *p)
 	    (e = fido_bio_enroll_new()) == NULL)
 		goto done;
 
-	fido_bio_dev_enroll_begin(dev, t, e, p->seed, p->pin);
+	fido_bio_dev_enroll_begin(dev, t, e, (uint32_t)p->seed, p->pin);
 
 	consume_template(t);
 	consume_enroll(e);
