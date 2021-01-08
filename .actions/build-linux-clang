@@ -1,7 +1,7 @@
 #!/bin/sh -eux
 
 ${CC} --version
-SCAN=scan-build-${CC#clang-}
+SCAN=scan-build${CC#clang}
 
 # Check exports.
 (cd src && ./diff_exports.sh)

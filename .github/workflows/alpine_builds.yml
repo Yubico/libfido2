@@ -1,0 +1,32 @@
+name: alpine
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: alpine:latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cc: [gcc, clang]
+    steps:
+    - name: checkout libfido2
+      uses: actions/checkout@v1
+    - name: checkout libcbor
+      uses: actions/checkout@v2
+      with:
+        repository: PJK/libcbor
+        path: libcbor
+        ref: v0.8.0
+    - name: dependencies
+      run: |
+        apk -q update
+        apk add sudo build-base openssl-dev cmake linux-headers eudev-dev \
+          clang clang-analyzer
+        (cd libcbor && cmake -DCMAKE_BUILD_TYPE=Release . && make && sudo make install)
+    - name: build
+      env:
+        CC: ${{ matrix.cc }}
+      run: |
+        /bin/sh -eux .actions/build-linux-${CC}
