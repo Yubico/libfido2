@@ -30,7 +30,7 @@ get_report_descriptor(int fd, struct hidraw_report_descriptor *hrd)
 {
 	int s = -1;
 
-	if (ioctl(fd, HIDIOCGRDESCSIZE, &s) == -1) {
+	if (ioctl(fd, IOCTL_REQ(HIDIOCGRDESCSIZE), &s) == -1) {
 		fido_log_error(errno, "%s: ioctl HIDIOCGRDESCSIZE", __func__);
 		return (-1);
 	}
@@ -42,7 +42,7 @@ get_report_descriptor(int fd, struct hidraw_report_descriptor *hrd)
 
 	hrd->size = (unsigned)s;
 
-	if (ioctl(fd, HIDIOCGRDESC, hrd) == -1) {
+	if (ioctl(fd, IOCTL_REQ(HIDIOCGRDESC), hrd) == -1) {
 		fido_log_error(errno, "%s: ioctl HIDIOCGRDESC", __func__);
 		return (-1);
 	}

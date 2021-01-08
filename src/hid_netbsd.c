@@ -46,7 +46,7 @@ is_fido(int fd)
 
 	memset(&ucrd, 0, sizeof(ucrd));
 
-	if (ioctl(fd, USB_GET_REPORT_DESC, &ucrd) == -1) {
+	if (ioctl(fd, IOCTL_REQ(USB_GET_REPORT_DESC), &ucrd) == -1) {
 		fido_log_error(errno, "%s: ioctl", __func__);
 		return (false);
 	}
@@ -71,7 +71,7 @@ is_fido(int fd)
 	 * to set the report descriptor rather than transfer data on
 	 * the output interrupt pipe as we need.
 	 */
-	if (ioctl(fd, USB_HID_SET_RAW, &raw) == -1) {
+	if (ioctl(fd, IOCTL_REQ(USB_HID_SET_RAW), &raw) == -1) {
 		fido_log_error(errno, "%s: unable to set raw", __func__);
 		return (false);
 	}
@@ -92,7 +92,7 @@ copy_info(fido_dev_info_t *di, const char *path)
 	if ((fd = fido_hid_unix_open(path)) == -1 || is_fido(fd) == 0)
 		goto fail;
 
-	if (ioctl(fd, USB_GET_DEVICEINFO, &udi) == -1) {
+	if (ioctl(fd, IOCTL_REQ(USB_GET_DEVICEINFO), &udi) == -1) {
 		fido_log_error(errno, "%s: ioctl", __func__);
 		goto fail;
 	}
@@ -221,7 +221,7 @@ fido_hid_open(const char *path)
 		return (NULL);
 	}
 
-	if ((r = ioctl(ctx->fd, USB_GET_REPORT_DESC, &ucrd)) == -1 ||
+	if ((r = ioctl(ctx->fd, IOCTL_REQ(USB_GET_REPORT_DESC), &ucrd)) == -1 ||
 	    ucrd.ucrd_size < 0 ||
 	    (size_t)ucrd.ucrd_size > sizeof(ucrd.ucrd_data) ||
 	    fido_hid_get_report_len(ucrd.ucrd_data, (size_t)ucrd.ucrd_size,

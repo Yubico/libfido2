@@ -96,4 +96,10 @@ ssize_t getline(char **, size_t *, FILE *);
 
 #include "time.h"
 
+#if !defined(HAVE_POSIX_IOCTL)
+#define IOCTL_REQ(x)	(x)
+#else
+#define IOCTL_REQ(x)	((int)(x))
+#endif
+
 #endif /* !_OPENBSD_COMPAT_H */

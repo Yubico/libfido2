@@ -39,7 +39,7 @@ is_fido(int fd)
 	ugd.ugd_data = buf;
 	ugd.ugd_maxlen = sizeof(buf);
 
-	if (ioctl(fd, USB_GET_REPORT_DESC, &ugd) == -1) {
+	if (ioctl(fd, IOCTL_REQ(USB_GET_REPORT_DESC), &ugd) == -1) {
 		fido_log_error(errno, "%s: ioctl", __func__);
 		return (false);
 	}
@@ -65,7 +65,7 @@ copy_info(fido_dev_info_t *di, const char *path)
 	if ((fd = fido_hid_unix_open(path)) == -1 || is_fido(fd) == 0)
 		goto fail;
 
-	if (ioctl(fd, USB_GET_DEVICEINFO, &udi) == -1) {
+	if (ioctl(fd, IOCTL_REQ(USB_GET_DEVICEINFO), &udi) == -1) {
 		fido_log_error(errno, "%s: ioctl", __func__);
 		strlcpy(udi.udi_vendor, "FreeBSD", sizeof(udi.udi_vendor));
 		strlcpy(udi.udi_product, "uhid(4)", sizeof(udi.udi_product));
@@ -148,7 +148,7 @@ fido_hid_open(const char *path)
 	ugd.ugd_data = buf;
 	ugd.ugd_maxlen = sizeof(buf);
 
-	if ((r = ioctl(ctx->fd, USB_GET_REPORT_DESC, &ugd) == -1) ||
+	if ((r = ioctl(ctx->fd, IOCTL_REQ(USB_GET_REPORT_DESC), &ugd) == -1) ||
 	    ugd.ugd_actlen > sizeof(buf) ||
 	    fido_hid_get_report_len(ugd.ugd_data, ugd.ugd_actlen,
 	    &ctx->report_in_len, &ctx->report_out_len) < 0) {

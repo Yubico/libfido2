@@ -46,7 +46,7 @@ fido_hid_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 		if ((fd = fido_hid_unix_open(path)) == -1)
 			continue;
 		memset(&udi, 0, sizeof(udi));
-		if (ioctl(fd, USB_GET_DEVICEINFO, &udi) == -1) {
+		if (ioctl(fd, IOCTL_REQ(USB_GET_DEVICEINFO), &udi) == -1) {
 			fido_log_error(errno, "%s: get device info %s",
 			    __func__, path);
 			if (close(fd) == -1)
