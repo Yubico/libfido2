@@ -11,7 +11,5 @@ sudo make -C build install
 # Check udev/fidodevs.
 [ -x "$(which update-alternatives)" ] && {
 	sudo update-alternatives --set awk "$(which original-awk)"
-	udev/check.sh udev/fidodevs
 }
-
-exit 0
+udev/check.sh udev/fidodevs

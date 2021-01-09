@@ -28,12 +28,12 @@ jobs:
           - os: ubuntu-16.04
             cc: i686-w64-mingw32-gcc-5
     steps:
-    - uses: actions/checkout@v1
-    - name: Dependencies
+    - uses: actions/checkout@v2
+    - name: dependencies
       env:
         CC: ${{ matrix.cc }}
       run: |
-        # ubuntu 16.04 does not package libcbor, use our ppa for that
+        # ubuntu 16.04 does not package libcbor
         if [ "$(lsb_release --short --release)" = "16.04" ]; then
           sudo apt-add-repository ppa:yubico/stable
         fi
@@ -47,8 +47,7 @@ jobs:
         else
           sudo apt install -q -y "${CC}"
         fi
-    - name: Build
+    - name: build
       env:
         CC: ${{ matrix.cc }}
-      run: |
-        /bin/sh -eux .actions/build-linux-${CC%-*}
+      run: ./.actions/build-linux-${CC%-*}

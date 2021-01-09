@@ -13,10 +13,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@master
-
     - name: Scan but do not fail on warnings
       run: |
         if [ "${SECRET}" != "" ]; then
@@ -30,7 +28,6 @@ jobs:
           echo "No docker registry credentials, not scanning"
         fi
       continue-on-error: true
-
     - uses: actions/upload-artifact@master
       if: failure()
       with:

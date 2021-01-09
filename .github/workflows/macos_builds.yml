@@ -10,16 +10,11 @@ jobs:
       matrix:
         os: [macos-latest]
         cc: [clang]
-
     steps:
-    - uses: actions/checkout@v1
-
-    - name: Dependencies
-      run: |
-        brew install libcbor llvm mandoc pkg-config
-
-    - name: Build
+    - uses: actions/checkout@v2
+    - name: dependencies
+      run: brew install libcbor llvm mandoc pkg-config
+    - name: build
       env:
         CC: ${{ matrix.cc }}
-      run: |
-        /bin/sh -eux .actions/build-osx-clang
+      run: ./.actions/build-osx-clang
