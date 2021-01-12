@@ -41,6 +41,7 @@
 /* U2F command flags. */
 #define U2F_AUTH_SIGN			0x03
 #define U2F_AUTH_CHECK			0x07
+#define U2F_AUTH_SIGN_NO_UP		0x08 /* u2f 1.2 only */
 
 /* ISO7816-4 status words. */
 #define SW1_MORE_DATA			0x61

@@ -283,7 +283,8 @@ parse_auth_reply(fido_blob_t *sig, fido_blob_t *ad, const char *rp_id,
 
 static int
 do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
-    const fido_blob_t *key_id, fido_blob_t *sig, fido_blob_t *ad, int ms)
+    fido_opt_t up, const fido_blob_t *key_id, fido_blob_t *sig,
+    fido_blob_t *ad, int ms)
 {
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
@@ -313,7 +314,8 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 
 	key_id_len = (uint8_t)key_id->len;
 
-	if ((apdu = iso7816_new(0, U2F_CMD_AUTH, U2F_AUTH_SIGN, (uint16_t)(2 *
+	if ((apdu = iso7816_new(0, U2F_CMD_AUTH, up == FIDO_OPT_FALSE ?
+	    U2F_AUTH_SIGN_NO_UP : U2F_AUTH_SIGN, (uint16_t)(2 *
 	    SHA256_DIGEST_LENGTH + sizeof(key_id_len) + key_id_len))) == NULL ||
 	    iso7816_add(apdu, cdh->ptr, cdh->len) < 0 ||
 	    iso7816_add(apdu, &rp_id_hash, sizeof(rp_id_hash)) < 0 ||
@@ -691,13 +693,7 @@ u2f_authenticate_single(fido_dev_t *dev, const fido_blob_t *key_id,
 		goto fail;
 	}
 
-	if (fa->up == FIDO_OPT_FALSE) {
-		fido_log_debug("%s: checking for key existence only", __func__);
-		r = FIDO_ERR_USER_PRESENCE_REQUIRED;
-		goto fail;
-	}
-
-	if ((r = do_auth(dev, &fa->cdh, fa->rp_id, key_id, &sig, &ad,
+	if ((r = do_auth(dev, &fa->cdh, fa->rp_id, fa->up, key_id, &sig, &ad,
 	    ms)) != FIDO_OK) {
 		fido_log_debug("%s: do_auth", __func__);
 		goto fail;
