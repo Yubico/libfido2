@@ -11,7 +11,7 @@ $ErrorActionPreference = "Continue"
 
 # LibreSSL coordinates.
 New-Variable -Name 'LIBRESSL_URL' `
-	-Value 'https://ftp.openbsd.org/pub/OpenBSD/LibreSSL' -Option Constant
+	-Value 'https://fastly.cdn.openbsd.org/pub/OpenBSD/LibreSSL' -Option Constant
 New-Variable -Name 'LIBRESSL' -Value 'libressl-3.2.2' -Option Constant
 
 # libcbor coordinates.
