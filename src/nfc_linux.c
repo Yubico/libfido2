@@ -363,12 +363,12 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 
 	/* XXX assumes USB for vendor/product info */
 	if ((str = get_usb_attr(dev, "idVendor")) != NULL &&
-	    (id = to_int(str, 16)) > 0 && id <= INT16_MAX)
+	    (id = to_int(str, 16)) > 0 && id <= UINT16_MAX)
 		di->vendor_id = (int16_t)id;
 	free(str);
 
 	if ((str = get_usb_attr(dev, "idProduct")) != NULL &&
-	    (id = to_int(str, 16)) > 0 && id <= INT16_MAX)
+	    (id = to_int(str, 16)) > 0 && id <= UINT16_MAX)
 		di->product_id = (int16_t)id;
 	free(str);
 

@@ -110,8 +110,7 @@ get_int(HANDLE dev, int16_t *vendor_id, int16_t *product_id)
 
 	attr.Size = sizeof(attr);
 
-	if (HidD_GetAttributes(dev, &attr) == false ||
-	    attr.VendorID > INT16_MAX || attr.ProductID > INT16_MAX) {
+	if (HidD_GetAttributes(dev, &attr) == false) {
 		fido_log_debug("%s: HidD_GetAttributes", __func__);
 		return (-1);
 	}
