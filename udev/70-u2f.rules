@@ -130,19 +130,19 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1ea8", ATTRS{idProduct
 # GoTrust Idem Key by NXP Semiconductors
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1fc9", ATTRS{idProduct}=="f143", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
-# Nitrokey FIDO U2F by Flirc
+# Nitrokey FIDO U2F by Clay Logic
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="4287", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
-# Nitrokey FIDO2 by Flirc
+# Nitrokey FIDO2 by Clay Logic
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="42b1", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
-# Nitrokey 3C NFC by Flirc
+# Nitrokey 3C NFC by Clay Logic
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="42b2", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
-# Safetech SafeKey by Flirc
+# Safetech SafeKey by Clay Logic
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="42b3", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
-# CanoKey by Flirc
+# CanoKey by Clay Logic
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="20a0", ATTRS{idProduct}=="42d4", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
 # JaCarta U2F by Aladdin Software Security R.D.
