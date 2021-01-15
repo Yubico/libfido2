@@ -388,6 +388,11 @@ fido_dev_set_pin_wait(fido_dev_t *dev, const char *pin, const char *oldpin,
 		return (r);
 	}
 
+	if (dev->flags & FIDO_DEV_PIN_UNSET) {
+		dev->flags &= ~FIDO_DEV_PIN_UNSET;
+		dev->flags |= FIDO_DEV_PIN_SET;
+	}
+
 	return (FIDO_OK);
 }
 

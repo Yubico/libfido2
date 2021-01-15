@@ -218,6 +218,39 @@ is_fido2(void)
 	wiredata_clear(&wiredata);
 }
 
+static void
+has_pin(void)
+{
+	const uint8_t	 set_pin_data[] = {
+			    WIREDATA_CTAP_CBOR_INFO,
+			    WIREDATA_CTAP_CBOR_AUTHKEY,
+			    WIREDATA_CTAP_CBOR_STATUS,
+			    WIREDATA_CTAP_CBOR_STATUS
+			 };
+	uint8_t		*wiredata;
+	fido_dev_t	*dev = NULL;
+	fido_dev_io_t	 io;
+
+	memset(&io, 0, sizeof(io));
+
+	io.open = dummy_open;
+	io.close = dummy_close;
+	io.read = dummy_read;
+	io.write = dummy_write;
+
+	wiredata = wiredata_setup(set_pin_data, sizeof(set_pin_data));
+	assert((dev = fido_dev_new()) != NULL);
+	assert(fido_dev_set_io_functions(dev, &io) == FIDO_OK);
+	assert(fido_dev_open(dev, "dummy") == FIDO_OK);
+	assert(fido_dev_has_pin(dev) == false);
+	assert(fido_dev_set_pin(dev, "top secret", NULL) == FIDO_OK);
+	assert(fido_dev_has_pin(dev) == true);
+	assert(fido_dev_reset(dev) == FIDO_OK);
+	assert(fido_dev_has_pin(dev) == false);
+	assert(fido_dev_close(dev) == FIDO_OK);
+	wiredata_clear(&wiredata);
+}
+
 int
 main(void)
 {
@@ -227,6 +260,7 @@ main(void)
 	reopen();
 	double_open();
 	is_fido2();
+	has_pin();
 
 	exit(0);
 }

@@ -29,6 +29,11 @@ fido_dev_reset_wait(fido_dev_t *dev, int ms)
 	    (r = fido_rx_cbor_status(dev, ms)) != FIDO_OK)
 		return (r);
 
+	if (dev->flags & FIDO_DEV_PIN_SET) {
+		dev->flags &= ~FIDO_DEV_PIN_SET;
+		dev->flags |= FIDO_DEV_PIN_UNSET;
+	}
+
 	return (FIDO_OK);
 }
 
