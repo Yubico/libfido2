@@ -154,6 +154,44 @@ open_dev(const char *path)
 	return (dev);
 }
 
+int
+get_devopt(fido_dev_t *dev, const char *name, int *val)
+{
+	fido_cbor_info_t *cbor_info;
+	char * const *names;
+	const bool *values;
+	int r, ok = -1;
+
+	if ((cbor_info = fido_cbor_info_new()) == NULL) {
+		warnx("fido_cbor_info_new");
+		goto out;
+	}
+
+	if ((r = fido_dev_get_cbor_info(dev, cbor_info)) != FIDO_OK) {
+		warnx("fido_dev_get_cbor_info: %s (0x%x)", fido_strerr(r), r);
+		goto out;
+	}
+
+	if ((names = fido_cbor_info_options_name_ptr(cbor_info)) == NULL ||
+	    (values = fido_cbor_info_options_value_ptr(cbor_info)) == NULL) {
+		warnx("fido_dev_get_cbor_info: NULL name/value pointer");
+		goto out;
+	}
+
+	*val = -1;
+	for (size_t i = 0; i < fido_cbor_info_options_len(cbor_info); i++)
+		if (strcmp(names[i], name) == 0) {
+			*val = values[i];
+			break;
+		}
+
+	ok = 0;
+out:
+	fido_cbor_info_free(&cbor_info);
+
+	return (ok);
+}
+
 EC_KEY *
 read_ec_pubkey(const char *path)
 {

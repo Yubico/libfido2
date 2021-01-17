@@ -10,7 +10,7 @@
 .Nd find and manage a FIDO 2 authenticator
 .Sh SYNOPSIS
 .Nm
-.Op Fl CR
+.Fl C
 .Op Fl d
 .Ar device
 .Nm
@@ -30,8 +30,13 @@
 .Op Fl k Ar rp_id
 .Op device
 .Nm
+.Fl R
+.Op Fl d
+.Ar device
+.Nm
 .Fl S
-.Op Fl de
+.Op Fl adeu
+.Op Fl l Ar pin_length
 .Op Fl i Ar template_id Fl n Ar template_name
 .Ar device
 .Nm
@@ -64,6 +69,11 @@ where
 .Ar id
 is the enrollment's template base64-encoded id.
 The user will be prompted for the PIN.
+.It Fl D Fl u Ar device
+Disables the FIDO 2.1
+.Dq user verification always
+feature on
+.Ar device .
 .It Fl I Ar device
 Retrieves information on
 .Ar device .
@@ -109,6 +119,9 @@ will NOT prompt for confirmation.
 Sets the PIN of
 .Ar device .
 The user will be prompted for the PIN.
+.It Fl S Fl a Ar device
+Enables FIDO 2.1 Enterprise Attestation on
+.Ar device .
 .It Fl S Fl e Ar device
 Performs a new biometric enrollment on
 .Ar device .
@@ -126,6 +139,21 @@ is base64-encoded and
 .Ar template_name
 is a UTF-8 string.
 The user will be prompted for the PIN.
+.It Fl S Fl f Ar device
+Forces a PIN change on
+.Ar device .
+The user will be prompted for the PIN.
+.It Fl S Fl l Ar pin_length Ar device
+Sets the minimum PIN length of
+.Ar device
+to
+.Ar pin_length .
+The user will be prompted for the PIN.
+.It Fl S Fl u Ar device
+Enables the FIDO 2.1
+.Dq user verification always
+feature on
+.Ar device .
 .It Fl V
 Prints version information.
 .It Fl d
@@ -162,3 +190,8 @@ An authenticator's path may contain spaces.
 Resident credentials are called
 .Dq discoverable credentials
 in FIDO2.1.
+.Pp
+Whether the FIDO 2.1
+.Dq user verification always
+feature is activated or deactivated after an authenticator reset
+is vendor-specific.

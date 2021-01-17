@@ -271,21 +271,37 @@ token_set(int argc, char **argv, char *path)
 {
 	char	*id = NULL;
 	char	*name = NULL;
+	char	*len = NULL;
 	int	 ch;
 	int	 enroll = 0;
+	int	 ea = 0;
+	int	 uv = 0;
+	bool	 force = false;
 
 	optind = 1;
 
 	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
 		switch (ch) {
+		case 'a':
+			ea = 1;
+			break;
 		case 'e':
 			enroll = 1;
+			break;
+		case 'f':
+			force = true;
 			break;
 		case 'i':
 			id = optarg;
 			break;
+		case 'l':
+			len = optarg;
+			break;
 		case 'n':
 			name = optarg;
+			break;
+		case 'u':
+			uv = 1;
 			break;
 		default:
 			break; /* ignore */
@@ -293,12 +309,27 @@ token_set(int argc, char **argv, char *path)
 	}
 
 	if (enroll) {
+		if (ea || uv)
+			usage();
 		if (id && name)
 			return (bio_set_name(path, id, name));
 		if (!id && !name)
 			return (bio_enroll(path));
 		usage();
 	}
+
+	if (ea) {
+		if (uv)
+			usage();
+		return (config_entattest(path));
+	}
+
+	if (len)
+		return (config_pin_minlen(path, len));
+	if (force)
+		return (config_force_pin_change(path));
+	if (uv)
+		return (config_always_uv(path, 1));
 
 	return (pin_set(path));
 }
@@ -368,6 +399,7 @@ token_delete(int argc, char **argv, char *path)
 	fido_dev_t	*dev = NULL;
 	int		 ch;
 	int		 enroll = 0;
+	int		 uv = 0;
 
 	optind = 1;
 
@@ -379,18 +411,28 @@ token_delete(int argc, char **argv, char *path)
 		case 'i':
 			id = optarg;
 			break;
+		case 'u':
+			uv = 1;
+			break;
 		default:
 			break; /* ignore */
 		}
 	}
 
-	if (path == NULL || id == NULL)
+	if (path == NULL)
 		usage();
 
-	dev = open_dev(path);
+	if (id) {
+		if (uv)
+			usage();
+		dev = open_dev(path);
+		if (enroll == 0)
+			return (credman_delete_rk(dev, path, id));
+		return (bio_delete(dev, path, id));
+	}
 
-	if (id && !enroll)
-		return (credman_delete_rk(dev, path, id));
+	if (uv == 0)
+		usage();
 
-	return (bio_delete(dev, path, id));
+	return (config_always_uv(path, 0));
 }

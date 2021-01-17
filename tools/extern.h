@@ -18,7 +18,7 @@ struct blob {
 	size_t len;
 };
 
-#define TOKEN_OPT	"CDILPRSVbcdei:k:n:r"
+#define TOKEN_OPT	"CDILPRSVabcdefi:k:l:n:ru"
 
 #define FLAG_DEBUG	0x01
 #define FLAG_QUIET	0x02
@@ -44,6 +44,10 @@ int bio_enroll(char *);
 void bio_info(fido_dev_t *);
 int bio_list(char *);
 int bio_set_name(char *, char *, char *);
+int config_entattest(char *);
+int config_always_uv(char *, int);
+int config_pin_minlen(char *, const char *);
+int config_force_pin_change(char *);
 int cose_type(const char *, int *);
 int cred_make(int, char **);
 int cred_verify(int, char **);
@@ -52,9 +56,11 @@ int credman_get_metadata(fido_dev_t *, const char *);
 int credman_list_rk(char *, const char *);
 int credman_list_rp(char *);
 int credman_print_rk(fido_dev_t *, const char *, char *, char *);
+int get_devopt(fido_dev_t *, const char *, int *);
 int pin_change(char *);
 int pin_set(char *);
 int string_read(FILE *, char **);
+int token_config(int, char **, char *);
 int token_delete(int, char **, char *);
 int token_info(int, char **, char *);
 int token_list(int, char **, char *);

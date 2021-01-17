@@ -14,6 +14,7 @@
 #include "wiredata_fido2.h"
 #include "dummy.h"
 #include "fido.h"
+#include "fido/config.h"
 
 #include "../openbsd-compat/openbsd-compat.h"
 
@@ -25,6 +26,7 @@ struct param {
 	struct blob set_pin_wire_data;
 	struct blob change_pin_wire_data;
 	struct blob retry_wire_data;
+	struct blob config_wire_data;
 	int seed;
 };
 
@@ -63,6 +65,12 @@ static const uint8_t dummy_retry_wire_data[] = {
 	WIREDATA_CTAP_CBOR_RETRIES,
 };
 
+static const uint8_t dummy_config_wire_data[] = {
+	WIREDATA_CTAP_INIT,
+	WIREDATA_CTAP_CBOR_INFO,
+	WIREDATA_CTAP_CBOR_STATUS,
+};
+
 struct param *
 unpack(const uint8_t *ptr, size_t len)
 {
@@ -76,7 +84,7 @@ unpack(const uint8_t *ptr, size_t len)
 	    cbor.read != len ||
 	    cbor_isa_array(item) == false ||
 	    cbor_array_is_definite(item) == false ||
-	    cbor_array_size(item) != 8 ||
+	    cbor_array_size(item) != 9 ||
 	    (v = cbor_array_handle(item)) == NULL)
 		goto fail;
 
@@ -87,7 +95,8 @@ unpack(const uint8_t *ptr, size_t len)
 	    unpack_blob(v[4], &p->info_wire_data) < 0 ||
 	    unpack_blob(v[5], &p->set_pin_wire_data) < 0 ||
 	    unpack_blob(v[6], &p->change_pin_wire_data) < 0 ||
-	    unpack_blob(v[7], &p->retry_wire_data) < 0)
+	    unpack_blob(v[7], &p->retry_wire_data) < 0 ||
+	    unpack_blob(v[8], &p->config_wire_data) < 0)
 		goto fail;
 
 	ok = 0;
@@ -106,13 +115,13 @@ fail:
 size_t
 pack(uint8_t *ptr, size_t len, const struct param *p)
 {
-	cbor_item_t *argv[8], *array = NULL;
+	cbor_item_t *argv[9], *array = NULL;
 	size_t cbor_alloc_len, cbor_len = 0;
 	unsigned char *cbor = NULL;
 
 	memset(argv, 0, sizeof(argv));
 
-	if ((array = cbor_new_definite_array(8)) == NULL ||
+	if ((array = cbor_new_definite_array(9)) == NULL ||
 	    (argv[0] = pack_int(p->seed)) == NULL ||
 	    (argv[1] = pack_string(p->pin1)) == NULL ||
 	    (argv[2] = pack_string(p->pin2)) == NULL ||
@@ -120,10 +129,11 @@ pack(uint8_t *ptr, size_t len, const struct param *p)
 	    (argv[4] = pack_blob(&p->info_wire_data)) == NULL ||
 	    (argv[5] = pack_blob(&p->set_pin_wire_data)) == NULL ||
 	    (argv[6] = pack_blob(&p->change_pin_wire_data)) == NULL ||
-	    (argv[7] = pack_blob(&p->retry_wire_data)) == NULL)
+	    (argv[7] = pack_blob(&p->retry_wire_data)) == NULL ||
+	    (argv[8] = pack_blob(&p->config_wire_data)) == NULL)
 		goto fail;
 
-	for (size_t i = 0; i < 8; i++)
+	for (size_t i = 0; i < 9; i++)
 		if (cbor_array_push(array, argv[i]) == false)
 			goto fail;
 
@@ -135,7 +145,7 @@ pack(uint8_t *ptr, size_t len, const struct param *p)
 
 	memcpy(ptr, cbor, cbor_len);
 fail:
-	for (size_t i = 0; i < 8; i++)
+	for (size_t i = 0; i < 9; i++)
 		if (argv[i])
 			cbor_decref(&argv[i]);
 
@@ -164,6 +174,7 @@ pack_dummy(uint8_t *ptr, size_t len)
 	dummy.set_pin_wire_data.len = sizeof(dummy_set_pin_wire_data);
 	dummy.change_pin_wire_data.len = sizeof(dummy_change_pin_wire_data);
 	dummy.retry_wire_data.len = sizeof(dummy_retry_wire_data);
+	dummy.config_wire_data.len = sizeof(dummy_config_wire_data);
 
 	memcpy(&dummy.reset_wire_data.body, &dummy_reset_wire_data,
 	    dummy.reset_wire_data.len);
@@ -175,6 +186,8 @@ pack_dummy(uint8_t *ptr, size_t len)
 	    dummy.change_pin_wire_data.len);
 	memcpy(&dummy.retry_wire_data.body, &dummy_retry_wire_data,
 	    dummy.retry_wire_data.len);
+	memcpy(&dummy.config_wire_data.body, &dummy_config_wire_data,
+	    dummy.config_wire_data.len);
 
 	assert((blob_len = pack(blob, sizeof(blob), &dummy)) != 0);
 
@@ -337,6 +350,82 @@ dev_get_uv_retry_count(const struct param *p)
 	fido_dev_free(&dev);
 }
 
+static void
+dev_enable_entattest(const struct param *p)
+{
+	fido_dev_t *dev;
+	const char *pin;
+	int r;
+
+	set_wire_data(p->config_wire_data.body, p->config_wire_data.len);
+	if ((dev = open_dev(0)) == NULL)
+		return;
+	pin = p->pin1;
+	if (strlen(pin) == 0)
+		pin = NULL;
+	r = fido_dev_enable_entattest(dev, pin);
+	consume_str(fido_strerr(r));
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+}
+
+static void
+dev_toggle_always_uv(const struct param *p)
+{
+	fido_dev_t *dev;
+	const char *pin;
+	int r;
+
+	set_wire_data(p->config_wire_data.body, p->config_wire_data.len);
+	if ((dev = open_dev(0)) == NULL)
+		return;
+	pin = p->pin1;
+	if (strlen(pin) == 0)
+		pin = NULL;
+	r = fido_dev_toggle_always_uv(dev, pin);
+	consume_str(fido_strerr(r));
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+}
+
+static void
+dev_force_pin_change(const struct param *p)
+{
+	fido_dev_t *dev;
+	const char *pin;
+	int r;
+
+	set_wire_data(p->config_wire_data.body, p->config_wire_data.len);
+	if ((dev = open_dev(0)) == NULL)
+		return;
+	pin = p->pin1;
+	if (strlen(pin) == 0)
+		pin = NULL;
+	r = fido_dev_force_pin_change(dev, pin);
+	consume_str(fido_strerr(r));
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+}
+
+static void
+dev_set_pin_minlen(const struct param *p)
+{
+	fido_dev_t *dev;
+	const char *pin;
+	int r;
+
+	set_wire_data(p->config_wire_data.body, p->config_wire_data.len);
+	if ((dev = open_dev(0)) == NULL)
+		return;
+	pin = p->pin1;
+	if (strlen(pin) == 0)
+		pin = NULL;
+	r = fido_dev_set_pin_minlen(dev, strlen(p->pin2), pin);
+	consume_str(fido_strerr(r));
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+}
+
 void
 test(const struct param *p)
 {
@@ -350,6 +439,10 @@ test(const struct param *p)
 	dev_change_pin(p);
 	dev_get_retry_count(p);
 	dev_get_uv_retry_count(p);
+	dev_enable_entattest(p);
+	dev_toggle_always_uv(p);
+	dev_force_pin_change(p);
+	dev_set_pin_minlen(p);
 }
 
 void

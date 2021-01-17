@@ -29,6 +29,7 @@ list(APPEND MAN_SOURCES
 	fido_credman_metadata_new.3
 	fido_cred_set_authdata.3
 	fido_cred_verify.3
+	fido_dev_enable_entattest.3
 	fido_dev_get_assert.3
 	fido_dev_get_touch_begin.3
 	fido_dev_info_manifest.3
@@ -174,6 +175,9 @@ list(APPEND MAN_ALIAS
 	fido_cred_set_authdata fido_cred_set_user
 	fido_cred_set_authdata fido_cred_set_uv
 	fido_cred_set_authdata fido_cred_set_x509
+	fido_dev_enable_entattest fido_dev_toggle_always_uv
+	fido_dev_enable_entattest fido_dev_force_pin_change
+	fido_dev_enable_entattest fido_dev_set_pin_minlen
 	fido_dev_get_touch_begin fido_dev_get_touch_status
 	fido_dev_info_manifest fido_dev_info_free
 	fido_dev_info_manifest fido_dev_info_manufacturer_string

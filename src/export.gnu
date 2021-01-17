@@ -156,8 +156,10 @@
 		fido_dev_build;
 		fido_dev_cancel;
 		fido_dev_close;
+		fido_dev_enable_entattest;
 		fido_dev_flags;
 		fido_dev_force_fido2;
+		fido_dev_force_pin_change;
 		fido_dev_force_u2f;
 		fido_dev_free;
 		fido_dev_get_assert;
@@ -186,11 +188,13 @@
 		fido_dev_reset;
 		fido_dev_set_io_functions;
 		fido_dev_set_pin;
+		fido_dev_set_pin_minlen;
 		fido_dev_set_sigmask;
 		fido_dev_set_transport_functions;
 		fido_dev_supports_credman;
 		fido_dev_supports_cred_prot;
 		fido_dev_supports_pin;
+		fido_dev_toggle_always_uv;
 		fido_init;
 		fido_set_log_handler;
 		fido_strerr;

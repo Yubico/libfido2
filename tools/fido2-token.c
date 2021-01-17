@@ -18,11 +18,12 @@ void
 usage(void)
 {
 	fprintf(stderr,
-"usage: fido2-token [-CR] [-d] device\n"
-"       fido2-token -D [-de] -i id device\n"
+"usage: fido2-token -C [-d] device\n"
+"       fido2-token -D [-deu] [-i id] device\n"
 "       fido2-token -I [-cd] [-k rp_id -i cred_id] device\n"
 "       fido2-token -L [-der] [-k rp_id] [device]\n"
-"       fido2-token -S [-de] [-i template_id -n template_name] device\n"
+"       fido2-token -R [-d] device\n"
+"       fido2-token -S [-adefu] [-l pin_length] [-i template_id -n template_name] device\n"
 "       fido2-token -V\n"
 	);
 
@@ -46,13 +47,17 @@ main(int argc, char **argv)
 
 	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
 		switch (ch) {
+		case 'a':
 		case 'b':
 		case 'c':
 		case 'e':
+		case 'f':
 		case 'i':
 		case 'k':
+		case 'l':
 		case 'n':
 		case 'r':
+		case 'u':
 			break; /* ignore */
 		case 'd':
 			flags = FIDO_DEBUG;

@@ -154,8 +154,10 @@ _fido_cred_x5c_ptr
 _fido_dev_build
 _fido_dev_cancel
 _fido_dev_close
+_fido_dev_enable_entattest
 _fido_dev_flags
 _fido_dev_force_fido2
+_fido_dev_force_pin_change
 _fido_dev_force_u2f
 _fido_dev_free
 _fido_dev_get_assert
@@ -184,11 +186,13 @@ _fido_dev_protocol
 _fido_dev_reset
 _fido_dev_set_io_functions
 _fido_dev_set_pin
+_fido_dev_set_pin_minlen
 _fido_dev_set_sigmask
 _fido_dev_set_transport_functions
 _fido_dev_supports_credman
 _fido_dev_supports_cred_prot
 _fido_dev_supports_pin
+_fido_dev_toggle_always_uv
 _fido_init
 _fido_set_log_handler
 _fido_strerr

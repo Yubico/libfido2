@@ -24,9 +24,9 @@ endif()
 
 if(NOT MSVC)
 	set_source_files_properties(assert_get.c assert_verify.c base64.c bio.c
-	    cred_make.c cred_verify.c credman.c fido2-assert.c fido2-cred.c
-	    fido2-token.c pin.c token.c util.c PROPERTIES COMPILE_FLAGS
-            "-Wconversion -Wsign-conversion")
+	    config.c cred_make.c cred_verify.c credman.c fido2-assert.c
+	    fido2-cred.c fido2-token.c pin.c token.c util.c
+	    PROPERTIES COMPILE_FLAGS "-Wconversion -Wsign-conversion")
 endif()
 
 add_executable(fido2-cred
@@ -51,6 +51,7 @@ add_executable(fido2-token
 	fido2-token.c
 	base64.c
 	bio.c
+	config.c
 	credman.c
 	pin.c
 	token.c

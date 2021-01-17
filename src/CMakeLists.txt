@@ -12,6 +12,7 @@ list(APPEND FIDO_SOURCES
 	blob.c
 	buf.c
 	cbor.c
+	config.c
 	cred.c
 	credman.c
 	dev.c
