@@ -255,7 +255,7 @@ else()
 		add_definitions(-DFIDO_FUZZ)
 	endif()
 	if(LIBFUZZER)
-		add_compile_options(-fsanitize=fuzzer-no-link)
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=fuzzer-no-link")
 	endif()
 endif()
 
