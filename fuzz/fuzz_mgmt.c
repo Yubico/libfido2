@@ -36,7 +36,7 @@ static const uint8_t dummy_reset_wire_data[] = {
 	WIREDATA_CTAP_KEEPALIVE,
 	WIREDATA_CTAP_KEEPALIVE,
 	WIREDATA_CTAP_KEEPALIVE,
-	WIREDATA_CTAP_CBOR_RESET,
+	WIREDATA_CTAP_CBOR_STATUS,
 };
 
 static const uint8_t dummy_info_wire_data[] = {
