@@ -29,6 +29,10 @@ int aes256_cbc_dec(const fido_dev_t *dev, const fido_blob_t *,
     const fido_blob_t *, fido_blob_t *);
 int aes256_cbc_enc(const fido_dev_t *dev, const fido_blob_t *,
     const fido_blob_t *, fido_blob_t *);
+int aes256_gcm_dec(const fido_blob_t *, const fido_blob_t *,
+    const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
+int aes256_gcm_enc(const fido_blob_t *, const fido_blob_t *,
+    const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 
 /* cbor encoding functions */
 cbor_item_t *cbor_flatten_vector(cbor_item_t **, size_t);

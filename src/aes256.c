@@ -148,3 +148,116 @@ fail:
 
 	return (ok);
 }
+
+int
+aes256_gcm_enc(const fido_blob_t *key, const fido_blob_t *iv,
+    const fido_blob_t *ad, const fido_blob_t *in, fido_blob_t *out)
+{
+	EVP_CIPHER_CTX	*ctx = NULL;
+	int		 outlen;
+	int		 ok = -1;
+
+	if (key->len != 32 || in->ptr == NULL || in->len > INT_MAX ||
+	    ad->ptr == NULL || ad->len > INT_MAX || iv->ptr == NULL ||
+	    iv->len != 12) {
+		fido_log_debug("%s: sanity check failed", __func__);
+		goto fail;
+	}
+
+	/* tag will be appended to ciphertext */
+	if ((out->ptr = calloc(1, in->len + 16)) == NULL) {
+		fido_log_debug("%s: calloc", __func__);
+		goto fail;
+	}
+
+	if ((ctx = EVP_CIPHER_CTX_new()) == NULL ||
+	    !EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, key->ptr, iv->ptr) ||
+	    !EVP_EncryptUpdate(ctx, NULL, &outlen, ad->ptr, (int)ad->len) ||
+	    !EVP_EncryptUpdate(ctx, out->ptr, &outlen, in->ptr, (int)in->len)) {
+		fido_log_debug("%s: EVP_Encrypt", __func__);
+		goto fail;
+	}
+
+	out->len = (size_t)outlen;
+
+	if(!EVP_EncryptFinal_ex(ctx, out->ptr, &outlen) ||
+	    !EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, out->ptr + out->len)) {
+		fido_log_debug("%s: EVP_EncryptFinal", __func__);
+		goto fail;
+	}
+
+	out->len += 16;
+	ok = 0;
+
+fail:
+	if (ctx != NULL)
+		EVP_CIPHER_CTX_free(ctx);
+
+	if (ok < 0) {
+		free(out->ptr);
+		out->ptr = NULL;
+		out->len = 0;
+	}
+
+	return (ok);
+}
+
+int
+aes256_gcm_dec(const fido_blob_t *key, const fido_blob_t *iv,
+    const fido_blob_t *ad, const fido_blob_t *in, fido_blob_t *out)
+{
+	EVP_CIPHER_CTX	*ctx = NULL;
+	fido_blob_t	 ct;
+	fido_blob_t	 tag;
+	int		 outlen;
+	int		 ok = -1;
+
+	if (key->len != 32 || in->ptr == NULL || in->len < 16 || in->len > INT_MAX ||
+	    ad->ptr == NULL || ad->len > INT_MAX || iv->ptr == NULL ||
+	    iv->len != 12) {
+		fido_log_debug("%s: sanity check failed", __func__);
+		goto fail;
+	}
+
+	/* tag at the end of input data assumed */
+	tag.len = 16;
+	ct.ptr = in->ptr;
+	ct.len = in->len - tag.len;
+	tag.ptr = in->ptr + ct.len;
+
+	if ((out->ptr = calloc(1, ct.len)) == NULL) {
+		fido_log_debug("%s: calloc", __func__);
+		goto fail;
+	}
+
+	if ((ctx = EVP_CIPHER_CTX_new()) == NULL ||
+	    !EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, key->ptr, iv->ptr) ||
+	    !EVP_DecryptUpdate(ctx, NULL, &outlen, ad->ptr, (int)ad->len) ||
+	    !EVP_DecryptUpdate(ctx, out->ptr, &outlen, ct.ptr, (int)ct.len)) {
+		fido_log_debug("%s: EVP_Decrypt", __func__);
+		goto fail;
+	}
+
+	/* set the plaintext length */
+	out->len = (size_t)outlen;
+
+	if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, (int)tag.len, tag.ptr) ||
+	    !EVP_DecryptFinal_ex(ctx, out->ptr, &outlen)) {
+		fido_log_debug("%s: EVP_DecryptFinal", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+
+fail:
+	if (ctx != NULL)
+		EVP_CIPHER_CTX_free(ctx);
+
+	if (ok < 0) {
+		free(out->ptr);
+		out->ptr = NULL;
+		out->len = 0;
+	}
+
+	return (ok);
+}
