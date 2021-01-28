@@ -1486,3 +1486,49 @@ cbor_decode_rp_entity(const cbor_item_t *item, fido_rp_t *rp)
 
 	return (0);
 }
+
+int
+cbor_array_copy(cbor_item_t *dst, const cbor_item_t *src)
+{
+	cbor_item_t	**arr = NULL;
+	size_t		  n;
+
+	if (dst == NULL || src == NULL ||
+	    !cbor_isa_array(dst) || !cbor_isa_array(src) ||
+	    (arr = cbor_array_handle(src)) == NULL)
+		return (-1);
+
+	n = cbor_array_size(src);
+	for (size_t i = 0; i < n; i++)
+		if (!cbor_array_push(dst, arr[i]))
+			return (-1);
+
+	return (0);
+}
+
+int
+cbor_array_remove(cbor_item_t **arr_p, size_t idx)
+{
+	cbor_item_t	**handle = NULL;
+	cbor_item_t	 *src = NULL;
+	cbor_item_t	 *dst = NULL;
+	size_t		  n;
+
+
+	if (arr_p == NULL || (src = *arr_p) == NULL || !cbor_isa_array(src) ||
+	    (n = cbor_array_size(src)) < 1 || idx >= n ||
+	    (handle = cbor_array_handle(src)) == NULL ||
+	    (dst = cbor_new_definite_array(n - 1)) == NULL)
+		return (-1);
+
+	for (size_t i = 0; i < n; i++)
+		if (i != idx && !cbor_array_push(dst, handle[i])) {
+			cbor_decref(&dst);
+			return (-1);
+		}
+
+	cbor_decref(&src);
+	*arr_p = dst;
+
+	return (0);
+}
