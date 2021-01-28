@@ -52,6 +52,7 @@ cbor_item_t *cbor_encode_pubkey_param(int);
 cbor_item_t *cbor_encode_rp_entity(const fido_rp_t *);
 cbor_item_t *cbor_encode_user_entity(const fido_user_t *);
 cbor_item_t *es256_pk_encode(const es256_pk_t *, int);
+cbor_item_t *cbor_encode_canonical_uint(const uint64_t);
 
 /* cbor decoding functions */
 int cbor_decode_attstmt(const cbor_item_t *, fido_attstmt_t *);
