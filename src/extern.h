@@ -162,6 +162,7 @@ int fido_dev_authkey(fido_dev_t *, es256_pk_t *);
 int fido_dev_get_cbor_info_wait(fido_dev_t *, fido_cbor_info_t *, int);
 int fido_dev_get_uv_token(fido_dev_t *, uint8_t, const char *,
     const fido_blob_t *, const es256_pk_t *, const char *, fido_blob_t *);
+uint64_t fido_dev_maxmsgsize(const fido_dev_t *);
 int fido_do_ecdh(fido_dev_t *, es256_pk_t **, fido_blob_t **);
 bool fido_dev_supports_permissions(const fido_dev_t *);
 bool fido_dev_can_get_uv_token(const fido_dev_t *, const char *);

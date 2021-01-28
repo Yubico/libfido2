@@ -223,8 +223,9 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 	}
 
 	if (fido_dev_is_fido2(dev) && info != NULL) {
+		dev->maxmsgsize = fido_cbor_info_maxmsgsiz(info);
 		fido_log_debug("%s: FIDO_MAXMSG=%d, maxmsgsiz=%lu", __func__,
-		    FIDO_MAXMSG, (unsigned long)fido_cbor_info_maxmsgsiz(info));
+		    FIDO_MAXMSG, (unsigned long)dev->maxmsgsize);
 	}
 
 	r = FIDO_OK;
@@ -697,4 +698,10 @@ fido_dev_get_pin_protocol(const fido_dev_t *dev)
 		return (CTAP_PIN_PROTOCOL1);
 
 	return (0);
+}
+
+uint64_t
+fido_dev_maxmsgsize(const fido_dev_t *dev)
+{
+	return (dev->maxmsgsize);
 }
