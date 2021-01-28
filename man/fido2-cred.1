@@ -11,7 +11,7 @@
 .Sh SYNOPSIS
 .Nm
 .Fl M
-.Op Fl dhqruv
+.Op Fl bdhqruv
 .Op Fl c Ar cred_protect
 .Op Fl i Ar input_file
 .Op Fl o Ar output_file
@@ -91,6 +91,12 @@ to make a new credential on
 Tells
 .Nm
 to verify a credential.
+.It Fl b
+Only available when making a credential, enable the FIDO2.1 largeBlobKey
+extension.
+Note that
+.Fl r
+must also be specified if this option is used.
 .It Fl c Ar cred_protect
 If making a credential, set the credential's protection level to
 .Ar cred_protect .

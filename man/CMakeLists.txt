@@ -19,6 +19,7 @@ list(APPEND MAN_SOURCES
 	fido_assert_allow_cred.3
 	fido_assert_set_authdata.3
 	fido_assert_verify.3
+	fido_blob_new.3
 	fido_bio_dev_get_info.3
 	fido_bio_enroll_new.3
 	fido_bio_info_new.3
@@ -37,6 +38,7 @@ list(APPEND MAN_SOURCES
 	fido_dev_open.3
 	fido_dev_set_io_functions.3
 	fido_dev_set_pin.3
+	fido_dev_large_blob_get.3
 	fido_strerr.3
 	rs256_pk_new.3
 )
@@ -58,6 +60,8 @@ list(APPEND MAN_ALIAS
 	fido_assert_new fido_assert_free
 	fido_assert_new fido_assert_hmac_secret_len
 	fido_assert_new fido_assert_hmac_secret_ptr
+	fido_assert_new fido_assert_large_blob_key_len
+	fido_assert_new fido_assert_large_blob_key_ptr
 	fido_assert_new fido_assert_id_len
 	fido_assert_new fido_assert_id_ptr
 	fido_assert_new fido_assert_rp_id
@@ -78,6 +82,9 @@ list(APPEND MAN_ALIAS
 	fido_assert_set_authdata fido_assert_set_sig
 	fido_assert_set_authdata fido_assert_set_up
 	fido_assert_set_authdata fido_assert_set_uv
+	fido_blob_new fido_blob_free
+	fido_blob_new fido_blob_ptr
+	fido_blob_new fido_blob_len
 	fido_bio_dev_get_info fido_bio_dev_enroll_begin
 	fido_bio_dev_get_info fido_bio_dev_enroll_cancel
 	fido_bio_dev_get_info fido_bio_dev_enroll_continue
@@ -132,6 +139,8 @@ list(APPEND MAN_ALIAS
 	fido_cred_new fido_cred_id_ptr
 	fido_cred_new fido_cred_aaguid_len
 	fido_cred_new fido_cred_aaguid_ptr
+	fido_cred_new fido_cred_large_blob_key_len
+	fido_cred_new fido_cred_large_blob_key_ptr
 	fido_cred_new fido_cred_prot
 	fido_cred_new fido_cred_pubkey_len
 	fido_cred_new fido_cred_pubkey_ptr
@@ -208,6 +217,9 @@ list(APPEND MAN_ALIAS
 	fido_dev_set_pin fido_dev_get_uv_retry_count
 	fido_dev_set_pin fido_dev_reset
 	fido_dev_set_io_functions fido_dev_set_sigmask
+	fido_dev_large_blob_get fido_dev_large_blob_put
+	fido_dev_large_blob_get fido_dev_large_blob_remove
+	fido_dev_large_blob_get fido_dev_large_blob_trim
 	rs256_pk_new rs256_pk_free
 	rs256_pk_new rs256_pk_from_ptr
 	rs256_pk_new rs256_pk_from_RSA

@@ -1,0 +1,124 @@
+.\" Copyright (c) 2020 Yubico AB. All rights reserved.
+.\" Use of this source code is governed by a BSD-style
+.\" license that can be found in the LICENSE file.
+.\"
+.Dd $Mdocdate: October 26 2020 $
+.Dt FIDO_LARGE_BLOB_GET 3
+.Os
+.Sh NAME
+.Nm fido_dev_large_blob_get ,
+.Nm fido_dev_large_blob_put
+.Nd FIDO 2 large blob API
+.Sh SYNOPSIS
+.In fido.h
+.Ft int
+.Fn fido_dev_large_blob_get "fido_dev_t *dev" "const unsigned char *key_ptr" "size_t key_len" "fido_blob_t *blob"
+.Ft int
+.Fn fido_dev_large_blob_put "fido_dev_t *dev" "const unsigned char *key_ptr" "size_t key_len" "const fido_blob_t *blob" "const char *pin"
+.Ft int
+.Fn fido_dev_large_blob_remove "fido_dev_t *dev" "const unsigned char *key_ptr" "size_t key_len" "const char *pin"
+.Ft int
+.Fn fido_dev_large_blob_trim "fido_dev_t *dev" "const char *pin"
+.Sh DESCRIPTION
+The functions described in this page allow interfacing with the
+.Em large-blob array
+of a FIDO2.1 authenticator.
+The data is protected by a key that is stored and accessed using the
+.Em large blob key extension .
+It can be created and retrieved from the authenticator using
+.Xr fido_dev_make_cred 3
+and
+.Xr fido_dev_get_assert 3
+functions.
+.Pp
+The
+.Fn fido_dev_large_blob_get
+function retrieves the large blob associated with the key pointed to by
+.Fa key_ptr .
+If a blob that can be decrypted by this key is in the large-blob array,
+and it can be decompressed successfully,
+.Fa blob
+will be filled with the result, where
+.Fa blob
+is an addressable pointer.
+The key pointed to by
+.Fa key_ptr
+must be a valid buffer of
+.Fa key_len
+bytes.
+.Pp
+The
+.Fn fido_dev_large_blob_put
+function compresses and encrypts the data contained in
+.Fa blob
+using the key pointed to by
+.Fa key_ptr .
+If the key has already been used for another blob in the array, the previous
+blob will be replaced by the new blob.
+Otherwise, the new blob will be appended to the end of the array.
+The key pointed to by
+.Fa key_ptr
+must be a valid buffer of
+.Fa key_len
+bytes.
+If a PIN is not needed to authenticate the request against
+.Fa dev
+then
+.Fa pin
+may be NULL.
+Otherwise,
+.Fa pin
+must point to a NUL-terminated UTF-8 string.
+.Pp
+The
+.Fn fido_dev_large_blob_remove
+function removes the first blob found in the large-blob array that can be
+decrypted using the key pointed to by
+.Fa key_ptr
+which must point to a valid buffer of
+.Fa key_len
+bytes.
+If a PIN is not needed to authenticate the request against
+.Fa dev
+then
+.Fa pin
+may be NULL.
+Otherwise,
+.Fa pin
+must point to a NUL-terminated UTF-8 string.
+.Pp
+The
+.Fn fido_dev_large_blob_trim
+function enumerates all large-blob keys stored on
+.Fa dev ,
+fetches the large-blob array, and removes any element of the array that
+cannot be decrypted by a large-blob key.
+Finally,
+.Fn fido_dev_large_blob_trim
+writes the array back on the authenticator.
+If a PIN is not needed to authenticate the request against
+.Fa dev
+then
+.Fa pin
+may be NULL.
+Note that garbage collection requires the authenticator to support FIDO2.1
+credential management.
+.Sh RETURN VALUES
+The error codes returned by the
+.Nm
+set of functions are defined in
+.In fido/err.h .
+On success,
+.Dv FIDO_OK
+is returned.
+.Sh SEE ALSO
+.Xr fido_assert_large_blob_key_len 3 ,
+.Xr fido_assert_large_blob_key_ptr 3 ,
+.Xr fido_assert_set_extensions 3 ,
+.Xr fido_cred_large_blob_key_len 3 ,
+.Xr fido_cred_large_blob_key_ptr 3 ,
+.Xr fido_cred_set_extensions 3 ,
+.Xr fido_credman_dev_get_rk 3 ,
+.Xr fido_credman_dev_get_rp 3 ,
+.Xr fido_dev_get_assert 3 ,
+.Xr fido_dev_make_cred 3

@@ -15,9 +15,10 @@
 .Ar device
 .Nm
 .Fl D
-.Op Fl de
+.Op Fl bde
 .Fl i
 .Ar id
+.Op large_blob_key
 .Ar device
 .Nm
 .Fl I
@@ -26,8 +27,9 @@
 .Ar device
 .Nm
 .Fl L
-.Op Fl der
+.Op Fl bder
 .Op Fl k Ar rp_id
+.Op large_blob_key
 .Op device
 .Nm
 .Fl R
@@ -35,9 +37,10 @@
 .Ar device
 .Nm
 .Fl S
-.Op Fl adeu
+.Op Fl abdeu
 .Op Fl l Ar pin_length
 .Op Fl i Ar template_id Fl n Ar template_name
+.Op large_blob_key
 .Ar device
 .Nm
 .Fl V
@@ -51,6 +54,16 @@ The options are as follows:
 Changes the PIN of
 .Ar device .
 The user will be prompted for the current and new PINs.
+.It Fl D Fl b Ar device
+Performs garbage collection of unknown large blobs on
+.Ar device .
+If PIN authentication is required, the user will be prompted for the PIN.
+.It Fl D Fl b Ar large_blob_key Ar device
+Removes the large blob encrypted using
+.Ar large_blob_key
+from
+.Ar device .
+If PIN authentication is required, the user will be prompted for the PIN.
 .It Fl D Fl i Ar id Ar device
 Deletes the resident credential specified by
 .Ar id
@@ -95,6 +108,13 @@ is a base64-encoded credential id.
 The user will be prompted for the PIN.
 .It Fl L
 Produces a list of authenticators found by the operating system.
+.It Fl L Fl b Ar large_blob_key Ar device
+Fetches the large blob which was encrypted using
+.Ar large_blob_key
+from
+.Ar device .
+The decompressed plaintext is printed to
+.Em stdout .
 .It Fl L Fl e Ar device
 Produces a list of biometric enrollments on
 .Ar device .
@@ -122,6 +142,14 @@ The user will be prompted for the PIN.
 .It Fl S Fl a Ar device
 Enables FIDO 2.1 Enterprise Attestation on
 .Ar device .
+.It Fl S Fl b Ar large_blob_key Ar device
+Plaintext supplied via
+.Em stdin
+is compressed and then encrypted using
+.Fl large_blob_key .
+The result is stored as a large blob on
+.Ar device .
+If PIN authentication is required, the user will be prompted for the PIN.
 .It Fl S Fl e Ar device
 Performs a new biometric enrollment on
 .Ar device .

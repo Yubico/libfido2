@@ -11,7 +11,7 @@
 .Sh SYNOPSIS
 .Nm
 .Fl G
-.Op Fl dhpruv
+.Op Fl bdhpruv
 .Op Fl t Ar option
 .Op Fl i Ar input_file
 .Op Fl o Ar output_file
@@ -75,6 +75,12 @@ If
 is not specified,
 .Em es256
 is assumed.
+.It Fl b
+Only available when obtaining an assertion, enable the FIDO2.1
+largeBlobKey extension.
+This will cause the large blob key to be a part of the
+output of the command.
+Note that a credential id is mandatory when obtaining a large blob key.
 .It Fl h
 If obtaining an assertion, enable the FIDO2 hmac-secret
 extension.
@@ -221,6 +227,9 @@ assertion signature (base64 blob);
 user id, if credential resident (base64 blob);
 .It
 hmac secret, if the FIDO2 hmac-secret extension is enabled
+(base64 blob);
+.It
+large blob key, if the FIDO2.1 large blob key extension is enabled
 (base64 blob);
 .El
 .Pp
