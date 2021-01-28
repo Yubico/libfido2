@@ -12,6 +12,7 @@ list(APPEND FIDO_SOURCES
 	blob.c
 	buf.c
 	cbor.c
+	compress.c
 	config.c
 	cred.c
 	credman.c
@@ -74,7 +75,7 @@ list(APPEND COMPAT_SOURCES
 if(BUILD_STATIC_LIBS)
 	add_library(fido2 STATIC ${FIDO_SOURCES} ${COMPAT_SOURCES})
 	target_link_libraries(fido2 ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
-		${UDEV_LIBRARIES} ${BASE_LIBRARIES} ${HIDAPI_LIBRARIES})
+		${UDEV_LIBRARIES} ${BASE_LIBRARIES} ${HIDAPI_LIBRARIES} ${ZLIB_LIBRARIES})
 	if(WIN32)
 		if (MINGW)
 			target_link_libraries(fido2 wsock32 ws2_32 bcrypt setupapi hid)
@@ -94,7 +95,7 @@ endif()
 if(BUILD_SHARED_LIBS)
 	add_library(fido2_shared SHARED ${FIDO_SOURCES} ${COMPAT_SOURCES})
 	target_link_libraries(fido2_shared ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
-		${UDEV_LIBRARIES} ${BASE_LIBRARIES} ${HIDAPI_LIBRARIES})
+		${UDEV_LIBRARIES} ${BASE_LIBRARIES} ${HIDAPI_LIBRARIES} ${ZLIB_LIBRARIES})
 	if(WIN32)
 		if (MINGW)
 			target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt

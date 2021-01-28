@@ -88,6 +88,10 @@ int cbor_add_uv_params(fido_dev_t *, uint8_t, const fido_blob_t *,
     cbor_item_t **, cbor_item_t **);
 void cbor_vector_free(cbor_item_t **, size_t);
 
+/* deflate */
+int fido_compress(fido_blob_t *, const fido_blob_t *);
+int fido_uncompress(fido_blob_t *, const fido_blob_t *, size_t);
+
 #ifndef nitems
 #define nitems(_a)	(sizeof((_a)) / sizeof((_a)[0]))
 #endif
