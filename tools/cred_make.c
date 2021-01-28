@@ -68,6 +68,10 @@ prepare_cred(FILE *in_f, int type, int flags)
 		    FIDO_EXT_HMAC_SECRET)) != FIDO_OK)
 			errx(1, "fido_cred_set_extensions: %s", fido_strerr(r));
 	}
+	if (flags & FLAG_LARGE_BLOB)
+		if ((r = fido_cred_set_extensions(cred,
+		    FIDO_EXT_LARGE_BLOB_KEY)) != FIDO_OK)
+			errx(1, "fido_cred_set_extensions: %s", fido_strerr(r));
 
 	free(cdh.ptr);
 	free(uid.ptr);
@@ -134,8 +138,11 @@ cred_make(int argc, char **argv)
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "c:dhi:o:qruv")) != -1) {
+	while ((ch = getopt(argc, argv, "bc:dhi:o:qruv")) != -1) {
 		switch (ch) {
+		case 'b':
+			flags |= FLAG_LARGE_BLOB;
+			break;
 		case 'c':
 			if ((cred_protect = base10(optarg)) < 0)
 				errx(1, "-c: invalid argument '%s'", optarg);

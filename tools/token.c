@@ -273,6 +273,7 @@ token_set(int argc, char **argv, char *path)
 	char	*name = NULL;
 	char	*len = NULL;
 	int	 ch;
+	int	 blobs = 0;
 	int	 enroll = 0;
 	int	 ea = 0;
 	int	 uv = 0;
@@ -284,6 +285,9 @@ token_set(int argc, char **argv, char *path)
 		switch (ch) {
 		case 'a':
 			ea = 1;
+			break;
+		case 'b':
+			blobs = 1;
 			break;
 		case 'e':
 			enroll = 1;
@@ -308,6 +312,9 @@ token_set(int argc, char **argv, char *path)
 		}
 	}
 
+	argc -= optind;
+	argv += optind;
+
 	if (enroll) {
 		if (ea || uv)
 			usage();
@@ -331,6 +338,13 @@ token_set(int argc, char **argv, char *path)
 	if (uv)
 		return (config_always_uv(path, 1));
 
+	if (blobs) {
+		if (argc != 2)
+			usage();
+
+		return (blob_set(path, argv[0]));
+	}
+
 	return (pin_set(path));
 }
 
@@ -340,6 +354,7 @@ token_list(int argc, char **argv, char *path)
 	fido_dev_info_t *devlist;
 	size_t ndevs;
 	const char *rp_id = NULL;
+	int blobs = 0;
 	int enrolls = 0;
 	int keys = 0;
 	int rplist = 0;
@@ -350,6 +365,9 @@ token_list(int argc, char **argv, char *path)
 
 	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
 		switch (ch) {
+		case 'b':
+			blobs = 1;
+			break;
 		case 'e':
 			enrolls = 1;
 			break;
@@ -365,12 +383,21 @@ token_list(int argc, char **argv, char *path)
 		}
 	}
 
+	argc -= optind;
+	argv += optind;
+
 	if (enrolls)
 		return (bio_list(path));
 	if (keys)
 		return (credman_list_rk(path, rp_id));
 	if (rplist)
 		return (credman_list_rp(path));
+	if (blobs) {
+		if (argc != 2)
+			usage();
+		return (blob_get(path, argv[0]));
+	}
+
 
 	if ((devlist = fido_dev_info_new(64)) == NULL)
 		errx(1, "fido_dev_info_new");
@@ -400,11 +427,15 @@ token_delete(int argc, char **argv, char *path)
 	int		 ch;
 	int		 enroll = 0;
 	int		 uv = 0;
+	int		 blobs = 0;
 
 	optind = 1;
 
 	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
 		switch (ch) {
+		case 'b':
+			blobs = 1;
+			break;
 		case 'e':
 			enroll = 1;
 			break;
@@ -419,6 +450,9 @@ token_delete(int argc, char **argv, char *path)
 		}
 	}
 
+	argc -= optind;
+	argv += optind;
+
 	if (path == NULL)
 		usage();
 
@@ -429,6 +463,15 @@ token_delete(int argc, char **argv, char *path)
 		if (enroll == 0)
 			return (credman_delete_rk(dev, path, id));
 		return (bio_delete(dev, path, id));
+	}
+
+	if (blobs) {
+		if (argc == 1)
+			return (blob_clean(path));
+		else if (argc == 2)
+			return (blob_delete(path, argv[0]));
+		else
+			usage();
 	}
 
 	if (uv == 0)

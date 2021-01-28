@@ -27,6 +27,7 @@ struct blob {
 #define FLAG_U2F	0x10
 #define FLAG_HMAC	0x20
 #define FLAG_UP		0x40
+#define FLAG_LARGE_BLOB 0x80
 
 EC_KEY *read_ec_pubkey(const char *);
 fido_dev_t *open_dev(const char *);
@@ -44,10 +45,14 @@ int bio_enroll(char *);
 void bio_info(fido_dev_t *);
 int bio_list(char *);
 int bio_set_name(char *, char *, char *);
-int config_entattest(char *);
+int blob_clean(const char *);
+int blob_delete(const char *, const char *);
+int blob_get(const char *, const char *);
+int blob_set(const char *, const char *);
 int config_always_uv(char *, int);
-int config_pin_minlen(char *, const char *);
+int config_entattest(char *);
 int config_force_pin_change(char *);
+int config_pin_minlen(char *, const char *);
 int cose_type(const char *, int *);
 int cred_make(int, char **);
 int cred_verify(int, char **);

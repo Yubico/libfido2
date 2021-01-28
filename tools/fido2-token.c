@@ -19,11 +19,11 @@ usage(void)
 {
 	fprintf(stderr,
 "usage: fido2-token -C [-d] device\n"
-"       fido2-token -D [-deu] [-i id] device\n"
-"       fido2-token -I [-cd] [-k rp_id -i cred_id] device\n"
-"       fido2-token -L [-der] [-k rp_id] [device]\n"
+"       fido2-token -D [-bdeu] [-i id] [large_blob_key] device\n"
+"       fido2-token -I [-cd] [-k rp_id -i cred_id]  device\n"
+"       fido2-token -L [-bder] [-k rp_id] [large_blob_key] [device]\n"
 "       fido2-token -R [-d] device\n"
-"       fido2-token -S [-adefu] [-l pin_length] [-i template_id -n template_name] device\n"
+"       fido2-token -S [-abdefu] [-l pin_length] [-i template_id -n template_name] [large_blob_key] device\n"
 "       fido2-token -V\n"
 	);
 
@@ -68,10 +68,10 @@ main(int argc, char **argv)
 		}
 	}
 
-	if (argc - optind == 1)
-		device = argv[optind];
-	else
+	if (argc - optind < 1)
 		device = NULL;
+	else
+		device = argv[argc - 1];
 
 	fido_init(flags);
 
