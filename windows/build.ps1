@@ -20,6 +20,12 @@ New-Variable -Name 'LIBCBOR_BRANCH' -Value 'v0.8.0' -Option Constant
 New-Variable -Name 'LIBCBOR_GIT' -Value 'https://github.com/pjk/libcbor' `
 	-Option Constant
 
+# zlib coordinates.
+New-Variable -Name 'ZLIB' -Value 'zlib-1.2.11' -Option Constant
+New-Variable -Name 'ZLIB_BRANCH' -Value 'v1.2.11' -Option Constant
+New-Variable -Name 'ZLIB_GIT' -Value 'https://github.com/madler/zlib' `
+	-Option Constant
+
 # Work directories.
 New-Variable -Name 'BUILD' -Value "$PSScriptRoot\..\build" -Option Constant
 New-Variable -Name 'OUTPUT' -Value "$PSScriptRoot\..\output" -Option Constant
@@ -115,6 +121,12 @@ try {
 		& $Git clone --branch ${LIBCBOR_BRANCH} ${LIBCBOR_GIT} `
 			.\${LIBCBOR}
 	}
+
+	if(-Not (Test-Path .\${ZLIB})) {
+		Write-Host "Cloning ${ZLIB}..."
+		& $Git clone --branch ${ZLIB_BRANCH} ${ZLIB_GIT} `
+			.\${ZLIB}
+	}
 } catch {
 	throw "Failed to fetch and verify dependencies"
 } finally {
@@ -148,10 +160,25 @@ Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 	& $CMake --build . --config Release --target install --verbose
 	Pop-Location
 
+	if(-Not (Test-Path .\${ZLIB})) {
+		New-Item -Type Directory .\${ZLIB} -ErrorAction Stop
+	}
+
+	Push-Location .\${ZLIB}
+	& $CMake ..\..\..\${ZLIB} -G "${GENERATOR}" -A "${ARCH}" `
+		-DBUILD_SHARED_LIBS="${SHARED}" `
+		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
+		-DCMAKE_INSTALL_PREFIX="${OUTPUT}"
+	& $CMake --build . --config Release --verbose
+	& $CMake --build . --config Release --target install --verbose
+	Pop-Location
+
 	& $CMake ..\..\.. -G "${GENERATOR}" -A "${ARCH}" `
 		-DBUILD_SHARED_LIBS="${SHARED}" `
 		-DCBOR_INCLUDE_DIRS="${OUTPUT}\include" `
 		-DCBOR_LIBRARY_DIRS="${OUTPUT}\lib" `
+		-DZLIB_INCLUDE_DIRS="${OUTPUT}\include" `
+		-DZLIB_LIBRARY_DIRS="${OUTPUT}\lib" `
 		-DCRYPTO_INCLUDE_DIRS="${OUTPUT}\include" `
 		-DCRYPTO_LIBRARY_DIRS="${OUTPUT}\lib" `
 		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
@@ -159,7 +186,7 @@ Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 	& $CMake --build . --config Release --verbose
 	& $CMake --build . --config Release --target install --verbose
 	if ("${SHARED}" -eq "ON") {
-		"cbor.dll", "crypto-46.dll" | %{ Copy-Item "${OUTPUT}\bin\$_" `
+		"cbor.dll", "crypto-46.dll", "zlib1.dll" | %{ Copy-Item "${OUTPUT}\bin\$_" `
 			-Destination "examples\Release" }
 	}
 }
@@ -172,6 +199,8 @@ Function Package-Headers() {
 Function Package-Dynamic(${SRC}, ${DEST}) {
 	Copy-Item "${SRC}\bin\cbor.dll" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}\lib\cbor.lib" "${DEST}" -ErrorAction Stop
+	Copy-Item "${SRC}\bin\zlib1.dll" "${DEST}" -ErrorAction Stop
+	Copy-Item "${SRC}\lib\zlib.lib" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}\bin\crypto-46.dll" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}\lib\crypto-46.lib" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}\lib\fido2.dll" "${DEST}" -ErrorAction Stop
@@ -190,6 +219,8 @@ Function Package-PDBs(${SRC}, ${DEST}) {
 		"${DEST}\crypto-46.pdb" -ErrorAction Stop
 	Copy-Item "${SRC}\${LIBCBOR}\src\cbor.dir\Release\vc142.pdb" `
 		"${DEST}\cbor.pdb" -ErrorAction Stop
+	Copy-Item "${SRC}\${ZLIB}\zlib.dir\Release\vc142.pdb" `
+		"${DEST}\zlib.pdb" -ErrorAction Stop
 	Copy-Item "${SRC}\src\fido2_shared.dir\Release\vc142.pdb" `
 		"${DEST}\fido2.pdb" -ErrorAction Stop
 }

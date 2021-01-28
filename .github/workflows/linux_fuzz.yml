@@ -18,7 +18,7 @@ jobs:
         CC: ${{ matrix.cc }}
       run: |
         sudo apt -q update
-        sudo apt install -q -y libcbor-dev \
+        sudo apt install -q -y libcbor-dev libz-dev \
           libudev-dev ${CC%-*}-tools-${CC#clang-}
     - name: fuzz
       env:

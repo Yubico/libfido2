@@ -157,12 +157,14 @@ endif()
 
 if(MSVC)
 	if((NOT CBOR_INCLUDE_DIRS) OR (NOT CBOR_LIBRARY_DIRS) OR
-	   (NOT CRYPTO_INCLUDE_DIRS) OR (NOT CRYPTO_LIBRARY_DIRS))
+	   (NOT CRYPTO_INCLUDE_DIRS) OR (NOT CRYPTO_LIBRARY_DIRS) OR
+	   (NOT ZLIB_INCLUDE_DIRS) OR (NOT ZLIB_LIBRARY_DIRS))
 		message(FATAL_ERROR "please provide definitions for "
-		    "{CBOR,CRYPTO}_{INCLUDE,LIBRARY}_DIRS when building "
+		   "{CBOR,CRYPTO,ZLIB}_{INCLUDE,LIBRARY}_DIRS when building "
 		    "under msvc")
 	endif()
 	set(CBOR_LIBRARIES cbor)
+	set(ZLIB_LIBRARIES zlib)
 	set(CRYPTO_LIBRARIES crypto-46)
 	set(MSVC_DISABLED_WARNINGS_LIST
 		"C4200" # nonstandard extension used: zero-sized array in
@@ -185,6 +187,7 @@ else()
 	include(FindPkgConfig)
 	pkg_search_module(CBOR libcbor)
 	pkg_search_module(CRYPTO libcrypto)
+	pkg_search_module(ZLIB zlib)
 
 	if(NOT CBOR_FOUND AND NOT HAVE_CBOR_H)
 		message(FATAL_ERROR "could not find cbor header files")
@@ -313,9 +316,11 @@ endif()
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CBOR_INCLUDE_DIRS})
 include_directories(${CRYPTO_INCLUDE_DIRS})
+include_directories(${ZLIB_INCLUDE_DIRS})
 
 link_directories(${CBOR_LIBRARY_DIRS})
 link_directories(${CRYPTO_LIBRARY_DIRS})
+link_directories(${ZLIB_LIBRARY_DIRS})
 
 message(STATUS "BASE_LIBRARIES: ${BASE_LIBRARIES}")
 message(STATUS "BUILD_EXAMPLES: ${BUILD_EXAMPLES}")
@@ -326,6 +331,9 @@ message(STATUS "BUILD_TOOLS: ${BUILD_TOOLS}")
 message(STATUS "CBOR_INCLUDE_DIRS: ${CBOR_INCLUDE_DIRS}")
 message(STATUS "CBOR_LIBRARIES: ${CBOR_LIBRARIES}")
 message(STATUS "CBOR_LIBRARY_DIRS: ${CBOR_LIBRARY_DIRS}")
+message(STATUS "ZLIB_INCLUDE_DIRS: ${ZLIB_INCLUDE_DIRS}")
+message(STATUS "ZLIB_LIBRARIES: ${ZLIB_LIBRARIES}")
+message(STATUS "ZLIB_LIBRARY_DIRS: ${ZLIB_LIBRARY_DIRS}")
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
 message(STATUS "CMAKE_C_COMPILER_ID: ${CMAKE_C_COMPILER_ID}")

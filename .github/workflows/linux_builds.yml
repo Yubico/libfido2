@@ -38,7 +38,8 @@ jobs:
           sudo apt-add-repository ppa:yubico/stable
         fi
         sudo apt -q update
-        sudo apt install -q -y libcbor-dev libudev-dev original-awk mandoc
+        sudo apt install -q -y libcbor-dev libudev-dev libz-dev \
+          original-awk mandoc
         if [ "${CC%-*}" == "clang" ]; then
           sudo apt install -q -y ${CC%-*}-tools-${CC#clang-}
         elif [ "${CC%-*}" == "i686-w64-mingw32-gcc" ]; then

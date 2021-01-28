@@ -38,6 +38,15 @@ make -j2
 sudo make install_sw
 cd ..
 
+# Build and install zlib.
+git clone https://github.com/madler/zlib
+cd zlib
+git checkout v1.2.11
+make -fwin32/Makefile.gcc PREFIX=i686-w64-mingw32-
+sudo make -fwin32/Makefile.gcc PREFIX=i686-w64-mingw32- DESTDIR=/fakeroot \
+	INCLUDE_PATH=/include LIBRARY_PATH=/lib BINARY_PATH=/bin install
+cd ..
+
 # Build and install libfido2.
 export PKG_CONFIG_PATH=/fakeroot/lib/pkgconfig
 mkdir build

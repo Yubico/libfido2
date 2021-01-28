@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: dependencies
-      run: brew install libcbor llvm mandoc pkg-config
+      run: brew install libcbor llvm mandoc pkg-config zlib
     - name: build
       env:
         CC: ${{ matrix.cc }}
