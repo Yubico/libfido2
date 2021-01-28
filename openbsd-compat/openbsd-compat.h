@@ -20,9 +20,12 @@
 #define be16toh(x) OSSwapBigToHostInt16((x))
 #define htobe16(x) OSSwapHostToBigInt16((x))
 #define be32toh(x) OSSwapBigToHostInt32((x))
+#define htole32(x) OSSwapHostToLittleInt32((x))
+#define htole64(x) OSSwapHostToLittleInt64((x))
 #endif /* __APPLE__ && !HAVE_ENDIAN_H */
 
 #if defined(_WIN32) && !defined(HAVE_ENDIAN_H)
+#include <stdint.h>
 #include <winsock2.h>
 #if !defined(_MSC_VER)
 #include <sys/param.h>
@@ -30,6 +33,8 @@
 #define be16toh(x) ntohs((x))
 #define htobe16(x) htons((x))
 #define be32toh(x) ntohl((x))
+uint32_t htole32(uint32_t);
+uint64_t htole64(uint64_t);
 #endif /* _WIN32 && !HAVE_ENDIAN_H */
 
 #if defined(__FreeBSD__) && !defined(HAVE_ENDIAN_H)
