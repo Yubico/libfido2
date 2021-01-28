@@ -32,7 +32,7 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: assert [-t ecdsa|rsa|eddsa] [-a cred_id] "
-	    "[-h hmac_secret] [-s hmac_salt] [-P pin] [-T seconds] [-puv] "
+	    "[-h hmac_secret] [-s hmac_salt] [-P pin] [-T seconds] [-bpuv] "
 	    "<pubkey> <device>\n");
 	exit(EXIT_FAILURE);
 }
@@ -176,7 +176,7 @@ main(int argc, char **argv)
 	if ((assert = fido_assert_new()) == NULL)
 		errx(1, "fido_assert_new");
 
-	while ((ch = getopt(argc, argv, "P:T:a:h:ps:t:uv")) != -1) {
+	while ((ch = getopt(argc, argv, "P:T:a:bh:ps:t:uv")) != -1) {
 		switch (ch) {
 		case 'P':
 			pin = optarg;
@@ -205,11 +205,14 @@ main(int argc, char **argv)
 		case 'h':
 			hmac_out = optarg;
 			break;
+		case 'b':
+			ext |= FIDO_EXT_LARGE_BLOB_KEY;
+			break;
 		case 'p':
 			up = true;
 			break;
 		case 's':
-			ext = FIDO_EXT_HMAC_SECRET;
+			ext |= FIDO_EXT_HMAC_SECRET;
 			if (read_blob(optarg, &body, &len) < 0)
 				errx(1, "read_blob: %s", optarg);
 			if ((r = fido_assert_set_hmac_salt(assert, body,

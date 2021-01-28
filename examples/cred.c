@@ -38,7 +38,7 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: cred [-t ecdsa|rsa|eddsa] [-k pubkey] "
-	    "[-ei cred_id] [-P pin] [-T seconds] [-hruv] <device>\n");
+	    "[-ei cred_id] [-P pin] [-T seconds] [-hbruv] <device>\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -180,7 +180,7 @@ main(int argc, char **argv)
 	if ((cred = fido_cred_new()) == NULL)
 		errx(1, "fido_cred_new");
 
-	while ((ch = getopt(argc, argv, "P:T:e:hi:k:rt:uv")) != -1) {
+	while ((ch = getopt(argc, argv, "P:T:be:hi:k:rt:uv")) != -1) {
 		switch (ch) {
 		case 'P':
 			pin = optarg;
@@ -207,13 +207,16 @@ main(int argc, char **argv)
 			body = NULL;
 			break;
 		case 'h':
-			ext = FIDO_EXT_HMAC_SECRET;
+			ext |= FIDO_EXT_HMAC_SECRET;
 			break;
 		case 'i':
 			id_out = optarg;
 			break;
 		case 'k':
 			key_out = optarg;
+			break;
+		case 'b':
+			ext |= FIDO_EXT_LARGE_BLOB_KEY;
 			break;
 		case 'r':
 			rk = true;
