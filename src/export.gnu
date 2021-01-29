@@ -206,6 +206,10 @@
 		fido_dev_supports_uv;
 		fido_dev_toggle_always_uv;
 		fido_init;
+		fido_dev_large_blob_trim;
+		fido_dev_large_blob_get;
+		fido_dev_large_blob_put;
+		fido_dev_large_blob_remove;
 		fido_set_log_handler;
 		fido_strerr;
 		rs256_pk_free;

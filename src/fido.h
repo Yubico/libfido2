@@ -198,6 +198,14 @@ const unsigned char *fido_blob_ptr(const fido_blob_t *);
 int fido_blob_set(fido_blob_t *, const unsigned char *, size_t);
 int fido_blob_append(fido_blob_t *, const unsigned char *, size_t);
 
+int fido_dev_large_blob_get(fido_dev_t *, const unsigned char *, size_t,
+    fido_blob_t *);
+int fido_dev_large_blob_put(fido_dev_t *, const unsigned char *, size_t,
+    const fido_blob_t *, const char *);
+int fido_dev_large_blob_remove(fido_dev_t *, const unsigned char *, size_t,
+    const char *);
+int fido_dev_large_blob_trim(fido_dev_t *, const char *);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */
