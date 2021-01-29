@@ -14,6 +14,7 @@
 #define CTAP21_UV_TOKEN_PERM_ASSERT	0x02
 #define CTAP21_UV_TOKEN_PERM_CRED_MGMT	0x04
 #define CTAP21_UV_TOKEN_PERM_BIO	0x08
+#define CTAP21_UV_TOKEN_PERM_LARGE_BLOB	0x10
 #define CTAP21_UV_TOKEN_PERM_CONFIG	0x20
 
 static int
@@ -139,6 +140,8 @@ encode_uv_permission(uint8_t cmd)
 		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_MAKECRED));
 	case CTAP_CBOR_CRED_MGMT_PRE:
 		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_CRED_MGMT));
+	case CTAP_CBOR_LARGE_BLOBS:
+		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_LARGE_BLOB));
 	default:
 		fido_log_debug("%s: cmd 0x%02x", __func__, cmd);
 		return (NULL);
