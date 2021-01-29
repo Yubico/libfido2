@@ -25,7 +25,7 @@ jobs:
         path: libcbor
         ref: v0.8.0
     - name: build libcbor
-      run: cmake -DCMAKE_BUILD_TYPE=Release . && make && sudo make install
+      run: cmake -DCMAKE_BUILD_TYPE=Release . && make -j2 && sudo make install
       working-directory: libcbor
     - name: build libfido2
       env:
