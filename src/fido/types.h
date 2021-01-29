@@ -156,16 +156,21 @@ typedef struct _fido_assert_stmt {
 	fido_blob_t     authdata_cbor;   /* raw cbor payload */
 	fido_authdata_t authdata;        /* decoded authdata payload */
 	fido_blob_t     sig;             /* signature of cdh + authdata */
+	fido_blob_t     large_blob_key;  /* decoded large blob key */
 } fido_assert_stmt;
+
+typedef struct fido_assert_ext {
+	int         mask;                /* enabled extensions */
+	fido_blob_t hmac_salt;           /* optional hmac-secret salt */
+} fido_assert_ext_t;
 
 typedef struct fido_assert {
 	char              *rp_id;        /* relying party id */
 	fido_blob_t        cdh;          /* client data hash */
-	fido_blob_t        hmac_salt;    /* optional hmac-secret salt */
 	fido_blob_array_t  allow_list;   /* list of allowed credentials */
 	fido_opt_t         up;           /* user presence */
 	fido_opt_t         uv;           /* user verification */
-	int                ext;          /* enabled extensions */
+	fido_assert_ext_t  ext;          /* enabled extensions */
 	fido_assert_stmt  *stmt;         /* array of expected assertions */
 	size_t             stmt_cnt;     /* number of allocated assertions */
 	size_t             stmt_len;     /* number of received assertions */

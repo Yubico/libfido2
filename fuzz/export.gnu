@@ -22,6 +22,8 @@
 		fido_assert_hmac_secret_ptr;
 		fido_assert_id_len;
 		fido_assert_id_ptr;
+		fido_assert_large_blob_key_len;
+		fido_assert_large_blob_key_ptr;
 		fido_assert_new;
 		fido_assert_rp_id;
 		fido_assert_set_authdata;
@@ -30,6 +32,7 @@
 		fido_assert_set_count;
 		fido_assert_set_extensions;
 		fido_assert_set_hmac_salt;
+		fido_assert_set_hmac_secret;
 		fido_assert_set_options;
 		fido_assert_set_rp;
 		fido_assert_set_sig;
@@ -205,6 +208,10 @@
 		fido_dev_supports_pin;
 		fido_dev_supports_uv;
 		fido_dev_toggle_always_uv;
+		fido_dev_large_blob_trim;
+		fido_dev_large_blob_get;
+		fido_dev_large_blob_put;
+		fido_dev_large_blob_remove;
 		fido_hid_get_report_len;
 		fido_hid_get_usage;
 		fido_init;
