@@ -13,32 +13,77 @@ fido_blob_new(void)
 	return (calloc(1, sizeof(fido_blob_t)));
 }
 
-int
-fido_blob_set(fido_blob_t *b, const unsigned char *ptr, size_t len)
+const unsigned char *
+fido_blob_ptr(const fido_blob_t *b)
+{
+	return (b->ptr);
+}
+
+size_t
+fido_blob_len(const fido_blob_t *b)
+{
+	return (b->len);
+}
+
+void
+fido_blob_reset(fido_blob_t *b)
 {
 	if (b->ptr != NULL) {
 		explicit_bzero(b->ptr, b->len);
 		free(b->ptr);
-		b->ptr = NULL;
 	}
 
-	b->len = 0;
+	explicit_bzero(b, sizeof(*b));
+}
+
+int
+fido_blob_set(fido_blob_t *b, const unsigned char *ptr, size_t len)
+{
+	fido_blob_reset(b);
 
 	if (ptr == NULL || len == 0) {
 		fido_log_debug("%s: ptr=%p, len=%zu", __func__,
 		    (const void *)ptr, len);
-		return (-1);
+		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
 	if ((b->ptr = malloc(len)) == NULL) {
 		fido_log_debug("%s: malloc", __func__);
-		return (-1);
+		return (FIDO_ERR_INTERNAL);
 	}
 
 	memcpy(b->ptr, ptr, len);
 	b->len = len;
 
-	return (0);
+	return (FIDO_OK);
+}
+
+int
+fido_blob_append(fido_blob_t *b, const unsigned char *ptr, size_t len)
+{
+	unsigned char	*tmp;
+
+	if (ptr == NULL || len == 0) {
+		fido_log_debug("%s: ptr=%p, len=%zu", __func__,
+		    (const void *)ptr, len);
+		return (FIDO_ERR_INVALID_ARGUMENT);
+	}
+
+	if ((SIZE_MAX - b->len) < len) {
+		fido_log_debug("%s: overflow", __func__);
+		return (FIDO_ERR_INTERNAL);
+	}
+
+	if ((tmp = realloc(b->ptr, b->len + len)) == NULL) {
+		fido_log_debug("%s: realloc", __func__);
+		return (FIDO_ERR_INTERNAL);
+	}
+
+	b->ptr = tmp;
+	memcpy(&b->ptr[b->len], ptr, len);
+	b->len += len;
+
+	return (FIDO_OK);
 }
 
 void
@@ -49,12 +94,7 @@ fido_blob_free(fido_blob_t **bp)
 	if (bp == NULL || (b = *bp) == NULL)
 		return;
 
-	if (b->ptr) {
-		explicit_bzero(b->ptr, b->len);
-		free(b->ptr);
-	}
-
-	explicit_bzero(b, sizeof(*b));
+	fido_blob_reset(b);
 	free(b);
 
 	*bp = NULL;

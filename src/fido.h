@@ -38,6 +38,7 @@ fido_dev_t *fido_dev_new(void);
 fido_dev_t *fido_dev_new_with_info(const fido_dev_info_t *);
 fido_dev_info_t *fido_dev_info_new(size_t);
 fido_cbor_info_t *fido_cbor_info_new(void);
+fido_blob_t *fido_blob_new(void);
 
 void fido_assert_free(fido_assert_t **);
 void fido_cbor_info_free(fido_cbor_info_t **);
@@ -46,6 +47,7 @@ void fido_dev_force_fido2(fido_dev_t *);
 void fido_dev_force_u2f(fido_dev_t *);
 void fido_dev_free(fido_dev_t **);
 void fido_dev_info_free(fido_dev_info_t **, size_t);
+void fido_blob_free(fido_blob_t **);
 
 /* fido_init() flags. */
 #define FIDO_DEBUG	0x01
@@ -190,6 +192,11 @@ bool fido_dev_supports_pin(const fido_dev_t *);
 bool fido_dev_supports_cred_prot(const fido_dev_t *);
 bool fido_dev_supports_credman(const fido_dev_t *);
 bool fido_dev_supports_uv(const fido_dev_t *);
+
+size_t fido_blob_len(const fido_blob_t *);
+const unsigned char *fido_blob_ptr(const fido_blob_t *);
+int fido_blob_set(fido_blob_t *, const unsigned char *, size_t);
+int fido_blob_append(fido_blob_t *, const unsigned char *, size_t);
 
 #ifdef __cplusplus
 } /* extern "C" */

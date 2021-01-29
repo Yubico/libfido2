@@ -237,6 +237,7 @@ typedef struct fido_dev {
 
 #else
 typedef struct fido_assert fido_assert_t;
+typedef struct fido_blob fido_blob_t;
 typedef struct fido_cbor_info fido_cbor_info_t;
 typedef struct fido_cred fido_cred_t;
 typedef struct fido_dev fido_dev_t;
