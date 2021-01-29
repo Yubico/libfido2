@@ -256,6 +256,8 @@ credman_parse_rk(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		    fido_cred_set_prot(cred, (int)prot) != FIDO_OK)
 			return (-1);
 		return (0);
+	case 11: /* large blob key */
+		return (fido_blob_decode(val, &cred->large_blob_key));
 	default:
 		fido_log_debug("%s: cbor type", __func__);
 		return (0); /* ignore */

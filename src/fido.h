@@ -90,6 +90,7 @@ const unsigned char *fido_cred_user_id_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_pubkey_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_sig_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_x5c_ptr(const fido_cred_t *);
+const unsigned char *fido_cred_large_blob_key_ptr(const fido_cred_t *);
 
 int fido_assert_allow_cred(fido_assert_t *, const unsigned char *, size_t);
 int fido_assert_set_authdata(fido_assert_t *, size_t, const unsigned char *,
@@ -168,6 +169,7 @@ size_t fido_cred_user_id_len(const fido_cred_t *);
 size_t fido_cred_pubkey_len(const fido_cred_t *);
 size_t fido_cred_sig_len(const fido_cred_t *);
 size_t fido_cred_x5c_len(const fido_cred_t *);
+size_t fido_cred_large_blob_key_len(const fido_cred_t *);
 
 uint8_t  fido_assert_flags(const fido_assert_t *, size_t);
 uint32_t fido_assert_sigcount(const fido_assert_t *, size_t);

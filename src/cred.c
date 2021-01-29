@@ -37,6 +37,8 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		    &cred->authdata_ext));
 	case 3: /* attestation statement */
 		return (cbor_decode_attstmt(val, &cred->attstmt));
+	case 5: /* large blob key */
+		return (fido_blob_decode(val, &cred->large_blob_key));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type", __func__);
 		return (0);
@@ -82,8 +84,8 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 
 	/* extensions */
 	if (cred->ext.mask)
-		if ((argv[5] = cbor_encode_extensions(&cred->ext)) == NULL) {
-			fido_log_debug("%s: cbor_encode_extensions", __func__);
+		if ((argv[5] = cbor_encode_cred_extensions(&cred->ext)) == NULL) {
+			fido_log_debug("%s: cbor_encode_cred_extensions", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
@@ -187,7 +189,13 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 static int
 check_extensions(const fido_cred_ext_t *authdata_ext, const fido_cred_ext_t *ext)
 {
-	return (timingsafe_bcmp(authdata_ext, ext, sizeof(*authdata_ext)));
+	fido_cred_ext_t	 tmp;
+
+	/* XXX: largeBlobKey is not part of the extensions map */
+	memcpy(&tmp, ext, sizeof(tmp));
+	tmp.mask &= ~FIDO_EXT_LARGE_BLOB_KEY;
+
+	return (timingsafe_bcmp(authdata_ext, &tmp, sizeof(*authdata_ext)));
 }
 
 int
@@ -389,6 +397,14 @@ fido_cred_verify_self(const fido_cred_t *cred)
 		goto out;
 	}
 
+	/* XXX: largeBlobKey is not part of the extensions map */
+	if (cred->ext.mask & FIDO_EXT_LARGE_BLOB_KEY &&
+	    fido_blob_is_empty(&cred->large_blob_key)) {
+		fido_log_debug("%s: large_blob_key", __func__);
+		r = FIDO_ERR_INVALID_PARAM;
+		goto out;
+	}
+
 	if (check_extensions(&cred->authdata_ext, &cred->ext) != 0) {
 		fido_log_debug("%s: check_extensions", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
@@ -502,6 +518,17 @@ fido_cred_clean_sig(fido_cred_t *cred)
 	cred->attstmt.sig.len = 0;
 }
 
+static void
+fido_cred_clean_large_blob_key(fido_cred_t *cred)
+{
+	if (cred->large_blob_key.ptr != NULL) {
+		explicit_bzero(cred->large_blob_key.ptr, cred->large_blob_key.len);
+	}
+	free(cred->large_blob_key.ptr);
+	cred->large_blob_key.ptr = NULL;
+	cred->large_blob_key.len = 0;
+}
+
 void
 fido_cred_reset_rx(fido_cred_t *cred)
 {
@@ -511,6 +538,7 @@ fido_cred_reset_rx(fido_cred_t *cred)
 	fido_cred_clean_authdata(cred);
 	fido_cred_clean_x509(cred);
 	fido_cred_clean_sig(cred);
+	fido_cred_clean_large_blob_key(cred);
 }
 
 void
@@ -777,8 +805,7 @@ fido_cred_set_extensions(fido_cred_t *cred, int ext)
 	if (ext == 0)
 		cred->ext.mask = 0;
 	else {
-		if (ext != FIDO_EXT_HMAC_SECRET &&
-		    ext != FIDO_EXT_CRED_PROTECT)
+		if ((ext & FIDO_EXT_CRED_MASK) != ext)
 			return (FIDO_ERR_INVALID_ARGUMENT);
 		cred->ext.mask |= ext;
 	}
@@ -1054,4 +1081,16 @@ size_t
 fido_cred_user_id_len(const fido_cred_t *cred)
 {
 	return (cred->user.id.len);
+}
+
+const unsigned char *
+fido_cred_large_blob_key_ptr(const fido_cred_t *cred)
+{
+	return (cred->large_blob_key.ptr);
+}
+
+size_t
+fido_cred_large_blob_key_len(const fido_cred_t *cred)
+{
+	return (cred->large_blob_key.len);
 }
