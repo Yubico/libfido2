@@ -5,7 +5,7 @@ ${CC} --version
 # Build and install libfido2.
 mkdir build
 (cd build && cmake -DCMAKE_BUILD_TYPE=Debug ..)
-make -C build
+make -j2 -C build
 sudo make -C build install
 
 # Check udev/fidodevs.
