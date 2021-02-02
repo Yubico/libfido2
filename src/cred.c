@@ -100,7 +100,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 		}
 
 	/* user verification */
-	if (pin != NULL || cred->uv == FIDO_OPT_TRUE) {
+	if (fido_dev_can_get_uv_token(dev, pin, cred->uv)) {
 		if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;

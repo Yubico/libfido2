@@ -62,7 +62,7 @@ config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
 	}
 
 	/* pinProtocol, pinAuth */
-	if (fido_dev_can_get_uv_token(dev, pin)) {
+	if (fido_dev_can_get_uv_token(dev, pin, FIDO_OPT_OMIT)) {
 		if ((argv[1] = cbor_flatten_vector(paramv, paramc)) == NULL) {
 			fido_log_debug("%s: cbor_flatten_vector", __func__);
 			goto fail;

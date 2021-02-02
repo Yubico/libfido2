@@ -136,7 +136,7 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 		}
 
 	/* user verification */
-	if (pk != NULL && ecdh != NULL)
+	if (fido_dev_can_get_uv_token(dev, pin, assert->uv))
 		if ((r = cbor_add_uv_params(dev, cmd, &assert->cdh, pk, ecdh,
 		    pin, assert->rp_id, &argv[5], &argv[6])) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
