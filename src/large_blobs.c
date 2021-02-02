@@ -677,7 +677,7 @@ large_blob_array_set_wait(fido_dev_t *dev, const cbor_item_t *arr,
 		goto fail;
 	}
 
-	if (fido_dev_can_get_uv_token(dev, pin)) {
+	if (fido_dev_can_get_uv_token(dev, pin, FIDO_OPT_OMIT)) {
 		if ((token = fido_blob_new()) == NULL) {
 			fido_log_debug("%s: fido_blob_new", __func__);
 			r = FIDO_ERR_INTERNAL;
