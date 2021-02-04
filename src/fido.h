@@ -15,11 +15,13 @@
 #include <stdlib.h>
 
 #ifdef _FIDO_INTERNAL
+#include <sys/types.h>
+
 #include <cbor.h>
 #include <limits.h>
 
-#include "blob.h"
 #include "../openbsd-compat/openbsd-compat.h"
+#include "blob.h"
 #include "iso7816.h"
 #include "extern.h"
 #endif
