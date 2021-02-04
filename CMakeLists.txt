@@ -89,6 +89,7 @@ check_include_files(unistd.h HAVE_UNISTD_H)
 check_symbol_exists(arc4random_buf stdlib.h HAVE_ARC4RANDOM_BUF)
 check_symbol_exists(clock_gettime time.h HAVE_CLOCK_GETTIME)
 check_symbol_exists(explicit_bzero string.h HAVE_EXPLICIT_BZERO)
+check_symbol_exists(freezero stdlib.h HAVE_FREEZERO)
 check_symbol_exists(getline stdio.h HAVE_GETLINE)
 check_symbol_exists(getopt unistd.h HAVE_GETOPT)
 check_symbol_exists(getpagesize unistd.h HAVE_GETPAGESIZE)
@@ -119,6 +120,7 @@ list(APPEND CHECK_VARIABLES
 	HAVE_CLOCK_GETTIME
 	HAVE_ENDIAN_H
 	HAVE_ERR_H
+	HAVE_FREEZERO
 	HAVE_GETLINE
 	HAVE_GETOPT
 	HAVE_GETPAGESIZE

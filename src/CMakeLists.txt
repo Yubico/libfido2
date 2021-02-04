@@ -68,6 +68,7 @@ list(APPEND COMPAT_SOURCES
 	../openbsd-compat/endian_win32.c
 	../openbsd-compat/explicit_bzero.c
 	../openbsd-compat/explicit_bzero_win32.c
+	../openbsd-compat/freezero.c
 	../openbsd-compat/recallocarray.c
 	../openbsd-compat/strlcat.c
 	../openbsd-compat/timingsafe_bcmp.c

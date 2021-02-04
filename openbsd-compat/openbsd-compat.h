@@ -42,6 +42,7 @@ uint64_t htole64(uint64_t);
 #endif
 
 #include <stdlib.h>
+#include <string.h>
 
 #if !defined(HAVE_STRLCAT)
 size_t strlcat(char *, const char *, size_t);
@@ -57,6 +58,10 @@ void *recallocarray(void *, size_t, size_t, size_t);
 
 #if !defined(HAVE_EXPLICIT_BZERO)
 void explicit_bzero(void *, size_t);
+#endif
+
+#if !defined(HAVE_FREEZERO)
+void freezero(void *, size_t);
 #endif
 
 #if !defined(HAVE_GETPAGESIZE)
