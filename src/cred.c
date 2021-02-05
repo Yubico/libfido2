@@ -515,27 +515,15 @@ fido_cred_clean_sig(fido_cred_t *cred)
 	cred->attstmt.sig.len = 0;
 }
 
-static void
-fido_cred_clean_large_blob_key(fido_cred_t *cred)
-{
-	if (cred->large_blob_key.ptr != NULL) {
-		explicit_bzero(cred->large_blob_key.ptr, cred->large_blob_key.len);
-	}
-	free(cred->large_blob_key.ptr);
-	cred->large_blob_key.ptr = NULL;
-	cred->large_blob_key.len = 0;
-}
-
 void
 fido_cred_reset_rx(fido_cred_t *cred)
 {
 	free(cred->fmt);
 	cred->fmt = NULL;
-
 	fido_cred_clean_authdata(cred);
 	fido_cred_clean_x509(cred);
 	fido_cred_clean_sig(cred);
-	fido_cred_clean_large_blob_key(cred);
+	fido_blob_reset(&cred->large_blob_key);
 }
 
 void
@@ -545,12 +533,9 @@ fido_cred_free(fido_cred_t **cred_p)
 
 	if (cred_p == NULL || (cred = *cred_p) == NULL)
 		return;
-
 	fido_cred_reset_tx(cred);
 	fido_cred_reset_rx(cred);
-
 	free(cred);
-
 	*cred_p = NULL;
 }
 

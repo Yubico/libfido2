@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -745,59 +745,37 @@ fido_assert_new(void)
 	return (calloc(1, sizeof(fido_assert_t)));
 }
 
-static void
-fido_assert_reset_ext(fido_assert_t *assert)
-{
-	if (assert->ext.hmac_salt.ptr != NULL)
-		explicit_bzero(assert->ext.hmac_salt.ptr, assert->ext.hmac_salt.len);
-	free(assert->ext.hmac_salt.ptr);
-	memset(&assert->ext, 0, sizeof(assert->ext));
-}
-
 void
 fido_assert_reset_tx(fido_assert_t *assert)
 {
 	free(assert->rp_id);
-	free(assert->cdh.ptr);
+	fido_blob_reset(&assert->cdh);
+	fido_blob_reset(&assert->ext.hmac_salt);
 	fido_free_blob_array(&assert->allow_list);
-
-	memset(&assert->cdh, 0, sizeof(assert->cdh));
+	memset(&assert->ext, 0, sizeof(assert->ext));
 	memset(&assert->allow_list, 0, sizeof(assert->allow_list));
-
 	assert->rp_id = NULL;
 	assert->up = FIDO_OPT_OMIT;
 	assert->uv = FIDO_OPT_OMIT;
-
-	fido_assert_reset_ext(assert);
 }
 
 void
 fido_assert_reset_rx(fido_assert_t *assert)
 {
 	for (size_t i = 0; i < assert->stmt_cnt; i++) {
-		free(assert->stmt[i].user.id.ptr);
 		free(assert->stmt[i].user.icon);
 		free(assert->stmt[i].user.name);
 		free(assert->stmt[i].user.display_name);
-		free(assert->stmt[i].id.ptr);
-		if (assert->stmt[i].hmac_secret.ptr != NULL) {
-			explicit_bzero(assert->stmt[i].hmac_secret.ptr,
-			    assert->stmt[i].hmac_secret.len);
-		}
-		if (assert->stmt[i].large_blob_key.ptr != NULL) {
-			explicit_bzero(assert->stmt[i].large_blob_key.ptr,
-			    assert->stmt[i].large_blob_key.len);
-		}
-		free(assert->stmt[i].large_blob_key.ptr);
-		free(assert->stmt[i].hmac_secret.ptr);
-		free(assert->stmt[i].hmac_secret_enc.ptr);
-		free(assert->stmt[i].authdata_cbor.ptr);
-		free(assert->stmt[i].sig.ptr);
+		fido_blob_reset(&assert->stmt[i].user.id);
+		fido_blob_reset(&assert->stmt[i].id);
+		fido_blob_reset(&assert->stmt[i].hmac_secret);
+		fido_blob_reset(&assert->stmt[i].hmac_secret_enc);
+		fido_blob_reset(&assert->stmt[i].authdata_cbor);
+		fido_blob_reset(&assert->stmt[i].large_blob_key);
+		fido_blob_reset(&assert->stmt[i].sig);
 		memset(&assert->stmt[i], 0, sizeof(assert->stmt[i]));
 	}
-
 	free(assert->stmt);
-
 	assert->stmt = NULL;
 	assert->stmt_len = 0;
 	assert->stmt_cnt = 0;
@@ -810,12 +788,9 @@ fido_assert_free(fido_assert_t **assert_p)
 
 	if (assert_p == NULL || (assert = *assert_p) == NULL)
 		return;
-
 	fido_assert_reset_tx(assert);
 	fido_assert_reset_rx(assert);
-
 	free(assert);
-
 	*assert_p = NULL;
 }
 
@@ -985,15 +960,12 @@ fido_assert_large_blob_key_len(const fido_assert_t *assert, size_t idx)
 }
 
 static void
-fido_assert_clean_authdata(fido_assert_stmt *as)
+fido_assert_clean_authdata(fido_assert_stmt *stmt)
 {
-	free(as->authdata_cbor.ptr);
-	free(as->hmac_secret_enc.ptr);
-
-	memset(&as->authdata_ext, 0, sizeof(as->authdata_ext));
-	memset(&as->authdata_cbor, 0, sizeof(as->authdata_cbor));
-	memset(&as->authdata, 0, sizeof(as->authdata));
-	memset(&as->hmac_secret_enc, 0, sizeof(as->hmac_secret_enc));
+	fido_blob_reset(&stmt->authdata_cbor);
+	fido_blob_reset(&stmt->hmac_secret_enc);
+	memset(&stmt->authdata_ext, 0, sizeof(stmt->authdata_ext));
+	memset(&stmt->authdata, 0, sizeof(stmt->authdata));
 }
 
 int
@@ -1073,14 +1045,6 @@ fail:
 	return (r);
 }
 
-static void
-fido_assert_clean_sig(fido_assert_stmt *as)
-{
-	free(as->sig.ptr);
-	as->sig.ptr = NULL;
-	as->sig.len = 0;
-}
-
 int
 fido_assert_set_sig(fido_assert_t *a, size_t idx, const unsigned char *ptr,
     size_t len)
@@ -1090,7 +1054,7 @@ fido_assert_set_sig(fido_assert_t *a, size_t idx, const unsigned char *ptr,
 	if (idx >= a->stmt_len || ptr == NULL || len == 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	fido_assert_clean_sig(&a->stmt[idx]);
+	fido_blob_reset(&a->stmt[idx].sig);
 
 	if ((sig = malloc(len)) == NULL)
 		return (FIDO_ERR_INTERNAL);
