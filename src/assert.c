@@ -116,18 +116,18 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 	}
 
 	if (assert->ext.mask)
-		if ((argv[3] = cbor_encode_assert_extensions(dev, &assert->ext, ecdh, pk)) == NULL) {
-			fido_log_debug("%s: cbor_encode_assert_extensions", __func__);
+		if ((argv[3] = cbor_encode_assert_ext(dev, &assert->ext, ecdh,
+		    pk)) == NULL) {
+			fido_log_debug("%s: cbor_encode_assert_ext", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
 
 	/* options */
 	if (assert->up != FIDO_OPT_OMIT || assert->uv != FIDO_OPT_OMIT)
-		if ((argv[4] = cbor_encode_assert_options(assert->up,
+		if ((argv[4] = cbor_encode_assert_opt(assert->up,
 		    assert->uv)) == NULL) {
-			fido_log_debug("%s: cbor_encode_assert_options",
-			    __func__);
+			fido_log_debug("%s: cbor_encode_assert_opt", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
@@ -356,8 +356,8 @@ check_extensions(int authdata_ext, int ext)
 }
 
 int
-fido_get_signed_hash(int cose_alg, fido_blob_t *dgst, const fido_blob_t *clientdata,
-    const fido_blob_t *authdata_cbor)
+fido_get_signed_hash(int cose_alg, fido_blob_t *dgst,
+    const fido_blob_t *clientdata, const fido_blob_t *authdata_cbor)
 {
 	cbor_item_t		*item = NULL;
 	unsigned char		*authdata_ptr = NULL;

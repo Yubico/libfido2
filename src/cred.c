@@ -81,17 +81,17 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 
 	/* extensions */
 	if (cred->ext.mask)
-		if ((argv[5] = cbor_encode_cred_extensions(&cred->ext)) == NULL) {
-			fido_log_debug("%s: cbor_encode_cred_extensions", __func__);
+		if ((argv[5] = cbor_encode_cred_ext(&cred->ext)) == NULL) {
+			fido_log_debug("%s: cbor_encode_cred_ext", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
 
 	/* options */
 	if (cred->rk != FIDO_OPT_OMIT || cred->uv != FIDO_OPT_OMIT)
-		if ((argv[6] = cbor_encode_options(cred->rk,
+		if ((argv[6] = cbor_encode_cred_opt(cred->rk,
 		    cred->uv)) == NULL) {
-			fido_log_debug("%s: cbor_encode_options", __func__);
+			fido_log_debug("%s: cbor_encode_cred_opt", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
@@ -159,7 +159,8 @@ fido_dev_make_cred_rx(fido_dev_t *dev, fido_cred_t *cred, int ms)
 }
 
 static int
-fido_dev_make_cred_wait(fido_dev_t *dev, fido_cred_t *cred, const char *pin, int ms)
+fido_dev_make_cred_wait(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
+    int ms)
 {
 	int  r;
 
@@ -184,7 +185,8 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 }
 
 static int
-check_extensions(const fido_cred_ext_t *authdata_ext, const fido_cred_ext_t *ext)
+check_extensions(const fido_cred_ext_t *authdata_ext,
+    const fido_cred_ext_t *ext)
 {
 	fido_cred_ext_t	 tmp;
 

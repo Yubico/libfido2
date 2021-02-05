@@ -571,7 +571,7 @@ cbor_encode_large_blob_key_ext(cbor_item_t *map)
 }
 
 cbor_item_t *
-cbor_encode_cred_extensions(const fido_cred_ext_t *ext)
+cbor_encode_cred_ext(const fido_cred_ext_t *ext)
 {
 	cbor_item_t *item = NULL;
 	size_t size = 0;
@@ -611,13 +611,12 @@ cbor_encode_cred_extensions(const fido_cred_ext_t *ext)
 }
 
 cbor_item_t *
-cbor_encode_options(fido_opt_t rk, fido_opt_t uv)
+cbor_encode_cred_opt(fido_opt_t rk, fido_opt_t uv)
 {
 	cbor_item_t *item = NULL;
 
 	if ((item = cbor_new_definite_map(2)) == NULL)
 		return (NULL);
-
 	if ((rk != FIDO_OPT_OMIT && cbor_add_bool(item, "rk", rk) < 0) ||
 	    (uv != FIDO_OPT_OMIT && cbor_add_bool(item, "uv", uv) < 0)) {
 		cbor_decref(&item);
@@ -628,13 +627,12 @@ cbor_encode_options(fido_opt_t rk, fido_opt_t uv)
 }
 
 cbor_item_t *
-cbor_encode_assert_options(fido_opt_t up, fido_opt_t uv)
+cbor_encode_assert_opt(fido_opt_t up, fido_opt_t uv)
 {
 	cbor_item_t *item = NULL;
 
 	if ((item = cbor_new_definite_map(2)) == NULL)
 		return (NULL);
-
 	if ((up != FIDO_OPT_OMIT && cbor_add_bool(item, "up", up) < 0) ||
 	    (uv != FIDO_OPT_OMIT && cbor_add_bool(item, "uv", uv) < 0)) {
 		cbor_decref(&item);
@@ -840,7 +838,7 @@ fail:
 }
 
 cbor_item_t *
-cbor_encode_assert_extensions(fido_dev_t *dev, const fido_assert_ext_t *ext,
+cbor_encode_assert_ext(fido_dev_t *dev, const fido_assert_ext_t *ext,
     const fido_blob_t *ecdh, const es256_pk_t *pk)
 {
 	cbor_item_t *item = NULL;
@@ -850,7 +848,6 @@ cbor_encode_assert_extensions(fido_dev_t *dev, const fido_assert_ext_t *ext,
 		size++;
 	if (ext->mask & FIDO_EXT_LARGE_BLOB_KEY)
 		size++;
-
 	if (size == 0 || (item = cbor_new_definite_map(size)) == NULL)
 		return (NULL);
 
