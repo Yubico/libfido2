@@ -129,9 +129,7 @@ eddsa_pk_free(eddsa_pk_t **pkp)
 	if (pkp == NULL || (pk = *pkp) == NULL)
 		return;
 
-	explicit_bzero(pk, sizeof(*pk));
-	free(pk);
-
+	freezero(pk, sizeof(*pk));
 	*pkp = NULL;
 }
 
