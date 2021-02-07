@@ -9,10 +9,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <string.h>
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>

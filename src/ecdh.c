@@ -12,8 +12,6 @@
 #include <openssl/kdf.h>
 #endif
 
-#include <string.h>
-
 #include "fido.h"
 #include "fido/es256.h"
 

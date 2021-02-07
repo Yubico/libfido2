@@ -4,12 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
-
 #include <openssl/sha.h>
-
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
 #include "fido.h"
 
 #ifndef TLS

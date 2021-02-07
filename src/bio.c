@@ -4,8 +4,6 @@
  * license that can be found in the LICENSE file.
  */
 
-#include <string.h>
-
 #include "fido.h"
 #include "fido/bio.h"
 #include "fido/es256.h"

@@ -4,12 +4,9 @@
  * license that can be found in the LICENSE file.
  */
 
-#include <openssl/ec.h>
 #include <openssl/ecdsa.h>
-#include <openssl/evp.h>
 #include <openssl/sha.h>
 
-#include <string.h>
 #include "fido.h"
 #include "fido/es256.h"
 #include "fido/rs256.h"

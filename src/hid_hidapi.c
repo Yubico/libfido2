@@ -13,8 +13,6 @@
 
 #include <errno.h>
 #include <hidapi.h>
-#include <stdlib.h>
-#include <string.h>
 #include <wchar.h>
 
 #include "fido.h"

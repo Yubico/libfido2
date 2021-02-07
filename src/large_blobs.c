@@ -6,7 +6,6 @@
 
 #include <openssl/sha.h>
 
-#include <string.h>
 #include "fido.h"
 #include "fido/credman.h"
 #include "fido/es256.h"

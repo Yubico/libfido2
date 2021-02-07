@@ -11,9 +11,6 @@
 #endif
 
 #include <fcntl.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

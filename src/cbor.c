@@ -4,11 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
-#include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
-
-#include <string.h>
 #include "fido.h"
 
 static int

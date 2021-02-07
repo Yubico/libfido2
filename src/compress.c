@@ -5,9 +5,6 @@
  */
 
 #include <zlib.h>
-
-#include <limits.h>
-
 #include "fido.h"
 
 #define FIDO_COMPRESS_BOUND (1024UL * 1024UL)
