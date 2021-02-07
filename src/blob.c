@@ -28,11 +28,7 @@ fido_blob_len(const fido_blob_t *b)
 void
 fido_blob_reset(fido_blob_t *b)
 {
-	if (b->ptr != NULL) {
-		explicit_bzero(b->ptr, b->len);
-		free(b->ptr);
-	}
-
+	freezero(b->ptr, b->len);
 	explicit_bzero(b, sizeof(*b));
 }
 
@@ -108,11 +104,8 @@ fido_free_blob_array(fido_blob_array_t *array)
 
 	for (size_t i = 0; i < array->len; i++) {
 		fido_blob_t *b = &array->ptr[i];
-		if (b->ptr != NULL) {
-			explicit_bzero(b->ptr, b->len);
-			free(b->ptr);
-			b->ptr = NULL;
-		}
+		freezero(b->ptr, b->len);
+		b->ptr = NULL;
 	}
 
 	free(array->ptr);
