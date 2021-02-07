@@ -13,8 +13,7 @@ aes256_cbc(const fido_blob_t *key, const u_char *iv, const fido_blob_t *in,
 	EVP_CIPHER_CTX *ctx = NULL;
 	int ok = -1;
 
-	out->ptr = NULL;
-	out->len = 0;
+	memset(out, 0, sizeof(*out));
 	if (in->len > UINT_MAX || in->len % 16 || in->len == 0 ||
 	    key->len != 32 || (out->ptr = calloc(1, in->len)) == NULL) {
 		fido_log_debug("%s: invalid param", __func__);
@@ -32,11 +31,8 @@ aes256_cbc(const fido_blob_t *key, const u_char *iv, const fido_blob_t *in,
 fail:
 	if (ctx != NULL)
 		EVP_CIPHER_CTX_free(ctx);
-	if (ok < 0) {
-		freezero(out->ptr, out->len);
-		out->ptr = NULL;
-		out->len = 0;
-	}
+	if (ok < 0)
+		fido_blob_reset(out);
 
 	return ok;
 }
@@ -59,8 +55,7 @@ aes256_cbc_fips(const fido_blob_t *secret, const fido_blob_t *in,
 	fido_blob_t key, cin, cout;
 	u_char iv[16];
 
-	out->ptr = NULL;
-	out->len = 0;
+	memset(out, 0, sizeof(*out));
 	if (secret->len != 64 || in->len < sizeof(iv)) {
 		fido_log_debug("%s: invalid param", __func__);
 		return -1;
@@ -83,13 +78,13 @@ aes256_cbc_fips(const fido_blob_t *secret, const fido_blob_t *in,
 	if (encrypt) {
 		if (cout.len > SIZE_MAX - sizeof(iv) ||
 		    (out->ptr = calloc(1, sizeof(iv) + cout.len)) == NULL) {
-			freezero(cout.ptr, cout.len);
+			fido_blob_reset(&cout);
 			return -1;
 		}
 		out->len = sizeof(iv) + cout.len;
 		memcpy(out->ptr, iv, sizeof(iv));
 		memcpy(out->ptr + sizeof(iv), cout.ptr, cout.len);
-		freezero(cout.ptr, cout.len);
+		fido_blob_reset(&cout);
 	} else
 		*out = cout;
 
@@ -103,8 +98,7 @@ aes256_gcm(const fido_blob_t *key, const fido_blob_t *iv, const fido_blob_t *aad
 	EVP_CIPHER_CTX *ctx = NULL;
 	int ok = -1;
 
-	out->ptr = NULL;
-	out->len = 0;
+	memset(out, 0, sizeof(*out));
 	if (iv->len != 12 || key->len != 32 || aad->len > UINT_MAX ||
 	    in->len > UINT_MAX || in->len % 16 || in->len < 16 ||
 	    (out->ptr = calloc(1, in->len)) == NULL) {
@@ -139,11 +133,8 @@ aes256_gcm(const fido_blob_t *key, const fido_blob_t *iv, const fido_blob_t *aad
 fail:
 	if (ctx != NULL)
 		EVP_CIPHER_CTX_free(ctx);
-	if (ok < 0) {
-		freezero(out->ptr, out->len);
-		out->ptr = NULL;
-		out->len = 0;
-	}
+	if (ok < 0)
+		fido_blob_reset(out);
 
 	return ok;
 }
