@@ -7,50 +7,43 @@
 #include <zlib.h>
 #include "fido.h"
 
-#define FIDO_COMPRESS_BOUND (1024UL * 1024UL)
+#define BOUND (1024UL * 1024UL)
 
-int
-fido_compress(fido_blob_t *dst, const fido_blob_t *src)
+static int
+do_compress(fido_blob_t *out, const fido_blob_t *in, size_t origsiz, int decomp)
 {
-	unsigned long in_len;
-	unsigned long out_len;
+	u_long ilen, olen;
+	int r;
 
-	if (dst == NULL || src == NULL || src->len > FIDO_COMPRESS_BOUND)
-		return (FIDO_ERR_INTERNAL);
+	memset(out, 0, sizeof(*out));
+	if (in->len > ULONG_MAX || (ilen = (u_long)in->len) > BOUND ||
+	    origsiz > ULONG_MAX || (olen = decomp ? (u_long)origsiz :
+	    compressBound(ilen)) > BOUND)
+		return FIDO_ERR_INVALID_ARGUMENT;
+	if ((out->ptr = calloc(1, olen)) == NULL)
+		return FIDO_ERR_INTERNAL;
+	out->len = olen;
+	if (decomp)
+		r = uncompress(out->ptr, &olen, in->ptr, ilen);
+	else
+		r = compress(out->ptr, &olen, in->ptr, ilen);
+	if (r != Z_OK || olen > SIZE_MAX || olen > out->len) {
+		fido_blob_reset(out);
+		return FIDO_ERR_COMPRESS;
+	}
+	out->len = olen;
 
-	in_len = (unsigned long)src->len;
-	out_len = compressBound(in_len);
-	if ((dst->ptr = calloc(1, out_len)) == NULL)
-		return (FIDO_ERR_INTERNAL);
-
-	if (compress(dst->ptr, &out_len, src->ptr, in_len) != Z_OK)
-		return (FIDO_ERR_COMPRESS);
-
-	dst->len = (size_t)out_len;
-
-	return (FIDO_OK);
+	return FIDO_OK;
 }
 
 int
-fido_uncompress(fido_blob_t *dst, const fido_blob_t *src, size_t orig_size)
+fido_compress(fido_blob_t *out, const fido_blob_t *in)
 {
-	unsigned long in_len;
-	unsigned long out_len;
+	return do_compress(out, in, 0, 0);
+}
 
-	if (dst == NULL || src == NULL || src->len > ULONG_MAX ||
-	    orig_size > FIDO_COMPRESS_BOUND)
-		return (FIDO_ERR_INTERNAL);
-
-	if ((dst->ptr = calloc(1, orig_size)) == NULL)
-		return (FIDO_ERR_INTERNAL);
-
-	in_len = (unsigned long)src->len;
-	out_len = (unsigned long)orig_size;
-
-	if (uncompress(dst->ptr, &out_len, src->ptr, in_len) != Z_OK)
-		return (FIDO_ERR_COMPRESS);
-
-	dst->len = (size_t)out_len;
-
-	return (FIDO_OK);
+int
+fido_uncompress(fido_blob_t *out, const fido_blob_t *in, size_t origsiz)
+{
+	return do_compress(out, in, origsiz, 1);
 }
