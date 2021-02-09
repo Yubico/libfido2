@@ -31,13 +31,8 @@ sig_get(fido_blob_t *sig, const unsigned char **buf, size_t *len)
 	if ((sig->ptr = calloc(1, sig->len)) == NULL ||
 	    fido_buf_read(buf, len, sig->ptr, sig->len) < 0) {
 		fido_log_debug("%s: fido_buf_read", __func__);
-		if (sig->ptr != NULL) {
-			explicit_bzero(sig->ptr, sig->len);
-			free(sig->ptr);
-			sig->ptr = NULL;
-			sig->len = 0;
-			return (-1);
-		}
+		fido_blob_reset(sig);
+		return (-1);
 	}
 
 	return (0);
@@ -472,14 +467,8 @@ fail:
 	if (authdata_cbor)
 		cbor_decref(&authdata_cbor);
 
-	if (pk_blob.ptr) {
-		explicit_bzero(pk_blob.ptr, pk_blob.len);
-		free(pk_blob.ptr);
-	}
-	if (authdata_blob.ptr) {
-		explicit_bzero(authdata_blob.ptr, authdata_blob.len);
-		free(authdata_blob.ptr);
-	}
+	freezero(pk_blob.ptr, pk_blob.len);
+	freezero(authdata_blob.ptr, authdata_blob.len);
 
 	return (ok);
 }
@@ -550,22 +539,10 @@ parse_register_reply(fido_cred_t *cred, const unsigned char *reply, size_t len)
 
 	r = FIDO_OK;
 fail:
-	if (kh) {
-		explicit_bzero(kh, kh_len);
-		free(kh);
-	}
-	if (x5c.ptr) {
-		explicit_bzero(x5c.ptr, x5c.len);
-		free(x5c.ptr);
-	}
-	if (sig.ptr) {
-		explicit_bzero(sig.ptr, sig.len);
-		free(sig.ptr);
-	}
-	if (ad.ptr) {
-		explicit_bzero(ad.ptr, ad.len);
-		free(ad.ptr);
-	}
+	freezero(kh, kh_len);
+	freezero(x5c.ptr, x5c.len);
+	freezero(sig.ptr, sig.len);
+	freezero(ad.ptr, ad.len);
 
 	return (r);
 }
@@ -711,14 +688,8 @@ u2f_authenticate_single(fido_dev_t *dev, const fido_blob_t *key_id,
 
 	r = FIDO_OK;
 fail:
-	if (sig.ptr) {
-		explicit_bzero(sig.ptr, sig.len);
-		free(sig.ptr);
-	}
-	if (ad.ptr) {
-		explicit_bzero(ad.ptr, ad.len);
-		free(ad.ptr);
-	}
+	freezero(sig.ptr, sig.len);
+	freezero(ad.ptr, ad.len);
 
 	return (r);
 }

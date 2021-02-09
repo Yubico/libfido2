@@ -36,10 +36,7 @@ iso7816_free(iso7816_apdu_t **apdu_p)
 
 	if (apdu_p == NULL || (apdu = *apdu_p) == NULL)
 		return;
-
-	explicit_bzero(apdu, apdu->alloc_len);
-	free(apdu);
-
+	freezero(apdu, apdu->alloc_len);
 	*apdu_p = NULL;
 }
 
