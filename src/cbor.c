@@ -762,8 +762,7 @@ fail:
 
 static int
 cbor_encode_hmac_secret_param(const fido_dev_t *dev, cbor_item_t *item,
-    const fido_blob_t *ecdh, const es256_pk_t *pk,
-    const fido_blob_t *hmac_salt)
+    const fido_blob_t *ecdh, const es256_pk_t *pk, const fido_blob_t *salt)
 {
 	cbor_item_t		*param = NULL;
 	cbor_item_t		*argv[4];
@@ -774,23 +773,22 @@ cbor_encode_hmac_secret_param(const fido_dev_t *dev, cbor_item_t *item,
 	memset(argv, 0, sizeof(argv));
 	memset(&pair, 0, sizeof(pair));
 
-	if (item == NULL || ecdh == NULL || pk == NULL || hmac_salt->ptr == NULL) {
-		fido_log_debug("%s: ecdh=%p, pk=%p, hmac_salt->ptr=%p",
-		    __func__, (const void *)ecdh, (const void *)pk,
-		    (const void *)hmac_salt->ptr);
+	if (item == NULL || ecdh == NULL || pk == NULL || salt->ptr == NULL) {
+		fido_log_debug("%s: ecdh=%p, pk=%p, salt->ptr=%p", __func__,
+		    (const void *)ecdh, (const void *)pk,
+		    (const void *)salt->ptr);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
 
-	if (hmac_salt->len != 32 && hmac_salt->len != 64) {
-		fido_log_debug("%s: hmac_salt->len=%zu", __func__,
-		    hmac_salt->len);
+	if (salt->len != 32 && salt->len != 64) {
+		fido_log_debug("%s: salt->len=%zu", __func__, salt->len);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
 
 	if ((enc = fido_blob_new()) == NULL ||
-	    aes256_cbc_enc(dev, ecdh, hmac_salt, enc) < 0) {
+	    aes256_cbc_enc(dev, ecdh, salt, enc) < 0) {
 		fido_log_debug("%s: aes256_cbc_enc", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
