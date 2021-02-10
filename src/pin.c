@@ -174,7 +174,7 @@ ctap20_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
 	if ((argv[0] = cbor_encode_pin_opt(dev)) == NULL ||
 	    (argv[1] = cbor_build_uint8(5)) == NULL ||
 	    (argv[2] = es256_pk_encode(pk, 1)) == NULL ||
-	    (argv[5] = cbor_build_bytestring(phe->ptr, phe->len)) == NULL) {
+	    (argv[5] = fido_blob_encode(phe)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -388,8 +388,8 @@ fido_dev_change_pin_tx(fido_dev_t *dev, const char *pin, const char *oldpin)
 	    (argv[1] = cbor_build_uint8(4)) == NULL ||
 	    (argv[2] = es256_pk_encode(pk, 1)) == NULL ||
 	    (argv[3] = cbor_encode_change_pin_auth(dev, ecdh, ppine, opinhe)) == NULL ||
-	    (argv[4] = cbor_build_bytestring(ppine->ptr, ppine->len)) == NULL ||
-	    (argv[5] = cbor_build_bytestring(opinhe->ptr, opinhe->len)) == NULL) {
+	    (argv[4] = fido_blob_encode(ppine)) == NULL ||
+	    (argv[5] = fido_blob_encode(opinhe)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -443,7 +443,7 @@ fido_dev_set_pin_tx(fido_dev_t *dev, const char *pin)
 	    (argv[1] = cbor_build_uint8(3)) == NULL ||
 	    (argv[2] = es256_pk_encode(pk, 1)) == NULL ||
 	    (argv[3] = cbor_encode_pin_auth(dev, ecdh, ppine)) == NULL ||
-	    (argv[4] = cbor_build_bytestring(ppine->ptr, ppine->len)) == NULL) {
+	    (argv[4] = fido_blob_encode(ppine)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;

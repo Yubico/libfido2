@@ -423,8 +423,8 @@ large_blob_encode(const fido_blob_t *pt, const fido_blob_t *key)
 		goto fail;
 	}
 
-	if ((argv[0] = cbor_build_bytestring(blob->ct.ptr, blob->ct.len)) == NULL ||
-	    (argv[1] = cbor_build_bytestring(blob->iv.ptr, blob->iv.len)) == NULL ||
+	if ((argv[0] = fido_blob_encode(&blob->ct)) == NULL ||
+	    (argv[1] = fido_blob_encode(&blob->iv)) == NULL ||
 	    (argv[2] = cbor_encode_canonical_uint(blob->sz)) == NULL) {
 		fido_log_debug("%s: cbor", __func__);
 		goto fail;
