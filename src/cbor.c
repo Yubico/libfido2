@@ -1171,7 +1171,7 @@ decode_hmac_secret_aux(const cbor_item_t *key, const cbor_item_t *val, void *arg
 		goto out;
 	}
 
-	ok = cbor_bytestring_copy(val, &out->ptr, &out->len);
+	ok = fido_blob_decode(val, out);
 out:
 	free(type);
 
@@ -1317,7 +1317,7 @@ decode_x5c(const cbor_item_t *item, void *arg)
 	if (x5c->len)
 		return (0); /* ignore */
 
-	return (cbor_bytestring_copy(item, &x5c->ptr, &x5c->len));
+	return (fido_blob_decode(item, x5c));
 }
 
 static int
@@ -1347,8 +1347,7 @@ decode_attstmt_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			goto out;
 		}
 	} else if (!strcmp(name, "sig")) {
-		if (cbor_bytestring_copy(val, &attstmt->sig.ptr,
-		    &attstmt->sig.len) < 0) {
+		if (fido_blob_decode(val, &attstmt->sig) < 0) {
 			fido_log_debug("%s: sig", __func__);
 			goto out;
 		}
@@ -1408,7 +1407,7 @@ decode_cred_id_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	}
 
 	if (!strcmp(name, "id"))
-		if (cbor_bytestring_copy(val, &id->ptr, &id->len) < 0) {
+		if (fido_blob_decode(val, id) < 0) {
 			fido_log_debug("%s: cbor_bytestring_copy", __func__);
 			goto out;
 		}
@@ -1462,7 +1461,7 @@ decode_user_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			goto out;
 		}
 	} else if (!strcmp(name, "id")) {
-		if (cbor_bytestring_copy(val, &user->id.ptr, &user->id.len) < 0) {
+		if (fido_blob_decode(val, &user->id) < 0) {
 			fido_log_debug("%s: id", __func__);
 			goto out;
 		}
