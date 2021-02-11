@@ -53,18 +53,15 @@ large_blob_reset(large_blob_t *blob)
 }
 
 static void
-large_blob_free(large_blob_t **blob_p)
+large_blob_free(large_blob_t **bp)
 {
-	large_blob_t	*blob;
+	large_blob_t *b;
 
-	if (blob_p == NULL || *blob_p == NULL)
+	if (bp == NULL || (b = *bp) == NULL)
 		return;
-
-	blob = *blob_p;
-	large_blob_reset(blob);
-	free(blob);
-
-	blob_p = NULL;
+	large_blob_reset(b);
+	free(b);
+	*bp = NULL;
 }
 
 static fido_blob_t *
