@@ -68,10 +68,10 @@ large_blob_free(large_blob_t **blob_p)
 }
 
 static fido_blob_t *
-large_blob_ad(uint64_t size)
+large_blob_aad(uint64_t size)
 {
 	uint8_t		 buf[4 + sizeof(uint64_t)];
-	fido_blob_t	*ad = NULL;
+	fido_blob_t	*aad = NULL;
 
 	buf[0] = 0x62; /* b */
 	buf[1] = 0x6c; /* l */
@@ -80,25 +80,25 @@ large_blob_ad(uint64_t size)
 	size = htole64(size);
 	memcpy(&buf[4], &size, sizeof(uint64_t));
 
-	if ((ad = fido_blob_new()) == NULL ||
-	    fido_blob_set(ad, buf, sizeof(buf)) < 0)
-		fido_blob_free(&ad);
+	if ((aad = fido_blob_new()) == NULL ||
+	    fido_blob_set(aad, buf, sizeof(buf)) < 0)
+		fido_blob_free(&aad);
 
-	return (ad);
+	return (aad);
 }
 
 static fido_blob_t *
 large_blob_pt(const large_blob_t *blob, const fido_blob_t *key)
 {
-	fido_blob_t	*ad = NULL;
+	fido_blob_t	*aad = NULL;
 	fido_blob_t	*pt = NULL;
 
 	if ((pt = fido_blob_new()) == NULL ||
-	    (ad = large_blob_ad(blob->sz)) == NULL ||
-	    aes256_gcm_dec(key, &blob->iv, ad, &blob->ct, pt) < 0)
+	    (aad = large_blob_aad(blob->sz)) == NULL ||
+	    aes256_gcm_dec(key, &blob->iv, aad, &blob->ct, pt) < 0)
 		fido_blob_free(&pt);
 
-	fido_blob_free(&ad);
+	fido_blob_free(&aad);
 
 	return (pt);
 }
@@ -107,15 +107,15 @@ static int
 large_blob_comp_enc(large_blob_t *blob, const fido_blob_t *pt,
     const fido_blob_t *key)
 {
-	fido_blob_t	*ad = NULL;
+	fido_blob_t	*aad = NULL;
 	fido_blob_t	*df = NULL;
 	int		 ok = -1;
 
 	if ((df = fido_blob_new()) == NULL ||
-	    (ad = large_blob_ad(pt->len)) == NULL ||
+	    (aad = large_blob_aad(pt->len)) == NULL ||
 	    large_blob_gen_iv(blob) < 0 ||
 	    fido_compress(df, pt) != FIDO_OK ||
-	    aes256_gcm_enc(key, &blob->iv, ad, df, &blob->ct) < 0)
+	    aes256_gcm_enc(key, &blob->iv, aad, df, &blob->ct) < 0)
 		goto fail;
 
 	blob->sz = pt->len;
@@ -123,7 +123,7 @@ large_blob_comp_enc(large_blob_t *blob, const fido_blob_t *pt,
 	ok = 0;
 fail:
 	fido_blob_free(&df);
-	fido_blob_free(&ad);
+	fido_blob_free(&aad);
 
 	return (ok);
 }

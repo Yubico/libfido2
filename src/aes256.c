@@ -160,14 +160,14 @@ aes256_cbc_dec(const fido_dev_t *dev, const fido_blob_t *secret,
 
 int
 aes256_gcm_enc(const fido_blob_t *key, const fido_blob_t *iv,
-    const fido_blob_t *ad, const fido_blob_t *in, fido_blob_t *out)
+    const fido_blob_t *aad, const fido_blob_t *in, fido_blob_t *out)
 {
-	return aes256_gcm(key, iv, ad, in, out, 1);
+	return aes256_gcm(key, iv, aad, in, out, 1);
 }
 
 int
 aes256_gcm_dec(const fido_blob_t *key, const fido_blob_t *iv,
-    const fido_blob_t *ad, const fido_blob_t *in, fido_blob_t *out)
+    const fido_blob_t *aad, const fido_blob_t *in, fido_blob_t *out)
 {
-	return aes256_gcm(key, iv, ad, in, out, 0);
+	return aes256_gcm(key, iv, aad, in, out, 0);
 }
