@@ -290,18 +290,27 @@ fail:
 }
 
 static cbor_item_t *
-large_blob_array_load(const uint8_t *ptr, size_t len)
+largeblob_array_load(const uint8_t *ptr, size_t len)
 {
-	struct cbor_load_result	 cbor;
-	cbor_item_t		*item = NULL;
+	struct cbor_load_result cbor;
+	cbor_item_t *item;
 
+	if (len < SHA256_DIGEST_LENGTH) {
+		fido_log_debug("%s: len", __func__);
+		return NULL;
+	}
+	len -= SHA256_DIGEST_LENGTH;
 	if ((item = cbor_load(ptr, len, &cbor)) == NULL) {
-		if (cbor.error.code == CBOR_ERR_MEMERROR)
-			return (NULL);
-	} else if (cbor_isa_array(item) && cbor_array_is_definite(item))
-		return (item);
+		fido_log_debug("%s: cbor_load", __func__);
+		return NULL;
+	}
+	if (!cbor_isa_array(item) || !cbor_array_is_definite(item)) {
+		fido_log_debug("%s: cbor type", __func__);
+		cbor_decref(&item);
+		return NULL;
+	}
 
-	return (cbor_new_definite_array(0));
+	return item;
 }
 
 static cbor_item_t *
@@ -341,12 +350,10 @@ large_blob_array_get_wait(fido_dev_t *dev, int ms)
 		last = frag->len;
 	}
 
-	if (validate_large_blob_array(arr) == 0) {
-		item = large_blob_array_load(arr->ptr,
-		    arr->len - LARGE_BLOBS_DIGEST_LENGTH);
-	} else {
+	if (validate_large_blob_array(arr) == 0)
+		item = largeblob_array_load(arr->ptr, arr->len);
+	else
 		item = cbor_new_definite_array(0);
-	}
 
 fail:
 	fido_blob_free(&frag);
