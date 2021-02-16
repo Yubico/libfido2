@@ -4,6 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
+#ifdef WITH_ZLIB
 #include <zlib.h>
 #include "fido.h"
 
@@ -47,3 +48,25 @@ fido_uncompress(fido_blob_t *out, const fido_blob_t *in, size_t origsiz)
 {
 	return do_compress(out, in, origsiz, 1);
 }
+#else
+#include "fido.h"
+
+int
+fido_compress(fido_blob_t *out, const fido_blob_t *in)
+{
+	(void)out;
+	(void)in;
+
+	return FIDO_ERR_INTERNAL;
+}
+
+int
+fido_uncompress(fido_blob_t *out, const fido_blob_t *in, size_t origsiz)
+{
+	(void)out;
+	(void)in;
+	(void)origsiz;
+
+	return FIDO_ERR_INTERNAL;
+}
+#endif
