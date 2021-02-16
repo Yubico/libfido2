@@ -524,7 +524,7 @@ large_blob_array_remove(cbor_item_t **arr_p, const fido_blob_t *key)
 	r = large_blob_array_find(&index, NULL, key, arr);
 	switch (r) {
 	case FIDO_OK:
-		if (cbor_array_remove(arr_p, index) < 0) {
+		if (cbor_array_drop(arr_p, index) < 0) {
 		    r = FIDO_ERR_INTERNAL;
 		    goto fail;
 		}

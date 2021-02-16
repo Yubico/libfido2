@@ -1573,28 +1573,23 @@ cbor_array_append(cbor_item_t **array, cbor_item_t *item)
 }
 
 int
-cbor_array_remove(cbor_item_t **arr_p, size_t idx)
+cbor_array_drop(cbor_item_t **array, size_t idx)
 {
-	cbor_item_t	**handle = NULL;
-	cbor_item_t	 *src = NULL;
-	cbor_item_t	 *dst = NULL;
-	size_t		  n;
+	cbor_item_t **v, *ret;
+	size_t n;
 
-
-	if (arr_p == NULL || (src = *arr_p) == NULL || !cbor_isa_array(src) ||
-	    (n = cbor_array_size(src)) < 1 || idx >= n ||
-	    (handle = cbor_array_handle(src)) == NULL ||
-	    (dst = cbor_new_definite_array(n - 1)) == NULL)
-		return (-1);
-
-	for (size_t i = 0; i < n; i++)
-		if (i != idx && !cbor_array_push(dst, handle[i])) {
-			cbor_decref(&dst);
-			return (-1);
+	if ((v = cbor_array_handle(*array)) == NULL ||
+	    (n = cbor_array_size(*array)) == 0 || idx >= n ||
+	    (ret = cbor_new_definite_array(n - 1)) == NULL)
+		return -1;
+	for (size_t i = 0; i < n; i++) {
+		if (i != idx && cbor_array_push(ret, v[i]) == 0) {
+			cbor_decref(&ret);
+			return -1;
 		}
+	}
+	cbor_decref(array);
+	*array = ret;
 
-	cbor_decref(&src);
-	*arr_p = dst;
-
-	return (0);
+	return 0;
 }
