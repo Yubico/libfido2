@@ -487,7 +487,6 @@ large_blob_array_insert(cbor_item_t **arr_p, const fido_blob_t *key,
     cbor_item_t *blob)
 {
 	cbor_item_t	*old = *arr_p;
-	cbor_item_t	*new = NULL;
 	size_t		 index;
 	int		 r;
 
@@ -501,20 +500,10 @@ large_blob_array_insert(cbor_item_t **arr_p, const fido_blob_t *key,
 		}
 		break;
 	case FIDO_ERR_NOTFOUND:
-		if ((new = cbor_new_definite_array(
-		    cbor_array_size(old) + 1)) == NULL) {
+		if (cbor_array_append(arr_p, blob) < 0) {
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
-		if (cbor_array_copy(new, old) < 0 ||
-		    !cbor_array_push(new, blob)) {
-			r = FIDO_ERR_INTERNAL;
-			cbor_decref(&new);
-			goto fail;
-		}
-
-		cbor_decref(&old);
-		*arr_p = new;
 		break;
 	default:
 		goto fail;

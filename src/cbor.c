@@ -1547,22 +1547,29 @@ cbor_build_uint(const uint64_t value)
 }
 
 int
-cbor_array_copy(cbor_item_t *dst, const cbor_item_t *src)
+cbor_array_append(cbor_item_t **array, cbor_item_t *item)
 {
-	cbor_item_t	**arr = NULL;
-	size_t		  n;
+	cbor_item_t **v, *ret;
+	size_t n;
 
-	if (dst == NULL || src == NULL ||
-	    !cbor_isa_array(dst) || !cbor_isa_array(src) ||
-	    (arr = cbor_array_handle(src)) == NULL)
-		return (-1);
+	if ((v = cbor_array_handle(*array)) == NULL ||
+	    (n = cbor_array_size(*array)) == SIZE_MAX ||
+	    (ret = cbor_new_definite_array(n + 1)) == NULL)
+		return -1;
+	for (size_t i = 0; i < n; i++) {
+		if (cbor_array_push(ret, v[i]) == 0) {
+			cbor_decref(&ret);
+			return -1;
+		}
+	}
+	if (cbor_array_push(ret, item) == 0) {
+		cbor_decref(&ret);
+		return -1;
+	}
+	cbor_decref(array);
+	*array = ret;
 
-	n = cbor_array_size(src);
-	for (size_t i = 0; i < n; i++)
-		if (!cbor_array_push(dst, arr[i]))
-			return (-1);
-
-	return (0);
+	return 0;
 }
 
 int
