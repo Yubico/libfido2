@@ -1534,17 +1534,16 @@ cbor_decode_rp_entity(const cbor_item_t *item, fido_rp_t *rp)
 }
 
 cbor_item_t *
-cbor_encode_canonical_uint(const uint64_t value)
+cbor_build_uint(const uint64_t value)
 {
-	/* CTAP2 canonical CBOR encoding form; all integers
-	 * must be encoded as small as possible */
 	if (value <= UINT8_MAX)
-		return (cbor_build_uint8((uint8_t)value));
+		return cbor_build_uint8((uint8_t)value);
 	else if (value <= UINT16_MAX)
-		return (cbor_build_uint16((uint16_t)value));
+		return cbor_build_uint16((uint16_t)value);
 	else if (value <= UINT32_MAX)
-		return (cbor_build_uint32((uint32_t)value));
-	return (cbor_build_uint64(value));
+		return cbor_build_uint32((uint32_t)value);
+
+	return cbor_build_uint64(value);
 }
 
 int

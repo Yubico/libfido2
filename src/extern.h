@@ -35,6 +35,7 @@ int aes256_gcm_enc(const fido_blob_t *, const fido_blob_t *,
     const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 
 /* cbor encoding functions */
+cbor_item_t *cbor_build_uint(const uint64_t);
 cbor_item_t *cbor_flatten_vector(cbor_item_t **, size_t);
 cbor_item_t *cbor_encode_assert_opt(fido_opt_t, fido_opt_t);
 cbor_item_t *cbor_encode_change_pin_auth(const fido_dev_t *,
@@ -52,7 +53,6 @@ cbor_item_t *cbor_encode_pubkey_param(int);
 cbor_item_t *cbor_encode_rp_entity(const fido_rp_t *);
 cbor_item_t *cbor_encode_user_entity(const fido_user_t *);
 cbor_item_t *es256_pk_encode(const es256_pk_t *, int);
-cbor_item_t *cbor_encode_canonical_uint(const uint64_t);
 
 /* cbor decoding functions */
 int cbor_decode_attstmt(const cbor_item_t *, fido_attstmt_t *);

@@ -235,8 +235,8 @@ large_blob_array_get_tx(fido_dev_t *dev, const size_t offset,
 	memset(argv, 0, sizeof(argv));
 	memset(&f, 0, sizeof(f));
 
-	if ((argv[0] = cbor_encode_canonical_uint(count)) == NULL ||
-	    (argv[2] = cbor_encode_canonical_uint(offset)) == NULL) {
+	if ((argv[0] = cbor_build_uint(count)) == NULL ||
+	    (argv[2] = cbor_build_uint(offset)) == NULL) {
 		fido_log_debug("%s: cbor_encode_uint", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -429,7 +429,7 @@ large_blob_encode(const fido_blob_t *pt, const fido_blob_t *key)
 
 	if ((argv[0] = fido_blob_encode(&blob->ct)) == NULL ||
 	    (argv[1] = fido_blob_encode(&blob->iv)) == NULL ||
-	    (argv[2] = cbor_encode_canonical_uint(blob->sz)) == NULL) {
+	    (argv[2] = cbor_build_uint(blob->sz)) == NULL) {
 		fido_log_debug("%s: cbor", __func__);
 		goto fail;
 	}
@@ -611,15 +611,15 @@ large_blob_array_set_tx(fido_dev_t *dev, const fido_blob_t *token,
 	memset(&f, 0, sizeof(f));
 
 	if ((argv[1] = cbor_build_bytestring(frag, len)) == NULL ||
-	    (argv[2] = cbor_encode_canonical_uint(offset)) == NULL) {
-		fido_log_debug("%s: cbor_encode_canonical_uint 1", __func__);
+	    (argv[2] = cbor_build_uint(offset)) == NULL) {
+		fido_log_debug("%s: cbor_build_uint 1", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
 
 	if ((offset == 0) &&
-	    (argv[3] = cbor_encode_canonical_uint(total)) == NULL) {
-		fido_log_debug("%s: cbor_encode_canonical_uint 2", __func__);
+	    (argv[3] = cbor_build_uint(total)) == NULL) {
+		fido_log_debug("%s: cbor_build_uint 2", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
