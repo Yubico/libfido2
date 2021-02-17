@@ -9,19 +9,7 @@
 fido_blob_t *
 fido_blob_new(void)
 {
-	return (calloc(1, sizeof(fido_blob_t)));
-}
-
-const unsigned char *
-fido_blob_ptr(const fido_blob_t *b)
-{
-	return (b->ptr);
-}
-
-size_t
-fido_blob_len(const fido_blob_t *b)
-{
-	return (b->len);
+	return calloc(1, sizeof(fido_blob_t));
 }
 
 void
@@ -32,53 +20,50 @@ fido_blob_reset(fido_blob_t *b)
 }
 
 int
-fido_blob_set(fido_blob_t *b, const unsigned char *ptr, size_t len)
+fido_blob_set(fido_blob_t *b, const u_char *ptr, size_t len)
 {
 	fido_blob_reset(b);
 
 	if (ptr == NULL || len == 0) {
 		fido_log_debug("%s: ptr=%p, len=%zu", __func__,
 		    (const void *)ptr, len);
-		return (FIDO_ERR_INVALID_ARGUMENT);
+		return -1;
 	}
 
 	if ((b->ptr = malloc(len)) == NULL) {
 		fido_log_debug("%s: malloc", __func__);
-		return (FIDO_ERR_INTERNAL);
+		return -1;
 	}
 
 	memcpy(b->ptr, ptr, len);
 	b->len = len;
 
-	return (FIDO_OK);
+	return 0;
 }
 
 int
-fido_blob_append(fido_blob_t *b, const unsigned char *ptr, size_t len)
+fido_blob_append(fido_blob_t *b, const u_char *ptr, size_t len)
 {
-	unsigned char	*tmp;
+	u_char *tmp;
 
 	if (ptr == NULL || len == 0) {
 		fido_log_debug("%s: ptr=%p, len=%zu", __func__,
 		    (const void *)ptr, len);
-		return (FIDO_ERR_INVALID_ARGUMENT);
+		return -1;
 	}
-
-	if ((SIZE_MAX - b->len) < len) {
+	if (SIZE_MAX - b->len < len) {
 		fido_log_debug("%s: overflow", __func__);
-		return (FIDO_ERR_INTERNAL);
+		return -1;
 	}
-
 	if ((tmp = realloc(b->ptr, b->len + len)) == NULL) {
 		fido_log_debug("%s: realloc", __func__);
-		return (FIDO_ERR_INTERNAL);
+		return -1;
 	}
-
 	b->ptr = tmp;
 	memcpy(&b->ptr[b->len], ptr, len);
 	b->len += len;
 
-	return (FIDO_OK);
+	return 0;
 }
 
 void
@@ -91,7 +76,6 @@ fido_blob_free(fido_blob_t **bp)
 
 	fido_blob_reset(b);
 	free(b);
-
 	*bp = NULL;
 }
 
@@ -116,19 +100,19 @@ cbor_item_t *
 fido_blob_encode(const fido_blob_t *b)
 {
 	if (b == NULL || b->ptr == NULL)
-		return (NULL);
+		return NULL;
 
-	return (cbor_build_bytestring(b->ptr, b->len));
+	return cbor_build_bytestring(b->ptr, b->len);
 }
 
 int
 fido_blob_decode(const cbor_item_t *item, fido_blob_t *b)
 {
-	return (cbor_bytestring_copy(item, &b->ptr, &b->len));
+	return cbor_bytestring_copy(item, &b->ptr, &b->len);
 }
 
 int
 fido_blob_is_empty(const fido_blob_t *b)
 {
-	return (b->ptr == NULL || b->len == 0);
+	return b->ptr == NULL || b->len == 0;
 }

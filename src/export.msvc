@@ -72,13 +72,6 @@ fido_bio_template_name
 fido_bio_template_new
 fido_bio_template_set_id
 fido_bio_template_set_name
-fido_blob_new
-fido_blob_len
-fido_blob_ptr
-fido_blob_set
-fido_blob_free
-fido_blob_reset
-fido_blob_append
 fido_cbor_info_aaguid_len
 fido_cbor_info_aaguid_ptr
 fido_cbor_info_extensions_len
