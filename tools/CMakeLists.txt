@@ -4,8 +4,9 @@
 
 list(APPEND COMPAT_SOURCES
 	../openbsd-compat/explicit_bzero.c
-	../openbsd-compat/strlcpy.c
+	../openbsd-compat/freezero.c
 	../openbsd-compat/strlcat.c
+	../openbsd-compat/strlcpy.c
 )
 
 if(WIN32 AND NOT CYGWIN AND NOT MSYS)

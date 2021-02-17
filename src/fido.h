@@ -198,12 +198,14 @@ bool fido_dev_supports_credman(const fido_dev_t *);
 bool fido_dev_supports_uv(const fido_dev_t *);
 
 int fido_dev_largeblob_get(fido_dev_t *, const unsigned char *, size_t,
-    fido_blob_t *);
-int fido_dev_largeblob_put(fido_dev_t *, const unsigned char *, size_t,
-    const fido_blob_t *, const char *);
+    unsigned char **, size_t *);
+int fido_dev_largeblob_set(fido_dev_t *, const unsigned char *, size_t,
+    const unsigned char *, size_t, const char *);
 int fido_dev_largeblob_remove(fido_dev_t *, const unsigned char *, size_t,
     const char *);
-int fido_dev_largeblob_trim(fido_dev_t *, const char *);
+int fido_dev_largeblob_get_array(fido_dev_t *, unsigned char **, size_t *);
+int fido_dev_largeblob_set_array(fido_dev_t *, const unsigned char *, size_t,
+    const char *);
 
 #ifdef __cplusplus
 } /* extern "C" */

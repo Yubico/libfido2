@@ -116,3 +116,18 @@ fido_blob_is_empty(const fido_blob_t *b)
 {
 	return b->ptr == NULL || b->len == 0;
 }
+
+int
+fido_blob_serialise(fido_blob_t *b, const cbor_item_t *item)
+{
+	size_t alloc;
+
+	if (!fido_blob_is_empty(b))
+		return -1;
+	if ((b->len = cbor_serialize_alloc(item, &b->ptr, &alloc)) == 0) {
+		b->ptr = NULL;
+		return -1;
+	}
+
+	return 0;
+}

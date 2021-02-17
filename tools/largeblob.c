@@ -29,13 +29,13 @@ read_key(const char *path, struct blob *key)
 }
 
 static void
-print_blob(const fido_blob_t *blob)
+print_blob(const struct blob *blob)
 {
 	FILE  *f = NULL;
 
 	f = open_write(NULL);
 
-	if (fwrite(fido_blob_ptr(blob), fido_blob_len(blob), 1, f) != 1)
+	if (fwrite(blob->ptr, blob->len, 1, f) != 1)
 		errx(1, "fwrite");
 
 	fclose(f);
@@ -56,29 +56,27 @@ int
 blob_get(const char *device_path, const char *key_path)
 {
 	fido_dev_t	*dev = NULL;
-	fido_blob_t	*blob = NULL;
+	struct blob	 blob;
 	struct blob	 key;
 	int		 r;
 
+	memset(&blob, 0, sizeof(blob));
 	memset(&key, 0, sizeof(key));
-
-	if ((blob = fido_blob_new()) == NULL)
-		errx(1, "fido_blob_new");
 
 	read_key(key_path, &key);
 
 	dev = open_dev(device_path);
 
-	r = fido_dev_largeblob_get(dev, key.ptr, key.len, blob);
+	r = fido_dev_largeblob_get(dev, key.ptr, key.len, &blob.ptr, &blob.len);
 
 	clear_key(&key);
 
 	if (r != FIDO_OK)
 		errx(1, "fido_dev_largeblob_get: %s", fido_strerr(r));
 
-	print_blob(blob);
+	print_blob(&blob);
 
-	fido_blob_free(&blob);
+	freezero(blob.ptr, blob.len);
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
 
@@ -86,21 +84,13 @@ blob_get(const char *device_path, const char *key_path)
 }
 
 static void
-read_blob(fido_blob_t *blob)
+read_blob(struct blob *blob)
 {
-	unsigned char buffer[1024];
-	FILE	*f;
-	size_t	 n;
+	FILE *f = NULL;
 
 	f = open_read(NULL);
-
-	while ((n = fread(buffer, sizeof(unsigned char), sizeof(buffer), f)) > 0)
-		if (fido_blob_append(blob, buffer, n) != FIDO_OK)
-			errx(1,"fido_blob_append");
-
-	if (ferror(f))
-		errx(1, "fread");
-
+	if (base64_read(f, blob) < 0)
+		errx(1, "blob input error");
 	fclose(f);
 	f = NULL;
 }
@@ -109,39 +99,39 @@ int
 blob_set(const char *device_path, const char *key_path)
 {
 	fido_dev_t	*dev = NULL;
-	fido_blob_t	*blob = NULL;
+	struct blob	 blob;
 	struct blob	 key;
 	char		 pin[1024];
 	char		 prompt[1024];
 	int		 r;
 
+	memset(&blob, 0, sizeof(blob));
 	memset(&key, 0, sizeof(key));
 
-	if ((blob = fido_blob_new()) == NULL)
-		errx(1, "fido_blob_new");
-
 	read_key(key_path, &key);
-	read_blob(blob);
+	read_blob(&blob);
 
 	dev = open_dev(device_path);
 
-	r = fido_dev_largeblob_put(dev, key.ptr, key.len, blob, NULL);
+	r = fido_dev_largeblob_set(dev, key.ptr, key.len, blob.ptr, blob.len,
+	    NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED) {
 		r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ", device_path);
 		if (r < 0 || (size_t)r >= sizeof(prompt))
 			errx(1, "snprintf");
 		if (!readpassphrase(prompt, pin, sizeof(pin), RPP_ECHO_OFF))
 			errx(1, "readpassphrase");
-		r = fido_dev_largeblob_put(dev, key.ptr, key.len, blob, pin);
+		r = fido_dev_largeblob_set(dev, key.ptr, key.len, blob.ptr,
+		    blob.len, pin);
 	}
 
 	explicit_bzero(pin, sizeof(pin));
 	clear_key(&key);
+	freezero(blob.ptr, blob.len);
 
 	if (r != FIDO_OK)
 		errx(1, "fido_dev_largeblob_set: %s", fido_strerr(r));
 
-	fido_blob_free(&blob);
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
 
@@ -185,30 +175,6 @@ blob_delete(const char* device_path, const char* key_path)
 int
 blob_clean(const char *device_path)
 {
-	fido_dev_t	*dev = NULL;
-	char		 pin[1024];
-	char		 prompt[1024];
-	int		 r;
-
-	dev = open_dev(device_path);
-
-	r = fido_dev_largeblob_trim(dev, NULL);
-	if (r == FIDO_ERR_PIN_REQUIRED || r == FIDO_ERR_INVALID_ARGUMENT) {
-		r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ", device_path);
-		if (r < 0 || (size_t)r >= sizeof(prompt))
-			errx(1, "snprintf");
-		if (!readpassphrase(prompt, pin, sizeof(pin), RPP_ECHO_OFF))
-			errx(1, "readpassphrase");
-		r = fido_dev_largeblob_trim(dev, pin);
-	}
-
-	explicit_bzero(pin, sizeof(pin));
-
-	if (r != FIDO_OK)
-		errx(1, "fido_dev_largeblob_trim: %s", fido_strerr(r));
-
-	fido_dev_close(dev);
-	fido_dev_free(&dev);
-
-	exit(0);
+	(void)device_path;
+	errx(1, "unimplemented, sorry"); /* XXX fix me */
 }
