@@ -11,12 +11,12 @@
 #include "fido/es256.h"
 
 #define LARGEBLOB_DIGEST_LENGTH	16
-#define LARGEBLOB_IV_LENGTH	12
+#define LARGEBLOB_NONCE_LENGTH	12
 #define LARGEBLOB_TAG_LENGTH	16
 
 typedef struct largeblob {
 	fido_blob_t ct;
-	fido_blob_t iv;
+	fido_blob_t nonce;
 	size_t      sz;
 } largeblob_t;
 
@@ -27,13 +27,13 @@ largeblob_new(void)
 }
 
 static int
-largeblob_gen_iv(largeblob_t *blob)
+largeblob_gen_nonce(largeblob_t *blob)
 {
-	uint8_t	  buf[LARGEBLOB_IV_LENGTH];
+	uint8_t	  buf[LARGEBLOB_NONCE_LENGTH];
 	int	  r = -1;
 
 	if (fido_get_random(buf, sizeof(buf)) < 0 ||
-	    fido_blob_set(&blob->iv, buf, sizeof(buf)) < 0)
+	    fido_blob_set(&blob->nonce, buf, sizeof(buf)) < 0)
 		goto fail;
 
 	r = 0;
@@ -48,7 +48,7 @@ static void
 largeblob_reset(largeblob_t *blob)
 {
 	fido_blob_reset(&blob->ct);
-	fido_blob_reset(&blob->iv);
+	fido_blob_reset(&blob->nonce);
 	blob->sz = 0;
 }
 
@@ -92,7 +92,7 @@ largeblob_pt(const largeblob_t *blob, const fido_blob_t *key)
 
 	if ((pt = fido_blob_new()) == NULL ||
 	    (aad = largeblob_aad(blob->sz)) == NULL ||
-	    aes256_gcm_dec(key, &blob->iv, aad, &blob->ct, pt) < 0)
+	    aes256_gcm_dec(key, &blob->nonce, aad, &blob->ct, pt) < 0)
 		fido_blob_free(&pt);
 
 	fido_blob_free(&aad);
@@ -110,9 +110,9 @@ largeblob_comp_enc(largeblob_t *blob, const fido_blob_t *pt,
 
 	if ((df = fido_blob_new()) == NULL ||
 	    (aad = largeblob_aad(pt->len)) == NULL ||
-	    largeblob_gen_iv(blob) < 0 ||
+	    largeblob_gen_nonce(blob) < 0 ||
 	    fido_compress(df, pt) != FIDO_OK ||
-	    aes256_gcm_enc(key, &blob->iv, aad, df, &blob->ct) < 0)
+	    aes256_gcm_enc(key, &blob->nonce, aad, df, &blob->ct) < 0)
 		goto fail;
 
 	blob->sz = pt->len;
@@ -381,8 +381,8 @@ largeblob_do_decode(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			return(-1);
 		return (0);
 	case 2: /* nonce */
-		if (fido_blob_decode(val, &blob->iv) < 0 ||
-		    blob->iv.len != LARGEBLOB_IV_LENGTH)
+		if (fido_blob_decode(val, &blob->nonce) < 0 ||
+		    blob->nonce.len != LARGEBLOB_NONCE_LENGTH)
 			return(-1);
 		return (0);
 	case 3: /* origSize */
@@ -405,7 +405,7 @@ largeblob_decode(largeblob_t *blob, const cbor_item_t *item)
 		return (-1);
 
 	if (fido_blob_is_empty(&blob->ct) ||
-	    fido_blob_is_empty(&blob->iv) ||
+	    fido_blob_is_empty(&blob->nonce) ||
 	    blob->sz == 0)
 		return (-1);
 
@@ -428,7 +428,7 @@ largeblob_encode(const fido_blob_t *pt, const fido_blob_t *key)
 	}
 
 	if ((argv[0] = fido_blob_encode(&blob->ct)) == NULL ||
-	    (argv[1] = fido_blob_encode(&blob->iv)) == NULL ||
+	    (argv[1] = fido_blob_encode(&blob->nonce)) == NULL ||
 	    (argv[2] = cbor_build_uint(blob->sz)) == NULL) {
 		fido_log_debug("%s: cbor", __func__);
 		goto fail;

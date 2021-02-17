@@ -94,15 +94,16 @@ aes256_cbc_fips(const fido_blob_t *secret, const fido_blob_t *in,
 }
 
 static int
-aes256_gcm(const fido_blob_t *key, const fido_blob_t *iv, const fido_blob_t *aad,
-    const fido_blob_t *in, fido_blob_t *out, int encrypt)
+aes256_gcm(const fido_blob_t *key, const fido_blob_t *nonce,
+    const fido_blob_t *aad, const fido_blob_t *in, fido_blob_t *out,
+    int encrypt)
 {
 	EVP_CIPHER_CTX *ctx = NULL;
 	const EVP_CIPHER *cipher;
 	int ok = -1;
 
 	memset(out, 0, sizeof(*out));
-	if (iv->len != 12 || key->len != 32 || aad->len > UINT_MAX ||
+	if (nonce->len != 12 || key->len != 32 || aad->len > UINT_MAX ||
 	    in->len > UINT_MAX || in->len % 16 || in->len < 16 ||
 	    (out->ptr = calloc(1, in->len)) == NULL) {
 		fido_log_debug("%s: invalid param", __func__);
@@ -111,7 +112,7 @@ aes256_gcm(const fido_blob_t *key, const fido_blob_t *iv, const fido_blob_t *aad
 	out->len = in->len;
 	if ((ctx = EVP_CIPHER_CTX_new()) == NULL ||
 	    (cipher = EVP_aes_256_gcm()) == NULL ||
-	    EVP_CipherInit(ctx, cipher, key->ptr, iv->ptr, encrypt) == 0) {
+	    EVP_CipherInit(ctx, cipher, key->ptr, nonce->ptr, encrypt) == 0) {
 		fido_log_debug("%s: EVP_CipherInit", __func__);
 		goto fail;
 	}
@@ -159,15 +160,15 @@ aes256_cbc_dec(const fido_dev_t *dev, const fido_blob_t *secret,
 }
 
 int
-aes256_gcm_enc(const fido_blob_t *key, const fido_blob_t *iv,
+aes256_gcm_enc(const fido_blob_t *key, const fido_blob_t *nonce,
     const fido_blob_t *aad, const fido_blob_t *in, fido_blob_t *out)
 {
-	return aes256_gcm(key, iv, aad, in, out, 1);
+	return aes256_gcm(key, nonce, aad, in, out, 1);
 }
 
 int
-aes256_gcm_dec(const fido_blob_t *key, const fido_blob_t *iv,
+aes256_gcm_dec(const fido_blob_t *key, const fido_blob_t *nonce,
     const fido_blob_t *aad, const fido_blob_t *in, fido_blob_t *out)
 {
-	return aes256_gcm(key, iv, aad, in, out, 0);
+	return aes256_gcm(key, nonce, aad, in, out, 0);
 }
