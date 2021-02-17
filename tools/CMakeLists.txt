@@ -53,7 +53,7 @@ add_executable(fido2-token
 	bio.c
 	config.c
 	credman.c
-	large_blobs.c
+	largeblob.c
 	pin.c
 	token.c
 	util.c

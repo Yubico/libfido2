@@ -47,7 +47,7 @@ static const unsigned char blob_write[128] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: large_blobs [-a cred_id] "
+	fprintf(stderr, "usage: largeblob [-a cred_id] "
 	    "[-s hmac_salt] [-P pin] [-pv] <pubkey>\n");
 	exit(EXIT_FAILURE);
 }
@@ -112,7 +112,7 @@ main(int argc, char **argv)
 	unsigned char	*body = NULL;
 	fido_blob_t	*blob = NULL;
 	size_t		 len;
-	int		 ext = FIDO_EXT_LARGE_BLOB_KEY;
+	int		 ext = FIDO_EXT_LARGEBLOB_KEY;
 	int		 ch;
 	int		 r;
 
@@ -182,29 +182,29 @@ main(int argc, char **argv)
 	if (r != FIDO_OK)
 		errx(1, "fido_blob_set");
 
-	r = fido_dev_large_blob_put(dev, fido_assert_large_blob_key_ptr(assert, 0),
-		fido_assert_large_blob_key_len(assert, 0), blob, pin);
+	r = fido_dev_largeblob_put(dev, fido_assert_largeblob_key_ptr(assert, 0),
+		fido_assert_largeblob_key_len(assert, 0), blob, pin);
 	if (r != FIDO_OK)
-		errx(1, "fido_dev_large_blob_put: %s (0x%x)", fido_strerr(r), r);
+		errx(1, "fido_dev_largeblob_put: %s (0x%x)", fido_strerr(r), r);
 
-	r = fido_dev_large_blob_get(dev, fido_assert_large_blob_key_ptr(assert, 0),
-	    fido_assert_large_blob_key_len(assert, 0), blob);
+	r = fido_dev_largeblob_get(dev, fido_assert_largeblob_key_ptr(assert, 0),
+	    fido_assert_largeblob_key_len(assert, 0), blob);
 	if (r != FIDO_OK)
-		errx(1, "fido_dev_large_blob_get 1: %s (0x%x)", fido_strerr(r), r);
+		errx(1, "fido_dev_largeblob_get 1: %s (0x%x)", fido_strerr(r), r);
 
 	/* blob should be identical to what we just wrote */
 	verify_blob(blob);
 
-	r = fido_dev_large_blob_remove(dev, fido_assert_large_blob_key_ptr(assert, 0),
-	    fido_assert_large_blob_key_len(assert, 0), pin);
+	r = fido_dev_largeblob_remove(dev, fido_assert_largeblob_key_ptr(assert, 0),
+	    fido_assert_largeblob_key_len(assert, 0), pin);
 	if (r != FIDO_OK)
-		errx(1, "fido_dev_large_blob_remove: %s (0x%x)", fido_strerr(r), r);
+		errx(1, "fido_dev_largeblob_remove: %s (0x%x)", fido_strerr(r), r);
 
 	/* there should no longer be a blob for this key */
-	r = fido_dev_large_blob_get(dev, fido_assert_large_blob_key_ptr(assert, 0),
-	    fido_assert_large_blob_key_len(assert, 0), blob);
+	r = fido_dev_largeblob_get(dev, fido_assert_largeblob_key_ptr(assert, 0),
+	    fido_assert_largeblob_key_len(assert, 0), blob);
 	if (r != FIDO_ERR_NOTFOUND)
-		errx(1, "fido_dev_large_blob_get 2: %s (0x%x)", fido_strerr(r), r);
+		errx(1, "fido_dev_largeblob_get 2: %s (0x%x)", fido_strerr(r), r);
 
 	r = fido_dev_close(dev);
 	if (r != FIDO_OK)

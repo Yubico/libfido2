@@ -25,7 +25,7 @@ list(APPEND FIDO_SOURCES
 	info.c
 	io.c
 	iso7816.c
-	large_blobs.c
+	largeblob.c
 	log.c
 	pin.c
 	random.c

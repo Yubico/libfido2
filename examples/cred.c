@@ -216,7 +216,7 @@ main(int argc, char **argv)
 			key_out = optarg;
 			break;
 		case 'b':
-			ext |= FIDO_EXT_LARGE_BLOB_KEY;
+			ext |= FIDO_EXT_LARGEBLOB_KEY;
 			break;
 		case 'r':
 			rk = true;

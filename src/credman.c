@@ -239,7 +239,7 @@ credman_parse_rk(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	}
 
 	switch (cbor_get_uint8(key)) {
-	case 6: /* user entity */
+	case 6:
 		return (cbor_decode_user(val, &cred->user));
 	case 7:
 		return (cbor_decode_cred_id(val, &cred->attcred.id));
@@ -254,8 +254,8 @@ credman_parse_rk(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		    fido_cred_set_prot(cred, (int)prot) != FIDO_OK)
 			return (-1);
 		return (0);
-	case 11: /* large blob key */
-		return (fido_blob_decode(val, &cred->large_blob_key));
+	case 11:
+		return (fido_blob_decode(val, &cred->largeblob_key));
 	default:
 		fido_log_debug("%s: cbor type", __func__);
 		return (0); /* ignore */

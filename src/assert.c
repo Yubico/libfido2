@@ -71,7 +71,7 @@ parse_assert_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	case 4: /* user attributes */
 		return (cbor_decode_user(val, &stmt->user));
 	case 7: /* large blob key */
-		return (fido_blob_decode(val, &stmt->large_blob_key));
+		return (fido_blob_decode(val, &stmt->largeblob_key));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type", __func__);
 		return (0);
@@ -345,7 +345,7 @@ static int
 check_extensions(int authdata_ext, int ext)
 {
 	/* XXX: largeBlobKey is not part of extensions map */
-	ext &= ~FIDO_EXT_LARGE_BLOB_KEY;
+	ext &= ~FIDO_EXT_LARGEBLOB_KEY;
 	if (authdata_ext != ext) {
 		fido_log_debug("%s: authdata_ext=0x%x != ext=0x%x", __func__,
 		    authdata_ext, ext);
@@ -771,7 +771,7 @@ fido_assert_reset_rx(fido_assert_t *assert)
 		fido_blob_reset(&assert->stmt[i].hmac_secret);
 		fido_blob_reset(&assert->stmt[i].hmac_secret_enc);
 		fido_blob_reset(&assert->stmt[i].authdata_cbor);
-		fido_blob_reset(&assert->stmt[i].large_blob_key);
+		fido_blob_reset(&assert->stmt[i].largeblob_key);
 		fido_blob_reset(&assert->stmt[i].sig);
 		memset(&assert->stmt[i], 0, sizeof(assert->stmt[i]));
 	}
@@ -942,21 +942,21 @@ fido_assert_hmac_secret_len(const fido_assert_t *assert, size_t idx)
 }
 
 const unsigned char *
-fido_assert_large_blob_key_ptr(const fido_assert_t *assert, size_t idx)
+fido_assert_largeblob_key_ptr(const fido_assert_t *assert, size_t idx)
 {
 	if (idx >= assert->stmt_len)
 		return (NULL);
 
-	return (assert->stmt[idx].large_blob_key.ptr);
+	return (assert->stmt[idx].largeblob_key.ptr);
 }
 
 size_t
-fido_assert_large_blob_key_len(const fido_assert_t *assert, size_t idx)
+fido_assert_largeblob_key_len(const fido_assert_t *assert, size_t idx)
 {
 	if (idx >= assert->stmt_len)
 		return (0);
 
-	return (assert->stmt[idx].large_blob_key.len);
+	return (assert->stmt[idx].largeblob_key.len);
 }
 
 static void

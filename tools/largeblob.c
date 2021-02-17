@@ -69,12 +69,12 @@ blob_get(const char *device_path, const char *key_path)
 
 	dev = open_dev(device_path);
 
-	r = fido_dev_large_blob_get(dev, key.ptr, key.len, blob);
+	r = fido_dev_largeblob_get(dev, key.ptr, key.len, blob);
 
 	clear_key(&key);
 
 	if (r != FIDO_OK)
-		errx(1, "fido_dev_large_blob_get: %s", fido_strerr(r));
+		errx(1, "fido_dev_largeblob_get: %s", fido_strerr(r));
 
 	print_blob(blob);
 
@@ -125,21 +125,21 @@ blob_set(const char *device_path, const char *key_path)
 
 	dev = open_dev(device_path);
 
-	r = fido_dev_large_blob_put(dev, key.ptr, key.len, blob, NULL);
+	r = fido_dev_largeblob_put(dev, key.ptr, key.len, blob, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED) {
 		r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ", device_path);
 		if (r < 0 || (size_t)r >= sizeof(prompt))
 			errx(1, "snprintf");
 		if (!readpassphrase(prompt, pin, sizeof(pin), RPP_ECHO_OFF))
 			errx(1, "readpassphrase");
-		r = fido_dev_large_blob_put(dev, key.ptr, key.len, blob, pin);
+		r = fido_dev_largeblob_put(dev, key.ptr, key.len, blob, pin);
 	}
 
 	explicit_bzero(pin, sizeof(pin));
 	clear_key(&key);
 
 	if (r != FIDO_OK)
-		errx(1, "fido_dev_large_blob_set: %s", fido_strerr(r));
+		errx(1, "fido_dev_largeblob_set: %s", fido_strerr(r));
 
 	fido_blob_free(&blob);
 	fido_dev_close(dev);
@@ -161,20 +161,20 @@ blob_delete(const char* device_path, const char* key_path)
 
 	dev = open_dev(device_path);
 
-	r = fido_dev_large_blob_remove(dev, key.ptr, key.len, NULL);
+	r = fido_dev_largeblob_remove(dev, key.ptr, key.len, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED) {
 		r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ", device_path);
 		if (r < 0 || (size_t)r >= sizeof(prompt))
 			errx(1, "snprintf");
 		if (!readpassphrase(prompt, pin, sizeof(pin), RPP_ECHO_OFF))
 			errx(1, "readpassphrase");
-		r = fido_dev_large_blob_remove(dev, key.ptr, key.len, pin);
+		r = fido_dev_largeblob_remove(dev, key.ptr, key.len, pin);
 	}
 
 	explicit_bzero(pin, sizeof(pin));
 
 	if (r != FIDO_OK)
-		errx(1, "fido_dev_large_blob_remove: %s", fido_strerr(r));
+		errx(1, "fido_dev_largeblob_remove: %s", fido_strerr(r));
 
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
@@ -192,20 +192,20 @@ blob_clean(const char *device_path)
 
 	dev = open_dev(device_path);
 
-	r = fido_dev_large_blob_trim(dev, NULL);
+	r = fido_dev_largeblob_trim(dev, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED || r == FIDO_ERR_INVALID_ARGUMENT) {
 		r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ", device_path);
 		if (r < 0 || (size_t)r >= sizeof(prompt))
 			errx(1, "snprintf");
 		if (!readpassphrase(prompt, pin, sizeof(pin), RPP_ECHO_OFF))
 			errx(1, "readpassphrase");
-		r = fido_dev_large_blob_trim(dev, pin);
+		r = fido_dev_largeblob_trim(dev, pin);
 	}
 
 	explicit_bzero(pin, sizeof(pin));
 
 	if (r != FIDO_OK)
-		errx(1, "fido_dev_large_blob_trim: %s", fido_strerr(r));
+		errx(1, "fido_dev_largeblob_trim: %s", fido_strerr(r));
 
 	fido_dev_close(dev);
 	fido_dev_free(&dev);

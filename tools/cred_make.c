@@ -68,9 +68,9 @@ prepare_cred(FILE *in_f, int type, int flags)
 		    FIDO_EXT_HMAC_SECRET)) != FIDO_OK)
 			errx(1, "fido_cred_set_extensions: %s", fido_strerr(r));
 	}
-	if (flags & FLAG_LARGE_BLOB)
+	if (flags & FLAG_LARGEBLOB)
 		if ((r = fido_cred_set_extensions(cred,
-		    FIDO_EXT_LARGE_BLOB_KEY)) != FIDO_OK)
+		    FIDO_EXT_LARGEBLOB_KEY)) != FIDO_OK)
 			errx(1, "fido_cred_set_extensions: %s", fido_strerr(r));
 
 	free(cdh.ptr);
@@ -141,7 +141,7 @@ cred_make(int argc, char **argv)
 	while ((ch = getopt(argc, argv, "bc:dhi:o:qruv")) != -1) {
 		switch (ch) {
 		case 'b':
-			flags |= FLAG_LARGE_BLOB;
+			flags |= FLAG_LARGEBLOB;
 			break;
 		case 'c':
 			if ((cred_protect = base10(optarg)) < 0)

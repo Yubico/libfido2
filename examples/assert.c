@@ -206,7 +206,7 @@ main(int argc, char **argv)
 			hmac_out = optarg;
 			break;
 		case 'b':
-			ext |= FIDO_EXT_LARGE_BLOB_KEY;
+			ext |= FIDO_EXT_LARGEBLOB_KEY;
 			break;
 		case 'p':
 			up = true;

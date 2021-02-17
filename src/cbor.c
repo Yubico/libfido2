@@ -561,7 +561,7 @@ fail:
 }
 
 static int
-cbor_encode_large_blob_key_ext(cbor_item_t *map)
+cbor_encode_largeblob_key_ext(cbor_item_t *map)
 {
 	if (map == NULL ||
 	    cbor_add_bool(map, "largeBlobKey", FIDO_OPT_TRUE) < 0)
@@ -580,7 +580,7 @@ cbor_encode_cred_ext(const fido_cred_ext_t *ext)
 		size++;
 	if (ext->mask & FIDO_EXT_CRED_PROTECT)
 		size++;
-	if (ext->mask & FIDO_EXT_LARGE_BLOB_KEY)
+	if (ext->mask & FIDO_EXT_LARGEBLOB_KEY)
 		size++;
 
 	if (size == 0 || (item = cbor_new_definite_map(size)) == NULL)
@@ -600,8 +600,8 @@ cbor_encode_cred_ext(const fido_cred_ext_t *ext)
 			return (NULL);
 		}
 	}
-	if (ext->mask & FIDO_EXT_LARGE_BLOB_KEY) {
-		if (cbor_encode_large_blob_key_ext(item) < 0) {
+	if (ext->mask & FIDO_EXT_LARGEBLOB_KEY) {
+		if (cbor_encode_largeblob_key_ext(item) < 0) {
 			cbor_decref(&item);
 			return (NULL);
 		}
@@ -846,7 +846,7 @@ cbor_encode_assert_ext(fido_dev_t *dev, const fido_assert_ext_t *ext,
 
 	if (ext->mask & FIDO_EXT_HMAC_SECRET)
 		size++;
-	if (ext->mask & FIDO_EXT_LARGE_BLOB_KEY)
+	if (ext->mask & FIDO_EXT_LARGEBLOB_KEY)
 		size++;
 	if (size == 0 || (item = cbor_new_definite_map(size)) == NULL)
 		return (NULL);
@@ -858,8 +858,8 @@ cbor_encode_assert_ext(fido_dev_t *dev, const fido_assert_ext_t *ext,
 			return (NULL);
 		}
 	}
-	if (ext->mask & FIDO_EXT_LARGE_BLOB_KEY) {
-		if (cbor_encode_large_blob_key_ext(item) < 0) {
+	if (ext->mask & FIDO_EXT_LARGEBLOB_KEY) {
+		if (cbor_encode_largeblob_key_ext(item) < 0) {
 			cbor_decref(&item);
 			return (NULL);
 		}

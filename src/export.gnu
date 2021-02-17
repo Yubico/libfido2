@@ -22,8 +22,8 @@
 		fido_assert_hmac_secret_ptr;
 		fido_assert_id_len;
 		fido_assert_id_ptr;
-		fido_assert_large_blob_key_len;
-		fido_assert_large_blob_key_ptr;
+		fido_assert_largeblob_key_len;
+		fido_assert_largeblob_key_ptr;
 		fido_assert_new;
 		fido_assert_rp_id;
 		fido_assert_set_authdata;
@@ -106,8 +106,8 @@
 		fido_cred_display_name;
 		fido_cred_exclude;
 		fido_cred_flags;
-		fido_cred_large_blob_key_len;
-		fido_cred_large_blob_key_ptr;
+		fido_cred_largeblob_key_len;
+		fido_cred_largeblob_key_ptr;
 		fido_cred_sigcount;
 		fido_cred_fmt;
 		fido_cred_free;
@@ -209,10 +209,10 @@
 		fido_dev_supports_pin;
 		fido_dev_supports_uv;
 		fido_dev_toggle_always_uv;
-		fido_dev_large_blob_trim;
-		fido_dev_large_blob_get;
-		fido_dev_large_blob_put;
-		fido_dev_large_blob_remove;
+		fido_dev_largeblob_trim;
+		fido_dev_largeblob_get;
+		fido_dev_largeblob_put;
+		fido_dev_largeblob_remove;
 		fido_init;
 		fido_set_log_handler;
 		fido_strerr;

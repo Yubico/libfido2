@@ -27,7 +27,7 @@ struct blob {
 #define FLAG_U2F	0x10
 #define FLAG_HMAC	0x20
 #define FLAG_UP		0x40
-#define FLAG_LARGE_BLOB 0x80
+#define FLAG_LARGEBLOB	0x80
 
 EC_KEY *read_ec_pubkey(const char *);
 fido_dev_t *open_dev(const char *);

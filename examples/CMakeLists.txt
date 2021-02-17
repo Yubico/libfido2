@@ -26,9 +26,9 @@ endif()
 
 # enable -Wconversion -Wsign-conversion
 if(NOT MSVC)
-	set_source_files_properties(assert.c cred.c info.c large_blobs.c manifest.c
-	    reset.c retries.c setpin.c util.c PROPERTIES COMPILE_FLAGS
-	    "-Wconversion -Wsign-conversion")
+	set_source_files_properties(assert.c cred.c info.c largeblob.c
+	    manifest.c reset.c retries.c setpin.c util.c
+	    PROPERTIES COMPILE_FLAGS "-Wconversion -Wsign-conversion")
 endif()
 
 # manifest
@@ -63,9 +63,9 @@ target_link_libraries(retries ${_FIDO2_LIBRARY})
 add_executable(select select.c ${COMPAT_SOURCES})
 target_link_libraries(select ${_FIDO2_LIBRARY})
 
-# large_blobs
-add_executable(large_blobs large_blobs.c util.c ${COMPAT_SOURCES})
-target_link_libraries(large_blobs ${_FIDO2_LIBRARY})
+# largeblob
+add_executable(largeblob largeblob.c util.c ${COMPAT_SOURCES})
+target_link_libraries(largeblob ${_FIDO2_LIBRARY})
 
 if(MINGW)
 	# needed for nanosleep() in mingw

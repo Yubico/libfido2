@@ -19,7 +19,7 @@
 .Nm fido_cred_clientdata_hash_ptr ,
 .Nm fido_cred_id_ptr ,
 .Nm fido_cred_aaguid_ptr ,
-.Nm fido_cred_large_blob_key_ptr ,
+.Nm fido_cred_largeblob_key_ptr ,
 .Nm fido_cred_pubkey_ptr ,
 .Nm fido_cred_sig_ptr ,
 .Nm fido_cred_user_id_ptr ,
@@ -29,7 +29,7 @@
 .Nm fido_cred_clientdata_hash_len ,
 .Nm fido_cred_id_len ,
 .Nm fido_cred_aaguid_len ,
-.Nm fido_cred_large_blob_key_len ,
+.Nm fido_cred_largeblob_key_len ,
 .Nm fido_cred_pubkey_len ,
 .Nm fido_cred_sig_len ,
 .Nm fido_cred_user_id_len ,
@@ -67,7 +67,7 @@
 .Ft const unsigned char *
 .Fn fido_cred_aaguid_ptr "const fido_cred_t *cred"
 .Ft const unsigned char *
-.Fn fido_cred_large_blob_key_ptr "const fido_cred_t *cred"
+.Fn fido_cred_largeblob_key_ptr "const fido_cred_t *cred"
 .Ft const unsigned char *
 .Fn fido_cred_pubkey_ptr "const fido_cred_t *cred"
 .Ft const unsigned char *
@@ -87,7 +87,7 @@
 .Ft size_t
 .Fn fido_cred_aaguid_len "const fido_cred_t *cred"
 .Ft size_t
-.Fn fido_cred_large_blob_key_len "const fido_cred_t *cred"
+.Fn fido_cred_largeblob_key_len "const fido_cred_t *cred"
 .Ft size_t
 .Fn fido_cred_pubkey_len "const fido_cred_t *cred"
 .Ft size_t
@@ -182,7 +182,7 @@ The
 .Fn fido_cred_clientdata_hash_ptr ,
 .Fn fido_cred_id_ptr ,
 .Fn fido_cred_aaguid_ptr ,
-.Fn fido_cred_large_blob_key_ptr ,
+.Fn fido_cred_largeblob_key_ptr ,
 .Fn fido_cred_pubkey_ptr ,
 .Fn fido_cred_sig_ptr ,
 .Fn fido_cred_user_id_ptr ,
@@ -200,7 +200,7 @@ The corresponding length can be obtained by
 .Fn fido_cred_clientdata_hash_len ,
 .Fn fido_cred_id_len ,
 .Fn fido_cred_aaguid_len ,
-.Fn fido_cred_large_blob_key_len ,
+.Fn fido_cred_largeblob_key_len ,
 .Fn fido_cred_pubkey_len ,
 .Fn fido_cred_sig_len ,
 .Fn fido_cred_user_id_len ,

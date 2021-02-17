@@ -19,11 +19,11 @@ usage(void)
 {
 	fprintf(stderr,
 "usage: fido2-token -C [-d] device\n"
-"       fido2-token -D [-bdeu] [-i id] [large_blob_key] device\n"
+"       fido2-token -D [-bdeu] [-i id] [largeblob_key] device\n"
 "       fido2-token -I [-cd] [-k rp_id -i cred_id]  device\n"
-"       fido2-token -L [-bder] [-k rp_id] [large_blob_key] [device]\n"
+"       fido2-token -L [-bder] [-k rp_id] [largeblob_key] [device]\n"
 "       fido2-token -R [-d] device\n"
-"       fido2-token -S [-abdefu] [-l pin_length] [-i template_id -n template_name] [large_blob_key] device\n"
+"       fido2-token -S [-abdefu] [-l pin_length] [-i template_id -n template_name] [largeblob_key] device\n"
 "       fido2-token -V\n"
 	);
 
