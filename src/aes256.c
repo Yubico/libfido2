@@ -104,12 +104,15 @@ aes256_gcm(const fido_blob_t *key, const fido_blob_t *nonce,
 
 	memset(out, 0, sizeof(*out));
 	if (nonce->len != 12 || key->len != 32 || aad->len > UINT_MAX ||
-	    in->len > UINT_MAX || in->len % 16 || in->len < 16 ||
-	    (out->ptr = calloc(1, in->len)) == NULL) {
+	    in->len > UINT_MAX || in->len > SIZE_MAX - 16 || in->len < 16) {
 		fido_log_debug("%s: invalid param", __func__);
 		goto fail;
 	}
-	out->len = in->len;
+	out->len = encrypt ? in->len + 16 : in->len - 16;
+	if ((out->ptr = calloc(1, out->len)) == NULL) {
+		fido_log_debug("%s: calloc", __func__);
+		goto fail;
+	}
 	if ((ctx = EVP_CIPHER_CTX_new()) == NULL ||
 	    (cipher = EVP_aes_256_gcm()) == NULL ||
 	    EVP_CipherInit(ctx, cipher, key->ptr, nonce->ptr, encrypt) == 0) {
@@ -122,7 +125,8 @@ aes256_gcm(const fido_blob_t *key, const fido_blob_t *nonce,
 		goto fail;
 	}
 	if (EVP_Cipher(ctx, NULL, aad->ptr, (u_int)aad->len) < 0 ||
-	    EVP_Cipher(ctx, out->ptr, in->ptr, (u_int)(in->len - 16)) < 0 ||
+	    EVP_Cipher(ctx, out->ptr, in->ptr, encrypt ?
+	    (u_int)in->len : (u_int)(in->len - 16)) < 0 ||
 	    EVP_Cipher(ctx, NULL, NULL, 0) < 0) {
 		fido_log_debug("%s: EVP_Cipher", __func__);
 		goto fail;
