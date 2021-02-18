@@ -128,7 +128,7 @@ aes256_gcm(const fido_blob_t *key, const fido_blob_t *nonce,
 		goto fail;
 	}
 	if (encrypt && EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16,
-	    out->ptr + out->len - 16) < 0) {
+	    out->ptr + out->len - 16) == 0) {
 		fido_log_debug("%s: EVP_CIPHER_CTX_ctrl", __func__);
 		goto fail;
 	}
