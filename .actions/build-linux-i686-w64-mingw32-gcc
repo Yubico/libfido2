@@ -28,10 +28,10 @@ make -j2 -C build
 sudo make -C build install
 cd ..
 
-# Build and install OpenSSL 1.1.1i.
+# Build and install OpenSSL 1.1.1j.
 git clone git://github.com/openssl/openssl
 cd openssl
-git checkout OpenSSL_1_1_1i
+git checkout OpenSSL_1_1_1j
 ./Configure mingw --prefix=/fakeroot --openssldir=/fakeroot/openssl \
 	--cross-compile-prefix=i686-w64-mingw32-
 make -j2
