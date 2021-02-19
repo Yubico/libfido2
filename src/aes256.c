@@ -100,41 +100,61 @@ aes256_gcm(const fido_blob_t *key, const fido_blob_t *nonce,
 {
 	EVP_CIPHER_CTX *ctx = NULL;
 	const EVP_CIPHER *cipher;
+	size_t textlen;
 	int ok = -1;
 
 	memset(out, 0, sizeof(*out));
-	if (nonce->len != 12 || key->len != 32 || aad->len > UINT_MAX ||
-	    in->len > UINT_MAX || in->len > SIZE_MAX - 16 || in->len < 16) {
-		fido_log_debug("%s: invalid param", __func__);
+
+	if (nonce->len != 12 || key->len != 32 || aad->len > UINT_MAX) {
+		fido_log_debug("%s: invalid params %zu, %zu, %zu", __func__,
+		    nonce->len, key->len, aad->len);
 		goto fail;
 	}
+	if (in->len > UINT_MAX || in->len > SIZE_MAX - 16 || in->len < 16) {
+		fido_log_debug("%s: invalid input len %zu", __func__, in->len);
+		goto fail;
+	}
+	/* add tag to (on encrypt) or trim tag from the output (on decrypt) */
 	out->len = encrypt ? in->len + 16 : in->len - 16;
 	if ((out->ptr = calloc(1, out->len)) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
 		goto fail;
 	}
 	if ((ctx = EVP_CIPHER_CTX_new()) == NULL ||
-	    (cipher = EVP_aes_256_gcm()) == NULL ||
-	    EVP_CipherInit(ctx, cipher, key->ptr, nonce->ptr, encrypt) == 0) {
+	    (cipher = EVP_aes_256_gcm()) == NULL) {
+		fido_log_debug("%s: EVP_CIPHER_CTX_new", __func__);
+		goto fail;
+	}
+	if (EVP_CipherInit(ctx, cipher, key->ptr, nonce->ptr, encrypt) == 0) {
 		fido_log_debug("%s: EVP_CipherInit", __func__);
 		goto fail;
 	}
-	if (!encrypt && EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16,
-	    in->ptr + in->len - 16) == 0) {
-		fido_log_debug("%s: EVP_CIPHER_CTX_ctrl", __func__);
-		goto fail;
+
+	if (encrypt)
+		textlen = in->len;
+	else {
+		textlen = in->len - 16;
+		/* point openssl at the mac tag */
+		if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16,
+		    in->ptr + in->len - 16) == 0) {
+			fido_log_debug("%s: EVP_CIPHER_CTX_ctrl", __func__);
+			goto fail;
+		}
 	}
+	/* the last EVP_Cipher() will either compute or verify the mac tag */
 	if (EVP_Cipher(ctx, NULL, aad->ptr, (u_int)aad->len) < 0 ||
-	    EVP_Cipher(ctx, out->ptr, in->ptr, encrypt ?
-	    (u_int)in->len : (u_int)(in->len - 16)) < 0 ||
+	    EVP_Cipher(ctx, out->ptr, in->ptr, (u_int)textlen) < 0 ||
 	    EVP_Cipher(ctx, NULL, NULL, 0) < 0) {
 		fido_log_debug("%s: EVP_Cipher", __func__);
 		goto fail;
 	}
-	if (encrypt && EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16,
-	    out->ptr + out->len - 16) == 0) {
-		fido_log_debug("%s: EVP_CIPHER_CTX_ctrl", __func__);
-		goto fail;
+	if (encrypt) {
+		/* append the mac tag */
+		if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16,
+		    out->ptr + out->len - 16) == 0) {
+			fido_log_debug("%s: EVP_CIPHER_CTX_ctrl", __func__);
+			goto fail;
+		}
 	}
 
 	ok = 0;
