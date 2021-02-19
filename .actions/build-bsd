@@ -27,7 +27,7 @@ tasks:
       cd libfido2
       mkdir build
       (cd build && cmake -DCMAKE_BUILD_TYPE=Debug ..)
-      make -j2 -C build
+      make -j"\$(sysctl -n hw.ncpu)" -C build
 EOF
 
 # start the build via POST to the build server
