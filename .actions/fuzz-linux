@@ -44,7 +44,7 @@ mkdir build
     -DCMAKE_C_FLAGS_DEBUG="${LIBCBOR_CFLAGS} ${COMMON_CFLAGS}" \
     -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_PREFIX="${FAKEROOT}" \
     -DSANITIZE=OFF ..)
-make VERBOSE=1 -j2 -C build all install
+make VERBOSE=1 -j"$(nproc)" -C build all install
 cd -
 
 # openssl
@@ -61,7 +61,7 @@ export PKG_CONFIG_PATH="${FAKEROOT}/lib/pkgconfig"
 (cd build && cmake -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_FLAGS_DEBUG="${FIDO2_CFLAGS} ${COMMON_CFLAGS}" -DFUZZ=ON \
     -DLIBFUZZER=ON "${WORKDIR}")
-make -j2 -C build
+make -j"$(nproc)" -C build
 
 # fuzz
 mkdir corpus
