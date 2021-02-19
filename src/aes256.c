@@ -15,15 +15,26 @@ aes256_cbc(const fido_blob_t *key, const u_char *iv, const fido_blob_t *in,
 	int ok = -1;
 
 	memset(out, 0, sizeof(*out));
-	if (in->len > UINT_MAX || in->len % 16 || in->len == 0 ||
-	    key->len != 32 || (out->ptr = calloc(1, in->len)) == NULL) {
-		fido_log_debug("%s: invalid param", __func__);
+
+	if (key->len != 32) {
+		fido_log_debug("%s: invalid key len %zu", __func__, key->len);
+		goto fail;
+	}
+	if (in->len > UINT_MAX || in->len % 16 || in->len == 0) {
+		fido_log_debug("%s: invalid input len %zu", __func__, in->len);
 		goto fail;
 	}
 	out->len = in->len;
+	if ((out->ptr = calloc(1, out->len)) == NULL) {
+		fido_log_debug("%s: calloc", __func__);
+		goto fail;
+	}
 	if ((ctx = EVP_CIPHER_CTX_new()) == NULL ||
-	    (cipher = EVP_aes_256_cbc()) == NULL ||
-	    EVP_CipherInit(ctx, cipher, key->ptr, iv, encrypt) == 0 ||
+	    (cipher = EVP_aes_256_cbc()) == NULL) {
+		fido_log_debug("%s: EVP_CIPHER_CTX_new", __func__);
+		goto fail;
+	}
+	if (EVP_CipherInit(ctx, cipher, key->ptr, iv, encrypt) == 0 ||
 	    EVP_Cipher(ctx, out->ptr, in->ptr, (u_int)out->len) < 0) {
 		fido_log_debug("%s: EVP_Cipher", __func__);
 		goto fail;
@@ -58,8 +69,14 @@ aes256_cbc_fips(const fido_blob_t *secret, const fido_blob_t *in,
 	u_char iv[16];
 
 	memset(out, 0, sizeof(*out));
-	if (secret->len != 64 || in->len < sizeof(iv)) {
-		fido_log_debug("%s: invalid param", __func__);
+
+	if (secret->len != 64) {
+		fido_log_debug("%s: invalid secret len %zu", __func__,
+		    secret->len);
+		return -1;
+	}
+	if (in->len < sizeof(iv)) {
+		fido_log_debug("%s: invalid input len %zu", __func__, in->len);
 		return -1;
 	}
 	if (encrypt) {
