@@ -202,8 +202,10 @@
 		fido_dev_supports_uv;
 		fido_dev_toggle_always_uv;
 		fido_dev_largeblob_get;
+		fido_dev_largeblob_get_array;
 		fido_dev_largeblob_remove;
 		fido_dev_largeblob_set;
+		fido_dev_largeblob_set_array;
 		fido_hid_get_report_len;
 		fido_hid_get_usage;
 		fido_init;
