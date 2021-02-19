@@ -358,16 +358,15 @@ largeblob_array_lookup(fido_blob_t *out, size_t *idx, const cbor_item_t *item,
 	if ((v = cbor_array_handle(item)) == NULL)
 		return FIDO_ERR_INVALID_ARGUMENT;
 	for (size_t i = 0; i < cbor_array_size(item); i++) {
-		if (largeblob_decode(&blob, v[i]) < 0) {
+		if (largeblob_decode(&blob, v[i]) < 0 ||
+		    (plaintext = largeblob_decrypt(&blob, key)) == NULL) {
 			fido_log_debug("%s: largeblob_decode", __func__);
-		} else if ((plaintext = largeblob_decrypt(&blob, key)) != NULL) {
-			if (idx != NULL)
-				*idx = i;
-			break;
-		} else {
-			fido_log_debug("%s: largeblob_decrypt", __func__);
 			largeblob_reset(&blob);
+			continue;
 		}
+		if (idx != NULL)
+			*idx = i;
+		break;
 	}
 	if (plaintext == NULL) {
 		fido_log_debug("%s: not found", __func__);
