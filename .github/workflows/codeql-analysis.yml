@@ -1,8 +1,13 @@
 name: "codeql"
 
 on:
-  push:
   pull_request:
+    branches:
+    - master
+  push:
+    branches:
+    - master
+    - '*/ci'
   schedule:
     - cron: '0 0 * * 0'
 

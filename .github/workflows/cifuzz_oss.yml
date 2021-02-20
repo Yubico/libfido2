@@ -1,6 +1,13 @@
 name: cifuzz
 
-on: [pull_request]
+on:
+  pull_request:
+    branches:
+    - master
+  push:
+    branches:
+    - master
+    - '*/ci'
 
 jobs:
   fuzzing:

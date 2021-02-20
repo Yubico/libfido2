@@ -1,6 +1,13 @@
 name: bsd
 
-on: push
+on:
+  pull_request:
+    branches:
+    - master
+  push:
+    branches:
+    - master
+    - '*/ci'
 
 jobs:
   build:
