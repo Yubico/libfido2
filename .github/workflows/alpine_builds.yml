@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cc: [gcc, clang]
+        cc: [ gcc, clang ]
     steps:
     - name: dependencies
       run: |

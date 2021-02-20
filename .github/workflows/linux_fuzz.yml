@@ -8,9 +8,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04]
-        cc: [clang-10]
-        sanitizer: [asan, msan]
+        os: [ ubuntu-20.04 ]
+        cc: [ clang-10 ]
+        sanitizer: [ asan, msan ]
     steps:
     - uses: actions/checkout@v2
     - name: dependencies

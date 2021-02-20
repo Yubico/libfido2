@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@master
-    - name: Scan but do not fail on warnings
+    - name: scan but do not fail on warnings
       run: |
         if [ "${SECRET}" != "" ]; then
           docker login yubico-yes-docker-local.jfrog.io/ \
@@ -25,7 +25,7 @@ jobs:
           docker run -v${PWD}:/k -e COMPILE_DEPS="${COMPILE_DEPS}" \
              -e PROJECT_NAME=${GITHUB_REPOSITORY#Yubico/} -t ${SCAN_IMG}
         else
-          echo "No docker registry credentials, not scanning"
+          echo "no docker registry credentials, not scanning"
         fi
       continue-on-error: true
     - uses: actions/upload-artifact@master

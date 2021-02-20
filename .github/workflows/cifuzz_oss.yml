@@ -1,24 +1,24 @@
-name: CIFuzz
+name: cifuzz
 
 on: [pull_request]
 
 jobs:
-  Fuzzing:
+  fuzzing:
     if: github.repository == 'Yubico/libfido2'
     runs-on: ubuntu-20.04
     steps:
-    - name: Build Fuzzers
+    - name: build fuzzers
       uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
       with:
         oss-fuzz-project-name: 'libfido2'
         dry-run: false
-    - name: Run Fuzzers
+    - name: run fuzzers
       uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
       with:
         oss-fuzz-project-name: 'libfido2'
         fuzz-seconds: 600
         dry-run: false
-    - name: Upload Crash
+    - name: upload crash
       uses: actions/upload-artifact@v1
       if: failure()
       with:
