@@ -5,7 +5,7 @@ on: [pull_request]
 jobs:
   Fuzzing:
     if: github.repository == 'Yubico/libfido2'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - name: Build Fuzzers
       uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
