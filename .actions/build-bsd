@@ -21,7 +21,7 @@ esac
 
 cat >> "${MANIFEST}" <<- EOF
 sources:
-  - ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}#${GITHUB_SHA}
+  - ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}#$(git rev-parse HEAD)
 tasks:
   - build: |
       cd libfido2
