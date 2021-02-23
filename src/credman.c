@@ -98,7 +98,7 @@ fail:
 
 static int
 credman_tx(fido_dev_t *dev, uint8_t subcmd, const fido_blob_t *param,
-    const char *pin, const char *rp_id)
+    const char *pin, const char *rp_id, fido_opt_t uv)
 {
 	fido_blob_t	 f;
 	fido_blob_t	*ecdh = NULL;
@@ -119,7 +119,7 @@ credman_tx(fido_dev_t *dev, uint8_t subcmd, const fido_blob_t *param,
 	}
 
 	/* pinProtocol, pinAuth */
-	if (fido_dev_can_get_uv_token(dev, pin, FIDO_OPT_OMIT)) {
+	if (fido_dev_can_get_uv_token(dev, pin, uv)) {
 		if (credman_prepare_hmac(subcmd, param, &argv[1], &hmac) < 0) {
 			fido_log_debug("%s: credman_prepare_hmac", __func__);
 			goto fail;
@@ -207,7 +207,8 @@ credman_get_metadata_wait(fido_dev_t *dev, fido_credman_metadata_t *metadata,
 {
 	int r;
 
-	if ((r = credman_tx(dev, CMD_CRED_METADATA, NULL, pin, NULL)) != FIDO_OK ||
+	if ((r = credman_tx(dev, CMD_CRED_METADATA, NULL, pin, NULL,
+	    FIDO_OPT_OMIT)) != FIDO_OK ||
 	    (r = credman_rx_metadata(dev, metadata, ms)) != FIDO_OK)
 		return (r);
 
@@ -388,12 +389,14 @@ credman_get_rk_wait(fido_dev_t *dev, const char *rp_id, fido_credman_rk_t *rk,
 	rp_dgst.ptr = dgst;
 	rp_dgst.len = sizeof(dgst);
 
-	if ((r = credman_tx(dev, CMD_RK_BEGIN, &rp_dgst, pin, rp_id)) != FIDO_OK ||
+	if ((r = credman_tx(dev, CMD_RK_BEGIN, &rp_dgst, pin, rp_id,
+	    FIDO_OPT_OMIT)) != FIDO_OK ||
 	    (r = credman_rx_rk(dev, rk, ms)) != FIDO_OK)
 		return (r);
 
 	while (rk->n_rx < rk->n_alloc) {
-		if ((r = credman_tx(dev, CMD_RK_NEXT, NULL, NULL, NULL)) != FIDO_OK ||
+		if ((r = credman_tx(dev, CMD_RK_NEXT, NULL, NULL, NULL,
+		    FIDO_OPT_FALSE)) != FIDO_OK ||
 		    (r = credman_rx_next_rk(dev, rk, ms)) != FIDO_OK)
 			return (r);
 		rk->n_rx++;
@@ -426,7 +429,8 @@ credman_del_rk_wait(fido_dev_t *dev, const unsigned char *cred_id,
 	if (fido_blob_set(&cred, cred_id, cred_id_len) < 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	if ((r = credman_tx(dev, CMD_DELETE_CRED, &cred, pin, NULL)) != FIDO_OK ||
+	if ((r = credman_tx(dev, CMD_DELETE_CRED, &cred, pin, NULL,
+	    FIDO_OPT_OMIT)) != FIDO_OK ||
 	    (r = fido_rx_cbor_status(dev, ms)) != FIDO_OK)
 		goto fail;
 
@@ -592,12 +596,14 @@ credman_get_rp_wait(fido_dev_t *dev, fido_credman_rp_t *rp, const char *pin,
 {
 	int r;
 
-	if ((r = credman_tx(dev, CMD_RP_BEGIN, NULL, pin, NULL)) != FIDO_OK ||
+	if ((r = credman_tx(dev, CMD_RP_BEGIN, NULL, pin, NULL,
+	    FIDO_OPT_OMIT)) != FIDO_OK ||
 	    (r = credman_rx_rp(dev, rp, ms)) != FIDO_OK)
 		return (r);
 
 	while (rp->n_rx < rp->n_alloc) {
-		if ((r = credman_tx(dev, CMD_RP_NEXT, NULL, NULL, NULL)) != FIDO_OK ||
+		if ((r = credman_tx(dev, CMD_RP_NEXT, NULL, NULL, NULL,
+		    FIDO_OPT_FALSE)) != FIDO_OK ||
 		    (r = credman_rx_next_rp(dev, rp, ms)) != FIDO_OK)
 			return (r);
 		rp->n_rx++;
