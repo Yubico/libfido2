@@ -17,6 +17,8 @@
 #define TLS
 #endif
 
+static TLS bool disable_u2f_fallback;
+
 typedef struct dev_manifest_func_node {
 	dev_manifest_func_t manifest_func;
 	struct dev_manifest_func_node *next;
@@ -184,9 +186,18 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
-		if (fido_dev_get_cbor_info_wait(dev, info, ms) != FIDO_OK) {
-			fido_log_debug("%s: falling back to u2f", __func__);
-			fido_dev_force_u2f(dev);
+		int res;
+		if ( (res = fido_dev_get_cbor_info_wait(dev, info, ms)) != FIDO_OK) {			
+			if (disable_u2f_fallback)
+			{
+				fido_log_debug("%s: fido_dev_get_cbor_info_wait failed - res %d - fallback not allowed", __func__, res);
+				r = FIDO_ERR_TIMEOUT;
+				goto fail;				
+			}
+			else {
+				fido_log_debug("%s: fido_dev_get_cbor_info_wait failed - falling back to u2f, res %d", __func__, res);
+				fido_dev_force_u2f(dev);
+			}
 		} else {
 			fido_dev_set_flags(dev, info);
 		}
@@ -463,6 +474,8 @@ fido_init(int flags)
 {
 	if (flags & FIDO_DEBUG || getenv("FIDO_DEBUG") != NULL)
 		fido_log_init();
+
+	disable_u2f_fallback = (flags & FIDO_DISABLE_U2F_FALLBACK);
 }
 
 fido_dev_t *
