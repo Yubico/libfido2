@@ -189,8 +189,9 @@ The
 and
 .Fn fido_cred_x5c_ptr
 functions return pointers to the CBOR-encoded and raw authenticator
-data, client data hash, ID, authenticator attestation GUID, large-blobs
-key, public key, signature, user ID, and x509 certificate parts of
+data, client data hash, ID, authenticator attestation GUID,
+.Dq largeBlobKey ,
+public key, signature, user ID, and x509 certificate parts of
 .Fa cred ,
 or NULL if the respective entry is not set.
 .Pp
@@ -237,6 +238,7 @@ If not NULL, pointers returned by
 .Fn fido_cred_clientdata_hash_ptr ,
 .Fn fido_cred_id_ptr ,
 .Fn fido_cred_aaguid_ptr ,
+.Fn fido_cred_largeblob_key_ptr ,
 .Fn fido_cred_pubkey_ptr ,
 .Fn fido_cred_sig_ptr ,
 and
@@ -251,4 +253,5 @@ qualifier is invoked.
 .Xr fido_cred_set_authdata 3 ,
 .Xr fido_cred_verify 3 ,
 .Xr fido_credman_metadata_new 3 ,
+.Xr fido_dev_largeblob_get 3 ,
 .Xr fido_dev_make_cred 3

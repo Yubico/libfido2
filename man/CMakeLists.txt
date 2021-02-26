@@ -33,11 +33,11 @@ list(APPEND MAN_SOURCES
 	fido_dev_get_assert.3
 	fido_dev_get_touch_begin.3
 	fido_dev_info_manifest.3
+	fido_dev_largeblob_get.3
 	fido_dev_make_cred.3
 	fido_dev_open.3
 	fido_dev_set_io_functions.3
 	fido_dev_set_pin.3
-	fido_dev_largeblob_get.3
 	fido_strerr.3
 	rs256_pk_new.3
 )
@@ -59,10 +59,10 @@ list(APPEND MAN_ALIAS
 	fido_assert_new fido_assert_free
 	fido_assert_new fido_assert_hmac_secret_len
 	fido_assert_new fido_assert_hmac_secret_ptr
-	fido_assert_new fido_assert_largeblob_key_len
-	fido_assert_new fido_assert_largeblob_key_ptr
 	fido_assert_new fido_assert_id_len
 	fido_assert_new fido_assert_id_ptr
+	fido_assert_new fido_assert_largeblob_key_len
+	fido_assert_new fido_assert_largeblob_key_ptr
 	fido_assert_new fido_assert_rp_id
 	fido_assert_new fido_assert_sigcount
 	fido_assert_new fido_assert_sig_len

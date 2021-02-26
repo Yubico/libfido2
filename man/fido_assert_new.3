@@ -155,11 +155,13 @@ The
 and
 .Fn fido_assert_id_ptr
 functions return pointers to the user ID, CBOR-encoded
-authenticator data, hmac-secret, large-blobs key, signature,
-and credential ID attributes of statement
+authenticator data, hmac-secret,
+.Dq largeBlobKey ,
+signature, and credential ID attributes of statement
 .Fa idx
 in
 .Fa assert .
+.Pp
 The
 .Fn fido_assert_user_id_len ,
 .Fn fido_assert_authdata_len ,
@@ -211,6 +213,8 @@ The
 .Fn fido_assert_user_name ,
 .Fn fido_assert_authdata_ptr ,
 .Fn fido_assert_clientdata_hash_ptr ,
+.Fn fido_assert_hmac_secret_ptr ,
+.Fn fido_assert_largeblob_key_ptr ,
 .Fn fido_assert_user_id_ptr ,
 and
 .Fn fido_assert_sig_ptr
@@ -227,4 +231,5 @@ qualifier is invoked.
 .Xr fido_assert_allow_cred 3 ,
 .Xr fido_assert_set_authdata 3 ,
 .Xr fido_assert_verify 3 ,
-.Xr fido_dev_get_assert 3
+.Xr fido_dev_get_assert 3 ,
+.Xr fido_dev_largeblob_get 3
