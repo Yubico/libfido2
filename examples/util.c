@@ -81,7 +81,7 @@ write_blob(const char *path, const unsigned char *ptr, size_t len)
 	int fd, ok = -1;
 	ssize_t n;
 
-	if ((fd = open(path, O_WRONLY | O_CREAT, 0644)) < 0) {
+	if ((fd = open(path, O_WRONLY | O_CREAT, 0600)) < 0) {
 		warn("open %s", path);
 		goto fail;
 	}
