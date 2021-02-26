@@ -19,7 +19,6 @@ list(APPEND MAN_SOURCES
 	fido_assert_allow_cred.3
 	fido_assert_set_authdata.3
 	fido_assert_verify.3
-	fido_blob_new.3
 	fido_bio_dev_get_info.3
 	fido_bio_enroll_new.3
 	fido_bio_info_new.3
@@ -82,9 +81,6 @@ list(APPEND MAN_ALIAS
 	fido_assert_set_authdata fido_assert_set_sig
 	fido_assert_set_authdata fido_assert_set_up
 	fido_assert_set_authdata fido_assert_set_uv
-	fido_blob_new fido_blob_free
-	fido_blob_new fido_blob_ptr
-	fido_blob_new fido_blob_len
 	fido_bio_dev_get_info fido_bio_dev_enroll_begin
 	fido_bio_dev_get_info fido_bio_dev_enroll_cancel
 	fido_bio_dev_get_info fido_bio_dev_enroll_continue
