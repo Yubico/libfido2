@@ -14,7 +14,7 @@
 #define LARGEBLOB_TAG_LENGTH	16
 
 typedef struct largeblob {
-	size_t      origsiz;
+	size_t origsiz;
 	fido_blob_t ciphertext;
 	fido_blob_t nonce;
 } largeblob_t;
@@ -354,7 +354,6 @@ largeblob_array_lookup(fido_blob_t *out, size_t *idx, const cbor_item_t *item,
 	memset(&blob, 0, sizeof(blob));
 	if (idx != NULL)
 		*idx = 0;
-
 	if ((v = cbor_array_handle(item)) == NULL)
 		return FIDO_ERR_INVALID_ARGUMENT;
 	for (size_t i = 0; i < cbor_array_size(item); i++) {
