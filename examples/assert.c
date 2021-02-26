@@ -32,8 +32,8 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: assert [-t ecdsa|rsa|eddsa] [-a cred_id] "
-	    "[-h hmac_secret] [-s hmac_salt] [-P pin] [-T seconds] [-bpuv] "
-	    "<pubkey> <device>\n");
+	    "[-h hmac_secret] [-s hmac_salt] [-P pin] [-T seconds] "
+	    "[-b blobkey] [-puv] <pubkey> <device>\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -164,6 +164,7 @@ main(int argc, char **argv)
 	fido_dev_t	*dev = NULL;
 	fido_assert_t	*assert = NULL;
 	const char	*pin = NULL;
+	const char	*blobkey_out = NULL;
 	const char	*hmac_out = NULL;
 	unsigned char	*body = NULL;
 	long long	 seconds = 0;
@@ -176,7 +177,7 @@ main(int argc, char **argv)
 	if ((assert = fido_assert_new()) == NULL)
 		errx(1, "fido_assert_new");
 
-	while ((ch = getopt(argc, argv, "P:T:a:bh:ps:t:uv")) != -1) {
+	while ((ch = getopt(argc, argv, "P:T:a:b:h:ps:t:uv")) != -1) {
 		switch (ch) {
 		case 'P':
 			pin = optarg;
@@ -202,11 +203,12 @@ main(int argc, char **argv)
 			free(body);
 			body = NULL;
 			break;
-		case 'h':
-			hmac_out = optarg;
-			break;
 		case 'b':
 			ext |= FIDO_EXT_LARGEBLOB_KEY;
+			blobkey_out = optarg;
+			break;
+		case 'h':
+			hmac_out = optarg;
 			break;
 		case 'p':
 			up = true;
@@ -324,6 +326,14 @@ main(int argc, char **argv)
 		/* extract the hmac secret */
 		if (write_blob(hmac_out, fido_assert_hmac_secret_ptr(assert, 0),
 		    fido_assert_hmac_secret_len(assert, 0)) < 0)
+			errx(1, "write_blob");
+	}
+
+	if (blobkey_out != NULL) {
+		/* extract the hmac secret */
+		if (write_blob(blobkey_out,
+		    fido_assert_largeblob_key_ptr(assert, 0),
+		    fido_assert_largeblob_key_len(assert, 0)) < 0)
 			errx(1, "write_blob");
 	}
 
