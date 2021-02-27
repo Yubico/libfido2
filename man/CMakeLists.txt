@@ -213,9 +213,10 @@ list(APPEND MAN_ALIAS
 	fido_dev_set_pin fido_dev_get_uv_retry_count
 	fido_dev_set_pin fido_dev_reset
 	fido_dev_set_io_functions fido_dev_set_sigmask
-	fido_dev_largeblob_get fido_dev_largeblob_put
+	fido_dev_largeblob_get fido_dev_largeblob_set
 	fido_dev_largeblob_get fido_dev_largeblob_remove
-	fido_dev_largeblob_get fido_dev_largeblob_trim
+	fido_dev_largeblob_get fido_dev_largeblob_get_array
+	fido_dev_largeblob_get fido_dev_largeblob_set_array
 	rs256_pk_new rs256_pk_free
 	rs256_pk_new rs256_pk_from_ptr
 	rs256_pk_new rs256_pk_from_RSA
