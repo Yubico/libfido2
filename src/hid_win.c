@@ -422,9 +422,9 @@ fido_hid_close(void *handle)
 	if (ctx->overlap.hEvent != NULL) {
 		if (ctx->report_pending) {
 			fido_log_debug("%s: report_pending", __func__);
-			if (!CancelIoEx(ctx->dev, &ctx->overlap)) {
-				fido_log_debug("%s error canceling IO: 0x%08x", __func__, GetLastError());
-			}
+			if (CancelIoEx(ctx->dev, &ctx->overlap) == 0)
+				fido_log_debug("%s CancelIoEx: 0x%lx",
+				    __func__, GetLastError());
 		}
 		CloseHandle(ctx->overlap.hEvent);
 	}
