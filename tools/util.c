@@ -469,6 +469,84 @@ prot_string(int prot)
 	}
 }
 
+int
+read_file(const char *path, u_char **ptr, size_t *len)
+{
+	int fd, ok = -1;
+	struct stat st;
+	ssize_t n;
+
+	*ptr = NULL;
+	*len = 0;
+
+	if ((fd = open(path, O_RDONLY)) < 0) {
+		warn("%s: open %s", __func__, path);
+		goto fail;
+	}
+	if (fstat(fd, &st) < 0) {
+		warn("%s: stat %s", __func__, path);
+		goto fail;
+	}
+	if (st.st_size < 0) {
+		warnx("%s: stat %s: invalid size", __func__, path);
+		goto fail;
+	}
+	*len = (size_t)st.st_size;
+	if ((*ptr = malloc(*len)) == NULL) {
+		warn("%s: malloc", __func__);
+		goto fail;
+	}
+	if ((n = read(fd, *ptr, *len)) < 0) {
+		warn("%s: read", __func__);
+		goto fail;
+	}
+	if ((size_t)n != *len) {
+		warnx("%s: read", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	if (fd != -1) {
+		close(fd);
+	}
+	if (ok < 0) {
+		free(*ptr);
+		*ptr = NULL;
+		*len = 0;
+	}
+
+	return ok;
+}
+
+int
+write_file(const char *path, const u_char *ptr, size_t len)
+{
+	int fd, ok = -1;
+	ssize_t n;
+
+	if ((fd = open(path, O_WRONLY | O_CREAT, 0600)) < 0) {
+		warn("%s: open %s", __func__, path);
+		goto fail;
+	}
+	if ((n = write(fd, ptr, len)) < 0) {
+		warn("%s: write", __func__);
+		goto fail;
+	}
+	if ((size_t)n != len) {
+		warnx("%s: write", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	if (fd != -1) {
+		close(fd);
+	}
+
+	return ok;
+}
+
 const char *
 plural(size_t x)
 {
