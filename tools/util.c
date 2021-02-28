@@ -468,3 +468,9 @@ prot_string(int prot)
 		return ("unknown");
 	}
 }
+
+const char *
+plural(size_t x)
+{
+	return x == 1 ? "" : "s";
+}

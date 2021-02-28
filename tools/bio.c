@@ -107,14 +107,6 @@ bio_set_name(char *path, char *id, char *name)
 }
 
 static const char *
-plural(uint8_t n)
-{
-	if (n == 1)
-		return "";
-	return "s";
-}
-
-static const char *
 enroll_strerr(uint8_t n)
 {
 	switch (n) {
