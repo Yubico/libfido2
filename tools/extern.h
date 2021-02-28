@@ -31,10 +31,13 @@ struct blob {
 #define FLAG_UP		0x40
 #define FLAG_LARGEBLOB	0x80
 
+#define PINBUF_LEN	256
+
 EC_KEY *read_ec_pubkey(const char *);
 fido_dev_t *open_dev(const char *);
 FILE *open_read(const char *);
 FILE *open_write(const char *);
+char *get_pin(const char *);
 const char *plural(size_t);
 const char *cose_string(int);
 const char *prot_string(int);

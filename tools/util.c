@@ -44,6 +44,38 @@ read_pin(const char *path, char *buf, size_t len)
 		errx(1, "readpassphrase");
 }
 
+/* XXX merge this w/ read_pin() */
+char *
+get_pin(const char *path)
+{
+	char *pin;
+	char prompt[1024];
+	int r, ok = -1;
+
+	if ((pin = calloc(1, PINBUF_LEN)) == NULL) {
+		warn("%s: calloc", __func__);
+		return NULL;
+	}
+	if ((r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ",
+	    path)) < 0 || (size_t)r >= sizeof(prompt)) {
+		warn("%s: snprintf", __func__);
+		goto out;
+	}
+	if (!readpassphrase(prompt, pin, PINBUF_LEN, RPP_ECHO_OFF)) {
+		warnx("%s: readpassphrase", __func__);
+		goto out;
+	}
+
+	ok = 0;
+out:
+	if (ok < 0) {
+		freezero(pin, PINBUF_LEN);
+		pin = NULL;
+	}
+
+	return pin;
+}
+
 FILE *
 open_write(const char *file)
 {
