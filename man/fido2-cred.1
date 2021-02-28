@@ -92,11 +92,9 @@ Tells
 .Nm
 to verify a credential.
 .It Fl b
-Only available when making a credential, enable the FIDO2.1 largeBlobKey
-extension.
-Note that
-.Fl r
-must also be specified if this option is used.
+Request the credential's
+.Dq largeBlobKey ,
+a 32-byte symmetric key associated with the generated credential.
 .It Fl c Ar cred_protect
 If making a credential, set the credential's protection level to
 .Ar cred_protect .
@@ -221,6 +219,10 @@ credential id (base64 blob);
 attestation signature (base64 blob);
 .It
 attestation certificate, if present (base64 blob).
+.It
+the credential's associated 32-byte symmetric key
+.Pq Dq largeBlobKey ,
+if present (base64 blob).
 .El
 .Pp
 Upon the successful verification of a credential,

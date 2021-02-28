@@ -68,10 +68,11 @@ prepare_cred(FILE *in_f, int type, int flags)
 		    FIDO_EXT_HMAC_SECRET)) != FIDO_OK)
 			errx(1, "fido_cred_set_extensions: %s", fido_strerr(r));
 	}
-	if (flags & FLAG_LARGEBLOB)
+	if (flags & FLAG_LARGEBLOB) {
 		if ((r = fido_cred_set_extensions(cred,
 		    FIDO_EXT_LARGEBLOB_KEY)) != FIDO_OK)
 			errx(1, "fido_cred_set_extensions: %s", fido_strerr(r));
+	}
 
 	free(cdh.ptr);
 	free(uid.ptr);
@@ -89,6 +90,7 @@ print_attcred(FILE *out_f, const fido_cred_t *cred)
 	char *id = NULL;
 	char *sig = NULL;
 	char *x5c = NULL;
+	char *key = NULL;
 	int r;
 
 	r = base64_encode(fido_cred_clientdata_hash_ptr(cred),
@@ -102,6 +104,9 @@ print_attcred(FILE *out_f, const fido_cred_t *cred)
 	if (fido_cred_x5c_ptr(cred) != NULL)
 		r |= base64_encode(fido_cred_x5c_ptr(cred),
 		    fido_cred_x5c_len(cred), &x5c);
+	if (fido_cred_largeblob_key_ptr(cred) != NULL)
+		r |= base64_encode(fido_cred_largeblob_key_ptr(cred),
+		    fido_cred_largeblob_key_len(cred), &key);
 	if (r < 0)
 		errx(1, "output error");
 
@@ -113,12 +118,17 @@ print_attcred(FILE *out_f, const fido_cred_t *cred)
 	fprintf(out_f, "%s\n", sig);
 	if (x5c != NULL)
 		fprintf(out_f, "%s\n", x5c);
+	if (key != NULL) {
+		fprintf(out_f, "%s\n", key);
+		explicit_bzero(key, strlen(key));
+	}
 
 	free(cdh);
 	free(authdata);
 	free(id);
 	free(sig);
 	free(x5c);
+	free(key);
 }
 
 int
