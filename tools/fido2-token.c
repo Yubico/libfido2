@@ -19,11 +19,15 @@ usage(void)
 {
 	fprintf(stderr,
 "usage: fido2-token -C [-d] device\n"
-"       fido2-token -D [-bdeu] [-i id] [largeblob_key] device\n"
+"       fido2-token -Db [-k key_path] [-i cred_id -n rp_id] device\n"
+"       fido2-token -Dei template_id device\n"
+"       fido2-token -Du device\n"
+"       fido2-token -G -b [-k key_path] [-i cred_id -n rp_id] blob_path device\n"
 "       fido2-token -I [-cd] [-k rp_id -i cred_id]  device\n"
-"       fido2-token -L [-bder] [-k rp_id] [largeblob_key] [device]\n"
+"       fido2-token -L [-bder] [-k rp_id] [device]\n"
 "       fido2-token -R [-d] device\n"
-"       fido2-token -S [-abdefu] [-l pin_length] [-i template_id -n template_name] [largeblob_key] device\n"
+"       fido2-token -S [-adefu] [-l pin_length] [-i template_id -n template_name] device\n"
+"       fido2-token -Sb [-k key_path] [-i cred_id -n rp_id] blob_path device\n"
 "       fido2-token -V\n"
 	);
 
@@ -80,6 +84,8 @@ main(int argc, char **argv)
 		return (pin_change(device));
 	case 'D':
 		return (token_delete(argc, argv, device));
+	case 'G':
+		return (token_get(argc, argv, device));
 	case 'I':
 		return (token_info(argc, argv, device));
 	case 'L':

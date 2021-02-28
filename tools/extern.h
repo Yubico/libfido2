@@ -20,7 +20,7 @@ struct blob {
 	size_t len;
 };
 
-#define TOKEN_OPT	"CDILPRSVabcdefi:k:l:n:ru"
+#define TOKEN_OPT	"CDGILPRSVabcdefi:k:l:n:ru"
 
 #define FLAG_DEBUG	0x01
 #define FLAG_QUIET	0x02
@@ -52,9 +52,12 @@ void bio_info(fido_dev_t *);
 int bio_list(char *);
 int bio_set_name(char *, char *, char *);
 int blob_clean(const char *);
-int blob_delete(const char *, const char *);
-int blob_get(const char *, const char *);
-int blob_set(const char *, const char *);
+int blob_list(const char *);
+int blob_delete(const char *, const char *, const char *, const char *);
+int blob_get(const char *, const char *, const char *, const char *,
+    const char *);
+int blob_set(const char *, const char *, const char *, const char *,
+    const char *);
 int config_always_uv(char *, int);
 int config_entattest(char *);
 int config_force_pin_change(char *);
@@ -73,6 +76,7 @@ int pin_set(char *);
 int string_read(FILE *, char **);
 int token_config(int, char **, char *);
 int token_delete(int, char **, char *);
+int token_get(int, char **, char *);
 int token_info(int, char **, char *);
 int token_list(int, char **, char *);
 int token_reset(char *);

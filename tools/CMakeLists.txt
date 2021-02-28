@@ -12,6 +12,7 @@ list(APPEND COMPAT_SOURCES
 if(WIN32 AND NOT CYGWIN AND NOT MSYS)
 	list(APPEND COMPAT_SOURCES
 		../openbsd-compat/bsd-getline.c
+		../openbsd-compat/endian_win32.c
 		../openbsd-compat/explicit_bzero_win32.c
 		../openbsd-compat/getopt_long.c
 		../openbsd-compat/readpassphrase_win32.c
