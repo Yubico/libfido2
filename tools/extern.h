@@ -33,6 +33,7 @@ EC_KEY *read_ec_pubkey(const char *);
 fido_dev_t *open_dev(const char *);
 FILE *open_read(const char *);
 FILE *open_write(const char *);
+const char *plural(size_t);
 const char *cose_string(int);
 const char *prot_string(int);
 int assert_get(int, char **);
