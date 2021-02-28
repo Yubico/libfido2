@@ -76,11 +76,9 @@ is not specified,
 .Em es256
 is assumed.
 .It Fl b
-Only available when obtaining an assertion, enable the FIDO2.1
-largeBlobKey extension.
-This will cause the large blob key to be a part of the
-output of the command.
-Note that a credential id is mandatory when obtaining a large blob key.
+Request the credential's
+.Dq largeBlobKey ,
+a 32-byte symmetric key associated with the asserted credential.
 .It Fl h
 If obtaining an assertion, enable the FIDO2 hmac-secret
 extension.
@@ -229,8 +227,9 @@ user id, if credential resident (base64 blob);
 hmac secret, if the FIDO2 hmac-secret extension is enabled
 (base64 blob);
 .It
-large blob key, if the FIDO2.1 large blob key extension is enabled
-(base64 blob);
+the credential's associated 32-byte symmetric key
+.Pq Dq largeBlobKey ,
+if requested (base64 blob).
 .El
 .Pp
 When verifying an assertion,
