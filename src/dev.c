@@ -216,7 +216,7 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 			if (disable_u2f_fallback)
 			{
 				fido_log_debug("%s: fido_dev_get_cbor_info_wait failed - res %d - fallback not allowed", __func__, res);
-				r = FIDO_ERR_TIMEOUT;
+				r = res;
 				goto fail;				
 			}
 			else {
