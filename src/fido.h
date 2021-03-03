@@ -51,6 +51,7 @@ void fido_dev_info_free(fido_dev_info_t **, size_t);
 
 /* fido_init() flags. */
 #define FIDO_DEBUG	0x01
+#define FIDO_DISABLE_U2F_FALLBACK 0x02
 
 void fido_init(int);
 void fido_set_log_handler(fido_log_handler_t *);
