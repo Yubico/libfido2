@@ -11,14 +11,13 @@
 #define TLS
 #endif
 
-static TLS bool disable_u2f_fallback;
-
 typedef struct dev_manifest_func_node {
 	dev_manifest_func_t manifest_func;
 	struct dev_manifest_func_node *next;
 } dev_manifest_func_node_t;
 
 static TLS dev_manifest_func_node_t *manifest_funcs = NULL;
+static TLS bool disable_u2f_fallback;
 
 static void
 find_manifest_func_node(dev_manifest_func_t f, dev_manifest_func_node_t **curr,
@@ -211,18 +210,14 @@ fido_dev_open_rx(fido_dev_t *dev, int ms)
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
-		int res;
-		if ( (res = fido_dev_get_cbor_info_wait(dev, info, ms)) != FIDO_OK) {			
+		if ((r = fido_dev_get_cbor_info_wait(dev, info,
+		    ms)) != FIDO_OK) {
+			fido_log_debug("%s: fido_dev_cbor_info_wait: %d",
+			    __func__, r);
 			if (disable_u2f_fallback)
-			{
-				fido_log_debug("%s: fido_dev_get_cbor_info_wait failed - res %d - fallback not allowed", __func__, res);
-				r = res;
-				goto fail;				
-			}
-			else {
-				fido_log_debug("%s: fido_dev_get_cbor_info_wait failed - falling back to u2f, res %d", __func__, res);
-				fido_dev_force_u2f(dev);
-			}
+				goto fail;
+			fido_log_debug("%s: falling back to u2f", __func__);
+			fido_dev_force_u2f(dev);
 		} else {
 			fido_dev_set_flags(dev, info);
 		}

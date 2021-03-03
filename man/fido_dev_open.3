@@ -75,6 +75,18 @@ where
 .Fa dev
 is a freshly allocated or otherwise closed
 .Vt fido_dev_t .
+If
+.Fa dev
+claims to be FIDO2,
+.Em libfido2
+will attempt to speak FIDO2 to
+.Fa dev .
+If that fails,
+.Em libfido2
+will fallback to U2F unless the
+.Dv FIDO_DISABLE_U2F_FALLBACK
+flag was set in
+.Xr fido_init 3 .
 .Pp
 The
 .Fn fido_dev_close
@@ -223,4 +235,5 @@ On error, a different error code defined in
 is returned.
 .Sh SEE ALSO
 .Xr fido_dev_info_manifest 3 ,
-.Xr fido_dev_set_io_functions 3
+.Xr fido_dev_set_io_functions 3 ,
+.Xr fido_init 3
