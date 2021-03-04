@@ -9,7 +9,7 @@
 #if defined(_WIN32) && !defined(HAVE_ENDIAN_H)
 
 /*
- * Hopefully, if the endian differs from the end result, the compiler
+ * Hopefully, if the endianness differs from the end result, the compiler
  * optimizes these functions with some type of bswap instruction. Or,
  * otherwise, to just return the input value unmodified. GCC and clang
  * both does these optimization at least. This should be preferred over
