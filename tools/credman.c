@@ -22,15 +22,17 @@ int
 credman_get_metadata(fido_dev_t *dev, const char *path)
 {
 	fido_credman_metadata_t *metadata = NULL;
-	char pin[1024];
+	char *pin = NULL;
 	int r;
 
 	if ((metadata = fido_credman_metadata_new()) == NULL)
 		errx(1, "fido_credman_metadata_new");
 
-	read_pin(path, pin, sizeof(pin));
+	if ((pin = get_pin(path)) == NULL)
+		errx(1, "get_pin");
 	r = fido_credman_get_dev_metadata(dev, metadata, pin);
-	explicit_bzero(pin, sizeof(pin));
+	freezero(pin, PINBUF_LEN);
+	pin = NULL;
 
 	if (r != FIDO_OK)
 		errx(1, "fido_credman_get_dev_metadata: %s", fido_strerr(r));
@@ -68,7 +70,7 @@ credman_list_rp(const char *path)
 {
 	fido_dev_t *dev = NULL;
 	fido_credman_rp_t *rp = NULL;
-	char pin[1024];
+	char *pin = NULL;
 	int r;
 
 	if (path == NULL)
@@ -77,9 +79,11 @@ credman_list_rp(const char *path)
 		errx(1, "fido_credman_rp_new");
 
 	dev = open_dev(path);
-	read_pin(path, pin, sizeof(pin));
+	if ((pin = get_pin(path)) == NULL)
+		errx(1, "get_pin");
 	r = fido_credman_get_dev_rp(dev, rp, pin);
-	explicit_bzero(pin, sizeof(pin));
+	freezero(pin, PINBUF_LEN);
+	pin = NULL;
 
 	if (r != FIDO_OK)
 		errx(1, "fido_credman_get_dev_rp: %s", fido_strerr(r));
@@ -127,7 +131,7 @@ credman_list_rk(const char *path, const char *rp_id)
 {
 	fido_dev_t *dev = NULL;
 	fido_credman_rk_t *rk = NULL;
-	char pin[1024];
+	char *pin = NULL;
 	int r;
 
 	if (path == NULL)
@@ -136,9 +140,11 @@ credman_list_rk(const char *path, const char *rp_id)
 		errx(1, "fido_credman_rk_new");
 
 	dev = open_dev(path);
-	read_pin(path, pin, sizeof(pin));
+	if ((pin = get_pin(path)) == NULL)
+		errx(1, "get_pin");
 	r = fido_credman_get_dev_rk(dev, rp_id, rk, pin);
-	explicit_bzero(pin, sizeof(pin));
+	freezero(pin, PINBUF_LEN);
+	pin = NULL;
 
 	if (r != FIDO_OK)
 		errx(1, "fido_credman_get_dev_rk: %s", fido_strerr(r));
@@ -158,7 +164,7 @@ credman_print_rk(fido_dev_t *dev, const char *path, const char *rp_id,
 {
 	const fido_cred_t *cred = NULL;
 	fido_credman_rk_t *rk = NULL;
-	char pin[1024];
+	char *pin = NULL;
 	void *cred_id_ptr = NULL;
 	size_t cred_id_len = 0;
 	int r;
@@ -167,10 +173,11 @@ credman_print_rk(fido_dev_t *dev, const char *path, const char *rp_id,
 		errx(1, "fido_credman_rk_new");
 	if (base64_decode(cred_id, &cred_id_ptr, &cred_id_len) < 0)
 		errx(1, "base64_decode");
-
-	read_pin(path, pin, sizeof(pin));
+	if ((pin = get_pin(path)) == NULL)
+		errx(1, "get_pin");
 	r = fido_credman_get_dev_rk(dev, rp_id, rk, pin);
-	explicit_bzero(pin, sizeof(pin));
+	freezero(pin, PINBUF_LEN);
+	pin = NULL;
 
 	if (r != FIDO_OK)
 		errx(1, "fido_credman_get_dev_rk: %s", fido_strerr(r));
@@ -202,7 +209,7 @@ out:
 int
 credman_delete_rk(const char *path, const char *id)
 {
-	char pin[1024];
+	char *pin = NULL;
 	fido_dev_t *dev = NULL;
 	void *id_ptr = NULL;
 	size_t id_len = 0;
@@ -212,9 +219,11 @@ credman_delete_rk(const char *path, const char *id)
 		errx(1, "base64_decode");
 
 	dev = open_dev(path);
-	read_pin(path, pin, sizeof(pin));
+	if ((pin = get_pin(path)) == NULL)
+		errx(1, "get_pin");
 	r = fido_credman_del_dev_rk(dev, id_ptr, id_len, pin);
-	explicit_bzero(pin, sizeof(pin));
+	freezero(pin, PINBUF_LEN);
+	pin = NULL;
 
 	if (r != FIDO_OK)
 		errx(1, "fido_credman_del_dev_rk: %s", fido_strerr(r));

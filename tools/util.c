@@ -31,20 +31,6 @@
 
 #include "extern.h"
 
-void
-read_pin(const char *path, char *buf, size_t len)
-{
-	char prompt[1024];
-	int r;
-
-	r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ", path);
-	if (r < 0 || (size_t)r >= sizeof(prompt))
-		errx(1, "snprintf");
-	if (!readpassphrase(prompt, buf, len, RPP_ECHO_OFF))
-		errx(1, "readpassphrase");
-}
-
-/* XXX merge this w/ read_pin() */
 char *
 get_pin(const char *path)
 {

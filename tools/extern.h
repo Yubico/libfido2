@@ -89,7 +89,6 @@ RSA *read_rsa_pubkey(const char *);
 EVP_PKEY *read_eddsa_pubkey(const char *);
 int write_eddsa_pubkey(FILE *, const void *, size_t);
 void print_cred(FILE *, int, const fido_cred_t *);
-void read_pin(const char *, char *, size_t);
 void usage(void);
 void xxd(const void *, size_t);
 int base10(const char *);

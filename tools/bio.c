@@ -39,7 +39,7 @@ print_template(const fido_bio_template_array_t *ta, size_t idx)
 int
 bio_list(const char *path)
 {
-	char				 pin[1024];
+	char				*pin = NULL;
 	fido_bio_template_array_t	*ta = NULL;
 	fido_dev_t			*dev = NULL;
 	int				 r;
@@ -50,9 +50,11 @@ bio_list(const char *path)
 		errx(1, "fido_bio_template_array_new");
 
 	dev = open_dev(path);
-	read_pin(path, pin, sizeof(pin));
+	if ((pin = get_pin(path)) == NULL)
+		errx(1, "get_pin");
 	r = fido_bio_dev_get_template_array(dev, ta, pin);
-	explicit_bzero(pin, sizeof(pin));
+	freezero(pin, PINBUF_LEN);
+	pin = NULL;
 
 	if (r != FIDO_OK)
 		errx(1, "fido_bio_dev_get_template_array: %s", fido_strerr(r));
@@ -69,7 +71,7 @@ bio_list(const char *path)
 int
 bio_set_name(const char *path, const char *id, const char *name)
 {
-	char			 pin[1024];
+	char			*pin = NULL;
 	fido_bio_template_t	*t = NULL;
 	fido_dev_t		*dev = NULL;
 	int			 r;
@@ -91,9 +93,11 @@ bio_set_name(const char *path, const char *id, const char *name)
 		errx(1, "fido_bio_template_set_id: %s", fido_strerr(r));
 
 	dev = open_dev(path);
-	read_pin(path, pin, sizeof(pin));
+	if ((pin = get_pin(path)) == NULL)
+		errx(1, "get_pin");
 	r = fido_bio_dev_set_template_name(dev, t, pin);
-	explicit_bzero(pin, sizeof(pin));
+	freezero(pin, PINBUF_LEN);
+	pin = NULL;
 
 	if (r != FIDO_OK)
 		errx(1, "fido_bio_dev_set_template_name: %s", fido_strerr(r));
@@ -148,7 +152,7 @@ enroll_strerr(uint8_t n)
 int
 bio_enroll(const char *path)
 {
-	char			 pin[1024];
+	char			*pin = NULL;
 	fido_bio_enroll_t	*e = NULL;
 	fido_bio_template_t	*t = NULL;
 	fido_dev_t		*dev = NULL;
@@ -162,12 +166,14 @@ bio_enroll(const char *path)
 		errx(1, "fido_bio_enroll_new");
 
 	dev = open_dev(path);
-	read_pin(path, pin, sizeof(pin));
+	if ((pin = get_pin(path)) == NULL)
+		errx(1, "get_pin");
 
 	printf("Touch your security key.\n");
 
 	r = fido_bio_dev_enroll_begin(dev, t, e, 10000, pin);
-	explicit_bzero(pin, sizeof(pin));
+	freezero(pin, PINBUF_LEN);
+	pin = NULL;
 	if (r != FIDO_OK)
 		errx(1, "fido_bio_dev_enroll_begin: %s", fido_strerr(r));
 
@@ -196,7 +202,7 @@ bio_enroll(const char *path)
 int
 bio_delete(const char *path, const char *id)
 {
-	char			 pin[1024];
+	char			*pin = NULL;
 	fido_dev_t		*dev = NULL;
 	fido_bio_template_t	*t = NULL;
 	int			 r;
@@ -213,9 +219,11 @@ bio_delete(const char *path, const char *id)
 		errx(1, "fido_bio_template_set_id: %s", fido_strerr(r));
 
 	dev = open_dev(path);
-	read_pin(path, pin, sizeof(pin));
+	if ((pin = get_pin(path)) == NULL)
+		errx(1, "get_pin");
 	r = fido_bio_dev_enroll_remove(dev, t, pin);
-	explicit_bzero(pin, sizeof(pin));
+	freezero(pin, PINBUF_LEN);
+	pin = NULL;
 
 	if (r != FIDO_OK)
 		errx(1, "fido_bio_dev_enroll_remove: %s", fido_strerr(r));
