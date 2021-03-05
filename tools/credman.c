@@ -199,9 +199,10 @@ out:
 }
 
 int
-credman_delete_rk(fido_dev_t *dev, const char *path, char *id)
+credman_delete_rk(const char *path, char *id)
 {
 	char pin[1024];
+	fido_dev_t *dev = NULL;
 	void *id_ptr = NULL;
 	size_t id_len = 0;
 	int r;
@@ -209,6 +210,7 @@ credman_delete_rk(fido_dev_t *dev, const char *path, char *id)
 	if (base64_decode(id, &id_ptr, &id_len) < 0)
 		errx(1, "base64_decode");
 
+	dev = open_dev(path);
 	read_pin(path, pin, sizeof(pin));
 	r = fido_credman_del_dev_rk(dev, id_ptr, id_len, pin);
 	explicit_bzero(pin, sizeof(pin));
