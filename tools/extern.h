@@ -73,6 +73,7 @@ int credman_print_rk(fido_dev_t *, const char *, const char *, const char *);
 int get_devopt(fido_dev_t *, const char *, int *);
 int pin_change(char *);
 int pin_set(char *);
+int should_retry_with_pin(const fido_dev_t *, int);
 int string_read(FILE *, char **);
 int token_config(int, char **, char *);
 int token_delete(int, char **, char *);

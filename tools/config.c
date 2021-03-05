@@ -23,8 +23,8 @@ config_entattest(char *path)
 	int r, ok = 1;
 
 	dev = open_dev(path);
-	r = fido_dev_enable_entattest(dev, NULL);
-	if (r == FIDO_ERR_PIN_REQUIRED) {
+	if ((r = fido_dev_enable_entattest(dev, NULL)) != FIDO_OK &&
+	    should_retry_with_pin(dev, r)) {
 		if ((pin = get_pin(path)) == NULL)
 			goto out;
 		r = fido_dev_enable_entattest(dev, pin);
@@ -53,7 +53,6 @@ config_always_uv(char *path, int toggle)
 	int v, r, ok = 1;
 
 	dev = open_dev(path);
-
 	if (get_devopt(dev, "alwaysUv", &v) < 0) {
 		warnx("%s: getdevopt", __func__);
 		goto out;
@@ -66,8 +65,8 @@ config_always_uv(char *path, int toggle)
 		ok = 0;
 		goto out;
 	}
-	r = fido_dev_toggle_always_uv(dev, NULL);
-	if (r == FIDO_ERR_PIN_REQUIRED) {
+	if ((r = fido_dev_toggle_always_uv(dev, NULL)) != FIDO_OK &&
+	    should_retry_with_pin(dev, r)) {
 		if ((pin = get_pin(path)) == NULL)
 			goto out;
 		r = fido_dev_toggle_always_uv(dev, pin);
@@ -96,13 +95,12 @@ config_pin_minlen(char *path, const char *pinlen)
 	int len, r, ok = 1;
 
 	dev = open_dev(path);
-
 	if ((len = base10(pinlen)) < 0 || len > 63) {
 		warnx("%s: len > 63", __func__);
 		goto out;
 	}
-	r = fido_dev_set_pin_minlen(dev, (size_t)len, NULL);
-	if (r == FIDO_ERR_PIN_REQUIRED) {
+	if ((r = fido_dev_set_pin_minlen(dev, (size_t)len, NULL)) != FIDO_OK &&
+	    should_retry_with_pin(dev, r)) {
 		if ((pin = get_pin(path)) == NULL)
 			goto out;
 		r = fido_dev_set_pin_minlen(dev, (size_t)len, pin);
@@ -130,9 +128,8 @@ config_force_pin_change(char *path)
 	int r, ok = 1;
 
 	dev = open_dev(path);
-
-	r = fido_dev_force_pin_change(dev, NULL);
-	if (r == FIDO_ERR_PIN_REQUIRED) {
+	if ((r = fido_dev_force_pin_change(dev, NULL)) != FIDO_OK &&
+	    should_retry_with_pin(dev, r)) {
 		if ((pin = get_pin(path)) == NULL)
 			goto out;
 		r = fido_dev_force_pin_change(dev, pin);
