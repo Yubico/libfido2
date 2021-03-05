@@ -19,15 +19,17 @@ int
 config_entattest(char *path)
 {
 	fido_dev_t *dev;
-	char pin[1024];
+	char *pin = NULL;
 	int r;
 
 	dev = open_dev(path);
 	r = fido_dev_enable_entattest(dev, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED) {
-		read_pin(path, pin, sizeof(pin));
+		if ((pin = get_pin(path)) == NULL)
+			errx(1, "get_pin");
 		r = fido_dev_enable_entattest(dev, pin);
-		explicit_bzero(pin, sizeof(pin));
+		freezero(pin, PINBUF_LEN);
+		pin = NULL;
 	}
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
@@ -40,7 +42,7 @@ int
 config_always_uv(char *path, int toggle)
 {
 	fido_dev_t *dev;
-	char pin[1024];
+	char *pin = NULL;
 	int v, r, ok = -1;
 
 	dev = open_dev(path);
@@ -59,9 +61,11 @@ config_always_uv(char *path, int toggle)
 	}
 	r = fido_dev_toggle_always_uv(dev, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED) {
-		read_pin(path, pin, sizeof(pin));
+		if ((pin = get_pin(path)) == NULL)
+			errx(1, "get_pin");
 		r = fido_dev_toggle_always_uv(dev, pin);
-		explicit_bzero(pin, sizeof(pin));
+		freezero(pin, PINBUF_LEN);
+		pin = NULL;
 	}
 	if (r == FIDO_OK) {
 		ok = 0;
@@ -79,7 +83,7 @@ int
 config_pin_minlen(char *path, const char *pinlen)
 {
 	fido_dev_t *dev;
-	char pin[1024];
+	char *pin = NULL;
 	int len, r, ok = -1;
 
 	dev = open_dev(path);
@@ -90,9 +94,11 @@ config_pin_minlen(char *path, const char *pinlen)
 	}
 	r = fido_dev_set_pin_minlen(dev, (size_t)len, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED) {
-		read_pin(path, pin, sizeof(pin));
+		if ((pin = get_pin(path)) == NULL)
+			errx(1, "get_pin");
 		r = fido_dev_set_pin_minlen(dev, (size_t)len, pin);
-		explicit_bzero(pin, sizeof(pin));
+		freezero(pin, PINBUF_LEN);
+		pin = NULL;
 	}
 	if (r == FIDO_OK) {
 		ok = 0;
@@ -110,16 +116,18 @@ int
 config_force_pin_change(char *path)
 {
 	fido_dev_t *dev;
-	char pin[1024];
+	char *pin = NULL;
 	int r, ok = -1;
 
 	dev = open_dev(path);
 
 	r = fido_dev_force_pin_change(dev, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED) {
-		read_pin(path, pin, sizeof(pin));
+		if ((pin = get_pin(path)) == NULL)
+			errx(1, "get_pin");
 		r = fido_dev_force_pin_change(dev, pin);
-		explicit_bzero(pin, sizeof(pin));
+		freezero(pin, PINBUF_LEN);
+		pin = NULL;
 	}
 	if (r == FIDO_OK) {
 		ok = 0;
