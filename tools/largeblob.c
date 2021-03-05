@@ -581,8 +581,6 @@ blob_list(const char *path)
 	cbor_item_t *item = NULL, **v;
 	int ok = 1;
 
-	if (path == NULL)
-		usage();
 	memset(&map, 0, sizeof(map));
 	dev = open_dev(path);
 	if (map_known_rps(dev, path, &map) < 0 ||

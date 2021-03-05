@@ -358,6 +358,9 @@ token_set(int argc, char **argv, char *path)
 	argc -= optind;
 	argv += optind;
 
+	if (path == NULL)
+		usage();
+
 	if (blob) {
 		if (argc != 2)
 			usage();
@@ -425,14 +428,19 @@ token_list(int argc, char **argv, char *path)
 		}
 	}
 
-	if (blobs)
-		return (blob_list(path));
-	if (enrolls)
-		return (bio_list(path));
-	if (keys)
-		return (credman_list_rk(path, rp_id));
-	if (rplist)
-		return (credman_list_rp(path));
+	if (blobs || enrolls || keys || rplist) {
+		if (path == NULL)
+			usage();
+		if (blobs)
+			return (blob_list(path));
+		if (enrolls)
+			return (bio_list(path));
+		if (keys)
+			return (credman_list_rk(path, rp_id));
+		if (rplist)
+			return (credman_list_rp(path));
+		/* NOTREACHED */
+	}
 
 	if ((devlist = fido_dev_info_new(64)) == NULL)
 		errx(1, "fido_dev_info_new");

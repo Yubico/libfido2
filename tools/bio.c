@@ -44,8 +44,6 @@ bio_list(const char *path)
 	fido_dev_t			*dev = NULL;
 	int				 r;
 
-	if (path == NULL)
-		usage();
 	if ((ta = fido_bio_template_array_new()) == NULL)
 		errx(1, "fido_bio_template_array_new");
 
@@ -78,8 +76,6 @@ bio_set_name(const char *path, const char *id, const char *name)
 	size_t			 id_blob_len = 0;
 	void			*id_blob_ptr = NULL;
 
-	if (path == NULL)
-		usage();
 	if ((t = fido_bio_template_new()) == NULL)
 		errx(1, "fido_bio_template_new");
 
@@ -158,8 +154,6 @@ bio_enroll(const char *path)
 	fido_dev_t		*dev = NULL;
 	int			 r;
 
-	if (path == NULL)
-		usage();
 	if ((t = fido_bio_template_new()) == NULL)
 		errx(1, "fido_bio_template_new");
 	if ((e = fido_bio_enroll_new()) == NULL)
