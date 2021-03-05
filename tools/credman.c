@@ -64,7 +64,7 @@ print_rp(fido_credman_rp_t *rp, size_t idx)
 }
 
 int
-credman_list_rp(char *path)
+credman_list_rp(const char *path)
 {
 	fido_dev_t *dev = NULL;
 	fido_credman_rp_t *rp = NULL;
@@ -123,7 +123,7 @@ print_rk(const fido_credman_rk_t *rk, size_t idx)
 }
 
 int
-credman_list_rk(char *path, const char *rp_id)
+credman_list_rk(const char *path, const char *rp_id)
 {
 	fido_dev_t *dev = NULL;
 	fido_credman_rk_t *rk = NULL;
@@ -153,7 +153,8 @@ credman_list_rk(char *path, const char *rp_id)
 }
 
 int
-credman_print_rk(fido_dev_t *dev, const char *path, char *rp_id, char *cred_id)
+credman_print_rk(fido_dev_t *dev, const char *path, const char *rp_id,
+    const char *cred_id)
 {
 	const fido_cred_t *cred = NULL;
 	fido_credman_rk_t *rk = NULL;
@@ -199,7 +200,7 @@ out:
 }
 
 int
-credman_delete_rk(const char *path, char *id)
+credman_delete_rk(const char *path, const char *id)
 {
 	char pin[1024];
 	fido_dev_t *dev = NULL;
