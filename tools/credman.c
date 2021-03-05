@@ -73,8 +73,6 @@ credman_list_rp(const char *path)
 	char *pin = NULL;
 	int r;
 
-	if (path == NULL)
-		usage();
 	if ((rp = fido_credman_rp_new()) == NULL)
 		errx(1, "fido_credman_rp_new");
 
@@ -134,8 +132,6 @@ credman_list_rk(const char *path, const char *rp_id)
 	char *pin = NULL;
 	int r;
 
-	if (path == NULL)
-		usage();
 	if ((rk = fido_credman_rk_new()) == NULL)
 		errx(1, "fido_credman_rk_new");
 
