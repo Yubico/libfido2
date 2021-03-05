@@ -194,16 +194,15 @@ bio_enroll(char *path)
 }
 
 int
-bio_delete(fido_dev_t *dev, char *path, char *id)
+bio_delete(char *path, char *id)
 {
 	char			 pin[1024];
+	fido_dev_t		*dev = NULL;
 	fido_bio_template_t	*t = NULL;
 	int			 r;
 	size_t			 id_blob_len = 0;
 	void			*id_blob_ptr = NULL;
 
-	if (path == NULL)
-		usage();
 	if ((t = fido_bio_template_new()) == NULL)
 		errx(1, "fido_bio_template_new");
 
@@ -213,6 +212,7 @@ bio_delete(fido_dev_t *dev, char *path, char *id)
 	    id_blob_len)) != FIDO_OK)
 		errx(1, "fido_bio_template_set_id: %s", fido_strerr(r));
 
+	dev = open_dev(path);
 	read_pin(path, pin, sizeof(pin));
 	r = fido_bio_dev_enroll_remove(dev, t, pin);
 	explicit_bzero(pin, sizeof(pin));

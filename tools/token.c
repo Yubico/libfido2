@@ -460,7 +460,6 @@ token_delete(int argc, char **argv, char *path)
 	char		*id = NULL;
 	char		*key = NULL;
 	char		*name = NULL;
-	fido_dev_t	*dev = NULL;
 	int		 blob = 0;
 	int		 ch;
 	int		 enroll = 0;
@@ -502,10 +501,9 @@ token_delete(int argc, char **argv, char *path)
 	if (id) {
 		if (uv)
 			usage();
-		dev = open_dev(path);
 		if (enroll == 0)
-			return (credman_delete_rk(dev, path, id));
-		return (bio_delete(dev, path, id));
+			return (credman_delete_rk(path, id));
+		return (bio_delete(path, id));
 	}
 
 	if (uv == 0)
