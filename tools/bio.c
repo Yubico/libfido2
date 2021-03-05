@@ -37,7 +37,7 @@ print_template(const fido_bio_template_array_t *ta, size_t idx)
 }
 
 int
-bio_list(char *path)
+bio_list(const char *path)
 {
 	char				 pin[1024];
 	fido_bio_template_array_t	*ta = NULL;
@@ -67,7 +67,7 @@ bio_list(char *path)
 }
 
 int
-bio_set_name(char *path, char *id, char *name)
+bio_set_name(const char *path, const char *id, const char *name)
 {
 	char			 pin[1024];
 	fido_bio_template_t	*t = NULL;
@@ -146,7 +146,7 @@ enroll_strerr(uint8_t n)
 }
 
 int
-bio_enroll(char *path)
+bio_enroll(const char *path)
 {
 	char			 pin[1024];
 	fido_bio_enroll_t	*e = NULL;
@@ -194,7 +194,7 @@ bio_enroll(char *path)
 }
 
 int
-bio_delete(char *path, char *id)
+bio_delete(const char *path, const char *id)
 {
 	char			 pin[1024];
 	fido_dev_t		*dev = NULL;
