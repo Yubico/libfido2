@@ -94,14 +94,6 @@ out:
 }
 
 static int
-should_retry_with_pin(int r, const char *pin)
-{
-	if (pin != NULL)
-		return 0;
-	return r == FIDO_ERR_PIN_REQUIRED || r == FIDO_ERR_UV_INVALID;
-}
-
-static int
 lookup_key(const char *path, fido_dev_t *dev, const char *rp_id,
     const struct blob *cred_id, char **pin, struct blob *key)
 {
@@ -115,7 +107,7 @@ lookup_key(const char *path, fido_dev_t *dev, const char *rp_id,
 		goto out;
 	}
 	if ((r = fido_credman_get_dev_rk(dev, rp_id, rk, *pin)) != FIDO_OK &&
-	    should_retry_with_pin(r, *pin)) {
+	    *pin == NULL && should_retry_with_pin(dev, r)) {
 		if ((*pin = get_pin(path)) == NULL)
 			goto out;
 		r = fido_credman_get_dev_rk(dev, rp_id, rk, *pin);
@@ -218,7 +210,7 @@ blob_set(const char *path, const char *keyf, const char *rp_id,
 	    load_key(keyf, cred_id64, rp_id, path, dev, &pin, &key) < 0)
 		goto out;
 	if ((r = fido_dev_largeblob_set(dev, key.ptr, key.len, blob.ptr,
-	    blob.len, pin)) != FIDO_OK && should_retry_with_pin(r, NULL)) {
+	    blob.len, pin)) != FIDO_OK && should_retry_with_pin(dev, r)) {
 		if ((pin = get_pin(path)) == NULL)
 			goto out;
 		r = fido_dev_largeblob_set(dev, key.ptr, key.len, blob.ptr,
@@ -291,7 +283,7 @@ blob_delete(const char *path, const char *keyf, const char *rp_id,
 	if (load_key(keyf, cred_id64, rp_id, path, dev, &pin, &key) < 0)
 		goto out;
 	if ((r = fido_dev_largeblob_remove(dev, key.ptr, key.len,
-	    pin)) != FIDO_OK && should_retry_with_pin(r, NULL)) {
+	    pin)) != FIDO_OK && should_retry_with_pin(dev, r)) {
 		if ((pin = get_pin(path)) == NULL)
 			goto out;
 		r = fido_dev_largeblob_remove(dev, key.ptr, key.len, pin);

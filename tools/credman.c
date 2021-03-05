@@ -29,11 +29,14 @@ credman_get_metadata(fido_dev_t *dev, const char *path)
 		warnx("fido_credman_metadata_new");
 		goto out;
 	}
-	if ((pin = get_pin(path)) == NULL)
-		goto out;
-	r = fido_credman_get_dev_metadata(dev, metadata, pin);
-	freezero(pin, PINBUF_LEN);
-	pin = NULL;
+	if ((r = fido_credman_get_dev_metadata(dev, metadata,
+	    NULL)) != FIDO_OK && should_retry_with_pin(dev, r)) {
+		if ((pin = get_pin(path)) == NULL)
+			goto out;
+		r = fido_credman_get_dev_metadata(dev, metadata, pin);
+		freezero(pin, PINBUF_LEN);
+		pin = NULL;
+	}
 	if (r != FIDO_OK) {
 		warnx("fido_credman_get_dev_metadata: %s", fido_strerr(r));
 		goto out;
@@ -78,14 +81,19 @@ credman_list_rp(const char *path)
 	char *pin = NULL;
 	int r, ok = 1;
 
-	if ((rp = fido_credman_rp_new()) == NULL)
-		errx(1, "fido_credman_rp_new");
 	dev = open_dev(path);
-	if ((pin = get_pin(path)) == NULL)
+	if ((rp = fido_credman_rp_new()) == NULL) {
+		warnx("fido_credman_rp_new");
 		goto out;
-	r = fido_credman_get_dev_rp(dev, rp, pin);
-	freezero(pin, PINBUF_LEN);
-	pin = NULL;
+	}
+	if ((r = fido_credman_get_dev_rp(dev, rp, NULL)) != FIDO_OK &&
+	    should_retry_with_pin(dev, r)) {
+		if ((pin = get_pin(path)) == NULL)
+			goto out;
+		r = fido_credman_get_dev_rp(dev, rp, pin);
+		freezero(pin, PINBUF_LEN);
+		pin = NULL;
+	}
 	if (r != FIDO_OK) {
 		warnx("fido_credman_get_dev_rp: %s", fido_strerr(r));
 		goto out;
@@ -143,14 +151,19 @@ credman_list_rk(const char *path, const char *rp_id)
 	char *pin = NULL;
 	int r, ok = 1;
 
-	if ((rk = fido_credman_rk_new()) == NULL)
-		errx(1, "fido_credman_rk_new");
 	dev = open_dev(path);
-	if ((pin = get_pin(path)) == NULL)
+	if ((rk = fido_credman_rk_new()) == NULL) {
+		warnx("fido_credman_rk_new");
 		goto out;
-	r = fido_credman_get_dev_rk(dev, rp_id, rk, pin);
-	freezero(pin, PINBUF_LEN);
-	pin = NULL;
+	}
+	if ((r = fido_credman_get_dev_rk(dev, rp_id, rk, NULL)) != FIDO_OK &&
+	    should_retry_with_pin(dev, r)) {
+		if ((pin = get_pin(path)) == NULL)
+			goto out;
+		r = fido_credman_get_dev_rk(dev, rp_id, rk, pin);
+		freezero(pin, PINBUF_LEN);
+		pin = NULL;
+	}
 	if (r != FIDO_OK) {
 		warnx("fido_credman_get_dev_rk: %s", fido_strerr(r));
 		goto out;
@@ -187,11 +200,14 @@ credman_print_rk(fido_dev_t *dev, const char *path, const char *rp_id,
 		warnx("base64_decode");
 		goto out;
 	}
-	if ((pin = get_pin(path)) == NULL)
-		goto out;
-	r = fido_credman_get_dev_rk(dev, rp_id, rk, pin);
-	freezero(pin, PINBUF_LEN);
-	pin = NULL;
+	if ((r = fido_credman_get_dev_rk(dev, rp_id, rk, NULL)) != FIDO_OK &&
+	    should_retry_with_pin(dev, r)) {
+		if ((pin = get_pin(path)) == NULL)
+			goto out;
+		r = fido_credman_get_dev_rk(dev, rp_id, rk, pin);
+		freezero(pin, PINBUF_LEN);
+		pin = NULL;
+	}
 	if (r != FIDO_OK) {
 		warnx("fido_credman_get_dev_rk: %s", fido_strerr(r));
 		goto out;
@@ -230,14 +246,19 @@ credman_delete_rk(const char *path, const char *id)
 	size_t id_len = 0;
 	int r, ok = 1;
 
-	if (base64_decode(id, &id_ptr, &id_len) < 0)
-		errx(1, "base64_decode");
 	dev = open_dev(path);
-	if ((pin = get_pin(path)) == NULL)
+	if (base64_decode(id, &id_ptr, &id_len) < 0) {
+		warnx("base64_decode");
 		goto out;
-	r = fido_credman_del_dev_rk(dev, id_ptr, id_len, pin);
-	freezero(pin, PINBUF_LEN);
-	pin = NULL;
+	}
+	if ((r = fido_credman_del_dev_rk(dev, id_ptr, id_len,
+	    NULL)) != FIDO_OK && should_retry_with_pin(dev, r)) {
+		if ((pin = get_pin(path)) == NULL)
+			goto out;
+		r = fido_credman_del_dev_rk(dev, id_ptr, id_len, pin);
+		freezero(pin, PINBUF_LEN);
+		pin = NULL;
+	}
 	if (r != FIDO_OK) {
 		warnx("fido_credman_del_dev_rk: %s", fido_strerr(r));
 		goto out;
