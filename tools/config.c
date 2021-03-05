@@ -20,22 +20,29 @@ config_entattest(char *path)
 {
 	fido_dev_t *dev;
 	char *pin = NULL;
-	int r;
+	int r, ok = 1;
 
 	dev = open_dev(path);
 	r = fido_dev_enable_entattest(dev, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED) {
 		if ((pin = get_pin(path)) == NULL)
-			errx(1, "get_pin");
+			goto out;
 		r = fido_dev_enable_entattest(dev, pin);
 		freezero(pin, PINBUF_LEN);
 		pin = NULL;
 	}
+	if (r != FIDO_OK) {
+		warnx("fido_dev_enable_entattest: %s (0x%x)",
+		    fido_strerr(r), r);
+		goto out;
+	}
+
+	ok = 0;
+out:
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
-	if (r == FIDO_OK)
-		exit(0);
-	errx(1, "fido_dev_enable_entattest: %s (0x%x)", fido_strerr(r), r);
+
+	exit(ok);
 }
 
 int
@@ -43,7 +50,7 @@ config_always_uv(char *path, int toggle)
 {
 	fido_dev_t *dev;
 	char *pin = NULL;
-	int v, r, ok = -1;
+	int v, r, ok = 1;
 
 	dev = open_dev(path);
 
@@ -62,21 +69,23 @@ config_always_uv(char *path, int toggle)
 	r = fido_dev_toggle_always_uv(dev, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED) {
 		if ((pin = get_pin(path)) == NULL)
-			errx(1, "get_pin");
+			goto out;
 		r = fido_dev_toggle_always_uv(dev, pin);
 		freezero(pin, PINBUF_LEN);
 		pin = NULL;
 	}
-	if (r == FIDO_OK) {
-		ok = 0;
+	if (r != FIDO_OK) {
+		warnx("fido_dev_toggle_always_uv: %s (0x%x)",
+		    fido_strerr(r), r);
 		goto out;
 	}
-	warnx("fido_dev_toggle_always_uv: %s (0x%x)", fido_strerr(r), r);
+
+	ok = 0;
 out:
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
 
-	exit(ok ? 1 : 0);
+	exit(ok);
 }
 
 int
@@ -84,7 +93,7 @@ config_pin_minlen(char *path, const char *pinlen)
 {
 	fido_dev_t *dev;
 	char *pin = NULL;
-	int len, r, ok = -1;
+	int len, r, ok = 1;
 
 	dev = open_dev(path);
 
@@ -95,21 +104,22 @@ config_pin_minlen(char *path, const char *pinlen)
 	r = fido_dev_set_pin_minlen(dev, (size_t)len, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED) {
 		if ((pin = get_pin(path)) == NULL)
-			errx(1, "get_pin");
+			goto out;
 		r = fido_dev_set_pin_minlen(dev, (size_t)len, pin);
 		freezero(pin, PINBUF_LEN);
 		pin = NULL;
 	}
 	if (r == FIDO_OK) {
-		ok = 0;
+		warnx("fido_dev_set_pin_minlen: %s (0x%x)", fido_strerr(r), r);
 		goto out;
 	}
-	warnx("fido_dev_set_pin_minlen: %s (0x%x)", fido_strerr(r), r);
+
+	ok = 0;
 out:
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
 
-	exit(ok ? 1 : 0);
+	exit(ok);
 }
 
 int
@@ -117,26 +127,28 @@ config_force_pin_change(char *path)
 {
 	fido_dev_t *dev;
 	char *pin = NULL;
-	int r, ok = -1;
+	int r, ok = 1;
 
 	dev = open_dev(path);
 
 	r = fido_dev_force_pin_change(dev, NULL);
 	if (r == FIDO_ERR_PIN_REQUIRED) {
 		if ((pin = get_pin(path)) == NULL)
-			errx(1, "get_pin");
+			goto out;
 		r = fido_dev_force_pin_change(dev, pin);
 		freezero(pin, PINBUF_LEN);
 		pin = NULL;
 	}
 	if (r == FIDO_OK) {
-		ok = 0;
+		warnx("fido_dev_force_pin_change: %s (0x%x)",
+		    fido_strerr(r), r);
 		goto out;
 	}
-	warnx("fido_dev_force_pin_change: %s (0x%x)", fido_strerr(r), r);
+
+	ok = 0;
 out:
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
 
-	exit(ok ? 1 : 0);
+	exit(ok);
 }
