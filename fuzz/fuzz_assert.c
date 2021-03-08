@@ -222,6 +222,8 @@ get_assert(fido_assert_t *assert, uint8_t opt, const struct blob *cdh,
 		fido_assert_set_extensions(assert, FIDO_EXT_HMAC_SECRET);
 	if (ext & FIDO_EXT_CRED_BLOB)
 		fido_assert_set_extensions(assert, FIDO_EXT_CRED_BLOB);
+	if (ext & FIDO_EXT_LARGEBLOB_KEY)
+		fido_assert_set_extensions(assert, FIDO_EXT_LARGEBLOB_KEY);
 	if (up & 1)
 		fido_assert_set_up(assert, FIDO_OPT_TRUE);
 	else if (opt & 1)
@@ -425,6 +427,8 @@ test(const struct param *p)
 		    xstrlen(fido_assert_user_display_name(assert, i)));
 		consume(fido_assert_blob_ptr(assert, i),
 		    fido_assert_blob_len(assert, i));
+		consume(fido_assert_largeblob_key_ptr(assert, i),
+		    fido_assert_largeblob_key_len(assert, i));
 		flags = fido_assert_flags(assert, i);
 		consume(&flags, sizeof(flags));
 		sigcount = fido_assert_sigcount(assert, i);
