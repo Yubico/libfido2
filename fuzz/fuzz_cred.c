@@ -236,6 +236,8 @@ make_cred(fido_cred_t *cred, uint8_t opt, int type, const struct blob *cdh,
 		fido_cred_set_extensions(cred, FIDO_EXT_HMAC_SECRET);
 	if (ext & FIDO_EXT_CRED_BLOB)
 		fido_cred_set_blob(cred, user_id->body, user_id->len);
+	if (ext & FIDO_EXT_LARGEBLOB_KEY)
+		fido_cred_set_extensions(cred, FIDO_EXT_LARGEBLOB_KEY);
 
 	if (rk & 1)
 		fido_cred_set_rk(cred, FIDO_OPT_TRUE);
@@ -312,6 +314,8 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	consume(fido_cred_user_name(cred), xstrlen(fido_cred_user_name(cred)));
 	consume(fido_cred_display_name(cred),
 	    xstrlen(fido_cred_display_name(cred)));
+	consume(fido_cred_largeblob_key_ptr(cred),
+	    fido_cred_largeblob_key_len(cred));
 
 	flags = fido_cred_flags(cred);
 	consume(&flags, sizeof(flags));
