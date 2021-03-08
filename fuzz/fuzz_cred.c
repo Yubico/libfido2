@@ -232,7 +232,10 @@ make_cred(fido_cred_t *cred, uint8_t opt, int type, const struct blob *cdh,
 	fido_cred_set_rp(cred, rp_id, rp_name);
 	fido_cred_set_user(cred, user_id->body, user_id->len, user_name,
 	    user_nick, user_icon);
-	fido_cred_set_extensions(cred, ext);
+	if (ext & FIDO_EXT_HMAC_SECRET)
+		fido_cred_set_extensions(cred, FIDO_EXT_HMAC_SECRET);
+	if (ext & FIDO_EXT_CRED_BLOB)
+		fido_cred_set_blob(cred, user_id->body, user_id->len);
 
 	if (rk & 1)
 		fido_cred_set_rk(cred, FIDO_OPT_TRUE);
