@@ -303,7 +303,7 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 	if (fido_dev_register_manifest_func(fido_hid_manifest) != FIDO_OK)
 		return (FIDO_ERR_INTERNAL);
 
-#ifdef __linux__
+#ifdef NFC_LINUX
 	if (fido_dev_register_manifest_func(fido_nfc_manifest) != FIDO_OK)
 		return (FIDO_ERR_INTERNAL);
 #endif
@@ -334,7 +334,7 @@ fido_dev_open_with_info(fido_dev_t *dev)
 int
 fido_dev_open(fido_dev_t *dev, const char *path)
 {
-#ifdef __linux__
+#ifdef NFC_LINUX
 	/*
 	 * this is a hack to get existing applications up and running with nfc;
 	 * it will *NOT* be part of a libfido2 release. to support nfc in your
@@ -378,7 +378,7 @@ fido_dev_set_sigmask(fido_dev_t *dev, const fido_sigset_t *sigmask)
 	if (dev->io_own || dev->io_handle == NULL || sigmask == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-#ifdef __linux__
+#ifdef NFC_LINUX
 	if (dev->transport.rx == fido_nfc_rx)
 		return (fido_nfc_set_sigmask(dev->io_handle, sigmask));
 #endif
