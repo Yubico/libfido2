@@ -205,6 +205,9 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="311f", ATTRS{idProduct
 # eWBM FIDO2 Goldengate G450 by eWBM Co., Ltd.
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="311f", ATTRS{idProduct}=="f47c", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
+# Idem Key by GoTrustID Inc.
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="32a3", ATTRS{idProduct}=="3201", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
 # Longmai mFIDO by Unknown vendor
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="4c4d", ATTRS{idProduct}=="f703", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
