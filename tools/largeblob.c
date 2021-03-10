@@ -11,9 +11,7 @@
 #include <fido.h>
 #include <fido/credman.h>
 #include <openssl/evp.h>
-#ifdef WITH_ZLIB
 #include <zlib.h>
-#endif
 
 #include <fcntl.h>
 #include <limits.h>
@@ -307,12 +305,6 @@ out:
 static int
 decompress(const struct blob *plaintext, uint64_t origsiz)
 {
-#ifndef WITH_ZLIB
-	(void)plaintext;
-	(void)origsiz;
-
-	return -1;
-#else
 	struct blob inflated;
 	u_long ilen, plen;
 	int ok = -1;
@@ -337,7 +329,6 @@ out:
 	freezero(inflated.ptr, inflated.len);
 
 	return ok;
-#endif
 }
 
 static int
