@@ -4,8 +4,8 @@
 
 IMAGE		:= libfido2-coverage:1.6.0
 RUNNER		:= libfido2-runner
-PROFDATA	:= llvm-profdata-10
-COV		:= llvm-cov-10
+PROFDATA	:= llvm-profdata-11
+COV		:= llvm-cov-11
 TARGETS		:= fuzz_assert fuzz_bio fuzz_cred fuzz_credman fuzz_hid \
 		   fuzz_largeblob fuzz_netlink fuzz_mgmt
 CORPORA		:= $(foreach f,${TARGETS},${f}/corpus)
