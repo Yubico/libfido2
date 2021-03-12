@@ -10,6 +10,10 @@ LIBCBOR_ASAN="address alignment bounds"
 LIBCBOR_MSAN="memory"
 OPENSSL_URL="git://github.com/openssl/openssl"
 OPENSSL_TAG="OpenSSL_1_1_1j"
+ZLIB_URL="git://github.com/madler/zlib"
+ZLIB_TAG="v1.2.11"
+ZLIB_ASAN="address alignment bounds undefined"
+ZLIB_MSAN="memory"
 FIDO2_ASAN="address bounds implicit-conversion leak pointer-compare pointer-subtract undefined"
 FIDO2_MSAN="memory"
 COMMON_CFLAGS="-g2 -fno-omit-frame-pointer"
@@ -20,10 +24,12 @@ MSAN_OPTIONS="${UBSAN_OPTIONS}"
 case "$1" in
 asan)
 	LIBCBOR_CFLAGS="-fsanitize=$(echo "${LIBCBOR_ASAN}" | tr ' ' ',')"
+	ZLIB_CFLAGS="-fsanitize=$(echo "${ZLIB_ASAN}" | tr ' ' ',')"
 	FIDO2_CFLAGS="-fsanitize=$(echo "${FIDO2_ASAN}" | tr ' ' ',')"
 	;;
 msan)
 	LIBCBOR_CFLAGS="-fsanitize=$(echo "${LIBCBOR_MSAN}" | tr ' ' ',')"
+	ZLIB_CFLAGS="-fsanitize=$(echo "${ZLIB_MSAN}" | tr ' ' ',')"
 	FIDO2_CFLAGS="-fsanitize=$(echo "${FIDO2_MSAN}" | tr ' ' ',') -fsanitize-memory-track-origins"
 	;;
 *)
@@ -53,6 +59,14 @@ cd openssl
 ./Configure linux-x86_64-clang "enable-$1" --prefix="${FAKEROOT}" \
     --openssldir="${FAKEROOT}/openssl"
 make install_sw
+cd -
+
+# zlib
+git clone "${ZLIB_URL}" -b "${ZLIB_TAG}"
+cd zlib
+CFLAGS="${ZLIB_CFLAGS}" LDFLAGS="${ZLIB_CFLAGS}" ./configure \
+    --prefix="${FAKEROOT}"
+make install
 cd -
 
 # libfido2
