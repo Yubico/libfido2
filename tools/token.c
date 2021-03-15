@@ -299,7 +299,7 @@ token_get(int argc, char **argv, char *path)
 	argc -= optind;
 	argv += optind;
 
-	if (blob == 0 || argc == 0)
+	if (blob == 0 || argc != 2)
 		usage();
 
 	return blob_get(path, key, name, id, argv[0]);
