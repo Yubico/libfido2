@@ -81,7 +81,7 @@ make -j"$(nproc)" -C build
 mkdir corpus
 curl -s https://ambientworks.net/libfido2/corpus.tgz | tar -C corpus -zxf -
 export UBSAN_OPTIONS ASAN_OPTIONS MSAN_OPTIONS
-for f in assert bio cred credman hid mgmt netlink; do
+for f in assert bio cred credman hid largeblob mgmt netlink; do
 	build/fuzz/fuzz_${f} -use_value_profile=1 -reload=30 -print_pcs=1 \
 	    -print_funcs=30 -timeout=10 -runs=1 corpus/fuzz_${f}
 done
