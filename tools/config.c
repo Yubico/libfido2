@@ -107,7 +107,7 @@ config_pin_minlen(char *path, const char *pinlen)
 		freezero(pin, PINBUF_LEN);
 		pin = NULL;
 	}
-	if (r == FIDO_OK) {
+	if (r != FIDO_OK) {
 		warnx("fido_dev_set_pin_minlen: %s (0x%x)", fido_strerr(r), r);
 		goto out;
 	}
@@ -136,9 +136,8 @@ config_force_pin_change(char *path)
 		freezero(pin, PINBUF_LEN);
 		pin = NULL;
 	}
-	if (r == FIDO_OK) {
-		warnx("fido_dev_force_pin_change: %s (0x%x)",
-		    fido_strerr(r), r);
+	if (r != FIDO_OK) {
+		warnx("fido_dev_force_pin_change: %s (0x%x)", fido_strerr(r), r);
 		goto out;
 	}
 
