@@ -47,6 +47,7 @@ config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
 	cbor_item_t *argv[4];
 	es256_pk_t *pk = NULL;
 	fido_blob_t *ecdh = NULL, f, hmac;
+	const uint8_t cmd = CTAP_CBOR_CONFIG;
 	int r = FIDO_ERR_INTERNAL;
 
 	memset(&f, 0, sizeof(f));
@@ -73,7 +74,7 @@ config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
-		if ((r = cbor_add_uv_params(dev, subcmd, &hmac, pk, ecdh, pin,
+		if ((r = cbor_add_uv_params(dev, cmd, &hmac, pk, ecdh, pin,
 		    NULL, &argv[3], &argv[2])) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
@@ -81,7 +82,7 @@ config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
 	}
 
 	/* framing and transmission */
-	if (cbor_build_frame(CTAP_CBOR_CONFIG, argv, nitems(argv), &f) < 0 ||
+	if (cbor_build_frame(cmd, argv, nitems(argv), &f) < 0 ||
 	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
