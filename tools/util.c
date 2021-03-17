@@ -575,5 +575,5 @@ int
 should_retry_with_pin(const fido_dev_t *dev, int r)
 {
 	return fido_dev_has_pin(dev) && (r == FIDO_ERR_PIN_REQUIRED ||
-	    r == FIDO_ERR_UV_INVALID);
+	    r == FIDO_ERR_UV_INVALID || r == FIDO_ERR_UNAUTHORIZED_PERM);
 }
