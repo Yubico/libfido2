@@ -4,10 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
-#include <openssl/ec.h>
-#include <openssl/pem.h>
-
 #include <errno.h>
+#include <fido.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,9 +14,8 @@
 #include <unistd.h>
 #endif
 
-#include "fido.h"
-#include "extern.h"
 #include "../openbsd-compat/openbsd-compat.h"
+#include "extern.h"
 
 static const unsigned char cdh[32] = {
 	0xf9, 0x64, 0x57, 0xe7, 0x2d, 0x97, 0xf6, 0xbb,
