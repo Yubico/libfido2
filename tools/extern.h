@@ -9,11 +9,11 @@
 
 #include <sys/types.h>
 
+#include <openssl/ec.h>
+
+#include <fido.h>
 #include <stddef.h>
 #include <stdio.h>
-
-#include <openssl/ec.h>
-#include <fido.h>
 
 struct blob {
 	unsigned char *ptr;

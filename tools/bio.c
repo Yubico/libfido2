@@ -7,7 +7,6 @@
 #include <fido.h>
 #include <fido/bio.h>
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

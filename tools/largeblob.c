@@ -7,12 +7,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <cbor.h>
 #include <fido.h>
 #include <fido/credman.h>
-#include <openssl/evp.h>
-#include <zlib.h>
 
+#include <cbor.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
@@ -21,6 +19,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <zlib.h>
 
 #include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"
