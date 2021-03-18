@@ -10,10 +10,8 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "mutator_aux.h"
-#include "fido.h"
-
 #include "../openbsd-compat/openbsd-compat.h"
+#include "mutator_aux.h"
 
 extern int fido_hid_get_usage(const uint8_t *, size_t, uint32_t *);
 extern int fido_hid_get_report_len(const uint8_t *, size_t, size_t *, size_t *);

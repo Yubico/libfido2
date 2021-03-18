@@ -9,8 +9,6 @@
 #include <openssl/sha.h>
 
 #include <cbor.h>
-#include <fido.h>
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>

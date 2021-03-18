@@ -11,7 +11,15 @@
 #include <stdint.h>
 #include <cbor.h>
 
-#include "fido.h"
+#include "../src/fido.h"
+#include "../src/fido/bio.h"
+#include "../src/fido/config.h"
+#include "../src/fido/credman.h"
+#include "../src/fido/eddsa.h"
+#include "../src/fido/es256.h"
+#include "../src/fido/es256.h"
+#include "../src/fido/rs256.h"
+#include "../src/netlink.h"
 
 /*
  * As of LLVM 10.0.0, MSAN support in libFuzzer was still experimental.

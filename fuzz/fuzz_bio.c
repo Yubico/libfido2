@@ -6,16 +6,13 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "mutator_aux.h"
 #include "wiredata_fido2.h"
 #include "dummy.h"
-
-#include "fido.h"
-#include "fido/bio.h"
 
 #include "../openbsd-compat/openbsd-compat.h"
 
