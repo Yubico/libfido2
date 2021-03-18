@@ -13,8 +13,6 @@
 #include "mutator_aux.h"
 #include "wiredata_fido2.h"
 #include "dummy.h"
-#include "fido.h"
-#include "fido/config.h"
 
 #include "../openbsd-compat/openbsd-compat.h"
 

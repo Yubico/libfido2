@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "fido.h"
 #include "mutator_aux.h"
 
 #define HID_DEV_HANDLE	0x68696421

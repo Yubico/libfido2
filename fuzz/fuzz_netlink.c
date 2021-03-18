@@ -10,11 +10,8 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "mutator_aux.h"
-#include "fido.h"
-
 #include "../openbsd-compat/openbsd-compat.h"
-#include "../src/netlink.h"
+#include "mutator_aux.h"
 
 struct param {
 	int seed;
