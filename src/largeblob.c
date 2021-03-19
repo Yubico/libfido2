@@ -861,7 +861,7 @@ fido_dev_largeblob_set_array(fido_dev_t *dev, const unsigned char *cbor_ptr,
 {
 	cbor_item_t *item = NULL;
 	struct cbor_load_result cbor_result;
-	int r = FIDO_ERR_INVALID_ARGUMENT;
+	int r;
 
 	if (cbor_ptr == NULL || cbor_len == 0) {
 		fido_log_debug("%s: invalid cbor_ptr=%p, cbor_len=%zu", __func__,
