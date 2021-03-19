@@ -221,8 +221,6 @@ fido_credman_get_dev_metadata(fido_dev_t *dev, fido_credman_metadata_t *metadata
 {
 	if (fido_dev_is_fido2(dev) == false)
 		return (FIDO_ERR_INVALID_COMMAND);
-	if (!fido_dev_can_get_uv_token(dev, pin, FIDO_OPT_OMIT))
-		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	return (credman_get_metadata_wait(dev, metadata, pin, -1));
 }
@@ -411,8 +409,6 @@ fido_credman_get_dev_rk(fido_dev_t *dev, const char *rp_id,
 {
 	if (fido_dev_is_fido2(dev) == false)
 		return (FIDO_ERR_INVALID_COMMAND);
-	if (!fido_dev_can_get_uv_token(dev, pin, FIDO_OPT_OMIT))
-		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	return (credman_get_rk_wait(dev, rp_id, rk, pin, -1));
 }
@@ -447,8 +443,6 @@ fido_credman_del_dev_rk(fido_dev_t *dev, const unsigned char *cred_id,
 {
 	if (fido_dev_is_fido2(dev) == false)
 		return (FIDO_ERR_INVALID_COMMAND);
-	if (!fido_dev_can_get_uv_token(dev, pin, FIDO_OPT_OMIT))
-		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	return (credman_del_rk_wait(dev, cred_id, cred_id_len, pin, -1));
 }
@@ -617,8 +611,6 @@ fido_credman_get_dev_rp(fido_dev_t *dev, fido_credman_rp_t *rp, const char *pin)
 {
 	if (fido_dev_is_fido2(dev) == false)
 		return (FIDO_ERR_INVALID_COMMAND);
-	if (fido_dev_can_get_uv_token(dev, pin, FIDO_OPT_OMIT) == false)
-		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	return (credman_get_rp_wait(dev, rp, pin, -1));
 }
