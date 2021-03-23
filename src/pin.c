@@ -212,11 +212,6 @@ ctap21_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
 	memset(argv, 0, sizeof(argv));
 
 	if (pin != NULL) {
-		if (ecdh == NULL) {
-			fido_log_debug("%s: ecdh", __func__);
-			r = FIDO_ERR_INVALID_ARGUMENT;
-			goto fail;
-		}
 		if ((p = fido_blob_new()) == NULL || fido_blob_set(p,
 		    (const unsigned char *)pin, strlen(pin)) < 0) {
 			fido_log_debug("%s: fido_blob_set", __func__);
@@ -228,12 +223,6 @@ ctap21_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
 			goto fail;
 		}
 		subcmd = 9;
-	}
-
-	if (pk == NULL) {
-		fido_log_debug("%s: pk", __func__);
-		r = FIDO_ERR_INVALID_ARGUMENT;
-		goto fail;
 	}
 
 	if ((argv[0] = cbor_encode_pin_opt(dev)) == NULL ||
@@ -326,11 +315,12 @@ uv_token_wait(fido_dev_t *dev, uint8_t cmd, const char *pin,
 {
 	int r;
 
+	if (ecdh == NULL || pk == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
 	if (fido_dev_supports_permissions(dev))
 		r = ctap21_uv_token_tx(dev, pin, ecdh, pk, cmd, rpid);
 	else
 		r = ctap20_uv_token_tx(dev, pin, ecdh, pk);
-
 	if (r != FIDO_OK)
 		return (r);
 
