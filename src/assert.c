@@ -132,7 +132,7 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 		}
 
 	/* user verification */
-	if (fido_dev_can_get_uv_token(dev, pin, assert->uv))
+	if (pk != NULL && ecdh != NULL)
 		if ((r = cbor_add_uv_params(dev, cmd, &assert->cdh, pk, ecdh,
 		    pin, assert->rp_id, &argv[5], &argv[6])) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
@@ -297,7 +297,7 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 		return (u2f_authenticate(dev, assert, -1));
 	}
 
-	if (pin != NULL || assert->uv == FIDO_OPT_TRUE ||
+	if (fido_dev_can_get_uv_token(dev, pin, assert->uv) ||
 	    (assert->ext.mask & FIDO_EXT_HMAC_SECRET)) {
 		if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
