@@ -97,7 +97,13 @@ Request the credential's
 a 32-byte symmetric key associated with the generated credential.
 .It Fl c Ar cred_protect
 If making a credential, set the credential's protection level to
-.Ar cred_protect .
+.Ar cred_protect ,
+where
+.Ar cred_protect
+is the credential's protection level in decimal notation.
+Please refer to
+.In fido/param.h
+for the set of possible values.
 If verifying a credential, check whether the credential's protection
 level was signed by the authenticator as
 .Ar cred_protect .
@@ -255,3 +261,7 @@ verify it, and save the id and the public key of the credential in
 Please note that
 .Nm
 handles Basic Attestation and Self Attestation transparently.
+In the case of Basic Attestation, the validity of the authenticator's
+attestation certificate is
+.Em not
+verified.
