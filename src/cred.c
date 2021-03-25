@@ -397,14 +397,6 @@ fido_cred_verify_self(const fido_cred_t *cred)
 		goto out;
 	}
 
-	/* XXX: largeBlobKey is not part of the extensions map */
-	if (cred->ext.mask & FIDO_EXT_LARGEBLOB_KEY &&
-	    fido_blob_is_empty(&cred->largeblob_key)) {
-		fido_log_debug("%s: largeblob_key", __func__);
-		r = FIDO_ERR_INVALID_PARAM;
-		goto out;
-	}
-
 	if (check_extensions(&cred->authdata_ext, &cred->ext) != 0) {
 		fido_log_debug("%s: check_extensions", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
