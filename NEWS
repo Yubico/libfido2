@@ -1,4 +1,4 @@
-* Version 1.7.0 (unreleased)
+* Version 1.7.0 (2021-03-29)
  ** New dependency on zlib.
  ** Fixed musl build; gh#259.
  ** hid_win: detect devices with vendor or product IDs > 0x7fff; gh#264.
