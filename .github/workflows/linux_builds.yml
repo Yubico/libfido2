@@ -40,8 +40,11 @@ jobs:
       env:
         CC: ${{ matrix.cc }}
       run: |
-        # ubuntu 16.04 does not package libcbor
+        # ubuntu 16.04 does not package libcbor, and github actions's
+        # ubuntu 16.04 image comes with openssl 1.1.1 by default.
         if [ "$(lsb_release --short --release)" = "16.04" ]; then
+          sudo apt-get install -y --allow-downgrades \
+            openssl=1.0.2g-1ubuntu4.19 libssl-dev=1.0.2g-1ubuntu4.19
           sudo apt-add-repository ppa:yubico/stable
         fi
         sudo apt -q update
