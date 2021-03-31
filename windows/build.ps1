@@ -203,7 +203,7 @@ Function Package-Dynamic(${SRC}, ${DEST}) {
 	Copy-Item "${SRC}\lib\zlib.lib" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}\bin\crypto-46.dll" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}\lib\crypto-46.lib" "${DEST}" -ErrorAction Stop
-	Copy-Item "${SRC}\lib\fido2.dll" "${DEST}" -ErrorAction Stop
+	Copy-Item "${SRC}\bin\fido2.dll" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}\lib\fido2.lib" "${DEST}" -ErrorAction Stop
 }
 
