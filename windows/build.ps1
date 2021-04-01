@@ -209,6 +209,7 @@ Function Package-Dynamic(${SRC}, ${DEST}) {
 
 Function Package-Static(${SRC}, ${DEST}) {
 	Copy-Item "${SRC}/lib/cbor.lib" "${DEST}" -ErrorAction Stop
+	Copy-Item "${SRC}/lib/zlib.lib" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}/lib/crypto-46.lib" "${DEST}" -ErrorAction Stop
 	Copy-Item "${SRC}/lib/fido2_static.lib" "${DEST}/fido2.lib" `
 		-ErrorAction Stop
