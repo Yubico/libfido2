@@ -7,7 +7,9 @@ SCAN=scan-build${CC#clang}
 (cd src && ./diff_exports.sh)
 
 # Build, analyze, and install libfido2.
-mkdir build
-(cd build && ${SCAN} --use-cc="${CC}" cmake -DCMAKE_BUILD_TYPE=Debug ..)
-${SCAN} --use-cc="${CC}" --status-bugs make -j"$(nproc)" -C build
-sudo make -C build install
+for T in Debug Release; do
+	mkdir build-$T
+	(cd build-$T && ${SCAN} --use-cc="${CC}" cmake -DCMAKE_BUILD_TYPE=$T ..)
+	${SCAN} --use-cc="${CC}" --status-bugs make -j"$(nproc)" -C build-$T
+	sudo make -C build-$T install
+done

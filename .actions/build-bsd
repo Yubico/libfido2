@@ -24,10 +24,18 @@ sources:
   - ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}#$(git rev-parse HEAD)
 tasks:
   - build: |
+      if [ "\$(uname)" = "OpenBSD" ]; then
+        SUDO="doas -u root"
+      else
+        SUDO=sudo
+      fi
       cd libfido2
-      mkdir build
-      (cd build && cmake -DCMAKE_BUILD_TYPE=Debug ..)
-      make -j"\$(sysctl -n hw.ncpu)" -C build
+      for T in Debug Release; do
+        mkdir build-\$T
+        (cd build-\$T && cmake -DCMAKE_BUILD_TYPE=\$T ..)
+        make -j"\$(sysctl -n hw.ncpu)" -C build-\$T
+        \${SUDO} make -C build-\$T install
+      done
 EOF
 
 # start the build via POST to the build server
