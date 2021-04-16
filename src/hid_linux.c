@@ -157,9 +157,10 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 #endif
 
 	di->path = strdup(path);
-	di->manufacturer = get_usb_attr(dev, "manufacturer");
-	di->product = get_usb_attr(dev, "product");
-
+	if ((di->manufacturer = get_usb_attr(dev, "manufacturer")) == NULL)
+		di->manufacturer = strdup("unknown");
+	if ((di->product = get_usb_attr(dev, "product")) == NULL)
+		di->product = strdup("unknown");
 	if (di->path == NULL || di->manufacturer == NULL || di->product == NULL)
 		goto fail;
 
