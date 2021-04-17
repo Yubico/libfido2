@@ -87,7 +87,7 @@ if(BUILD_STATIC_LIBS)
 	target_link_libraries(fido2 ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
 		${UDEV_LIBRARIES} ${BASE_LIBRARIES} ${HIDAPI_LIBRARIES} ${ZLIB_LIBRARIES})
 	if(WIN32)
-		if (MINGW)
+		if(MINGW)
 			target_link_libraries(fido2 wsock32 ws2_32 bcrypt setupapi hid)
 		else()
 			target_link_libraries(fido2 wsock32 ws2_32 bcrypt SetupAPI hid)
@@ -107,7 +107,7 @@ if(BUILD_SHARED_LIBS)
 	target_link_libraries(fido2_shared ${CBOR_LIBRARIES} ${CRYPTO_LIBRARIES}
 		${UDEV_LIBRARIES} ${BASE_LIBRARIES} ${HIDAPI_LIBRARIES} ${ZLIB_LIBRARIES})
 	if(WIN32)
-		if (MINGW)
+		if(MINGW)
 			target_link_libraries(fido2_shared wsock32 ws2_32 bcrypt
 				setupapi hid)
 		else()
