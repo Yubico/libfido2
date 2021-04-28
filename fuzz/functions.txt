@@ -214,16 +214,16 @@ cbor.c:get_cose_alg                         36       0 100.00%        48       0
 cbor.c:find_cose_alg                        35       0 100.00%        40       0 100.00%
 cbor.c:decode_attcred                       25       0 100.00%        56       0 100.00%
 cbor.c:decode_cred_extensions               14       0 100.00%        31       0 100.00%
-cbor.c:decode_cred_extension                40      13  67.50%        45      15  66.67%
+cbor.c:decode_cred_extension                40       3  92.50%        45       9  80.00%
 cbor.c:decode_assert_extensions             14       0 100.00%        29       0 100.00%
-cbor.c:decode_assert_extension              19       7  63.16%        31       6  80.65%
+cbor.c:decode_assert_extension              19       1  94.74%        31       3  90.32%
 cbor.c:decode_attstmt_entry                 38       0 100.00%        44       0 100.00%
 cbor.c:decode_x5c                            4       0 100.00%         8       0 100.00%
 cbor.c:decode_cred_id_entry                 10       0 100.00%        23       0 100.00%
 cbor.c:decode_user_entry                    25       0 100.00%        39       0 100.00%
 cbor.c:decode_rp_entity_entry               15       0 100.00%        29       0 100.00%
 ----------------------------------------------------------------------------------------
-TOTAL                                      984      34  96.54%      1425      49  96.56%
+TOTAL                                      984      18  98.17%      1425      40  97.19%
 
 File '/libfido2/src/compress.c':
 Name                                   Regions    Miss   Cover     Lines    Miss   Cover
@@ -501,14 +501,14 @@ fido_hid_read                                15      15   0.00%        26      2
 fido_hid_write                               12      12   0.00%        21      21   0.00%
 fido_hid_report_in_len                        1       1   0.00%         5       5   0.00%
 fido_hid_report_out_len                       1       1   0.00%         5       5   0.00%
-hid_linux.c:copy_info                        30      30   0.00%        52      52   0.00%
+hid_linux.c:copy_info                        34      34   0.00%        53      53   0.00%
 hid_linux.c:is_fido                          10      10   0.00%        19      19   0.00%
 hid_linux.c:get_parent_attr                   6       6   0.00%        11      11   0.00%
 hid_linux.c:parse_uevent                     12      12   0.00%        28      28   0.00%
 hid_linux.c:get_usb_attr                      1       1   0.00%         3       3   0.00%
 hid_linux.c:get_report_descriptor            14      14   0.00%        22      22   0.00%
 -----------------------------------------------------------------------------------------
-TOTAL                                       159     159   0.00%       281     281   0.00%
+TOTAL                                       163     163   0.00%       282     282   0.00%
 
 File '/libfido2/src/hid_unix.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -593,7 +593,7 @@ fido_dev_largeblob_get                       26       2  92.31%        41       
 fido_dev_largeblob_set                       27       2  92.59%        39       4  89.74%
 fido_dev_largeblob_remove                    12       0 100.00%        21       0 100.00%
 fido_dev_largeblob_get_array                 15       2  86.67%        30       4  86.67%
-fido_dev_largeblob_set_array                 14       2  85.71%        21       4  80.95%
+fido_dev_largeblob_set_array                 14       0 100.00%        21       0 100.00%
 largeblob.c:largeblob_get_array              32       0 100.00%        39       0 100.00%
 largeblob.c:get_chunklen                      9       1  88.89%        11       0 100.00%
 largeblob.c:largeblob_get_tx                 19       0 100.00%        28       0 100.00%
@@ -620,7 +620,7 @@ largeblob.c:largeblob_get_uv_token           19       0 100.00%        28       
 largeblob.c:largeblob_set_tx                 35       0 100.00%        40       0 100.00%
 largeblob.c:prepare_hmac                     13       2  84.62%        26       7  73.08%
 -----------------------------------------------------------------------------------------
-TOTAL                                       511      23  95.50%       759      51  93.28%
+TOTAL                                       511      21  95.89%       759      47  93.81%
 
 File '/libfido2/src/log.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
