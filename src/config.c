@@ -22,9 +22,6 @@ config_prepare_hmac(uint8_t subcmd, const cbor_item_t *item, fido_blob_t *hmac)
 	prefix[sizeof(prefix) - 2] = CTAP_CBOR_CONFIG;
 	prefix[sizeof(prefix) - 1] = subcmd;
 
-	if (item == NULL)
-		return fido_blob_set(hmac, prefix, sizeof(prefix));
-
 	if ((cbor_len = cbor_serialize(item, cbor, sizeof(cbor))) == 0) {
 		fido_log_debug("%s: cbor_serialize", __func__);
 		return -1;
