@@ -12,12 +12,14 @@
 .Nm fido_cbor_info_aaguid_ptr ,
 .Nm fido_cbor_info_extensions_ptr ,
 .Nm fido_cbor_info_protocols_ptr ,
+.Nm fido_cbor_info_transports_ptr ,
 .Nm fido_cbor_info_versions_ptr ,
 .Nm fido_cbor_info_options_name_ptr ,
 .Nm fido_cbor_info_options_value_ptr ,
 .Nm fido_cbor_info_aaguid_len ,
 .Nm fido_cbor_info_extensions_len ,
 .Nm fido_cbor_info_protocols_len ,
+.Nm fido_cbor_info_transports_len ,
 .Nm fido_cbor_info_versions_len ,
 .Nm fido_cbor_info_options_len ,
 .Nm fido_cbor_info_maxmsgsiz ,
@@ -40,6 +42,8 @@
 .Ft const uint8_t *
 .Fn fido_cbor_info_protocols_ptr "const fido_cbor_info_t *ci"
 .Ft char **
+.Fn fido_cbor_info_transports_ptr "const fido_cbor_info_t *ci"
+.Ft char **
 .Fn fido_cbor_info_versions_ptr "const fido_cbor_info_t *ci"
 .Ft char **
 .Fn fido_cbor_info_options_name_ptr "const fido_cbor_info_t *ci"
@@ -51,6 +55,8 @@
 .Fn fido_cbor_info_extensions_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_protocols_len "const fido_cbor_info_t *ci"
+.Ft size_t
+.Fn fido_cbor_info_transports_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_versions_len "const fido_cbor_info_t *ci"
 .Ft size_t
@@ -109,16 +115,19 @@ The
 .Fn fido_cbor_info_aaguid_ptr ,
 .Fn fido_cbor_info_extensions_ptr ,
 .Fn fido_cbor_info_protocols_ptr ,
+.Fn fido_cbor_info_transports_ptr ,
 and
 .Fn fido_cbor_info_versions_ptr
 functions return pointers to the authenticator attestation GUID,
-supported extensions, PIN protocol and CTAP version strings of
+supported extensions, PIN protocol, transports, and CTAP version
+strings of
 .Fa ci .
 The corresponding length of a given attribute can be
 obtained by
 .Fn fido_cbor_info_aaguid_len ,
 .Fn fido_cbor_info_extensions_len ,
 .Fn fido_cbor_info_protocols_len ,
+.Fn fido_cbor_info_transports_len ,
 or
 .Fn fido_cbor_info_versions_len .
 .Pp
@@ -171,6 +180,7 @@ The
 .Fn fido_cbor_info_aaguid_ptr ,
 .Fn fido_cbor_info_extensions_ptr ,
 .Fn fido_cbor_info_protocols_ptr ,
+.Fn fido_cbor_info_transports_ptr ,
 .Fn fido_cbor_info_versions_ptr ,
 .Fn fido_cbor_info_options_name_ptr ,
 and
