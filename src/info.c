@@ -179,6 +179,8 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (cbor_decode_uint64(val, &ci->maxcredcntlst));
 	case 8: /* maxCredentialIdLength */
 		return (cbor_decode_uint64(val, &ci->maxcredidlen));
+	case 9: /* transports */
+		return (decode_string_array(val, &ci->transports));
 	case 14: /* fwVersion */
 		return (cbor_decode_uint64(val, &ci->fwversion));
 	case 15: /* maxCredBlobLen */
@@ -295,6 +297,7 @@ fido_cbor_info_free(fido_cbor_info_t **ci_p)
 
 	free_str_array(&ci->versions);
 	free_str_array(&ci->extensions);
+	free_str_array(&ci->transports);
 	free_opt_array(&ci->options);
 	free_byte_array(&ci->protocols);
 	free(ci);
@@ -324,6 +327,18 @@ size_t
 fido_cbor_info_extensions_len(const fido_cbor_info_t *ci)
 {
 	return (ci->extensions.len);
+}
+
+char **
+fido_cbor_info_transports_ptr(const fido_cbor_info_t *ci)
+{
+	return (ci->transports.ptr);
+}
+
+size_t
+fido_cbor_info_transports_len(const fido_cbor_info_t *ci)
+{
+	return (ci->transports.len);
 }
 
 const unsigned char *
