@@ -53,9 +53,9 @@ and binary releases.
   $ sudo apt install libfido2-doc
 
 Alternatively, newer versions of *libfido2* are available in Yubico's PPA.
-Follow the instructions for Ubuntu 18.04 (Bionic) and 16.04 (Xenial) below.
+Follow the instructions for Ubuntu 18.04 (Bionic) below.
 
-==== Ubuntu 18.04 (Bionic) and 16.04 (Xenial)
+==== Ubuntu 18.04 (Bionic)
 
   $ sudo apt install software-properties-common
   $ sudo apt-add-repository ppa:yubico/stable

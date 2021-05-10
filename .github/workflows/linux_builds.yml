@@ -28,25 +28,12 @@ jobs:
             cc: clang-10
           - os: ubuntu-18.04
             cc: i686-w64-mingw32-gcc-7
-          - os: ubuntu-16.04
-            cc: gcc-5
-          - os: ubuntu-16.04
-            cc: clang-8
-          - os: ubuntu-16.04
-            cc: i686-w64-mingw32-gcc-5
     steps:
     - uses: actions/checkout@v2
     - name: dependencies
       env:
         CC: ${{ matrix.cc }}
       run: |
-        # ubuntu 16.04 does not package libcbor, and github actions's
-        # ubuntu 16.04 image comes with openssl 1.1.1 by default.
-        if [ "$(lsb_release --short --release)" = "16.04" ]; then
-          sudo apt-get install -y --allow-downgrades \
-            openssl=1.0.2g-1ubuntu4.19 libssl-dev=1.0.2g-1ubuntu4.19
-          sudo apt-add-repository ppa:yubico/stable
-        fi
         sudo apt -q update
         sudo apt install -q -y libcbor-dev libudev-dev libz-dev \
           original-awk mandoc
