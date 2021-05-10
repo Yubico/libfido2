@@ -7,24 +7,24 @@
 #include "fido.h"
 
 static int
-decode_version(const cbor_item_t *item, void *arg)
+decode_string(const cbor_item_t *item, void *arg)
 {
-	fido_str_array_t	*v = arg;
-	const size_t		 i = v->len;
+	fido_str_array_t	*a = arg;
+	const size_t		 i = a->len;
 
 	/* keep ptr[x] and len consistent */
-	if (cbor_string_copy(item, &v->ptr[i]) < 0) {
+	if (cbor_string_copy(item, &a->ptr[i]) < 0) {
 		fido_log_debug("%s: cbor_string_copy", __func__);
 		return (-1);
 	}
 
-	v->len++;
+	a->len++;
 
 	return (0);
 }
 
 static int
-decode_versions(const cbor_item_t *item, fido_str_array_t *v)
+decode_string_array(const cbor_item_t *item, fido_str_array_t *v)
 {
 	v->ptr = NULL;
 	v->len = 0;
@@ -39,49 +39,8 @@ decode_versions(const cbor_item_t *item, fido_str_array_t *v)
 	if (v->ptr == NULL)
 		return (-1);
 
-	if (cbor_array_iter(item, v, decode_version) < 0) {
-		fido_log_debug("%s: decode_version", __func__);
-		return (-1);
-	}
-
-	return (0);
-}
-
-static int
-decode_extension(const cbor_item_t *item, void *arg)
-{
-	fido_str_array_t	*e = arg;
-	const size_t		 i = e->len;
-
-	/* keep ptr[x] and len consistent */
-	if (cbor_string_copy(item, &e->ptr[i]) < 0) {
-		fido_log_debug("%s: cbor_string_copy", __func__);
-		return (-1);
-	}
-
-	e->len++;
-
-	return (0);
-}
-
-static int
-decode_extensions(const cbor_item_t *item, fido_str_array_t *e)
-{
-	e->ptr = NULL;
-	e->len = 0;
-
-	if (cbor_isa_array(item) == false ||
-	    cbor_array_is_definite(item) == false) {
-		fido_log_debug("%s: cbor type", __func__);
-		return (-1);
-	}
-
-	e->ptr = calloc(cbor_array_size(item), sizeof(char *));
-	if (e->ptr == NULL)
-		return (-1);
-
-	if (cbor_array_iter(item, e, decode_extension) < 0) {
-		fido_log_debug("%s: decode_extension", __func__);
+	if (cbor_array_iter(item, v, decode_string) < 0) {
+		fido_log_debug("%s: decode_string", __func__);
 		return (-1);
 	}
 
@@ -205,9 +164,9 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	switch (cbor_get_uint8(key)) {
 	case 1: /* versions */
-		return (decode_versions(val, &ci->versions));
+		return (decode_string_array(val, &ci->versions));
 	case 2: /* extensions */
-		return (decode_extensions(val, &ci->extensions));
+		return (decode_string_array(val, &ci->extensions));
 	case 3: /* aaguid */
 		return (decode_aaguid(val, ci->aaguid, sizeof(ci->aaguid)));
 	case 4: /* options */
