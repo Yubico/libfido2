@@ -120,6 +120,8 @@ list(APPEND MAN_ALIAS
 	fido_cbor_info_new fido_cbor_info_options_value_ptr
 	fido_cbor_info_new fido_cbor_info_protocols_len
 	fido_cbor_info_new fido_cbor_info_protocols_ptr
+	fido_cbor_info_new fido_cbor_info_transports_len
+	fido_cbor_info_new fido_cbor_info_transports_ptr
 	fido_cbor_info_new fido_cbor_info_versions_len
 	fido_cbor_info_new fido_cbor_info_versions_ptr
 	fido_cbor_info_new fido_dev_get_cbor_info
