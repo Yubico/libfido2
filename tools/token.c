@@ -202,6 +202,10 @@ token_info(int argc, char **argv, char *path)
 	print_str_array("extension", fido_cbor_info_extensions_ptr(ci),
 	    fido_cbor_info_extensions_len(ci));
 
+	/* print supported transports */
+	print_str_array("transport", fido_cbor_info_transports_ptr(ci),
+	    fido_cbor_info_transports_len(ci));
+
 	/* print aaguid */
 	print_aaguid(fido_cbor_info_aaguid_ptr(ci),
 	    fido_cbor_info_aaguid_len(ci));
