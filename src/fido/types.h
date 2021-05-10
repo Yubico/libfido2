@@ -201,6 +201,7 @@ typedef struct fido_byte_array {
 typedef struct fido_cbor_info {
 	fido_str_array_t  versions;      /* supported versions: fido2|u2f */
 	fido_str_array_t  extensions;    /* list of supported extensions */
+	fido_str_array_t  transports;    /* list of supported transports */
 	unsigned char     aaguid[16];    /* aaguid */
 	fido_opt_array_t  options;       /* list of supported options */
 	uint64_t          maxmsgsiz;     /* maximum message size */

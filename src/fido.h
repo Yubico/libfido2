@@ -67,6 +67,7 @@ const unsigned char *fido_assert_blob_ptr(const fido_assert_t *, size_t);
 
 char **fido_cbor_info_extensions_ptr(const fido_cbor_info_t *);
 char **fido_cbor_info_options_name_ptr(const fido_cbor_info_t *);
+char **fido_cbor_info_transports_ptr(const fido_cbor_info_t *);
 char **fido_cbor_info_versions_ptr(const fido_cbor_info_t *);
 const bool *fido_cbor_info_options_value_ptr(const fido_cbor_info_t *);
 const char *fido_assert_rp_id(const fido_assert_t *);
@@ -165,6 +166,7 @@ size_t fido_cbor_info_aaguid_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_extensions_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_options_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_protocols_len(const fido_cbor_info_t *);
+size_t fido_cbor_info_transports_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_versions_len(const fido_cbor_info_t *);
 size_t fido_cred_authdata_len(const fido_cred_t *);
 size_t fido_cred_authdata_raw_len(const fido_cred_t *);
