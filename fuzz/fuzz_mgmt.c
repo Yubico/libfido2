@@ -266,6 +266,14 @@ dev_get_cbor_info(const struct param *p)
 		consume(&va[i], sizeof(va[i]));
 	}
 
+	/* +1 on purpose */
+	for (size_t i = 0; i <= fido_cbor_info_algorithm_count(ci); i++) {
+		const char *type = fido_cbor_info_algorithm_type(ci, i);
+		int cose = fido_cbor_info_algorithm_cose(ci, i);
+		consume(type, xstrlen(type));
+		consume(&cose, sizeof(cose));
+	}
+
 	n = fido_cbor_info_maxmsgsiz(ci);
 	consume(&n, sizeof(n));
 
