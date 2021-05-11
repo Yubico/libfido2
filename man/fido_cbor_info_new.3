@@ -16,6 +16,9 @@
 .Nm fido_cbor_info_versions_ptr ,
 .Nm fido_cbor_info_options_name_ptr ,
 .Nm fido_cbor_info_options_value_ptr ,
+.Nm fido_cbor_info_algorithm_type ,
+.Nm fido_cbor_info_algorithm_cose ,
+.Nm fido_cbor_info_algorithm_count ,
 .Nm fido_cbor_info_aaguid_len ,
 .Nm fido_cbor_info_extensions_len ,
 .Nm fido_cbor_info_protocols_len ,
@@ -49,6 +52,12 @@
 .Fn fido_cbor_info_options_name_ptr "const fido_cbor_info_t *ci"
 .Ft const bool *
 .Fn fido_cbor_info_options_value_ptr "const fido_cbor_info_t *ci"
+.Ft const char *
+.Fn fido_cbor_info_algorithm_type "const fido_cbor_info_t *ci" "size_t idx"
+.Ft int
+.Fn fido_cbor_info_algorithm_cose "const fido_cbor_info_t *ci" "size_t idx"
+.Ft size_t
+.Fn fido_cbor_info_algorithm_count "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_aaguid_len "const fido_cbor_info_t *ci"
 .Ft size_t
@@ -141,6 +150,30 @@ in
 .Fa ci .
 The length of the options array is returned by
 .Fn fido_cbor_info_options_len .
+.Pp
+The
+.Fn fido_cbor_info_algorithm_count
+function returns the number of supported algorithms in
+.Fa ci .
+The
+.Fn fido_cbor_info_algorithm_cose
+function returns the COSE identifier of algorithm
+.Fa idx
+in
+.Fa ci ,
+or 0 if the COSE identifier is unknown or unset.
+The
+.Fn fido_cbor_info_algorithm_type
+function returns the type of algorithm
+.Fa idx
+in
+.Fa ci ,
+or NULL if the type is unset.
+Please note that the first algorithm in
+.Fa ci
+has an
+.Fa idx
+(index) value of 0.
 .Pp
 The
 .Fn fido_cbor_info_maxmsgsiz
