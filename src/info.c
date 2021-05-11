@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -152,6 +152,99 @@ decode_protocols(const cbor_item_t *item, fido_byte_array_t *p)
 }
 
 static int
+decode_algorithm_entry(const cbor_item_t *key, const cbor_item_t *val,
+    void *arg)
+{
+	fido_algo_t *alg = arg;
+	char *name = NULL;
+	int ok = -1;
+
+	if (cbor_string_copy(key, &name) < 0) {
+		fido_log_debug("%s: cbor type", __func__);
+		ok = 0; /* ignore */
+		goto out;
+	}
+
+	if (!strcmp(name, "alg")) {
+		if (cbor_isa_negint(val) == false ||
+		    cbor_get_int(val) > INT_MAX || alg->cose != 0) {
+			fido_log_debug("%s: alg", __func__);
+			goto out;
+		}
+		alg->cose = -(int)cbor_get_int(val) - 1;
+	} else if (!strcmp(name, "type")) {
+		if (cbor_string_copy(val, &alg->type) < 0) {
+			fido_log_debug("%s: type", __func__);
+			goto out;
+		}
+	}
+
+	ok = 0;
+out:
+	free(name);
+
+	return (ok);
+}
+
+static void
+free_algo(fido_algo_t *a)
+{
+	free(a->type);
+	a->type = NULL;
+	a->cose = 0;
+}
+
+static int
+decode_algorithm(const cbor_item_t *item, void *arg)
+{
+	fido_algo_array_t *aa = arg;
+	const size_t i = aa->len;
+
+	if (cbor_isa_map(item) == false ||
+	    cbor_map_is_definite(item) == false) {
+		fido_log_debug("%s: cbor type", __func__);
+		return (-1);
+	}
+
+	memset(&aa->ptr[i], 0, sizeof(aa->ptr[i]));
+
+	if (cbor_map_iter(item, &aa->ptr[i], decode_algorithm_entry) < 0) {
+		fido_log_debug("%s: decode_algorithm_entry", __func__);
+		free_algo(&aa->ptr[i]);
+		return (-1);
+	}
+
+	/* keep ptr[x] and len consistent */
+	aa->len++;
+
+	return (0);
+}
+
+static int
+decode_algorithms(const cbor_item_t *item, fido_algo_array_t *aa)
+{
+	aa->ptr = NULL;
+	aa->len = 0;
+
+	if (cbor_isa_array(item) == false ||
+	    cbor_array_is_definite(item) == false) {
+		fido_log_debug("%s: cbor type", __func__);
+		return (-1);
+	}
+
+	aa->ptr = calloc(cbor_array_size(item), sizeof(fido_algo_t));
+	if (aa->ptr == NULL)
+		return (-1);
+
+	if (cbor_array_iter(item, aa, decode_algorithm) < 0) {
+		fido_log_debug("%s: decode_algorithm", __func__);
+		return (-1);
+	}
+
+	return (0);
+}
+
+static int
 parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
 	fido_cbor_info_t *ci = arg;
@@ -181,6 +274,8 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (cbor_decode_uint64(val, &ci->maxcredidlen));
 	case 9: /* transports */
 		return (decode_string_array(val, &ci->transports));
+	case 10: /* algorithms */
+		return (decode_algorithms(val, &ci->algorithms));
 	case 14: /* fwVersion */
 		return (cbor_decode_uint64(val, &ci->fwversion));
 	case 15: /* maxCredBlobLen */
@@ -287,6 +382,17 @@ free_byte_array(fido_byte_array_t *ba)
 	ba->len = 0;
 }
 
+static void
+free_algo_array(fido_algo_array_t *aa)
+{
+	for (size_t i = 0; i < aa->len; i++)
+		free_algo(&aa->ptr[i]);
+
+	free(aa->ptr);
+	aa->ptr = NULL;
+	aa->len = 0;
+}
+
 void
 fido_cbor_info_free(fido_cbor_info_t **ci_p)
 {
@@ -300,6 +406,7 @@ fido_cbor_info_free(fido_cbor_info_t **ci_p)
 	free_str_array(&ci->transports);
 	free_opt_array(&ci->options);
 	free_byte_array(&ci->protocols);
+	free_algo_array(&ci->algorithms);
 	free(ci);
 
 	*ci_p = NULL;
@@ -411,4 +518,28 @@ size_t
 fido_cbor_info_protocols_len(const fido_cbor_info_t *ci)
 {
 	return (ci->protocols.len);
+}
+
+size_t
+fido_cbor_info_algorithm_count(const fido_cbor_info_t *ci)
+{
+	return (ci->algorithms.len);
+}
+
+const char *
+fido_cbor_info_algorithm_type(const fido_cbor_info_t *ci, size_t idx)
+{
+	if (idx >= ci->algorithms.len)
+		return (NULL);
+
+	return (ci->algorithms.ptr[idx].type);
+}
+
+int
+fido_cbor_info_algorithm_cose(const fido_cbor_info_t *ci, size_t idx)
+{
+	if (idx >= ci->algorithms.len)
+		return (0);
+
+	return (ci->algorithms.ptr[idx].cose);
 }
