@@ -95,6 +95,38 @@ print_opt_array(const char *label, char * const *name, const bool *value,
 }
 
 static void
+print_algorithms(const fido_cbor_info_t *ci)
+{
+	const char *cose, *type;
+	size_t len;
+
+	if ((len = fido_cbor_info_algorithm_count(ci)) == 0)
+		return;
+
+	printf("algorithms: ");
+
+	for (size_t i = 0; i < len; i++) {
+		cose = type = "unknown";
+		switch (fido_cbor_info_algorithm_cose(ci, i)) {
+		case COSE_EDDSA:
+			cose = "eddsa";
+			break;
+		case COSE_ES256:
+			cose = "es256";
+			break;
+		case COSE_RS256:
+			cose = "rs256";
+			break;
+		}
+		if (fido_cbor_info_algorithm_type(ci, i) != NULL)
+			type = fido_cbor_info_algorithm_type(ci, i);
+		printf("%s%s (%s)", i > 0 ? ", " : "", cose, type);
+	}
+
+	printf("\n");
+}
+
+static void
 print_aaguid(const unsigned char *buf, size_t buflen)
 {
 	printf("aaguid: ");
@@ -205,6 +237,9 @@ token_info(int argc, char **argv, char *path)
 	/* print supported transports */
 	print_str_array("transport", fido_cbor_info_transports_ptr(ci),
 	    fido_cbor_info_transports_len(ci));
+
+	/* print supported algorithms */
+	print_algorithms(ci);
 
 	/* print aaguid */
 	print_aaguid(fido_cbor_info_aaguid_ptr(ci),
