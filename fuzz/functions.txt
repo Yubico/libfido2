@@ -243,12 +243,12 @@ fido_dev_set_pin_minlen                       1       0 100.00%         3       
 fido_dev_force_pin_change                     1       0 100.00%         3       0 100.00%
 config.c:config_enable_entattest_wait         6       0 100.00%         8       0 100.00%
 config.c:config_tx                           33       0 100.00%        56       0 100.00%
-config.c:config_prepare_hmac                 11       2  81.82%        25       3  88.00%
+config.c:config_prepare_hmac                  8       1  87.50%        22       3  86.36%
 config.c:config_toggle_always_uv_wait         6       0 100.00%         8       0 100.00%
 config.c:config_pin_minlen                    5       0 100.00%         8       0 100.00%
 config.c:config_pin_minlen_tx                28       0 100.00%        31       0 100.00%
 -----------------------------------------------------------------------------------------
-TOTAL                                        93       2  97.85%       148       3  97.97%
+TOTAL                                        90       1  98.89%       145       3  97.93%
 
 File '/libfido2/src/cred.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -524,11 +524,13 @@ Name                                    Regions    Miss   Cover     Lines    Mis
 fido_dev_get_cbor_info_wait                  10       0 100.00%         9       0 100.00%
 fido_dev_get_cbor_info                        1       0 100.00%         3       0 100.00%
 fido_cbor_info_new                            1       0 100.00%         3       0 100.00%
-fido_cbor_info_free                           6       0 100.00%        14       0 100.00%
+fido_cbor_info_free                           6       0 100.00%        16       0 100.00%
 fido_cbor_info_versions_ptr                   1       0 100.00%         3       0 100.00%
 fido_cbor_info_versions_len                   1       0 100.00%         3       0 100.00%
 fido_cbor_info_extensions_ptr                 1       0 100.00%         3       0 100.00%
 fido_cbor_info_extensions_len                 1       0 100.00%         3       0 100.00%
+fido_cbor_info_transports_ptr                 1       0 100.00%         3       0 100.00%
+fido_cbor_info_transports_len                 1       0 100.00%         3       0 100.00%
 fido_cbor_info_aaguid_ptr                     1       0 100.00%         3       0 100.00%
 fido_cbor_info_aaguid_len                     1       0 100.00%         3       0 100.00%
 fido_cbor_info_options_name_ptr               1       0 100.00%         3       0 100.00%
@@ -541,23 +543,29 @@ fido_cbor_info_maxcredidlen                   1       0 100.00%         3       
 fido_cbor_info_fwversion                      1       0 100.00%         3       0 100.00%
 fido_cbor_info_protocols_ptr                  1       0 100.00%         3       0 100.00%
 fido_cbor_info_protocols_len                  1       0 100.00%         3       0 100.00%
+fido_cbor_info_algorithm_count                1       0 100.00%         3       0 100.00%
+fido_cbor_info_algorithm_type                 4       0 100.00%         6       0 100.00%
+fido_cbor_info_algorithm_cose                 4       0 100.00%         6       0 100.00%
 info.c:fido_dev_get_cbor_info_tx              8       0 100.00%        12       0 100.00%
 info.c:fido_dev_get_cbor_info_rx              6       0 100.00%        18       0 100.00%
-info.c:parse_reply_element                   17       0 100.00%        35       0 100.00%
-info.c:decode_versions                       12       0 100.00%        21       0 100.00%
-info.c:decode_version                         4       0 100.00%        14       0 100.00%
-info.c:decode_extensions                     12       0 100.00%        21       0 100.00%
-info.c:decode_extension                       4       0 100.00%        14       0 100.00%
+info.c:parse_reply_element                   19       0 100.00%        39       0 100.00%
+info.c:decode_string_array                   12       0 100.00%        21       0 100.00%
+info.c:decode_string                          4       0 100.00%        14       0 100.00%
 info.c:decode_aaguid                          8       0 100.00%        12       0 100.00%
 info.c:decode_options                        11       0 100.00%        18       0 100.00%
 info.c:decode_option                         11       0 100.00%        22       0 100.00%
 info.c:decode_protocols                      12       0 100.00%        21       0 100.00%
 info.c:decode_protocol                        6       0 100.00%        16       0 100.00%
+info.c:decode_algorithms                     12       0 100.00%        21       0 100.00%
+info.c:decode_algorithm                       9       0 100.00%        23       0 100.00%
+info.c:decode_algorithm_entry                20       0 100.00%        31       0 100.00%
+info.c:free_algo                              1       0 100.00%         5       0 100.00%
 info.c:free_str_array                         4       0 100.00%         8       0 100.00%
 info.c:free_opt_array                         4       0 100.00%         9       0 100.00%
 info.c:free_byte_array                        1       0 100.00%         6       0 100.00%
+info.c:free_algo_array                        4       0 100.00%         8       0 100.00%
 -----------------------------------------------------------------------------------------
-TOTAL                                       154       0 100.00%       324       0 100.00%
+TOTAL                                       197       0 100.00%       404       0 100.00%
 
 File '/libfido2/src/io.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
