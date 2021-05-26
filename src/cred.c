@@ -247,7 +247,11 @@ verify_sig(const fido_blob_t *dgst, const fido_blob_t *x5c,
 	BIO		*rawcert = NULL;
 	X509		*cert = NULL;
 	EVP_PKEY	*pkey = NULL;
-	EC_KEY		*ec;
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+	EVP_PKEY_CTX	*pctx = NULL;
+#else
+	EC_KEY		*ec = NULL;
+#endif
 	int		 ok = -1;
 
 	/* openssl needs ints */
@@ -257,6 +261,22 @@ verify_sig(const fido_blob_t *dgst, const fido_blob_t *x5c,
 		return (-1);
 	}
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+	if ((rawcert = BIO_new_mem_buf(x5c->ptr, (int)x5c->len)) == NULL ||
+	    (cert = d2i_X509_bio(rawcert, NULL)) == NULL ||
+	    (pkey = X509_get_pubkey(cert)) == NULL ||
+	    (pctx = EVP_PKEY_CTX_new(pkey, NULL)) == NULL) {
+		fido_log_debug("%s: x509 key", __func__);
+		goto fail;
+	}
+
+	if (EVP_PKEY_verify_init(pctx) != 1 ||
+	    EVP_PKEY_verify(pctx, sig->ptr, sig->len,
+	    dgst->ptr, dgst->len) != 1) {
+		fido_log_debug("%s: EVP_PKEY_verify", __func__);
+		goto fail;
+	}
+#else
 	/* fetch key from x509 */
 	if ((rawcert = BIO_new_mem_buf(x5c->ptr, (int)x5c->len)) == NULL ||
 	    (cert = d2i_X509_bio(rawcert, NULL)) == NULL ||
@@ -271,6 +291,7 @@ verify_sig(const fido_blob_t *dgst, const fido_blob_t *x5c,
 		fido_log_debug("%s: ECDSA_verify", __func__);
 		goto fail;
 	}
+#endif
 
 	ok = 0;
 fail:
@@ -280,6 +301,9 @@ fail:
 		X509_free(cert);
 	if (pkey != NULL)
 		EVP_PKEY_free(pkey);
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+	EVP_PKEY_CTX_free(pctx);
+#endif
 
 	return (ok);
 }

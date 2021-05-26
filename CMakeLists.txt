@@ -255,6 +255,7 @@ else()
 	add_compile_options(-Wbad-function-cast)
 	add_compile_options(-pedantic)
 	add_compile_options(-pedantic-errors)
+	add_compile_options(-Wno-deprecated-declarations)
 
 	if(HAVE_SHORTEN_64_TO_32)
 		add_compile_options(-Wshorten-64-to-32)
