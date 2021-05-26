@@ -6,6 +6,9 @@
 
 #include <openssl/bn.h>
 #include <openssl/obj_mac.h>
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+#include <openssl/core_names.h>
+#endif
 
 #include "fido.h"
 #include "fido/es256.h"
@@ -205,8 +208,12 @@ es256_sk_create(es256_sk_t *key)
 	EVP_PKEY_CTX	*kctx = NULL;
 	EVP_PKEY	*p = NULL;
 	EVP_PKEY	*k = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x30000000
 	const EC_KEY	*ec;
 	const BIGNUM	*d;
+#else
+	BIGNUM	*d = NULL;
+#endif
 	const int	 nid = NID_X9_62_prime256v1;
 	int		 n;
 	int		 ok = -1;
@@ -225,6 +232,7 @@ es256_sk_create(es256_sk_t *key)
 		goto fail;
 	}
 
+#if OPENSSL_VERSION_NUMBER < 0x30000000
 	if ((ec = EVP_PKEY_get0_EC_KEY(k)) == NULL ||
 	    (d = EC_KEY_get0_private_key(ec)) == NULL ||
 	    (n = BN_num_bytes(d)) < 0 || (size_t)n > sizeof(key->d) ||
@@ -232,6 +240,14 @@ es256_sk_create(es256_sk_t *key)
 		fido_log_debug("%s: EC_KEY_get0_private_key", __func__);
 		goto fail;
 	}
+#else
+	if (EVP_PKEY_get_bn_param(k, OSSL_PKEY_PARAM_PRIV_KEY, &d) != 1 ||
+	    (n = BN_num_bytes(d)) < 0 || (size_t)n > sizeof(key->d) ||
+	    (n = BN_bn2bin(d, key->d)) < 0 || (size_t)n > sizeof(key->d)) {
+		fido_log_debug("%s: EC_KEY_get0_private_key", __func__);
+		goto fail;
+	}
+#endif
 
 	ok = 0;
 fail:
@@ -243,6 +259,9 @@ fail:
 		EVP_PKEY_CTX_free(pctx);
 	if (kctx != NULL)
 		EVP_PKEY_CTX_free(kctx);
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+	BN_clear_free(d);
+#endif
 
 	return (ok);
 }
@@ -251,7 +270,15 @@ EVP_PKEY *
 es256_pk_to_EVP_PKEY(const es256_pk_t *k)
 {
 	BN_CTX		*bnctx = NULL;
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+	OSSL_PARAM params[3];
+	EVP_PKEY_CTX 	*pctx = NULL;
+	unsigned char	*pbuf = NULL;
+	size_t		point_len = 0;
+	char 		curvename[] = "prime256v1";
+#else
 	EC_KEY		*ec = NULL;
+#endif
 	EC_POINT	*q = NULL;
 	EVP_PKEY	*pkey = NULL;
 	BIGNUM		*x = NULL;
@@ -275,6 +302,28 @@ es256_pk_to_EVP_PKEY(const es256_pk_t *k)
 		goto fail;
 	}
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+	if ((g = EC_GROUP_new_by_curve_name(nid)) == NULL ||
+	    (q = EC_POINT_new(g)) == NULL ||
+	    EC_POINT_set_affine_coordinates(g, q, x, y, bnctx) == 0 ||
+	    (point_len = EC_POINT_point2buf(g, q, POINT_CONVERSION_UNCOMPRESSED, &pbuf, bnctx)) != 0)
+		goto fail;
+
+	params[0] = OSSL_PARAM_construct_utf8_string(OSSL_PKEY_PARAM_GROUP_NAME,
+			curvename, 0);
+
+	params[1] = OSSL_PARAM_construct_octet_string(OSSL_PKEY_PARAM_PUB_KEY,
+			pbuf, point_len);
+
+	params[2] = OSSL_PARAM_construct_end();
+
+	if ((pctx = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL)) == NULL ||
+	    EVP_PKEY_fromdata_init(pctx) <= 0)
+		goto fail;
+
+	if (EVP_PKEY_fromdata(pctx, &pkey, EVP_PKEY_PUBLIC_KEY, params) <= 0)
+		goto fail;
+#else
 	if ((ec = EC_KEY_new_by_curve_name(nid)) == NULL ||
 	    (g = EC_KEY_get0_group(ec)) == NULL) {
 		fido_log_debug("%s: EC_KEY init", __func__);
@@ -295,7 +344,7 @@ es256_pk_to_EVP_PKEY(const es256_pk_t *k)
 	}
 
 	ec = NULL; /* at this point, ec belongs to evp */
-
+#endif
 	ok = 0;
 fail:
 	if (bnctx != NULL) {
@@ -303,8 +352,10 @@ fail:
 		BN_CTX_free(bnctx);
 	}
 
+#if OPENSSL_VERSION_NUMBER < 0x30000000
 	if (ec != NULL)
 		EC_KEY_free(ec);
+#endif
 	if (q != NULL)
 		EC_POINT_free(q);
 
@@ -313,6 +364,10 @@ fail:
 		pkey = NULL;
 	}
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+	EVP_PKEY_CTX_free(pctx);
+	OPENSSL_free(pbuf);
+#endif
 	return (pkey);
 }
 

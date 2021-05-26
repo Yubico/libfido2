@@ -56,7 +56,11 @@ hkdf_sha256(uint8_t *key, char *info, fido_blob_t *secret)
 	    EVP_PKEY_CTX_set_hkdf_md(ctx, md) < 1 ||
 	    EVP_PKEY_CTX_set1_hkdf_salt(ctx, salt, sizeof(salt)) < 1 ||
 	    EVP_PKEY_CTX_set1_hkdf_key(ctx, secret->ptr, (int)secret->len) < 1 ||
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+	    EVP_PKEY_CTX_add1_hkdf_info(ctx, (unsigned char *)info, (int)strlen(info)) < 1) {
+#else
 	    EVP_PKEY_CTX_add1_hkdf_info(ctx, info, (int)strlen(info)) < 1) {
+#endif
 		fido_log_debug("%s: EVP_PKEY_CTX", __func__);
 		goto fail;
 	}
