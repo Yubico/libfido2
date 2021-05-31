@@ -6,6 +6,9 @@
 
 #include <openssl/bn.h>
 #include <openssl/obj_mac.h>
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+#include <openssl/core_names.h>
+#endif
 
 #include "fido.h"
 #include "fido/es256.h"
@@ -205,8 +208,12 @@ es256_sk_create(es256_sk_t *key)
 	EVP_PKEY_CTX	*kctx = NULL;
 	EVP_PKEY	*p = NULL;
 	EVP_PKEY	*k = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x30000000
 	const EC_KEY	*ec;
 	const BIGNUM	*d;
+#else
+	BIGNUM	*d;
+#endif
 	const int	 nid = NID_X9_62_prime256v1;
 	int		 n;
 	int		 ok = -1;
@@ -225,6 +232,7 @@ es256_sk_create(es256_sk_t *key)
 		goto fail;
 	}
 
+#if OPENSSL_VERSION_NUMBER < 0x30000000
 	if ((ec = EVP_PKEY_get0_EC_KEY(k)) == NULL ||
 	    (d = EC_KEY_get0_private_key(ec)) == NULL ||
 	    (n = BN_num_bytes(d)) < 0 || (size_t)n > sizeof(key->d) ||
@@ -232,6 +240,14 @@ es256_sk_create(es256_sk_t *key)
 		fido_log_debug("%s: EC_KEY_get0_private_key", __func__);
 		goto fail;
 	}
+#else
+	if (EVP_PKEY_get_bn_param(k, OSSL_PKEY_PARAM_PRIV_KEY, &d) != 1 ||
+	    (n = BN_num_bytes(d)) < 0 || (size_t)n > sizeof(key->d) ||
+	    (n = BN_bn2bin(d, key->d)) < 0 || (size_t)n > sizeof(key->d)) {
+		fido_log_debug("%s: EC_KEY_get0_private_key", __func__);
+		goto fail;
+	}
+#endif
 
 	ok = 0;
 fail:
@@ -243,6 +259,9 @@ fail:
 		EVP_PKEY_CTX_free(pctx);
 	if (kctx != NULL)
 		EVP_PKEY_CTX_free(kctx);
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+	BN_clear_free(d);
+#endif
 
 	return (ok);
 }
