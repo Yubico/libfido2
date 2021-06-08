@@ -108,8 +108,7 @@ fido_dev_set_flags(fido_dev_t *dev, const fido_cbor_info_t *info)
 static int
 fido_dev_open_tx(fido_dev_t *dev, const char *path)
 {
-	const uint8_t	cmd = CTAP_CMD_INIT;
-	int		r;
+	int r;
 
 	if (dev->io_handle != NULL) {
 		fido_log_debug("%s: handle=%p", __func__, dev->io_handle);
@@ -162,7 +161,7 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 		goto fail;
 	}
 
-	if (fido_tx(dev, cmd, &dev->nonce, sizeof(dev->nonce)) < 0) {
+	if (fido_tx(dev, CTAP_CMD_INIT, &dev->nonce, sizeof(dev->nonce)) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
