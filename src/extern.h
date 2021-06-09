@@ -125,6 +125,15 @@ int fido_nfc_rx(fido_dev_t *, uint8_t, unsigned char *, size_t, int);
 int fido_nfc_tx(fido_dev_t *, uint8_t, const unsigned char *, size_t);
 int fido_nfc_set_sigmask(void *, const fido_sigset_t *);
 
+/* windows hello */
+int fido_winhello_manifest(fido_dev_info_t *, size_t, size_t *);
+int fido_winhello_open(fido_dev_t *);
+int fido_winhello_close(fido_dev_t *);
+int fido_winhello_cancel(fido_dev_t *);
+int fido_winhello_get_assert(fido_dev_t *, fido_assert_t *, const char *);
+int fido_winhello_get_cbor_info(fido_dev_t *, fido_cbor_info_t *);
+int fido_winhello_make_cred(fido_dev_t *, fido_cred_t *, const char *);
+
 /* generic i/o */
 int fido_rx_cbor_status(fido_dev_t *, int);
 int fido_rx(fido_dev_t *, uint8_t, void *, size_t, int);
@@ -215,12 +224,14 @@ uint32_t uniform_random(uint32_t);
 #define FIDO_DEV_UV_SET 	0x040
 #define FIDO_DEV_UV_UNSET	0x080
 #define FIDO_DEV_TOKEN_PERMS	0x100
+#define FIDO_DEV_WINHELLO	0x200
 
 /* miscellanea */
 #define FIDO_DUMMY_CLIENTDATA	""
 #define FIDO_DUMMY_RP_ID	"localhost"
 #define FIDO_DUMMY_USER_NAME	"dummy"
 #define FIDO_DUMMY_USER_ID	1
+#define FIDO_WINHELLO_PATH	"windows://hello"
 
 #ifdef __cplusplus
 } /* extern "C" */
