@@ -245,6 +245,10 @@ fido_dev_open_wait(fido_dev_t *dev, const char *path, int ms)
 {
 	int r;
 
+#ifdef USE_WINHELLO
+	if (strcmp(path, FIDO_WINHELLO_PATH) == 0)
+		return (fido_winhello_open(dev));
+#endif
 	if ((r = fido_dev_open_tx(dev, path)) != FIDO_OK ||
 	    (r = fido_dev_open_rx(dev, ms)) != FIDO_OK)
 		return (r);
@@ -301,9 +305,12 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 	if (fido_dev_register_manifest_func(fido_hid_manifest) != FIDO_OK)
 		return (FIDO_ERR_INTERNAL);
-
 #ifdef NFC_LINUX
 	if (fido_dev_register_manifest_func(fido_nfc_manifest) != FIDO_OK)
+		return (FIDO_ERR_INTERNAL);
+#endif
+#ifdef USE_WINHELLO
+	if (fido_dev_register_manifest_func(fido_winhello_manifest) != FIDO_OK)
 		return (FIDO_ERR_INTERNAL);
 #endif
 
@@ -355,12 +362,17 @@ fido_dev_open(fido_dev_t *dev, const char *path)
 		};
 	}
 #endif
+
 	return (fido_dev_open_wait(dev, path, -1));
 }
 
 int
 fido_dev_close(fido_dev_t *dev)
 {
+#ifdef USE_WINHELLO
+	if (dev->flags & FIDO_DEV_WINHELLO)
+		return (fido_winhello_close(dev));
+#endif
 	if (dev->io_handle == NULL || dev->io.close == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
@@ -387,9 +399,12 @@ fido_dev_set_sigmask(fido_dev_t *dev, const fido_sigset_t *sigmask)
 int
 fido_dev_cancel(fido_dev_t *dev)
 {
+#ifdef USE_WINHELLO
+	if (dev->flags & FIDO_DEV_WINHELLO)
+		return (fido_winhello_cancel(dev));
+#endif
 	if (fido_dev_is_fido2(dev) == false)
 		return (FIDO_ERR_INVALID_ARGUMENT);
-
 	if (fido_tx(dev, CTAP_CMD_CANCEL, NULL, 0) < 0)
 		return (FIDO_ERR_TX);
 
@@ -565,12 +580,14 @@ fido_dev_new_with_info(const fido_dev_info_t *di)
 	if ((dev = calloc(1, sizeof(*dev))) == NULL)
 		return (NULL);
 
+#if 0
 	if (di->io.open == NULL || di->io.close == NULL ||
 	    di->io.read == NULL || di->io.write == NULL) {
 		fido_log_debug("%s: NULL function", __func__);
 		fido_dev_free(&dev);
 		return (NULL);
 	}
+#endif
 
 	dev->io = di->io;
 	dev->io_own = di->transport.tx != NULL || di->transport.rx != NULL;

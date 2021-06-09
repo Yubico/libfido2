@@ -327,6 +327,10 @@ fido_dev_get_cbor_info_wait(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 {
 	int r;
 
+#ifdef USE_WINHELLO
+	if (dev->flags & FIDO_DEV_WINHELLO)
+		return (fido_winhello_get_cbor_info(dev, ci));
+#endif
 	if ((r = fido_dev_get_cbor_info_tx(dev)) != FIDO_OK ||
 	    (r = fido_dev_get_cbor_info_rx(dev, ci, ms)) != FIDO_OK)
 		return (r);

@@ -285,6 +285,11 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 	es256_pk_t	*pk = NULL;
 	int		 r;
 
+#ifdef USE_WINHELLO
+	if (dev->flags & FIDO_DEV_WINHELLO)
+		return (fido_winhello_get_assert(dev, assert, pin));
+#endif
+
 	if (assert->rp_id == NULL || assert->cdh.ptr == NULL) {
 		fido_log_debug("%s: rp_id=%p, cdh.ptr=%p", __func__,
 		    (void *)assert->rp_id, (void *)assert->cdh.ptr);
