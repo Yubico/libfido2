@@ -474,6 +474,7 @@ fido_cred_clean_authdata(fido_cred_t *cred)
 void
 fido_cred_reset_tx(fido_cred_t *cred)
 {
+	free(cred->cd.ptr);
 	free(cred->cdh.ptr);
 	free(cred->rp.id);
 	free(cred->rp.name);
@@ -483,6 +484,7 @@ fido_cred_reset_tx(fido_cred_t *cred)
 	free(cred->user.display_name);
 	fido_free_blob_array(&cred->excl);
 
+	memset(&cred->cd, 0, sizeof(cred->cd));
 	memset(&cred->cdh, 0, sizeof(cred->cdh));
 	memset(&cred->rp, 0, sizeof(cred->rp));
 	memset(&cred->user, 0, sizeof(cred->user));
@@ -686,10 +688,27 @@ fido_cred_exclude(fido_cred_t *cred, const unsigned char *id_ptr, size_t id_len)
 }
 
 int
+fido_cred_set_clientdata(fido_cred_t *cred, const unsigned char *data,
+    size_t data_len)
+{
+	if (!fido_blob_is_empty(&cred->cdh) ||
+	    fido_blob_set(&cred->cd, data, data_len) < 0) {
+		return (FIDO_ERR_INVALID_ARGUMENT);
+	}
+	if (fido_sha256(&cred->cdh, data, data_len) < 0) {
+		fido_blob_reset(&cred->cd);
+		return (FIDO_ERR_INTERNAL);
+	}
+
+	return (FIDO_OK);
+}
+
+int
 fido_cred_set_clientdata_hash(fido_cred_t *cred, const unsigned char *hash,
     size_t hash_len)
 {
-	if (fido_blob_set(&cred->cdh, hash, hash_len) < 0)
+	if (!fido_blob_is_empty(&cred->cd) ||
+	    fido_blob_set(&cred->cdh, hash, hash_len) < 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	return (FIDO_OK);

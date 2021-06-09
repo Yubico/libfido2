@@ -606,10 +606,27 @@ out:
 }
 
 int
+fido_assert_set_clientdata(fido_assert_t *assert, const unsigned char *data,
+    size_t data_len)
+{
+	if (!fido_blob_is_empty(&assert->cdh) ||
+	    fido_blob_set(&assert->cd, data, data_len) < 0) {
+		return (FIDO_ERR_INVALID_ARGUMENT);
+	}
+	if (fido_sha256(&assert->cdh, data, data_len) < 0) {
+		fido_blob_reset(&assert->cd);
+		return (FIDO_ERR_INTERNAL);
+	}
+
+	return (FIDO_OK);
+}
+
+int
 fido_assert_set_clientdata_hash(fido_assert_t *assert,
     const unsigned char *hash, size_t hash_len)
 {
-	if (fido_blob_set(&assert->cdh, hash, hash_len) < 0)
+	if (!fido_blob_is_empty(&assert->cd) ||
+	    fido_blob_set(&assert->cdh, hash, hash_len) < 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	return (FIDO_OK);
@@ -749,6 +766,7 @@ void
 fido_assert_reset_tx(fido_assert_t *assert)
 {
 	free(assert->rp_id);
+	fido_blob_reset(&assert->cd);
 	fido_blob_reset(&assert->cdh);
 	fido_blob_reset(&assert->ext.hmac_salt);
 	fido_free_blob_array(&assert->allow_list);

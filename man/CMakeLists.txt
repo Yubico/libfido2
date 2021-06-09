@@ -74,6 +74,7 @@ list(APPEND MAN_ALIAS
 	fido_assert_new fido_assert_user_id_len
 	fido_assert_new fido_assert_user_id_ptr
 	fido_assert_new fido_assert_user_name
+	fido_assert_set_authdata fido_assert_set_clientdata
 	fido_assert_set_authdata fido_assert_set_clientdata_hash
 	fido_assert_set_authdata fido_assert_set_count
 	fido_assert_set_authdata fido_assert_set_extensions
@@ -178,6 +179,7 @@ list(APPEND MAN_ALIAS
 	fido_credman_metadata_new fido_credman_rp_new
 	fido_cred_set_authdata fido_cred_set_authdata_raw
 	fido_cred_set_authdata fido_cred_set_blob
+	fido_cred_set_authdata fido_cred_set_clientdata
 	fido_cred_set_authdata fido_cred_set_clientdata_hash
 	fido_cred_set_authdata fido_cred_set_extensions
 	fido_cred_set_authdata fido_cred_set_fmt
