@@ -15,8 +15,8 @@
 #define CTAP21_UV_TOKEN_PERM_LARGEBLOB	0x10
 #define CTAP21_UV_TOKEN_PERM_CONFIG	0x20
 
-static int
-sha256(const unsigned char *data, size_t data_len, fido_blob_t *digest)
+int
+fido_sha256(fido_blob_t *digest, const u_char *data, size_t data_len)
 {
 	if ((digest->ptr = calloc(1, SHA256_DIGEST_LENGTH)) == NULL)
 		return (-1);
@@ -46,7 +46,7 @@ pin_sha256_enc(const fido_dev_t *dev, const fido_blob_t *shared,
 		goto fail;
 	}
 
-	if (sha256(pin->ptr, pin->len, ph) < 0 || ph->len < 16) {
+	if (fido_sha256(ph, pin->ptr, pin->len) < 0 || ph->len < 16) {
 		fido_log_debug("%s: SHA256", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
