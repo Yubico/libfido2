@@ -175,10 +175,11 @@ void fido_assert_reset_rx(fido_assert_t *);
 void fido_assert_reset_tx(fido_assert_t *);
 void fido_cred_reset_rx(fido_cred_t *);
 void fido_cred_reset_tx(fido_cred_t *);
-int fido_check_rp_id(const char *, const unsigned char *);
-int fido_check_flags(uint8_t, fido_opt_t, fido_opt_t);
-int fido_get_random(void *, size_t);
 int fido_blob_serialise(fido_blob_t *, const cbor_item_t *);
+int fido_check_flags(uint8_t, fido_opt_t, fido_opt_t);
+int fido_check_rp_id(const char *, const unsigned char *);
+int fido_get_random(void *, size_t);
+int fido_sha256(fido_blob_t *, const u_char *, size_t);
 
 /* crypto */
 int fido_verify_sig_es256(const fido_blob_t *, const es256_pk_t *,
