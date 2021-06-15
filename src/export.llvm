@@ -193,6 +193,7 @@ _fido_dev_info_product_string
 _fido_dev_info_ptr
 _fido_dev_info_vendor
 _fido_dev_is_fido2
+_fido_dev_is_winhello
 _fido_dev_major
 _fido_dev_make_cred
 _fido_dev_minor

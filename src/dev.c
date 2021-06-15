@@ -654,6 +654,12 @@ fido_dev_is_fido2(const fido_dev_t *dev)
 }
 
 bool
+fido_dev_is_winhello(const fido_dev_t *dev)
+{
+	return (dev->flags & FIDO_DEV_WINHELLO);
+}
+
+bool
 fido_dev_supports_pin(const fido_dev_t *dev)
 {
 	return (dev->flags & (FIDO_DEV_PIN_SET|FIDO_DEV_PIN_UNSET));

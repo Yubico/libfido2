@@ -211,6 +211,7 @@ list(APPEND MAN_ALIAS
 	fido_dev_open fido_dev_force_u2f
 	fido_dev_open fido_dev_free
 	fido_dev_open fido_dev_is_fido2
+	fido_dev_open fido_dev_is_winhello
 	fido_dev_open fido_dev_major
 	fido_dev_open fido_dev_minor
 	fido_dev_open fido_dev_new
