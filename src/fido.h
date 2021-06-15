@@ -204,6 +204,7 @@ uint64_t fido_cbor_info_fwversion(const fido_cbor_info_t *);
 bool fido_dev_has_pin(const fido_dev_t *);
 bool fido_dev_has_uv(const fido_dev_t *);
 bool fido_dev_is_fido2(const fido_dev_t *);
+bool fido_dev_is_winhello(const fido_dev_t *);
 bool fido_dev_supports_pin(const fido_dev_t *);
 bool fido_dev_supports_cred_prot(const fido_dev_t *);
 bool fido_dev_supports_credman(const fido_dev_t *);
