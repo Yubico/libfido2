@@ -477,9 +477,7 @@ credman_reset_rp(fido_credman_rp_t *rp)
 		free(rp->ptr[i].rp_entity.name);
 		rp->ptr[i].rp_entity.id = NULL;
 		rp->ptr[i].rp_entity.name = NULL;
-		free(rp->ptr[i].rp_id_hash.ptr);
-		memset(&rp->ptr[i].rp_id_hash, 0,
-		    sizeof(rp->ptr[i].rp_id_hash));
+		fido_blob_reset(&rp->ptr[i].rp_id_hash);
 	}
 
 	free(rp->ptr);
