@@ -464,13 +464,11 @@ fido_cred_new(void)
 static void
 fido_cred_clean_authdata(fido_cred_t *cred)
 {
-	free(cred->authdata_cbor.ptr);
-	free(cred->authdata_raw.ptr);
-	free(cred->attcred.id.ptr);
+	fido_blob_reset(&cred->authdata_cbor);
+	fido_blob_reset(&cred->authdata_raw);
+	fido_blob_reset(&cred->attcred.id);
 
 	memset(&cred->authdata_ext, 0, sizeof(cred->authdata_ext));
-	memset(&cred->authdata_cbor, 0, sizeof(cred->authdata_cbor));
-	memset(&cred->authdata_raw, 0, sizeof(cred->authdata_raw));
 	memset(&cred->authdata, 0, sizeof(cred->authdata));
 	memset(&cred->attcred, 0, sizeof(cred->attcred));
 }
@@ -478,24 +476,21 @@ fido_cred_clean_authdata(fido_cred_t *cred)
 void
 fido_cred_reset_tx(fido_cred_t *cred)
 {
-	free(cred->cd.ptr);
-	free(cred->cdh.ptr);
+	fido_blob_reset(&cred->cd);
+	fido_blob_reset(&cred->cdh);
+	fido_blob_reset(&cred->user.id);
+	fido_blob_reset(&cred->blob);
+
 	free(cred->rp.id);
 	free(cred->rp.name);
-	free(cred->user.id.ptr);
 	free(cred->user.icon);
 	free(cred->user.name);
 	free(cred->user.display_name);
 	fido_free_blob_array(&cred->excl);
 
-	memset(&cred->cd, 0, sizeof(cred->cd));
-	memset(&cred->cdh, 0, sizeof(cred->cdh));
 	memset(&cred->rp, 0, sizeof(cred->rp));
 	memset(&cred->user, 0, sizeof(cred->user));
 	memset(&cred->excl, 0, sizeof(cred->excl));
-
-	fido_blob_reset(&cred->blob);
-
 	memset(&cred->ext, 0, sizeof(cred->ext));
 
 	cred->type = 0;
@@ -506,17 +501,13 @@ fido_cred_reset_tx(fido_cred_t *cred)
 static void
 fido_cred_clean_x509(fido_cred_t *cred)
 {
-	free(cred->attstmt.x5c.ptr);
-	cred->attstmt.x5c.ptr = NULL;
-	cred->attstmt.x5c.len = 0;
+	fido_blob_reset(&cred->attstmt.x5c);
 }
 
 static void
 fido_cred_clean_sig(fido_cred_t *cred)
 {
-	free(cred->attstmt.sig.ptr);
-	cred->attstmt.sig.ptr = NULL;
-	cred->attstmt.sig.len = 0;
+	fido_blob_reset(&cred->attstmt.sig);
 }
 
 void
