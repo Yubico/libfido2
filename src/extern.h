@@ -184,6 +184,7 @@ void fido_assert_reset_rx(fido_assert_t *);
 void fido_assert_reset_tx(fido_assert_t *);
 void fido_cred_reset_rx(fido_cred_t *);
 void fido_cred_reset_tx(fido_cred_t *);
+void fido_cbor_info_reset(fido_cbor_info_t *);
 int fido_blob_serialise(fido_blob_t *, const cbor_item_t *);
 int fido_check_flags(uint8_t, fido_opt_t, fido_opt_t);
 int fido_check_rp_id(const char *, const unsigned char *);
