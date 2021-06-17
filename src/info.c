@@ -310,7 +310,7 @@ fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 	fido_log_debug("%s: dev=%p, ci=%p, ms=%d", __func__, (void *)dev,
 	    (void *)ci, ms);
 
-	memset(ci, 0, sizeof(*ci));
+	fido_cbor_info_reset(ci);
 
 	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
 	    ms)) < 0) {
@@ -398,21 +398,25 @@ free_algo_array(fido_algo_array_t *aa)
 }
 
 void
-fido_cbor_info_free(fido_cbor_info_t **ci_p)
+fido_cbor_info_reset(fido_cbor_info_t *ci)
 {
-	fido_cbor_info_t *ci;
-
-	if (ci_p == NULL || (ci = *ci_p) ==  NULL)
-		return;
-
 	free_str_array(&ci->versions);
 	free_str_array(&ci->extensions);
 	free_str_array(&ci->transports);
 	free_opt_array(&ci->options);
 	free_byte_array(&ci->protocols);
 	free_algo_array(&ci->algorithms);
-	free(ci);
+}
 
+void
+fido_cbor_info_free(fido_cbor_info_t **ci_p)
+{
+	fido_cbor_info_t *ci;
+
+	if (ci_p == NULL || (ci = *ci_p) ==  NULL)
+		return;
+	fido_cbor_info_reset(ci);
+	free(ci);
 	*ci_p = NULL;
 }
 
