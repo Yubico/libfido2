@@ -24,9 +24,7 @@ fido_sha256(fido_blob_t *digest, const u_char *data, size_t data_len)
 	digest->len = SHA256_DIGEST_LENGTH;
 
 	if (SHA256(data, data_len, digest->ptr) != digest->ptr) {
-		free(digest->ptr);
-		digest->ptr = NULL;
-		digest->len = 0;
+		fido_blob_reset(digest);
 		return (-1);
 	}
 
