@@ -98,29 +98,6 @@ to_utf8(const wchar_t *utf16)
 	return utf8;
 }
 
-static void
-free_str_array(fido_str_array_t *sa)
-{
-	for (size_t i = 0; i < sa->len; i++)
-		free(sa->ptr[i]);
-
-	free(sa->ptr);
-	sa->ptr = NULL;
-	sa->len = 0;
-}
-
-static void
-free_opt_array(fido_opt_array_t *oa)
-{
-	for (size_t i = 0; i < oa->len; i++)
-		free(oa->name[i]);
-
-	free(oa->name);
-	free(oa->value);
-	oa->name = NULL;
-	oa->value = NULL;
-}
-
 static int
 to_fido_str_array(fido_str_array_t *sa, const char **v, size_t n)
 {
@@ -845,10 +822,7 @@ fido_winhello_get_cbor_info(fido_dev_t *dev, fido_cbor_info_t *ci)
 
 	(void)dev;
 
-	free_str_array(&ci->versions);
-	free_str_array(&ci->extensions);
-	free_str_array(&ci->transports);
-	free_opt_array(&ci->options);
+	fido_cbor_info_reset(ci);
 
 	if (to_fido_str_array(&ci->versions, v, nitems(v)) < 0 ||
 	    to_fido_str_array(&ci->extensions, e, nitems(e)) < 0 ||
