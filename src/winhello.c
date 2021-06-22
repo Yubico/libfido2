@@ -32,7 +32,6 @@ struct winhello_cred {
 	WEBAUTHN_COSE_CREDENTIAL_PARAMETERS		 cose;
 	WEBAUTHN_CLIENT_DATA				 cd;
 	WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS	 opt;
-	WEBAUTHN_CRED_PROTECT_EXTENSION_IN		 prot;
 	WEBAUTHN_CREDENTIAL_ATTESTATION			*att;
 	wchar_t						*rp_id;
 	wchar_t						*rp_name;
@@ -285,29 +284,56 @@ pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg,
 }
 
 static int
-pack_cred_ext(WEBAUTHN_EXTENSIONS *out, WEBAUTHN_CRED_PROTECT_EXTENSION_IN *prot,
-    fido_cred_ext_t *in)
+pack_cred_ext(WEBAUTHN_EXTENSIONS *out, fido_cred_ext_t *in)
 {
 	WEBAUTHN_EXTENSION *e;
+	WEBAUTHN_CRED_PROTECT_EXTENSION_IN *p;
+	BOOL *b;
+	size_t n = 0, i = 0;
 
 	if (in->mask == 0) {
 		return 0; /* nothing to do */
 	}
-	if (in->mask & ~FIDO_EXT_CRED_PROTECT) {
+	if (in->mask & ~(FIDO_EXT_HMAC_SECRET | FIDO_EXT_CRED_PROTECT)) {
 		fido_log_debug("%s: mask 0x%x", in->mask);
 		return -1;
 	}
-	if ((out->pExtensions = calloc(1, sizeof(*e))) == NULL) {
+	if (in->mask & FIDO_EXT_HMAC_SECRET)
+		n++;
+	if (in->mask & FIDO_EXT_CRED_PROTECT)
+		n++;
+	if ((out->pExtensions = calloc(n, sizeof(*e))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
 		return -1;
 	}
-	out->cExtensions = 1;
-	prot->dwCredProtect = (DWORD)in->prot;
-	prot->bRequireCredProtect = true;
-	e = &out->pExtensions[0];
-	e->pwszExtensionIdentifier = WEBAUTHN_EXTENSIONS_IDENTIFIER_CRED_PROTECT;
-	e->pvExtension = prot;
-	e->cbExtension = sizeof(*prot);
+	out->cExtensions = (DWORD)n;
+	if (in->mask & FIDO_EXT_HMAC_SECRET) {
+		if ((b = calloc(1, sizeof(*b))) == NULL) {
+			fido_log_debug("%s: calloc", __func__);
+			return -1;
+		}
+		*b = true;
+		e = &out->pExtensions[i];
+		e->pwszExtensionIdentifier =
+		    WEBAUTHN_EXTENSIONS_IDENTIFIER_HMAC_SECRET;
+		e->pvExtension = b;
+		e->cbExtension = sizeof(*b);
+		i++;
+	}
+	if (in->mask & FIDO_EXT_CRED_PROTECT) {
+		if ((p = calloc(1, sizeof(*p))) == NULL) {
+			fido_log_debug("%s: calloc", __func__);
+			return -1;
+		}
+		p->dwCredProtect = (DWORD)in->prot;
+		p->bRequireCredProtect = true;
+		e = &out->pExtensions[i];
+		e->pwszExtensionIdentifier =
+		    WEBAUTHN_EXTENSIONS_IDENTIFIER_CRED_PROTECT;
+		e->pvExtension = p;
+		e->cbExtension = sizeof(*p);
+		i++;
+	}
 
 	return 0;
 }
@@ -576,7 +602,7 @@ translate_fido_cred(struct winhello_cred *ctx, fido_cred_t *cred,
 		fido_log_debug("%s: pack_credlist", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
-	if (pack_cred_ext(&opt->Extensions, &ctx->prot, &cred->ext) < 0) {
+	if (pack_cred_ext(&opt->Extensions, &cred->ext) < 0) {
 		fido_log_debug("%s: pack_cred_ext", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
@@ -702,6 +728,10 @@ winhello_cred_free(struct winhello_cred *ctx)
 	free(ctx->user_icon);
 	free(ctx->display_name);
 	free(ctx->opt.CredentialList.pCredentials);
+	for (size_t i = 0; i < ctx->opt.Extensions.cExtensions; i++) {
+		WEBAUTHN_EXTENSION *e = &ctx->opt.Extensions.pExtensions[i];
+		free(e->pvExtension);
+	}
 	free(ctx->opt.Extensions.pExtensions);
 	free(ctx);
 }
@@ -817,7 +847,7 @@ int
 fido_winhello_get_cbor_info(fido_dev_t *dev, fido_cbor_info_t *ci)
 {
 	const char *v[3] = { "U2F_V2", "FIDO_2_0", "FIDO_2_1_PRE" };
-	const char *e[1] = { "credProtect" };
+	const char *e[2] = { "credProtect", "hmac-secret" };
 	const char *t[2] = { "nfc", "usb" };
 	const char *o[4] = { "rk", "up", "plat", "clientPin" };
 
