@@ -630,6 +630,7 @@ winhello_manifest(BOOL *present)
 		fido_log_debug("%s: unsupported api %u", __func__, n);
 		return FIDO_ERR_INTERNAL;
 	}
+	fido_log_debug("%s: api version %u", __func__, n);
 	hr = WebAuthNIsUserVerifyingPlatformAuthenticatorAvailable(present);
 	if (hr != S_OK)  {
 		r = to_fido(hr);
