@@ -1096,19 +1096,10 @@ int
 fido_assert_set_sig(fido_assert_t *a, size_t idx, const unsigned char *ptr,
     size_t len)
 {
-	unsigned char *sig;
-
 	if (idx >= a->stmt_len || ptr == NULL || len == 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
-
-	fido_blob_reset(&a->stmt[idx].sig);
-
-	if ((sig = malloc(len)) == NULL)
+	if (fido_blob_set(&a->stmt[idx].sig, ptr, len) < 0)
 		return (FIDO_ERR_INTERNAL);
-
-	memcpy(sig, ptr, len);
-	a->stmt[idx].sig.ptr = sig;
-	a->stmt[idx].sig.len = len;
 
 	return (FIDO_OK);
 }
