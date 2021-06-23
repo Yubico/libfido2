@@ -126,6 +126,7 @@ int fido_cred_set_clientdata(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_clientdata_hash(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_extensions(fido_cred_t *, int);
 int fido_cred_set_fmt(fido_cred_t *, const char *);
+int fido_cred_set_id(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_options(fido_cred_t *, bool, bool);
 int fido_cred_set_prot(fido_cred_t *, int);
 int fido_cred_set_rk(fido_cred_t *, fido_opt_t);

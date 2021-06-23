@@ -617,6 +617,15 @@ fail:
 }
 
 int
+fido_cred_set_id(fido_cred_t *cred, const unsigned char *ptr, size_t len)
+{
+	if (fido_blob_set(&cred->attcred.id, ptr, len) < 0)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	return (FIDO_OK);
+}
+
+int
 fido_cred_set_x509(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 {
 	unsigned char *x509;
