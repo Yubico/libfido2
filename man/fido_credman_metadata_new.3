@@ -299,14 +299,6 @@ should have their return values checked for NULL.
 .Xr fido_cbor_info_new 3 ,
 .Xr fido_cred_new 3
 .Sh CAVEATS
-Credential management is a tentative feature of FIDO 2.1.
-Applications willing to strictly abide by FIDO 2.0 should refrain
-from using credential management.
-Applications using credential management should ensure it is
-supported by the authenticator prior to using the API.
-Since FIDO 2.1 hasn't been finalised, there is a chance the
-functionality and associated data structures may change.
-.Pp
 Resident credentials are called
 .Dq discoverable credentials
 in FIDO2.1.
