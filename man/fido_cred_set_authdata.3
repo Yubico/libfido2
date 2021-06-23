@@ -10,6 +10,7 @@
 .Nm fido_cred_set_authdata_raw ,
 .Nm fido_cred_set_x509 ,
 .Nm fido_cred_set_sig ,
+.Nm fido_cred_set_id ,
 .Nm fido_cred_set_clientdata ,
 .Nm fido_cred_set_clientdata_hash ,
 .Nm fido_cred_set_rp ,
@@ -39,6 +40,8 @@ typedef enum {
 .Fn fido_cred_set_x509 "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
 .Ft int
 .Fn fido_cred_set_sig "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
+.Ft int
+.Fn fido_cred_set_id "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
 .Ft int
 .Fn fido_cred_set_clientdata "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
 .Ft int
@@ -79,10 +82,11 @@ The
 .Fn fido_cred_set_authdata ,
 .Fn fido_cred_set_x509 ,
 .Fn fido_cred_set_sig ,
+.Fn fido_cred_set_id ,
 and
 .Fn fido_cred_set_clientdata_hash
 functions set the authenticator data, attestation certificate,
-signature and client data hash parts of
+signature, id, and client data hash parts of
 .Fa cred
 to
 .Fa ptr ,
@@ -100,6 +104,13 @@ must be a CBOR-encoded byte string, as obtained from
 .Fn fido_cred_authdata_ptr .
 Alternatively, a raw binary blob may be passed to
 .Fn fido_cred_set_authdata_raw .
+.Pp
+An application calling
+.Fn fido_cred_set_authdata
+does not need to call
+.Fn fido_cred_set_id .
+The latter is meant to be used in contexts where the
+credential's authenticator data is not available.
 .Pp
 The
 .Fn fido_cred_set_clientdata
