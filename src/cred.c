@@ -498,26 +498,14 @@ fido_cred_reset_tx(fido_cred_t *cred)
 	cred->uv = FIDO_OPT_OMIT;
 }
 
-static void
-fido_cred_clean_x509(fido_cred_t *cred)
-{
-	fido_blob_reset(&cred->attstmt.x5c);
-}
-
-static void
-fido_cred_clean_sig(fido_cred_t *cred)
-{
-	fido_blob_reset(&cred->attstmt.sig);
-}
-
 void
 fido_cred_reset_rx(fido_cred_t *cred)
 {
 	free(cred->fmt);
 	cred->fmt = NULL;
 	fido_cred_clean_authdata(cred);
-	fido_cred_clean_x509(cred);
-	fido_cred_clean_sig(cred);
+	fido_blob_reset(&cred->attstmt.x5c);
+	fido_blob_reset(&cred->attstmt.sig);
 	fido_blob_reset(&cred->largeblob_key);
 }
 
@@ -628,18 +616,8 @@ fido_cred_set_id(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 int
 fido_cred_set_x509(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 {
-	unsigned char *x509;
-
-	fido_cred_clean_x509(cred);
-
-	if (ptr == NULL || len == 0)
+	if (fido_blob_set(&cred->attstmt.x5c, ptr, len) < 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
-	if ((x509 = malloc(len)) == NULL)
-		return (FIDO_ERR_INTERNAL);
-
-	memcpy(x509, ptr, len);
-	cred->attstmt.x5c.ptr = x509;
-	cred->attstmt.x5c.len = len;
 
 	return (FIDO_OK);
 }
@@ -647,18 +625,8 @@ fido_cred_set_x509(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 int
 fido_cred_set_sig(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 {
-	unsigned char *sig;
-
-	fido_cred_clean_sig(cred);
-
-	if (ptr == NULL || len == 0)
+	if (fido_blob_set(&cred->attstmt.sig, ptr, len) < 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
-	if ((sig = malloc(len)) == NULL)
-		return (FIDO_ERR_INTERNAL);
-
-	memcpy(sig, ptr, len);
-	cred->attstmt.sig.ptr = sig;
-	cred->attstmt.sig.len = len;
 
 	return (FIDO_OK);
 }
@@ -772,12 +740,8 @@ fido_cred_set_user(fido_cred_t *cred, const unsigned char *user_id,
 		up->icon = NULL;
 	}
 
-	if (user_id != NULL) {
-		if ((up->id.ptr = malloc(user_id_len)) == NULL)
-			goto fail;
-		memcpy(up->id.ptr, user_id, user_id_len);
-		up->id.len = user_id_len;
-	}
+	if (user_id != NULL && fido_blob_set(&up->id, user_id, user_id_len) < 0)
+		goto fail;
 	if (name != NULL && (up->name = strdup(name)) == NULL)
 		goto fail;
 	if (display_name != NULL &&
