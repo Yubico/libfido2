@@ -363,11 +363,7 @@ fido_get_signed_hash(int cose_alg, fido_blob_t *dgst,
 	unsigned char		*authdata_ptr = NULL;
 	size_t			 authdata_len;
 	struct cbor_load_result	 cbor;
-#if OPENSSL_VERSION_NUMBER < 0x30000000
-	SHA256_CTX		 ctx;
-#else
 	EVP_MD_CTX		*mdctx = NULL;
-#endif
 	int			 ok = -1;
 
 	if ((item = cbor_load(authdata_cbor->ptr, authdata_cbor->len,
@@ -382,18 +378,11 @@ fido_get_signed_hash(int cose_alg, fido_blob_t *dgst,
 
 	if (cose_alg != COSE_EDDSA) {
 		if (dgst->len < SHA256_DIGEST_LENGTH ||
-#if OPENSSL_VERSION_NUMBER < 0x30000000
-		    SHA256_Init(&ctx) == 0 ||
-		    SHA256_Update(&ctx, authdata_ptr, authdata_len) == 0 ||
-		    SHA256_Update(&ctx, clientdata->ptr, clientdata->len) == 0 ||
-		    SHA256_Final(dgst->ptr, &ctx) == 0
-#else
 		    (mdctx = EVP_MD_CTX_new()) == NULL ||
 		    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL) <= 0 ||
 		    EVP_DigestUpdate(mdctx, authdata_ptr, authdata_len) <= 0 ||
 		    EVP_DigestUpdate(mdctx, clientdata->ptr, clientdata->len) <= 0 ||
 		    EVP_DigestFinal_ex(mdctx, dgst->ptr, NULL) <= 0
-#endif
 		    ) {
 			fido_log_debug("%s: sha256", __func__);
 			goto fail;
@@ -415,9 +404,7 @@ fido_get_signed_hash(int cose_alg, fido_blob_t *dgst,
 fail:
 	if (item != NULL)
 		cbor_decref(&item);
-#if OPENSSL_VERSION_NUMBER >= 0x30000000
 	EVP_MD_CTX_free(mdctx);
-#endif
 
 	return (ok);
 }
@@ -427,11 +414,7 @@ fido_verify_sig_es256(const fido_blob_t *dgst, const es256_pk_t *pk,
     const fido_blob_t *sig)
 {
 	EVP_PKEY	*pkey = NULL;
-#if OPENSSL_VERSION_NUMBER >= 0x30000000
 	EVP_PKEY_CTX	*pctx = NULL;
-#else
-	EC_KEY		*ec = NULL;
-#endif
 	int		 ok = -1;
 
 	/* ECDSA_verify needs ints */
@@ -441,7 +424,6 @@ fido_verify_sig_es256(const fido_blob_t *dgst, const es256_pk_t *pk,
 		return (-1);
 	}
 
-#if OPENSSL_VERSION_NUMBER >= 0x30000000
 	if ((pkey = es256_pk_to_EVP_PKEY(pk)) == NULL ||
 	    (pctx = EVP_PKEY_CTX_new(pkey, NULL)) == NULL) {
 		fido_log_debug("%s: pk -> ec", __func__);
@@ -454,27 +436,10 @@ fido_verify_sig_es256(const fido_blob_t *dgst, const es256_pk_t *pk,
 		fido_log_debug("%s: EVP_PKEY_verify", __func__);
 		goto fail;
 	}
-#else
-	if ((pkey = es256_pk_to_EVP_PKEY(pk)) == NULL ||
-	    (ec = EVP_PKEY_get0_EC_KEY(pkey)) == NULL) {
-		fido_log_debug("%s: pk -> ec", __func__);
-		goto fail;
-	}
-
-	if (ECDSA_verify(0, dgst->ptr, (int)dgst->len, sig->ptr,
-	    (int)sig->len, ec) != 1) {
-		fido_log_debug("%s: ECDSA_verify", __func__);
-		goto fail;
-	}
-
-	ok = 0;
-#endif
 fail:
 	if (pkey != NULL)
 		EVP_PKEY_free(pkey);
-#if OPENSSL_VERSION_NUMBER >= 0x30000000
 	EVP_PKEY_CTX_free(pctx);
-#endif
 	return (ok);
 }
 
@@ -483,11 +448,7 @@ fido_verify_sig_rs256(const fido_blob_t *dgst, const rs256_pk_t *pk,
     const fido_blob_t *sig)
 {
 	EVP_PKEY	*pkey = NULL;
-#if OPENSSL_VERSION_NUMBER >= 0x30000000
 	EVP_PKEY_CTX	*pctx = NULL;
-#else
-	RSA		*rsa = NULL;
-#endif
 	int		 ok = -1;
 
 	/* RSA_verify needs unsigned ints */
@@ -497,7 +458,6 @@ fido_verify_sig_rs256(const fido_blob_t *dgst, const rs256_pk_t *pk,
 		return (-1);
 	}
 
-#if OPENSSL_VERSION_NUMBER >= 0x30000000
 	if ((pkey = rs256_pk_to_EVP_PKEY(pk)) == NULL ||
 	    (pctx = EVP_PKEY_CTX_new(pkey, NULL)) == NULL) {
 		fido_log_debug("%s: pk -> ec", __func__);
@@ -512,28 +472,13 @@ fido_verify_sig_rs256(const fido_blob_t *dgst, const rs256_pk_t *pk,
 		fido_log_debug("%s: EVP_PKEY_verify", __func__);
 		goto fail;
 	}
-#else
-	if ((pkey = rs256_pk_to_EVP_PKEY(pk)) == NULL ||
-	    (rsa = EVP_PKEY_get0_RSA(pkey)) == NULL) {
-		fido_log_debug("%s: pk -> ec", __func__);
-		goto fail;
-	}
-
-	if (RSA_verify(NID_sha256, dgst->ptr, (unsigned int)dgst->len, sig->ptr,
-	    (unsigned int)sig->len, rsa) != 1) {
-		fido_log_debug("%s: RSA_verify", __func__);
-		goto fail;
-	}
-#endif
 
 	ok = 0;
 fail:
 	if (pkey != NULL)
 		EVP_PKEY_free(pkey);
 
-#if OPENSSL_VERSION_NUMBER >= 0x30000000
 	EVP_PKEY_CTX_free(pctx);
-#endif
 	return (ok);
 }
 
