@@ -209,7 +209,7 @@ ctap21_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
 	fido_blob_t	*p = NULL;
 	fido_blob_t	*phe = NULL;
 	cbor_item_t	*argv[10];
-	uint8_t		 subcmd = 6;
+	uint8_t		 subcmd;
 	int		 r;
 
 	memset(&f, 0, sizeof(f));
@@ -226,7 +226,14 @@ ctap21_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
 			fido_log_debug("%s: pin_sha256_enc", __func__);
 			goto fail;
 		}
-		subcmd = 9;
+		subcmd = 9; /* getPinUvAuthTokenUsingPinWithPermissions */
+	} else {
+		if (fido_dev_has_uv(dev) == false) {
+			fido_log_debug("%s: fido_dev_has_uv", __func__);
+			r = FIDO_ERR_PIN_REQUIRED;
+			goto fail;
+		}
+		subcmd = 6; /* getPinUvAuthTokenUsingUvWithPermissions */
 	}
 
 	if ((argv[0] = cbor_encode_pin_opt(dev)) == NULL ||
