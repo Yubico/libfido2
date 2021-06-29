@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -345,6 +345,35 @@ del_rk(const struct param *p)
 	fido_dev_free(&dev);
 }
 
+static void
+set_rk(const struct param *p)
+{
+	fido_dev_t *dev = NULL;
+	fido_cred_t *cred = NULL;
+	const char *pin = p->pin;
+	int r0, r1, r2;
+
+	set_wire_data(p->del_wire_data.body, p->del_wire_data.len);
+
+	if ((dev = prepare_dev()) == NULL)
+		return;
+	if ((cred = fido_cred_new()) == NULL)
+		goto out;
+	r0 = fido_cred_set_id(cred, p->cred_id.body, p->cred_id.len);
+	r1 = fido_cred_set_user(cred, p->cred_id.body, p->cred_id.len, p->rp_id,
+	    NULL, NULL);
+	if (strlen(pin) == 0)
+		pin = NULL;
+	r2 = fido_credman_set_dev_rk(dev, cred, pin);
+	consume(&r0, sizeof(r0));
+	consume(&r1, sizeof(r1));
+	consume(&r2, sizeof(r2));
+out:
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+	fido_cred_free(&cred);
+}
+
 void
 test(const struct param *p)
 {
@@ -356,6 +385,7 @@ test(const struct param *p)
 	get_rp_list(p);
 	get_rk_list(p);
 	del_rk(p);
+	set_rk(p);
 }
 
 void
