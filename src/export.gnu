@@ -136,6 +136,7 @@
 		fido_credman_rp_id_hash_ptr;
 		fido_credman_rp_name;
 		fido_credman_rp_new;
+		fido_credman_set_dev_rk;
 		fido_cred_new;
 		fido_cred_prot;
 		fido_cred_pubkey_len;
