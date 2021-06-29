@@ -47,6 +47,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 {
 	fido_blob_t	 f;
 	fido_blob_t	*ecdh = NULL;
+	fido_opt_t	 uv = cred->uv;
 	es256_pk_t	*pk = NULL;
 	cbor_item_t	*argv[9];
 	const uint8_t	 cmd = CTAP_CBOR_MAKECRED;
@@ -88,17 +89,9 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 			goto fail;
 		}
 
-	/* options */
-	if (cred->rk != FIDO_OPT_OMIT || cred->uv != FIDO_OPT_OMIT)
-		if ((argv[6] = cbor_encode_cred_opt(cred->rk,
-		    cred->uv)) == NULL) {
-			fido_log_debug("%s: cbor_encode_cred_opt", __func__);
-			r = FIDO_ERR_INTERNAL;
-			goto fail;
-		}
-
 	/* user verification */
-	if (fido_dev_can_get_uv_token(dev, pin, cred->uv)) {
+	if (pin != NULL || (uv == FIDO_OPT_TRUE &&
+	    fido_dev_supports_permissions(dev))) {
 		if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
@@ -108,7 +101,16 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
+		uv = FIDO_OPT_OMIT;
 	}
+
+	/* options */
+	if (cred->rk != FIDO_OPT_OMIT || uv != FIDO_OPT_OMIT)
+		if ((argv[6] = cbor_encode_cred_opt(cred->rk, uv)) == NULL) {
+			fido_log_debug("%s: cbor_encode_cred_opt", __func__);
+			r = FIDO_ERR_INTERNAL;
+			goto fail;
+		}
 
 	/* framing and transmission */
 	if (cbor_build_frame(cmd, argv, nitems(argv), &f) < 0 ||
