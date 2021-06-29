@@ -688,17 +688,3 @@ fail:
 
 	return (r);
 }
-
-bool
-fido_dev_can_get_uv_token(const fido_dev_t *dev, const char *pin, fido_opt_t uv)
-{
-	if (pin != NULL)
-		return (true);
-	if (fido_dev_supports_permissions(dev)) {
-		if (uv != FIDO_OPT_OMIT)
-			return (uv == FIDO_OPT_TRUE);
-		return (fido_dev_has_uv(dev));
-	}
-
-	return (false);
-}
