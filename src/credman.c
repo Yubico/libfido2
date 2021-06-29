@@ -112,6 +112,12 @@ credman_tx(fido_dev_t *dev, uint8_t subcmd, const fido_blob_t *param,
 	memset(&hmac, 0, sizeof(hmac));
 	memset(&argv, 0, sizeof(argv));
 
+	if (fido_dev_is_fido2(dev) == false) {
+		fido_log_debug("%s: fido_dev_is_fido2", __func__);
+		r = FIDO_ERR_INVALID_COMMAND;
+		goto fail;
+	}
+
 	/* subCommand */
 	if ((argv[0] = cbor_build_uint8(subcmd)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
@@ -219,9 +225,6 @@ int
 fido_credman_get_dev_metadata(fido_dev_t *dev, fido_credman_metadata_t *metadata,
     const char *pin)
 {
-	if (fido_dev_is_fido2(dev) == false)
-		return (FIDO_ERR_INVALID_COMMAND);
-
 	return (credman_get_metadata_wait(dev, metadata, pin, -1));
 }
 
@@ -407,9 +410,6 @@ int
 fido_credman_get_dev_rk(fido_dev_t *dev, const char *rp_id,
     fido_credman_rk_t *rk, const char *pin)
 {
-	if (fido_dev_is_fido2(dev) == false)
-		return (FIDO_ERR_INVALID_COMMAND);
-
 	return (credman_get_rk_wait(dev, rp_id, rk, pin, -1));
 }
 
@@ -441,9 +441,6 @@ int
 fido_credman_del_dev_rk(fido_dev_t *dev, const unsigned char *cred_id,
     size_t cred_id_len, const char *pin)
 {
-	if (fido_dev_is_fido2(dev) == false)
-		return (FIDO_ERR_INVALID_COMMAND);
-
 	return (credman_del_rk_wait(dev, cred_id, cred_id_len, pin, -1));
 }
 
@@ -607,9 +604,6 @@ credman_get_rp_wait(fido_dev_t *dev, fido_credman_rp_t *rp, const char *pin,
 int
 fido_credman_get_dev_rp(fido_dev_t *dev, fido_credman_rp_t *rp, const char *pin)
 {
-	if (fido_dev_is_fido2(dev) == false)
-		return (FIDO_ERR_INVALID_COMMAND);
-
 	return (credman_get_rp_wait(dev, rp, pin, -1));
 }
 
