@@ -157,7 +157,13 @@ ctap20_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
 
-	if (pin == NULL || (p = fido_blob_new()) == NULL || fido_blob_set(p,
+	if (pin == NULL) {
+		fido_log_debug("%s: NULL pin", __func__);
+		r = FIDO_ERR_PIN_REQUIRED;
+		goto fail;
+	}
+
+	if ((p = fido_blob_new()) == NULL || fido_blob_set(p,
 	    (const unsigned char *)pin, strlen(pin)) < 0) {
 		fido_log_debug("%s: fido_blob_set", __func__);
 		r = FIDO_ERR_INVALID_ARGUMENT;
