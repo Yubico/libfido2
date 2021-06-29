@@ -540,7 +540,6 @@ largeblob_get_uv_token(fido_dev_t *dev, const char *pin, fido_blob_t **token)
 	fido_blob_t *ecdh = NULL;
 	int r;
 
-	*token = NULL;
 	if ((*token = fido_blob_new()) == NULL)
 		return FIDO_ERR_INTERNAL;
 	if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
