@@ -1,4 +1,4 @@
-.\" Copyright (c) 2018 Yubico AB. All rights reserved.
+.\" Copyright (c) 2018-2021 Yubico AB. All rights reserved.
 .\" Use of this source code is governed by a BSD-style
 .\" license that can be found in the LICENSE file.
 .\"
@@ -101,6 +101,15 @@
 .Fl n Ar rp_id
 .Op Fl i Ar cred_id
 .Ar blob_path
+.Ar device
+.Nm
+.Fl S
+.Fl c
+.Op Fl d
+.Fl i Ar cred_id
+.Fl k Ar user_id
+.Fl n Ar name
+.Fl p Ar display_name
 .Ar device
 .Nm
 .Fl V
@@ -284,6 +293,25 @@ the credential ID must be specified using
 where
 .Ar cred_id
 is a base64-encoded blob.
+A PIN or equivalent user-verification gesture is required.
+.It Fl S Fl c Fl i Ar cred_id Fl k Ar user_id Fl n Ar name Fl p Ar display_name Ar device
+Sets the
+.Ar name
+and
+.Ar display_name
+attributes of the resident credential identified by
+.Ar cred_id
+and
+.Ar user_id ,
+where
+.Ar name
+and
+.Ar display_name
+are UTF-8 strings and
+.Ar cred_id
+and
+.Ar user_id
+are base64-encoded blobs.
 A PIN or equivalent user-verification gesture is required.
 .It Fl S Fl e Ar device
 Performs a new biometric enrollment on
