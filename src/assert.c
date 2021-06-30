@@ -436,6 +436,8 @@ fido_verify_sig_es256(const fido_blob_t *dgst, const es256_pk_t *pk,
 		fido_log_debug("%s: EVP_PKEY_verify", __func__);
 		goto fail;
 	}
+
+	ok = 0;
 fail:
 	if (pkey != NULL)
 		EVP_PKEY_free(pkey);
