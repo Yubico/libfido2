@@ -218,7 +218,7 @@ pack_rp(wchar_t **id, wchar_t **name, WEBAUTHN_RP_ENTITY_INFORMATION *out,
 		fido_log_debug("%s: id", __func__);
 		return -1;
 	}
-	if ((out->pwszName = *name = to_utf16(in->name)) == NULL) {
+	if (in->name && (out->pwszName = *name = to_utf16(in->name)) == NULL) {
 		fido_log_debug("%s: name", __func__);
 		return -1;
 	}
