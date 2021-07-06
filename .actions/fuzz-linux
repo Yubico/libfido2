@@ -42,7 +42,7 @@ FAKEROOT="${FAKEROOT:-$(mktemp -d)}"
 cd "${FAKEROOT}"
 
 # libcbor
-git clone "${LIBCBOR_URL}" -b "${LIBCBOR_TAG}"
+git clone --depth=1 "${LIBCBOR_URL}" -b "${LIBCBOR_TAG}"
 cd libcbor
 patch -p0 -s < "${WORKDIR}/fuzz/README"
 mkdir build
@@ -54,7 +54,7 @@ make VERBOSE=1 -j"$(nproc)" -C build all install
 cd -
 
 # openssl
-git clone "${OPENSSL_URL}" -b "${OPENSSL_TAG}"
+git clone --depth=1 "${OPENSSL_URL}" -b "${OPENSSL_TAG}"
 cd openssl
 ./Configure linux-x86_64-clang "enable-$1" --prefix="${FAKEROOT}" \
     --openssldir="${FAKEROOT}/openssl"
@@ -62,7 +62,7 @@ make install_sw
 cd -
 
 # zlib
-git clone "${ZLIB_URL}" -b "${ZLIB_TAG}"
+git clone --depth=1 "${ZLIB_URL}" -b "${ZLIB_TAG}"
 cd zlib
 CFLAGS="${ZLIB_CFLAGS}" LDFLAGS="${ZLIB_CFLAGS}" ./configure \
     --prefix="${FAKEROOT}"

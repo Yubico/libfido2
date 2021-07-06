@@ -18,9 +18,8 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 EOF
 
 # Build and install libcbor.
-git clone git://github.com/pjk/libcbor
+git clone --depth=1 git://github.com/pjk/libcbor -b v0.8.0
 cd libcbor
-git checkout v0.8.0
 mkdir build
 (cd build && cmake -DCMAKE_TOOLCHAIN_FILE=/tmp/mingw.cmake \
 	-DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/fakeroot ..)
@@ -29,9 +28,8 @@ sudo make -C build install
 cd ..
 
 # Build and install OpenSSL 1.1.1k.
-git clone git://github.com/openssl/openssl
+git clone --depth=1 git://github.com/openssl/openssl -b OpenSSL_1_1_1k
 cd openssl
-git checkout OpenSSL_1_1_1k
 ./Configure mingw --prefix=/fakeroot --openssldir=/fakeroot/openssl \
 	--cross-compile-prefix=i686-w64-mingw32-
 make -j"$(nproc)"
@@ -39,9 +37,8 @@ sudo make install_sw
 cd ..
 
 # Build and install zlib.
-git clone https://github.com/madler/zlib
+git clone --depth=1 https://github.com/madler/zlib -b v1.2.11
 cd zlib
-git checkout v1.2.11
 make -fwin32/Makefile.gcc PREFIX=i686-w64-mingw32-
 sudo make -fwin32/Makefile.gcc PREFIX=i686-w64-mingw32- DESTDIR=/fakeroot \
 	INCLUDE_PATH=/include LIBRARY_PATH=/lib BINARY_PATH=/bin install
