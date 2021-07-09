@@ -347,6 +347,7 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 	const char *name;
 	char *str;
 	struct udev_device *dev = NULL;
+	void *ctx = NULL;
 	int id, ok = -1;
 
 	memset(di, 0, sizeof(*di));
@@ -371,10 +372,17 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 		di->product_id = (int16_t)id;
 	free(str);
 
+	if ((ctx = fido_nfc_open(di->path)) == NULL) {
+		fido_log_debug("%s: fido_nfc_open", __func__);
+		goto fail;
+	}
+
 	ok = 0;
 fail:
 	if (dev != NULL)
 		udev_device_unref(dev);
+	if (ctx != NULL)
+		fido_nfc_close(ctx);
 
 	if (ok < 0) {
 		free(di->path);
