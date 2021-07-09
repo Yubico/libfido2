@@ -341,14 +341,7 @@ int
 fido_dev_open(fido_dev_t *dev, const char *path)
 {
 #ifdef NFC_LINUX
-	/*
-	 * this is a hack to get existing applications up and running with nfc;
-	 * it will *NOT* be part of a libfido2 release. to support nfc in your
-	 * application, please change it to use fido_dev_open_with_info().
-	 */
-	if (strncmp(path, "/sys", strlen("/sys")) == 0 && strlen(path) > 4 &&
-	    path[strlen(path) - 4] == 'n' && path[strlen(path) - 3] == 'f' &&
-	    path[strlen(path) - 2] == 'c') {
+	if (strncmp(path, FIDO_NFC_PREFIX, strlen(FIDO_NFC_PREFIX)) == 0) {
 		dev->io_own = true;
 		dev->io = (fido_dev_io_t) {
 			fido_nfc_open,
