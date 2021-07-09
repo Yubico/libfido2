@@ -13,6 +13,8 @@
 #include <errno.h>
 #include <libudev.h>
 #include <signal.h>
+#include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "fido.h"
@@ -355,18 +357,15 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 	if ((name = udev_list_entry_get_name(udev_entry)) == NULL ||
 	    (dev = udev_device_new_from_syspath(udev, name)) == NULL)
 		goto fail;
-
-	if ((di->path = strdup(name)) == NULL ||
+	if (asprintf(&di->path, "%s/%s", FIDO_NFC_PREFIX, name) == -1 ||
 	    (di->manufacturer = get_usb_attr(dev, "manufacturer")) == NULL ||
 	    (di->product = get_usb_attr(dev, "product")) == NULL)
 		goto fail;
-
 	/* XXX assumes USB for vendor/product info */
 	if ((str = get_usb_attr(dev, "idVendor")) != NULL &&
 	    (id = to_int(str, 16)) > 0 && id <= UINT16_MAX)
 		di->vendor_id = (int16_t)id;
 	free(str);
-
 	if ((str = get_usb_attr(dev, "idProduct")) != NULL &&
 	    (id = to_int(str, 16)) > 0 && id <= UINT16_MAX)
 		di->product_id = (int16_t)id;
@@ -540,7 +539,11 @@ fido_nfc_open(const char *path)
 	struct nfc_linux *ctx = NULL;
 	int idx;
 
-	if ((idx = sysnum_from_syspath(path)) < 0 ||
+	if (strncmp(path, FIDO_NFC_PREFIX, strlen(FIDO_NFC_PREFIX)) != 0) {
+		fido_log_debug("%s: bad prefix", __func__);
+		goto fail;
+	}
+	if ((idx = sysnum_from_syspath(path + strlen(FIDO_NFC_PREFIX))) < 0 ||
 	    (ctx = nfc_new((uint32_t)idx)) == NULL) {
 		fido_log_debug("%s: nfc_new", __func__);
 		goto fail;

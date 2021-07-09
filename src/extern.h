@@ -247,6 +247,7 @@ uint32_t uniform_random(uint32_t);
 #define FIDO_DUMMY_USER_NAME	"dummy"
 #define FIDO_DUMMY_USER_ID	1
 #define FIDO_WINHELLO_PATH	"windows://hello"
+#define FIDO_NFC_PREFIX		"nfc:"
 
 #ifdef __cplusplus
 } /* extern "C" */
