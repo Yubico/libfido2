@@ -273,10 +273,8 @@ get_rp_list(const struct param *p)
 	for (size_t i = 0; i < fido_credman_rp_count(rp) + 1; i++) {
 		consume(fido_credman_rp_id_hash_ptr(rp, i),
 		    fido_credman_rp_id_hash_len(rp, i));
-		consume(fido_credman_rp_id(rp, i),
-		    xstrlen(fido_credman_rp_id(rp, i)));
-		consume(fido_credman_rp_name(rp, i),
-		    xstrlen(fido_credman_rp_name(rp, i)));
+		consume_str(fido_credman_rp_id(rp, i));
+		consume_str(fido_credman_rp_name(rp, i));
 	}
 
 	fido_credman_rp_free(&rp);
@@ -317,10 +315,8 @@ get_rk_list(const struct param *p)
 		consume(fido_cred_pubkey_ptr(cred), fido_cred_pubkey_len(cred));
 		consume(fido_cred_user_id_ptr(cred),
 		    fido_cred_user_id_len(cred));
-		consume(fido_cred_user_name(cred),
-		    xstrlen(fido_cred_user_name(cred)));
-		consume(fido_cred_display_name(cred),
-		    xstrlen(fido_cred_display_name(cred)));
+		consume_str(fido_cred_user_name(cred));
+		consume_str(fido_cred_display_name(cred));
 		val = fido_cred_prot(cred);
 		consume(&val, sizeof(val));
 	}

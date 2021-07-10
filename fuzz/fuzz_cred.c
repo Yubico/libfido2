@@ -310,9 +310,8 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	consume(fido_cred_id_ptr(cred), fido_cred_id_len(cred));
 	consume(fido_cred_aaguid_ptr(cred), fido_cred_aaguid_len(cred));
 	consume(fido_cred_user_id_ptr(cred), fido_cred_user_id_len(cred));
-	consume(fido_cred_user_name(cred), xstrlen(fido_cred_user_name(cred)));
-	consume(fido_cred_display_name(cred),
-	    xstrlen(fido_cred_display_name(cred)));
+	consume_str(fido_cred_user_name(cred));
+	consume_str(fido_cred_display_name(cred));
 	consume(fido_cred_largeblob_key_ptr(cred),
 	    fido_cred_largeblob_key_len(cred));
 

@@ -270,7 +270,7 @@ dev_get_cbor_info(const struct param *p)
 	for (size_t i = 0; i <= fido_cbor_info_algorithm_count(ci); i++) {
 		const char *type = fido_cbor_info_algorithm_type(ci, i);
 		int cose = fido_cbor_info_algorithm_cose(ci, i);
-		consume(type, xstrlen(type));
+		consume_str(type);
 		consume(&cose, sizeof(cose));
 	}
 
