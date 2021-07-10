@@ -51,7 +51,8 @@ consume(const void *body, size_t len)
 void
 consume_str(const char *str)
 {
-	consume(str, strlen(str));
+	if (str != NULL)
+		consume(str, strlen(str));
 }
 
 int
