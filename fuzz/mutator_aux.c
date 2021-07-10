@@ -25,15 +25,6 @@ size_t LLVMFuzzerMutate(uint8_t *, size_t, size_t);
 static const uint8_t *wire_data_ptr = NULL;
 static size_t wire_data_len = 0;
 
-size_t
-xstrlen(const char *s)
-{
-	if (s == NULL)
-		return 0;
-
-	return strlen(s);
-}
-
 void
 consume(const void *body, size_t len)
 {
