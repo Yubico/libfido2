@@ -168,8 +168,8 @@ copy_info(fido_dev_info_t *di)
 	    (di->manufacturer = strdup(VENDORNAME)) == NULL ||
 	    (di->product = strdup(PRODNAME)) == NULL)
 		return -1;
-	di->vendor_id = uniform_random(0xffff);
-	di->product_id = uniform_random(0xffff);
+	di->vendor_id = (int16_t)uniform_random(0xffff);
+	di->product_id = (int16_t)uniform_random(0xffff);
 
 	return 0;
 }
@@ -198,7 +198,7 @@ test_manifest(void)
 {
 	size_t ndevs, nfound;
 	fido_dev_info_t *devlist;
-	uint16_t vendor_id, product_id;
+	int16_t vendor_id, product_id;
 
 	fido_dev_register_manifest_func(manifest);
 	ndevs = uniform_random(64);
