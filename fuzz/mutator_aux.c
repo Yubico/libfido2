@@ -52,7 +52,7 @@ void
 consume_str(const char *str)
 {
 	if (str != NULL)
-		consume(str, strlen(str));
+		consume(str, strlen(str) + 1);
 }
 
 int
