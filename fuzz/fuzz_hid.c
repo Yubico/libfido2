@@ -10,11 +10,19 @@
 #include <string.h>
 #include <stdio.h>
 
+#define _FIDO_INTERNAL
+
 #include "../openbsd-compat/openbsd-compat.h"
 #include "mutator_aux.h"
 
+#define DEVPATH		"/dev/hidraw1"
+#define VENDORNAME	"Yubico AB"
+#define PRODNAME	"Security Key"
+
+extern int fido_dev_register_manifest_func(const dev_manifest_func_t);
 extern int fido_hid_get_usage(const uint8_t *, size_t, uint32_t *);
 extern int fido_hid_get_report_len(const uint8_t *, size_t, size_t *, size_t *);
+extern void fido_dev_unregister_manifest_func(const dev_manifest_func_t);
 
 struct param {
 	int seed;
@@ -151,6 +159,68 @@ get_report_len(const struct param *p)
 	consume(&report_out_len, sizeof(report_out_len));
 }
 
+static int
+copy_info(fido_dev_info_t *di)
+{
+	memset(di, 0, sizeof(*di));
+
+	if ((di->path = strdup(DEVPATH)) == NULL ||
+	    (di->manufacturer = strdup(VENDORNAME)) == NULL ||
+	    (di->product = strdup(PRODNAME)) == NULL)
+		return -1;
+	di->vendor_id = uniform_random(0xffff);
+	di->product_id = uniform_random(0xffff);
+
+	return 0;
+}
+
+/* not much we can do here, unfortunately */
+static int
+manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
+{
+	size_t ndevs;
+
+	*olen = 0;
+	if (ilen == 0)
+		return FIDO_OK; /* nothing to do */
+	ndevs = uniform_random(64);
+	for (size_t i = 0; i < ndevs && *olen < ilen; i++) {
+		if (copy_info(&devlist[*olen]) < 0)
+			return FIDO_ERR_INTERNAL;
+		++(*olen);
+	}
+
+	return FIDO_OK;
+}
+
+static void
+test_manifest(void)
+{
+	size_t ndevs, nfound;
+	fido_dev_info_t *devlist;
+	uint16_t vendor_id, product_id;
+
+	fido_dev_register_manifest_func(manifest);
+	ndevs = uniform_random(64);
+	if ((devlist = fido_dev_info_new(ndevs)) == NULL)
+		goto out;
+	if (fido_dev_info_manifest(devlist, ndevs, &nfound) != FIDO_OK)
+		goto out;
+	for (size_t i = 0; i < nfound; i++) {
+		const fido_dev_info_t *di = fido_dev_info_ptr(devlist, i);
+		consume_str(fido_dev_info_path(di));
+		consume_str(fido_dev_info_manufacturer_string(di));
+		consume_str(fido_dev_info_product_string(di));
+		vendor_id = fido_dev_info_vendor(di);
+		product_id = fido_dev_info_product(di);
+		consume(&vendor_id, sizeof(vendor_id));
+		consume(&product_id, sizeof(product_id));
+	}
+out:
+	fido_dev_info_free(&devlist, ndevs);
+	fido_dev_unregister_manifest_func(manifest);
+}
+
 void
 test(const struct param *p)
 {
@@ -160,6 +230,7 @@ test(const struct param *p)
 
 	get_usage(p);
 	get_report_len(p);
+	test_manifest();
 }
 
 void
