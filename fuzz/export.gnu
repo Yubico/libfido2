@@ -201,6 +201,7 @@
 		fido_dev_new;
 		fido_dev_open;
 		fido_dev_protocol;
+		fido_dev_register_manifest_func;
 		fido_dev_reset;
 		fido_dev_set_io_functions;
 		fido_dev_set_pin;
@@ -212,6 +213,7 @@
 		fido_dev_supports_pin;
 		fido_dev_supports_uv;
 		fido_dev_toggle_always_uv;
+		fido_dev_unregister_manifest_func;
 		fido_dev_largeblob_get;
 		fido_dev_largeblob_get_array;
 		fido_dev_largeblob_remove;
