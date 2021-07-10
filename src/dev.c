@@ -303,13 +303,15 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 	*olen = 0;
 
+#if !defined(FIDO_FUZZ)
 	if (fido_dev_register_manifest_func(fido_hid_manifest) != FIDO_OK)
 		return (FIDO_ERR_INTERNAL);
-#ifdef NFC_LINUX
+#endif
+#if defined(NFC_LINUX) && !defined(FIDO_FUZZ)
 	if (fido_dev_register_manifest_func(fido_nfc_manifest) != FIDO_OK)
 		return (FIDO_ERR_INTERNAL);
 #endif
-#ifdef USE_WINHELLO
+#if defined(USE_WINHELLO) && !defined(FIDO_FUZZ)
 	if (fido_dev_register_manifest_func(fido_winhello_manifest) != FIDO_OK)
 		return (FIDO_ERR_INTERNAL);
 #endif
