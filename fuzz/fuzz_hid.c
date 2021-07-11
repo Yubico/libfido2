@@ -15,9 +15,9 @@
 #include "../openbsd-compat/openbsd-compat.h"
 #include "mutator_aux.h"
 
-#define DEVPATH		"/dev/hidraw1"
-#define VENDORNAME	"Yubico AB"
-#define PRODNAME	"Security Key"
+#define PATH		"/dev/hidraw1"
+#define MANUFACTURER	"Yubico AB"
+#define PRODUCT		"Security Key"
 
 extern int fido_dev_register_manifest_func(const dev_manifest_func_t);
 extern int fido_hid_get_usage(const uint8_t *, size_t, uint32_t *);
@@ -164,10 +164,11 @@ copy_info(fido_dev_info_t *di)
 {
 	memset(di, 0, sizeof(*di));
 
-	if ((di->path = strdup(DEVPATH)) == NULL ||
-	    (di->manufacturer = strdup(VENDORNAME)) == NULL ||
-	    (di->product = strdup(PRODNAME)) == NULL)
+	if ((di->path = strdup(PATH)) == NULL ||
+	    (di->manufacturer = strdup(MANUFACTURER)) == NULL ||
+	    (di->product = strdup(PRODUCT)) == NULL)
 		return -1;
+
 	di->vendor_id = (int16_t)uniform_random(0xffff);
 	di->product_id = (int16_t)uniform_random(0xffff);
 
@@ -202,9 +203,8 @@ test_manifest(void)
 
 	fido_dev_register_manifest_func(manifest);
 	ndevs = uniform_random(64);
-	if ((devlist = fido_dev_info_new(ndevs)) == NULL)
-		goto out;
-	if (fido_dev_info_manifest(devlist, ndevs, &nfound) != FIDO_OK)
+	if ((devlist = fido_dev_info_new(ndevs)) == NULL ||
+	    fido_dev_info_manifest(devlist, ndevs, &nfound) != FIDO_OK)
 		goto out;
 	for (size_t i = 0; i < nfound; i++) {
 		const fido_dev_info_t *di = fido_dev_info_ptr(devlist, i);
