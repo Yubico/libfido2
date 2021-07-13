@@ -271,6 +271,9 @@ pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg,
 	case COSE_EDDSA:
 		alg->lAlg = -8; /* XXX */;
 		break;
+	case COSE_RS256:
+		alg->lAlg = WEBAUTHN_COSE_ALGORITHM_RSASSA_PKCS1_V1_5_WITH_SHA256;
+		break;
 	default:
 		fido_log_debug("%s: type %d", __func__, type);
 		return -1;
