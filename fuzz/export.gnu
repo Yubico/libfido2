@@ -235,6 +235,7 @@
 		rs256_pk_to_EVP_PKEY;
 		prng_init;
 		set_netlink_io_functions;
+		set_udev_parameters;
 		uniform_random;
 	local:
 		*;
