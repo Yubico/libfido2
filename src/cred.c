@@ -152,8 +152,7 @@ fido_dev_make_cred_rx(fido_dev_t *dev, fido_cred_t *cred, int ms)
 	}
 
 	if (cred->fmt == NULL || fido_blob_is_empty(&cred->authdata_cbor) ||
-	    fido_blob_is_empty(&cred->attcred.id) ||
-	    fido_blob_is_empty(&cred->attstmt.sig)) {
+	    fido_blob_is_empty(&cred->attcred.id)) {
 		fido_cred_reset_rx(cred);
 		return (FIDO_ERR_INVALID_CBOR);
 	}
@@ -341,7 +340,7 @@ fido_cred_verify(const fido_cred_t *cred)
 			r = FIDO_ERR_INTERNAL;
 			goto out;
 		}
-	} else {
+	} else if (!strcmp(cred->fmt, "fido-u2f")) {
 		if (get_signed_hash_u2f(&dgst, cred->authdata.rp_id_hash,
 		    sizeof(cred->authdata.rp_id_hash), &cred->cdh,
 		    &cred->attcred.id, &cred->attcred.pubkey.es256) < 0) {
@@ -349,6 +348,10 @@ fido_cred_verify(const fido_cred_t *cred)
 			r = FIDO_ERR_INTERNAL;
 			goto out;
 		}
+	} else {
+		fido_log_debug("%s: unknown fmt %s", __func__, cred->fmt);
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto out;
 	}
 
 	if (verify_sig(&dgst, &cred->attstmt.x5c, &cred->attstmt.sig) < 0) {
@@ -416,7 +419,7 @@ fido_cred_verify_self(const fido_cred_t *cred)
 			r = FIDO_ERR_INTERNAL;
 			goto out;
 		}
-	} else {
+	} else if (!strcmp(cred->fmt, "fido-u2f")) {
 		if (get_signed_hash_u2f(&dgst, cred->authdata.rp_id_hash,
 		    sizeof(cred->authdata.rp_id_hash), &cred->cdh,
 		    &cred->attcred.id, &cred->attcred.pubkey.es256) < 0) {
@@ -424,6 +427,10 @@ fido_cred_verify_self(const fido_cred_t *cred)
 			r = FIDO_ERR_INTERNAL;
 			goto out;
 		}
+	} else {
+		fido_log_debug("%s: unknown fmt %s", __func__, cred->fmt);
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto out;
 	}
 
 	switch (cred->attcred.type) {
@@ -848,7 +855,8 @@ fido_cred_set_fmt(fido_cred_t *cred, const char *fmt)
 	if (fmt == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	if (strcmp(fmt, "packed") && strcmp(fmt, "fido-u2f"))
+	if (strcmp(fmt, "packed") && strcmp(fmt, "fido-u2f") &&
+	    strcmp(fmt, "none"))
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	if ((cred->fmt = strdup(fmt)) == NULL)
