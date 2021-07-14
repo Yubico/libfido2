@@ -240,18 +240,19 @@ by default, allowing the authenticator to use its default settings.
 .Pp
 The
 .Fn fido_cred_set_fmt
-function sets the format of
+function sets the attestation format of
 .Fa cred
 to
 .Fa fmt ,
 where
 .Fa fmt
-must be either
+must be
 .Vt "packed"
-.Pq the format used in FIDO2
-or
+.Pq the format used in FIDO2 ,
 .Vt "fido-u2f"
-.Pq the format used by U2F .
+.Pq the format used by U2F ,
+or
+.Vt "none" .
 A copy of
 .Fa fmt
 is made, and no references to the passed pointer are kept.
