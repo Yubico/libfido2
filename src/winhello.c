@@ -623,11 +623,6 @@ translate_fido_cred(struct winhello_cred *ctx, fido_cred_t *cred,
 static int
 translate_winhello_cred(fido_cred_t *cred, WEBAUTHN_CREDENTIAL_ATTESTATION *att)
 {
-	if (att->dwAttestationDecodeType != WEBAUTHN_ATTESTATION_DECODE_COMMON) {
-		fido_log_debug("%s: dwAttestationDecodeType %u", __func__,
-		    att->dwAttestationDecodeType);
-		return FIDO_ERR_INTERNAL;
-	}
 	if (unpack_fmt(cred, att) < 0) {
 		fido_log_debug("%s: unpack_fmt", __func__);
 		return FIDO_ERR_INTERNAL;
@@ -636,12 +631,31 @@ translate_winhello_cred(fido_cred_t *cred, WEBAUTHN_CREDENTIAL_ATTESTATION *att)
 		fido_log_debug("%s: unpack_cred_authdata", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
-	if (unpack_cred_sig(cred, att->pvAttestationDecode) < 0) {
-		fido_log_debug("%s: unpack_cred_sig", __func__);
-		return FIDO_ERR_INTERNAL;
-	}
-	if (unpack_x5c(cred, att->pvAttestationDecode) < 0) {
-		fido_log_debug("%s: unpack_x5c", __func__);
+
+	switch (att->dwAttestationDecodeType) {
+	case WEBAUTHN_ATTESTATION_DECODE_NONE:
+		if (att->pvAttestationDecode != NULL) {
+			fido_log_debug("%s: pvAttestationDecode", __func__);
+			return FIDO_ERR_INTERNAL;
+		}
+		break;
+	case WEBAUTHN_ATTESTATION_DECODE_COMMON:
+		if (att->pvAttestationDecode == NULL) {
+			fido_log_debug("%s: pvAttestationDecode", __func__);
+			return FIDO_ERR_INTERNAL;
+		}
+		if (unpack_cred_sig(cred, att->pvAttestationDecode) < 0) {
+			fido_log_debug("%s: unpack_cred_sig", __func__);
+			return FIDO_ERR_INTERNAL;
+		}
+		if (unpack_x5c(cred, att->pvAttestationDecode) < 0) {
+			fido_log_debug("%s: unpack_x5c", __func__);
+			return FIDO_ERR_INTERNAL;
+		}
+		break;
+	default:
+		fido_log_debug("%s: dwAttestationDecodeType: %u", __func__,
+		    att->dwAttestationDecodeType);
 		return FIDO_ERR_INTERNAL;
 	}
 
