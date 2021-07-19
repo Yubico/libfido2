@@ -182,7 +182,8 @@ if(MSVC)
 			# initializer;
 		"C4706" # assignment within conditional expression;
 		"C4996" # The POSIX name for this item is deprecated. Instead,
-			# use the ISO C and C++ conformant name
+			# use the ISO C and C++ conformant name;
+		"C6287" # redundant code: the left and right subexpressions are identical
 		)
 	# The construction in the following 3 lines was taken from LibreSSL's
 	# CMakeLists.txt.
