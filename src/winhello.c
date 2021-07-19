@@ -746,7 +746,8 @@ winhello_cred_free(struct winhello_cred *ctx)
 	free(ctx->display_name);
 	free(ctx->opt.CredentialList.pCredentials);
 	for (size_t i = 0; i < ctx->opt.Extensions.cExtensions; i++) {
-		WEBAUTHN_EXTENSION *e = &ctx->opt.Extensions.pExtensions[i];
+		WEBAUTHN_EXTENSION *e;
+		e = &ctx->opt.Extensions.pExtensions[i];
 		free(e->pvExtension);
 	}
 	free(ctx->opt.Extensions.pExtensions);
