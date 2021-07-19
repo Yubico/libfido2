@@ -3,7 +3,8 @@ param(
 	[string]$GitPath = "C:\Program Files\Git\bin\git.exe",
 	[string]$SevenZPath = "C:\Program Files\7-Zip\7z.exe",
 	[string]$GPGPath = "C:\Program Files (x86)\GnuPG\bin\gpg.exe",
-	[string]$WinSDK = ""
+	[string]$WinSDK = "",
+	[string]$Fido2Flags = ""
 )
 
 $ErrorActionPreference = "Continue"
@@ -189,7 +190,7 @@ Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 		-DZLIB_LIBRARY_DIRS="${OUTPUT}\lib" `
 		-DCRYPTO_INCLUDE_DIRS="${OUTPUT}\include" `
 		-DCRYPTO_LIBRARY_DIRS="${OUTPUT}\lib" `
-		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
+		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl ${Fido2Flags}" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"
 	& $CMake --build . --config Release --verbose
 	& $CMake --build . --config Release --target install --verbose
