@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: build
-      run: .\windows\build.ps1 -WinSDK '10.0.19041.0'
+      run: .\windows\build.ps1 -WinSDK '10.0.19041.0' -Fido2Flags '/analyze'
