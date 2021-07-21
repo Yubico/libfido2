@@ -18,7 +18,7 @@ FIDO2_ASAN="address bounds implicit-conversion leak pointer-compare pointer-subt
 FIDO2_MSAN="memory"
 COMMON_CFLAGS="-g2 -fno-omit-frame-pointer"
 UBSAN_OPTIONS="halt_on_error=1:print_stacktrace=1"
-ASAN_OPTIONS="${UBSAN_OPTIONS}:detect_invalid_pointer_pairs=1:detect_leaks=1"
+ASAN_OPTIONS="${UBSAN_OPTIONS}:detect_invalid_pointer_pairs=2:detect_leaks=1"
 MSAN_OPTIONS="${UBSAN_OPTIONS}"
 
 case "$1" in
