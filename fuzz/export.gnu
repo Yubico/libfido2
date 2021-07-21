@@ -137,6 +137,7 @@
 		fido_credman_rp_new;
 		fido_credman_set_dev_rk;
 		fido_cred_new;
+		fido_cred_pin_minlen;
 		fido_cred_prot;
 		fido_cred_pubkey_len;
 		fido_cred_pubkey_ptr;
@@ -150,6 +151,7 @@
 		fido_cred_set_fmt;
 		fido_cred_set_id;
 		fido_cred_set_options;
+		fido_cred_set_pin_minlen;
 		fido_cred_set_prot;
 		fido_cred_set_rk;
 		fido_cred_set_rp;
