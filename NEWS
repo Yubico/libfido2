@@ -1,4 +1,4 @@
-* Version 1.8.0 (unreleased)
+* Version 1.8.0 (2021-07-22)
  ** Dropped 'Requires.private' entry from pkg-config file.
  ** Better support for FIDO 2.1 authenticators.
  ** Support for Windows's native webauthn API.
