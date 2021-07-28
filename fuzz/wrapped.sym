@@ -31,6 +31,9 @@ EVP_CIPHER_CTX_set_padding
 EVP_CipherInit
 EVP_DecryptInit_ex
 EVP_DecryptUpdate
+EVP_DigestFinal_ex
+EVP_DigestInit_ex
+EVP_DigestUpdate
 EVP_DigestVerifyInit
 EVP_EncryptInit_ex
 EVP_EncryptUpdate
@@ -61,9 +64,6 @@ ioctl
 malloc
 RSA_set0_key
 SHA256
-SHA256_Final
-SHA256_Init
-SHA256_Update
 strdup
 udev_device_get_devnode
 udev_device_get_parent_with_subsystem_devtype
