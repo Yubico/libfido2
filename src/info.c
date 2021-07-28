@@ -186,14 +186,6 @@ out:
 	return (ok);
 }
 
-static void
-free_algo(fido_algo_t *a)
-{
-	free(a->type);
-	a->type = NULL;
-	a->cose = 0;
-}
-
 static int
 decode_algorithm(const cbor_item_t *item, void *arg)
 {
@@ -210,7 +202,7 @@ decode_algorithm(const cbor_item_t *item, void *arg)
 
 	if (cbor_map_iter(item, &aa->ptr[i], decode_algorithm_entry) < 0) {
 		fido_log_debug("%s: decode_algorithm_entry", __func__);
-		free_algo(&aa->ptr[i]);
+		fido_algo_free(&aa->ptr[i]);
 		return (-1);
 	}
 
@@ -354,58 +346,15 @@ fido_cbor_info_new(void)
 	return (calloc(1, sizeof(fido_cbor_info_t)));
 }
 
-static void
-free_str_array(fido_str_array_t *sa)
-{
-	for (size_t i = 0; i < sa->len; i++)
-		free(sa->ptr[i]);
-
-	free(sa->ptr);
-	sa->ptr = NULL;
-	sa->len = 0;
-}
-
-static void
-free_opt_array(fido_opt_array_t *oa)
-{
-	for (size_t i = 0; i < oa->len; i++)
-		free(oa->name[i]);
-
-	free(oa->name);
-	free(oa->value);
-	oa->name = NULL;
-	oa->value = NULL;
-}
-
-static void
-free_byte_array(fido_byte_array_t *ba)
-{
-	free(ba->ptr);
-
-	ba->ptr = NULL;
-	ba->len = 0;
-}
-
-static void
-free_algo_array(fido_algo_array_t *aa)
-{
-	for (size_t i = 0; i < aa->len; i++)
-		free_algo(&aa->ptr[i]);
-
-	free(aa->ptr);
-	aa->ptr = NULL;
-	aa->len = 0;
-}
-
 void
 fido_cbor_info_reset(fido_cbor_info_t *ci)
 {
-	free_str_array(&ci->versions);
-	free_str_array(&ci->extensions);
-	free_str_array(&ci->transports);
-	free_opt_array(&ci->options);
-	free_byte_array(&ci->protocols);
-	free_algo_array(&ci->algorithms);
+	fido_str_array_free(&ci->versions);
+	fido_str_array_free(&ci->extensions);
+	fido_str_array_free(&ci->transports);
+	fido_opt_array_free(&ci->options);
+	fido_byte_array_free(&ci->protocols);
+	fido_algo_array_free(&ci->algorithms);
 }
 
 void

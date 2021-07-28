@@ -31,6 +31,7 @@ list(APPEND FIDO_SOURCES
 	random.c
 	reset.c
 	rs256.c
+	types.c
 	u2f.c
 )
 
