@@ -225,24 +225,33 @@ get_signed_hash_u2f(fido_blob_t *dgst, const unsigned char *rp_id,
     size_t rp_id_len, const fido_blob_t *clientdata, const fido_blob_t *id,
     const es256_pk_t *pk)
 {
-	const uint8_t		zero = 0;
-	const uint8_t		four = 4; /* uncompressed point */
-	SHA256_CTX		ctx;
+	const uint8_t	 zero = 0;
+	const uint8_t	 four = 4; /* uncompressed point */
+	const EVP_MD	*md = NULL;
+	EVP_MD_CTX	*ctx = NULL;
+	int		 ok = -1;
 
-	if (dgst->len != SHA256_DIGEST_LENGTH || SHA256_Init(&ctx) == 0 ||
-	    SHA256_Update(&ctx, &zero, sizeof(zero)) == 0 ||
-	    SHA256_Update(&ctx, rp_id, rp_id_len) == 0 ||
-	    SHA256_Update(&ctx, clientdata->ptr, clientdata->len) == 0 ||
-	    SHA256_Update(&ctx, id->ptr, id->len) == 0 ||
-	    SHA256_Update(&ctx, &four, sizeof(four)) == 0 ||
-	    SHA256_Update(&ctx, pk->x, sizeof(pk->x)) == 0 ||
-	    SHA256_Update(&ctx, pk->y, sizeof(pk->y)) == 0 ||
-	    SHA256_Final(dgst->ptr, &ctx) == 0) {
+	if (dgst->len != SHA256_DIGEST_LENGTH ||
+	    (md = EVP_sha256()) == NULL ||
+	    (ctx = EVP_MD_CTX_new()) == NULL ||
+	    EVP_DigestInit_ex(ctx, md, NULL) != 1 ||
+	    EVP_DigestUpdate(ctx, &zero, sizeof(zero)) != 1 ||
+	    EVP_DigestUpdate(ctx, rp_id, rp_id_len) != 1 ||
+	    EVP_DigestUpdate(ctx, clientdata->ptr, clientdata->len) != 1 ||
+	    EVP_DigestUpdate(ctx, id->ptr, id->len) != 1 ||
+	    EVP_DigestUpdate(ctx, &four, sizeof(four)) != 1 ||
+	    EVP_DigestUpdate(ctx, pk->x, sizeof(pk->x)) != 1 ||
+	    EVP_DigestUpdate(ctx, pk->y, sizeof(pk->y)) != 1 ||
+	    EVP_DigestFinal_ex(ctx, dgst->ptr, NULL) != 1) {
 		fido_log_debug("%s: sha256", __func__);
-		return (-1);
+		goto fail;
 	}
 
-	return (0);
+	ok = 0;
+fail:
+	EVP_MD_CTX_free(ctx);
+
+	return (ok);
 }
 
 static int

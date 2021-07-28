@@ -136,30 +136,6 @@ WRAP(int,
 	1
 )
 
-WRAP(int,
-	SHA256_Init,
-	(SHA256_CTX *c),
-	0,
-	(c),
-	1
-)
-
-WRAP(int,
-	SHA256_Update,
-	(SHA256_CTX *c, const void *data, size_t len),
-	0,
-	(c, data, len),
-	1
-)
-
-WRAP(int,
-	SHA256_Final,
-	(unsigned char *md, SHA256_CTX *c),
-	0,
-	(md, c),
-	1
-)
-
 WRAP(RSA *,
 	EVP_PKEY_get0_RSA,
 	(EVP_PKEY *pkey),
@@ -198,6 +174,30 @@ WRAP(int,
 	    EVP_PKEY *pkey),
 	0,
 	(ctx, pctx, type, e, pkey),
+	1
+)
+
+WRAP(int,
+	EVP_DigestInit_ex,
+	(EVP_MD_CTX *ctx, const EVP_MD *type, ENGINE *impl),
+	0,
+	(ctx, type, impl),
+	1
+)
+
+WRAP(int,
+	EVP_DigestUpdate,
+	(EVP_MD_CTX *ctx, const void *data, size_t count),
+	0,
+	(ctx, data, count),
+	1
+)
+
+WRAP(int,
+	EVP_DigestFinal_ex,
+	(EVP_MD_CTX *ctx, unsigned char *md, unsigned int *isize),
+	0,
+	(ctx, md, isize),
 	1
 )
 
