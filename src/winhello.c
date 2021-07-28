@@ -98,24 +98,6 @@ to_utf8(const wchar_t *utf16)
 }
 
 static int
-to_fido_str_array(fido_str_array_t *sa, const char **v, size_t n)
-{
-	if ((sa->ptr = calloc(n, sizeof(char *))) == NULL) {
-		fido_log_debug("%s: calloc", __func__);
-		return -1;
-	}
-	for (size_t i = 0; i < n; i++) {
-		if ((sa->ptr[i] = strdup(v[i])) == NULL) {
-			fido_log_debug("%s: strdup", __func__);
-			return -1;
-		}
-		sa->len++;
-	}
-
-	return 0;
-}
-
-static int
 to_fido(HRESULT hr)
 {
 	switch (hr) {
@@ -873,10 +855,10 @@ fido_winhello_get_cbor_info(fido_dev_t *dev, fido_cbor_info_t *ci)
 
 	fido_cbor_info_reset(ci);
 
-	if (to_fido_str_array(&ci->versions, v, nitems(v)) < 0 ||
-	    to_fido_str_array(&ci->extensions, e, nitems(e)) < 0 ||
-	    to_fido_str_array(&ci->transports, t, nitems(t)) < 0) {
-		fido_log_debug("%s: to_fido_str_array", __func__);
+	if (fido_str_array_pack(&ci->versions, v, nitems(v)) < 0 ||
+	    fido_str_array_pack(&ci->extensions, e, nitems(e)) < 0 ||
+	    fido_str_array_pack(&ci->transports, t, nitems(t)) < 0) {
+		fido_log_debug("%s: fido_str_array_pack", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
 	if ((ci->options.name = calloc(nitems(o), sizeof(char *))) == NULL ||

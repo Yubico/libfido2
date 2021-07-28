@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -177,6 +177,14 @@ int fido_dev_get_uv_token(fido_dev_t *, uint8_t, const char *,
 uint64_t fido_dev_maxmsgsize(const fido_dev_t *);
 int fido_do_ecdh(fido_dev_t *, es256_pk_t **, fido_blob_t **);
 bool fido_dev_supports_permissions(const fido_dev_t *);
+
+/* types */
+void fido_algo_array_free(fido_algo_array_t *);
+void fido_byte_array_free(fido_byte_array_t *);
+void fido_opt_array_free(fido_opt_array_t *);
+void fido_str_array_free(fido_str_array_t *);
+void fido_algo_free(fido_algo_t *);
+int fido_str_array_pack(fido_str_array_t *, const char **, size_t);
 
 /* misc */
 void fido_assert_reset_rx(fido_assert_t *);
