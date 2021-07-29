@@ -58,7 +58,7 @@ fido_algo_array_free(fido_algo_array_t *aa)
 }
 
 int
-fido_str_array_pack(fido_str_array_t *sa, const char **v, size_t n)
+fido_str_array_pack(fido_str_array_t *sa, const char * const *v, size_t n)
 {
 	if ((sa->ptr = calloc(n, sizeof(char *))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);

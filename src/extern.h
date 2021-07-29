@@ -184,7 +184,7 @@ void fido_byte_array_free(fido_byte_array_t *);
 void fido_opt_array_free(fido_opt_array_t *);
 void fido_str_array_free(fido_str_array_t *);
 void fido_algo_free(fido_algo_t *);
-int fido_str_array_pack(fido_str_array_t *, const char **, size_t);
+int fido_str_array_pack(fido_str_array_t *, const char * const *, size_t);
 
 /* misc */
 void fido_assert_reset_rx(fido_assert_t *);
