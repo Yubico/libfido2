@@ -129,6 +129,8 @@ list(APPEND MAN_ALIAS
 	fido_cbor_info_new fido_cbor_info_versions_len
 	fido_cbor_info_new fido_cbor_info_versions_ptr
 	fido_cbor_info_new fido_dev_get_cbor_info
+	fido_cred_new fido_cred_aaguid_len
+	fido_cred_new fido_cred_aaguid_ptr
 	fido_cred_new fido_cred_authdata_len
 	fido_cred_new fido_cred_authdata_ptr
 	fido_cred_new fido_cred_authdata_raw_len
@@ -137,26 +139,25 @@ list(APPEND MAN_ALIAS
 	fido_cred_new fido_cred_clientdata_hash_ptr
 	fido_cred_new fido_cred_display_name
 	fido_cred_new fido_cred_flags
-	fido_cred_new fido_cred_sigcount
 	fido_cred_new fido_cred_fmt
 	fido_cred_new fido_cred_free
 	fido_cred_new fido_cred_id_len
 	fido_cred_new fido_cred_id_ptr
-	fido_cred_new fido_cred_aaguid_len
-	fido_cred_new fido_cred_aaguid_ptr
 	fido_cred_new fido_cred_largeblob_key_len
 	fido_cred_new fido_cred_largeblob_key_ptr
+	fido_cred_new fido_cred_pin_minlen
 	fido_cred_new fido_cred_prot
 	fido_cred_new fido_cred_pubkey_len
 	fido_cred_new fido_cred_pubkey_ptr
 	fido_cred_new fido_cred_rp_id
 	fido_cred_new fido_cred_rp_name
+	fido_cred_new fido_cred_sigcount
 	fido_cred_new fido_cred_sig_len
 	fido_cred_new fido_cred_sig_ptr
 	fido_cred_new fido_cred_type
-	fido_cred_new fido_cred_user_name
 	fido_cred_new fido_cred_user_id_len
 	fido_cred_new fido_cred_user_id_ptr
+	fido_cred_new fido_cred_user_name
 	fido_cred_new fido_cred_x5c_len
 	fido_cred_new fido_cred_x5c_ptr
 	fido_credman_metadata_new fido_credman_del_dev_rk
@@ -185,6 +186,7 @@ list(APPEND MAN_ALIAS
 	fido_cred_set_authdata fido_cred_set_extensions
 	fido_cred_set_authdata fido_cred_set_fmt
 	fido_cred_set_authdata fido_cred_set_id
+	fido_cred_set_authdata fido_cred_set_pin_minlen
 	fido_cred_set_authdata fido_cred_set_prot
 	fido_cred_set_authdata fido_cred_set_rk
 	fido_cred_set_authdata fido_cred_set_rp
@@ -196,6 +198,7 @@ list(APPEND MAN_ALIAS
 	fido_dev_enable_entattest fido_dev_toggle_always_uv
 	fido_dev_enable_entattest fido_dev_force_pin_change
 	fido_dev_enable_entattest fido_dev_set_pin_minlen
+	fido_dev_enable_entattest fido_dev_set_pin_minlen_rpid
 	fido_dev_get_touch_begin fido_dev_get_touch_status
 	fido_dev_info_manifest fido_dev_info_free
 	fido_dev_info_manifest fido_dev_info_manufacturer_string
