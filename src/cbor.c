@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -560,6 +560,32 @@ fail:
 	return (NULL);
 }
 
+cbor_item_t *
+cbor_encode_str_array(const fido_str_array_t *a)
+{
+	cbor_item_t	*array = NULL;
+	cbor_item_t	*entry = NULL;
+
+	if ((array = cbor_new_definite_array(a->len)) == NULL)
+		goto fail;
+
+	for (size_t i = 0; i < a->len; i++) {
+		if ((entry = cbor_build_string(a->ptr[i])) == NULL ||
+		    cbor_array_push(array, entry) == false)
+			goto fail;
+		cbor_decref(&entry);
+	}
+
+	return (array);
+fail:
+	if (entry != NULL)
+		cbor_decref(&entry);
+	if (array != NULL)
+		cbor_decref(&array);
+
+	return (NULL);
+}
+
 static int
 cbor_encode_largeblob_key_ext(cbor_item_t *map)
 {
@@ -583,6 +609,8 @@ cbor_encode_cred_ext(const fido_cred_ext_t *ext, const fido_blob_t *blob)
 	if (ext->mask & FIDO_EXT_CRED_PROTECT)
 		size++;
 	if (ext->mask & FIDO_EXT_LARGEBLOB_KEY)
+		size++;
+	if (ext->mask & FIDO_EXT_MINPINLEN)
 		size++;
 
 	if (size == 0 || (item = cbor_new_definite_map(size)) == NULL)
@@ -611,6 +639,12 @@ cbor_encode_cred_ext(const fido_cred_ext_t *ext, const fido_blob_t *blob)
 	}
 	if (ext->mask & FIDO_EXT_LARGEBLOB_KEY) {
 		if (cbor_encode_largeblob_key_ext(item) < 0) {
+			cbor_decref(&item);
+			return (NULL);
+		}
+	}
+	if (ext->mask & FIDO_EXT_MINPINLEN) {
+		if (cbor_add_bool(item, "minPinLength", FIDO_OPT_TRUE) < 0) {
 			cbor_decref(&item);
 			return (NULL);
 		}
@@ -1141,6 +1175,14 @@ decode_cred_extension(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		}
 		if (cbor_ctrl_value(val) == CBOR_CTRL_TRUE)
 			authdata_ext->mask |= FIDO_EXT_CRED_BLOB;
+	} else if (strcmp(type, "minPinLength") == 0) {
+		if (cbor_isa_uint(val) == false ||
+		    cbor_int_get_width(val) != CBOR_INT_8) {
+			fido_log_debug("%s: cbor type", __func__);
+			goto out;
+		}
+		authdata_ext->mask |= FIDO_EXT_MINPINLEN;
+		authdata_ext->minpinlen = cbor_get_uint8(val);
 	}
 
 	ok = 0;

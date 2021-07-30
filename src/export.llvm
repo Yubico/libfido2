@@ -136,6 +136,7 @@ _fido_credman_rp_name
 _fido_credman_rp_new
 _fido_credman_set_dev_rk
 _fido_cred_new
+_fido_cred_pin_minlen
 _fido_cred_prot
 _fido_cred_pubkey_len
 _fido_cred_pubkey_ptr
@@ -150,6 +151,7 @@ _fido_cred_set_extensions
 _fido_cred_set_fmt
 _fido_cred_set_id
 _fido_cred_set_options
+_fido_cred_set_pin_minlen
 _fido_cred_set_prot
 _fido_cred_set_rk
 _fido_cred_set_rp
@@ -206,6 +208,7 @@ _fido_dev_reset
 _fido_dev_set_io_functions
 _fido_dev_set_pin
 _fido_dev_set_pin_minlen
+_fido_dev_set_pin_minlen_rpid
 _fido_dev_set_sigmask
 _fido_dev_set_transport_functions
 _fido_dev_supports_cred_prot
