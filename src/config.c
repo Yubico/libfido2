@@ -133,19 +133,25 @@ fido_dev_toggle_always_uv(fido_dev_t *dev, const char *pin)
 }
 
 static int
-config_pin_minlen_tx(fido_dev_t *dev, size_t len, bool force, const char *pin)
+config_pin_minlen_tx(fido_dev_t *dev, size_t len, bool force,
+    const fido_str_array_t *rpid, const char *pin)
 {
 	cbor_item_t *argv[3];
 	int r;
 
 	memset(argv, 0, sizeof(argv));
 
-	if ((!len && !force) || len > UINT8_MAX) {
+	if ((rpid == NULL && len == 0 && !force) || len > UINT8_MAX) {
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
 	if (len && (argv[0] = cbor_build_uint8((uint8_t)len)) == NULL) {
 		fido_log_debug("%s: cbor_encode_uint8", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+	if (rpid != NULL && (argv[1] = cbor_encode_str_array(rpid)) == NULL) {
+		fido_log_debug("%s: cbor_encode_str_array", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
@@ -167,12 +173,12 @@ fail:
 }
 
 static int
-config_pin_minlen(fido_dev_t *dev, size_t len, bool force, const char *pin,
-    int ms)
+config_pin_minlen(fido_dev_t *dev, size_t len, bool force,
+    const fido_str_array_t *rpid, const char *pin, int ms)
 {
 	int r;
 
-	if ((r = config_pin_minlen_tx(dev, len, force, pin)) != FIDO_OK)
+	if ((r = config_pin_minlen_tx(dev, len, force, rpid, pin)) != FIDO_OK)
 		return r;
 
 	return fido_rx_cbor_status(dev, ms);
@@ -181,11 +187,31 @@ config_pin_minlen(fido_dev_t *dev, size_t len, bool force, const char *pin,
 int
 fido_dev_set_pin_minlen(fido_dev_t *dev, size_t len, const char *pin)
 {
-	return config_pin_minlen(dev, len, false, pin, -1);
+	return config_pin_minlen(dev, len, false, NULL, pin, -1);
 }
 
 int
 fido_dev_force_pin_change(fido_dev_t *dev, const char *pin)
 {
-	return config_pin_minlen(dev, 0, true, pin, -1);
+	return config_pin_minlen(dev, 0, true, NULL, pin, -1);
+}
+
+int
+fido_dev_set_pin_minlen_rpid(fido_dev_t *dev, const char * const *rpid,
+    size_t n, const char *pin)
+{
+	fido_str_array_t sa;
+	int r;
+
+	memset(&sa, 0, sizeof(sa));
+	if (fido_str_array_pack(&sa, rpid, n) < 0) {
+		fido_log_debug("%s: fido_str_array_pack", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+	r = config_pin_minlen(dev, 0, false, &sa, pin, -1);
+fail:
+	fido_str_array_free(&sa);
+
+	return r;
 }

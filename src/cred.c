@@ -843,6 +843,19 @@ fido_cred_set_prot(fido_cred_t *cred, int prot)
 }
 
 int
+fido_cred_set_pin_minlen(fido_cred_t *cred, size_t len)
+{
+	if (len == 0)
+		cred->ext.mask &= ~FIDO_EXT_MINPINLEN;
+	else
+		cred->ext.mask |= FIDO_EXT_MINPINLEN;
+
+	cred->ext.minpinlen = len;
+
+	return (FIDO_OK);
+}
+
+int
 fido_cred_set_blob(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 {
 	if (ptr == NULL || len == 0)
@@ -1038,6 +1051,12 @@ int
 fido_cred_prot(const fido_cred_t *cred)
 {
 	return (cred->ext.prot);
+}
+
+size_t
+fido_cred_pin_minlen(const fido_cred_t *cred)
+{
+	return (cred->ext.minpinlen);
 }
 
 const char *

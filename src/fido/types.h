@@ -124,8 +124,9 @@ typedef struct fido_user {
 } fido_user_t;
 
 typedef struct fido_cred_ext {
-	int mask; /* enabled extensions */
-	int prot; /* protection policy */
+	int    mask;      /* enabled extensions */
+	int    prot;      /* protection policy */
+	size_t minpinlen; /* minimum pin length */
 } fido_cred_ext_t;
 
 typedef struct fido_cred {
