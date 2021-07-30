@@ -1,4 +1,4 @@
-.\" Copyright (c) 2018 Yubico AB. All rights reserved.
+.\" Copyright (c) 2018-2021 Yubico AB. All rights reserved.
 .\" Use of this source code is governed by a BSD-style
 .\" license that can be found in the LICENSE file.
 .\"
@@ -17,6 +17,7 @@
 .Nm fido_cred_set_user ,
 .Nm fido_cred_set_extensions ,
 .Nm fido_cred_set_blob ,
+.Nm fido_cred_set_pin_minlen ,
 .Nm fido_cred_set_prot ,
 .Nm fido_cred_set_rk ,
 .Nm fido_cred_set_uv ,
@@ -54,6 +55,8 @@ typedef enum {
 .Fn fido_cred_set_extensions "fido_cred_t *cred" "int flags"
 .Ft int
 .Fn fido_cred_set_blob "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
+.Ft int
+.Fn fido_cred_set_pin_minlen "fido_cred_t *cred" "size_t len"
 .Ft int
 .Fn fido_cred_set_prot "fido_cred_t *cred" "int prot"
 .Ft int
@@ -183,6 +186,7 @@ At the moment, only the
 .Dv FIDO_EXT_CRED_BLOB ,
 .Dv FIDO_EXT_CRED_PROTECT ,
 .Dv FIDO_EXT_HMAC_SECRET ,
+.Dv FIDO_EXT_MINPINLEN ,
 and
 .Dv FIDO_EXT_LARGEBLOB_KEY
 extensions are supported.
@@ -205,8 +209,32 @@ which must be
 bytes long.
 .Pp
 The
+.Fn fido_cred_set_pin_minlen
+function enables the FIDO 2.1
+.Dv FIDO_EXT_MINPINLEN
+extension on
+.Fa cred
+and sets the expected minimum PIN length of
+.Fa cred
+to
+.Fa len ,
+where
+.Fa len
+is greater than zero.
+If
+.Fa len
+is zero, the
+.Dv FIDO_EXT_MINPINLEN
+extension is disabled on
+.Fa cred .
+.Pp
+The
 .Fn fido_cred_set_prot
-function sets the protection of
+function enables the FIDO 2.1
+.Dv FIDO_EXT_CRED_PROTECT
+extension on
+.Fa cred
+and sets the protection of
 .Fa cred
 to the scalar
 .Fa prot .

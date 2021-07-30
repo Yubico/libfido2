@@ -1,4 +1,4 @@
-.\" Copyright (c) 2018 Yubico AB. All rights reserved.
+.\" Copyright (c) 2018-2021 Yubico AB. All rights reserved.
 .\" Use of this source code is governed by a BSD-style
 .\" license that can be found in the LICENSE file.
 .\"
@@ -29,8 +29,8 @@ A brief description follows:
 The
 .Fn fido_cred_verify
 function verifies whether the client data hash, relying party ID,
-credential ID, type, and resident/discoverable key and user verification
-attributes of
+credential ID, type, protection policy, minimum PIN length, and
+resident/discoverable key and user verification attributes of
 .Fa cred
 have been attested by the holder of the private counterpart of
 the public key contained in the credential's x509 certificate.
