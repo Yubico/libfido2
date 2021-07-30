@@ -52,6 +52,10 @@ size_t strlcat(char *, const char *, size_t);
 size_t strlcpy(char *, const char *, size_t);
 #endif
 
+#if !defined(HAVE_STRSEP)
+char *strsep(char **, const char *);
+#endif
+
 #if !defined(HAVE_RECALLOCARRAY)
 void *recallocarray(void *, size_t, size_t, size_t);
 #endif

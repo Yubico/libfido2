@@ -205,6 +205,7 @@
 		fido_dev_set_io_functions;
 		fido_dev_set_pin;
 		fido_dev_set_pin_minlen;
+		fido_dev_set_pin_minlen_rpid;
 		fido_dev_set_transport_functions;
 		fido_dev_supports_cred_prot;
 		fido_dev_supports_credman;
