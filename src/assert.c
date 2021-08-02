@@ -4,7 +4,6 @@
  * license that can be found in the LICENSE file.
  */
 
-#include <openssl/ecdsa.h>
 #include <openssl/sha.h>
 
 #include "fido.h"
@@ -421,123 +420,6 @@ fail:
 }
 
 int
-fido_verify_sig_es256(const fido_blob_t *dgst, const es256_pk_t *pk,
-    const fido_blob_t *sig)
-{
-	EVP_PKEY	*pkey = NULL;
-	EC_KEY		*ec = NULL;
-	int		 ok = -1;
-
-	/* ECDSA_verify needs ints */
-	if (dgst->len > INT_MAX || sig->len > INT_MAX) {
-		fido_log_debug("%s: dgst->len=%zu, sig->len=%zu", __func__,
-		    dgst->len, sig->len);
-		return (-1);
-	}
-
-	if ((pkey = es256_pk_to_EVP_PKEY(pk)) == NULL ||
-	    (ec = EVP_PKEY_get0_EC_KEY(pkey)) == NULL) {
-		fido_log_debug("%s: pk -> ec", __func__);
-		goto fail;
-	}
-
-	if (ECDSA_verify(0, dgst->ptr, (int)dgst->len, sig->ptr,
-	    (int)sig->len, ec) != 1) {
-		fido_log_debug("%s: ECDSA_verify", __func__);
-		goto fail;
-	}
-
-	ok = 0;
-fail:
-	if (pkey != NULL)
-		EVP_PKEY_free(pkey);
-
-	return (ok);
-}
-
-int
-fido_verify_sig_rs256(const fido_blob_t *dgst, const rs256_pk_t *pk,
-    const fido_blob_t *sig)
-{
-	EVP_PKEY	*pkey = NULL;
-	RSA		*rsa = NULL;
-	int		 ok = -1;
-
-	/* RSA_verify needs unsigned ints */
-	if (dgst->len > UINT_MAX || sig->len > UINT_MAX) {
-		fido_log_debug("%s: dgst->len=%zu, sig->len=%zu", __func__,
-		    dgst->len, sig->len);
-		return (-1);
-	}
-
-	if ((pkey = rs256_pk_to_EVP_PKEY(pk)) == NULL ||
-	    (rsa = EVP_PKEY_get0_RSA(pkey)) == NULL) {
-		fido_log_debug("%s: pk -> ec", __func__);
-		goto fail;
-	}
-
-	if (RSA_verify(NID_sha256, dgst->ptr, (unsigned int)dgst->len, sig->ptr,
-	    (unsigned int)sig->len, rsa) != 1) {
-		fido_log_debug("%s: RSA_verify", __func__);
-		goto fail;
-	}
-
-	ok = 0;
-fail:
-	if (pkey != NULL)
-		EVP_PKEY_free(pkey);
-
-	return (ok);
-}
-
-int
-fido_verify_sig_eddsa(const fido_blob_t *dgst, const eddsa_pk_t *pk,
-    const fido_blob_t *sig)
-{
-	EVP_PKEY	*pkey = NULL;
-	EVP_MD_CTX	*mdctx = NULL;
-	int		 ok = -1;
-
-	/* EVP_DigestVerify needs ints */
-	if (dgst->len > INT_MAX || sig->len > INT_MAX) {
-		fido_log_debug("%s: dgst->len=%zu, sig->len=%zu", __func__,
-		    dgst->len, sig->len);
-		return (-1);
-	}
-
-	if ((pkey = eddsa_pk_to_EVP_PKEY(pk)) == NULL) {
-		fido_log_debug("%s: pk -> pkey", __func__);
-		goto fail;
-	}
-
-	if ((mdctx = EVP_MD_CTX_new()) == NULL) {
-		fido_log_debug("%s: EVP_MD_CTX_new", __func__);
-		goto fail;
-	}
-
-	if (EVP_DigestVerifyInit(mdctx, NULL, NULL, NULL, pkey) != 1) {
-		fido_log_debug("%s: EVP_DigestVerifyInit", __func__);
-		goto fail;
-	}
-
-	if (EVP_DigestVerify(mdctx, sig->ptr, sig->len, dgst->ptr,
-	    dgst->len) != 1) {
-		fido_log_debug("%s: EVP_DigestVerify", __func__);
-		goto fail;
-	}
-
-	ok = 0;
-fail:
-	if (mdctx != NULL)
-		EVP_MD_CTX_free(mdctx);
-
-	if (pkey != NULL)
-		EVP_PKEY_free(pkey);
-
-	return (ok);
-}
-
-int
 fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
     const void *pk)
 {
@@ -595,13 +477,13 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 
 	switch (cose_alg) {
 	case COSE_ES256:
-		ok = fido_verify_sig_es256(&dgst, pk, &stmt->sig);
+		ok = es256_verify_sig(&dgst, pk, &stmt->sig);
 		break;
 	case COSE_RS256:
-		ok = fido_verify_sig_rs256(&dgst, pk, &stmt->sig);
+		ok = rs256_verify_sig(&dgst, pk, &stmt->sig);
 		break;
 	case COSE_EDDSA:
-		ok = fido_verify_sig_eddsa(&dgst, pk, &stmt->sig);
+		ok = eddsa_verify_sig(&dgst, pk, &stmt->sig);
 		break;
 	default:
 		fido_log_debug("%s: unsupported cose_alg %d", __func__,

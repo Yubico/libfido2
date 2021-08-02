@@ -5,6 +5,7 @@
  */
 
 #include <openssl/bn.h>
+#include <openssl/ecdsa.h>
 #include <openssl/obj_mac.h>
 
 #include "fido.h"
@@ -448,6 +449,41 @@ fail:
 		EC_POINT_free(q);
 	if (ec != NULL)
 		EC_KEY_free(ec);
+
+	return (ok);
+}
+
+int
+es256_verify_sig(const fido_blob_t *dgst, const es256_pk_t *pk,
+    const fido_blob_t *sig)
+{
+	EVP_PKEY	*pkey = NULL;
+	EC_KEY		*ec = NULL;
+	int		 ok = -1;
+
+	/* ECDSA_verify needs ints */
+	if (dgst->len > INT_MAX || sig->len > INT_MAX) {
+		fido_log_debug("%s: dgst->len=%zu, sig->len=%zu", __func__,
+		    dgst->len, sig->len);
+		return (-1);
+	}
+
+	if ((pkey = es256_pk_to_EVP_PKEY(pk)) == NULL ||
+	    (ec = EVP_PKEY_get0_EC_KEY(pkey)) == NULL) {
+		fido_log_debug("%s: pk -> ec", __func__);
+		goto fail;
+	}
+
+	if (ECDSA_verify(0, dgst->ptr, (int)dgst->len, sig->ptr,
+	    (int)sig->len, ec) != 1) {
+		fido_log_debug("%s: ECDSA_verify", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	if (pkey != NULL)
+		EVP_PKEY_free(pkey);
 
 	return (ok);
 }
