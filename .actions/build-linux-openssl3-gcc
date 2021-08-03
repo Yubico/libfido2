@@ -1,0 +1,22 @@
+#!/bin/sh -eux
+
+${CC} --version
+FAKEROOT="$(mktemp -d)"
+
+# Build and install OpenSSL 3.0.0-beta2.
+git clone --branch openssl-3.0.0-beta2 \
+	--depth=1 https://github.com/openssl/openssl
+cd openssl
+./Configure linux-x86_64 --prefix="${FAKEROOT}" \
+	--openssldir="${FAKEROOT}/openssl" --libdir=lib
+make install_sw
+cd ..
+
+# Build and install libfido2.
+for T in Debug Release; do
+	mkdir build-$T
+	export PKG_CONFIG_PATH="${FAKEROOT}/lib/pkgconfig"
+	(cd build-$T && cmake -DCMAKE_BUILD_TYPE=$T ..)
+	make -j"$(nproc)" -C build-$T
+	sudo make -C build-$T install
+done
