@@ -11,32 +11,6 @@
 #include "fido.h"
 #include "fido/rs256.h"
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-static int
-RSA_bits(const RSA *r)
-{
-	return (BN_num_bits(r->n));
-}
-
-static int
-RSA_set0_key(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d)
-{
-	r->n = n;
-	r->e = e;
-	r->d = d;
-
-	return (1);
-}
-
-static void
-RSA_get0_key(const RSA *r, const BIGNUM **n, const BIGNUM **e, const BIGNUM **d)
-{
-	*n = r->n;
-	*e = r->e;
-	*d = r->d;
-}
-#endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
-
 static int
 decode_bignum(const cbor_item_t *item, void *ptr, size_t len)
 {
