@@ -277,9 +277,14 @@ else()
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer")
 	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -D_FORTIFY_SOURCE=2")
 
+	if(CRYPTO_VERSION VERSION_GREATER_EQUAL 3.0)
+		add_definitions(-DOPENSSL_API_COMPAT=0x10100000L)
+	endif()
+
 	if(FUZZ)
 		add_definitions(-DFIDO_FUZZ)
 	endif()
+
 	if(LIBFUZZER)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=fuzzer-no-link")
 	endif()
