@@ -4,6 +4,9 @@
  * license that can be found in the LICENSE file.
  */
 
+#include <sys/types.h>
+#include <sys/socket.h>
+
 #include <openssl/bn.h>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
@@ -47,6 +50,14 @@ WRAP(void *,
 	(size_t nmemb, size_t size),
 	NULL,
 	(nmemb, size),
+	1
+)
+
+WRAP(void *,
+	realloc,
+	(void *ptr, size_t size),
+	NULL,
+	(ptr, size),
 	1
 )
 
@@ -197,11 +208,27 @@ WRAP(BIGNUM *,
 	1
 )
 
+WRAP(RSA *,
+	RSA_new,
+	(void),
+	NULL,
+	(),
+	1
+)
+
 WRAP(int,
 	RSA_set0_key,
 	(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d),
 	0,
 	(r, n, e, d),
+	1
+)
+
+WRAP(int,
+	RSA_pkey_ctx_ctrl,
+	(EVP_PKEY_CTX *ctx, int optype, int cmd, int p1, void *p2),
+	-1,
+	(ctx, optype, cmd, p1, p2),
 	1
 )
 
@@ -341,8 +368,40 @@ WRAP(int,
 	1
 )
 
+WRAP(int,
+	EVP_PKEY_verify_init,
+	(EVP_PKEY_CTX *ctx),
+	0,
+	(ctx),
+	1
+)
+
+WRAP(int,
+	EVP_PKEY_CTX_ctrl,
+	(EVP_PKEY_CTX *ctx, int keytype, int optype, int cmd, int p1, void *p2),
+	-1,
+	(ctx, keytype, optype, cmd, p1, p2),
+	1
+)
+
 WRAP(const EVP_MD *,
 	EVP_sha256,
+	(void),
+	NULL,
+	(),
+	1
+)
+
+WRAP(const EVP_CIPHER *,
+	EVP_aes_256_cbc,
+	(void),
+	NULL,
+	(),
+	1
+)
+
+WRAP(const EVP_CIPHER *,
+	EVP_aes_256_gcm,
 	(void),
 	NULL,
 	(),
@@ -457,8 +516,24 @@ WRAP(cbor_item_t *,
 )
 
 WRAP(cbor_item_t *,
+	cbor_build_uint16,
+	(uint16_t value),
+	NULL,
+	(value),
+	1
+)
+
+WRAP(cbor_item_t *,
 	cbor_build_uint32,
 	(uint32_t value),
+	NULL,
+	(value),
+	1
+)
+
+WRAP(cbor_item_t *,
+	cbor_build_uint64,
+	(uint64_t value),
 	NULL,
 	(value),
 	1
@@ -512,6 +587,14 @@ WRAP(cbor_item_t *,
 	1
 )
 
+WRAP(cbor_item_t *,
+	cbor_new_definite_bytestring,
+	(void),
+	NULL,
+	(),
+	1
+)
+
 WRAP(size_t,
 	cbor_serialize_alloc,
 	(const cbor_item_t *item, cbor_mutable_data *buffer,
@@ -534,5 +617,13 @@ WRAP(int,
 	(unsigned int usec),
 	-1,
 	(usec),
+	1
+)
+
+WRAP(int,
+	bind,
+	(int sockfd, const struct sockaddr *addr, socklen_t addrlen),
+	-1,
+	(sockfd, addr, addrlen),
 	1
 )
