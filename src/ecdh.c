@@ -8,14 +8,14 @@
 #include <openssl/sha.h>
 #if defined(LIBRESSL_VERSION_NUMBER)
 #include <openssl/hkdf.h>
-#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
+#else
 #include <openssl/kdf.h>
 #endif
 
 #include "fido.h"
 #include "fido/es256.h"
 
-#if defined(LIBRESSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER < 0x10100000L
+#if defined(LIBRESSL_VERSION_NUMBER)
 static int
 hkdf_sha256(uint8_t *key, const char *info, const fido_blob_t *secret)
 {
@@ -74,7 +74,7 @@ fail:
 
 	return ok;
 }
-#endif /* defined(LIBRESSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER < 0x10100000L */
+#endif /* defined(LIBRESSL_VERSION_NUMBER) */
 
 static int
 kdf(uint8_t prot, fido_blob_t *key, /* const */ fido_blob_t *secret)

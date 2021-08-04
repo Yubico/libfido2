@@ -740,11 +740,7 @@ cbor_encode_change_pin_auth(const fido_dev_t *dev, const fido_blob_t *secret,
 	unsigned int	 dgst_len;
 	cbor_item_t	*item = NULL;
 	const EVP_MD	*md = NULL;
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	HMAC_CTX	 ctx;
-#else
 	HMAC_CTX	*ctx = NULL;
-#endif
 	fido_blob_t	 key;
 	uint8_t		 prot;
 	size_t		 outlen;
@@ -760,19 +756,6 @@ cbor_encode_change_pin_auth(const fido_dev_t *dev, const fido_blob_t *secret,
 	if (prot == CTAP_PIN_PROTOCOL2 && key.len > 32)
 		key.len = 32;
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	HMAC_CTX_init(&ctx);
-
-	if ((md = EVP_sha256()) == NULL ||
-	    HMAC_Init_ex(&ctx, key.ptr, (int)key.len, md, NULL) == 0 ||
-	    HMAC_Update(&ctx, new_pin_enc->ptr, new_pin_enc->len) == 0 ||
-	    HMAC_Update(&ctx, pin_hash_enc->ptr, pin_hash_enc->len) == 0 ||
-	    HMAC_Final(&ctx, dgst, &dgst_len) == 0 ||
-	    dgst_len != SHA256_DIGEST_LENGTH) {
-		fido_log_debug("%s: HMAC", __func__);
-		goto fail;
-	}
-#else
 	if ((ctx = HMAC_CTX_new()) == NULL ||
 	    (md = EVP_sha256())  == NULL ||
 	    HMAC_Init_ex(ctx, key.ptr, (int)key.len, md, NULL) == 0 ||
@@ -783,7 +766,6 @@ cbor_encode_change_pin_auth(const fido_dev_t *dev, const fido_blob_t *secret,
 		fido_log_debug("%s: HMAC", __func__);
 		goto fail;
 	}
-#endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
 
 	outlen = (prot == CTAP_PIN_PROTOCOL1) ? 16 : dgst_len;
 
@@ -793,10 +775,7 @@ cbor_encode_change_pin_auth(const fido_dev_t *dev, const fido_blob_t *secret,
 	}
 
 fail:
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	if (ctx != NULL)
-		HMAC_CTX_free(ctx);
-#endif
+	HMAC_CTX_free(ctx);
 
 	return (item);
 }

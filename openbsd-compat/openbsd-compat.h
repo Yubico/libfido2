@@ -84,13 +84,6 @@ int timingsafe_bcmp(const void *, const void *, size_t);
 
 #include <openssl/opensslv.h>
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-#include <stdint.h>
-#include "hkdf.h"
-#define EVP_PKEY_get0_EC_KEY(x) ((x)->pkey.ec)
-#define EVP_PKEY_get0_RSA(x) ((x)->pkey.rsa)
-#endif
-
 #if !defined(HAVE_ERR_H)
 #include "err.h"
 #else

@@ -77,7 +77,8 @@ https://www.freedesktop.org/wiki/Software/pkg-config/[pkg-config] may need to
 be installed, or the PKG_CONFIG_PATH environment variable set.
 
 *libfido2* depends on https://github.com/pjk/libcbor[libcbor],
-https://www.openssl.org[OpenSSL], and https://zlib.net[zlib]. On Linux, libudev
+https://www.openssl.org[OpenSSL] 1.1 or newer, and https://zlib.net[zlib].
+On Linux, libudev
 (part of https://www.freedesktop.org/wiki/Software/systemd[systemd]) is also
 required.
 
