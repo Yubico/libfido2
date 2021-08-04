@@ -27,16 +27,11 @@ EC_POINT_new
 EVP_Cipher
 EVP_CIPHER_CTX_ctrl
 EVP_CIPHER_CTX_new
-EVP_CIPHER_CTX_set_padding
 EVP_CipherInit
-EVP_DecryptInit_ex
-EVP_DecryptUpdate
 EVP_DigestFinal_ex
 EVP_DigestInit_ex
 EVP_DigestUpdate
 EVP_DigestVerifyInit
-EVP_EncryptInit_ex
-EVP_EncryptUpdate
 EVP_MD_CTX_new
 EVP_PKEY_assign
 EVP_PKEY_CTX_new

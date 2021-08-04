@@ -84,55 +84,11 @@ WRAP(EVP_CIPHER_CTX *,
 )
 
 WRAP(int,
-	EVP_EncryptInit_ex,
-	(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type, ENGINE *impl,
-	    const unsigned char *key, const unsigned char *iv),
-	0,
-	(ctx, type, impl, key, iv),
-	1
-)
-
-WRAP(int,
-	EVP_CIPHER_CTX_set_padding,
-	(EVP_CIPHER_CTX *x, int padding),
-	0,
-	(x, padding),
-	1
-)
-
-WRAP(int,
-	EVP_EncryptUpdate,
-	(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
-	    const unsigned char *in, int inl),
-	0,
-	(ctx, out, outl, in, inl),
-	1
-)
-
-WRAP(int,
 	EVP_CipherInit,
 	(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *cipher,
 	    const unsigned char *key, const unsigned char *iv, int enc),
 	0,
 	(ctx, cipher, key, iv, enc),
-	1
-)
-
-WRAP(int,
-	EVP_DecryptInit_ex,
-	(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type, ENGINE *impl,
-	    const unsigned char *key, const unsigned char *iv),
-	0,
-	(ctx, type, impl, key, iv),
-	1
-)
-
-WRAP(int,
-	EVP_DecryptUpdate,
-	(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl,
-	    const unsigned char *in, int inl),
-	0,
-	(ctx, out, outl, in, inl),
 	1
 )
 
