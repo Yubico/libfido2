@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -361,6 +361,18 @@ fail:
 	}
 
 	return (ok);
+}
+
+int
+es256_pk_from_EVP_PKEY(es256_pk_t *pk, const EVP_PKEY *pkey)
+{
+	EC_KEY *ec;
+
+	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_EC ||
+	    (ec = EVP_PKEY_get0(pkey)) == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	return (es256_pk_from_EC_KEY(pk, ec));
 }
 
 EVP_PKEY *
