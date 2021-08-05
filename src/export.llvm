@@ -227,6 +227,7 @@ _fido_set_log_handler
 _fido_strerr
 _rs256_pk_free
 _rs256_pk_from_ptr
+_rs256_pk_from_EVP_PKEY
 _rs256_pk_from_RSA
 _rs256_pk_new
 _rs256_pk_to_EVP_PKEY

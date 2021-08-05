@@ -223,6 +223,18 @@ rs256_pk_from_RSA(rs256_pk_t *pk, const RSA *rsa)
 }
 
 int
+rs256_pk_from_EVP_PKEY(rs256_pk_t *pk, const EVP_PKEY *pkey)
+{
+	RSA *rsa;
+
+	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA ||
+	    (rsa = EVP_PKEY_get0(pkey)) == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	return (rs256_pk_from_RSA(pk, rsa));
+}
+
+int
 rs256_verify_sig(const fido_blob_t *dgst, const rs256_pk_t *pk,
     const fido_blob_t *sig)
 {
