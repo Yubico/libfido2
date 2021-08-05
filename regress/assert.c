@@ -589,6 +589,26 @@ rs256_PKEY(void)
 	EVP_PKEY_free(pkey);
 }
 
+/* es256 <-> EVP_PKEY transformations */
+static void
+es256_PKEY(void)
+{
+	es256_pk_t *pk1, *pk2;
+	EVP_PKEY *pkey;
+
+	pk1 = alloc_es256_pk();
+	pk2 = alloc_es256_pk();
+
+	assert(es256_pk_from_ptr(pk1, es256_pk, sizeof(es256_pk)) == FIDO_OK);
+	assert((pkey = es256_pk_to_EVP_PKEY(pk1)) != NULL);
+	assert(es256_pk_from_EVP_PKEY(pk2, pkey) == FIDO_OK);
+	assert(memcmp(pk1, pk2, sizeof(*pk1)) == 0);
+
+	free_es256_pk(pk1);
+	free_es256_pk(pk2);
+	EVP_PKEY_free(pkey);
+}
+
 int
 main(void)
 {
@@ -607,6 +627,7 @@ main(void)
 	wrong_options();
 	bad_cbor_serialize();
 	rs256_PKEY();
+	es256_PKEY();
 
 	exit(0);
 }

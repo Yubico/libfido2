@@ -48,6 +48,7 @@ list(APPEND MAN_ALIAS
 	eddsa_pk_new eddsa_pk_to_EVP_PKEY
 	es256_pk_new es256_pk_free
 	es256_pk_new es256_pk_from_EC_KEY
+	es256_pk_new es256_pk_from_EVP_PKEY
 	es256_pk_new es256_pk_from_ptr
 	es256_pk_new es256_pk_to_EVP_PKEY
 	fido_assert_new fido_assert_authdata_len

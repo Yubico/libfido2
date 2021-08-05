@@ -5,6 +5,7 @@ _eddsa_pk_new
 _eddsa_pk_to_EVP_PKEY
 _es256_pk_free
 _es256_pk_from_EC_KEY
+_es256_pk_from_EVP_PKEY
 _es256_pk_from_ptr
 _es256_pk_new
 _es256_pk_to_EVP_PKEY
