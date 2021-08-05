@@ -291,27 +291,24 @@ verify_assert(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 }
 
 /*
- * Do a dummy conversion to exercise rs256_pk_from_RSA().
+ * Do a dummy conversion to exercise rs256_pk_from_EVP_PKEY().
  */
 static void
 rs256_convert(const rs256_pk_t *k)
 {
 	EVP_PKEY *pkey = NULL;
 	rs256_pk_t *pk = NULL;
-	RSA *rsa = NULL;
-	volatile int r;
+	int r;
 
 	if ((pkey = rs256_pk_to_EVP_PKEY(k)) == NULL ||
-	    (pk = rs256_pk_new()) == NULL ||
-	    (rsa = EVP_PKEY_get0_RSA(pkey)) == NULL)
+	    (pk = rs256_pk_new()) == NULL)
 		goto out;
 
-	r = rs256_pk_from_RSA(pk, rsa);
+	r = rs256_pk_from_EVP_PKEY(pk, pkey);
+	consume(&r, sizeof(r));
 out:
-	if (pk)
-		rs256_pk_free(&pk);
-	if (pkey)
-		EVP_PKEY_free(pkey);
+	rs256_pk_free(&pk);
+	EVP_PKEY_free(pkey);
 }
 
 /*
