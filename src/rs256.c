@@ -235,21 +235,15 @@ rs256_pk_from_EVP_PKEY(rs256_pk_t *pk, const EVP_PKEY *pkey)
 }
 
 int
-rs256_verify_sig(const fido_blob_t *dgst, const rs256_pk_t *pk,
+rs256_verify_sig(const fido_blob_t *dgst, EVP_PKEY *pkey,
     const fido_blob_t *sig)
 {
-	EVP_PKEY	*pkey = NULL;
 	EVP_PKEY_CTX	*pctx = NULL;
 	EVP_MD		*md = NULL;
 	int		 ok = -1;
 
 	if ((md = rs256_get_EVP_MD()) == NULL) {
 		fido_log_debug("%s: rs256_get_EVP_MD", __func__);
-		goto fail;
-	}
-
-	if ((pkey = rs256_pk_to_EVP_PKEY(pk)) == NULL) {
-		fido_log_debug("%s:  rs256_pk_to_EVP_PKEY", __func__);
 		goto fail;
 	}
 
@@ -269,9 +263,28 @@ rs256_verify_sig(const fido_blob_t *dgst, const rs256_pk_t *pk,
 
 	ok = 0;
 fail:
-	EVP_PKEY_free(pkey);
 	EVP_PKEY_CTX_free(pctx);
 	rs256_free_EVP_MD(md);
+
+	return (ok);
+}
+
+int
+rs256_pk_verify_sig(const fido_blob_t *dgst, const rs256_pk_t *pk,
+    const fido_blob_t *sig)
+{
+	EVP_PKEY	*pkey;
+	int		 ok = -1;
+
+	if ((pkey = rs256_pk_to_EVP_PKEY(pk)) == NULL ||
+	    rs256_verify_sig(dgst, pkey, sig) < 0) {
+		fido_log_debug("%s: rs256_verify_sig", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	EVP_PKEY_free(pkey);
 
 	return (ok);
 }
