@@ -261,7 +261,7 @@ verify_sig(const fido_blob_t *dgst, const fido_blob_t *x5c,
 	BIO		*rawcert = NULL;
 	X509		*cert = NULL;
 	EVP_PKEY	*pkey = NULL;
-	EVP_PKEY_CTX	*pctx = NULL;
+	int		 id;
 	int		 ok = -1;
 
 	/* openssl needs ints */
@@ -273,25 +273,32 @@ verify_sig(const fido_blob_t *dgst, const fido_blob_t *x5c,
 	/* fetch key from x509 */
 	if ((rawcert = BIO_new_mem_buf(x5c->ptr, (int)x5c->len)) == NULL ||
 	    (cert = d2i_X509_bio(rawcert, NULL)) == NULL ||
-	    (pkey = X509_get_pubkey(cert)) == NULL ||
-	    (pctx = EVP_PKEY_CTX_new(pkey, NULL)) == NULL) {
+	    (pkey = X509_get_pubkey(cert)) == NULL) {
 		fido_log_debug("%s: x509 key", __func__);
 		goto fail;
 	}
 
-	if (EVP_PKEY_verify_init(pctx) != 1 ||
-	    EVP_PKEY_verify(pctx, sig->ptr, sig->len, dgst->ptr,
-	    dgst->len) != 1) {
-		fido_log_debug("%s: EVP_PKEY_verify", __func__);
-		goto fail;
+	switch ((id = EVP_PKEY_base_id(pkey))) {
+	case EVP_PKEY_EC:
+		ok = es256_verify_sig(dgst, pkey, sig);
+		break;
+	case EVP_PKEY_RSA:
+		ok = rs256_verify_sig(dgst, pkey, sig);
+		break;
+#ifndef LIBRESSL_VERSION_NUMBER
+	case EVP_PKEY_ED25519:
+		ok = eddsa_verify_sig(dgst, pkey, sig);
+		break;
+#endif
+	default:
+		fido_log_debug("%s: unknown pkey id %d", __func__, id);
+		break;
 	}
 
-	ok = 0;
 fail:
 	BIO_free(rawcert);
 	X509_free(cert);
 	EVP_PKEY_free(pkey);
-	EVP_PKEY_CTX_free(pctx);
 
 	return (ok);
 }
