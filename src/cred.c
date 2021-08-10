@@ -283,7 +283,14 @@ verify_sig(const fido_blob_t *dgst, const fido_blob_t *x5c,
 		ok = es256_verify_sig(dgst, pkey, sig);
 		break;
 	case EVP_PKEY_RSA:
+#ifdef USE_WINHELLO
+		if (dgst->len == SHA_DIGEST_LENGTH)
+			ok = rs1_verify_sig(dgst, pkey, sig);
+		else
+			ok = rs256_verify_sig(dgst, pkey, sig);
+#else
 		ok = rs256_verify_sig(dgst, pkey, sig);
+#endif
 		break;
 #ifndef LIBRESSL_VERSION_NUMBER
 	case EVP_PKEY_ED25519:
