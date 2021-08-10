@@ -442,15 +442,15 @@ fido_cred_verify_self(const fido_cred_t *cred)
 
 	switch (cred->attcred.type) {
 	case COSE_ES256:
-		ok = es256_verify_sig(&dgst, &cred->attcred.pubkey.es256,
+		ok = es256_pk_verify_sig(&dgst, &cred->attcred.pubkey.es256,
 		    &cred->attstmt.sig);
 		break;
 	case COSE_RS256:
-		ok = rs256_verify_sig(&dgst, &cred->attcred.pubkey.rs256,
+		ok = rs256_pk_verify_sig(&dgst, &cred->attcred.pubkey.rs256,
 		    &cred->attstmt.sig);
 		break;
 	case COSE_EDDSA:
-		ok = eddsa_verify_sig(&dgst, &cred->attcred.pubkey.eddsa,
+		ok = eddsa_pk_verify_sig(&dgst, &cred->attcred.pubkey.eddsa,
 		    &cred->attstmt.sig);
 		break;
 	default:

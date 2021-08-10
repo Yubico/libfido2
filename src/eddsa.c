@@ -156,10 +156,9 @@ eddsa_pk_from_EVP_PKEY(eddsa_pk_t *pk, const EVP_PKEY *pkey)
 }
 
 int
-eddsa_verify_sig(const fido_blob_t *dgst, const eddsa_pk_t *pk,
+eddsa_verify_sig(const fido_blob_t *dgst, EVP_PKEY *pkey,
     const fido_blob_t *sig)
 {
-	EVP_PKEY	*pkey = NULL;
 	EVP_MD_CTX	*mdctx = NULL;
 	int		 ok = -1;
 
@@ -168,11 +167,6 @@ eddsa_verify_sig(const fido_blob_t *dgst, const eddsa_pk_t *pk,
 		fido_log_debug("%s: dgst->len=%zu, sig->len=%zu", __func__,
 		    dgst->len, sig->len);
 		return (-1);
-	}
-
-	if ((pkey = eddsa_pk_to_EVP_PKEY(pk)) == NULL) {
-		fido_log_debug("%s: pk -> pkey", __func__);
-		goto fail;
 	}
 
 	if ((mdctx = EVP_MD_CTX_new()) == NULL) {
@@ -193,11 +187,27 @@ eddsa_verify_sig(const fido_blob_t *dgst, const eddsa_pk_t *pk,
 
 	ok = 0;
 fail:
-	if (mdctx != NULL)
-		EVP_MD_CTX_free(mdctx);
+	EVP_MD_CTX_free(mdctx);
 
-	if (pkey != NULL)
-		EVP_PKEY_free(pkey);
+	return (ok);
+}
+
+int
+eddsa_pk_verify_sig(const fido_blob_t *dgst, const eddsa_pk_t *pk,
+    const fido_blob_t *sig)
+{
+	EVP_PKEY	*pkey;
+	int		 ok = -1;
+
+	if ((pkey = eddsa_pk_to_EVP_PKEY(pk)) == NULL ||
+	    eddsa_verify_sig(dgst, pkey, sig) < 0) {
+		fido_log_debug("%s: eddsa_verify_sig", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	EVP_PKEY_free(pkey);
 
 	return (ok);
 }

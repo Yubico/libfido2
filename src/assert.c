@@ -477,13 +477,13 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 
 	switch (cose_alg) {
 	case COSE_ES256:
-		ok = es256_verify_sig(&dgst, pk, &stmt->sig);
+		ok = es256_pk_verify_sig(&dgst, pk, &stmt->sig);
 		break;
 	case COSE_RS256:
-		ok = rs256_verify_sig(&dgst, pk, &stmt->sig);
+		ok = rs256_pk_verify_sig(&dgst, pk, &stmt->sig);
 		break;
 	case COSE_EDDSA:
-		ok = eddsa_verify_sig(&dgst, pk, &stmt->sig);
+		ok = eddsa_pk_verify_sig(&dgst, pk, &stmt->sig);
 		break;
 	default:
 		fido_log_debug("%s: unsupported cose_alg %d", __func__,
