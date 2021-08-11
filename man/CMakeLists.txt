@@ -132,6 +132,8 @@ list(APPEND MAN_ALIAS
 	fido_cbor_info_new fido_dev_get_cbor_info
 	fido_cred_new fido_cred_aaguid_len
 	fido_cred_new fido_cred_aaguid_ptr
+	fido_cred_new fido_cred_attstmt_len
+	fido_cred_new fido_cred_attstmt_ptr
 	fido_cred_new fido_cred_authdata_len
 	fido_cred_new fido_cred_authdata_ptr
 	fido_cred_new fido_cred_authdata_raw_len
@@ -180,6 +182,7 @@ list(APPEND MAN_ALIAS
 	fido_credman_metadata_new fido_credman_rp_name
 	fido_credman_metadata_new fido_credman_rp_new
 	fido_credman_metadata_new fido_credman_set_dev_rk
+	fido_cred_set_authdata fido_cred_set_attstmt
 	fido_cred_set_authdata fido_cred_set_authdata_raw
 	fido_cred_set_authdata fido_cred_set_blob
 	fido_cred_set_authdata fido_cred_set_clientdata
