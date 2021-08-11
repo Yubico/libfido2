@@ -502,6 +502,8 @@ fido_cred_clean_authdata(fido_cred_t *cred)
 static void
 fido_cred_clean_attstmt(fido_attstmt_t *attstmt)
 {
+	fido_blob_reset(&attstmt->certinfo);
+	fido_blob_reset(&attstmt->pubarea);
 	fido_blob_reset(&attstmt->cbor);
 	fido_blob_reset(&attstmt->x5c);
 	fido_blob_reset(&attstmt->sig);

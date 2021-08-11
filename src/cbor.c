@@ -1419,6 +1419,16 @@ decode_attstmt_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			fido_log_debug("%s: x5c", __func__);
 			goto out;
 		}
+	} else if (!strcmp(name, "certInfo")) {
+		if (fido_blob_decode(val, &attstmt->certinfo) < 0) {
+			fido_log_debug("%s: certinfo", __func__);
+			goto out;
+		}
+	} else if (!strcmp(name, "pubArea")) {
+		if (fido_blob_decode(val, &attstmt->pubarea) < 0) {
+			fido_log_debug("%s: pubarea", __func__);
+			goto out;
+		}
 	}
 
 	ok = 0;
