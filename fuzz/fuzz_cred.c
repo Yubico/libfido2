@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -268,7 +268,8 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
     size_t authdata_len, const unsigned char *authdata_raw_ptr,
     size_t authdata_raw_len, int ext, uint8_t rk, uint8_t uv,
     const unsigned char *x5c_ptr, size_t x5c_len, const unsigned char *sig_ptr,
-    size_t sig_len, const char *fmt, int prot)
+    size_t sig_len, const unsigned char *attstmt_ptr, size_t attstmt_len,
+    const char *fmt, int prot)
 {
 	fido_cred_t *cred;
 	uint8_t flags;
@@ -282,12 +283,17 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	fido_cred_set_rp(cred, rp_id, rp_name);
 	consume(authdata_ptr, authdata_len);
 	consume(authdata_raw_ptr, authdata_raw_len);
+	consume(x5c_ptr, x5c_len);
+	consume(sig_ptr, sig_len);
+	consume(attstmt_ptr, attstmt_len);
 	if (fido_cred_set_authdata(cred, authdata_ptr, authdata_len) != FIDO_OK)
 		fido_cred_set_authdata_raw(cred, authdata_raw_ptr,
 		    authdata_raw_len);
 	fido_cred_set_extensions(cred, ext);
-	fido_cred_set_x509(cred, x5c_ptr, x5c_len);
-	fido_cred_set_sig(cred, sig_ptr, sig_len);
+	if (fido_cred_set_attstmt(cred, attstmt_ptr, attstmt_len) != FIDO_OK) {
+		fido_cred_set_x509(cred, x5c_ptr, x5c_len);
+		fido_cred_set_sig(cred, sig_ptr, sig_len);
+	}
 	fido_cred_set_prot(cred, prot);
 
 	if (rk & 1)
@@ -299,7 +305,12 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 
 	/* repeat memory operations to trigger reallocation paths */
 	if (fido_cred_set_authdata(cred, authdata_ptr, authdata_len) != FIDO_OK)
-		fido_cred_set_authdata_raw(cred, authdata_ptr, authdata_len);
+		fido_cred_set_authdata_raw(cred, authdata_raw_ptr,
+		    authdata_raw_len);
+	if (fido_cred_set_attstmt(cred, attstmt_ptr, attstmt_len) != FIDO_OK) {
+		fido_cred_set_x509(cred, x5c_ptr, x5c_len);
+		fido_cred_set_sig(cred, sig_ptr, sig_len);
+	}
 	fido_cred_set_x509(cred, x5c_ptr, x5c_len);
 	fido_cred_set_sig(cred, sig_ptr, sig_len);
 
@@ -360,6 +371,7 @@ test_cred(const struct param *p)
 	    fido_cred_authdata_raw_len(cred), p->ext, p->rk, p->uv,
 	    fido_cred_x5c_ptr(cred), fido_cred_x5c_len(cred),
 	    fido_cred_sig_ptr(cred), fido_cred_sig_len(cred),
+	    fido_cred_attstmt_ptr(cred), fido_cred_attstmt_len(cred),
 	    fido_cred_fmt(cred), fido_cred_prot(cred));
 
 	fido_cred_free(&cred);
