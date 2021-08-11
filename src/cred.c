@@ -503,6 +503,14 @@ fido_cred_clean_authdata(fido_cred_t *cred)
 	memset(&cred->attcred, 0, sizeof(cred->attcred));
 }
 
+static void
+fido_cred_clean_attstmt(fido_attstmt_t *attstmt)
+{
+	fido_blob_reset(&attstmt->cbor);
+	fido_blob_reset(&attstmt->x5c);
+	fido_blob_reset(&attstmt->sig);
+}
+
 void
 fido_cred_reset_tx(fido_cred_t *cred)
 {
@@ -534,8 +542,7 @@ fido_cred_reset_rx(fido_cred_t *cred)
 	free(cred->fmt);
 	cred->fmt = NULL;
 	fido_cred_clean_authdata(cred);
-	fido_blob_reset(&cred->attstmt.x5c);
-	fido_blob_reset(&cred->attstmt.sig);
+	fido_cred_clean_attstmt(&cred->attstmt);
 	fido_blob_reset(&cred->largeblob_key);
 }
 
@@ -589,7 +596,6 @@ fail:
 		fido_cred_clean_authdata(cred);
 
 	return (r);
-
 }
 
 int
@@ -631,7 +637,6 @@ fail:
 		fido_cred_clean_authdata(cred);
 
 	return (r);
-
 }
 
 int
@@ -659,6 +664,39 @@ fido_cred_set_sig(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	return (FIDO_OK);
+}
+
+int
+fido_cred_set_attstmt(fido_cred_t *cred, const unsigned char *ptr, size_t len)
+{
+	cbor_item_t		*item = NULL;
+	struct cbor_load_result	 cbor;
+	int			 r = FIDO_ERR_INVALID_ARGUMENT;
+
+	fido_cred_clean_attstmt(&cred->attstmt);
+
+	if (ptr == NULL || len == 0)
+		goto fail;
+
+	if ((item = cbor_load(ptr, len, &cbor)) == NULL) {
+		fido_log_debug("%s: cbor_load", __func__);
+		goto fail;
+	}
+
+	if (cbor_decode_attstmt(item, &cred->attstmt) < 0) {
+		fido_log_debug("%s: cbor_decode_attstmt", __func__);
+		goto fail;
+	}
+
+	r = FIDO_OK;
+fail:
+	if (item != NULL)
+		cbor_decref(&item);
+
+	if (r != FIDO_OK)
+		fido_cred_clean_attstmt(&cred->attstmt);
+
+	return (r);
 }
 
 int
@@ -987,6 +1025,18 @@ size_t
 fido_cred_authdata_raw_len(const fido_cred_t *cred)
 {
 	return (cred->authdata_raw.len);
+}
+
+const unsigned char *
+fido_cred_attstmt_ptr(const fido_cred_t *cred)
+{
+	return (cred->attstmt.cbor.ptr);
+}
+
+size_t
+fido_cred_attstmt_len(const fido_cred_t *cred)
+{
+	return (cred->attstmt.cbor.len);
 }
 
 const unsigned char *
