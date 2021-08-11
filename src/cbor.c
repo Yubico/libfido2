@@ -1431,10 +1431,19 @@ out:
 int
 cbor_decode_attstmt(const cbor_item_t *item, fido_attstmt_t *attstmt)
 {
+	size_t alloc_len;
+
 	if (cbor_isa_map(item) == false ||
 	    cbor_map_is_definite(item) == false ||
 	    cbor_map_iter(item, attstmt, decode_attstmt_entry) < 0) {
 		fido_log_debug("%s: cbor type", __func__);
+		return (-1);
+	}
+
+	if (attstmt->cbor.ptr != NULL ||
+	    (attstmt->cbor.len = cbor_serialize_alloc(item,
+	    &attstmt->cbor.ptr, &alloc_len)) == 0) {
+		fido_log_debug("%s: cbor_serialize_alloc", __func__);
 		return (-1);
 	}
 

@@ -99,6 +99,8 @@
 		fido_cbor_info_transports_ptr;
 		fido_cbor_info_versions_len;
 		fido_cbor_info_versions_ptr;
+		fido_cred_attstmt_len;
+		fido_cred_attstmt_ptr;
 		fido_cred_authdata_len;
 		fido_cred_authdata_ptr;
 		fido_cred_authdata_raw_len;
@@ -144,6 +146,7 @@
 		fido_cred_pubkey_ptr;
 		fido_cred_rp_id;
 		fido_cred_rp_name;
+		fido_cred_set_attstmt;
 		fido_cred_set_authdata;
 		fido_cred_set_authdata_raw;
 		fido_cred_set_blob;
