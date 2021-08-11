@@ -162,6 +162,11 @@ eddsa_verify_sig(const fido_blob_t *dgst, EVP_PKEY *pkey,
 	EVP_MD_CTX	*mdctx = NULL;
 	int		 ok = -1;
 
+	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_ED25519) {
+		fido_log_debug("%s: EVP_PKEY_base_id", __func__);
+		goto fail;
+	}
+
 	/* EVP_DigestVerify needs ints */
 	if (dgst->len > INT_MAX || sig->len > INT_MAX) {
 		fido_log_debug("%s: dgst->len=%zu, sig->len=%zu", __func__,

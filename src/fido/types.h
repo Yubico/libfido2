@@ -110,6 +110,7 @@ typedef struct fido_attstmt {
 	fido_blob_t cbor; /* cbor-encoded attestation statement */
 	fido_blob_t x5c;  /* attestation certificate */
 	fido_blob_t sig;  /* attestation signature */
+	int         alg;  /* attestation algorithm (cose) */
 } fido_attstmt_t;
 
 typedef struct fido_rp {
