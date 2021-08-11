@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -82,10 +82,12 @@
 #define FIDO_CAP_NMSG	0x08 /* if set, device doesn't support CTAP_CMD_MSG */
 
 /* Supported COSE algorithms. */
+#define	COSE_UNSPEC	0
 #define	COSE_ES256	-7
 #define	COSE_EDDSA	-8
 #define	COSE_ECDH_ES256	-25
 #define	COSE_RS256	-257
+#define	COSE_RS1	-65535
 
 /* Supported COSE types. */
 #define COSE_KTY_OKP	1

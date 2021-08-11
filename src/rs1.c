@@ -66,6 +66,11 @@ rs1_verify_sig(const fido_blob_t *dgst, EVP_PKEY *pkey,
 	EVP_MD		*md = NULL;
 	int		 ok = -1;
 
+	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA) {
+		fido_log_debug("%s: EVP_PKEY_base_id", __func__);
+		goto fail;
+	}
+
 	if ((md = rs1_get_EVP_MD()) == NULL) {
 		fido_log_debug("%s: rs1_get_EVP_MD", __func__);
 		goto fail;

@@ -255,50 +255,46 @@ fail:
 }
 
 static int
-verify_sig(const fido_blob_t *dgst, const fido_blob_t *x5c,
-    const fido_blob_t *sig)
+verify_attstmt(const fido_blob_t *dgst, const fido_attstmt_t *attstmt)
 {
 	BIO		*rawcert = NULL;
 	X509		*cert = NULL;
 	EVP_PKEY	*pkey = NULL;
-	int		 id;
 	int		 ok = -1;
 
 	/* openssl needs ints */
-	if (x5c->len > INT_MAX) {
-		fido_log_debug("%s: x5c->len=%zu", __func__, x5c->len);
+	if (attstmt->x5c.len > INT_MAX) {
+		fido_log_debug("%s: x5c.len=%zu", __func__, attstmt->x5c.len);
 		return (-1);
 	}
 
 	/* fetch key from x509 */
-	if ((rawcert = BIO_new_mem_buf(x5c->ptr, (int)x5c->len)) == NULL ||
+	if ((rawcert = BIO_new_mem_buf(attstmt->x5c.ptr,
+	    (int)attstmt->x5c.len)) == NULL ||
 	    (cert = d2i_X509_bio(rawcert, NULL)) == NULL ||
 	    (pkey = X509_get_pubkey(cert)) == NULL) {
 		fido_log_debug("%s: x509 key", __func__);
 		goto fail;
 	}
 
-	switch ((id = EVP_PKEY_base_id(pkey))) {
-	case EVP_PKEY_EC:
-		ok = es256_verify_sig(dgst, pkey, sig);
+	switch (attstmt->alg) {
+	case COSE_UNSPEC:
+	case COSE_ES256:
+		ok = es256_verify_sig(dgst, pkey, &attstmt->sig);
 		break;
-	case EVP_PKEY_RSA:
+	case COSE_RS256:
+		ok = rs256_verify_sig(dgst, pkey, &attstmt->sig);
+		break;
 #ifdef USE_WINHELLO
-		if (dgst->len == SHA_DIGEST_LENGTH)
-			ok = rs1_verify_sig(dgst, pkey, sig);
-		else
-			ok = rs256_verify_sig(dgst, pkey, sig);
-#else
-		ok = rs256_verify_sig(dgst, pkey, sig);
-#endif
-		break;
-#ifndef LIBRESSL_VERSION_NUMBER
-	case EVP_PKEY_ED25519:
-		ok = eddsa_verify_sig(dgst, pkey, sig);
+	case COSE_RS1:
+		ok = rs1_verify_sig(dgst, pkey, &attstmt->sig);
 		break;
 #endif
+	case COSE_EDDSA:
+		ok = eddsa_verify_sig(dgst, pkey, &attstmt->sig);
+		break;
 	default:
-		fido_log_debug("%s: unknown pkey id %d", __func__, id);
+		fido_log_debug("%s: unknown alg %d", __func__, attstmt->alg);
 		break;
 	}
 
@@ -375,8 +371,8 @@ fido_cred_verify(const fido_cred_t *cred)
 		goto out;
 	}
 
-	if (verify_sig(&dgst, &cred->attstmt.x5c, &cred->attstmt.sig) < 0) {
-		fido_log_debug("%s: verify_sig", __func__);
+	if (verify_attstmt(&dgst, &cred->attstmt) < 0) {
+		fido_log_debug("%s: verify_attstmt", __func__);
 		r = FIDO_ERR_INVALID_SIG;
 		goto out;
 	}
@@ -509,6 +505,8 @@ fido_cred_clean_attstmt(fido_attstmt_t *attstmt)
 	fido_blob_reset(&attstmt->cbor);
 	fido_blob_reset(&attstmt->x5c);
 	fido_blob_reset(&attstmt->sig);
+
+	memset(attstmt, 0, sizeof(*attstmt));
 }
 
 void

@@ -469,8 +469,13 @@ int
 es256_verify_sig(const fido_blob_t *dgst, EVP_PKEY *pkey,
     const fido_blob_t *sig)
 {
-	EVP_PKEY_CTX	*pctx;
+	EVP_PKEY_CTX	*pctx = NULL;
 	int		 ok = -1;
+
+	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_EC) {
+		fido_log_debug("%s: EVP_PKEY_base_id", __func__);
+		goto fail;
+	}
 
 	if ((pctx = EVP_PKEY_CTX_new(pkey, NULL)) == NULL ||
 	    EVP_PKEY_verify_init(pctx) != 1 ||
