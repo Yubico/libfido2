@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -20,6 +20,7 @@
 #define be16toh(x) OSSwapBigToHostInt16((x))
 #define htobe16(x) OSSwapHostToBigInt16((x))
 #define be32toh(x) OSSwapBigToHostInt32((x))
+#define htobe32(x) OSSwapHostToBigInt32((x))
 #define htole32(x) OSSwapHostToLittleInt32((x))
 #define htole64(x) OSSwapHostToLittleInt64((x))
 #endif /* __APPLE__ && !HAVE_ENDIAN_H */
@@ -33,6 +34,7 @@
 #define be16toh(x) ntohs((x))
 #define htobe16(x) htons((x))
 #define be32toh(x) ntohl((x))
+#define htobe32(x) htonl((x))
 uint32_t htole32(uint32_t);
 uint64_t htole64(uint64_t);
 #endif /* _WIN32 && !HAVE_ENDIAN_H */
