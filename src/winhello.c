@@ -324,93 +324,6 @@ pack_cred_ext(WEBAUTHN_EXTENSIONS *out, const fido_cred_ext_t *in)
 }
 
 static int
-unpack_fmt(fido_cred_t *cred, const WEBAUTHN_CREDENTIAL_ATTESTATION *att)
-{
-	char *fmt;
-	int r;
-
-	if ((fmt = to_utf8(att->pwszFormatType)) == NULL) {
-		fido_log_debug("%s: fmt", __func__);
-		return -1;
-	}
-	r = fido_cred_set_fmt(cred, fmt);
-	free(fmt);
-	fmt = NULL;
-	if (r != FIDO_OK) {
-		fido_log_debug("%s: fido_cred_set_fmt: %s", __func__,
-		    fido_strerr(r));
-		return -1;
-	}
-
-	return 0;
-}
-
-static int
-unpack_cred_authdata(fido_cred_t *cred, const WEBAUTHN_CREDENTIAL_ATTESTATION *att)
-{
-	int r;
-
-	if (att->cbAuthenticatorData > SIZE_MAX) {
-		fido_log_debug("%s: cbAuthenticatorData", __func__);
-		return -1;
-	}
-	if ((r = fido_cred_set_authdata_raw(cred, att->pbAuthenticatorData,
-	    (size_t)att->cbAuthenticatorData)) != FIDO_OK) {
-		fido_log_debug("%s: fido_cred_set_authdata_raw: %s", __func__,
-		    fido_strerr(r));
-		return -1;
-	}
-
-	return 0;
-}
-
-static int
-unpack_cred_sig(fido_cred_t *cred, const WEBAUTHN_COMMON_ATTESTATION *attr)
-{
-	int r;
-
-	if (attr->cbSignature > SIZE_MAX) {
-		fido_log_debug("%s: cbSignature", __func__);
-		return -1;
-	}
-	if ((r = fido_cred_set_sig(cred, attr->pbSignature,
-	    (size_t)attr->cbSignature)) != FIDO_OK) {
-		fido_log_debug("%s: fido_cred_set_sig: %s", __func__,
-		    fido_strerr(r));
-		return -1;
-	}
-
-	return 0;
-}
-
-static int
-unpack_x5c(fido_cred_t *cred, const WEBAUTHN_COMMON_ATTESTATION *attr)
-{
-	int r;
-
-	fido_log_debug("%s: %u cert(s)", __func__, attr->cX5c);
-
-	if (attr->cX5c == 0)
-		return 0; /* self-attestation */
-	if (attr->lAlg != WEBAUTHN_COSE_ALGORITHM_ECDSA_P256_WITH_SHA256) {
-		fido_log_debug("%s: lAlg %d", __func__, attr->lAlg);
-		return -1;
-	}
-	if (attr->pX5c[0].cbData > SIZE_MAX) {
-		fido_log_debug("%s: cbData", __func__);
-		return -1;
-	}
-	if ((r = fido_cred_set_x509(cred, attr->pX5c[0].pbData,
-	    (size_t)attr->pX5c[0].cbData)) != FIDO_OK) {
-		fido_log_debug("%s: fido_cred_set_x509: %s", __func__,
-		    fido_strerr(r));
-		return -1;
-	}
-
-	return 0;
-}
-
-static int
 unpack_assert_authdata(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
 	int r;
@@ -603,45 +516,76 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
 }
 
 static int
+decode_attobj(const cbor_item_t *key, const cbor_item_t *val, void *arg)
+{
+	fido_cred_t *cred = arg;
+	char *name = NULL;
+	int ok = -1;
+
+	if (cbor_string_copy(key, &name) < 0) {
+		fido_log_debug("%s: cbor type", __func__);
+		ok = 0; /* ignore */
+		goto fail;
+	}
+
+	if (!strcmp(name, "fmt")) {
+		if (cbor_decode_fmt(val, &cred->fmt) < 0) {
+			fido_log_debug("%s: cbor_decode_fmt", __func__);
+			goto fail;
+		}
+	} else if (!strcmp(name, "attStmt")) {
+		if (cbor_decode_attstmt(val, &cred->attstmt) < 0) {
+			fido_log_debug("%s: cbor_decode_attstmt", __func__);
+			goto fail;
+		}
+	} else if (!strcmp(name, "authData")) {
+		if (cbor_decode_cred_authdata(val, cred->type,
+		    &cred->authdata_cbor, &cred->authdata, &cred->attcred,
+		    &cred->authdata_ext) < 0) {
+			fido_log_debug("%s: cbor_decode_cred_authdata",
+			    __func__);
+			goto fail;
+		}
+	}
+
+	ok = 0;
+fail:
+	free(name);
+
+	return (ok);
+}
+
+static int
 translate_winhello_cred(fido_cred_t *cred, const WEBAUTHN_CREDENTIAL_ATTESTATION *att)
 {
-	if (unpack_fmt(cred, att) < 0) {
-		fido_log_debug("%s: unpack_fmt", __func__);
-		return FIDO_ERR_INTERNAL;
+
+	cbor_item_t *item = NULL;
+	struct cbor_load_result cbor;
+	int r = FIDO_ERR_INTERNAL;
+
+	if (att->pbAttestationObject == NULL ||
+	    att->cbAttestationObject > SIZE_MAX) {
+		fido_log_debug("%s: pbAttestationObject", __func__);
+		goto fail;
 	}
-	if (unpack_cred_authdata(cred, att) < 0) {
-		fido_log_debug("%s: unpack_cred_authdata", __func__);
-		return FIDO_ERR_INTERNAL;
+	if ((item = cbor_load(att->pbAttestationObject,
+	    (size_t)att->cbAttestationObject, &cbor)) == NULL) {
+		fido_log_debug("%s: cbor_load", __func__);
+		goto fail;
+	}
+	if (cbor_isa_map(item) == false ||
+	    cbor_map_is_definite(item) == false ||
+	    cbor_map_iter(item, cred, decode_attobj) < 0) {
+		fido_log_debug("%s: cbor type", __func__);
+		goto fail;
 	}
 
-	switch (att->dwAttestationDecodeType) {
-	case WEBAUTHN_ATTESTATION_DECODE_NONE:
-		if (att->pvAttestationDecode != NULL) {
-			fido_log_debug("%s: pvAttestationDecode", __func__);
-			return FIDO_ERR_INTERNAL;
-		}
-		break;
-	case WEBAUTHN_ATTESTATION_DECODE_COMMON:
-		if (att->pvAttestationDecode == NULL) {
-			fido_log_debug("%s: pvAttestationDecode", __func__);
-			return FIDO_ERR_INTERNAL;
-		}
-		if (unpack_cred_sig(cred, att->pvAttestationDecode) < 0) {
-			fido_log_debug("%s: unpack_cred_sig", __func__);
-			return FIDO_ERR_INTERNAL;
-		}
-		if (unpack_x5c(cred, att->pvAttestationDecode) < 0) {
-			fido_log_debug("%s: unpack_x5c", __func__);
-			return FIDO_ERR_INTERNAL;
-		}
-		break;
-	default:
-		fido_log_debug("%s: dwAttestationDecodeType: %u", __func__,
-		    att->dwAttestationDecodeType);
-		return FIDO_ERR_INTERNAL;
-	}
+	r = FIDO_OK;
+fail:
+	if (item != NULL)
+		cbor_decref(&item);
 
-	return FIDO_OK;
+	return r;
 }
 
 static int
