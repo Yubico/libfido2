@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Yubico AB. All rights reserved.
+# Copyright (c) 2018-2021 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -31,6 +31,7 @@ list(APPEND FIDO_SOURCES
 	random.c
 	reset.c
 	rs256.c
+	tpm.c
 	types.c
 	u2f.c
 )

@@ -214,6 +214,8 @@ int eddsa_pk_verify_sig(const fido_blob_t *, const eddsa_pk_t *,
     const fido_blob_t *);
 int fido_get_signed_hash(int, fido_blob_t *, const fido_blob_t *,
     const fido_blob_t *);
+int fido_get_signed_hash_tpm(fido_blob_t *, const fido_blob_t *,
+    const fido_blob_t *, const fido_attstmt_t *, const fido_attcred_t *);
 
 /* device manifest functions */
 int fido_hid_manifest(fido_dev_info_t *, size_t, size_t *);
