@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -20,7 +20,7 @@
 #include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"
 
-static const unsigned char cdh[32] = {
+static const unsigned char cd[32] = {
 	0xec, 0x8d, 0x8f, 0x78, 0x42, 0x4a, 0x2b, 0xb7,
 	0x82, 0x34, 0xaa, 0xca, 0x07, 0xa1, 0xf6, 0x56,
 	0x42, 0x1c, 0xb6, 0xf6, 0xb3, 0x00, 0x86, 0x52,
@@ -106,10 +106,9 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 		errx(1, "fido_assert_new");
 
 	/* client data hash */
-	r = fido_assert_set_clientdata_hash(assert, cdh, sizeof(cdh));
+	r = fido_assert_set_clientdata(assert, cd, sizeof(cd));
 	if (r != FIDO_OK)
-		errx(1, "fido_assert_set_clientdata_hash: %s (0x%x)",
-		    fido_strerr(r), r);
+		errx(1, "fido_assert_set_clientdata: %s (0x%x)", fido_strerr(r), r);
 
 	/* relying party */
 	r = fido_assert_set_rp(assert, "localhost");
@@ -262,10 +261,9 @@ main(int argc, char **argv)
 		fido_dev_force_u2f(dev);
 
 	/* client data hash */
-	r = fido_assert_set_clientdata_hash(assert, cdh, sizeof(cdh));
+	r = fido_assert_set_clientdata(assert, cd, sizeof(cd));
 	if (r != FIDO_OK)
-		errx(1, "fido_assert_set_clientdata_hash: %s (0x%x)",
-		    fido_strerr(r), r);
+		errx(1, "fido_assert_set_clientdata: %s (0x%x)", fido_strerr(r), r);
 
 	/* relying party */
 	r = fido_assert_set_rp(assert, "localhost");
