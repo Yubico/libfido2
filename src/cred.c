@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -362,6 +362,13 @@ fido_cred_verify(const fido_cred_t *cred)
 		    sizeof(cred->authdata.rp_id_hash), &cred->cdh,
 		    &cred->attcred.id, &cred->attcred.pubkey.es256) < 0) {
 			fido_log_debug("%s: get_signed_hash_u2f", __func__);
+			r = FIDO_ERR_INTERNAL;
+			goto out;
+		}
+	} else if (!strcmp(cred->fmt, "tpm")) {
+		if (fido_get_signed_hash_tpm(&dgst, &cred->cdh,
+		    &cred->authdata_raw, &cred->attstmt, &cred->attcred) < 0) {
+			fido_log_debug("%s: fido_get_signed_hash_tpm", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto out;
 		}
