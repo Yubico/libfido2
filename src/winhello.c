@@ -816,6 +816,8 @@ fido_winhello_get_assert(fido_dev_t *dev, fido_assert_t *assert,
 
 	(void)dev;
 
+	fido_assert_reset_rx(assert);
+
 	if ((ctx = calloc(1, sizeof(*ctx))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
 		goto fail;
@@ -886,6 +888,8 @@ fido_winhello_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 	int			 r = FIDO_ERR_INTERNAL;
 
 	(void)dev;
+
+	fido_cred_reset_rx(cred);
 
 	if ((ctx = calloc(1, sizeof(*ctx))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
