@@ -909,7 +909,7 @@ cbor_decode_fmt(const cbor_item_t *item, char **fmt)
 	}
 
 	if (strcmp(type, "packed") && strcmp(type, "fido-u2f") &&
-	    strcmp(type, "none")) {
+	    strcmp(type, "none") && strcmp(type, "tpm")) {
 		fido_log_debug("%s: type=%s", __func__, type);
 		free(type);
 		return (-1);

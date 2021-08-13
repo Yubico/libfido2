@@ -928,7 +928,7 @@ fido_cred_set_fmt(fido_cred_t *cred, const char *fmt)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	if (strcmp(fmt, "packed") && strcmp(fmt, "fido-u2f") &&
-	    strcmp(fmt, "none"))
+	    strcmp(fmt, "none") && strcmp(fmt, "tpm"))
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	if ((cred->fmt = strdup(fmt)) == NULL)
