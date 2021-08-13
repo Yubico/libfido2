@@ -496,6 +496,8 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
 	opt = &ctx->opt;
 	opt->dwVersion = WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_VERSION_1;
 	opt->dwTimeoutMilliseconds = MAXMSEC;
+	opt->dwAttestationConveyancePreference =
+	    WEBAUTHN_ATTESTATION_CONVEYANCE_PREFERENCE_DIRECT;
 	if (pack_credlist(&opt->CredentialList, &cred->excl) < 0) {
 		fido_log_debug("%s: pack_credlist", __func__);
 		return FIDO_ERR_INTERNAL;
