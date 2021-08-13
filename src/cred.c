@@ -285,11 +285,9 @@ verify_attstmt(const fido_blob_t *dgst, const fido_attstmt_t *attstmt)
 	case COSE_RS256:
 		ok = rs256_verify_sig(dgst, pkey, &attstmt->sig);
 		break;
-#ifdef USE_WINHELLO
 	case COSE_RS1:
 		ok = rs1_verify_sig(dgst, pkey, &attstmt->sig);
 		break;
-#endif
 	case COSE_EDDSA:
 		ok = eddsa_verify_sig(dgst, pkey, &attstmt->sig);
 		break;

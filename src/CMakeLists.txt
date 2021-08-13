@@ -30,6 +30,7 @@ list(APPEND FIDO_SOURCES
 	pin.c
 	random.c
 	reset.c
+	rs1.c
 	rs256.c
 	tpm.c
 	types.c
@@ -54,7 +55,7 @@ if(USE_HIDAPI)
 elseif(WIN32)
 	list(APPEND FIDO_SOURCES hid_win.c)
 	if(USE_WINHELLO)
-		list(APPEND FIDO_SOURCES rs1.c winhello.c)
+		list(APPEND FIDO_SOURCES winhello.c)
 	endif()
 elseif(APPLE)
 	list(APPEND FIDO_SOURCES hid_osx.c)
