@@ -192,7 +192,7 @@ set_uv(DWORD *out, fido_opt_t uv, const char *pin)
 
 static int
 pack_rp(wchar_t **id, wchar_t **name, WEBAUTHN_RP_ENTITY_INFORMATION *out,
-    fido_rp_t *in)
+    const fido_rp_t *in)
 {
 	/* keep non-const copies of pwsz* for free() */
 	out->dwVersion = WEBAUTHN_RP_ENTITY_INFORMATION_CURRENT_VERSION;
@@ -209,7 +209,7 @@ pack_rp(wchar_t **id, wchar_t **name, WEBAUTHN_RP_ENTITY_INFORMATION *out,
 
 static int
 pack_user(wchar_t **name, wchar_t **icon, wchar_t **display_name,
-    WEBAUTHN_USER_ENTITY_INFORMATION *out, fido_user_t *in)
+    WEBAUTHN_USER_ENTITY_INFORMATION *out, const fido_user_t *in)
 {
 	if (in->id.ptr == NULL || in->id.len > ULONG_MAX) {
 		fido_log_debug("%s: id", __func__);
@@ -269,7 +269,7 @@ pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg,
 }
 
 static int
-pack_cred_ext(WEBAUTHN_EXTENSIONS *out, fido_cred_ext_t *in)
+pack_cred_ext(WEBAUTHN_EXTENSIONS *out, const fido_cred_ext_t *in)
 {
 	WEBAUTHN_EXTENSION *e;
 	WEBAUTHN_CRED_PROTECT_EXTENSION_IN *p;
@@ -324,7 +324,7 @@ pack_cred_ext(WEBAUTHN_EXTENSIONS *out, fido_cred_ext_t *in)
 }
 
 static int
-unpack_fmt(fido_cred_t *cred, WEBAUTHN_CREDENTIAL_ATTESTATION *att)
+unpack_fmt(fido_cred_t *cred, const WEBAUTHN_CREDENTIAL_ATTESTATION *att)
 {
 	char *fmt;
 	int r;
@@ -346,7 +346,7 @@ unpack_fmt(fido_cred_t *cred, WEBAUTHN_CREDENTIAL_ATTESTATION *att)
 }
 
 static int
-unpack_cred_authdata(fido_cred_t *cred, WEBAUTHN_CREDENTIAL_ATTESTATION *att)
+unpack_cred_authdata(fido_cred_t *cred, const WEBAUTHN_CREDENTIAL_ATTESTATION *att)
 {
 	int r;
 
@@ -365,7 +365,7 @@ unpack_cred_authdata(fido_cred_t *cred, WEBAUTHN_CREDENTIAL_ATTESTATION *att)
 }
 
 static int
-unpack_cred_sig(fido_cred_t *cred, WEBAUTHN_COMMON_ATTESTATION *attr)
+unpack_cred_sig(fido_cred_t *cred, const WEBAUTHN_COMMON_ATTESTATION *attr)
 {
 	int r;
 
@@ -384,7 +384,7 @@ unpack_cred_sig(fido_cred_t *cred, WEBAUTHN_COMMON_ATTESTATION *attr)
 }
 
 static int
-unpack_x5c(fido_cred_t *cred, WEBAUTHN_COMMON_ATTESTATION *attr)
+unpack_x5c(fido_cred_t *cred, const WEBAUTHN_COMMON_ATTESTATION *attr)
 {
 	int r;
 
@@ -411,7 +411,7 @@ unpack_x5c(fido_cred_t *cred, WEBAUTHN_COMMON_ATTESTATION *attr)
 }
 
 static int
-unpack_assert_authdata(fido_assert_t *assert, WEBAUTHN_ASSERTION *wa)
+unpack_assert_authdata(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
 	int r;
 
@@ -430,7 +430,7 @@ unpack_assert_authdata(fido_assert_t *assert, WEBAUTHN_ASSERTION *wa)
 }
 
 static int
-unpack_assert_sig(fido_assert_t *assert, WEBAUTHN_ASSERTION *wa)
+unpack_assert_sig(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
 	int r;
 
@@ -449,7 +449,7 @@ unpack_assert_sig(fido_assert_t *assert, WEBAUTHN_ASSERTION *wa)
 }
 
 static int
-unpack_cred_id(fido_assert_t *assert, WEBAUTHN_ASSERTION *wa)
+unpack_cred_id(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
 	if (wa->Credential.cbId > SIZE_MAX) {
 		fido_log_debug("%s: Credential.cbId", __func__);
@@ -465,7 +465,7 @@ unpack_cred_id(fido_assert_t *assert, WEBAUTHN_ASSERTION *wa)
 }
 
 static int
-unpack_user_id(fido_assert_t *assert, WEBAUTHN_ASSERTION *wa)
+unpack_user_id(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
 	if (wa->cbUserId == 0)
 		return 0; /* user id absent */
@@ -483,7 +483,7 @@ unpack_user_id(fido_assert_t *assert, WEBAUTHN_ASSERTION *wa)
 }
 
 static int
-translate_fido_assert(struct winhello_assert *ctx, fido_assert_t *assert,
+translate_fido_assert(struct winhello_assert *ctx, const fido_assert_t *assert,
     const char *pin)
 {
 	WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS *opt;
@@ -523,7 +523,7 @@ translate_fido_assert(struct winhello_assert *ctx, fido_assert_t *assert,
 }
 
 static int
-translate_winhello_assert(fido_assert_t *assert, WEBAUTHN_ASSERTION *wa)
+translate_winhello_assert(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
 	int r;
 
@@ -557,7 +557,7 @@ translate_winhello_assert(fido_assert_t *assert, WEBAUTHN_ASSERTION *wa)
 }
 
 static int
-translate_fido_cred(struct winhello_cred *ctx, fido_cred_t *cred,
+translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
     const char *pin)
 {
 	WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS *opt;
@@ -603,7 +603,7 @@ translate_fido_cred(struct winhello_cred *ctx, fido_cred_t *cred,
 }
 
 static int
-translate_winhello_cred(fido_cred_t *cred, WEBAUTHN_CREDENTIAL_ATTESTATION *att)
+translate_winhello_cred(fido_cred_t *cred, const WEBAUTHN_CREDENTIAL_ATTESTATION *att)
 {
 	if (unpack_fmt(cred, att) < 0) {
 		fido_log_debug("%s: unpack_fmt", __func__);
