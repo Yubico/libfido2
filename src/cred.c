@@ -10,6 +10,10 @@
 #include "fido.h"
 #include "fido/es256.h"
 
+#ifndef FIDO_MAXMSG_CRED
+#define FIDO_MAXMSG_CRED	4096
+#endif
+
 static int
 parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
@@ -133,31 +137,44 @@ fail:
 static int
 fido_dev_make_cred_rx(fido_dev_t *dev, fido_cred_t *cred, int ms)
 {
-	unsigned char	reply[FIDO_MAXMSG];
-	int		reply_len;
-	int		r;
+	unsigned char	*reply;
+	int		 reply_len;
+	int		 r;
 
 	fido_cred_reset_rx(cred);
 
-	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
+	if ((reply = malloc(FIDO_MAXMSG_CRED)) == NULL) {
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, reply, FIDO_MAXMSG_CRED,
 	    ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
-		return (FIDO_ERR_RX);
+		r = FIDO_ERR_RX;
+		goto fail;
 	}
 
 	if ((r = cbor_parse_reply(reply, (size_t)reply_len, cred,
 	    parse_makecred_reply)) != FIDO_OK) {
 		fido_log_debug("%s: parse_makecred_reply", __func__);
-		return (r);
+		goto fail;
 	}
 
 	if (cred->fmt == NULL || fido_blob_is_empty(&cred->authdata_cbor) ||
 	    fido_blob_is_empty(&cred->attcred.id)) {
-		fido_cred_reset_rx(cred);
-		return (FIDO_ERR_INVALID_CBOR);
+		r = FIDO_ERR_INVALID_CBOR;
+		goto fail;
 	}
 
-	return (FIDO_OK);
+	r = FIDO_OK;
+fail:
+	free(reply);
+
+	if (r != FIDO_OK)
+		fido_cred_reset_rx(cred);
+
+	return (r);
 }
 
 static int
