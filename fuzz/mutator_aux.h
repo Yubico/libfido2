@@ -49,7 +49,7 @@
 #define MUTATE_ALL	(MUTATE_SEED | MUTATE_PARAM | MUTATE_WIREDATA)
 
 #define MAXSTR	1024
-#define MAXBLOB	3072
+#define MAXBLOB	3600
 
 struct blob {
 	uint8_t body[MAXBLOB];
