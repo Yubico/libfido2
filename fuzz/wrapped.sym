@@ -69,6 +69,7 @@ realloc
 RSA_new
 RSA_pkey_ctx_ctrl
 RSA_set0_key
+SHA1
 SHA256
 strdup
 udev_device_get_devnode

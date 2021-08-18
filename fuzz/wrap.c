@@ -452,6 +452,14 @@ WRAP(int,
 )
 
 WRAP(unsigned char *,
+	SHA1,
+	(const unsigned char *d, size_t n, unsigned char *md),
+	NULL,
+	(d, n, md),
+	1
+)
+
+WRAP(unsigned char *,
 	SHA256,
 	(const unsigned char *d, size_t n, unsigned char *md),
 	NULL,
