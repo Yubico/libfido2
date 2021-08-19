@@ -56,6 +56,7 @@ EVP_PKEY_new_raw_public_key
 EVP_PKEY_paramgen
 EVP_PKEY_paramgen_init
 EVP_PKEY_verify_init
+EVP_sha1
 EVP_sha256
 fido_tx
 HMAC

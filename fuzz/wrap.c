@@ -385,6 +385,14 @@ WRAP(int,
 )
 
 WRAP(const EVP_MD *,
+	EVP_sha1,
+	(void),
+	NULL,
+	(),
+	1
+)
+
+WRAP(const EVP_MD *,
 	EVP_sha256,
 	(void),
 	NULL,
