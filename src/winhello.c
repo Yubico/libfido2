@@ -591,25 +591,17 @@ fail:
 }
 
 static int
-winhello_manifest(BOOL *present)
+winhello_manifest(void)
 {
 	DWORD n;
-	HRESULT hr;
-	int r = FIDO_OK;
 
 	if ((n = WebAuthNGetApiVersionNumber()) < 1) {
 		fido_log_debug("%s: unsupported api %u", __func__, n);
 		return FIDO_ERR_INTERNAL;
 	}
 	fido_log_debug("%s: api version %u", __func__, n);
-	hr = WebAuthNIsUserVerifyingPlatformAuthenticatorAvailable(present);
-	if (hr != S_OK)  {
-		r = to_fido(hr);
-		fido_log_debug("%s: %ls -> %s", __func__,
-		    WebAuthNGetErrorName(hr), fido_strerr(r));
-	}
 
-	return r;
+	return FIDO_OK;
 }
 
 static int
@@ -686,7 +678,6 @@ int
 fido_winhello_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
 	int r;
-	BOOL present;
 	fido_dev_info_t *di;
 
 	if (ilen == 0) {
@@ -695,13 +686,9 @@ fido_winhello_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 	if (devlist == NULL) {
 		return FIDO_ERR_INVALID_ARGUMENT;
 	}
-	if ((r = winhello_manifest(&present)) != FIDO_OK) {
+	if ((r = winhello_manifest()) != FIDO_OK) {
 		fido_log_debug("%s: winhello_manifest", __func__);
 		return r;
-	}
-	if (present == false) {
-		fido_log_debug("%s: not present", __func__);
-		return FIDO_OK;
 	}
 
 	di = &devlist[*olen];
