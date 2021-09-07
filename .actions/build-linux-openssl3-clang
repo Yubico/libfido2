@@ -7,8 +7,8 @@ FAKEROOT="$(mktemp -d)"
 # Check exports.
 (cd src && ./diff_exports.sh)
 
-# Build and install OpenSSL 3.0.0-beta2.
-git clone --branch openssl-3.0.0-beta2 \
+# Build and install OpenSSL 3.0.0.
+git clone --branch openssl-3.0.0 \
 	--depth=1 https://github.com/openssl/openssl
 cd openssl
 ./Configure linux-x86_64-clang --prefix="${FAKEROOT}" \
