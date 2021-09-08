@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -181,6 +181,32 @@ double_open(void)
 }
 
 static void
+double_close(void)
+{
+	const uint8_t	 cbor_info_data[] = { WIREDATA_CTAP_CBOR_INFO };
+	uint8_t		*wiredata;
+	fido_dev_t	*dev = NULL;
+	fido_dev_io_t	 io;
+
+	memset(&io, 0, sizeof(io));
+
+	io.open = dummy_open;
+	io.close = dummy_close;
+	io.read = dummy_read;
+	io.write = dummy_write;
+
+	wiredata = wiredata_setup(cbor_info_data, sizeof(cbor_info_data));
+	assert((dev = fido_dev_new()) != NULL);
+	assert(fido_dev_close(dev) == FIDO_ERR_INVALID_ARGUMENT);
+	assert(fido_dev_set_io_functions(dev, &io) == FIDO_OK);
+	assert(fido_dev_close(dev) == FIDO_ERR_INVALID_ARGUMENT);
+	assert(fido_dev_open(dev, "dummy") == FIDO_OK);
+	assert(fido_dev_close(dev) == FIDO_OK);
+	assert(fido_dev_close(dev) == FIDO_ERR_INVALID_ARGUMENT);
+	wiredata_clear(&wiredata);
+}
+
+static void
 is_fido2(void)
 {
 	const uint8_t	 cbor_info_data[] = { WIREDATA_CTAP_CBOR_INFO };
@@ -259,6 +285,7 @@ main(void)
 	open_iff_ok();
 	reopen();
 	double_open();
+	double_close();
 	is_fido2();
 	has_pin();
 
