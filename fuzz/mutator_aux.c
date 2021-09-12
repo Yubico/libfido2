@@ -37,6 +37,8 @@ consume(const void *body, size_t len)
 
 	while (len--)
 		x ^= *ptr++;
+
+	(void)x;
 }
 
 void

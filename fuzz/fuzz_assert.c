@@ -342,13 +342,14 @@ eddsa_convert(const eddsa_pk_t *k)
 {
 	EVP_PKEY *pkey = NULL;
 	eddsa_pk_t *pk = NULL;
-	volatile int r;
+	int r;
 
 	if ((pkey = eddsa_pk_to_EVP_PKEY(k)) == NULL ||
 	    (pk = eddsa_pk_new()) == NULL)
 		goto out;
 
 	r = eddsa_pk_from_EVP_PKEY(pk, pkey);
+	consume(&r, sizeof(r));
 out:
 	if (pk)
 		eddsa_pk_free(&pk);
