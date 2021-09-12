@@ -131,27 +131,6 @@ out:
 	fido_cred_free(&cred);
 }
 
-static fido_dev_t *
-open_from_manifest(const fido_dev_info_t *dev_infos, size_t len,
-    const char *path)
-{
-	size_t i;
-	fido_dev_t *dev;
-
-	for (i = 0; i < len; i++) {
-		const fido_dev_info_t *curr = fido_dev_info_ptr(dev_infos, i);
-		if (path == NULL ||
-		    strcmp(path, fido_dev_info_path(curr)) == 0) {
-			dev = fido_dev_new_with_info(curr);
-			if (fido_dev_open_with_info(dev) == FIDO_OK)
-				return (dev);
-			fido_dev_free(&dev);
-		}
-	}
-
-	return (NULL);
-}
-
 int
 main(int argc, char **argv)
 {
@@ -164,7 +143,6 @@ main(int argc, char **argv)
 	const char	*blobkey_out = NULL;
 	const char	*key_out = NULL;
 	const char	*id_out = NULL;
-	const char	*path = NULL;
 	unsigned char	*body = NULL;
 	long long	 seconds = 0;
 	size_t		 len;
@@ -172,8 +150,6 @@ main(int argc, char **argv)
 	int		 ext = 0;
 	int		 ch;
 	int		 r;
-	fido_dev_info_t	*dev_infos = NULL;
-	size_t		 dev_infos_len = 0;
 
 	if ((cred = fido_cred_new()) == NULL)
 		errx(1, "fido_cred_new");
@@ -241,21 +217,20 @@ main(int argc, char **argv)
 		}
 	}
 
-	fido_init(0);
-
 	argc -= optind;
 	argv += optind;
 
-	if (argc > 1)
+	if (argc != 1)
 		usage();
-	dev_infos = fido_dev_info_new(16);
-	fido_dev_info_manifest(dev_infos, 16, &dev_infos_len);
-	if (argc == 1)
-		path = argv[0];
 
-	if ((dev = open_from_manifest(dev_infos, dev_infos_len, path)) == NULL)
-		errx(1, "open_from_manifest");
+	fido_init(0);
 
+	if ((dev = fido_dev_new()) == NULL)
+		errx(1, "fido_dev_new");
+
+	r = fido_dev_open(dev, argv[0]);
+	if (r != FIDO_OK)
+		errx(1, "fido_dev_open: %s (0x%x)", fido_strerr(r), r);
 	if (u2f)
 		fido_dev_force_u2f(dev);
 
