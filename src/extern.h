@@ -171,6 +171,7 @@ int u2f_get_touch_status(fido_dev_t *, int *, int);
 
 /* unexposed fido ops */
 uint8_t fido_dev_get_pin_protocol(const fido_dev_t *);
+bool fido_dev_supports_pin_protocol_in_hmac_assert(const fido_dev_t *);
 int fido_dev_authkey(fido_dev_t *, es256_pk_t *);
 int fido_dev_get_cbor_info_wait(fido_dev_t *, fido_cbor_info_t *, int);
 int fido_dev_get_uv_token(fido_dev_t *, uint8_t, const char *,
@@ -240,6 +241,7 @@ uint32_t uniform_random(uint32_t);
 #define FIDO_DEV_UV_UNSET	0x080
 #define FIDO_DEV_TOKEN_PERMS	0x100
 #define FIDO_DEV_WINHELLO	0x200
+#define FIDO_2_1 0x400
 
 /* miscellanea */
 #define FIDO_DUMMY_CLIENTDATA	""
