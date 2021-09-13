@@ -98,11 +98,25 @@ fido_dev_set_protocol_flags(fido_dev_t *dev, const fido_cbor_info_t *info)
 }
 
 static void
+fido_dev_set_versions_flags(fido_dev_t *dev, const fido_cbor_info_t *info)
+{
+    const char ** versions = fido_cbor_info_versions_ptr(info);
+    size_t len = fido_cbor_info_versions_len(info);
+    for(size_t i = 0;i < len; i++)
+    {
+        if (strcmp(versions[i], "FIDO_2_1") == 0){
+            dev->flags |= FIDO_2_1;
+        }
+    }
+}
+
+static void
 fido_dev_set_flags(fido_dev_t *dev, const fido_cbor_info_t *info)
 {
 	fido_dev_set_extension_flags(dev, info);
 	fido_dev_set_option_flags(dev, info);
 	fido_dev_set_protocol_flags(dev, info);
+	fido_dev_set_versions_flags(dev, info);
 }
 
 static int
@@ -708,6 +722,12 @@ void
 fido_dev_force_fido2(fido_dev_t *dev)
 {
 	dev->attr.flags |= FIDO_CAP_CBOR;
+}
+
+bool
+fido_dev_supports_pin_protocol_in_hmac_assert(const fido_dev_t* dev)
+{
+    return (dev->flags & FIDO_2_1);
 }
 
 uint8_t
