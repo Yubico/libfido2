@@ -817,13 +817,20 @@ cbor_encode_hmac_secret_param(const fido_dev_t *dev, cbor_item_t *item,
 	/* XXX not pin, but salt */
 	if ((argv[0] = es256_pk_encode(pk, 1)) == NULL ||
 	    (argv[1] = fido_blob_encode(enc)) == NULL ||
-	    (argv[2] = cbor_encode_pin_auth(dev, ecdh, enc)) == NULL ||
-	    (argv[3] = cbor_encode_pin_opt(dev)) == NULL) {
+	    (argv[2] = cbor_encode_pin_auth(dev, ecdh, enc)) == NULL ) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
 
+	if (fido_dev_supports_pin_protocol_in_hmac_assert(dev)) {
+            if ((argv[3] = cbor_encode_pin_opt(dev)) == NULL) {
+                fido_log_debug("%s: cbor encode", __func__);
+                r = FIDO_ERR_INTERNAL;
+                goto fail;
+            }
+    	}
+	
 	if ((param = cbor_flatten_vector(argv, nitems(argv))) == NULL) {
 		fido_log_debug("%s: cbor_flatten_vector", __func__);
 		r = FIDO_ERR_INTERNAL;
