@@ -231,12 +231,15 @@ make_cred(fido_cred_t *cred, uint8_t opt, int type, const struct blob *cdh,
 	fido_cred_set_rp(cred, rp_id, rp_name);
 	fido_cred_set_user(cred, user_id->body, user_id->len, user_name,
 	    user_nick, user_icon);
+
 	if (ext & FIDO_EXT_HMAC_SECRET)
 		fido_cred_set_extensions(cred, FIDO_EXT_HMAC_SECRET);
 	if (ext & FIDO_EXT_CRED_BLOB)
 		fido_cred_set_blob(cred, user_id->body, user_id->len);
 	if (ext & FIDO_EXT_LARGEBLOB_KEY)
 		fido_cred_set_extensions(cred, FIDO_EXT_LARGEBLOB_KEY);
+	if (ext & FIDO_EXT_MINPINLEN)
+		fido_cred_set_pin_minlen(cred, strlen(pin));
 
 	if (rk & 1)
 		fido_cred_set_rk(cred, FIDO_OPT_TRUE);
@@ -269,7 +272,7 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
     size_t authdata_raw_len, int ext, uint8_t rk, uint8_t uv,
     const unsigned char *x5c_ptr, size_t x5c_len, const unsigned char *sig_ptr,
     size_t sig_len, const unsigned char *attstmt_ptr, size_t attstmt_len,
-    const char *fmt, int prot)
+    const char *fmt, int prot, size_t minpinlen)
 {
 	fido_cred_t *cred;
 	uint8_t flags;
@@ -296,6 +299,7 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 		fido_cred_set_sig(cred, sig_ptr, sig_len);
 	}
 	fido_cred_set_prot(cred, prot);
+	fido_cred_set_pin_minlen(cred, minpinlen);
 
 	if (rk & 1)
 		fido_cred_set_rk(cred, FIDO_OPT_TRUE);
@@ -335,6 +339,8 @@ verify_cred(int type, const unsigned char *cdh_ptr, size_t cdh_len,
 	consume(&sigcount, sizeof(sigcount));
 	type = fido_cred_type(cred);
 	consume(&type, sizeof(type));
+	minpinlen = fido_cred_pin_minlen(cred);
+	consume(&minpinlen, sizeof(minpinlen));
 
 	fido_cred_free(&cred);
 }
@@ -375,7 +381,8 @@ test_cred(const struct param *p)
 	    fido_cred_x5c_ptr(cred), fido_cred_x5c_len(cred),
 	    fido_cred_sig_ptr(cred), fido_cred_sig_len(cred),
 	    fido_cred_attstmt_ptr(cred), fido_cred_attstmt_len(cred),
-	    fido_cred_fmt(cred), fido_cred_prot(cred));
+	    fido_cred_fmt(cred), fido_cred_prot(cred),
+	    fido_cred_pin_minlen(cred));
 
 	fido_cred_free(&cred);
 }
