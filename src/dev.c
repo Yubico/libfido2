@@ -379,14 +379,17 @@ fido_dev_close(fido_dev_t *dev)
 int
 fido_dev_set_sigmask(fido_dev_t *dev, const fido_sigset_t *sigmask)
 {
-	if (dev->io_own || dev->io_handle == NULL || sigmask == NULL)
+	if (dev->io_handle == NULL || sigmask == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 #ifdef NFC_LINUX
-	if (dev->transport.rx == fido_nfc_rx)
+	if (dev->transport.rx == fido_nfc_rx && dev->io.read == fido_nfc_read)
 		return (fido_nfc_set_sigmask(dev->io_handle, sigmask));
 #endif
-	return (fido_hid_set_sigmask(dev->io_handle, sigmask));
+	if (dev->transport.rx == NULL && dev->io.read == fido_hid_read)
+		return (fido_hid_set_sigmask(dev->io_handle, sigmask));
+
+	return (FIDO_ERR_INVALID_ARGUMENT);
 }
 
 int
