@@ -137,7 +137,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 size_t
 LLVMFuzzerCustomMutator(uint8_t *data, size_t size, size_t maxsize,
-    unsigned int seed) NO_MSAN
+    unsigned int seed)
 {
 	struct param *p;
 	uint8_t blob[4096];
