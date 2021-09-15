@@ -788,6 +788,7 @@ cbor_encode_hmac_secret_param(const fido_dev_t *dev, cbor_item_t *item,
 	cbor_item_t		*argv[4];
 	struct cbor_pair	 pair;
 	fido_blob_t		*enc = NULL;
+	uint8_t			 prot;
 	int			 r;
 
 	memset(argv, 0, sizeof(argv));
@@ -814,11 +815,17 @@ cbor_encode_hmac_secret_param(const fido_dev_t *dev, cbor_item_t *item,
 		goto fail;
 	}
 
+	if ((prot = fido_dev_get_pin_protocol(dev)) == 0) {
+		fido_log_debug("%s: fido_dev_get_pin_protocol", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
 	/* XXX not pin, but salt */
 	if ((argv[0] = es256_pk_encode(pk, 1)) == NULL ||
 	    (argv[1] = fido_blob_encode(enc)) == NULL ||
 	    (argv[2] = cbor_encode_pin_auth(dev, ecdh, enc)) == NULL ||
-	    (argv[3] = cbor_encode_pin_opt(dev)) == NULL) {
+	    (prot != 1 && (argv[3] = cbor_build_uint8(prot)) == NULL)) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
