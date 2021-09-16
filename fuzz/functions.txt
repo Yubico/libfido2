@@ -184,7 +184,7 @@ cbor_encode_pubkey_param                    36       0 100.00%        48       0
 cbor_encode_pubkey                          10       0 100.00%        13       0 100.00%
 cbor_encode_pubkey_list                     18       0 100.00%        23       0 100.00%
 cbor_encode_str_array                       18       0 100.00%        23       0 100.00%
-cbor_encode_cred_ext                        55       4  92.73%        54       4  92.59%
+cbor_encode_cred_ext                        55       0 100.00%        54       0 100.00%
 cbor_encode_cred_opt                        13       0 100.00%        13       0 100.00%
 cbor_encode_assert_opt                      13       0 100.00%        13       0 100.00%
 cbor_encode_pin_auth                        20       1  95.00%        30       3  90.00%
@@ -208,21 +208,21 @@ cbor.c:check_key_type                        8       0 100.00%         9       0
 cbor.c:cbor_add_arg                         13       0 100.00%        28       0 100.00%
 cbor.c:cbor_add_uint8                       14       0 100.00%        26       0 100.00%
 cbor.c:cbor_encode_largeblob_key_ext         6       0 100.00%         7       0 100.00%
-cbor.c:cbor_encode_hmac_secret_param        53       2  96.23%        75       4  94.67%
+cbor.c:cbor_encode_hmac_secret_param        59       8  86.44%        82      16  80.49%
 cbor.c:get_cose_alg                         36       0 100.00%        48       0 100.00%
 cbor.c:find_cose_alg                        35       0 100.00%        40       0 100.00%
 cbor.c:decode_attcred                       25       0 100.00%        56       0 100.00%
 cbor.c:decode_cred_extensions               14       0 100.00%        31       0 100.00%
 cbor.c:decode_cred_extension                49      10  79.59%        53      17  67.92%
 cbor.c:decode_assert_extensions             14       0 100.00%        29       0 100.00%
-cbor.c:decode_assert_extension              19       0 100.00%        31       0 100.00%
+cbor.c:decode_assert_extension              19       1  94.74%        31       4  87.10%
 cbor.c:decode_attstmt_entry                 52       0 100.00%        54       0 100.00%
 cbor.c:decode_x5c                            4       0 100.00%         8       0 100.00%
 cbor.c:decode_cred_id_entry                 10       0 100.00%        23       0 100.00%
 cbor.c:decode_user_entry                    25       0 100.00%        39       0 100.00%
 cbor.c:decode_rp_entity_entry               15       0 100.00%        29       0 100.00%
 ----------------------------------------------------------------------------------------
-TOTAL                                     1041      28  97.31%      1479      49  96.69%
+TOTAL                                     1047      31  97.04%      1486      61  95.90%
 
 File '/libfido2/src/compress.c':
 Name                                   Regions    Miss   Cover     Lines    Miss   Cover
@@ -256,7 +256,7 @@ Name                                    Regions    Miss   Cover     Lines    Mis
 fido_dev_make_cred                           12       0 100.00%        10       0 100.00%
 fido_check_rp_id                              4       0 100.00%        14       0 100.00%
 fido_cred_verify                             56       2  96.43%        82       5  93.90%
-fido_cred_verify_self                        58       6  89.66%        94      10  89.36%
+fido_cred_verify_self                        58       4  93.10%        94       5  94.68%
 fido_cred_new                                 1       0 100.00%         3       0 100.00%
 fido_cred_reset_tx                            1       0 100.00%        22       0 100.00%
 fido_cred_reset_rx                            1       0 100.00%         7       0 100.00%
@@ -277,8 +277,8 @@ fido_cred_set_options                         6       6   0.00%         6       
 fido_cred_set_rk                              2       0 100.00%         5       0 100.00%
 fido_cred_set_uv                              2       0 100.00%         5       0 100.00%
 fido_cred_set_prot                           21       0 100.00%        16       0 100.00%
-fido_cred_set_pin_minlen                      7       7   0.00%        10      10   0.00%
-fido_cred_set_blob                           13       2  84.62%        10       1  90.00%
+fido_cred_set_pin_minlen                      7       0 100.00%        10       0 100.00%
+fido_cred_set_blob                           13       0 100.00%        10       0 100.00%
 fido_cred_set_fmt                            20       4  80.00%        16       1  93.75%
 fido_cred_set_type                           17       0 100.00%         9       0 100.00%
 fido_cred_type                                1       0 100.00%         3       0 100.00%
@@ -303,7 +303,7 @@ fido_cred_id_len                              1       0 100.00%         3       
 fido_cred_aaguid_ptr                          1       0 100.00%         3       0 100.00%
 fido_cred_aaguid_len                          1       0 100.00%         3       0 100.00%
 fido_cred_prot                                1       0 100.00%         3       0 100.00%
-fido_cred_pin_minlen                          1       1   0.00%         3       3   0.00%
+fido_cred_pin_minlen                          1       0 100.00%         3       0 100.00%
 fido_cred_fmt                                 1       0 100.00%         3       0 100.00%
 fido_cred_rp_id                               1       0 100.00%         3       0 100.00%
 fido_cred_rp_name                             1       0 100.00%         3       0 100.00%
@@ -319,11 +319,11 @@ cred.c:fido_dev_make_cred_rx                 29       0 100.00%        40       
 cred.c:parse_makecred_reply                  14       0 100.00%        29       0 100.00%
 cred.c:check_extensions                       2       0 100.00%         9       0 100.00%
 cred.c:get_signed_hash_u2f                   27       0 100.00%        29       0 100.00%
-cred.c:verify_attstmt                        23       4  82.61%        47       7  85.11%
+cred.c:verify_attstmt                        23       2  91.30%        47       5  89.36%
 cred.c:fido_cred_clean_authdata               1       0 100.00%         9       0 100.00%
 cred.c:fido_cred_clean_attstmt                1       0 100.00%         9       0 100.00%
 -----------------------------------------------------------------------------------------
-TOTAL                                       632      46  92.72%       963      58  93.98%
+TOTAL                                       632      32  94.94%       963      37  96.16%
 
 File '/libfido2/src/credman.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -378,9 +378,9 @@ fido_dev_register_manifest_func              10       2  80.00%        18       
 fido_dev_unregister_manifest_func             7       7   0.00%        13      13   0.00%
 fido_dev_info_manifest                       22       4  81.82%        28       0 100.00%
 fido_dev_open_with_info                       5       5   0.00%         6       6   0.00%
-fido_dev_open                                11       5  54.55%        26      12  53.85%
+fido_dev_open                                 5       1  80.00%        19      12  36.84%
 fido_dev_close                                9       2  77.78%        10       0 100.00%
-fido_dev_set_sigmask                         12      12   0.00%        10      10   0.00%
+fido_dev_set_sigmask                         18      18   0.00%        13      13   0.00%
 fido_dev_cancel                              11       0 100.00%         8       0 100.00%
 fido_dev_get_touch_begin                     50       0 100.00%        68       0 100.00%
 fido_dev_get_touch_status                    17       0 100.00%        25       0 100.00%
@@ -418,7 +418,7 @@ dev.c:fido_dev_set_extension_flags            7       0 100.00%         8       
 dev.c:fido_dev_set_option_flags              29       0 100.00%        19       0 100.00%
 dev.c:fido_dev_set_protocol_flags            11       0 100.00%        18       0 100.00%
 -----------------------------------------------------------------------------------------
-TOTAL                                       414      74  82.13%       556     106  80.94%
+TOTAL                                       414      76  81.64%       552     109  80.25%
 
 File '/libfido2/src/ecdh.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -528,9 +528,9 @@ File '/libfido2/src/hid_unix.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
 -----------------------------------------------------------------------------------------
 fido_hid_unix_open                           18      11  38.89%        26      14  46.15%
-fido_hid_unix_wait                           12       9  25.00%        26      14  46.15%
+fido_hid_unix_wait                           10       9  10.00%        25      12  52.00%
 -----------------------------------------------------------------------------------------
-TOTAL                                        30      20  33.33%        52      28  46.15%
+TOTAL                                        28      20  28.57%        51      26  49.02%
 
 File '/libfido2/src/info.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -657,7 +657,7 @@ File '/libfido2/src/netlink.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
 -----------------------------------------------------------------------------------------
 fido_nl_power_nfc                            18       1  94.44%        26       3  88.46%
-fido_nl_get_nfc_target                       16       1  93.75%        33       3  90.91%
+fido_nl_get_nfc_target                       17       1  94.12%        33       3  90.91%
 fido_nl_free                                 10       2  80.00%        11       1  90.91%
 fido_nl_new                                  16       1  93.75%        29       3  89.66%
 set_netlink_io_functions                      1       0 100.00%         4       0 100.00%
@@ -697,15 +697,15 @@ netlink.c:parse_mcastgrps                     1       0 100.00%         3       
 netlink.c:parse_mcastgrp                     15       0 100.00%        27       0 100.00%
 netlink.c:nla_get_str                        10       0 100.00%        13       0 100.00%
 -----------------------------------------------------------------------------------------
-TOTAL                                       327      14  95.72%       565      32  94.34%
+TOTAL                                       328      14  95.73%       565      32  94.34%
 
 File '/libfido2/src/nfc_linux.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
 -----------------------------------------------------------------------------------------
 fido_nfc_tx                                  28       0 100.00%        48       0 100.00%
 fido_nfc_rx                                   8       1  87.50%        13       3  76.92%
-fido_nfc_manifest                            35       2  94.29%        54       0 100.00%
-fido_nfc_open                                14      14   0.00%        21      21   0.00%
+fido_nfc_manifest                            35       5  85.71%        54      13  75.93%
+fido_nfc_open                                20       3  85.00%        25       6  76.00%
 fido_nfc_close                                1       1   0.00%         5       5   0.00%
 fido_nfc_set_sigmask                          2       2   0.00%         8       8   0.00%
 fido_nfc_read                                14      14   0.00%        34      34   0.00%
@@ -717,16 +717,16 @@ nfc_linux.c:rx_cbor                           4       0 100.00%         8       
 nfc_linux.c:rx_msg                           18       2  88.89%        28       6  78.57%
 nfc_linux.c:rx_apdu                           8       1  87.50%        22       3  86.36%
 nfc_linux.c:tx_get_response                   4       0 100.00%        14       0 100.00%
-nfc_linux.c:copy_info                        30       6  80.00%        42       0 100.00%
+nfc_linux.c:copy_info                        36       8  77.78%        47       3  93.62%
 nfc_linux.c:get_usb_attr                      1       0 100.00%         3       0 100.00%
 nfc_linux.c:get_parent_attr                   6       0 100.00%        11       0 100.00%
-nfc_linux.c:to_int                           21      21   0.00%        16      16   0.00%
-nfc_linux.c:sysnum_from_syspath              12      12   0.00%        20      20   0.00%
-nfc_linux.c:nfc_new                           6       6   0.00%        14      14   0.00%
+nfc_linux.c:to_int                           21       6  71.43%        16       1  93.75%
+nfc_linux.c:sysnum_from_syspath              12       0 100.00%        20       0 100.00%
+nfc_linux.c:nfc_new                           6       0 100.00%        14       0 100.00%
 nfc_linux.c:nfc_target_connect                9       9   0.00%        24      24   0.00%
-nfc_linux.c:nfc_free                         12      12   0.00%        13      13   0.00%
+nfc_linux.c:nfc_free                         12       0 100.00%        13       0 100.00%
 -----------------------------------------------------------------------------------------
-TOTAL                                       304     123  59.54%       520     199  61.73%
+TOTAL                                       316      72  77.22%       529     138  73.91%
 
 File '/libfido2/src/pin.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
@@ -779,11 +779,11 @@ TOTAL                                          24       0 100.00%        27     
 File '/libfido2/src/rs1.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
 -------------------------------------------------------------------------------------------
-rs1_verify_sig                                 20       4  80.00%        36      12  66.67%
-rs1.c:rs1_get_EVP_MD                            4       1  75.00%         8       0 100.00%
+rs1_verify_sig                                 20       0 100.00%        36       0 100.00%
+rs1.c:rs1_get_EVP_MD                            4       0 100.00%         8       0 100.00%
 rs1.c:rs1_free_EVP_MD                           1       0 100.00%         3       0 100.00%
 -------------------------------------------------------------------------------------------
-TOTAL                                          25       5  80.00%        47      12  74.47%
+TOTAL                                          25       0 100.00%        47       0 100.00%
 
 File '/libfido2/src/rs256.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
@@ -795,27 +795,27 @@ rs256_pk_from_ptr                               6       0 100.00%         8     
 rs256_pk_to_EVP_PKEY                           32       0 100.00%        48       0 100.00%
 rs256_pk_from_RSA                              32       4  87.50%        32       6  81.25%
 rs256_pk_from_EVP_PKEY                          7       2  71.43%         9       0 100.00%
-rs256_verify_sig                               20       2  90.00%        36       6  83.33%
+rs256_verify_sig                               20       1  95.00%        36       3  91.67%
 rs256_pk_verify_sig                             7       1  85.71%        16       3  81.25%
 rs256.c:decode_rsa_pubkey                       9       0 100.00%        16       0 100.00%
 rs256.c:decode_bignum                           8       0 100.00%        12       0 100.00%
 rs256.c:rs256_get_EVP_MD                        4       0 100.00%         8       0 100.00%
 rs256.c:rs256_free_EVP_MD                       1       0 100.00%         3       0 100.00%
 -------------------------------------------------------------------------------------------
-TOTAL                                         141       9  93.62%       210      15  92.86%
+TOTAL                                         141       8  94.33%       210      12  94.29%
 
 File '/libfido2/src/tpm.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
 -------------------------------------------------------------------------------------------
-fido_get_signed_hash_tpm                       20       2  90.00%        30       6  80.00%
-tpm.c:check_rsa2048_pubarea                    16       2  87.50%        32       3  90.62%
+fido_get_signed_hash_tpm                       20       0 100.00%        30       0 100.00%
+tpm.c:check_rsa2048_pubarea                    16       0 100.00%        32       0 100.00%
 tpm.c:bswap_rsa2048_pubarea                     1       0 100.00%        10       0 100.00%
-tpm.c:check_sha1_certinfo                      14       1  92.86%        43       3  93.02%
+tpm.c:check_sha1_certinfo                      14       0 100.00%        43       0 100.00%
 tpm.c:get_signed_sha1                          17       0 100.00%        22       0 100.00%
 tpm.c:get_signed_name                           7       0 100.00%        11       0 100.00%
 tpm.c:bswap_sha1_certinfo                       1       0 100.00%         8       0 100.00%
 -------------------------------------------------------------------------------------------
-TOTAL                                          76       5  93.42%       156      12  92.31%
+TOTAL                                          76       0 100.00%       156       0 100.00%
 
 File '/libfido2/src/types.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
