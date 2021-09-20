@@ -8,6 +8,7 @@ cat > "${MANIFEST}" <<- EOF
 image: ${IMAGE}
 packages:
   - cmake
+  - llvm
 EOF
 
 case "${IMAGE}" in
@@ -26,16 +27,10 @@ tasks:
   - build: |
       if [ "\$(uname)" = "OpenBSD" ]; then
         SUDO="doas -u root"
-        VERSION="\$(uname -r)"
-        ARCH="\$(uname -m)"
-        PKG_PATH="https://cdn.openbsd.org/pub/OpenBSD/\${VERSION}/packages/\${ARCH}/"
-        export PKG_PATH
-        \${SUDO} pkg_add -x llvm
-        SCAN="/usr/local/bin/scan-build --use-cc=/usr/bin/cc --status-bugs"
       else
         SUDO=sudo
-        SCAN=""
       fi
+      SCAN="/usr/local/bin/scan-build --use-cc=/usr/bin/cc --status-bugs"
       cd libfido2
       for T in Debug Release; do
         mkdir build-\$T
