@@ -11,6 +11,7 @@
 #include <unistd.h>
 #endif
 
+#define FIDO_RX_MS_REF
 #include "fido.h"
 #include "fido/es256.h"
 
@@ -115,7 +116,7 @@ authdata_fake(const char *rp_id, uint8_t flags, uint32_t sigcount,
 
 /* TODO: use u2f_get_touch_begin & u2f_get_touch_status instead */
 static int
-send_dummy_register(fido_dev_t *dev, int ms)
+send_dummy_register(fido_dev_t *dev, int *ms)
 {
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 challenge[SHA256_DIGEST_LENGTH];
@@ -124,7 +125,7 @@ send_dummy_register(fido_dev_t *dev, int ms)
 	int		 r;
 
 #ifdef FIDO_FUZZ
-	ms = 0; /* XXX */
+	*ms = 0; /* XXX */
 #endif
 
 	/* dummy challenge & application */
@@ -152,7 +153,7 @@ send_dummy_register(fido_dev_t *dev, int ms)
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-		if (usleep((unsigned)(ms == -1 ? 100 : ms) * 1000) < 0) {
+		if (usleep((unsigned)(*ms == -1 ? 100 : *ms) * 1000) < 0) {
 			fido_log_debug("%s: usleep", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
@@ -168,7 +169,7 @@ fail:
 
 static int
 key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
-    int *found, int ms)
+    int *found, int *ms)
 {
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 challenge[SHA256_DIGEST_LENGTH];
@@ -274,7 +275,7 @@ parse_auth_reply(fido_blob_t *sig, fido_blob_t *ad, const char *rp_id,
 
 static int
 do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
-    const fido_blob_t *key_id, fido_blob_t *sig, fido_blob_t *ad, int ms)
+    const fido_blob_t *key_id, fido_blob_t *sig, fido_blob_t *ad, int *ms)
 {
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
@@ -284,7 +285,7 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 	int		 r;
 
 #ifdef FIDO_FUZZ
-	ms = 0; /* XXX */
+	*ms = 0; /* XXX */
 #endif
 
 	if (cdh->len != SHA256_DIGEST_LENGTH || key_id->len > UINT8_MAX ||
@@ -328,7 +329,7 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-		if (usleep((unsigned)(ms == -1 ? 100 : ms) * 1000) < 0) {
+		if (usleep((unsigned)(*ms == -1 ? 100 : *ms) * 1000) < 0) {
 			fido_log_debug("%s: usleep", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
@@ -545,7 +546,7 @@ fail:
 }
 
 int
-u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
+u2f_register(fido_dev_t *dev, fido_cred_t *cred, int *ms)
 {
 	iso7816_apdu_t	*apdu = NULL;
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
@@ -555,7 +556,7 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 	int		 r;
 
 #ifdef FIDO_FUZZ
-	ms = 0; /* XXX */
+	*ms = 0; /* XXX */
 #endif
 
 	if (cred->rk == FIDO_OPT_TRUE || cred->uv == FIDO_OPT_TRUE) {
@@ -617,7 +618,7 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int ms)
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-		if (usleep((unsigned)(ms == -1 ? 100 : ms) * 1000) < 0) {
+		if (usleep((unsigned)(*ms == -1 ? 100 : *ms) * 1000) < 0) {
 			fido_log_debug("%s: usleep", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
@@ -637,7 +638,7 @@ fail:
 
 static int
 u2f_authenticate_single(fido_dev_t *dev, const fido_blob_t *key_id,
-    fido_assert_t *fa, size_t idx, int ms)
+    fido_assert_t *fa, size_t idx, int *ms)
 {
 	fido_blob_t	sig;
 	fido_blob_t	ad;
@@ -692,7 +693,7 @@ fail:
 }
 
 int
-u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int ms)
+u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int *ms)
 {
 	size_t	nfound = 0;
 	size_t	nauth_ok = 0;
@@ -747,6 +748,7 @@ u2f_get_touch_begin(fido_dev_t *dev)
 	unsigned char	 clientdata_hash[SHA256_DIGEST_LENGTH];
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
 	unsigned char	 reply[FIDO_MAXMSG];
+	int		 ms = 200; /* XXX */
 	int		 r;
 
 	memset(&clientdata_hash, 0, sizeof(clientdata_hash));
@@ -770,7 +772,7 @@ u2f_get_touch_begin(fido_dev_t *dev)
 
 	if (dev->attr.flags & FIDO_CAP_WINK) {
 		fido_tx(dev, CTAP_CMD_WINK, NULL, 0);
-		fido_rx(dev, CTAP_CMD_WINK, &reply, sizeof(reply), 200);
+		fido_rx(dev, CTAP_CMD_WINK, &reply, sizeof(reply), &ms);
 	}
 
 	if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
@@ -788,7 +790,7 @@ fail:
 }
 
 int
-u2f_get_touch_status(fido_dev_t *dev, int *touched, int ms)
+u2f_get_touch_status(fido_dev_t *dev, int *touched, int *ms)
 {
 	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;

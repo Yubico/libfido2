@@ -285,6 +285,7 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 {
 	fido_blob_t	*ecdh = NULL;
 	es256_pk_t	*pk = NULL;
+	int		 ms = dev->timeout_ms;
 	int		 r;
 
 #ifdef USE_WINHELLO
@@ -301,7 +302,7 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 	if (fido_dev_is_fido2(dev) == false) {
 		if (pin != NULL || assert->ext.mask != 0)
 			return (FIDO_ERR_UNSUPPORTED_OPTION);
-		return (u2f_authenticate(dev, assert, -1));
+		return (u2f_authenticate(dev, assert, &ms));
 	}
 
 	if (pin != NULL || (assert->uv == FIDO_OPT_TRUE &&
