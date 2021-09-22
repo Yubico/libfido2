@@ -265,6 +265,7 @@ typedef struct fido_dev {
 	int                   flags;      /* internal flags; see FIDO_DEV_* */
 	fido_dev_transport_t  transport;  /* transport functions */
 	uint64_t	      maxmsgsize; /* max message size */
+	int		      timeout_ms; /* read timeout in ms */
 } fido_dev_t;
 
 #else
