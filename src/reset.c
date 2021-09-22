@@ -4,6 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
+#define FIDO_RX_MS_REF
 #include "fido.h"
 
 static int
@@ -20,7 +21,7 @@ fido_dev_reset_tx(fido_dev_t *dev)
 }
 
 static int
-fido_dev_reset_wait(fido_dev_t *dev, int ms)
+fido_dev_reset_wait(fido_dev_t *dev, int *ms)
 {
 	int r;
 
@@ -39,5 +40,7 @@ fido_dev_reset_wait(fido_dev_t *dev, int ms)
 int
 fido_dev_reset(fido_dev_t *dev)
 {
-	return (fido_dev_reset_wait(dev, -1));
+	int ms = dev->timeout_ms;
+
+	return (fido_dev_reset_wait(dev, &ms));
 }
