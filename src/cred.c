@@ -193,6 +193,8 @@ fido_dev_make_cred_wait(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 int
 fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 {
+	int ms = dev->timeout_ms;
+
 #ifdef USE_WINHELLO
 	if (dev->flags & FIDO_DEV_WINHELLO)
 		return (fido_winhello_make_cred(dev, cred, pin));
@@ -201,7 +203,7 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 		if (pin != NULL || cred->rk == FIDO_OPT_TRUE ||
 		    cred->ext.mask != 0)
 			return (FIDO_ERR_UNSUPPORTED_OPTION);
-		return (u2f_register(dev, cred, -1));
+		return (u2f_register(dev, cred, &ms));
 	}
 
 	return (fido_dev_make_cred_wait(dev, cred, pin, -1));

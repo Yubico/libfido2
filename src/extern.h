@@ -164,10 +164,10 @@ void fido_log_error(int, const char *, ...);
 #endif /* FIDO_NO_DIAGNOSTIC */
 
 /* u2f */
-int u2f_register(fido_dev_t *, fido_cred_t *, int);
-int u2f_authenticate(fido_dev_t *, fido_assert_t *, int);
+int u2f_register(fido_dev_t *, fido_cred_t *, int *);
+int u2f_authenticate(fido_dev_t *, fido_assert_t *, int *);
 int u2f_get_touch_begin(fido_dev_t *);
-int u2f_get_touch_status(fido_dev_t *, int *, int);
+int u2f_get_touch_status(fido_dev_t *, int *, int *);
 
 /* unexposed fido ops */
 uint8_t fido_dev_get_pin_protocol(const fido_dev_t *);

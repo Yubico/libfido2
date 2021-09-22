@@ -491,7 +491,7 @@ fido_dev_get_touch_status(fido_dev_t *dev, int *touched, int ms)
 	*touched = 0;
 
 	if (fido_dev_is_fido2(dev) == false)
-		return (u2f_get_touch_status(dev, touched, ms));
+		return (u2f_get_touch_status(dev, touched, &ms));
 
 	switch ((r = fido_rx_cbor_status(dev, &ms))) {
 	case FIDO_ERR_PIN_AUTH_INVALID:
