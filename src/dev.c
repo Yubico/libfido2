@@ -558,6 +558,7 @@ fido_dev_new(void)
 		return (NULL);
 
 	dev->cid = CTAP_CID_BROADCAST;
+	dev->timeout_ms = -1;
 	dev->io = (fido_dev_io_t) {
 		&fido_hid_open,
 		&fido_hid_close,
@@ -589,6 +590,7 @@ fido_dev_new_with_info(const fido_dev_info_t *di)
 	dev->io_own = di->transport.tx != NULL || di->transport.rx != NULL;
 	dev->transport = di->transport;
 	dev->cid = CTAP_CID_BROADCAST;
+	dev->timeout_ms = -1;
 
 	if ((dev->path = strdup(di->path)) == NULL) {
 		fido_log_debug("%s: strdup", __func__);
