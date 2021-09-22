@@ -172,7 +172,7 @@ int u2f_get_touch_status(fido_dev_t *, int *, int);
 /* unexposed fido ops */
 uint8_t fido_dev_get_pin_protocol(const fido_dev_t *);
 int fido_dev_authkey(fido_dev_t *, es256_pk_t *);
-int fido_dev_get_cbor_info_wait(fido_dev_t *, fido_cbor_info_t *, int);
+int fido_dev_get_cbor_info_wait(fido_dev_t *, fido_cbor_info_t *, int *);
 int fido_dev_get_uv_token(fido_dev_t *, uint8_t, const char *,
     const fido_blob_t *, const es256_pk_t *, const char *, fido_blob_t *);
 uint64_t fido_dev_maxmsgsize(const fido_dev_t *);

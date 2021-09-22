@@ -4,6 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
+#define FIDO_RX_MS_REF
 #include <openssl/sha.h>
 #include "fido.h"
 
@@ -176,7 +177,7 @@ fail:
 }
 
 static int
-fido_dev_open_rx(fido_dev_t *dev, int ms)
+fido_dev_open_rx(fido_dev_t *dev, int *ms)
 {
 	fido_cbor_info_t	*info = NULL;
 	int			 reply_len;
@@ -241,7 +242,7 @@ fail:
 }
 
 static int
-fido_dev_open_wait(fido_dev_t *dev, const char *path, int ms)
+fido_dev_open_wait(fido_dev_t *dev, const char *path, int *ms)
 {
 	int r;
 
@@ -331,15 +332,19 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 int
 fido_dev_open_with_info(fido_dev_t *dev)
 {
+	int ms = dev->timeout_ms;
+
 	if (dev->path == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	return (fido_dev_open_wait(dev, dev->path, -1));
+	return (fido_dev_open_wait(dev, dev->path, &ms));
 }
 
 int
 fido_dev_open(fido_dev_t *dev, const char *path)
 {
+	int ms = dev->timeout_ms;
+
 #ifdef NFC_LINUX
 	if (strncmp(path, FIDO_NFC_PREFIX, strlen(FIDO_NFC_PREFIX)) == 0) {
 		dev->io_own = true;
@@ -356,7 +361,7 @@ fido_dev_open(fido_dev_t *dev, const char *path)
 	}
 #endif
 
-	return (fido_dev_open_wait(dev, path, -1));
+	return (fido_dev_open_wait(dev, path, &ms));
 }
 
 int
@@ -488,7 +493,7 @@ fido_dev_get_touch_status(fido_dev_t *dev, int *touched, int ms)
 	if (fido_dev_is_fido2(dev) == false)
 		return (u2f_get_touch_status(dev, touched, ms));
 
-	switch ((r = fido_rx_cbor_status(dev, ms))) {
+	switch ((r = fido_rx_cbor_status(dev, &ms))) {
 	case FIDO_ERR_PIN_AUTH_INVALID:
 	case FIDO_ERR_PIN_INVALID:
 	case FIDO_ERR_PIN_NOT_SET:
