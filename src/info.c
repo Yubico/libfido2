@@ -4,6 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
+#define FIDO_RX_MS_REF
 #include "fido.h"
 
 static int
@@ -294,13 +295,13 @@ fido_dev_get_cbor_info_tx(fido_dev_t *dev)
 }
 
 static int
-fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
+fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int *ms)
 {
 	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
 
 	fido_log_debug("%s: dev=%p, ci=%p, ms=%d", __func__, (void *)dev,
-	    (void *)ci, ms);
+	    (void *)ci, *ms);
 
 	fido_cbor_info_reset(ci);
 
@@ -315,7 +316,7 @@ fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 }
 
 int
-fido_dev_get_cbor_info_wait(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
+fido_dev_get_cbor_info_wait(fido_dev_t *dev, fido_cbor_info_t *ci, int *ms)
 {
 	int r;
 
@@ -333,7 +334,9 @@ fido_dev_get_cbor_info_wait(fido_dev_t *dev, fido_cbor_info_t *ci, int ms)
 int
 fido_dev_get_cbor_info(fido_dev_t *dev, fido_cbor_info_t *ci)
 {
-	return (fido_dev_get_cbor_info_wait(dev, ci, -1));
+	int ms = dev->timeout_ms;
+
+	return (fido_dev_get_cbor_info_wait(dev, ci, &ms));
 }
 
 /*
