@@ -142,13 +142,13 @@ try {
 	Pop-Location
 }
 
-Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}, ${SHARED}, ${FLAGS}) {
+Function Build(${OUTPUT}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 	if (-Not (Test-Path .\${LIBRESSL})) {
 		New-Item -Type Directory .\${LIBRESSL} -ErrorAction Stop
 	}
 
 	Push-Location .\${LIBRESSL}
-	& $CMake ..\..\..\${LIBRESSL} -G "${GENERATOR}" -A "${ARCH}" `
+	& $CMake ..\..\..\${LIBRESSL} -A "${ARCH}" `
 		-DBUILD_SHARED_LIBS="${SHARED}" -DLIBRESSL_TESTS=OFF `
 		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"
@@ -161,7 +161,7 @@ Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 	}
 
 	Push-Location .\${LIBCBOR}
-	& $CMake ..\..\..\${LIBCBOR} -G "${GENERATOR}" -A "${ARCH}" `
+	& $CMake ..\..\..\${LIBCBOR} -A "${ARCH}" `
 		-DBUILD_SHARED_LIBS="${SHARED}" `
 		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"
@@ -174,7 +174,7 @@ Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 	}
 
 	Push-Location .\${ZLIB}
-	& $CMake ..\..\..\${ZLIB} -G "${GENERATOR}" -A "${ARCH}" `
+	& $CMake ..\..\..\${ZLIB} -A "${ARCH}" `
 		-DBUILD_SHARED_LIBS="${SHARED}" `
 		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"
@@ -182,7 +182,7 @@ Function Build(${OUTPUT}, ${GENERATOR}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 	& $CMake --build . --config Release --target install --verbose
 	Pop-Location
 
-	& $CMake ..\..\.. -G "${GENERATOR}" -A "${ARCH}" `
+	& $CMake ..\..\.. -A "${ARCH}" `
 		-DBUILD_SHARED_LIBS="${SHARED}" `
 		-DCBOR_INCLUDE_DIRS="${OUTPUT}\include" `
 		-DCBOR_LIBRARY_DIRS="${OUTPUT}\lib" `
@@ -245,17 +245,17 @@ Function Package-Tools(${SRC}, ${DEST}) {
 }
 
 Push-Location ${BUILD}\64\dynamic
-Build ${OUTPUT}\64\dynamic "Visual Studio 16 2019" "x64" "ON" "/MD"
+Build ${OUTPUT}\64\dynamic "x64" "ON" "/MD"
 Pop-Location
 Push-Location ${BUILD}\32\dynamic
-Build ${OUTPUT}\32\dynamic "Visual Studio 16 2019" "Win32" "ON" "/MD"
+Build ${OUTPUT}\32\dynamic "Win32" "ON" "/MD"
 Pop-Location
 
 Push-Location ${BUILD}\64\static
-Build ${OUTPUT}\64\static "Visual Studio 16 2019" "x64" "OFF" "/MT"
+Build ${OUTPUT}\64\static "x64" "OFF" "/MT"
 Pop-Location
 Push-Location ${BUILD}\32\static
-Build ${OUTPUT}\32\static "Visual Studio 16 2019" "Win32" "OFF" "/MT"
+Build ${OUTPUT}\32\static "Win32" "OFF" "/MT"
 Pop-Location
 
 Package-Headers
