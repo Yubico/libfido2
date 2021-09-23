@@ -357,9 +357,13 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 	if ((name = udev_list_entry_get_name(udev_entry)) == NULL ||
 	    (dev = udev_device_new_from_syspath(udev, name)) == NULL)
 		goto fail;
-	if (asprintf(&di->path, "%s/%s", FIDO_NFC_PREFIX, name) == -1 ||
-	    (di->manufacturer = get_usb_attr(dev, "manufacturer")) == NULL ||
-	    (di->product = get_usb_attr(dev, "product")) == NULL)
+	if (asprintf(&di->path, "%s/%s", FIDO_NFC_PREFIX, name) == -1)
+		goto fail;
+	if ((di->manufacturer = get_usb_attr(dev, "manufacturer")) == NULL)
+		di->manufacturer = strdup("");
+	if ((di->product = get_usb_attr(dev, "product")) == NULL)
+		di->product = strdup("");
+	if (di->manufacturer == NULL || di->product == NULL)
 		goto fail;
 	/* XXX assumes USB for vendor/product info */
 	if ((str = get_usb_attr(dev, "idVendor")) != NULL &&
