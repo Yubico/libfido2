@@ -7,6 +7,7 @@
 #include <openssl/sha.h>
 #include <openssl/x509.h>
 
+#define FIDO_RX_MS_REF
 #include "fido.h"
 #include "fido/es256.h"
 
@@ -47,7 +48,8 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 }
 
 static int
-fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
+fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
+    int *ms)
 {
 	fido_blob_t	 f;
 	fido_blob_t	*ecdh = NULL;
@@ -96,7 +98,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 	/* user verification */
 	if (pin != NULL || (uv == FIDO_OPT_TRUE &&
 	    fido_dev_supports_permissions(dev))) {
-		if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
+		if ((r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
@@ -135,7 +137,7 @@ fail:
 }
 
 static int
-fido_dev_make_cred_rx(fido_dev_t *dev, fido_cred_t *cred, int ms)
+fido_dev_make_cred_rx(fido_dev_t *dev, fido_cred_t *cred, int *ms)
 {
 	unsigned char	*reply;
 	int		 reply_len;
@@ -179,11 +181,11 @@ fail:
 
 static int
 fido_dev_make_cred_wait(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
-    int ms)
+    int *ms)
 {
 	int  r;
 
-	if ((r = fido_dev_make_cred_tx(dev, cred, pin)) != FIDO_OK ||
+	if ((r = fido_dev_make_cred_tx(dev, cred, pin, ms)) != FIDO_OK ||
 	    (r = fido_dev_make_cred_rx(dev, cred, ms)) != FIDO_OK)
 		return (r);
 
@@ -206,7 +208,7 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 		return (u2f_register(dev, cred, &ms));
 	}
 
-	return (fido_dev_make_cred_wait(dev, cred, pin, -1));
+	return (fido_dev_make_cred_wait(dev, cred, pin, &ms));
 }
 
 static int
