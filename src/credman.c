@@ -6,7 +6,6 @@
 
 #include <openssl/sha.h>
 
-#define FIDO_RX_MS_REF
 #include "fido.h"
 #include "fido/credman.h"
 #include "fido/es256.h"

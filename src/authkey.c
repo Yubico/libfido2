@@ -4,7 +4,6 @@
  * license that can be found in the LICENSE file.
  */
 
-#define FIDO_RX_MS_REF
 #include "fido.h"
 
 static int

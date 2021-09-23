@@ -253,27 +253,27 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 }
 
 int
-fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int ms)
+fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int *ms)
 {
 	int n;
 
 	fido_log_debug("%s: dev=%p, cmd=0x%02x, ms=%d", __func__, (void *)d,
-	    cmd, ms);
+	    cmd, *ms);
 
 	if (d->transport.rx != NULL)
-		return (d->transport.rx(d, cmd, buf, count, ms));
+		return (d->transport.rx(d, cmd, buf, count, *ms));
 	if (d->io_handle == NULL || d->io.read == NULL || count > UINT16_MAX) {
 		fido_log_debug("%s: invalid argument", __func__);
 		return (-1);
 	}
-	if ((n = rx(d, cmd, buf, count, ms)) >= 0)
+	if ((n = rx(d, cmd, buf, count, *ms)) >= 0)
 		fido_log_xxd(buf, (size_t)n, "%s", __func__);
 
 	return (n);
 }
 
 int
-fido_rx_cbor_status(fido_dev_t *d, int ms)
+fido_rx_cbor_status(fido_dev_t *d, int *ms)
 {
 	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
