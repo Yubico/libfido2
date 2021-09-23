@@ -131,23 +131,18 @@ get_str(IOHIDDeviceRef dev, char **manufacturer, char **product)
 	*manufacturer = NULL;
 	*product = NULL;
 
-	if (get_utf8(dev, CFSTR(kIOHIDManufacturerKey), buf, sizeof(buf)) < 0) {
-		fido_log_debug("%s: get_utf8 manufacturer", __func__);
-		goto fail;
-	}
+	if (get_utf8(dev, CFSTR(kIOHIDManufacturerKey), buf, sizeof(buf)) < 0)
+		*manufacturer = strdup("");
+	else
+		*manufacturer = strdup(buf);
 
-	if ((*manufacturer = strdup(buf)) == NULL) {
-		fido_log_debug("%s: strdup manufacturer", __func__);
-		goto fail;
-	}
+	if (get_utf8(dev, CFSTR(kIOHIDProductKey), buf, sizeof(buf)) < 0)
+		*product = strdup("");
+	else
+		*product = strdup(buf);
 
-	if (get_utf8(dev, CFSTR(kIOHIDProductKey), buf, sizeof(buf)) < 0) {
-		fido_log_debug("%s: get_utf8 product", __func__);
-		goto fail;
-	}
-
-	if ((*product = strdup(buf)) == NULL) {
-		fido_log_debug("%s: strdup product", __func__);
+	if (*manufacturer == NULL || *product == NULL) {
+		fido_log_debug("%s: strdup", __func__);
 		goto fail;
 	}
 
