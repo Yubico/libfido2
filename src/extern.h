@@ -253,6 +253,8 @@ uint32_t uniform_random(uint32_t);
 #ifdef FIDO_RX_MS_REF
 #define fido_rx_cbor_status(dev, ms) fido_rx_cbor_status(dev, *(ms))
 #define fido_rx(dev, cmd, buf, siz, ms) fido_rx(dev, cmd, buf, siz, *(ms))
+#define fido_do_ecdh(dev, pk, ecdh, ms) \
+    ((void)(ms), fido_do_ecdh(dev, pk, ecdh))
 #endif
 
 #ifdef __cplusplus

@@ -309,7 +309,7 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 	if (pin != NULL || (assert->uv == FIDO_OPT_TRUE &&
 	    fido_dev_supports_permissions(dev)) ||
 	    (assert->ext.mask & FIDO_EXT_HMAC_SECRET)) {
-		if ((r = fido_do_ecdh(dev, &pk, &ecdh)) != FIDO_OK) {
+		if ((r = fido_do_ecdh(dev, &pk, &ecdh, &ms)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
