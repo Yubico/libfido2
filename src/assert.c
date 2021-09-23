@@ -6,6 +6,7 @@
 
 #include <openssl/sha.h>
 
+#define FIDO_RX_MS_REF
 #include "fido.h"
 #include "fido/es256.h"
 #include "fido/rs256.h"
@@ -158,7 +159,7 @@ fail:
 }
 
 static int
-fido_dev_get_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
+fido_dev_get_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int *ms)
 {
 	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
@@ -212,7 +213,7 @@ fido_get_next_assert_tx(fido_dev_t *dev)
 }
 
 static int
-fido_get_next_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
+fido_get_next_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int *ms)
 {
 	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
@@ -242,7 +243,7 @@ fido_get_next_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int ms)
 
 static int
 fido_dev_get_assert_wait(fido_dev_t *dev, fido_assert_t *assert,
-    const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin, int ms)
+    const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin, int *ms)
 {
 	int r;
 
@@ -314,7 +315,7 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 		}
 	}
 
-	r = fido_dev_get_assert_wait(dev, assert, pk, ecdh, pin, -1);
+	r = fido_dev_get_assert_wait(dev, assert, pk, ecdh, pin, &ms);
 	if (r == FIDO_OK && (assert->ext.mask & FIDO_EXT_HMAC_SECRET))
 		if (decrypt_hmac_secrets(dev, assert, ecdh) < 0) {
 			fido_log_debug("%s: decrypt_hmac_secrets", __func__);
