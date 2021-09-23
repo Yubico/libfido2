@@ -103,7 +103,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 			goto fail;
 		}
 		if ((r = cbor_add_uv_params(dev, cmd, &cred->cdh, pk, ecdh,
-		    pin, cred->rp.id, &argv[7], &argv[8])) != FIDO_OK) {
+		    pin, cred->rp.id, &argv[7], &argv[8], ms)) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
