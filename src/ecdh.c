@@ -164,7 +164,7 @@ fail:
 }
 
 int
-fido_do_ecdh(fido_dev_t *dev, es256_pk_t **pk, fido_blob_t **ecdh)
+fido_do_ecdh(fido_dev_t *dev, es256_pk_t **pk, fido_blob_t **ecdh, int *ms)
 {
 	es256_sk_t *sk = NULL; /* our private key */
 	es256_pk_t *ak = NULL; /* authenticator's public key */
@@ -182,7 +182,7 @@ fido_do_ecdh(fido_dev_t *dev, es256_pk_t **pk, fido_blob_t **ecdh)
 		goto fail;
 	}
 	if ((ak = es256_pk_new()) == NULL ||
-	    fido_dev_authkey(dev, ak) != FIDO_OK) {
+	    fido_dev_authkey(dev, ak, ms) != FIDO_OK) {
 		fido_log_debug("%s: fido_dev_authkey", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
