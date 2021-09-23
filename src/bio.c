@@ -467,7 +467,7 @@ fido_bio_dev_enroll_begin(fido_dev_t *dev, fido_bio_template_t *t,
 	}
 
 	if ((r = fido_dev_get_uv_token(dev, CTAP_CBOR_BIO_ENROLL_PRE, pin, ecdh,
-	    pk, NULL, token)) != FIDO_OK) {
+	    pk, NULL, token, &ms)) != FIDO_OK) {
 		fido_log_debug("%s: fido_dev_get_uv_token", __func__);
 		goto fail;
 	}

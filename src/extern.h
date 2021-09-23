@@ -257,6 +257,8 @@ uint32_t uniform_random(uint32_t);
     ((void)(ms), fido_do_ecdh(dev, pk, ecdh))
 #define cbor_add_uv_params(dev, cmd, data, pk, ecdh, pin, rpid, auth, opt, ms) \
     ((void)(ms), cbor_add_uv_params(dev, cmd, data, pk, ecdh, pin, rpid, auth, opt))
+#define fido_dev_get_uv_token(dev, cmd, pin, ecdh, pk, rpid, token, ms) \
+    ((void)(ms), fido_dev_get_uv_token(dev, cmd, pin, ecdh, pk, rpid, token))
 #endif
 
 #ifdef __cplusplus
