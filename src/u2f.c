@@ -11,7 +11,6 @@
 #include <unistd.h>
 #endif
 
-#define FIDO_RX_MS_REF
 #include "fido.h"
 #include "fido/es256.h"
 
