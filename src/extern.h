@@ -87,7 +87,7 @@ int cbor_parse_reply(const unsigned char *, size_t, void *,
     int(*)(const cbor_item_t *, const cbor_item_t *, void *));
 int cbor_add_uv_params(fido_dev_t *, uint8_t, const fido_blob_t *,
     const es256_pk_t *, const fido_blob_t *, const char *, const char *,
-    cbor_item_t **, cbor_item_t **);
+    cbor_item_t **, cbor_item_t **, int *);
 void cbor_vector_free(cbor_item_t **, size_t);
 int cbor_array_append(cbor_item_t **, cbor_item_t *);
 int cbor_array_drop(cbor_item_t **, size_t);
@@ -174,7 +174,8 @@ uint8_t fido_dev_get_pin_protocol(const fido_dev_t *);
 int fido_dev_authkey(fido_dev_t *, es256_pk_t *);
 int fido_dev_get_cbor_info_wait(fido_dev_t *, fido_cbor_info_t *, int *);
 int fido_dev_get_uv_token(fido_dev_t *, uint8_t, const char *,
-    const fido_blob_t *, const es256_pk_t *, const char *, fido_blob_t *);
+    const fido_blob_t *, const es256_pk_t *, const char *, fido_blob_t *,
+    int *);
 uint64_t fido_dev_maxmsgsize(const fido_dev_t *);
 int fido_do_ecdh(fido_dev_t *, es256_pk_t **, fido_blob_t **);
 bool fido_dev_supports_permissions(const fido_dev_t *);
@@ -255,10 +256,6 @@ uint32_t uniform_random(uint32_t);
 #define fido_rx(dev, cmd, buf, siz, ms) fido_rx(dev, cmd, buf, siz, *(ms))
 #define fido_do_ecdh(dev, pk, ecdh, ms) \
     ((void)(ms), fido_do_ecdh(dev, pk, ecdh))
-#define cbor_add_uv_params(dev, cmd, data, pk, ecdh, pin, rpid, auth, opt, ms) \
-    ((void)(ms), cbor_add_uv_params(dev, cmd, data, pk, ecdh, pin, rpid, auth, opt))
-#define fido_dev_get_uv_token(dev, cmd, pin, ecdh, pk, rpid, token, ms) \
-    ((void)(ms), fido_dev_get_uv_token(dev, cmd, pin, ecdh, pk, rpid, token))
 #endif
 
 #ifdef __cplusplus
