@@ -4,6 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
+#define FIDO_RX_MS_REF
 #include "fido.h"
 
 static int
@@ -58,13 +59,13 @@ fail:
 }
 
 static int
-fido_dev_authkey_rx(fido_dev_t *dev, es256_pk_t *authkey, int ms)
+fido_dev_authkey_rx(fido_dev_t *dev, es256_pk_t *authkey, int *ms)
 {
 	unsigned char	reply[FIDO_MAXMSG];
 	int		reply_len;
 
 	fido_log_debug("%s: dev=%p, authkey=%p, ms=%d", __func__, (void *)dev,
-	    (void *)authkey, ms);
+	    (void *)authkey, *ms);
 
 	memset(authkey, 0, sizeof(*authkey));
 
@@ -79,7 +80,7 @@ fido_dev_authkey_rx(fido_dev_t *dev, es256_pk_t *authkey, int ms)
 }
 
 static int
-fido_dev_authkey_wait(fido_dev_t *dev, es256_pk_t *authkey, int ms)
+fido_dev_authkey_wait(fido_dev_t *dev, es256_pk_t *authkey, int *ms)
 {
 	int r;
 
@@ -91,7 +92,7 @@ fido_dev_authkey_wait(fido_dev_t *dev, es256_pk_t *authkey, int ms)
 }
 
 int
-fido_dev_authkey(fido_dev_t *dev, es256_pk_t *authkey)
+fido_dev_authkey(fido_dev_t *dev, es256_pk_t *authkey, int *ms)
 {
-	return (fido_dev_authkey_wait(dev, authkey, -1));
+	return (fido_dev_authkey_wait(dev, authkey, ms));
 }

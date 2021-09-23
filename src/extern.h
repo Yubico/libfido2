@@ -171,13 +171,13 @@ int u2f_get_touch_status(fido_dev_t *, int *, int *);
 
 /* unexposed fido ops */
 uint8_t fido_dev_get_pin_protocol(const fido_dev_t *);
-int fido_dev_authkey(fido_dev_t *, es256_pk_t *);
+int fido_dev_authkey(fido_dev_t *, es256_pk_t *, int *);
 int fido_dev_get_cbor_info_wait(fido_dev_t *, fido_cbor_info_t *, int *);
 int fido_dev_get_uv_token(fido_dev_t *, uint8_t, const char *,
     const fido_blob_t *, const es256_pk_t *, const char *, fido_blob_t *,
     int *);
 uint64_t fido_dev_maxmsgsize(const fido_dev_t *);
-int fido_do_ecdh(fido_dev_t *, es256_pk_t **, fido_blob_t **);
+int fido_do_ecdh(fido_dev_t *, es256_pk_t **, fido_blob_t **, int *);
 bool fido_dev_supports_permissions(const fido_dev_t *);
 
 /* types */
@@ -254,8 +254,6 @@ uint32_t uniform_random(uint32_t);
 #ifdef FIDO_RX_MS_REF
 #define fido_rx_cbor_status(dev, ms) fido_rx_cbor_status(dev, *(ms))
 #define fido_rx(dev, cmd, buf, siz, ms) fido_rx(dev, cmd, buf, siz, *(ms))
-#define fido_do_ecdh(dev, pk, ecdh, ms) \
-    ((void)(ms), fido_do_ecdh(dev, pk, ecdh))
 #endif
 
 #ifdef __cplusplus
