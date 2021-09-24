@@ -397,7 +397,7 @@ unpack_user_id(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 
 static int
 translate_fido_assert(struct winhello_assert *ctx, const fido_assert_t *assert,
-    const char *pin)
+    const char *pin, int ms)
 {
 	WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS *opt;
 
@@ -422,7 +422,7 @@ translate_fido_assert(struct winhello_assert *ctx, const fido_assert_t *assert,
 	/* options */
 	opt = &ctx->opt;
 	opt->dwVersion = WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS_VERSION_1;
-	opt->dwTimeoutMilliseconds = MAXMSEC;
+	opt->dwTimeoutMilliseconds = ms < 0 ? MAXMSEC : (DWORD)ms;
 	if (pack_credlist(&opt->CredentialList, &assert->allow_list) < 0) {
 		fido_log_debug("%s: pack_credlist", __func__);
 		return FIDO_ERR_INTERNAL;
@@ -471,7 +471,7 @@ translate_winhello_assert(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 
 static int
 translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
-    const char *pin)
+    const char *pin, int ms)
 {
 	WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS *opt;
 
@@ -495,7 +495,7 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
 	/* options */
 	opt = &ctx->opt;
 	opt->dwVersion = WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_VERSION_1;
-	opt->dwTimeoutMilliseconds = MAXMSEC;
+	opt->dwTimeoutMilliseconds = ms < 0 ? MAXMSEC : (DWORD)ms;
 	opt->dwAttestationConveyancePreference =
 	    WEBAUTHN_ATTESTATION_CONVEYANCE_PREFERENCE_DIRECT;
 	if (pack_credlist(&opt->CredentialList, &cred->excl) < 0) {
@@ -741,7 +741,7 @@ fido_winhello_cancel(fido_dev_t *dev)
 
 int
 fido_winhello_get_assert(fido_dev_t *dev, fido_assert_t *assert,
-    const char *pin)
+    const char *pin, int ms)
 {
 	HWND			 w;
 	struct winhello_assert	*ctx;
@@ -759,7 +759,7 @@ fido_winhello_get_assert(fido_dev_t *dev, fido_assert_t *assert,
 		fido_log_debug("%s: GetForegroundWindow", __func__);
 		goto fail;
 	}
-	if ((r = translate_fido_assert(ctx, assert, pin)) != FIDO_OK) {
+	if ((r = translate_fido_assert(ctx, assert, pin, ms)) != FIDO_OK) {
 		fido_log_debug("%s: translate_fido_assert", __func__);
 		goto fail;
 	}
@@ -814,7 +814,8 @@ fido_winhello_get_cbor_info(fido_dev_t *dev, fido_cbor_info_t *ci)
 }
 
 int
-fido_winhello_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
+fido_winhello_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
+    int ms)
 {
 	HWND			 w;
 	struct winhello_cred	*ctx;
@@ -832,7 +833,7 @@ fido_winhello_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 		fido_log_debug("%s: GetForegroundWindow", __func__);
 		goto fail;
 	}
-	if ((r = translate_fido_cred(ctx, cred, pin)) != FIDO_OK) {
+	if ((r = translate_fido_cred(ctx, cred, pin, ms)) != FIDO_OK) {
 		fido_log_debug("%s: translate_fido_cred", __func__);
 		goto fail;
 	}

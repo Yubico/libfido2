@@ -131,9 +131,9 @@ int fido_winhello_manifest(fido_dev_info_t *, size_t, size_t *);
 int fido_winhello_open(fido_dev_t *);
 int fido_winhello_close(fido_dev_t *);
 int fido_winhello_cancel(fido_dev_t *);
-int fido_winhello_get_assert(fido_dev_t *, fido_assert_t *, const char *);
+int fido_winhello_get_assert(fido_dev_t *, fido_assert_t *, const char *, int);
 int fido_winhello_get_cbor_info(fido_dev_t *, fido_cbor_info_t *);
-int fido_winhello_make_cred(fido_dev_t *, fido_cred_t *, const char *);
+int fido_winhello_make_cred(fido_dev_t *, fido_cred_t *, const char *, int);
 
 /* generic i/o */
 int fido_rx_cbor_status(fido_dev_t *, int *);

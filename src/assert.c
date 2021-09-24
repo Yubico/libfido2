@@ -291,7 +291,7 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 
 #ifdef USE_WINHELLO
 	if (dev->flags & FIDO_DEV_WINHELLO)
-		return (fido_winhello_get_assert(dev, assert, pin));
+		return (fido_winhello_get_assert(dev, assert, pin, ms));
 #endif
 
 	if (assert->rp_id == NULL || assert->cdh.ptr == NULL) {
