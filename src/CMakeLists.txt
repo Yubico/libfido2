@@ -32,6 +32,7 @@ list(APPEND FIDO_SOURCES
 	reset.c
 	rs1.c
 	rs256.c
+	time.c
 	tpm.c
 	types.c
 	u2f.c
@@ -79,6 +80,7 @@ endif()
 
 list(APPEND COMPAT_SOURCES
 	../openbsd-compat/bsd-getpagesize.c
+	../openbsd-compat/clock_gettime.c
 	../openbsd-compat/endian_win32.c
 	../openbsd-compat/explicit_bzero.c
 	../openbsd-compat/explicit_bzero_win32.c
