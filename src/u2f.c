@@ -10,9 +10,12 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <errno.h>
 
 #include "fido.h"
 #include "fido/es256.h"
+
+#define U2F_PACE_MS (100)
 
 #if defined(_MSC_VER)
 static int
@@ -23,6 +26,28 @@ usleep(unsigned int usec)
 	return (0);
 }
 #endif
+
+static int
+delay_ms(unsigned int ms, int *ms_remain)
+{
+	if (*ms_remain > -1 && (unsigned int)*ms_remain < ms)
+		ms = (unsigned int)*ms_remain;
+
+	if (ms > UINT_MAX / 1000) {
+		fido_log_debug("%s: ms=%u", __func__, ms);
+		return (-1);
+	}
+
+	if (usleep(ms * 1000) < 0) {
+		fido_log_error(errno, "%s: usleep", __func__);
+		return (-1);
+	}
+
+	if (*ms_remain > -1)
+		*ms_remain -= (int)ms;
+
+	return (0);
+}
 
 static int
 sig_get(fido_blob_t *sig, const unsigned char **buf, size_t *len)
@@ -152,8 +177,8 @@ send_dummy_register(fido_dev_t *dev, int *ms)
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-		if (usleep((unsigned)(*ms == -1 ? 100 : *ms) * 1000) < 0) {
-			fido_log_debug("%s: usleep", __func__);
+		if (delay_ms(U2F_PACE_MS, ms) != 0) {
+			fido_log_debug("%s: delay_ms", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
@@ -328,8 +353,8 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-		if (usleep((unsigned)(*ms == -1 ? 100 : *ms) * 1000) < 0) {
-			fido_log_debug("%s: usleep", __func__);
+		if (delay_ms(U2F_PACE_MS, ms) != 0) {
+			fido_log_debug("%s: delay_ms", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
@@ -617,8 +642,8 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int *ms)
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
-		if (usleep((unsigned)(*ms == -1 ? 100 : *ms) * 1000) < 0) {
-			fido_log_debug("%s: usleep", __func__);
+		if (delay_ms(U2F_PACE_MS, ms) != 0) {
+			fido_log_debug("%s: delay_ms", __func__);
 			r = FIDO_ERR_RX;
 			goto fail;
 		}
