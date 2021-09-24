@@ -142,21 +142,25 @@ fido_tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
 }
 
 static int
-rx_frame(fido_dev_t *d, struct frame *fp, int ms)
+rx_frame(fido_dev_t *d, struct frame *fp, int *ms)
 {
+	struct timespec ts;
 	int n;
 
 	memset(fp, 0, sizeof(*fp));
 
-	if (d->rx_len > sizeof(*fp) || (n = d->io.read(d->io_handle,
-	    (unsigned char *)fp, d->rx_len, ms)) < 0 || (size_t)n != d->rx_len)
+	if (fido_time_now(&ts) != 0)
 		return (-1);
 
-	return (0);
+	if (d->rx_len > sizeof(*fp) || (n = d->io.read(d->io_handle,
+	    (unsigned char *)fp, d->rx_len, *ms)) < 0 || (size_t)n != d->rx_len)
+		return (-1);
+
+	return (fido_time_delta(&ts, ms));
 }
 
 static int
-rx_preamble(fido_dev_t *d, uint8_t cmd, struct frame *fp, int ms)
+rx_preamble(fido_dev_t *d, uint8_t cmd, struct frame *fp, int *ms)
 {
 	do {
 		if (rx_frame(d, fp, ms) < 0)
@@ -185,7 +189,7 @@ rx_preamble(fido_dev_t *d, uint8_t cmd, struct frame *fp, int ms)
 }
 
 static int
-rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
+rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int *ms)
 {
 	struct frame f;
 	size_t r, payload_len, init_data_len, cont_data_len;
@@ -252,6 +256,23 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms)
 	return ((int)r);
 }
 
+static int
+transport_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int *ms)
+{
+	struct timespec ts;
+	int n;
+
+	if (fido_time_now(&ts) != 0)
+		return (-1);
+
+	n = d->transport.rx(d, cmd, buf, count, *ms);
+
+	if (fido_time_delta(&ts, ms) != 0)
+		return (-1);
+
+	return (n);
+}
+
 int
 fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int *ms)
 {
@@ -261,12 +282,12 @@ fido_rx(fido_dev_t *d, uint8_t cmd, void *buf, size_t count, int *ms)
 	    cmd, *ms);
 
 	if (d->transport.rx != NULL)
-		return (d->transport.rx(d, cmd, buf, count, *ms));
+		return (transport_rx(d, cmd, buf, count, ms));
 	if (d->io_handle == NULL || d->io.read == NULL || count > UINT16_MAX) {
 		fido_log_debug("%s: invalid argument", __func__);
 		return (-1);
 	}
-	if ((n = rx(d, cmd, buf, count, *ms)) >= 0)
+	if ((n = rx(d, cmd, buf, count, ms)) >= 0)
 		fido_log_xxd(buf, (size_t)n, "%s", __func__);
 
 	return (n);
