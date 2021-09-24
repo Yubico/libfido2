@@ -1,11 +1,11 @@
-# Copyright (c) 2019 Yubico AB. All rights reserved.
+# Copyright (c) 2019-2021 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-IMAGE		:= libfido2-coverage:1.9.0
+IMAGE		:= libfido2-coverage:1.9.1
 RUNNER		:= libfido2-runner
-PROFDATA	:= llvm-profdata-11
-COV		:= llvm-cov-11
+PROFDATA	:= llvm-profdata-12
+COV		:= llvm-cov-12
 TARGETS		:= fuzz_assert fuzz_bio fuzz_cred fuzz_credman fuzz_hid \
 		   fuzz_largeblob fuzz_netlink fuzz_mgmt
 CORPORA		:= $(foreach f,${TARGETS},${f}/corpus)
