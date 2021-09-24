@@ -199,6 +199,8 @@ int fido_check_flags(uint8_t, fido_opt_t, fido_opt_t);
 int fido_check_rp_id(const char *, const unsigned char *);
 int fido_get_random(void *, size_t);
 int fido_sha256(fido_blob_t *, const u_char *, size_t);
+int fido_time_now(struct timespec *);
+int fido_time_delta(const struct timespec *, int *);
 
 /* crypto */
 int es256_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
