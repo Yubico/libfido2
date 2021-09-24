@@ -220,15 +220,22 @@ tx_get_response(fido_dev_t *d, uint8_t count)
 }
 
 static int
-rx_apdu(fido_dev_t *d, uint8_t sw[2], unsigned char **buf, size_t *count, int ms)
+rx_apdu(fido_dev_t *d, uint8_t sw[2], unsigned char **buf, size_t *count, int *ms)
 {
 	uint8_t f[256 + 2];
+	struct timespec ts;
 	int n, ok = -1;
 
-	if ((n = d->io.read(d->io_handle, f, sizeof(f), ms)) < 2) {
+	if (fido_time_now(&ts) != 0)
+		goto fail;
+
+	if ((n = d->io.read(d->io_handle, f, sizeof(f), *ms)) < 2) {
 		fido_log_debug("%s: read", __func__);
 		goto fail;
 	}
+
+	if (fido_time_delta(&ts, ms) != 0)
+		goto fail;
 
 	if (fido_buf_write(buf, count, f, (size_t)(n - 2)) < 0) {
 		fido_log_debug("%s: fido_buf_write", __func__);
@@ -250,14 +257,14 @@ rx_msg(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 	uint8_t sw[2];
 	const size_t bufsiz = count;
 
-	if (rx_apdu(d, sw, &buf, &count, ms) < 0) {
+	if (rx_apdu(d, sw, &buf, &count, &ms) < 0) {
 		fido_log_debug("%s: preamble", __func__);
 		return (-1);
 	}
 
 	while (sw[0] == SW1_MORE_DATA)
 		if (tx_get_response(d, sw[1]) < 0 ||
-		    rx_apdu(d, sw, &buf, &count, ms) < 0) {
+		    rx_apdu(d, sw, &buf, &count, &ms) < 0) {
 			fido_log_debug("%s: chain", __func__);
 			return (-1);
 		}
