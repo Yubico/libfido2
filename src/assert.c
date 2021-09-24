@@ -81,6 +81,7 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
     const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin, int *ms)
 {
 	fido_blob_t	 f;
+	fido_blob_t	*token = NULL;
 	fido_opt_t	 uv = assert->uv;
 	cbor_item_t	*argv[7];
 	const uint8_t	 cmd = CTAP_CBOR_ASSERT;
@@ -125,8 +126,18 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 	/* user verification */
 	if (pin != NULL || (uv == FIDO_OPT_TRUE &&
 	    fido_dev_supports_permissions(dev))) {
-		if ((r = cbor_add_uv_params(dev, cmd, &assert->cdh, pk, ecdh,
-		    pin, assert->rp_id, &argv[5], &argv[6], ms)) != FIDO_OK) {
+		if ((token = fido_blob_new()) == NULL) {
+			fido_log_debug("%s: fido_blob_new", __func__);
+			r = FIDO_ERR_INTERNAL;
+			goto fail;
+		}
+		if ((r = fido_dev_get_uv_token(dev, cmd, pin, ecdh, pk,
+		    assert->rp_id, token, ms)) != FIDO_OK) {
+			fido_log_debug("%s: fido_dev_get_uv_token", __func__);
+			goto fail;
+		}
+		if ((r = cbor_add_uv_params(dev, token, &assert->cdh, &argv[5],
+		    &argv[6])) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
@@ -152,6 +163,7 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 	r = FIDO_OK;
 fail:
 	cbor_vector_free(argv, nitems(argv));
+	fido_blob_free(&token);
 	free(f.ptr);
 
 	return (r);

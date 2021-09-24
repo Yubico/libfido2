@@ -52,6 +52,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 {
 	fido_blob_t	 f;
 	fido_blob_t	*ecdh = NULL;
+	fido_blob_t	*token = NULL;
 	fido_opt_t	 uv = cred->uv;
 	es256_pk_t	*pk = NULL;
 	cbor_item_t	*argv[9];
@@ -97,12 +98,22 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 	/* user verification */
 	if (pin != NULL || (uv == FIDO_OPT_TRUE &&
 	    fido_dev_supports_permissions(dev))) {
+		if ((token = fido_blob_new()) == NULL) {
+			fido_log_debug("%s: fido_blob_new", __func__);
+			r = FIDO_ERR_INTERNAL;
+			goto fail;
+		}
 		if ((r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
-		if ((r = cbor_add_uv_params(dev, cmd, &cred->cdh, pk, ecdh,
-		    pin, cred->rp.id, &argv[7], &argv[8], ms)) != FIDO_OK) {
+		if ((r = fido_dev_get_uv_token(dev, cmd, pin, ecdh, pk,
+		    cred->rp.id, token, ms)) != FIDO_OK) {
+			fido_log_debug("%s: fido_dev_get_uv_token", __func__);
+			goto fail;
+		}
+		if ((r = cbor_add_uv_params(dev, token,  &cred->cdh, &argv[7],
+		    &argv[8])) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
@@ -129,6 +140,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 fail:
 	es256_pk_free(&pk);
 	fido_blob_free(&ecdh);
+	fido_blob_free(&token);
 	cbor_vector_free(argv, nitems(argv));
 	free(f.ptr);
 

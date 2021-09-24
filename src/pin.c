@@ -665,34 +665,14 @@ fido_dev_get_uv_retry_count(fido_dev_t *dev, int *retries)
 }
 
 int
-cbor_add_uv_params(fido_dev_t *dev, uint8_t cmd, const fido_blob_t *hmac_data,
-    const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin,
-    const char *rpid, cbor_item_t **auth, cbor_item_t **opt, int *ms)
+cbor_add_uv_params(fido_dev_t *dev, const fido_blob_t *token,
+    const fido_blob_t *hmac_data, cbor_item_t **auth, cbor_item_t **opt)
 {
-	fido_blob_t	*token = NULL;
-	int		 r;
-
-	if ((token = fido_blob_new()) == NULL) {
-		r = FIDO_ERR_INTERNAL;
-		goto fail;
-	}
-
-	if ((r = fido_dev_get_uv_token(dev, cmd, pin, ecdh, pk, rpid,
-	    token, ms)) != FIDO_OK) {
-		fido_log_debug("%s: fido_dev_get_uv_token", __func__);
-		goto fail;
-	}
-
 	if ((*auth = cbor_encode_pin_auth(dev, token, hmac_data)) == NULL ||
 	    (*opt = cbor_encode_pin_opt(dev)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
-		r = FIDO_ERR_INTERNAL;
-		goto fail;
+		return (FIDO_ERR_INTERNAL);
 	}
 
-	r = FIDO_OK;
-fail:
-	fido_blob_free(&token);
-
-	return (r);
+	return (FIDO_OK);
 }

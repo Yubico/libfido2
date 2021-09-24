@@ -116,6 +116,7 @@ credman_tx(fido_dev_t *dev, uint8_t subcmd, const void *param, const char *pin,
 {
 	fido_blob_t	 f;
 	fido_blob_t	*ecdh = NULL;
+	fido_blob_t	*token = NULL;
 	fido_blob_t	 hmac;
 	es256_pk_t	*pk = NULL;
 	cbor_item_t	*argv[4];
@@ -144,12 +145,21 @@ credman_tx(fido_dev_t *dev, uint8_t subcmd, const void *param, const char *pin,
 			fido_log_debug("%s: credman_prepare_hmac", __func__);
 			goto fail;
 		}
+		if ((token = fido_blob_new()) == NULL) {
+			fido_log_debug("%s: fido_blob_new", __func__);
+			goto fail;
+		}
 		if ((r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
-		if ((r = cbor_add_uv_params(dev, cmd, &hmac, pk, ecdh, pin,
-		    rp_id, &argv[3], &argv[2], ms)) != FIDO_OK) {
+		if ((r = fido_dev_get_uv_token(dev, cmd, pin, ecdh, pk, rp_id,
+		    token, ms)) != FIDO_OK) {
+			fido_log_debug("%s: fido_dev_get_uv_token", __func__);
+			goto fail;
+		}
+		if ((r = cbor_add_uv_params(dev, token, &hmac, &argv[3],
+		    &argv[2])) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
@@ -167,6 +177,7 @@ credman_tx(fido_dev_t *dev, uint8_t subcmd, const void *param, const char *pin,
 fail:
 	es256_pk_free(&pk);
 	fido_blob_free(&ecdh);
+	fido_blob_free(&token);
 	cbor_vector_free(argv, nitems(argv));
 	free(f.ptr);
 	free(hmac.ptr);

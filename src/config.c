@@ -43,7 +43,7 @@ config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
 {
 	cbor_item_t *argv[4];
 	es256_pk_t *pk = NULL;
-	fido_blob_t *ecdh = NULL, f, hmac;
+	fido_blob_t *ecdh = NULL, *token = NULL, f, hmac;
 	const uint8_t cmd = CTAP_CBOR_CONFIG;
 	int r = FIDO_ERR_INTERNAL;
 
@@ -68,12 +68,21 @@ config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
 			fido_log_debug("%s: config_prepare_hmac", __func__);
 			goto fail;
 		}
+		if ((token = fido_blob_new()) == NULL) {
+			fido_log_debug("%s: fido_blob_new", __func__);
+			goto fail;
+		}
 		if ((r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
-		if ((r = cbor_add_uv_params(dev, cmd, &hmac, pk, ecdh, pin,
-		    NULL, &argv[3], &argv[2], ms)) != FIDO_OK) {
+		if ((r = fido_dev_get_uv_token(dev, cmd, pin, ecdh, pk,
+		    NULL, token, ms)) != FIDO_OK) {
+			fido_log_debug("%s: fido_dev_get_uv_token", __func__);
+			goto fail;
+		}
+		if ((r = cbor_add_uv_params(dev, token, &hmac, &argv[3],
+		    &argv[2])) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
@@ -92,6 +101,7 @@ fail:
 	cbor_vector_free(argv, nitems(argv));
 	es256_pk_free(&pk);
 	fido_blob_free(&ecdh);
+	fido_blob_free(&token);
 	free(f.ptr);
 	free(hmac.ptr);
 

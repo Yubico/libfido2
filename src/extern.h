@@ -85,9 +85,8 @@ int cbor_map_iter(const cbor_item_t *, void *, int(*)(const cbor_item_t *,
 int cbor_string_copy(const cbor_item_t *, char **);
 int cbor_parse_reply(const unsigned char *, size_t, void *,
     int(*)(const cbor_item_t *, const cbor_item_t *, void *));
-int cbor_add_uv_params(fido_dev_t *, uint8_t, const fido_blob_t *,
-    const es256_pk_t *, const fido_blob_t *, const char *, const char *,
-    cbor_item_t **, cbor_item_t **, int *);
+int cbor_add_uv_params(fido_dev_t *, const fido_blob_t *, const fido_blob_t *,
+    cbor_item_t **, cbor_item_t **);
 void cbor_vector_free(cbor_item_t **, size_t);
 int cbor_array_append(cbor_item_t **, cbor_item_t *);
 int cbor_array_drop(cbor_item_t **, size_t);
