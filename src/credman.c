@@ -6,6 +6,7 @@
 
 #include <openssl/sha.h>
 
+#define FIDO_TX_MS_REF
 #include "fido.h"
 #include "fido/credman.h"
 #include "fido/es256.h"
@@ -157,7 +158,7 @@ credman_tx(fido_dev_t *dev, uint8_t subcmd, const void *param, const char *pin,
 
 	/* framing and transmission */
 	if (cbor_build_frame(cmd, argv, nitems(argv), &f) < 0 ||
-	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len, ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
