@@ -4,7 +4,6 @@
  * license that can be found in the LICENSE file.
  */
 
-#define FIDO_TX_MS_REF
 #include <openssl/sha.h>
 #include "fido.h"
 
