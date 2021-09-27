@@ -6,6 +6,7 @@
 
 #include <openssl/sha.h>
 
+#define FIDO_TX_MS_REF
 #include "fido.h"
 #include "fido/es256.h"
 #include "fido/rs256.h"
@@ -143,7 +144,7 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 
 	/* frame and transmit */
 	if (cbor_build_frame(cmd, argv, nitems(argv), &f) < 0 ||
-	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len, ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -199,11 +200,11 @@ fido_dev_get_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int *ms)
 }
 
 static int
-fido_get_next_assert_tx(fido_dev_t *dev)
+fido_get_next_assert_tx(fido_dev_t *dev, int *ms)
 {
 	const unsigned char cbor[] = { CTAP_CBOR_NEXT_ASSERT };
 
-	if (fido_tx(dev, CTAP_CMD_CBOR, cbor, sizeof(cbor)) < 0) {
+	if (fido_tx(dev, CTAP_CMD_CBOR, cbor, sizeof(cbor), ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		return (FIDO_ERR_TX);
 	}
@@ -252,7 +253,7 @@ fido_dev_get_assert_wait(fido_dev_t *dev, fido_assert_t *assert,
 		return (r);
 
 	while (assert->stmt_len < assert->stmt_cnt) {
-		if ((r = fido_get_next_assert_tx(dev)) != FIDO_OK ||
+		if ((r = fido_get_next_assert_tx(dev, ms)) != FIDO_OK ||
 		    (r = fido_get_next_assert_rx(dev, assert, ms)) != FIDO_OK)
 			return (r);
 		assert->stmt_len++;
