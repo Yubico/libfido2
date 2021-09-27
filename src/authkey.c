@@ -4,6 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
+#define FIDO_TX_MS_REF
 #include "fido.h"
 
 static int
@@ -22,7 +23,7 @@ parse_authkey(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 }
 
 static int
-fido_dev_authkey_tx(fido_dev_t *dev)
+fido_dev_authkey_tx(fido_dev_t *dev, int *ms)
 {
 	fido_blob_t	 f;
 	cbor_item_t	*argv[2];
@@ -43,7 +44,7 @@ fido_dev_authkey_tx(fido_dev_t *dev)
 
 	/* frame and transmit */
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, nitems(argv),
-	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len, ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -83,7 +84,7 @@ fido_dev_authkey_wait(fido_dev_t *dev, es256_pk_t *authkey, int *ms)
 {
 	int r;
 
-	if ((r = fido_dev_authkey_tx(dev)) != FIDO_OK ||
+	if ((r = fido_dev_authkey_tx(dev, ms)) != FIDO_OK ||
 	    (r = fido_dev_authkey_rx(dev, authkey, ms)) != FIDO_OK)
 		return (r);
 
