@@ -252,6 +252,11 @@ uint32_t uniform_random(uint32_t);
 #define FIDO_WINHELLO_PATH	"windows://hello"
 #define FIDO_NFC_PREFIX		"nfc:"
 
+#ifdef FIDO_TX_MS_REF
+#define fido_tx(dev, cmd, buf, count, ms) \
+    ((void)ms, fido_tx(dev, cmd, buf, count))
+#endif
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */

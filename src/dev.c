@@ -4,6 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
+#define FIDO_TX_MS_REF
 #include <openssl/sha.h>
 #include "fido.h"
 
@@ -106,7 +107,7 @@ fido_dev_set_flags(fido_dev_t *dev, const fido_cbor_info_t *info)
 }
 
 static int
-fido_dev_open_tx(fido_dev_t *dev, const char *path)
+fido_dev_open_tx(fido_dev_t *dev, const char *path, int *ms)
 {
 	int r;
 
@@ -161,7 +162,8 @@ fido_dev_open_tx(fido_dev_t *dev, const char *path)
 		goto fail;
 	}
 
-	if (fido_tx(dev, CTAP_CMD_INIT, &dev->nonce, sizeof(dev->nonce)) < 0) {
+	if (fido_tx(dev, CTAP_CMD_INIT, &dev->nonce, sizeof(dev->nonce),
+	    ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -249,7 +251,7 @@ fido_dev_open_wait(fido_dev_t *dev, const char *path, int *ms)
 	if (strcmp(path, FIDO_WINHELLO_PATH) == 0)
 		return (fido_winhello_open(dev));
 #endif
-	if ((r = fido_dev_open_tx(dev, path)) != FIDO_OK ||
+	if ((r = fido_dev_open_tx(dev, path, ms)) != FIDO_OK ||
 	    (r = fido_dev_open_rx(dev, ms)) != FIDO_OK)
 		return (r);
 
@@ -399,13 +401,15 @@ fido_dev_set_sigmask(fido_dev_t *dev, const fido_sigset_t *sigmask)
 int
 fido_dev_cancel(fido_dev_t *dev)
 {
+	int ms = dev->timeout_ms;
+
 #ifdef USE_WINHELLO
 	if (dev->flags & FIDO_DEV_WINHELLO)
 		return (fido_winhello_cancel(dev));
 #endif
 	if (fido_dev_is_fido2(dev) == false)
 		return (FIDO_ERR_INVALID_ARGUMENT);
-	if (fido_tx(dev, CTAP_CMD_CANCEL, NULL, 0) < 0)
+	if (fido_tx(dev, CTAP_CMD_CANCEL, NULL, 0, &ms) < 0)
 		return (FIDO_ERR_TX);
 
 	return (FIDO_OK);
@@ -421,6 +425,7 @@ fido_dev_get_touch_begin(fido_dev_t *dev)
 	unsigned char	 cdh[SHA256_DIGEST_LENGTH];
 	fido_rp_t	 rp;
 	fido_user_t	 user;
+	int		 ms = dev->timeout_ms;
 	int		 r = FIDO_ERR_INTERNAL;
 
 	memset(&f, 0, sizeof(f));
@@ -465,7 +470,7 @@ fido_dev_get_touch_begin(fido_dev_t *dev)
 	}
 
 	if (cbor_build_frame(CTAP_CBOR_MAKECRED, argv, nitems(argv), &f) < 0 ||
-	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len, &ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
