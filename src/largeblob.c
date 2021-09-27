@@ -6,6 +6,7 @@
 
 #include <openssl/sha.h>
 
+#define FIDO_TX_MS_REF
 #include "fido.h"
 #include "fido/es256.h"
 
@@ -153,7 +154,7 @@ fail:
 }
 
 static int
-largeblob_get_tx(fido_dev_t *dev, size_t offset, size_t count)
+largeblob_get_tx(fido_dev_t *dev, size_t offset, size_t count, int *ms)
 {
 	fido_blob_t f;
 	cbor_item_t *argv[3];
@@ -169,7 +170,7 @@ largeblob_get_tx(fido_dev_t *dev, size_t offset, size_t count)
 		goto fail;
 	}
 	if (cbor_build_frame(CTAP_CBOR_LARGEBLOB, argv, nitems(argv), &f) < 0 ||
-	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len, ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -432,7 +433,7 @@ largeblob_get_array(fido_dev_t *dev, cbor_item_t **item, int *ms)
 		return FIDO_ERR_INTERNAL;
 	do {
 		fido_blob_free(&chunk);
-		if ((r = largeblob_get_tx(dev, array->len, n)) != FIDO_OK ||
+		if ((r = largeblob_get_tx(dev, array->len, n, ms)) != FIDO_OK ||
 		    (r = largeblob_get_rx(dev, &chunk, ms)) != FIDO_OK) {
 			fido_log_debug("%s: largeblob_get_wait %zu/%zu",
 			    __func__, array->len, n);
@@ -491,7 +492,7 @@ prepare_hmac(size_t offset, const u_char *data, size_t len, fido_blob_t *hmac)
 
 static int
 largeblob_set_tx(fido_dev_t *dev, const fido_blob_t *token, const u_char *chunk,
-    size_t chunk_len, size_t offset, size_t totalsiz)
+    size_t chunk_len, size_t offset, size_t totalsiz, int *ms)
 {
 	fido_blob_t *hmac = NULL, f;
 	cbor_item_t *argv[6];
@@ -518,7 +519,7 @@ largeblob_set_tx(fido_dev_t *dev, const fido_blob_t *token, const u_char *chunk,
 		}
 	}
 	if (cbor_build_frame(CTAP_CBOR_LARGEBLOB, argv, nitems(argv), &f) < 0 ||
-	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len, ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -612,14 +613,14 @@ largeblob_set_array(fido_dev_t *dev, const cbor_item_t *item, const char *pin,
 		if ((chunklen = cbor.len - offset) > maxchunklen)
 			chunklen = maxchunklen;
 		if ((r = largeblob_set_tx(dev, token, cbor.ptr + offset,
-		    chunklen, offset, totalsize)) != FIDO_OK ||
+		    chunklen, offset, totalsize, ms)) != FIDO_OK ||
 		    (r = fido_rx_cbor_status(dev, ms)) != FIDO_OK) {
 			fido_log_debug("%s: body", __func__);
 			goto fail;
 		}
 	}
 	if ((r = largeblob_set_tx(dev, token, dgst, sizeof(dgst) - 16, cbor.len,
-	    totalsize)) != FIDO_OK ||
+	    totalsize, ms)) != FIDO_OK ||
 	    (r = fido_rx_cbor_status(dev, ms)) != FIDO_OK) {
 		fido_log_debug("%s: dgst", __func__);
 		goto fail;
