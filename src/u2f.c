@@ -12,6 +12,7 @@
 #endif
 #include <errno.h>
 
+#define FIDO_TX_MS_REF
 #include "fido.h"
 #include "fido/es256.h"
 
@@ -167,7 +168,7 @@ send_dummy_register(fido_dev_t *dev, int *ms)
 
 	do {
 		if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
-		    iso7816_len(apdu)) < 0) {
+		    iso7816_len(apdu), ms) < 0) {
 			fido_log_debug("%s: fido_tx", __func__);
 			r = FIDO_ERR_TX;
 			goto fail;
@@ -233,7 +234,7 @@ key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
 	}
 
 	if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
-	    iso7816_len(apdu)) < 0) {
+	    iso7816_len(apdu), ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -342,7 +343,7 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 
 	do {
 		if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
-		    iso7816_len(apdu)) < 0) {
+		    iso7816_len(apdu), ms) < 0) {
 			fido_log_debug("%s: fido_tx", __func__);
 			r = FIDO_ERR_TX;
 			goto fail;
@@ -631,7 +632,7 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int *ms)
 
 	do {
 		if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
-		    iso7816_len(apdu)) < 0) {
+		    iso7816_len(apdu), ms) < 0) {
 			fido_log_debug("%s: fido_tx", __func__);
 			r = FIDO_ERR_TX;
 			goto fail;
@@ -795,12 +796,12 @@ u2f_get_touch_begin(fido_dev_t *dev)
 	}
 
 	if (dev->attr.flags & FIDO_CAP_WINK) {
-		fido_tx(dev, CTAP_CMD_WINK, NULL, 0);
+		fido_tx(dev, CTAP_CMD_WINK, NULL, 0, &ms);
 		fido_rx(dev, CTAP_CMD_WINK, &reply, sizeof(reply), &ms);
 	}
 
 	if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
-	    iso7816_len(apdu)) < 0) {
+	    iso7816_len(apdu), &ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
