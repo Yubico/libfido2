@@ -4,6 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
+#define FIDO_TX_MS_REF
 #include "fido.h"
 
 static int
@@ -279,13 +280,13 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 }
 
 static int
-fido_dev_get_cbor_info_tx(fido_dev_t *dev)
+fido_dev_get_cbor_info_tx(fido_dev_t *dev, int *ms)
 {
 	const unsigned char cbor[] = { CTAP_CBOR_GETINFO };
 
 	fido_log_debug("%s: dev=%p", __func__, (void *)dev);
 
-	if (fido_tx(dev, CTAP_CMD_CBOR, cbor, sizeof(cbor)) < 0) {
+	if (fido_tx(dev, CTAP_CMD_CBOR, cbor, sizeof(cbor), ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		return (FIDO_ERR_TX);
 	}
@@ -323,7 +324,7 @@ fido_dev_get_cbor_info_wait(fido_dev_t *dev, fido_cbor_info_t *ci, int *ms)
 	if (dev->flags & FIDO_DEV_WINHELLO)
 		return (fido_winhello_get_cbor_info(dev, ci));
 #endif
-	if ((r = fido_dev_get_cbor_info_tx(dev)) != FIDO_OK ||
+	if ((r = fido_dev_get_cbor_info_tx(dev, ms)) != FIDO_OK ||
 	    (r = fido_dev_get_cbor_info_rx(dev, ci, ms)) != FIDO_OK)
 		return (r);
 
