@@ -7,7 +7,6 @@
 #include <openssl/sha.h>
 #include <openssl/x509.h>
 
-#define FIDO_TX_MS_REF
 #include "fido.h"
 #include "fido/es256.h"
 

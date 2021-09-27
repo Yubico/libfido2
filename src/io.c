@@ -126,19 +126,32 @@ tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 }
 
 int
-fido_tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count)
+fido_tx(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count, int *ms)
 {
+	struct timespec ts;
+	int r;
+
 	fido_log_debug("%s: dev=%p, cmd=0x%02x", __func__, (void *)d, cmd);
 	fido_log_xxd(buf, count, "%s", __func__);
 
-	if (d->transport.tx != NULL)
-		return (d->transport.tx(d, cmd, buf, count));
-	if (d->io_handle == NULL || d->io.write == NULL || count > UINT16_MAX) {
-		fido_log_debug("%s: invalid argument", __func__);
+	if (fido_time_now(&ts) != 0)
 		return (-1);
+
+	if (d->transport.tx != NULL)
+		r = (d->transport.tx(d, cmd, buf, count));
+	else {
+		if (d->io_handle == NULL || d->io.write == NULL ||
+		    count > UINT16_MAX) {
+			fido_log_debug("%s: invalid argument", __func__);
+			return (-1);
+		}
+		r = count == 0 ? tx_empty(d, cmd) : tx(d, cmd, buf, count);
 	}
 
-	return (count == 0 ? tx_empty(d, cmd) : tx(d, cmd, buf, count));
+	if (fido_time_delta(&ts, ms) != 0)
+		return (-1);
+
+	return (r);
 }
 
 static int

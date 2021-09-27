@@ -138,7 +138,7 @@ int fido_winhello_make_cred(fido_dev_t *, fido_cred_t *, const char *, int);
 /* generic i/o */
 int fido_rx_cbor_status(fido_dev_t *, int *);
 int fido_rx(fido_dev_t *, uint8_t, void *, size_t, int *);
-int fido_tx(fido_dev_t *, uint8_t, const void *, size_t);
+int fido_tx(fido_dev_t *, uint8_t, const void *, size_t, int *);
 
 /* log */
 #ifdef FIDO_NO_DIAGNOSTIC
@@ -251,11 +251,6 @@ uint32_t uniform_random(uint32_t);
 #define FIDO_DUMMY_USER_ID	1
 #define FIDO_WINHELLO_PATH	"windows://hello"
 #define FIDO_NFC_PREFIX		"nfc:"
-
-#ifdef FIDO_TX_MS_REF
-#define fido_tx(dev, cmd, buf, count, ms) \
-    ((void)ms, fido_tx(dev, cmd, buf, count))
-#endif
 
 #ifdef __cplusplus
 } /* extern "C" */

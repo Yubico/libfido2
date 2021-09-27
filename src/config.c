@@ -4,7 +4,6 @@
  * license that can be found in the LICENSE file.
  */
 
-#define FIDO_TX_MS_REF
 #include "fido.h"
 #include "fido/config.h"
 #include "fido/es256.h"
