@@ -4,6 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
+#define FIDO_TX_MS_REF
 #include <openssl/sha.h>
 #include "fido.h"
 #include "fido/es256.h"
@@ -146,7 +147,7 @@ encode_uv_permission(uint8_t cmd)
 
 static int
 ctap20_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
-    const es256_pk_t *pk)
+    const es256_pk_t *pk, int *ms)
 {
 	fido_blob_t	 f;
 	fido_blob_t	*p = NULL;
@@ -185,7 +186,7 @@ ctap20_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
 	}
 
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, nitems(argv),
-	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len, ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -203,7 +204,7 @@ fail:
 
 static int
 ctap21_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
-    const es256_pk_t *pk, uint8_t cmd, const char *rpid)
+    const es256_pk_t *pk, uint8_t cmd, const char *rpid, int *ms)
 {
 	fido_blob_t	 f;
 	fido_blob_t	*p = NULL;
@@ -248,7 +249,7 @@ ctap21_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
 	}
 
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, nitems(argv),
-	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len, ms) < 0) {
 		fido_log_debug("%s:  fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -329,9 +330,9 @@ uv_token_wait(fido_dev_t *dev, uint8_t cmd, const char *pin,
 	if (ecdh == NULL || pk == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	if (fido_dev_supports_permissions(dev))
-		r = ctap21_uv_token_tx(dev, pin, ecdh, pk, cmd, rpid);
+		r = ctap21_uv_token_tx(dev, pin, ecdh, pk, cmd, rpid, ms);
 	else
-		r = ctap20_uv_token_tx(dev, pin, ecdh, pk);
+		r = ctap20_uv_token_tx(dev, pin, ecdh, pk, ms);
 	if (r != FIDO_OK)
 		return (r);
 
@@ -398,7 +399,7 @@ fido_dev_change_pin_tx(fido_dev_t *dev, const char *pin, const char *oldpin,
 	}
 
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, nitems(argv),
-	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len, ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -452,7 +453,7 @@ fido_dev_set_pin_tx(fido_dev_t *dev, const char *pin, int *ms)
 	}
 
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, nitems(argv),
-	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len, ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -546,7 +547,7 @@ parse_uv_retry_count(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 }
 
 static int
-fido_dev_get_retry_count_tx(fido_dev_t *dev, uint8_t subcmd)
+fido_dev_get_retry_count_tx(fido_dev_t *dev, uint8_t subcmd, int *ms)
 {
 	fido_blob_t	 f;
 	cbor_item_t	*argv[2];
@@ -562,7 +563,7 @@ fido_dev_get_retry_count_tx(fido_dev_t *dev, uint8_t subcmd)
 	}
 
 	if (cbor_build_frame(CTAP_CBOR_CLIENT_PIN, argv, nitems(argv),
-	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len) < 0) {
+	    &f) < 0 || fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len, ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -605,7 +606,7 @@ fido_dev_get_pin_retry_count_wait(fido_dev_t *dev, int *retries, int *ms)
 {
 	int r;
 
-	if ((r = fido_dev_get_retry_count_tx(dev, 1)) != FIDO_OK ||
+	if ((r = fido_dev_get_retry_count_tx(dev, 1, ms)) != FIDO_OK ||
 	    (r = fido_dev_get_pin_retry_count_rx(dev, retries, ms)) != FIDO_OK)
 		return (r);
 
@@ -649,7 +650,7 @@ fido_dev_get_uv_retry_count_wait(fido_dev_t *dev, int *retries, int *ms)
 {
 	int r;
 
-	if ((r = fido_dev_get_retry_count_tx(dev, 7)) != FIDO_OK ||
+	if ((r = fido_dev_get_retry_count_tx(dev, 7, ms)) != FIDO_OK ||
 	    (r = fido_dev_get_uv_retry_count_rx(dev, retries, ms)) != FIDO_OK)
 		return (r);
 
