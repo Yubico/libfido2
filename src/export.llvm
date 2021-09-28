@@ -214,6 +214,7 @@ _fido_dev_set_pin
 _fido_dev_set_pin_minlen
 _fido_dev_set_pin_minlen_rpid
 _fido_dev_set_sigmask
+_fido_dev_set_timeout
 _fido_dev_set_transport_functions
 _fido_dev_supports_cred_prot
 _fido_dev_supports_credman
