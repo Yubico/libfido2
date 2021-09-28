@@ -736,3 +736,14 @@ fido_dev_maxmsgsize(const fido_dev_t *dev)
 {
 	return (dev->maxmsgsize);
 }
+
+int
+fido_dev_set_timeout(fido_dev_t *dev, int ms)
+{
+	if (ms < -1)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	dev->timeout_ms = ms;
+
+	return (FIDO_OK);
+}
