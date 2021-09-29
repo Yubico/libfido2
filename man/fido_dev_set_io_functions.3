@@ -137,7 +137,9 @@ milliseconds while communicating with
 If a timeout occurs, the corresponding
 .Em fido_dev_*
 function will fail with
-.Dv FIDO_ERR_RX .
+.Dv FIDO_ERR_RX
+or
+.Dv FIDO_ERR_TX .
 If
 .Fa ms
 is -1,
