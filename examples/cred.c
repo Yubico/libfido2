@@ -144,7 +144,7 @@ main(int argc, char **argv)
 	const char	*key_out = NULL;
 	const char	*id_out = NULL;
 	unsigned char	*body = NULL;
-	long long	 seconds = 0;
+	long long	 ms = 0;
 	size_t		 len;
 	int		 type = COSE_ES256;
 	int		 ext = 0;
@@ -160,16 +160,12 @@ main(int argc, char **argv)
 			pin = optarg;
 			break;
 		case 'T':
-#ifndef SIGNAL_EXAMPLE
-			(void)seconds;
-			errx(1, "-T not supported");
-#else
-			if (base10(optarg, &seconds) < 0)
+			if (base10(optarg, &ms) < 0)
 				errx(1, "base10: %s", optarg);
-			if (seconds <= 0 || seconds > 30)
+			if (ms <= 0 || ms > 30)
 				errx(1, "-T: %s must be in (0,30]", optarg);
+			ms *= 1000; /* seconds to milliseconds */
 			break;
-#endif
 		case 'b':
 			ext |= FIDO_EXT_LARGEBLOB_KEY;
 			blobkey_out = optarg;
@@ -268,20 +264,12 @@ main(int argc, char **argv)
 	if (uv && (r = fido_cred_set_uv(cred, FIDO_OPT_TRUE)) != FIDO_OK)
 		errx(1, "fido_cred_set_uv: %s (0x%x)", fido_strerr(r), r);
 
-#ifdef SIGNAL_EXAMPLE
-	prepare_signal_handler(SIGINT);
-	if (seconds) {
-		prepare_signal_handler(SIGALRM);
-		alarm((unsigned)seconds);
-	}
-#endif
+	/* timeout */
+	if (ms != 0 && (r = fido_dev_set_timeout(dev, (int)ms)) != FIDO_OK)
+		errx(1, "fido_dev_set_timeout: %s (0x%x)", fido_strerr(r), r);
 
-	r = fido_dev_make_cred(dev, cred, pin);
-	if (r != FIDO_OK) {
-#ifdef SIGNAL_EXAMPLE
-		if (got_signal)
-			fido_dev_cancel(dev);
-#endif
+	if ((r = fido_dev_make_cred(dev, cred, pin)) != FIDO_OK) {
+		fido_dev_cancel(dev);
 		errx(1, "fido_makecred: %s (0x%x)", fido_strerr(r), r);
 	}
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Yubico AB. All rights reserved.
+# Copyright (c) 2018-2021 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -102,17 +102,12 @@ check_symbol_exists(getrandom sys/random.h HAVE_GETRANDOM)
 check_symbol_exists(memset_s string.h HAVE_MEMSET_S)
 check_symbol_exists(readpassphrase readpassphrase.h HAVE_READPASSPHRASE)
 check_symbol_exists(recallocarray stdlib.h HAVE_RECALLOCARRAY)
-check_symbol_exists(sigaction signal.h HAVE_SIGACTION)
 check_symbol_exists(strlcat string.h HAVE_STRLCAT)
 check_symbol_exists(strlcpy string.h HAVE_STRLCPY)
 check_symbol_exists(strsep string.h HAVE_STRSEP)
 check_symbol_exists(sysconf unistd.h HAVE_SYSCONF)
 check_symbol_exists(timespecsub sys/time.h HAVE_TIMESPECSUB)
 check_symbol_exists(timingsafe_bcmp string.h HAVE_TIMINGSAFE_BCMP)
-
-set(CMAKE_EXTRA_INCLUDE_FILES signal.h)
-check_type_size("sig_atomic_t" HAVE_SIG_ATOMIC_T)
-set(CMAKE_EXTRA_INCLUDE_FILES)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 try_compile(HAVE_POSIX_IOCTL
@@ -136,7 +131,6 @@ list(APPEND CHECK_VARIABLES
 	HAVE_POSIX_IOCTL
 	HAVE_READPASSPHRASE
 	HAVE_RECALLOCARRAY
-	HAVE_SIGACTION
 	HAVE_SIGNAL_H
 	HAVE_STRLCAT
 	HAVE_STRLCPY
@@ -157,10 +151,6 @@ endforeach()
 
 if(HAVE_EXPLICIT_BZERO AND NOT LIBFUZZER)
 	add_definitions(-DHAVE_EXPLICIT_BZERO)
-endif()
-
-if(HAVE_SIGACTION AND (NOT HAVE_SIG_ATOMIC_T STREQUAL ""))
-	add_definitions(-DSIGNAL_EXAMPLE)
 endif()
 
 if(UNIX)
