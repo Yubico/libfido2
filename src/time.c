@@ -8,22 +8,22 @@
 #include "fido.h"
 
 static int
-timespec_to_ms(const struct timespec *ts, int upper_bound)
+timespec_to_ms(const struct timespec *ts)
 {
 	int64_t x, y;
 
-	if (upper_bound < 0 || ts->tv_sec < 0 || ts->tv_nsec < 0 ||
+	if (ts->tv_sec < 0 || ts->tv_nsec < 0 ||
 	    ts->tv_nsec >= 1000000000LL)
 		return -1;
 
 	if ((uint64_t)ts->tv_sec >= INT64_MAX / 1000LL)
-		return upper_bound;
+		return -1;
 
 	x = ts->tv_sec * 1000LL;
 	y = ts->tv_nsec / 1000000LL;
 
-	if (INT64_MAX - x < y || x + y > upper_bound)
-		return upper_bound;
+	if (INT64_MAX - x < y || x + y > INT_MAX)
+		return -1;
 
 	return (int)(x + y);
 }
@@ -45,7 +45,7 @@ fido_time_delta(const struct timespec *ts_start, int *ms_remain)
 	struct timespec ts_end, ts_delta;
 	int ms;
 
-	if (*ms_remain <= 0)
+	if (*ms_remain < 0)
 		return 0;
 
 	if (clock_gettime(CLOCK_MONOTONIC, &ts_end) != 0) {
@@ -60,8 +60,13 @@ fido_time_delta(const struct timespec *ts_start, int *ms_remain)
 
 	timespecsub(&ts_end, ts_start, &ts_delta);
 
-	if ((ms = timespec_to_ms(&ts_delta, *ms_remain)) < 0) {
+	if ((ms = timespec_to_ms(&ts_delta)) < 0) {
 		fido_log_debug("%s: timespec_to_ms", __func__);
+		return -1;
+	}
+
+	if (ms > *ms_remain) {
+		fido_log_debug("%s: timeout", __func__);
 		return -1;
 	}
 
