@@ -186,10 +186,13 @@ Function Build(${OUTPUT}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 		-DBUILD_SHARED_LIBS="${SHARED}" `
 		-DCBOR_INCLUDE_DIRS="${OUTPUT}\include" `
 		-DCBOR_LIBRARY_DIRS="${OUTPUT}\lib" `
+		-DCBOR_BIN_DIRS="${OUTPUT}\bin" `
 		-DZLIB_INCLUDE_DIRS="${OUTPUT}\include" `
 		-DZLIB_LIBRARY_DIRS="${OUTPUT}\lib" `
+		-DZLIB_BIN_DIRS="${OUTPUT}\bin" `
 		-DCRYPTO_INCLUDE_DIRS="${OUTPUT}\include" `
 		-DCRYPTO_LIBRARY_DIRS="${OUTPUT}\lib" `
+		-DCRYPTO_BIN_DIRS="${OUTPUT}\bin" `
 		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl ${Fido2Flags}" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"
 	& $CMake --build . --config Release --verbose
