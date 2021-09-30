@@ -162,6 +162,7 @@ Function Build(${OUTPUT}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 
 	Push-Location .\${LIBCBOR}
 	& $CMake ..\..\..\${LIBCBOR} -A "${ARCH}" `
+		-DWITH_EXAMPLES=OFF `
 		-DBUILD_SHARED_LIBS="${SHARED}" `
 		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
 		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"
