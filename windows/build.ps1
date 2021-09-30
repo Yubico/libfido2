@@ -97,6 +97,12 @@ New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v142\dynamic
 New-Item -Type Directory ${OUTPUT}\pkg\Win64\Release\v142\static
 New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v142\static
 
+Function ExitOnError() {
+	if ($LastExitCode -ne 0) {
+		exit $LastExitCode
+	}
+}
+
 Function Clone(${REPO}, ${BRANCH}, ${DIR}) {
 	Write-Host "Cloning ${REPO}..."
 	& $Git -c advice.detachedHead=false clone --quiet --depth=1 `
@@ -152,9 +158,11 @@ Function Build(${OUTPUT}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 	& $CMake ..\..\..\${LIBRESSL} -A "${ARCH}" `
 		-DBUILD_SHARED_LIBS="${SHARED}" -DLIBRESSL_TESTS=OFF `
 		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
-		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"
-	& $CMake --build . --config Release --verbose
-	& $CMake --build . --config Release --target install --verbose
+		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"; `
+		ExitOnError
+	& $CMake --build . --config Release --verbose; ExitOnError
+	& $CMake --build . --config Release --target install --verbose; `
+		ExitOnError
 	Pop-Location
 
 	if (-Not (Test-Path .\${LIBCBOR})) {
@@ -166,9 +174,11 @@ Function Build(${OUTPUT}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 		-DWITH_EXAMPLES=OFF `
 		-DBUILD_SHARED_LIBS="${SHARED}" `
 		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
-		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"
-	& $CMake --build . --config Release --verbose
-	& $CMake --build . --config Release --target install --verbose
+		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"; `
+		ExitOnError
+	& $CMake --build . --config Release --verbose; ExitOnError
+	& $CMake --build . --config Release --target install --verbose; `
+		ExitOnError
 	Pop-Location
 
 	if(-Not (Test-Path .\${ZLIB})) {
@@ -179,9 +189,11 @@ Function Build(${OUTPUT}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 	& $CMake ..\..\..\${ZLIB} -A "${ARCH}" `
 		-DBUILD_SHARED_LIBS="${SHARED}" `
 		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
-		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"
-	& $CMake --build . --config Release --verbose
-	& $CMake --build . --config Release --target install --verbose
+		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"; `
+		ExitOnError
+	& $CMake --build . --config Release --verbose; ExitOnError
+	& $CMake --build . --config Release --target install --verbose; `
+		ExitOnError
 	Pop-Location
 
 	& $CMake ..\..\.. -A "${ARCH}" `
@@ -196,9 +208,11 @@ Function Build(${OUTPUT}, ${ARCH}, ${SHARED}, ${FLAGS}) {
 		-DCRYPTO_LIBRARY_DIRS="${OUTPUT}\lib" `
 		-DCRYPTO_BIN_DIRS="${OUTPUT}\bin" `
 		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl ${Fido2Flags}" `
-		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"
-	& $CMake --build . --config Release --verbose
-	& $CMake --build . --config Release --target install --verbose
+		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"; `
+		ExitOnError
+	& $CMake --build . --config Release --verbose; ExitOnError
+	& $CMake --build . --config Release --target install --verbose; `
+		ExitOnError
 	if ("${SHARED}" -eq "ON") {
 		"cbor.dll", "crypto-46.dll", "zlib1.dll" | %{ Copy-Item "${OUTPUT}\bin\$_" `
 			-Destination "examples\Release" }
