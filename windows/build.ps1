@@ -97,13 +97,20 @@ New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v142\dynamic
 New-Item -Type Directory ${OUTPUT}\pkg\Win64\Release\v142\static
 New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v142\static
 
+Function Clone(${REPO}, ${BRANCH}, ${DIR}) {
+	Write-Host "Cloning ${REPO}..."
+	& $Git -c advice.detachedHead=false clone --quiet --depth=1 `
+		--branch "${BRANCH}" "${REPO}" "${DIR}"
+	Write-Host "${REPO} HEAD is:"
+	& $Git -C "${DIR}" show -s HEAD
+}
+
 Push-Location ${BUILD}
 
 try {
 	if (Test-Path .\${LIBRESSL}) {
 		Remove-Item .\${LIBRESSL} -Recurse -ErrorAction Stop
 	}
-
 	if(-Not (Test-Path .\${LIBRESSL}.tar.gz -PathType leaf)) {
 		Invoke-WebRequest ${LIBRESSL_URL}/${LIBRESSL}.tar.gz `
 			-OutFile .\${LIBRESSL}.tar.gz
@@ -120,21 +127,15 @@ try {
 	if ($LastExitCode -ne 0) {
 		throw "GPG signature verification failed"
 	}
-
 	& $SevenZ e .\${LIBRESSL}.tar.gz
 	& $SevenZ x .\${LIBRESSL}.tar
 	Remove-Item -Force .\${LIBRESSL}.tar
 
 	if(-Not (Test-Path .\${LIBCBOR})) {
-		Write-Host "Cloning ${LIBCBOR}..."
-		& $Git clone --branch ${LIBCBOR_BRANCH} ${LIBCBOR_GIT} `
-			.\${LIBCBOR}
+		Clone "${LIBCBOR_GIT}" "${LIBCBOR_BRANCH}" ".\${LIBCBOR}"
 	}
-
 	if(-Not (Test-Path .\${ZLIB})) {
-		Write-Host "Cloning ${ZLIB}..."
-		& $Git clone --branch ${ZLIB_BRANCH} ${ZLIB_GIT} `
-			.\${ZLIB}
+		Clone "${ZLIB_GIT}" "${ZLIB_BRANCH}" ".\${ZLIB}"
 	}
 } catch {
 	throw "Failed to fetch and verify dependencies"
