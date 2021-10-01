@@ -1,135 +1,126 @@
+# Copyright (c) 2021 Yubico AB. All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
 param(
 	[string]$CMakePath = "C:\Program Files\CMake\bin\cmake.exe",
 	[string]$GitPath = "C:\Program Files\Git\bin\git.exe",
 	[string]$SevenZPath = "C:\Program Files\7-Zip\7z.exe",
 	[string]$GPGPath = "C:\Program Files (x86)\GnuPG\bin\gpg.exe",
 	[string]$WinSDK = "",
+	[string]$Config = "Release",
+	[string]$Arch = "x64",
+	[string]$Type = "dynamic",
 	[string]$Fido2Flags = ""
 )
 
 $ErrorActionPreference = "Stop"
-
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-# LibreSSL coordinates.
-New-Variable -Name 'LIBRESSL_URL' `
-	-Value 'https://fastly.cdn.openbsd.org/pub/OpenBSD/LibreSSL' -Option Constant
-New-Variable -Name 'LIBRESSL' -Value 'libressl-3.3.4' -Option Constant
+. "$PSScriptRoot\const.ps1"
 
-# libcbor coordinates.
-New-Variable -Name 'LIBCBOR' -Value 'libcbor-0.8.0' -Option Constant
-New-Variable -Name 'LIBCBOR_BRANCH' -Value 'v0.8.0' -Option Constant
-New-Variable -Name 'LIBCBOR_GIT' -Value 'https://github.com/pjk/libcbor' `
-	-Option Constant
+Function ExitOnError() {
+	if ($LastExitCode -ne 0) {
+		throw "A command exited with status $LastExitCode"
+	}
+}
 
-# zlib coordinates.
-New-Variable -Name 'ZLIB' -Value 'zlib-1.2.11' -Option Constant
-New-Variable -Name 'ZLIB_BRANCH' -Value 'v1.2.11' -Option Constant
-New-Variable -Name 'ZLIB_GIT' -Value 'https://github.com/madler/zlib' `
-	-Option Constant
-
-# Work directories.
-New-Variable -Name 'BUILD' -Value "$PSScriptRoot\..\build" -Option Constant
-New-Variable -Name 'OUTPUT' -Value "$PSScriptRoot\..\output" -Option Constant
-
-# Find CMake.
-$CMake = $(Get-Command cmake -ErrorAction Ignore | Select-Object -ExpandProperty Source)
-if([string]::IsNullOrEmpty($CMake)) {
-	$CMake = $CMakePath
+Function GitClone(${REPO}, ${BRANCH}, ${DIR}) {
+	Write-Host "Cloning ${REPO}..."
+	& $Git -c advice.detachedHead=false clone --quiet --depth=1 `
+	    --branch "${BRANCH}" "${REPO}" "${DIR}"
+	Write-Host "${REPO}'s ${BRANCH} HEAD is:"
+	& $Git -C "${DIR}" show -s HEAD
 }
 
 # Find Git.
-$Git = $(Get-Command git -ErrorAction Ignore | Select-Object -ExpandProperty Source)
-if([string]::IsNullOrEmpty($Git)) {
+$Git = $(Get-Command git -ErrorAction Ignore | `
+    Select-Object -ExpandProperty Source)
+if ([string]::IsNullOrEmpty($Git)) {
 	$Git = $GitPath
+}
+if (-Not (Test-Path $Git)) {
+	throw "Unable to find Git at $Git"
+}
+
+# Find CMake.
+$CMake = $(Get-Command cmake -ErrorAction Ignore | `
+    Select-Object -ExpandProperty Source)
+if ([string]::IsNullOrEmpty($CMake)) {
+	$CMake = $CMakePath
+}
+if (-Not (Test-Path $CMake)) {
+	throw "Unable to find CMake at $CMake"
 }
 
 # Find 7z.
-$SevenZ = $(Get-Command 7z -ErrorAction Ignore | Select-Object -ExpandProperty Source)
-if([string]::IsNullOrEmpty($SevenZ)) {
+$SevenZ = $(Get-Command 7z -ErrorAction Ignore | `
+    Select-Object -ExpandProperty Source)
+if ([string]::IsNullOrEmpty($SevenZ)) {
 	$SevenZ = $SevenZPath
+}
+if (-Not (Test-Path $SevenZ)) {
+	throw "Unable to find 7z at $SevenZ"
 }
 
 # Find GPG.
-$GPG = $(Get-Command gpg -ErrorAction Ignore | Select-Object -ExpandProperty Source)
-if([string]::IsNullOrEmpty($GPG)) {
+$GPG = $(Get-Command gpg -ErrorAction Ignore | `
+    Select-Object -ExpandProperty Source)
+if ([string]::IsNullOrEmpty($GPG)) {
 	$GPG = $GPGPath
+}
+if (-Not (Test-Path $GPG)) {
+	throw "Unable to find GPG at $GPG"
 }
 
 # Override CMAKE_SYSTEM_VERSION if $WinSDK is set.
-if(-Not ([string]::IsNullOrEmpty($WinSDK))) {
+if (-Not ([string]::IsNullOrEmpty($WinSDK))) {
 	$CMAKE_SYSTEM_VERSION = "-DCMAKE_SYSTEM_VERSION='$WinSDK'"
 } else {
 	$CMAKE_SYSTEM_VERSION = ''
 }
 
-if(-Not (Test-Path $CMake)) {
-	throw "Unable to find CMake at $CMake"
-}
-
-if(-Not (Test-Path $Git)) {
-	throw "Unable to find Git at $Git"
-}
-
-if(-Not (Test-Path $SevenZ)) {
-	throw "Unable to find 7z at $SevenZ"
-}
-
-if(-Not (Test-Path $GPG)) {
-	throw "Unable to find GPG at $GPG"
-}
-
+Write-Host "WinSDK: $WinSDK"
+Write-Host "Config: $Config"
+Write-Host "Arch: $Arch"
+Write-Host "Type: $Type"
 Write-Host "Git: $Git"
 Write-Host "CMake: $CMake"
 Write-Host "7z: $SevenZ"
 Write-Host "GPG: $GPG"
 
-New-Item -Type Directory ${BUILD}
-New-Item -Type Directory ${BUILD}\32
-New-Item -Type Directory ${BUILD}\32\dynamic
-New-Item -Type Directory ${BUILD}\32\static
-New-Item -Type Directory ${BUILD}\64
-New-Item -Type Directory ${BUILD}\64\dynamic
-New-Item -Type Directory ${BUILD}\64\static
-New-Item -Type Directory ${OUTPUT}
-New-Item -Type Directory ${OUTPUT}\pkg\Win64\Release\v142\dynamic
-New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v142\dynamic
-New-Item -Type Directory ${OUTPUT}\pkg\Win64\Release\v142\static
-New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v142\static
+# Create build directories.
+New-Item -Type Directory "${BUILD}" -Force
+New-Item -Type Directory "${BUILD}\${Arch}" -Force
+New-Item -Type Directory "${BUILD}\${Arch}\${Type}" -Force
+New-Item -Type Directory "${STAGE}\${LIBRESSL}" -Force
+New-Item -Type Directory "${STAGE}\${LIBCBOR}" -Force
+New-Item -Type Directory "${STAGE}\${ZLIB}" -Force
 
-Function ExitOnError() {
-	if ($LastExitCode -ne 0) {
-		exit $LastExitCode
-	}
-}
+# Create output directories.
+New-Item -Type Directory "${OUTPUT}" -Force
+New-Item -Type Directory "${OUTPUT}\${Arch}" -Force
+New-Item -Type Directory "${OUTPUT}\${Arch}\${Type}" -force
 
-Function Clone(${REPO}, ${BRANCH}, ${DIR}) {
-	Write-Host "Cloning ${REPO}..."
-	& $Git -c advice.detachedHead=false clone --quiet --depth=1 `
-		--branch "${BRANCH}" "${REPO}" "${DIR}"
-	Write-Host "${REPO} HEAD is:"
-	& $Git -C "${DIR}" show -s HEAD
-}
-
+# Fetch and verify dependencies.
 Push-Location ${BUILD}
-
 try {
 	if (Test-Path .\${LIBRESSL}) {
 		Remove-Item .\${LIBRESSL} -Recurse -ErrorAction Stop
 	}
-	if(-Not (Test-Path .\${LIBRESSL}.tar.gz -PathType leaf)) {
+	if (-Not (Test-Path .\${LIBRESSL}.tar.gz -PathType leaf)) {
 		Invoke-WebRequest ${LIBRESSL_URL}/${LIBRESSL}.tar.gz `
-			-OutFile .\${LIBRESSL}.tar.gz
+		    -OutFile .\${LIBRESSL}.tar.gz
 	}
-	if(-Not (Test-Path .\${LIBRESSL}.tar.gz.asc -PathType leaf)) {
+	if (-Not (Test-Path .\${LIBRESSL}.tar.gz.asc -PathType leaf)) {
 		Invoke-WebRequest ${LIBRESSL_URL}/${LIBRESSL}.tar.gz.asc `
-			-OutFile .\${LIBRESSL}.tar.gz.asc
+		    -OutFile .\${LIBRESSL}.tar.gz.asc
 	}
 
 	Copy-Item "$PSScriptRoot\libressl.gpg" -Destination "${BUILD}"
 	& $GPG --list-keys
 	& $GPG --quiet --no-default-keyring --keyring ./libressl.gpg `
-		--verify .\${LIBRESSL}.tar.gz.asc .\${LIBRESSL}.tar.gz
+	    --verify .\${LIBRESSL}.tar.gz.asc .\${LIBRESSL}.tar.gz
 	if ($LastExitCode -ne 0) {
 		throw "GPG signature verification failed"
 	}
@@ -137,11 +128,11 @@ try {
 	& $SevenZ x .\${LIBRESSL}.tar
 	Remove-Item -Force .\${LIBRESSL}.tar
 
-	if(-Not (Test-Path .\${LIBCBOR})) {
-		Clone "${LIBCBOR_GIT}" "${LIBCBOR_BRANCH}" ".\${LIBCBOR}"
+	if (-Not (Test-Path .\${LIBCBOR})) {
+		GitClone "${LIBCBOR_GIT}" "${LIBCBOR_BRANCH}" ".\${LIBCBOR}"
 	}
-	if(-Not (Test-Path .\${ZLIB})) {
-		Clone "${ZLIB_GIT}" "${ZLIB_BRANCH}" ".\${ZLIB}"
+	if (-Not (Test-Path .\${ZLIB})) {
+		GitClone "${ZLIB_GIT}" "${ZLIB_BRANCH}" ".\${ZLIB}"
 	}
 } catch {
 	throw "Failed to fetch and verify dependencies"
@@ -149,143 +140,99 @@ try {
 	Pop-Location
 }
 
-Function Build(${OUTPUT}, ${ARCH}, ${SHARED}, ${FLAGS}) {
-	if (-Not (Test-Path .\${LIBRESSL})) {
-		New-Item -Type Directory .\${LIBRESSL} -ErrorAction Stop
-	}
-
-	Push-Location .\${LIBRESSL}
-	& $CMake ..\..\..\${LIBRESSL} -A "${ARCH}" `
-		-DBUILD_SHARED_LIBS="${SHARED}" -DLIBRESSL_TESTS=OFF `
-		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
-		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"; `
-		ExitOnError
-	& $CMake --build . --config Release --verbose; ExitOnError
-	& $CMake --build . --config Release --target install --verbose; `
-		ExitOnError
+# Build LibreSSL.
+Push-Location ${STAGE}\${LIBRESSL}
+try {
+	& $CMake ..\..\..\${LIBRESSL} -A "${Arch}" `
+	    -DBUILD_SHARED_LIBS="${SHARED}" -DLIBRESSL_TESTS=OFF `
+	    -DCMAKE_C_FLAGS="${RUNTIME} /Zi /guard:cf /sdl" `
+	    -DCMAKE_INSTALL_PREFIX="${PREFIX}" "${CMAKE_SYSTEM_VERSION}"; `
+	    ExitOnError
+	& $CMake --build . --config ${Config} --verbose; ExitOnError
+	& $CMake --build . --config ${Config} --target install --verbose; `
+	    ExitOnError
+} catch {
+	throw "Failed to build LibreSSL"
+} finally {
 	Pop-Location
+}
 
-	if (-Not (Test-Path .\${LIBCBOR})) {
-		New-Item -Type Directory .\${LIBCBOR} -ErrorAction Stop
-	}
-
-	Push-Location .\${LIBCBOR}
-	& $CMake ..\..\..\${LIBCBOR} -A "${ARCH}" `
-		-DWITH_EXAMPLES=OFF `
-		-DBUILD_SHARED_LIBS="${SHARED}" `
-		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
-		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"; `
-		ExitOnError
-	& $CMake --build . --config Release --verbose; ExitOnError
-	& $CMake --build . --config Release --target install --verbose; `
-		ExitOnError
+# Build libcbor.
+Push-Location ${STAGE}\${LIBCBOR}
+try {
+	& $CMake ..\..\..\${LIBCBOR} -A "${Arch}" `
+	    -DWITH_EXAMPLES=OFF `
+	    -DBUILD_SHARED_LIBS="${SHARED}" `
+	    -DCMAKE_C_FLAGS="${RUNTIME} /Zi /guard:cf /sdl" `
+	    -DCMAKE_INSTALL_PREFIX="${PREFIX}" "${CMAKE_SYSTEM_VERSION}"; `
+	    ExitOnError
+	& $CMake --build . --config ${Config} --verbose; ExitOnError
+	& $CMake --build . --config ${Config} --target install --verbose; `
+	    ExitOnError
+} catch {
+	throw "Failed to build libcbor"
+} finally {
 	Pop-Location
+}
 
-	if(-Not (Test-Path .\${ZLIB})) {
-		New-Item -Type Directory .\${ZLIB} -ErrorAction Stop
+# Build zlib.
+Push-Location ${STAGE}\${ZLIB}
+try {
+	& $CMake ..\..\..\${ZLIB} -A "${Arch}" `
+	    -DBUILD_SHARED_LIBS="${SHARED}" `
+	    -DCMAKE_C_FLAGS="${RUNTIME} /Zi /guard:cf /sdl" `
+	    -DCMAKE_INSTALL_PREFIX="${PREFIX}" "${CMAKE_SYSTEM_VERSION}"; `
+	    ExitOnError
+	& $CMake --build . --config ${Config} --verbose; ExitOnError
+	& $CMake --build . --config ${Config} --target install --verbose; `
+	    ExitOnError
+	# Patch up zlib's resulting names when built with --config Debug.
+	if ("${Config}" -eq "Debug") {
+		if ("${Type}" -eq "Dynamic") {
+			Copy-Item "${PREFIX}/lib/zlibd.lib" `
+			    -Destination "${PREFIX}/lib/zlib.lib" -Force
+			Copy-Item "${PREFIX}/bin/zlibd1.dll" `
+			    -Destination "${PREFIX}/bin/zlib1.dll" -Force
+		} else {
+			Copy-Item "${PREFIX}/lib/zlibstaticd.lib" `
+			    -Destination "${PREFIX}/lib/zlib.lib" -Force
+		}
 	}
-
-	Push-Location .\${ZLIB}
-	& $CMake ..\..\..\${ZLIB} -A "${ARCH}" `
-		-DBUILD_SHARED_LIBS="${SHARED}" `
-		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl" `
-		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"; `
-		ExitOnError
-	& $CMake --build . --config Release --verbose; ExitOnError
-	& $CMake --build . --config Release --target install --verbose; `
-		ExitOnError
+} catch {
+	throw "Failed to build zlib"
+} finally {
 	Pop-Location
+}
 
-	& $CMake ..\..\.. -A "${ARCH}" `
-		-DBUILD_SHARED_LIBS="${SHARED}" `
-		-DCBOR_INCLUDE_DIRS="${OUTPUT}\include" `
-		-DCBOR_LIBRARY_DIRS="${OUTPUT}\lib" `
-		-DCBOR_BIN_DIRS="${OUTPUT}\bin" `
-		-DZLIB_INCLUDE_DIRS="${OUTPUT}\include" `
-		-DZLIB_LIBRARY_DIRS="${OUTPUT}\lib" `
-		-DZLIB_BIN_DIRS="${OUTPUT}\bin" `
-		-DCRYPTO_INCLUDE_DIRS="${OUTPUT}\include" `
-		-DCRYPTO_LIBRARY_DIRS="${OUTPUT}\lib" `
-		-DCRYPTO_BIN_DIRS="${OUTPUT}\bin" `
-		-DCMAKE_C_FLAGS_RELEASE="${FLAGS} /Zi /guard:cf /sdl ${Fido2Flags}" `
-		-DCMAKE_INSTALL_PREFIX="${OUTPUT}" "${CMAKE_SYSTEM_VERSION}"; `
-		ExitOnError
-	& $CMake --build . --config Release --verbose; ExitOnError
-	& $CMake --build . --config Release --target install --verbose; `
-		ExitOnError
+# Build libfido2.
+Push-Location ${STAGE}
+try {
+	& $CMake ..\..\.. -A "${Arch}" `
+	    -DCMAKE_BUILD_TYPE="${Config}" `
+	    -DBUILD_SHARED_LIBS="${SHARED}" `
+	    -DCBOR_INCLUDE_DIRS="${PREFIX}\include" `
+	    -DCBOR_LIBRARY_DIRS="${PREFIX}\lib" `
+	    -DCBOR_BIN_DIRS="${PREFIX}\bin" `
+	    -DZLIB_INCLUDE_DIRS="${PREFIX}\include" `
+	    -DZLIB_LIBRARY_DIRS="${PREFIX}\lib" `
+	    -DZLIB_BIN_DIRS="${PREFIX}\bin" `
+	    -DCRYPTO_INCLUDE_DIRS="${PREFIX}\include" `
+	    -DCRYPTO_LIBRARY_DIRS="${PREFIX}\lib" `
+	    -DCRYPTO_BIN_DIRS="${PREFIX}\bin" `
+	    -DCMAKE_C_FLAGS="${RUNTIME} /Zi /guard:cf /sdl ${Fido2Flags}" `
+	    -DCMAKE_INSTALL_PREFIX="${PREFIX}" "${CMAKE_SYSTEM_VERSION}"; `
+	    ExitOnError
+	& $CMake --build . --config ${Config} --verbose; ExitOnError
+	& $CMake --build . --config ${Config} --target install --verbose; `
+	    ExitOnError
+	# Copy DLLs.
 	if ("${SHARED}" -eq "ON") {
-		"cbor.dll", "crypto-46.dll", "zlib1.dll" | %{ Copy-Item "${OUTPUT}\bin\$_" `
-			-Destination "examples\Release" }
+		"cbor.dll", "crypto-46.dll", "zlib1.dll" | `
+		    %{ Copy-Item "${PREFIX}\bin\$_" `
+		    -Destination "examples\${Config}" }
 	}
+} catch {
+	throw "Failed to build libfido2"
+} finally {
+	Pop-Location
 }
-
-Function Package-Headers() {
-	Copy-Item "${OUTPUT}\64\dynamic\include" -Destination "${OUTPUT}\pkg" `
-		-Recurse -ErrorAction Stop
-}
-
-Function Package-Dynamic(${SRC}, ${DEST}) {
-	Copy-Item "${SRC}\bin\cbor.dll" "${DEST}" -ErrorAction Stop
-	Copy-Item "${SRC}\lib\cbor.lib" "${DEST}" -ErrorAction Stop
-	Copy-Item "${SRC}\bin\zlib1.dll" "${DEST}" -ErrorAction Stop
-	Copy-Item "${SRC}\lib\zlib.lib" "${DEST}" -ErrorAction Stop
-	Copy-Item "${SRC}\bin\crypto-46.dll" "${DEST}" -ErrorAction Stop
-	Copy-Item "${SRC}\lib\crypto-46.lib" "${DEST}" -ErrorAction Stop
-	Copy-Item "${SRC}\bin\fido2.dll" "${DEST}" -ErrorAction Stop
-	Copy-Item "${SRC}\lib\fido2.lib" "${DEST}" -ErrorAction Stop
-}
-
-Function Package-Static(${SRC}, ${DEST}) {
-	Copy-Item "${SRC}/lib/cbor.lib" "${DEST}" -ErrorAction Stop
-	Copy-Item "${SRC}/lib/zlib.lib" "${DEST}" -ErrorAction Stop
-	Copy-Item "${SRC}/lib/crypto-46.lib" "${DEST}" -ErrorAction Stop
-	Copy-Item "${SRC}/lib/fido2_static.lib" "${DEST}/fido2.lib" `
-		-ErrorAction Stop
-}
-
-Function Package-PDBs(${SRC}, ${DEST}) {
-	Copy-Item "${SRC}\${LIBRESSL}\crypto\crypto.dir\Release\vc142.pdb" `
-		"${DEST}\crypto-46.pdb" -ErrorAction Stop
-	Copy-Item "${SRC}\${LIBCBOR}\src\cbor.dir\Release\vc142.pdb" `
-		"${DEST}\cbor.pdb" -ErrorAction Stop
-	Copy-Item "${SRC}\${ZLIB}\zlib.dir\Release\vc142.pdb" `
-		"${DEST}\zlib.pdb" -ErrorAction Stop
-	Copy-Item "${SRC}\src\fido2_shared.dir\Release\vc142.pdb" `
-		"${DEST}\fido2.pdb" -ErrorAction Stop
-}
-
-Function Package-Tools(${SRC}, ${DEST}) {
-	Copy-Item "${SRC}\tools\Release\fido2-assert.exe" `
-		"${DEST}\fido2-assert.exe" -ErrorAction stop
-	Copy-Item "${SRC}\tools\Release\fido2-cred.exe" `
-		"${DEST}\fido2-cred.exe" -ErrorAction stop
-	Copy-Item "${SRC}\tools\Release\fido2-token.exe" `
-		"${DEST}\fido2-token.exe" -ErrorAction stop
-}
-
-Push-Location ${BUILD}\64\dynamic
-Build ${OUTPUT}\64\dynamic "x64" "ON" "/MD"
-Pop-Location
-Push-Location ${BUILD}\32\dynamic
-Build ${OUTPUT}\32\dynamic "Win32" "ON" "/MD"
-Pop-Location
-
-Push-Location ${BUILD}\64\static
-Build ${OUTPUT}\64\static "x64" "OFF" "/MT"
-Pop-Location
-Push-Location ${BUILD}\32\static
-Build ${OUTPUT}\32\static "Win32" "OFF" "/MT"
-Pop-Location
-
-Package-Headers
-
-Package-Dynamic ${OUTPUT}\64\dynamic ${OUTPUT}\pkg\Win64\Release\v142\dynamic
-Package-PDBs ${BUILD}\64\dynamic ${OUTPUT}\pkg\Win64\Release\v142\dynamic
-Package-Tools ${BUILD}\64\dynamic ${OUTPUT}\pkg\Win64\Release\v142\dynamic
-
-Package-Dynamic ${OUTPUT}\32\dynamic ${OUTPUT}\pkg\Win32\Release\v142\dynamic
-Package-PDBs ${BUILD}\32\dynamic ${OUTPUT}\pkg\Win32\Release\v142\dynamic
-Package-Tools ${BUILD}\32\dynamic ${OUTPUT}\pkg\Win32\Release\v142\dynamic
-
-Package-Static ${OUTPUT}\64\static ${OUTPUT}\pkg\Win64\Release\v142\static
-Package-Static ${OUTPUT}\32\static ${OUTPUT}\pkg\Win32\Release\v142\static
