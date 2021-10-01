@@ -1214,7 +1214,7 @@ junk_cdh(void)
 	junk = malloc(sizeof(cdh));
 	assert(junk != NULL);
 	memcpy(junk, cdh, sizeof(cdh));
-	junk[0] = ~junk[0];
+	junk[0] = (unsigned char)~junk[0];
 
 	c = alloc_cred();
 	assert(fido_cred_set_type(c, COSE_ES256) == FIDO_OK);
@@ -1316,7 +1316,7 @@ junk_authdata(void)
 	junk = malloc(sizeof(authdata));
 	assert(junk != NULL);
 	memcpy(junk, authdata, sizeof(authdata));
-	junk[0] = ~junk[0];
+	junk[0] = (unsigned char)~junk[0];
 
 	unset = calloc(1, sizeof(aaguid));
 	assert(unset != NULL);
@@ -1357,7 +1357,7 @@ junk_sig(void)
 	junk = malloc(sizeof(sig));
 	assert(junk != NULL);
 	memcpy(junk, sig, sizeof(sig));
-	junk[0] = ~junk[0];
+	junk[0] = (unsigned char)~junk[0];
 
 	c = alloc_cred();
 	assert(fido_cred_set_type(c, COSE_ES256) == FIDO_OK);
@@ -1389,7 +1389,7 @@ junk_x509(void)
 	junk = malloc(sizeof(x509));
 	assert(junk != NULL);
 	memcpy(junk, x509, sizeof(x509));
-	junk[0] = ~junk[0];
+	junk[0] = (unsigned char)~junk[0];
 
 	c = alloc_cred();
 	assert(fido_cred_set_type(c, COSE_ES256) == FIDO_OK);

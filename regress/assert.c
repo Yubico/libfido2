@@ -435,7 +435,7 @@ junk_cdh(void)
 	junk = malloc(sizeof(cdh));
 	assert(junk != NULL);
 	memcpy(junk, cdh, sizeof(cdh));
-	junk[0] = ~junk[0];
+	junk[0] = (unsigned char)~junk[0];
 
 	a = alloc_assert();
 	pk = alloc_es256_pk();
@@ -486,7 +486,7 @@ junk_authdata(void)
 	junk = malloc(sizeof(authdata));
 	assert(junk != NULL);
 	memcpy(junk, authdata, sizeof(authdata));
-	junk[0] = ~junk[0];
+	junk[0] = (unsigned char)~junk[0];
 
 	a = alloc_assert();
 	assert(fido_assert_set_count(a, 1) == FIDO_OK);
@@ -506,7 +506,7 @@ junk_sig(void)
 	junk = malloc(sizeof(sig));
 	assert(junk != NULL);
 	memcpy(junk, sig, sizeof(sig));
-	junk[0] = ~junk[0];
+	junk[0] = (unsigned char)~junk[0];
 
 	a = alloc_assert();
 	pk = alloc_es256_pk();
