@@ -173,6 +173,7 @@ reopen(void)
 	wiredata = wiredata_setup(cbor_info_data, sizeof(cbor_info_data));
 	assert(fido_dev_open(dev, "dummy") == FIDO_OK);
 	assert(fido_dev_close(dev) == FIDO_OK);
+	fido_dev_free(&dev);
 	wiredata_clear(&wiredata);
 }
 
@@ -197,6 +198,7 @@ double_open(void)
 	assert(fido_dev_open(dev, "dummy") == FIDO_OK);
 	assert(fido_dev_open(dev, "dummy") == FIDO_ERR_INVALID_ARGUMENT);
 	assert(fido_dev_close(dev) == FIDO_OK);
+	fido_dev_free(&dev);
 	wiredata_clear(&wiredata);
 }
 
@@ -223,6 +225,7 @@ double_close(void)
 	assert(fido_dev_open(dev, "dummy") == FIDO_OK);
 	assert(fido_dev_close(dev) == FIDO_OK);
 	assert(fido_dev_close(dev) == FIDO_ERR_INVALID_ARGUMENT);
+	fido_dev_free(&dev);
 	wiredata_clear(&wiredata);
 }
 
@@ -261,6 +264,7 @@ is_fido2(void)
 	assert(fido_dev_is_fido2(dev) == true);
 	assert(fido_dev_supports_pin(dev) == false);
 	assert(fido_dev_close(dev) == FIDO_OK);
+	fido_dev_free(&dev);
 	wiredata_clear(&wiredata);
 }
 
@@ -294,6 +298,7 @@ has_pin(void)
 	assert(fido_dev_reset(dev) == FIDO_OK);
 	assert(fido_dev_has_pin(dev) == false);
 	assert(fido_dev_close(dev) == FIDO_OK);
+	fido_dev_free(&dev);
 	wiredata_clear(&wiredata);
 }
 
@@ -319,6 +324,7 @@ timeout_tx(void)
 	interval_ms = 2000;
 	assert(fido_dev_reset(dev) == FIDO_ERR_TX);
 	assert(fido_dev_close(dev) == FIDO_OK);
+	fido_dev_free(&dev);
 	wiredata_clear(&wiredata);
 	interval_ms = 0;
 }
@@ -354,6 +360,7 @@ timeout_rx(void)
 	interval_ms = 1000;
 	assert(fido_dev_reset(dev) == FIDO_ERR_RX);
 	assert(fido_dev_close(dev) == FIDO_OK);
+	fido_dev_free(&dev);
 	wiredata_clear(&wiredata);
 	interval_ms = 0;
 }
@@ -389,6 +396,7 @@ timeout_ok(void)
 	interval_ms = 1000;
 	assert(fido_dev_reset(dev) == FIDO_OK);
 	assert(fido_dev_close(dev) == FIDO_OK);
+	fido_dev_free(&dev);
 	wiredata_clear(&wiredata);
 	interval_ms = 0;
 }
@@ -402,6 +410,7 @@ timeout_misc(void)
 	assert(fido_dev_set_timeout(dev, -2) == FIDO_ERR_INVALID_ARGUMENT);
 	assert(fido_dev_set_timeout(dev, 3 * 1000) == FIDO_OK);
 	assert(fido_dev_set_timeout(dev, -1) == FIDO_OK);
+	fido_dev_free(&dev);
 }
 
 int
