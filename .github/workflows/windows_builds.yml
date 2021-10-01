@@ -16,7 +16,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ windows-2019, windows-2022 ]
+        arch: [ x64, Win32 ]
+        type: [ dynamic, static ]
+        config: [ "Debug", "Release" ]
     steps:
     - uses: actions/checkout@v2
     - name: build
-      run: .\windows\build.ps1 -WinSDK '10.0.19041.0' -Fido2Flags '/analyze'
+      run: |
+        .\windows\build.ps1 -WinSDK '10.0.19041.0' -Fido2Flags '/analyze' `
+          -Arch ${{ matrix.arch }} -Type ${{ matrix.type }} `
+          -Config ${{ matrix.config }}
