@@ -126,6 +126,7 @@ test(const struct param *p)
 	uint32_t target;
 
 	prng_init((unsigned int)p->seed);
+	fuzz_clock_reset();
 	fido_init(FIDO_DEBUG);
 	fido_set_log_handler(consume_str);
 

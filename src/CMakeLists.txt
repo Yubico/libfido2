@@ -39,6 +39,7 @@ list(APPEND FIDO_SOURCES
 )
 
 if(FUZZ)
+	list(APPEND FIDO_SOURCES ../fuzz/clock.c)
 	list(APPEND FIDO_SOURCES ../fuzz/prng.c)
 	list(APPEND FIDO_SOURCES ../fuzz/uniform_random.c)
 	list(APPEND FIDO_SOURCES ../fuzz/udev.c)

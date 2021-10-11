@@ -73,6 +73,7 @@ ssize_t fd_write(int, const void *, size_t);
 fido_dev_t *open_dev(int);
 void set_wire_data(const uint8_t *, size_t);
 
+void fuzz_clock_reset(void);
 void prng_init(unsigned long);
 unsigned long prng_uint32(void);
 

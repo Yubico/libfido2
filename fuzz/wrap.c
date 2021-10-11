@@ -629,14 +629,6 @@ WRAP(int,
 )
 
 WRAP(int,
-	usleep,
-	(unsigned int usec),
-	-1,
-	(usec),
-	1
-)
-
-WRAP(int,
 	bind,
 	(int sockfd, const struct sockaddr *addr, socklen_t addrlen),
 	-1,
