@@ -756,7 +756,7 @@ u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int *ms)
 }
 
 int
-u2f_get_touch_begin(fido_dev_t *dev)
+u2f_get_touch_begin(fido_dev_t *dev, int *ms)
 {
 	iso7816_apdu_t	*apdu = NULL;
 	const char	*clientdata = FIDO_DUMMY_CLIENTDATA;
@@ -764,7 +764,6 @@ u2f_get_touch_begin(fido_dev_t *dev)
 	unsigned char	 clientdata_hash[SHA256_DIGEST_LENGTH];
 	unsigned char	 rp_id_hash[SHA256_DIGEST_LENGTH];
 	unsigned char	 reply[FIDO_MAXMSG];
-	int		 ms = 200; /* XXX */
 	int		 r;
 
 	memset(&clientdata_hash, 0, sizeof(clientdata_hash));
@@ -787,12 +786,12 @@ u2f_get_touch_begin(fido_dev_t *dev)
 	}
 
 	if (dev->attr.flags & FIDO_CAP_WINK) {
-		fido_tx(dev, CTAP_CMD_WINK, NULL, 0, &ms);
-		fido_rx(dev, CTAP_CMD_WINK, &reply, sizeof(reply), &ms);
+		fido_tx(dev, CTAP_CMD_WINK, NULL, 0, ms);
+		fido_rx(dev, CTAP_CMD_WINK, &reply, sizeof(reply), ms);
 	}
 
 	if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
-	    iso7816_len(apdu), &ms) < 0) {
+	    iso7816_len(apdu), ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
 		goto fail;
@@ -820,7 +819,7 @@ u2f_get_touch_status(fido_dev_t *dev, int *touched, int *ms)
 
 	switch ((reply[reply_len - 2] << 8) | reply[reply_len - 1]) {
 	case SW_CONDITIONS_NOT_SATISFIED:
-		if ((r = u2f_get_touch_begin(dev)) != FIDO_OK) {
+		if ((r = u2f_get_touch_begin(dev, ms)) != FIDO_OK) {
 			fido_log_debug("%s: u2f_get_touch_begin", __func__);
 			return (r);
 		}
