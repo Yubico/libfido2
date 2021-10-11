@@ -166,7 +166,7 @@ void fido_log_error(int, const char *, ...);
 /* u2f */
 int u2f_register(fido_dev_t *, fido_cred_t *, int *);
 int u2f_authenticate(fido_dev_t *, fido_assert_t *, int *);
-int u2f_get_touch_begin(fido_dev_t *);
+int u2f_get_touch_begin(fido_dev_t *, int *);
 int u2f_get_touch_status(fido_dev_t *, int *, int *);
 
 /* unexposed fido ops */

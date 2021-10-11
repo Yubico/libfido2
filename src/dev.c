@@ -434,7 +434,7 @@ fido_dev_get_touch_begin(fido_dev_t *dev)
 	memset(&user, 0, sizeof(user));
 
 	if (fido_dev_is_fido2(dev) == false)
-		return (u2f_get_touch_begin(dev));
+		return (u2f_get_touch_begin(dev, &ms));
 
 	if (SHA256((const void *)clientdata, strlen(clientdata), cdh) != cdh) {
 		fido_log_debug("%s: sha256", __func__);
