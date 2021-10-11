@@ -148,10 +148,6 @@ send_dummy_register(fido_dev_t *dev, int *ms)
 	unsigned char	 reply[FIDO_MAXMSG];
 	int		 r;
 
-#ifdef FIDO_FUZZ
-	*ms = 0; /* XXX */
-#endif
-
 	/* dummy challenge & application */
 	memset(&challenge, 0xff, sizeof(challenge));
 	memset(&application, 0xff, sizeof(application));
@@ -578,10 +574,6 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int *ms)
 	int		 reply_len;
 	int		 found;
 	int		 r;
-
-#ifdef FIDO_FUZZ
-	*ms = 0; /* XXX */
-#endif
 
 	if (cred->rk == FIDO_OPT_TRUE || cred->uv == FIDO_OPT_TRUE) {
 		fido_log_debug("%s: rk=%d, uv=%d", __func__, cred->rk,
