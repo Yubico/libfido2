@@ -40,8 +40,7 @@ dummy_read(void *handle, unsigned char *ptr, size_t len, int ms)
 {
 	struct timespec tv;
 	size_t		n;
-
-	(void)ms;
+	long		d;
 
 	assert(handle == FAKE_DEV_HANDLE);
 	assert(ptr != NULL);
@@ -56,12 +55,20 @@ dummy_read(void *handle, unsigned char *ptr, size_t len, int ms)
 		initialised = 1;
 	}
 
-	if (interval_ms) {
-		tv.tv_sec = interval_ms / 1000;
-		tv.tv_nsec = (interval_ms % 1000) * 1000000;
+	if (ms >= 0 && ms < interval_ms)
+		d = ms;
+	else
+		d = interval_ms;
+
+	if (d) {
+		tv.tv_sec = d / 1000;
+		tv.tv_nsec = (d % 1000) * 1000000;
 		if (nanosleep(&tv, NULL) == -1)
 			err(1, "nanosleep");
 	}
+
+	if (d != interval_ms)
+		return (-1); /* timeout */
 
 	if (wiredata_len < len)
 		n = wiredata_len;
@@ -303,33 +310,6 @@ has_pin(void)
 }
 
 static void
-timeout_tx(void)
-{
-	uint8_t		*wiredata;
-	fido_dev_t	*dev = NULL;
-	fido_dev_io_t	 io;
-
-	memset(&io, 0, sizeof(io));
-
-	io.open = dummy_open;
-	io.close = dummy_close;
-	io.read = dummy_read;
-	io.write = dummy_write;
-
-	wiredata = wiredata_setup(NULL, 0);
-	assert((dev = fido_dev_new()) != NULL);
-	assert(fido_dev_set_io_functions(dev, &io) == FIDO_OK);
-	assert(fido_dev_open(dev, "dummy") == FIDO_OK);
-	assert(fido_dev_set_timeout(dev, 1 * 1000) == FIDO_OK);
-	interval_ms = 2000;
-	assert(fido_dev_reset(dev) == FIDO_ERR_TX);
-	assert(fido_dev_close(dev) == FIDO_OK);
-	fido_dev_free(&dev);
-	wiredata_clear(&wiredata);
-	interval_ms = 0;
-}
-
-static void
 timeout_rx(void)
 {
 	const uint8_t	 timeout_rx_data[] = {
@@ -424,7 +404,6 @@ main(void)
 	double_close();
 	is_fido2();
 	has_pin();
-	timeout_tx();
 	timeout_rx();
 	timeout_ok();
 	timeout_misc();

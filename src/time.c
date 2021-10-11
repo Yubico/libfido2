@@ -65,10 +65,8 @@ fido_time_delta(const struct timespec *ts_start, int *ms_remain)
 		return -1;
 	}
 
-	if (ms > *ms_remain) {
-		fido_log_debug("%s: timeout", __func__);
-		return -1;
-	}
+	if (ms > *ms_remain)
+		ms = *ms_remain;
 
 	*ms_remain -= ms;
 
