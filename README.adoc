@@ -68,7 +68,7 @@ Follow the instructions for Ubuntu 18.04 (Bionic) below.
 
 Or from source, on UNIX-like systems:
 
-  $ (rm -rf build && mkdir build && cd build && cmake ..)
+  $ cmake -B build
   $ make -C build
   $ sudo make -C build install
 
