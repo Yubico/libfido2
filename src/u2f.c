@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -412,6 +412,71 @@ fail:
 }
 
 static int
+encode_cred_attstmt(int cose_alg, const fido_blob_t *x5c,
+    const fido_blob_t *sig, fido_blob_t *out)
+{
+	cbor_item_t		*item = NULL;
+	cbor_item_t		*x5c_cbor = NULL;
+	const uint8_t		 alg_cbor = (uint8_t)(-cose_alg - 1);
+	struct cbor_pair	 kv[3];
+	size_t			 alloc_len;
+	int			 ok = -1;
+
+	memset(&kv, 0, sizeof(kv));
+	memset(out, 0, sizeof(*out));
+
+	if ((item = cbor_new_definite_map(3)) == NULL) {
+		fido_log_debug("%s: cbor_new_definite_map", __func__);
+		goto fail;
+	}
+
+	if ((kv[0].key = cbor_build_string("alg")) == NULL ||
+	    (kv[0].value = cbor_build_negint8(alg_cbor)) == NULL ||
+	    !cbor_map_add(item, kv[0])) {
+		fido_log_debug("%s: alg", __func__);
+		goto fail;
+	}
+
+	if ((kv[1].key = cbor_build_string("sig")) == NULL ||
+	    (kv[1].value = fido_blob_encode(sig)) == NULL ||
+	    !cbor_map_add(item, kv[1])) {
+		fido_log_debug("%s: sig", __func__);
+		goto fail;
+	}
+
+	if ((kv[2].key = cbor_build_string("x5c")) == NULL ||
+	    (kv[2].value = cbor_new_definite_array(1)) == NULL ||
+	    (x5c_cbor = fido_blob_encode(x5c)) == NULL ||
+	    !cbor_array_push(kv[2].value, x5c_cbor) ||
+	    !cbor_map_add(item, kv[2])) {
+		fido_log_debug("%s: x5c", __func__);
+		goto fail;
+	}
+
+	if ((out->len = cbor_serialize_alloc(item, &out->ptr,
+	    &alloc_len)) == 0) {
+		fido_log_debug("%s: cbor_serialize_alloc", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	if (item != NULL)
+		cbor_decref(&item);
+	if (x5c_cbor != NULL)
+		cbor_decref(&x5c_cbor);
+
+	for (size_t i = 0; i < nitems(kv); i++) {
+		if (kv[i].key)
+			cbor_decref(&kv[i].key);
+		if (kv[i].value)
+			cbor_decref(&kv[i].value);
+	}
+
+	return (ok);
+}
+
+static int
 encode_cred_authdata(const char *rp_id, const uint8_t *kh, uint8_t kh_len,
     const uint8_t *pubkey, size_t pubkey_len, fido_blob_t *out)
 {
@@ -497,6 +562,7 @@ parse_register_reply(fido_cred_t *cred, const unsigned char *reply, size_t len)
 	fido_blob_t	 x5c;
 	fido_blob_t	 sig;
 	fido_blob_t	 ad;
+	fido_blob_t	 stmt;
 	uint8_t		 dummy;
 	uint8_t		 pubkey[65];
 	uint8_t		 kh_len = 0;
@@ -506,6 +572,7 @@ parse_register_reply(fido_cred_t *cred, const unsigned char *reply, size_t len)
 	memset(&x5c, 0, sizeof(x5c));
 	memset(&sig, 0, sizeof(sig));
 	memset(&ad, 0, sizeof(ad));
+	memset(&stmt, 0, sizeof(stmt));
 	r = FIDO_ERR_RX;
 
 	/* status word */
@@ -539,6 +606,12 @@ parse_register_reply(fido_cred_t *cred, const unsigned char *reply, size_t len)
 		goto fail;
 	}
 
+	/* attstmt */
+	if (encode_cred_attstmt(COSE_ES256, &x5c, &sig, &stmt) < 0) {
+		fido_log_debug("%s: encode_cred_attstmt", __func__);
+		goto fail;
+	}
+
 	/* authdata */
 	if (encode_cred_authdata(cred->rp.id, kh, kh_len, pubkey,
 	    sizeof(pubkey), &ad) < 0) {
@@ -548,8 +621,7 @@ parse_register_reply(fido_cred_t *cred, const unsigned char *reply, size_t len)
 
 	if (fido_cred_set_fmt(cred, "fido-u2f") != FIDO_OK ||
 	    fido_cred_set_authdata(cred, ad.ptr, ad.len) != FIDO_OK ||
-	    fido_cred_set_x509(cred, x5c.ptr, x5c.len) != FIDO_OK ||
-	    fido_cred_set_sig(cred, sig.ptr, sig.len) != FIDO_OK) {
+	    fido_cred_set_attstmt(cred, stmt.ptr, stmt.len) != FIDO_OK) {
 		fido_log_debug("%s: fido_cred_set", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -561,6 +633,7 @@ fail:
 	fido_blob_reset(&x5c);
 	fido_blob_reset(&sig);
 	fido_blob_reset(&ad);
+	fido_blob_reset(&stmt);
 
 	return (r);
 }
