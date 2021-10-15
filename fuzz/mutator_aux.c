@@ -103,7 +103,7 @@ unpack_blob(cbor_item_t *item, struct blob *v)
 }
 
 cbor_item_t *
-pack_int(int v)
+pack_int(int v) NO_MSAN
 {
 	if (v < 0)
 		return cbor_build_negint64((uint64_t)(-(int64_t)v - 1));
@@ -112,7 +112,7 @@ pack_int(int v)
 }
 
 cbor_item_t *
-pack_string(const char *v)
+pack_string(const char *v) NO_MSAN
 {
 	if (strlen(v) >= MAXSTR)
 		return NULL;
@@ -121,13 +121,13 @@ pack_string(const char *v)
 }
 
 cbor_item_t *
-pack_byte(uint8_t v)
+pack_byte(uint8_t v) NO_MSAN
 {
 	return cbor_build_uint8(v);
 }
 
 cbor_item_t *
-pack_blob(const struct blob *v)
+pack_blob(const struct blob *v) NO_MSAN
 {
 	return cbor_build_bytestring(v->body, v->len);
 }

@@ -21,11 +21,26 @@
 #include "../src/fido/rs256.h"
 #include "../src/netlink.h"
 
+/*
+ * As of LLVM 10.0.0, MSAN support in libFuzzer was still experimental.
+ * We therefore have to be careful when using our custom mutator, or
+ * MSAN will flag uninitialised reads on memory populated by libFuzzer.
+ * Since there is no way to suppress MSAN without regenerating object
+ * code (in which case you might as well rebuild libFuzzer with MSAN),
+ * we adjust our mutator to make it less accurate while allowing
+ * fuzzing to proceed.
+ */
+
 #if defined(__has_feature)
 # if  __has_feature(memory_sanitizer)
 #  include <sanitizer/msan_interface.h>
+#  define NO_MSAN	__attribute__((no_sanitize("memory")))
 #  define WITH_MSAN	1
 # endif
+#endif
+
+#if !defined(WITH_MSAN)
+# define NO_MSAN
 #endif
 
 #define MUTATE_SEED	0x01
