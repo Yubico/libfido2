@@ -214,7 +214,7 @@ test(const struct param *p)
 }
 
 void
-mutate(struct param *p, unsigned int seed, unsigned int flags)
+mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 {
 	if (flags & MUTATE_SEED)
 		p->seed = (int)seed;
