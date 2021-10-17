@@ -80,7 +80,7 @@ if(NOT MSVC)
 endif()
 
 check_c_compiler_flag("-Wshorten-64-to-32" HAVE_SHORTEN_64_TO_32)
-check_c_compiler_flag("-fstack-protector-all" HAVE_STACK_PROTECTOR_ALL)
+check_c_compiler_flag("-Werror -fstack-protector-all" HAVE_STACK_PROTECTOR_ALL)
 
 check_include_files(cbor.h HAVE_CBOR_H)
 check_include_files(endian.h HAVE_ENDIAN_H)
