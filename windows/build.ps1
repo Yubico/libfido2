@@ -145,7 +145,8 @@ Push-Location ${STAGE}\${LIBRESSL}
 try {
 	& $CMake ..\..\..\${LIBRESSL} -A "${Arch}" `
 	    -DBUILD_SHARED_LIBS="${SHARED}" -DLIBRESSL_TESTS=OFF `
-	    -DCMAKE_C_FLAGS="${RUNTIME} /Zi /guard:cf /sdl" `
+	    -DCMAKE_C_FLAGS_DEBUG="${CFLAGS_DEBUG}" `
+	    -DCMAKE_C_FLAGS_RELEASE="${CFLAGS_RELEASE}" `
 	    -DCMAKE_INSTALL_PREFIX="${PREFIX}" "${CMAKE_SYSTEM_VERSION}"; `
 	    ExitOnError
 	& $CMake --build . --config ${Config} --verbose; ExitOnError
@@ -163,7 +164,8 @@ try {
 	& $CMake ..\..\..\${LIBCBOR} -A "${Arch}" `
 	    -DWITH_EXAMPLES=OFF `
 	    -DBUILD_SHARED_LIBS="${SHARED}" `
-	    -DCMAKE_C_FLAGS="${RUNTIME} /Zi /guard:cf /sdl" `
+	    -DCMAKE_C_FLAGS_DEBUG="${CFLAGS_DEBUG}" `
+	    -DCMAKE_C_FLAGS_RELEASE="${CFLAGS_RELEASE}" `
 	    -DCMAKE_INSTALL_PREFIX="${PREFIX}" "${CMAKE_SYSTEM_VERSION}"; `
 	    ExitOnError
 	& $CMake --build . --config ${Config} --verbose; ExitOnError
@@ -180,7 +182,8 @@ Push-Location ${STAGE}\${ZLIB}
 try {
 	& $CMake ..\..\..\${ZLIB} -A "${Arch}" `
 	    -DBUILD_SHARED_LIBS="${SHARED}" `
-	    -DCMAKE_C_FLAGS="${RUNTIME} /Zi /guard:cf /sdl" `
+	    -DCMAKE_C_FLAGS_DEBUG="${CFLAGS_DEBUG}" `
+	    -DCMAKE_C_FLAGS_RELEASE="${CFLAGS_RELEASE}" `
 	    -DCMAKE_INSTALL_PREFIX="${PREFIX}" "${CMAKE_SYSTEM_VERSION}"; `
 	    ExitOnError
 	& $CMake --build . --config ${Config} --verbose; ExitOnError
@@ -219,7 +222,8 @@ try {
 	    -DCRYPTO_INCLUDE_DIRS="${PREFIX}\include" `
 	    -DCRYPTO_LIBRARY_DIRS="${PREFIX}\lib" `
 	    -DCRYPTO_BIN_DIRS="${PREFIX}\bin" `
-	    -DCMAKE_C_FLAGS="${RUNTIME} /Zi /guard:cf /sdl ${Fido2Flags}" `
+	    -DCMAKE_C_FLAGS_DEBUG="${CFLAGS_DEBUG} ${Fido2Flags}" `
+	    -DCMAKE_C_FLAGS_RELEASE="${CFLAGS_RELEASE} ${Fido2Flags}" `
 	    -DCMAKE_INSTALL_PREFIX="${PREFIX}" "${CMAKE_SYSTEM_VERSION}"; `
 	    ExitOnError
 	& $CMake --build . --config ${Config} --verbose; ExitOnError
