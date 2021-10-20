@@ -36,3 +36,7 @@ if ("${Type}" -eq "dynamic") {
 	New-Variable -Name 'RUNTIME' -Value '/MT' -Option Constant
 	New-Variable -Name 'SHARED' -Value 'OFF' -Option Constant
 }
+New-Variable -Name 'CFLAGS_DEBUG' -Value "${RUNTIME}d /Zi /guard:cf /sdl" `
+    -Option Constant
+New-Variable -Name 'CFLAGS_RELEASE' -Value "${RUNTIME} /Zi /guard:cf /sdl" `
+    -Option Constant
