@@ -89,7 +89,6 @@ check_include_files(openssl/opensslv.h HAVE_OPENSSLV_H)
 check_include_files(signal.h HAVE_SIGNAL_H)
 check_include_files(sys/random.h HAVE_SYS_RANDOM_H)
 check_include_files(unistd.h HAVE_UNISTD_H)
-check_include_files("windows.h;webauthn.h" HAVE_WEBAUTHN_H)
 
 check_symbol_exists(arc4random_buf stdlib.h HAVE_ARC4RANDOM_BUF)
 check_symbol_exists(clock_gettime time.h HAVE_CLOCK_GETTIME)
@@ -140,7 +139,6 @@ list(APPEND CHECK_VARIABLES
 	HAVE_TIMESPECSUB
 	HAVE_TIMINGSAFE_BCMP
 	HAVE_UNISTD_H
-	HAVE_WEBAUTHN_H
 )
 
 foreach(v ${CHECK_VARIABLES})
@@ -188,10 +186,8 @@ if(MSVC)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -MP -W4 -WX ${MSVC_DISABLED_WARNINGS_STR}")
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Od /Z7 /guard:cf /sdl /RTCcsu")
 	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Zi /guard:cf /sdl")
-	if (HAVE_WEBAUTHN_H)
-		add_definitions(-DUSE_WINHELLO)
-		set(USE_WINHELLO ON)
-	endif()
+	add_definitions(-DUSE_WINHELLO)
+	set(USE_WINHELLO ON)
 else()
 	include(FindPkgConfig)
 	pkg_search_module(CBOR libcbor)

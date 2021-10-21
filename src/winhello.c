@@ -8,9 +8,9 @@
 
 #include <stdlib.h>
 #include <windows.h>
-#include <webauthn.h>
 
 #include "fido.h"
+#include "webauthn.h"
 
 #define MAXCHARS	128
 #define MAXCREDS	128
