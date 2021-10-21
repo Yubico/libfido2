@@ -169,12 +169,12 @@ if(MSVC)
 	set(ZLIB_LIBRARIES zlib)
 	set(CRYPTO_LIBRARIES crypto-46)
 	set(MSVC_DISABLED_WARNINGS_LIST
+		"C4152" # nonstandard extension used: function/data pointer
+			# conversion in expression;
 		"C4200" # nonstandard extension used: zero-sized array in
 			# struct/union;
 		"C4204" # nonstandard extension used: non-constant aggregate
 			# initializer;
-		"C4152" # nonstandard extension used: function/data pointer
-			# conversion in expression;
 		"C4706" # assignment within conditional expression;
 		"C4996" # The POSIX name for this item is deprecated. Instead,
 			# use the ISO C and C++ conformant name;
