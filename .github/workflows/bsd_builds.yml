@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [freebsd/13.x, openbsd/6.9]
+        image: [freebsd/13.x, openbsd/7.0]
     steps:
     - uses: actions/checkout@v2
     - name: dependencies
