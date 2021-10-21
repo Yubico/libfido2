@@ -40,6 +40,87 @@ struct winhello_cred {
 	wchar_t						*display_name;
 };
 
+static TLS BOOL		  webauthn_loaded;
+static TLS HMODULE	  webauthn_handle;
+static TLS DWORD	(*webauthn_get_api_version)(void);
+static TLS PCWSTR	(*webauthn_strerr)(HRESULT);
+static TLS HRESULT	(*webauthn_get_assert)(HWND, LPCWSTR,
+			    PCWEBAUTHN_CLIENT_DATA,
+			    PCWEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS,
+			    PWEBAUTHN_ASSERTION *);
+static TLS HRESULT	(*webauthn_make_cred)(HWND,
+			    PCWEBAUTHN_RP_ENTITY_INFORMATION,
+			    PCWEBAUTHN_USER_ENTITY_INFORMATION,
+			    PCWEBAUTHN_COSE_CREDENTIAL_PARAMETERS,
+			    PCWEBAUTHN_CLIENT_DATA,
+			    PCWEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS,
+			    PWEBAUTHN_CREDENTIAL_ATTESTATION *);
+static TLS void		(*webauthn_free_assert)(PWEBAUTHN_ASSERTION);
+static TLS void		(*webauthn_free_attest)(PWEBAUTHN_CREDENTIAL_ATTESTATION);
+
+static int
+webauthn_load(void)
+{
+	if (webauthn_loaded || webauthn_handle != NULL) {
+		fido_log_debug("%s: already loaded", __func__);
+		return -1;
+	}
+	if ((webauthn_handle = LoadLibrary("webauthn.dll")) == NULL) {
+		fido_log_debug("%s: LoadLibrary", __func__);
+		return -1;
+	}
+
+	if ((webauthn_get_api_version = (void *)GetProcAddress(webauthn_handle,
+	    "WebAuthNGetApiVersionNumber")) == NULL) {
+		fido_log_debug("%s: WebAuthNGetApiVersionNumber", __func__);
+		goto fail;
+	}
+	if ((webauthn_strerr = (void *)GetProcAddress(webauthn_handle,
+	    "WebAuthNGetErrorName")) == NULL) {
+		fido_log_debug("%s: WebAuthNGetErrorName", __func__);
+		goto fail;
+	}
+	if ((webauthn_get_assert = (void *)GetProcAddress(webauthn_handle,
+	    "WebAuthNAuthenticatorGetAssertion")) == NULL) {
+		fido_log_debug("%s: WebAuthNAuthenticatorGetAssertion",
+		    __func__);
+		goto fail;
+	}
+	if ((webauthn_make_cred = (void *)GetProcAddress(webauthn_handle,
+	    "WebAuthNAuthenticatorMakeCredential")) == NULL) {
+		fido_log_debug("%s: WebAuthNAuthenticatorMakeCredential",
+		    __func__);
+		goto fail;
+	}
+	if ((webauthn_free_assert = (void *)GetProcAddress(webauthn_handle,
+	    "WebAuthNFreeAssertion")) == NULL) {
+		fido_log_debug("%s: WebAuthNFreeAssertion", __func__);
+		goto fail;
+	}
+	if ((webauthn_free_attest = (void *)GetProcAddress(webauthn_handle,
+	    "WebAuthNFreeCredentialAttestation")) == NULL) {
+		fido_log_debug("%s: WebAuthNFreeCredentialAttestation",
+		    __func__);
+		goto fail;
+	}
+
+	webauthn_loaded = true;
+
+	return 0;
+fail:
+	fido_log_debug("%s: GetProcAddress", __func__);
+	webauthn_get_api_version = NULL;
+	webauthn_strerr = NULL;
+	webauthn_get_assert = NULL;
+	webauthn_make_cred = NULL;
+	webauthn_free_assert = NULL;
+	webauthn_free_attest = NULL;
+	FreeLibrary(webauthn_handle);
+	webauthn_handle = NULL;
+
+	return -1;
+}
+
 static wchar_t *
 to_utf16(const char *utf8)
 {
@@ -595,7 +676,11 @@ winhello_manifest(void)
 {
 	DWORD n;
 
-	if ((n = WebAuthNGetApiVersionNumber()) < 1) {
+	if (!webauthn_loaded && webauthn_load() < 0) {
+		fido_log_debug("%s: webauthn_load", __func__);
+		return FIDO_ERR_INTERNAL;
+	}
+	if ((n = webauthn_get_api_version()) < 1) {
 		fido_log_debug("%s: unsupported api %u", __func__, n);
 		return FIDO_ERR_INTERNAL;
 	}
@@ -610,12 +695,11 @@ winhello_get_assert(HWND w, struct winhello_assert *ctx)
 	HRESULT hr;
 	int r = FIDO_OK;
 
-	hr = WebAuthNAuthenticatorGetAssertion(w, ctx->rp_id, &ctx->cd,
-	    &ctx->opt, &ctx->assert);
-	if (hr != S_OK) {
+	if ((hr = webauthn_get_assert(w, ctx->rp_id, &ctx->cd, &ctx->opt,
+	    &ctx->assert)) != S_OK) {
 		r = to_fido(hr);
-		fido_log_debug("%s: %ls -> %s", __func__,
-		    WebAuthNGetErrorName(hr), fido_strerr(r));
+		fido_log_debug("%s: %ls -> %s", __func__, webauthn_strerr(hr),
+		    fido_strerr(r));
 	}
 
 	return r;
@@ -627,12 +711,11 @@ winhello_make_cred(HWND w, struct winhello_cred *ctx)
 	HRESULT hr;
 	int r = FIDO_OK;
 
-	hr = WebAuthNAuthenticatorMakeCredential(w, &ctx->rp, &ctx->user,
-	    &ctx->cose, &ctx->cd, &ctx->opt, &ctx->att);
-	if (hr != S_OK) {
+	if ((hr = webauthn_make_cred(w, &ctx->rp, &ctx->user, &ctx->cose,
+	    &ctx->cd, &ctx->opt, &ctx->att)) != S_OK) {
 		r = to_fido(hr);
-		fido_log_debug("%s: %ls -> %s", __func__,
-		    WebAuthNGetErrorName(hr), fido_strerr(r));
+		fido_log_debug("%s: %ls -> %s", __func__, webauthn_strerr(hr),
+		    fido_strerr(r));
 	}
 
 	return r;
@@ -644,7 +727,7 @@ winhello_assert_free(struct winhello_assert *ctx)
 	if (ctx == NULL)
 		return;
 	if (ctx->assert != NULL)
-		WebAuthNFreeAssertion(ctx->assert);
+		webauthn_free_assert(ctx->assert);
 
 	free(ctx->rp_id);
 	free(ctx->opt.CredentialList.pCredentials);
@@ -657,7 +740,7 @@ winhello_cred_free(struct winhello_cred *ctx)
 	if (ctx == NULL)
 		return;
 	if (ctx->att != NULL)
-		WebAuthNFreeCredentialAttestation(ctx->att);
+		webauthn_free_attest(ctx->att);
 
 	free(ctx->rp_id);
 	free(ctx->rp_name);
@@ -714,9 +797,12 @@ fido_winhello_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 int
 fido_winhello_open(fido_dev_t *dev)
 {
+	if (!webauthn_loaded && webauthn_load() < 0) {
+		fido_log_debug("%s: webauthn_load", __func__);
+		return FIDO_ERR_INTERNAL;
+	}
 	if (dev->flags != 0)
 		return FIDO_ERR_INVALID_ARGUMENT;
-
 	dev->attr.flags = FIDO_CAP_CBOR | FIDO_CAP_WINK;
 	dev->flags = FIDO_DEV_WINHELLO | FIDO_DEV_CRED_PROT | FIDO_DEV_PIN_SET;
 

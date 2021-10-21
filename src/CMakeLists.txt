@@ -93,9 +93,6 @@ list(APPEND COMPAT_SOURCES
 
 if(WIN32)
 	list(APPEND BASE_LIBRARIES wsock32 ws2_32 bcrypt setupapi hid)
-	if(USE_WINHELLO)
-		list(APPEND BASE_LIBRARIES webauthn)
-	endif()
 elseif(APPLE)
 	list(APPEND BASE_LIBRARIES "-framework CoreFoundation" "-framework IOKit")
 endif()
