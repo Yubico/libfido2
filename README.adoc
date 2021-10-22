@@ -23,7 +23,7 @@ file for the full license text.
 
 *libfido2* is known to work on Linux, macOS, Windows, OpenBSD, and FreeBSD.
 
-On Linux, *experimental* NFC support is available in git HEAD.
+NFC support is available on Linux and Windows.
 
 === Documentation
 
