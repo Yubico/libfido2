@@ -587,7 +587,8 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
 		fido_log_debug("%s: pack_cred_ext", __func__);
 		return FIDO_ERR_UNSUPPORTED_EXTENSION;
 	}
-	if (set_uv(&opt->dwUserVerificationRequirement, cred->uv, pin) < 0) {
+	if (set_uv(&opt->dwUserVerificationRequirement, (cred->ext.mask &
+	    FIDO_EXT_CRED_PROTECT) ? FIDO_OPT_TRUE : cred->uv, pin) < 0) {
 		fido_log_debug("%s: set_uv", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
