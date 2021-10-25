@@ -3,18 +3,27 @@
 # license that can be found in the LICENSE file.
 
 $ErrorActionPreference = "Stop"
-
-./build.ps1 -Arch x64 -Type dynamic -Config Release
-./build.ps1 -Arch x64 -Type static -Config Release
-./build.ps1 -Arch Win32 -Type dynamic -Config Release
-./build.ps1 -Arch Win32 -Type static -Config Release
+$Architectures = @('x64', 'Win32', 'ARM64', 'ARM')
+$InstallPrefixes =  @('Win64', 'Win32', 'ARM64', 'ARM')
+$Types = @('dynamic', 'static')
+$Config = 'Release'
+$LibCrypto = '46'
+$SDK = '142'
 
 . "$PSScriptRoot\const.ps1"
 
-New-Item -Type Directory ${OUTPUT}\pkg\Win64\Release\v142\dynamic
-New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v142\dynamic
-New-Item -Type Directory ${OUTPUT}\pkg\Win64\Release\v142\static
-New-Item -Type Directory ${OUTPUT}\pkg\Win32\Release\v142\static
+foreach ($Arch in $Architectures) {
+	foreach ($Type in $Types) {
+		./build.ps1 -Arch ${Arch} -Type ${Type} -Config ${Config}
+	}
+}
+
+foreach ($InstallPrefix in $InstallPrefixes) {
+	foreach ($Type in $Types) {
+		New-Item -Type Directory `
+		    "${OUTPUT}/pkg/${InstallPrefix}/${Config}/v${SDK}/${Type}"
+	}
+}
 
 Function Package-Headers() {
 	Copy-Item "${OUTPUT}\x64\dynamic\include" -Destination "${OUTPUT}\pkg" `
@@ -26,8 +35,8 @@ Function Package-Dynamic(${SRC}, ${DEST}) {
 	Copy-Item "${SRC}\lib\cbor.lib" "${DEST}"
 	Copy-Item "${SRC}\bin\zlib1.dll" "${DEST}"
 	Copy-Item "${SRC}\lib\zlib.lib" "${DEST}"
-	Copy-Item "${SRC}\bin\crypto-46.dll" "${DEST}"
-	Copy-Item "${SRC}\lib\crypto-46.lib" "${DEST}"
+	Copy-Item "${SRC}\bin\crypto-${LibCrypto}.dll" "${DEST}"
+	Copy-Item "${SRC}\lib\crypto-${LibCrypto}.lib" "${DEST}"
 	Copy-Item "${SRC}\bin\fido2.dll" "${DEST}"
 	Copy-Item "${SRC}\lib\fido2.lib" "${DEST}"
 }
@@ -35,38 +44,41 @@ Function Package-Dynamic(${SRC}, ${DEST}) {
 Function Package-Static(${SRC}, ${DEST}) {
 	Copy-Item "${SRC}/lib/cbor.lib" "${DEST}"
 	Copy-Item "${SRC}/lib/zlib.lib" "${DEST}"
-	Copy-Item "${SRC}/lib/crypto-46.lib" "${DEST}"
+	Copy-Item "${SRC}/lib/crypto-${LibCrypto}.lib" "${DEST}"
 	Copy-Item "${SRC}/lib/fido2_static.lib" "${DEST}/fido2.lib"
 }
 
 Function Package-PDBs(${SRC}, ${DEST}) {
-	Copy-Item "${SRC}\${LIBRESSL}\crypto\crypto.dir\Release\vc142.pdb" `
-	    "${DEST}\crypto-46.pdb"
-	Copy-Item "${SRC}\${LIBCBOR}\src\cbor.dir\Release\vc142.pdb" `
+	Copy-Item "${SRC}\${LIBRESSL}\crypto\crypto.dir\${Config}\vc${SDK}.pdb" `
+	    "${DEST}\crypto-${LibCrypto}.pdb"
+	Copy-Item "${SRC}\${LIBCBOR}\src\cbor.dir\${Config}\vc${SDK}.pdb" `
 	    "${DEST}\cbor.pdb"
-	Copy-Item "${SRC}\${ZLIB}\zlib.dir\Release\vc142.pdb" `
+	Copy-Item "${SRC}\${ZLIB}\zlib.dir\${Config}\vc${SDK}.pdb" `
 	    "${DEST}\zlib.pdb"
-	Copy-Item "${SRC}\src\fido2_shared.dir\Release\vc142.pdb" `
+	Copy-Item "${SRC}\src\fido2_shared.dir\${Config}\vc${SDK}.pdb" `
 	    "${DEST}\fido2.pdb"
 }
 
 Function Package-Tools(${SRC}, ${DEST}) {
-	Copy-Item "${SRC}\tools\Release\fido2-assert.exe" `
+	Copy-Item "${SRC}\tools\${Config}\fido2-assert.exe" `
 	    "${DEST}\fido2-assert.exe"
-	Copy-Item "${SRC}\tools\Release\fido2-cred.exe" "${DEST}\fido2-cred.exe"
-	Copy-Item "${SRC}\tools\Release\fido2-token.exe" `
+	Copy-Item "${SRC}\tools\${Config}\fido2-cred.exe" `
+	    "${DEST}\fido2-cred.exe"
+	Copy-Item "${SRC}\tools\${Config}\fido2-token.exe" `
 	    "${DEST}\fido2-token.exe"
 }
 
 Package-Headers
 
-Package-Dynamic ${OUTPUT}\x64\dynamic ${OUTPUT}\pkg\Win64\Release\v142\dynamic
-Package-PDBs ${BUILD}\x64\dynamic ${OUTPUT}\pkg\Win64\Release\v142\dynamic
-Package-Tools ${BUILD}\x64\dynamic ${OUTPUT}\pkg\Win64\Release\v142\dynamic
-
-Package-Dynamic ${OUTPUT}\Win32\dynamic ${OUTPUT}\pkg\Win32\Release\v142\dynamic
-Package-PDBs ${BUILD}\Win32\dynamic ${OUTPUT}\pkg\Win32\Release\v142\dynamic
-Package-Tools ${BUILD}\Win32\dynamic ${OUTPUT}\pkg\Win32\Release\v142\dynamic
-
-Package-Static ${OUTPUT}\x64\static ${OUTPUT}\pkg\Win64\Release\v142\static
-Package-Static ${OUTPUT}\Win32\static ${OUTPUT}\pkg\Win32\Release\v142\static
+for ($i = 0; $i -lt $Architectures.Length; $i++) {
+	$Arch = $Architectures[$i]
+	$InstallPrefix = $InstallPrefixes[$i]
+	Package-Dynamic "${OUTPUT}\${Arch}\dynamic" `
+	    "${OUTPUT}\pkg\${InstallPrefix}\${Config}\v${SDK}\dynamic"
+	Package-PDBs "${BUILD}\${Arch}\dynamic" `
+	    "${OUTPUT}\pkg\${InstallPrefix}\${Config}\v${SDK}\dynamic"
+	Package-Tools "${BUILD}\${Arch}\dynamic" `
+	    "${OUTPUT}\pkg\${InstallPrefix}\${Config}\v${SDK}\dynamic"
+	Package-Static "${OUTPUT}\${Arch}\static" `
+	    "${OUTPUT}\pkg\${InstallPrefix}\${Config}\v${SDK}\static"
+}
