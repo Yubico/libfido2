@@ -23,6 +23,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: build
       run: |
-        .\windows\build.ps1 -WinSDK '10.0.19041.0' -Fido2Flags '/analyze' `
+        .\windows\build.ps1 -Fido2Flags '/analyze' `
           -Arch ${{ matrix.arch }} -Type ${{ matrix.type }} `
           -Config ${{ matrix.config }}
