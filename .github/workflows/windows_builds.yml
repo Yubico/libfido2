@@ -16,13 +16,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [ windows-2022 ]
-        arch: [ x64, Win32 ]
+        arch: [ x64, Win32, ARM64, ARM ]
         type: [ dynamic, static ]
-        config: [ "Debug", "Release" ]
+        config: [ "Release" ]
     steps:
     - uses: actions/checkout@v2
     - name: build
       run: |
-        .\windows\build.ps1 -Fido2Flags '/analyze' `
-          -Arch ${{ matrix.arch }} -Type ${{ matrix.type }} `
-          -Config ${{ matrix.config }}
+        .\windows\build.ps1 -Fido2Flags '/analyze' -Arch ${{ matrix.arch }} `
+          -Type ${{ matrix.type }} -Config ${{ matrix.config }}
