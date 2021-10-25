@@ -105,29 +105,27 @@ New-Item -Type Directory "${OUTPUT}\${Arch}\${Type}" -force
 # Fetch and verify dependencies.
 Push-Location ${BUILD}
 try {
-	if (Test-Path .\${LIBRESSL}) {
-		Remove-Item .\${LIBRESSL} -Recurse -ErrorAction Stop
-	}
-	if (-Not (Test-Path .\${LIBRESSL}.tar.gz -PathType leaf)) {
-		Invoke-WebRequest ${LIBRESSL_URL}/${LIBRESSL}.tar.gz `
-		    -OutFile .\${LIBRESSL}.tar.gz
-	}
-	if (-Not (Test-Path .\${LIBRESSL}.tar.gz.asc -PathType leaf)) {
-		Invoke-WebRequest ${LIBRESSL_URL}/${LIBRESSL}.tar.gz.asc `
-		    -OutFile .\${LIBRESSL}.tar.gz.asc
-	}
+	if (-Not (Test-Path .\${LIBRESSL})) {
+		if (-Not (Test-Path .\${LIBRESSL}.tar.gz -PathType leaf)) {
+			Invoke-WebRequest ${LIBRESSL_URL}/${LIBRESSL}.tar.gz `
+			    -OutFile .\${LIBRESSL}.tar.gz
+		}
+		if (-Not (Test-Path .\${LIBRESSL}.tar.gz.asc -PathType leaf)) {
+			Invoke-WebRequest ${LIBRESSL_URL}/${LIBRESSL}.tar.gz.asc `
+			    -OutFile .\${LIBRESSL}.tar.gz.asc
+		}
 
-	Copy-Item "$PSScriptRoot\libressl.gpg" -Destination "${BUILD}"
-	& $GPG --list-keys
-	& $GPG --quiet --no-default-keyring --keyring ./libressl.gpg `
-	    --verify .\${LIBRESSL}.tar.gz.asc .\${LIBRESSL}.tar.gz
-	if ($LastExitCode -ne 0) {
-		throw "GPG signature verification failed"
+		Copy-Item "$PSScriptRoot\libressl.gpg" -Destination "${BUILD}"
+		& $GPG --list-keys
+		& $GPG --quiet --no-default-keyring --keyring ./libressl.gpg `
+		    --verify .\${LIBRESSL}.tar.gz.asc .\${LIBRESSL}.tar.gz
+		if ($LastExitCode -ne 0) {
+			throw "GPG signature verification failed"
+		}
+		& $SevenZ e .\${LIBRESSL}.tar.gz
+		& $SevenZ x .\${LIBRESSL}.tar
+		Remove-Item -Force .\${LIBRESSL}.tar
 	}
-	& $SevenZ e .\${LIBRESSL}.tar.gz
-	& $SevenZ x .\${LIBRESSL}.tar
-	Remove-Item -Force .\${LIBRESSL}.tar
-
 	if (-Not (Test-Path .\${LIBCBOR})) {
 		GitClone "${LIBCBOR_GIT}" "${LIBCBOR_BRANCH}" ".\${LIBCBOR}"
 	}
