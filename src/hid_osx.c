@@ -11,10 +11,15 @@
 #include <signal.h>
 #include <unistd.h>
 
+#include <Availability.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/hid/IOHIDKeys.h>
 #include <IOKit/hid/IOHIDManager.h>
+
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < 120000
+#define kIOMainPortDefault kIOMasterPortDefault
+#endif
 
 #include "fido.h"
 
@@ -393,7 +398,7 @@ fido_hid_open(const char *path)
 		goto fail;
 	}
 
-	if ((entry = IORegistryEntryFromPath(kIOMasterPortDefault,
+	if ((entry = IORegistryEntryFromPath(kIOMainPortDefault,
 	    path)) == MACH_PORT_NULL) {
 		fido_log_debug("%s: IORegistryEntryFromPath", __func__);
 		goto fail;
