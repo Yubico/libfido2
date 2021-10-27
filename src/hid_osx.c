@@ -17,11 +17,11 @@
 #include <IOKit/hid/IOHIDKeys.h>
 #include <IOKit/hid/IOHIDManager.h>
 
+#include "fido.h"
+
 #if __MAC_OS_X_VERSION_MIN_REQUIRED < 120000
 #define kIOMainPortDefault kIOMasterPortDefault
 #endif
-
-#include "fido.h"
 
 struct hid_osx {
 	IOHIDDeviceRef	ref;
