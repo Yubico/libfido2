@@ -1,4 +1,4 @@
-* Version 1.9.0 (unreleased)
+* Version 1.9.0 (2021-10-27)
  ** Enabled NFC support on Linux.
  ** Added OpenSSL 3.0 compatibility.
  ** Removed OpenSSL 1.0 compatibility.
