@@ -73,7 +73,7 @@ webauthn_load(void)
 	if ((webauthn_get_api_version = (void *)GetProcAddress(webauthn_handle,
 	    "WebAuthNGetApiVersionNumber")) == NULL) {
 		fido_log_debug("%s: WebAuthNGetApiVersionNumber", __func__);
-		goto fail;
+		/* WebAuthNGetApiVersionNumber might not exist */
 	}
 	if ((webauthn_strerr = (void *)GetProcAddress(webauthn_handle,
 	    "WebAuthNGetErrorName")) == NULL) {
@@ -675,13 +675,14 @@ fail:
 static int
 winhello_manifest(void)
 {
-	DWORD n;
+	DWORD n = 1;
 
 	if (!webauthn_loaded && webauthn_load() < 0) {
 		fido_log_debug("%s: webauthn_load", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
-	if ((n = webauthn_get_api_version()) < 1) {
+	if (webauthn_get_api_version != NULL &&
+	    (n = webauthn_get_api_version()) < 1) {
 		fido_log_debug("%s: unsupported api %u", __func__, n);
 		return FIDO_ERR_INTERNAL;
 	}
