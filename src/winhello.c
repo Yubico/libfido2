@@ -249,7 +249,7 @@ pack_credlist(WEBAUTHN_CREDENTIALS *out, const fido_blob_array_t *in)
 }
 
 static int
-set_uv(DWORD *out, fido_opt_t uv, const char *pin)
+set_cred_uv(DWORD *out, fido_opt_t uv, const char *pin)
 {
 	if (pin) {
 		*out = WEBAUTHN_USER_VERIFICATION_REQUIREMENT_REQUIRED;
@@ -258,7 +258,28 @@ set_uv(DWORD *out, fido_opt_t uv, const char *pin)
 
 	switch (uv) {
 	case FIDO_OPT_OMIT:
-		*out = WEBAUTHN_USER_VERIFICATION_REQUIREMENT_ANY;
+	case FIDO_OPT_FALSE:
+		*out = WEBAUTHN_USER_VERIFICATION_REQUIREMENT_DISCOURAGED;
+		break;
+	case FIDO_OPT_TRUE:
+		*out = WEBAUTHN_USER_VERIFICATION_REQUIREMENT_REQUIRED;
+		break;
+	}
+
+	return 0;
+}
+
+static int
+set_assert_uv(DWORD *out, fido_opt_t uv, const char *pin)
+{
+	if (pin) {
+		*out = WEBAUTHN_USER_VERIFICATION_REQUIREMENT_REQUIRED;
+		return 0;
+	}
+
+	switch (uv) {
+	case FIDO_OPT_OMIT:
+		*out = WEBAUTHN_USER_VERIFICATION_REQUIREMENT_PREFERRED;
 		break;
 	case FIDO_OPT_FALSE:
 		*out = WEBAUTHN_USER_VERIFICATION_REQUIREMENT_DISCOURAGED;
@@ -508,8 +529,9 @@ translate_fido_assert(struct winhello_assert *ctx, const fido_assert_t *assert,
 		fido_log_debug("%s: pack_credlist", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
-	if (set_uv(&opt->dwUserVerificationRequirement, assert->uv, pin) < 0) {
-		fido_log_debug("%s: set_uv", __func__);
+	if (set_assert_uv(&opt->dwUserVerificationRequirement, assert->uv,
+	    pin) < 0) {
+		fido_log_debug("%s: set_assert_uv", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
 
@@ -587,9 +609,9 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
 		fido_log_debug("%s: pack_cred_ext", __func__);
 		return FIDO_ERR_UNSUPPORTED_EXTENSION;
 	}
-	if (set_uv(&opt->dwUserVerificationRequirement, (cred->ext.mask &
+	if (set_cred_uv(&opt->dwUserVerificationRequirement, (cred->ext.mask &
 	    FIDO_EXT_CRED_PROTECT) ? FIDO_OPT_TRUE : cred->uv, pin) < 0) {
-		fido_log_debug("%s: set_uv", __func__);
+		fido_log_debug("%s: set_cred_uv", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
 	if (cred->rk == FIDO_OPT_TRUE) {
