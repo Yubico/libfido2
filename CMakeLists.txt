@@ -9,7 +9,7 @@ project(libfido2 C)
 cmake_minimum_required(VERSION 3.0)
 # Set PIE flags for POSITION_INDEPENDENT_CODE targets, added in CMake 3.14.
 if(POLICY CMP0083)
-  cmake_policy(SET CMP0083 NEW)
+	cmake_policy(SET CMP0083 NEW)
 endif()
 
 include(CheckCCompilerFlag)
@@ -21,7 +21,7 @@ include(CheckTypeSize)
 include(GNUInstallDirs)
 include(CheckPIESupported OPTIONAL RESULT_VARIABLE CHECK_PIE_SUPPORTED)
 if(CHECK_PIE_SUPPORTED)
-  check_pie_supported(LANGUAGES C)
+	check_pie_supported(LANGUAGES C)
 endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -307,10 +307,10 @@ elseif(NOT MSVC)
 	# clang/gcc + gnu ld
 	if(FUZZ)
 		string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-                    " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/fuzz/export.gnu")
+		    " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/fuzz/export.gnu")
 	else()
 		string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-                    " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/src/export.gnu")
+		    " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/src/export.gnu")
 	endif()
 	if(NOT WIN32)
 		string(CONCAT CMAKE_SHARED_LINKER_FLAGS
