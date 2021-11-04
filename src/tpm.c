@@ -21,6 +21,10 @@
 #define TPM_ALG_RSA	0x0001
 #define TPM_ALG_SHA256	0x000b
 #define TPM_ALG_NULL	0x0010
+#define TPM_ALG_ECC	0x0023
+
+/* Part 2, 6.4: TPM_ECC_CURVE */
+#define TPM_ECC_P256	0x0003
 
 /* Part 2, 6.9: TPM_ST_ATTEST_CERTIFY */
 #define TPM_ST_CERTIFY	0x8017
@@ -84,6 +88,20 @@ struct tpm_rs256_key {
 	uint8_t  body[256];
 })
 
+/* Part 2, 11.2.5.1: TPM2B_ECC_PARAMETER */
+PACKED_TYPE(tpm_es256_coord_t,
+struct tpm_es256_coord {
+	uint16_t size; /* sizeof(body) */
+	uint8_t  body[32];
+})
+
+/* Part 2, 11.2.5.2: TPMS_ECC_POINT */
+PACKED_TYPE(tpm_es256_point_t,
+struct tpm_es256_point {
+	tpm_es256_coord_t x;
+	tpm_es256_coord_t y;
+})
+
 /* Part 2, 12.2.3.5: TPMS_RSA_PARMS */
 PACKED_TYPE(tpm_rs256_param_t,
 struct tpm_rs256_param {
@@ -91,6 +109,15 @@ struct tpm_rs256_param {
 	uint16_t scheme;    /* TPM_ALG_NULL */
 	uint16_t keybits;   /* 2048 */
 	uint32_t exponent;  /* zero (meaning 2^16 + 1) */
+})
+
+/* Part 2, 12.2.3.6: TPMS_ECC_PARMS */
+PACKED_TYPE(tpm_es256_param_t,
+struct tpm_es256_param {
+	uint16_t symmetric; /* TPM_ALG_NULL */
+	uint16_t scheme;    /* TPM_ALG_NULL */
+	uint16_t curve_id;  /* TPM_ECC_P256 */
+	uint16_t kdf;       /* TPM_ALG_NULL */
 })
 
 /* Part 2, 12.2.4: TPMT_PUBLIC */
@@ -102,6 +129,17 @@ struct tpm_rs256_pubarea {
 	tpm_sha256_digest_t policy; /* must be present? */
 	tpm_rs256_param_t   param;
 	tpm_rs256_key_t     key;
+})
+
+/* Part 2, 12.2.4: TPMT_PUBLIC */
+PACKED_TYPE(tpm_es256_pubarea_t,
+struct tpm_es256_pubarea {
+	uint16_t            alg;    /* TPM_ALG_ECC */
+	uint16_t            hash;   /* TPM_ALG_SHA256 */
+	uint32_t            attr;
+	tpm_sha256_digest_t policy; /* must be present? */
+	tpm_es256_param_t   param;
+	tpm_es256_point_t   point;
 })
 
 static int
@@ -158,6 +196,21 @@ bswap_rs256_pubarea(tpm_rs256_pubarea_t *x)
 }
 
 static void
+bswap_es256_pubarea(tpm_es256_pubarea_t *x)
+{
+	x->alg = htobe16(x->alg);
+	x->hash = htobe16(x->hash);
+	x->attr = htobe32(x->attr);
+	x->policy.size = htobe16(x->policy.size);
+	x->param.symmetric = htobe16(x->param.symmetric);
+	x->param.scheme = htobe16(x->param.scheme);
+	x->param.curve_id = htobe16(x->param.curve_id);
+	x->param.kdf = htobe16(x->param.kdf);
+	x->point.x.size = htobe16(x->point.x.size);
+	x->point.y.size = htobe16(x->point.y.size);
+}
+
+static void
 bswap_sha1_certinfo(tpm_sha1_attest_t *x)
 {
 	x->magic = htobe32(x->magic);
@@ -196,6 +249,43 @@ check_rs256_pubarea(const fido_blob_t *buf, const rs256_pk_t *pk)
 	expected.key.size = sizeof(expected.key.body);
 	memcpy(&expected.key.body, &pk->n, sizeof(expected.key.body));
 	bswap_rs256_pubarea(&expected);
+
+	ok = timingsafe_bcmp(&expected, actual, sizeof(expected));
+	explicit_bzero(&expected, sizeof(expected));
+
+	return ok != 0 ? -1 : 0;
+}
+
+static int
+check_es256_pubarea(const fido_blob_t *buf, const es256_pk_t *pk)
+{
+	const tpm_es256_pubarea_t	*actual;
+	tpm_es256_pubarea_t		 expected;
+	int				 ok;
+
+	if (buf->len != sizeof(*actual)) {
+		fido_log_debug("%s: buf->len=%zu", __func__, buf->len);
+		return -1;
+	}
+	actual = (const void *)buf->ptr;
+
+	memset(&expected, 0, sizeof(expected));
+	expected.alg = TPM_ALG_ECC;
+	expected.hash = TPM_ALG_SHA256;
+	expected.attr = be32toh(actual->attr);
+	expected.attr &= ~(TPMA_RESERVED|TPMA_CLEAR);
+	expected.attr |= (TPMA_FIXED|TPMA_FIXED_P|TPMA_SENSITIVE|TPMA_SIGN);
+	expected.policy = actual->policy;
+	expected.policy.size = sizeof(expected.policy.body);
+	expected.param.symmetric = TPM_ALG_NULL;
+	expected.param.scheme = TPM_ALG_NULL; /* TCG Alg. Registry, 5.2.4 */
+	expected.param.curve_id = TPM_ECC_P256;
+	expected.param.kdf = TPM_ALG_NULL;
+	expected.point.x.size = sizeof(expected.point.x.body);
+	expected.point.y.size = sizeof(expected.point.y.body);
+	memcpy(&expected.point.x.body, &pk->x, sizeof(expected.point.x.body));
+	memcpy(&expected.point.y.body, &pk->y, sizeof(expected.point.y.body));
+	bswap_es256_pubarea(&expected);
 
 	ok = timingsafe_bcmp(&expected, actual, sizeof(expected));
 	explicit_bzero(&expected, sizeof(expected));
@@ -258,14 +348,28 @@ fido_get_signed_hash_tpm(fido_blob_t *dgst, const fido_blob_t *clientdata_hash,
 	const fido_blob_t *pubarea = &attstmt->pubarea;
 	const fido_blob_t *certinfo = &attstmt->certinfo;
 
-	if (attstmt->alg != COSE_RS1 || attcred->type != COSE_RS256) {
-		fido_log_debug("%s: unsupported alg %d, type %d", __func__,
-		    attstmt->alg, attcred->type);
+	if (attstmt->alg != COSE_RS1) {
+		fido_log_debug("%s: unsupported alg %d", __func__,
+		    attstmt->alg);
 		return -1;
 	}
 
-	if (check_rs256_pubarea(pubarea, &attcred->pubkey.rs256) < 0) {
-		fido_log_debug("%s: check_rs256_pubarea", __func__);
+	switch (attcred->type) {
+	case COSE_ES256:
+		if (check_es256_pubarea(pubarea, &attcred->pubkey.es256) < 0) {
+			fido_log_debug("%s: check_es256_pubarea", __func__);
+			return -1;
+		}
+		break;
+	case COSE_RS256:
+		if (check_rs256_pubarea(pubarea, &attcred->pubkey.rs256) < 0) {
+			fido_log_debug("%s: check_rs256_pubarea", __func__);
+			return -1;
+		}
+		break;
+	default:
+		fido_log_debug("%s: unsupported type %d", __func__,
+		    attcred->type);
 		return -1;
 	}
 
