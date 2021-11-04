@@ -102,7 +102,7 @@ static const unsigned char authdata_unsorted_keys[198] = {
 	0xe1, 0x30, 0xfc, 0x2b, 0x1e, 0xd2,
 };
 
-const unsigned char authdata_tpm[362] = {
+const unsigned char authdata_tpm_rs256[362] = {
 	0x59, 0x01, 0x67, 0x49, 0x96, 0x0d, 0xe5, 0x88,
 	0x0e, 0x8c, 0x68, 0x74, 0x34, 0x17, 0x0f, 0x64,
 	0x76, 0x60, 0x5b, 0x8f, 0xe4, 0xae, 0xb9, 0xa2,
@@ -270,7 +270,7 @@ const unsigned char pubkey[64] = {
 	0xfe, 0x5d, 0xe1, 0x30, 0xfc, 0x2b, 0x1e, 0xd2,
 };
 
-const unsigned char pubkey_tpm[259] = {
+const unsigned char pubkey_tpm_rs256[259] = {
 	0xc5, 0xb6, 0x9c, 0x06, 0x1d, 0xcf, 0xb9, 0xf2,
 	0x5e, 0x99, 0x7d, 0x6d, 0x73, 0xd8, 0x36, 0xc1,
 	0x4a, 0x90, 0x05, 0x4d, 0x82, 0x57, 0xc1, 0xb6,
@@ -317,14 +317,14 @@ const unsigned char id[64] = {
 	0x34, 0xe3, 0x83, 0xe7, 0xd1, 0xbd, 0x9f, 0x25,
 };
 
-const unsigned char id_tpm[32] = {
+const unsigned char id_tpm_rs256[32] = {
 	0x89, 0x99, 0x6d, 0x5a, 0x00, 0x29, 0xe5, 0x3e,
 	0x6a, 0x1c, 0x72, 0x6d, 0x71, 0x4a, 0x4f, 0x03,
 	0x9b, 0x68, 0x17, 0xdb, 0x29, 0x1a, 0x6b, 0x02,
 	0x6c, 0x26, 0xf9, 0xbd, 0xc3, 0x0e, 0x38, 0x1a
 };
 
-const unsigned char attstmt_tpm[4034] = {
+const unsigned char attstmt_tpm_rs256[4034] = {
 	0xa6, 0x63, 0x61, 0x6c, 0x67, 0x39, 0xff, 0xfe,
 	0x63, 0x73, 0x69, 0x67, 0x59, 0x01, 0x00, 0x1c,
 	0x09, 0x0d, 0x35, 0x97, 0x22, 0xfc, 0xfe, 0xc0,
@@ -1563,7 +1563,7 @@ fmt_none(void)
 }
 
 static void
-valid_tpm_cred(void)
+valid_tpm_rs256_cred(void)
 {
 	fido_cred_t *c;
 
@@ -1571,17 +1571,17 @@ valid_tpm_cred(void)
 	assert(fido_cred_set_type(c, COSE_RS256) == FIDO_OK);
 	assert(fido_cred_set_clientdata(c, cdh, sizeof(cdh)) == FIDO_OK);
 	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
-	assert(fido_cred_set_authdata(c, authdata_tpm, sizeof(authdata_tpm)) == FIDO_OK);
+	assert(fido_cred_set_authdata(c, authdata_tpm_rs256, sizeof(authdata_tpm_rs256)) == FIDO_OK);
 	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
 	assert(fido_cred_set_uv(c, FIDO_OPT_TRUE) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "tpm") == FIDO_OK);
-	assert(fido_cred_set_attstmt(c, attstmt_tpm, sizeof(attstmt_tpm)) == FIDO_OK);
+	assert(fido_cred_set_attstmt(c, attstmt_tpm_rs256, sizeof(attstmt_tpm_rs256)) == FIDO_OK);
 	assert(fido_cred_verify(c) == FIDO_OK);
 	assert(fido_cred_prot(c) == 0);
-	assert(fido_cred_pubkey_len(c) == sizeof(pubkey_tpm));
-	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey_tpm, sizeof(pubkey_tpm)) == 0);
-	assert(fido_cred_id_len(c) == sizeof(id_tpm));
-	assert(memcmp(fido_cred_id_ptr(c), id_tpm, sizeof(id_tpm)) == 0);
+	assert(fido_cred_pubkey_len(c) == sizeof(pubkey_tpm_rs256));
+	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey_tpm_rs256, sizeof(pubkey_tpm_rs256)) == 0);
+	assert(fido_cred_id_len(c) == sizeof(id_tpm_rs256));
+	assert(memcmp(fido_cred_id_ptr(c), id_tpm_rs256, sizeof(id_tpm_rs256)) == 0);
 	assert(fido_cred_aaguid_len(c) == sizeof(aaguid_tpm));
 	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid_tpm, sizeof(aaguid_tpm)) == 0);
 	free_cred(c);
@@ -1616,7 +1616,7 @@ main(void)
 	wrong_credprot();
 	raw_authdata();
 	fmt_none();
-	valid_tpm_cred();
+	valid_tpm_rs256_cred();
 
 	exit(0);
 }
