@@ -645,6 +645,10 @@ decode_attobj(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			goto fail;
 		}
 	} else if (!strcmp(name, "authData")) {
+		if (fido_blob_decode(val, &cred->authdata_raw) < 0) {
+			fido_log_debug("%s: fido_blob_decode", __func__);
+			goto fail;
+		}
 		if (cbor_decode_cred_authdata(val, cred->type,
 		    &cred->authdata_cbor, &cred->authdata, &cred->attcred,
 		    &cred->authdata_ext) < 0) {
