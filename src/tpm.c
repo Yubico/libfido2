@@ -73,20 +73,20 @@ struct tpm_sha1_attest {
 	tpm_sha1_data_t   data;      /* signed sha1 */
 	tpm_clock_info_t  clock;
 	uint64_t          fwversion; /* obfuscated by tpm */
-	tpm_sha256_name_t name;      /* sha256 of tpm_rsa2048_pubarea_t */
+	tpm_sha256_name_t name;      /* sha256 of tpm_rs256_pubarea_t */
 	tpm_sha256_name_t qual_name; /* full tpm path of attested key */
 })
 
 /* Part 2, 11.2.4.5: TPM2B_PUBLIC_KEY_RSA */
-PACKED_TYPE(tpm_rsa2048_key_t,
-struct tpm_rsa2048_key {
+PACKED_TYPE(tpm_rs256_key_t,
+struct tpm_rs256_key {
 	uint16_t size; /* sizeof(body) */
 	uint8_t  body[256];
 })
 
 /* Part 2, 12.2.3.5: TPMS_RSA_PARMS */
-PACKED_TYPE(tpm_rsa2048_param_t,
-struct tpm_rsa2048_param {
+PACKED_TYPE(tpm_rs256_param_t,
+struct tpm_rs256_param {
 	uint16_t symmetric; /* TPM_ALG_NULL */
 	uint16_t scheme;    /* TPM_ALG_NULL */
 	uint16_t keybits;   /* 2048 */
@@ -94,14 +94,14 @@ struct tpm_rsa2048_param {
 })
 
 /* Part 2, 12.2.4: TPMT_PUBLIC */
-PACKED_TYPE(tpm_rsa2048_pubarea_t,
-struct tpm_rsa2048_pubarea {
+PACKED_TYPE(tpm_rs256_pubarea_t,
+struct tpm_rs256_pubarea {
 	uint16_t            alg;    /* TPM_ALG_RSA */
 	uint16_t            hash;   /* TPM_ALG_SHA256 */
 	uint32_t            attr;
 	tpm_sha256_digest_t policy; /* must be present? */
-	tpm_rsa2048_param_t param;
-	tpm_rsa2048_key_t   key;
+	tpm_rs256_param_t   param;
+	tpm_rs256_key_t     key;
 })
 
 static int
@@ -145,7 +145,7 @@ get_signed_name(tpm_sha256_name_t *name, const fido_blob_t *pubarea)
 }
 
 static void
-bswap_rsa2048_pubarea(tpm_rsa2048_pubarea_t *x)
+bswap_rs256_pubarea(tpm_rs256_pubarea_t *x)
 {
 	x->alg = htobe16(x->alg);
 	x->hash = htobe16(x->hash);
@@ -169,10 +169,10 @@ bswap_sha1_certinfo(tpm_sha1_attest_t *x)
 }
 
 static int
-check_rsa2048_pubarea(const fido_blob_t *buf, const rs256_pk_t *pk)
+check_rs256_pubarea(const fido_blob_t *buf, const rs256_pk_t *pk)
 {
-	const tpm_rsa2048_pubarea_t	*actual;
-	tpm_rsa2048_pubarea_t		 expected;
+	const tpm_rs256_pubarea_t	*actual;
+	tpm_rs256_pubarea_t		 expected;
 	int				 ok;
 
 	if (buf->len != sizeof(*actual)) {
@@ -195,7 +195,7 @@ check_rsa2048_pubarea(const fido_blob_t *buf, const rs256_pk_t *pk)
 	expected.param.exponent = 0; /* meaning 2^16+1 */
 	expected.key.size = sizeof(expected.key.body);
 	memcpy(&expected.key.body, &pk->n, sizeof(expected.key.body));
-	bswap_rsa2048_pubarea(&expected);
+	bswap_rs256_pubarea(&expected);
 
 	ok = timingsafe_bcmp(&expected, actual, sizeof(expected));
 	explicit_bzero(&expected, sizeof(expected));
@@ -264,8 +264,8 @@ fido_get_signed_hash_tpm(fido_blob_t *dgst, const fido_blob_t *clientdata_hash,
 		return -1;
 	}
 
-	if (check_rsa2048_pubarea(pubarea, &attcred->pubkey.rs256) < 0) {
-		fido_log_debug("%s: check_rsa2048_pubarea", __func__);
+	if (check_rs256_pubarea(pubarea, &attcred->pubkey.rs256) < 0) {
+		fido_log_debug("%s: check_rs256_pubarea", __func__);
 		return -1;
 	}
 
