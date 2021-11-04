@@ -31,7 +31,7 @@
 #define TPMA_CLEAR	0x00000004	/* object persists */
 #define TPMA_FIXED_P	0x00000010	/* object has fixed parent */
 #define TPMA_SENSITIVE	0x00000020	/* data originates within tpm */
-#define TPMA_SIGN	0x00020000	/* object may sign */
+#define TPMA_SIGN	0x00040000	/* object may sign */
 
 /* Part 2, 10.4.2: TPM2B_DIGEST */
 PACKED_TYPE(tpm_sha256_digest_t,
