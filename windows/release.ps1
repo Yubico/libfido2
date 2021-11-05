@@ -8,7 +8,7 @@ $InstallPrefixes =  @('Win64', 'Win32', 'ARM64', 'ARM')
 $Types = @('dynamic', 'static')
 $Config = 'Release'
 $LibCrypto = '46'
-$SDK = '142'
+$SDK = '143'
 
 . "$PSScriptRoot\const.ps1"
 
