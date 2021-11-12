@@ -8,7 +8,9 @@
 
 #include <winapifamily.h>
 
+#ifdef _MSC_VER
 #pragma region Desktop Family or OneCore Family
+#endif
 #if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
 
 #ifdef __cplusplus
@@ -834,6 +836,8 @@ WebAuthNGetW3CExceptionDOMError(
 #endif
 
 #endif // WINAPI_FAMILY_PARTITION
+#ifdef _MSC_VER
 #pragma endregion
+#endif
 
 #endif // __WEBAUTHN_H_
