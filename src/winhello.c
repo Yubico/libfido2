@@ -50,23 +50,30 @@ struct winhello_cred {
 	wchar_t						*display_name;
 };
 
-static TLS BOOL		  webauthn_loaded;
-static TLS HMODULE	  webauthn_handle;
-static TLS DWORD	(*webauthn_get_api_version)(void);
-static TLS PCWSTR	(*webauthn_strerr)(HRESULT);
-static TLS HRESULT	(*webauthn_get_assert)(HWND, LPCWSTR,
+typedef DWORD		webauthn_get_api_version_t(void);
+typedef PCWSTR		webauthn_strerr_t(HRESULT);
+typedef HRESULT		webauthn_get_assert_t(HWND, LPCWSTR,
 			    PCWEBAUTHN_CLIENT_DATA,
 			    PCWEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS,
 			    PWEBAUTHN_ASSERTION *);
-static TLS HRESULT	(*webauthn_make_cred)(HWND,
+typedef HRESULT		webauthn_make_cred_t(HWND,
 			    PCWEBAUTHN_RP_ENTITY_INFORMATION,
 			    PCWEBAUTHN_USER_ENTITY_INFORMATION,
 			    PCWEBAUTHN_COSE_CREDENTIAL_PARAMETERS,
 			    PCWEBAUTHN_CLIENT_DATA,
 			    PCWEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS,
 			    PWEBAUTHN_CREDENTIAL_ATTESTATION *);
-static TLS void		(*webauthn_free_assert)(PWEBAUTHN_ASSERTION);
-static TLS void		(*webauthn_free_attest)(PWEBAUTHN_CREDENTIAL_ATTESTATION);
+typedef void		webauthn_free_assert_t(PWEBAUTHN_ASSERTION);
+typedef void		webauthn_free_attest_t(PWEBAUTHN_CREDENTIAL_ATTESTATION);
+
+static TLS BOOL				 webauthn_loaded;
+static TLS HMODULE			 webauthn_handle;
+static TLS webauthn_get_api_version_t	*webauthn_get_api_version;
+static TLS webauthn_strerr_t		*webauthn_strerr;
+static TLS webauthn_get_assert_t	*webauthn_get_assert;
+static TLS webauthn_make_cred_t		*webauthn_make_cred;
+static TLS webauthn_free_assert_t	*webauthn_free_assert;
+static TLS webauthn_free_attest_t	*webauthn_free_attest;
 
 static int
 webauthn_load(void)
@@ -80,34 +87,40 @@ webauthn_load(void)
 		return -1;
 	}
 
-	if ((webauthn_get_api_version = (void *)GetProcAddress(webauthn_handle,
+	if ((webauthn_get_api_version =
+	    (webauthn_get_api_version_t *)GetProcAddress(webauthn_handle,
 	    "WebAuthNGetApiVersionNumber")) == NULL) {
 		fido_log_debug("%s: WebAuthNGetApiVersionNumber", __func__);
 		/* WebAuthNGetApiVersionNumber might not exist */
 	}
-	if ((webauthn_strerr = (void *)GetProcAddress(webauthn_handle,
+	if ((webauthn_strerr =
+	    (webauthn_strerr_t *)GetProcAddress(webauthn_handle,
 	    "WebAuthNGetErrorName")) == NULL) {
 		fido_log_debug("%s: WebAuthNGetErrorName", __func__);
 		goto fail;
 	}
-	if ((webauthn_get_assert = (void *)GetProcAddress(webauthn_handle,
+	if ((webauthn_get_assert =
+	    (webauthn_get_assert_t *)GetProcAddress(webauthn_handle,
 	    "WebAuthNAuthenticatorGetAssertion")) == NULL) {
 		fido_log_debug("%s: WebAuthNAuthenticatorGetAssertion",
 		    __func__);
 		goto fail;
 	}
-	if ((webauthn_make_cred = (void *)GetProcAddress(webauthn_handle,
+	if ((webauthn_make_cred =
+	    (webauthn_make_cred_t *)GetProcAddress(webauthn_handle,
 	    "WebAuthNAuthenticatorMakeCredential")) == NULL) {
 		fido_log_debug("%s: WebAuthNAuthenticatorMakeCredential",
 		    __func__);
 		goto fail;
 	}
-	if ((webauthn_free_assert = (void *)GetProcAddress(webauthn_handle,
+	if ((webauthn_free_assert =
+	    (webauthn_free_assert_t *)GetProcAddress(webauthn_handle,
 	    "WebAuthNFreeAssertion")) == NULL) {
 		fido_log_debug("%s: WebAuthNFreeAssertion", __func__);
 		goto fail;
 	}
-	if ((webauthn_free_attest = (void *)GetProcAddress(webauthn_handle,
+	if ((webauthn_free_attest =
+	    (webauthn_free_attest_t *)GetProcAddress(webauthn_handle,
 	    "WebAuthNFreeCredentialAttestation")) == NULL) {
 		fido_log_debug("%s: WebAuthNFreeCredentialAttestation",
 		    __func__);
