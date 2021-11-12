@@ -163,7 +163,7 @@ to_fido(HRESULT hr)
 	case NTE_NOT_FOUND:
 		return FIDO_ERR_NOT_ALLOWED;
 	default:
-		fido_log_debug("%s: hr=0x%x", __func__, hr);
+		fido_log_debug("%s: hr=0x%lx", __func__, (u_long)hr);
 		return FIDO_ERR_INTERNAL;
 	}
 }
@@ -680,10 +680,10 @@ winhello_manifest(void)
 	}
 	if (webauthn_get_api_version != NULL &&
 	    (n = webauthn_get_api_version()) < 1) {
-		fido_log_debug("%s: unsupported api %u", __func__, n);
+		fido_log_debug("%s: unsupported api %lu", __func__, (u_long)n);
 		return FIDO_ERR_INTERNAL;
 	}
-	fido_log_debug("%s: api version %u", __func__, n);
+	fido_log_debug("%s: api version %lu", __func__, (u_long)n);
 
 	return FIDO_OK;
 }
