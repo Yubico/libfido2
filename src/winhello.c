@@ -353,7 +353,7 @@ pack_cred_ext(WEBAUTHN_EXTENSIONS *out, const fido_cred_ext_t *in)
 		return 0; /* nothing to do */
 	}
 	if (in->mask & ~(FIDO_EXT_HMAC_SECRET | FIDO_EXT_CRED_PROTECT)) {
-		fido_log_debug("%s: mask 0x%x", in->mask);
+		fido_log_debug("%s: mask 0x%x", __func__, in->mask);
 		return -1;
 	}
 	if (in->mask & FIDO_EXT_HMAC_SECRET)
