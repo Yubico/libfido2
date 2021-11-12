@@ -149,35 +149,6 @@ to_utf16(const char *utf8)
 	return utf16;
 }
 
-static char *
-to_utf8(const wchar_t *utf16)
-{
-	int nch;
-	char *utf8;
-
-	if (utf16 == NULL) {
-		fido_log_debug("%s: NULL", __func__);
-		return NULL;
-	}
-	if ((nch = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, utf16,
-	    -1, NULL, 0, NULL, NULL)) < 1 || (size_t)nch > MAXCHARS) {
-		fido_log_debug("%s: WideCharToMultiByte %d", __func__);
-		return NULL;
-	}
-	if ((utf8 = calloc((size_t)nch, sizeof(*utf8))) == NULL) {
-		fido_log_debug("%s: calloc", __func__);
-		return NULL;
-	}
-	if (WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, utf16, -1,
-	    utf8, nch, NULL, NULL) != nch) {
-		fido_log_debug("%s: WideCharToMultiByte", __func__);
-		free(utf8);
-		return NULL;
-	}
-
-	return utf8;
-}
-
 static int
 to_fido(HRESULT hr)
 {
