@@ -18,7 +18,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 EOF
 
 # Build and install libcbor.
-git clone --depth=1 git://github.com/pjk/libcbor -b v0.8.0
+git clone --depth=1 git://github.com/pjk/libcbor -b v0.9.0
 cd libcbor
 mkdir build
 (cd build && cmake -DCMAKE_TOOLCHAIN_FILE=/tmp/mingw.cmake \
