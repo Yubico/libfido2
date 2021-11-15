@@ -779,8 +779,8 @@ fido_winhello_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 		return FIDO_ERR_INVALID_ARGUMENT;
 	}
 	if ((r = winhello_manifest()) != FIDO_OK) {
-		fido_log_debug("%s: winhello_manifest", __func__);
-		return r;
+		fido_log_debug("%s: winhello_manifest: 0x%x", __func__, r);
+		return FIDO_OK; /* not an error */
 	}
 
 	di = &devlist[*olen];
