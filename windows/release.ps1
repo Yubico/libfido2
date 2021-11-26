@@ -7,7 +7,7 @@ $Architectures = @('x64', 'Win32', 'ARM64', 'ARM')
 $InstallPrefixes =  @('Win64', 'Win32', 'ARM64', 'ARM')
 $Types = @('dynamic', 'static')
 $Config = 'Release'
-$LibCrypto = '46'
+$LibCrypto = '47'
 $SDK = '143'
 
 . "$PSScriptRoot\const.ps1"
@@ -49,7 +49,7 @@ Function Package-Static(${SRC}, ${DEST}) {
 }
 
 Function Package-PDBs(${SRC}, ${DEST}) {
-	Copy-Item "${SRC}\${LIBRESSL}\crypto\crypto.dir\${Config}\vc${SDK}.pdb" `
+	Copy-Item "${SRC}\${LIBRESSL}\crypto\crypto_obj.dir\${Config}\crypto_obj.pdb" `
 	    "${DEST}\crypto-${LibCrypto}.pdb"
 	Copy-Item "${SRC}\${LIBCBOR}\src\cbor.dir\${Config}\vc${SDK}.pdb" `
 	    "${DEST}\cbor.pdb"
