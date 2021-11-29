@@ -50,21 +50,21 @@ struct winhello_cred {
 	wchar_t						*display_name;
 };
 
-typedef DWORD		webauthn_get_api_version_t(void);
-typedef PCWSTR		webauthn_strerr_t(HRESULT);
-typedef HRESULT		webauthn_get_assert_t(HWND, LPCWSTR,
+typedef DWORD	WINAPI	webauthn_get_api_version_t(void);
+typedef PCWSTR	WINAPI	webauthn_strerr_t(HRESULT);
+typedef HRESULT	WINAPI	webauthn_get_assert_t(HWND, LPCWSTR,
 			    PCWEBAUTHN_CLIENT_DATA,
 			    PCWEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS,
 			    PWEBAUTHN_ASSERTION *);
-typedef HRESULT		webauthn_make_cred_t(HWND,
+typedef HRESULT	WINAPI	webauthn_make_cred_t(HWND,
 			    PCWEBAUTHN_RP_ENTITY_INFORMATION,
 			    PCWEBAUTHN_USER_ENTITY_INFORMATION,
 			    PCWEBAUTHN_COSE_CREDENTIAL_PARAMETERS,
 			    PCWEBAUTHN_CLIENT_DATA,
 			    PCWEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS,
 			    PWEBAUTHN_CREDENTIAL_ATTESTATION *);
-typedef void		webauthn_free_assert_t(PWEBAUTHN_ASSERTION);
-typedef void		webauthn_free_attest_t(PWEBAUTHN_CREDENTIAL_ATTESTATION);
+typedef void	WINAPI	webauthn_free_assert_t(PWEBAUTHN_ASSERTION);
+typedef void	WINAPI	webauthn_free_attest_t(PWEBAUTHN_CREDENTIAL_ATTESTATION);
 
 static TLS BOOL				 webauthn_loaded;
 static TLS HMODULE			 webauthn_handle;
