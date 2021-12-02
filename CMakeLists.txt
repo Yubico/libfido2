@@ -171,6 +171,7 @@ if(MSVC)
 			# conversion in expression;
 		"C4200" # nonstandard extension used: zero-sized array in
 			# struct/union;
+		"C4201" # nonstandard extension used: nameless struct/union;
 		"C4204" # nonstandard extension used: non-constant aggregate
 			# initializer;
 		"C4706" # assignment within conditional expression;
