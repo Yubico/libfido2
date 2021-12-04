@@ -202,6 +202,7 @@
 		fido_dev_info_product_string;
 		fido_dev_info_ptr;
 		fido_dev_info_vendor;
+		fido_dev_io_handle;
 		fido_dev_is_fido2;
 		fido_dev_is_winhello;
 		fido_dev_major;

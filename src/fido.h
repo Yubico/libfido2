@@ -40,6 +40,7 @@ fido_dev_t *fido_dev_new(void);
 fido_dev_t *fido_dev_new_with_info(const fido_dev_info_t *);
 fido_dev_info_t *fido_dev_info_new(size_t);
 fido_cbor_info_t *fido_cbor_info_new(void);
+void *fido_dev_io_handle(const fido_dev_t *);
 
 void fido_assert_free(fido_assert_t **);
 void fido_cbor_info_free(fido_cbor_info_t **);
