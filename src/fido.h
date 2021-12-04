@@ -85,6 +85,8 @@ const char *fido_dev_info_manufacturer_string(const fido_dev_info_t *);
 const char *fido_dev_info_path(const fido_dev_info_t *);
 const char *fido_dev_info_product_string(const fido_dev_info_t *);
 const fido_dev_info_t *fido_dev_info_ptr(const fido_dev_info_t *, size_t);
+int fido_dev_info_set(fido_dev_info_t *, size_t, const char *, const char *,
+    const char *, const fido_dev_io_t *, const fido_dev_transport_t *);
 const uint8_t *fido_cbor_info_protocols_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cbor_info_aaguid_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cred_aaguid_ptr(const fido_cred_t *);

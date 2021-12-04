@@ -148,6 +148,43 @@ fido_dev_info_ptr(const fido_dev_info_t *devlist, size_t i)
 	return (&devlist[i]);
 }
 
+int
+fido_dev_info_set(fido_dev_info_t *devlist, size_t i,
+    const char *path, const char *manufacturer, const char *product,
+    const fido_dev_io_t *io, const fido_dev_transport_t *transport)
+{
+	char *path_copy = NULL, *manu_copy = NULL, *prod_copy = NULL;
+	int r;
+
+	if (path == NULL || manufacturer == NULL || product == NULL ||
+	    io == NULL) {
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto out;
+	}
+
+	if ((path_copy = strdup(path)) == NULL ||
+	    (manu_copy = strdup(manufacturer)) == NULL ||
+	    (prod_copy = strdup(product)) == NULL) {
+		r = FIDO_ERR_INTERNAL;
+		goto out;
+	}
+
+	devlist[i].path = path_copy;
+	devlist[i].manufacturer = manu_copy;
+	devlist[i].product = prod_copy;
+	devlist[i].io = *io;
+	if (transport)
+		devlist[i].transport = *transport;
+	r = FIDO_OK;
+out:
+	if (r != FIDO_OK) {
+		free(prod_copy);
+		free(manu_copy);
+		free(path_copy);
+	}
+	return (r);
+}
+
 const char *
 fido_dev_info_path(const fido_dev_info_t *di)
 {
