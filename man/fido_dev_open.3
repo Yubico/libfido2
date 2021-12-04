@@ -7,9 +7,11 @@
 .Os
 .Sh NAME
 .Nm fido_dev_open ,
+.Nm fido_dev_open_with_info ,
 .Nm fido_dev_close ,
 .Nm fido_dev_cancel ,
 .Nm fido_dev_new ,
+.Nm fido_dev_new_with_info ,
 .Nm fido_dev_free ,
 .Nm fido_dev_force_fido2 ,
 .Nm fido_dev_force_u2f ,
@@ -32,11 +34,15 @@
 .Ft int
 .Fn fido_dev_open "fido_dev_t *dev" "const char *path"
 .Ft int
+.Fn fido_dev_open_with_info "fido_dev_t *dev"
+.Ft int
 .Fn fido_dev_close "fido_dev_t *dev"
 .Ft int
 .Fn fido_dev_cancel "fido_dev_t *dev"
 .Ft fido_dev_t *
 .Fn fido_dev_new "void"
+.Ft fido_dev_t *
+.Fn fido_dev_new_with_info "const fido_dev_info_t *"
 .Ft void
 .Fn fido_dev_free "fido_dev_t **dev_p"
 .Ft void
@@ -90,6 +96,14 @@ will fallback to U2F unless the
 .Dv FIDO_DISABLE_U2F_FALLBACK
 flag was set in
 .Xr fido_init 3 .
+The
+.Fn fido_dev_open_with_info
+function can be used only with
+.Fn fido_dev_new_with_info ,
+and opens the device by the
+.Vt fido_dev_info_t
+passed to it, using any specified path, I/O functions, transport
+functions, etc.
 .Pp
 The
 .Fn fido_dev_close
@@ -111,6 +125,16 @@ The
 function returns a pointer to a newly allocated, empty
 .Vt fido_dev_t .
 If memory cannot be allocated, NULL is returned.
+The
+.Fn fido_dev_new_with_info
+function returns a pointer to a newly allocated
+.Vt fido_dev_t
+with
+.Vt fido_dev_info_t
+parameters, for use with
+.Xr fido_dev_info_manifest 3
+and
+.Fn fido_dev_open_with_info .
 .Pp
 The
 .Fn fido_dev_free
