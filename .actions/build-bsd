@@ -40,29 +40,47 @@ tasks:
       done
 EOF
 
-# start the build via POST to the build server
-JOB_INFO=$(curl -s -X POST \
-    -H Authorization:"token ${SOURCEHUT_TOKEN}" \
-    --data-urlencode "manifest@${MANIFEST}" \
-    "${BASE_URL}/api/jobs"
-)
 
-# extract required build information
-JOB_OWNER=$(echo "${JOB_INFO}" | jq -e -r '.owner.canonical_name')
-JOB_ID=$(echo "${JOB_INFO}" | jq -e -r '.id')
-echo "Job '${JOB_ID}' running at ${BASE_URL}/${JOB_OWNER}/job/${JOB_ID}"
+q() {
+	curl \
+		--silent \
+		--oauth2-bearer "${SOURCEHUT_TOKEN}" \
+		--header "Content-Type: application/json" \
+		--data @- -- \
+		"${BASE_URL}/query"
+}
+
+submit_job() {
+	local manifest="$1"
+	jq \
+		--compact-output --null-input \
+		'{ query: $body, variables: { var: $var } }' \
+		--arg body 'mutation($var: String!) { submit(manifest: $var) { id } }' \
+		--rawfile var "${manifest}" \
+	| q \
+	| jq --raw-output '.data.submit.id'
+}
+
+job_status() {
+	local id="$1"
+	jq \
+		--compact-output --null-input \
+		'{ query: $body, variables: { var: $var } }' \
+		--arg body 'query($var: Int!) { job(id: $var) { status } }' \
+		--argjson var "${id}" \
+	| q \
+	| jq --raw-output '.data.job.status'
+}
+
+JOB_ID="$(submit_job "${MANIFEST}")"
+[ -z "${JOB_ID}" ] && exit 1
+echo "Job '${JOB_ID}' running at ${BASE_URL}/~yubico-libfido2/job/${JOB_ID}"
 
 while true; do
-	# fetch current build status
-	JOB_STATUS=$(curl -s -X GET \
-	    -H Authorization:"token ${SOURCEHUT_TOKEN}" \
-	    "${BASE_URL}/api/jobs/${JOB_ID}" | \
-	    jq -e -r '.status')
-
-	case "${JOB_STATUS}" in
-		success) exit 0;;
-		failed) exit 1;;
-		pending|queued|running) ;;
+	case "$(job_status "${JOB_ID}")" in
+		SUCCESS) exit 0;;
+		FAILED) exit 1;;
+		PENDING|QUEUED|RUNNING) ;;
 		*) exit 1;;
 	esac
 	sleep 60
