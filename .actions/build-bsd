@@ -58,7 +58,7 @@ submit_job() {
 		--arg body 'mutation($var: String!) { submit(manifest: $var) { id } }' \
 		--rawfile var "${manifest}" \
 	| q \
-	| jq --raw-output '.data.submit.id'
+	| jq --exit-status --raw-output '.data.submit.id'
 }
 
 job_status() {
@@ -69,15 +69,16 @@ job_status() {
 		--arg body 'query($var: Int!) { job(id: $var) { status } }' \
 		--argjson var "${id}" \
 	| q \
-	| jq --raw-output '.data.job.status'
+	| jq --exit-status --raw-output '.data.job.status'
 }
 
-JOB_ID="$(submit_job "${MANIFEST}")"
+JOB_ID="$(submit_job "${MANIFEST}")" || exit 1
 [ -z "${JOB_ID}" ] && exit 1
 echo "Job '${JOB_ID}' running at ${BASE_URL}/~yubico-libfido2/job/${JOB_ID}"
 
 while true; do
-	case "$(job_status "${JOB_ID}")" in
+	JOB_STATUS="$(job_status "${JOB_ID}")" || exit 1
+	case "${JOB_STATUS}" in
 		SUCCESS) exit 0;;
 		FAILED) exit 1;;
 		PENDING|QUEUED|RUNNING) ;;
