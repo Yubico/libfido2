@@ -44,6 +44,7 @@ list(APPEND MAN_SOURCES
 
 list(APPEND MAN_ALIAS
 	eddsa_pk_new eddsa_pk_free
+	eddsa_pk_new eddsa_pk_from_EVP_PKEY
 	eddsa_pk_new eddsa_pk_from_ptr
 	eddsa_pk_new eddsa_pk_to_EVP_PKEY
 	es256_pk_new es256_pk_free
