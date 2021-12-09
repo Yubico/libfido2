@@ -76,6 +76,7 @@ list(APPEND MAN_ALIAS
 	fido_assert_new fido_assert_user_id_len
 	fido_assert_new fido_assert_user_id_ptr
 	fido_assert_new fido_assert_user_name
+	fido_assert_set_authdata fido_assert_set_authdata_raw
 	fido_assert_set_authdata fido_assert_set_clientdata
 	fido_assert_set_authdata fido_assert_set_clientdata_hash
 	fido_assert_set_authdata fido_assert_set_count
