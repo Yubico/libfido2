@@ -236,8 +236,10 @@ list(APPEND MAN_ALIAS
 	fido_dev_set_pin fido_dev_get_retry_count
 	fido_dev_set_pin fido_dev_get_uv_retry_count
 	fido_dev_set_pin fido_dev_reset
+	fido_dev_set_io_functions fido_dev_io_handle
 	fido_dev_set_io_functions fido_dev_set_sigmask
 	fido_dev_set_io_functions fido_dev_set_timeout
+	fido_dev_set_io_functions fido_dev_set_transport_functions
 	fido_dev_largeblob_get fido_dev_largeblob_set
 	fido_dev_largeblob_get fido_dev_largeblob_remove
 	fido_dev_largeblob_get fido_dev_largeblob_get_array
