@@ -1,7 +1,8 @@
 #!/bin/sh -eux
 BASE_URL="https://builds.sr.ht"
-MANIFEST=$(mktemp)
-trap "rm -f ${MANIFEST}" EXIT
+MANIFEST="$(mktemp)"
+LOGFILE="$(mktemp)"
+trap '[ -f "${LOGFILE}" ] && cat -- "${LOGFILE}"' EXIT
 
 # construct the sourcehut build manifest
 cat > "${MANIFEST}" <<- EOF
@@ -47,7 +48,8 @@ q() {
 		--oauth2-bearer "${SOURCEHUT_TOKEN}" \
 		--header "Content-Type: application/json" \
 		--data @- -- \
-		"${BASE_URL}/query"
+		"${BASE_URL}/query" \
+	| tee -a -- "${LOGFILE}"
 }
 
 submit_job() {
