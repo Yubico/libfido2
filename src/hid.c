@@ -121,6 +121,15 @@ fido_dev_info_new(size_t n)
 	return (calloc(n, sizeof(fido_dev_info_t)));
 }
 
+static void
+fido_dev_info_reset(fido_dev_info_t *di)
+{
+	free(di->path);
+	free(di->manufacturer);
+	free(di->product);
+	memset(di, 0, sizeof(*di));
+}
+
 void
 fido_dev_info_free(fido_dev_info_t **devlist_p, size_t n)
 {
@@ -129,13 +138,8 @@ fido_dev_info_free(fido_dev_info_t **devlist_p, size_t n)
 	if (devlist_p == NULL || (devlist = *devlist_p) == NULL)
 		return;
 
-	for (size_t i = 0; i < n; i++) {
-		const fido_dev_info_t *di;
-		di = &devlist[i];
-		free(di->path);
-		free(di->manufacturer);
-		free(di->product);
-	}
+	for (size_t i = 0; i < n; i++)
+		fido_dev_info_reset(&devlist[i]);
 
 	free(devlist);
 
@@ -169,6 +173,7 @@ fido_dev_info_set(fido_dev_info_t *devlist, size_t i,
 		goto out;
 	}
 
+	fido_dev_info_reset(&devlist[i]);
 	devlist[i].path = path_copy;
 	devlist[i].manufacturer = manu_copy;
 	devlist[i].product = prod_copy;
