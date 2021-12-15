@@ -78,6 +78,8 @@ static TLS webauthn_free_attest_t	*webauthn_free_attest;
 static int
 webauthn_load(void)
 {
+	DWORD n = 1;
+
 	if (webauthn_loaded || webauthn_handle != NULL) {
 		fido_log_debug("%s: already loaded", __func__);
 		return -1;
@@ -93,6 +95,12 @@ webauthn_load(void)
 		fido_log_debug("%s: WebAuthNGetApiVersionNumber", __func__);
 		/* WebAuthNGetApiVersionNumber might not exist */
 	}
+	if (webauthn_get_api_version != NULL &&
+	    (n = webauthn_get_api_version()) < 1) {
+		fido_log_debug("%s: unsupported api %lu", __func__, (u_long)n);
+		goto fail;
+	}
+	fido_log_debug("%s: api version %lu", __func__, (u_long)n);
 	if ((webauthn_strerr =
 	    (webauthn_strerr_t *)GetProcAddress(webauthn_handle,
 	    "WebAuthNGetErrorName")) == NULL) {
@@ -693,25 +701,6 @@ fail:
 }
 
 static int
-winhello_manifest(void)
-{
-	DWORD n = 1;
-
-	if (!webauthn_loaded && webauthn_load() < 0) {
-		fido_log_debug("%s: webauthn_load", __func__);
-		return FIDO_ERR_INTERNAL;
-	}
-	if (webauthn_get_api_version != NULL &&
-	    (n = webauthn_get_api_version()) < 1) {
-		fido_log_debug("%s: unsupported api %lu", __func__, (u_long)n);
-		return FIDO_ERR_INTERNAL;
-	}
-	fido_log_debug("%s: api version %lu", __func__, (u_long)n);
-
-	return FIDO_OK;
-}
-
-static int
 winhello_get_assert(HWND w, struct winhello_assert *ctx)
 {
 	HRESULT hr;
@@ -782,7 +771,6 @@ winhello_cred_free(struct winhello_cred *ctx)
 int
 fido_winhello_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
-	int r;
 	fido_dev_info_t *di;
 
 	if (ilen == 0) {
@@ -791,8 +779,8 @@ fido_winhello_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 	if (devlist == NULL) {
 		return FIDO_ERR_INVALID_ARGUMENT;
 	}
-	if ((r = winhello_manifest()) != FIDO_OK) {
-		fido_log_debug("%s: winhello_manifest: 0x%x", __func__, r);
+	if (!webauthn_loaded && webauthn_load() < 0) {
+		fido_log_debug("%s: webauthn_load", __func__);
 		return FIDO_OK; /* not an error */
 	}
 
