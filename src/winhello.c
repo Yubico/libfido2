@@ -853,7 +853,10 @@ fido_winhello_get_assert(fido_dev_t *dev, fido_assert_t *assert,
 	}
 	if ((w = GetForegroundWindow()) == NULL) {
 		fido_log_debug("%s: GetForegroundWindow", __func__);
-		goto fail;
+		if ((w = GetTopWindow(NULL)) == NULL) {
+			fido_log_debug("%s: GetTopWindow", __func__);
+			goto fail;
+		}
 	}
 	if ((r = translate_fido_assert(ctx, assert, pin, ms)) != FIDO_OK) {
 		fido_log_debug("%s: translate_fido_assert", __func__);
@@ -927,7 +930,10 @@ fido_winhello_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 	}
 	if ((w = GetForegroundWindow()) == NULL) {
 		fido_log_debug("%s: GetForegroundWindow", __func__);
-		goto fail;
+		if ((w = GetTopWindow(NULL)) == NULL) {
+			fido_log_debug("%s: GetTopWindow", __func__);
+			goto fail;
+		}
 	}
 	if ((r = translate_fido_cred(ctx, cred, pin, ms)) != FIDO_OK) {
 		fido_log_debug("%s: translate_fido_cred", __func__);
