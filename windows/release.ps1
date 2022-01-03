@@ -59,6 +59,17 @@ Function Package-PDBs(${SRC}, ${DEST}) {
 	    "${DEST}\fido2.pdb"
 }
 
+Function Package-StaticPDBs(${SRC}, ${DEST}) {
+	Copy-Item "${SRC}\${LIBRESSL}\crypto\Release\crypto-${LibCrypto}.pdb" `
+	    "${DEST}\crypto-${LibCrypto}.pdb"
+	Copy-Item "${SRC}\${LIBCBOR}\src\Release\cbor.pdb" `
+	    "${DEST}\cbor.pdb"
+	Copy-Item "${SRC}\${ZLIB}\Release\zlibstatic.pdb" `
+	    "${DEST}\zlib.pdb"
+	Copy-Item "${SRC}\src\Release\fido2_static.pdb" `
+	    "${DEST}\fido2.pdb"
+}
+
 Function Package-Tools(${SRC}, ${DEST}) {
 	Copy-Item "${SRC}\tools\${Config}\fido2-assert.exe" `
 	    "${DEST}\fido2-assert.exe"
@@ -80,5 +91,7 @@ for ($i = 0; $i -lt $Architectures.Length; $i++) {
 	Package-Tools "${BUILD}\${Arch}\dynamic" `
 	    "${OUTPUT}\pkg\${InstallPrefix}\${Config}\v${SDK}\dynamic"
 	Package-Static "${OUTPUT}\${Arch}\static" `
+	    "${OUTPUT}\pkg\${InstallPrefix}\${Config}\v${SDK}\static"
+	Package-StaticPDBs "${BUILD}\${Arch}\static" `
 	    "${OUTPUT}\pkg\${InstallPrefix}\${Config}\v${SDK}\static"
 }
