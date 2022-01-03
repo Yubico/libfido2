@@ -862,7 +862,7 @@ fido_winhello_get_assert(fido_dev_t *dev, fido_assert_t *assert,
 		fido_log_debug("%s: translate_fido_assert", __func__);
 		goto fail;
 	}
-	if ((r = winhello_get_assert(w, ctx)) != S_OK) {
+	if ((r = winhello_get_assert(w, ctx)) != FIDO_OK) {
 		fido_log_debug("%s: winhello_get_assert", __func__);
 		goto fail;
 	}
