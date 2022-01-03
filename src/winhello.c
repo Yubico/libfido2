@@ -668,9 +668,9 @@ fail:
 }
 
 static int
-translate_winhello_cred(fido_cred_t *cred, const WEBAUTHN_CREDENTIAL_ATTESTATION *att)
+translate_winhello_cred(fido_cred_t *cred,
+    const WEBAUTHN_CREDENTIAL_ATTESTATION *att)
 {
-
 	cbor_item_t *item = NULL;
 	struct cbor_load_result cbor;
 	int r = FIDO_ERR_INTERNAL;
