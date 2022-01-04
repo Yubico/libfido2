@@ -18,7 +18,7 @@
 .Nm fido_assert_set_uv ,
 .Nm fido_assert_set_rp ,
 .Nm fido_assert_set_sig
-.Nd set parameters of a FIDO 2 assertion
+.Nd set parameters of a FIDO2 assertion
 .Sh SYNOPSIS
 .In fido.h
 .Bd -literal
@@ -55,14 +55,14 @@ typedef enum {
 .Sh DESCRIPTION
 The
 .Nm
-set of functions define the various parameters of a FIDO 2
+set of functions define the various parameters of a FIDO2
 assertion, allowing a
 .Fa fido_assert_t
 type to be prepared for a subsequent call to
 .Xr fido_dev_get_assert 3
 or
 .Xr fido_assert_verify 3 .
-For the complete specification of a FIDO 2 assertion and the format
+For the complete specification of a FIDO2 assertion and the format
 of its constituent parts, please refer to the Web Authentication
 (webauthn) standard.
 .Pp
@@ -184,16 +184,16 @@ by default, allowing the authenticator to use its default settings.
 Use of the
 .Nm
 set of functions may happen in two distinct situations:
-when asking a FIDO device to produce a series of assertion
+when asking a FIDO2 device to produce a series of assertion
 statements, prior to
 .Xr fido_dev_get_assert 3
-(i.e, in the context of a FIDO client), or when verifying assertion
+(i.e, in the context of a FIDO2 client), or when verifying assertion
 statements using
 .Xr fido_assert_verify 3
-(i.e, in the context of a FIDO server).
+(i.e, in the context of a FIDO2 server).
 .Pp
-For a complete description of the generation of a FIDO 2 assertion
-and its verification, please refer to the FIDO 2 specification.
+For a complete description of the generation of a FIDO2 assertion
+and its verification, please refer to the FIDO2 specification.
 An example of how to use the
 .Nm
 set of functions can be found in the
@@ -202,7 +202,7 @@ file shipped with
 .Em libfido2 .
 .Pp
 .Fn fido_assert_set_hmac_secret
-is not normally useful in a FIDO client or server \(em it is provided
+is not normally useful in a FIDO2 client or server \(em it is provided
 to enable testing other functionality that relies on retrieving the
 HMAC secret from an assertion obtained from an authenticator.
 .Sh RETURN VALUES

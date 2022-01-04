@@ -28,7 +28,7 @@
 .Nm fido_dev_flags ,
 .Nm fido_dev_major ,
 .Nm fido_dev_minor
-.Nd FIDO 2 device open/close and related functions
+.Nd FIDO2 device open/close and related functions
 .Sh SYNOPSIS
 .In fido.h
 .Ft int
@@ -177,7 +177,7 @@ function returns
 .Dv true
 if
 .Fa dev
-is a FIDO 2 device.
+is a FIDO2 device.
 .Pp
 The
 .Fn fido_dev_is_winhello
@@ -193,7 +193,7 @@ function returns
 .Dv true
 if
 .Fa dev
-supports FIDO 2.1 Credential Management.
+supports CTAP 2.1 Credential Management.
 .Pp
 The
 .Fn fido_dev_supports_cred_prot
@@ -201,7 +201,7 @@ function returns
 .Dv true
 if
 .Fa dev
-supports FIDO 2.1 Credential Protection.
+supports CTAP 2.1 Credential Protection.
 .Pp
 The
 .Fn fido_dev_supports_pin
@@ -209,7 +209,7 @@ function returns
 .Dv true
 if
 .Fa dev
-supports FIDO 2.0 Client PINs.
+supports CTAP 2.0 Client PINs.
 .Pp
 The
 .Fn fido_dev_has_pin
@@ -217,7 +217,7 @@ function returns
 .Dv true
 if
 .Fa dev
-has a FIDO 2.0 Client PIN set.
+has a CTAP 2.0 Client PIN set.
 .Pp
 The
 .Fn fido_dev_supports_uv
