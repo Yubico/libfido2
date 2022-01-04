@@ -16,7 +16,7 @@
 .Nm fido_dev_info_manufacturer_string ,
 .Nm fido_dev_info_product_string ,
 .Nm fido_dev_info_set
-.Nd FIDO 2 device discovery functions
+.Nd FIDO2 device discovery functions
 .Sh SYNOPSIS
 .In fido.h
 .Ft int
@@ -46,7 +46,7 @@ function fills
 .Fa devlist
 with up to
 .Fa ilen
-FIDO devices found by the underlying operating system.
+FIDO2 devices found by the underlying operating system.
 Currently only USB HID devices are supported.
 The number of discovered devices is returned in
 .Fa olen ,
@@ -156,7 +156,7 @@ automatically by
 .Xr fido_dev_new_with_info 3
 and
 .Xr fido_dev_open_with_info 3 .
-An application can use this, for example, to substitute mock FIDO
+An application can use this, for example, to substitute mock FIDO2
 devices in testing for the real ones that
 .Fn fido_dev_info_manifest
 would discover.

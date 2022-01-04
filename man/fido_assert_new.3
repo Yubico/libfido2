@@ -31,7 +31,7 @@
 .Nm fido_assert_id_len ,
 .Nm fido_assert_sigcount ,
 .Nm fido_assert_flags
-.Nd FIDO 2 assertion API
+.Nd FIDO2 assertion API
 .Sh SYNOPSIS
 .In fido.h
 .Ft fido_assert_t *
@@ -85,7 +85,7 @@
 .Ft uint8_t
 .Fn fido_assert_flags "const fido_assert_t *assert" "size_t idx"
 .Sh DESCRIPTION
-FIDO 2 assertions are abstracted in
+FIDO2 assertions are abstracted in
 .Em libfido2
 by the
 .Vt fido_assert_t
@@ -202,7 +202,7 @@ has an
 (index) value of 0.
 .Pp
 The authenticator data and signature parts of an assertion
-statement are typically passed to a FIDO 2 server for verification.
+statement are typically passed to a FIDO2 server for verification.
 .Pp
 The
 .Fn fido_assert_clientdata_hash_ptr
