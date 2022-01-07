@@ -29,9 +29,9 @@ typedef enum {
 } fido_opt_t;
 .Ed
 .Ft int
-.Fn fido_assert_set_authdata "fido_assert_t *assert" " size_t idx" "const unsigned char *ptr" "size_t len"
+.Fn fido_assert_set_authdata "fido_assert_t *assert" "size_t idx" "const unsigned char *ptr" "size_t len"
 .Ft int
-.Fn fido_assert_set_authdata_raw "fido_assert_t *assert" " size_t idx" "const unsigned char *ptr" "size_t len"
+.Fn fido_assert_set_authdata_raw "fido_assert_t *assert" "size_t idx" "const unsigned char *ptr" "size_t len"
 .Ft int
 .Fn fido_assert_set_clientdata "fido_assert_t *assert" "const unsigned char *ptr" "size_t len"
 .Ft int
@@ -43,7 +43,7 @@ typedef enum {
 .Ft int
 .Fn fido_assert_set_hmac_salt "fido_assert_t *assert" "const unsigned char *ptr" "size_t len"
 .Ft int
-.Fn fido_assert_set_hmac_secret "fido_assert_t *assert" "const unsigned char *ptr" "size_t len"
+.Fn fido_assert_set_hmac_secret "fido_assert_t *assert" "size_t idx" "const unsigned char *ptr" "size_t len"
 .Ft int
 .Fn fido_assert_set_up "fido_assert_t *assert" "fido_opt_t up"
 .Ft int
