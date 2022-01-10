@@ -85,8 +85,6 @@ const char *fido_dev_info_manufacturer_string(const fido_dev_info_t *);
 const char *fido_dev_info_path(const fido_dev_info_t *);
 const char *fido_dev_info_product_string(const fido_dev_info_t *);
 const fido_dev_info_t *fido_dev_info_ptr(const fido_dev_info_t *, size_t);
-int fido_dev_info_set(fido_dev_info_t *, size_t, const char *, const char *,
-    const char *, const fido_dev_io_t *, const fido_dev_transport_t *);
 const uint8_t *fido_cbor_info_protocols_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cbor_info_aaguid_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cred_aaguid_ptr(const fido_cred_t *);
@@ -156,6 +154,8 @@ int fido_dev_get_uv_retry_count(fido_dev_t *, int *);
 int fido_dev_get_touch_begin(fido_dev_t *);
 int fido_dev_get_touch_status(fido_dev_t *, int *, int);
 int fido_dev_info_manifest(fido_dev_info_t *, size_t, size_t *);
+int fido_dev_info_set(fido_dev_info_t *, size_t, const char *, const char *,
+    const char *, const fido_dev_io_t *, const fido_dev_transport_t *);
 int fido_dev_make_cred(fido_dev_t *, fido_cred_t *, const char *);
 int fido_dev_open_with_info(fido_dev_t *);
 int fido_dev_open(fido_dev_t *, const char *);
