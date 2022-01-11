@@ -18,7 +18,7 @@ cd "$1"
 DEV="$2"
 
 make_cred() {
-	cat > cred_param << EOF
+	sed /^$/d > cred_param << EOF
 $(dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64)
 $1
 some user name
@@ -34,7 +34,7 @@ verify_cred() {
 }
 
 get_assert() {
-	cat > assert_param << EOF
+	sed /^$/d > assert_param << EOF
 $(dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64)
 $1
 $(cat $3)
