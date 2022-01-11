@@ -12,7 +12,7 @@
 # - should pass as-is on a YubiKey with a PIN set;
 # - may otherwise require set +e above;
 # - can be executed with UV=1 to run additional UV tests;
-# - was last tested on 2021-07-21 with firmware 5.2.7.
+# - was last tested on 2022-01-11 with firmware 5.4.3.
 
 cd "$1"
 DEV="$2"
