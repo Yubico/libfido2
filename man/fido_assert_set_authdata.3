@@ -106,11 +106,8 @@ Alternatively, a raw binary blob may be passed to
 .Fn fido_assert_set_authdata_raw .
 .Pp
 The
-.Fn fido_assert_set_clientdata_hash ,
-.Fn fido_assert_set_hmac_salt ,
-and
-.Fn fido_assert_set_hmac_secret
-functions set the client data hash and hmac-salt parts of
+.Fn fido_assert_set_clientdata_hash
+function sets the client data hash of
 .Fa assert
 to
 .Fa ptr ,
@@ -167,6 +164,29 @@ is zero, the extensions of
 are cleared.
 .Pp
 The
+.Fn fido_assert_set_hmac_salt
+and
+.Fn fido_assert_set_hmac_secret
+functions set the hmac-salt and hmac-secret parts of
+.Fa assert
+to
+.Fa ptr ,
+where
+.Fa ptr
+points to
+.Fa len
+bytes.
+A copy of
+.Fa ptr
+is made, and no references to the passed pointer are kept.
+The HMAC Secret
+.Pq hmac-secret
+Extension is a CTAP 2.0 extension.
+The
+.Fn fido_assert_set_hmac_secret
+function is normally only useful when writing tests.
+.Pp
+The
 .Fn fido_assert_set_up
 and
 .Fn fido_assert_set_uv
@@ -200,11 +220,6 @@ set of functions can be found in the
 .Pa examples/assert.c
 file shipped with
 .Em libfido2 .
-.Pp
-.Fn fido_assert_set_hmac_secret
-is not normally useful in a FIDO2 client or server \(em it is provided
-to enable testing other functionality that relies on retrieving the
-HMAC secret from an assertion obtained from an authenticator.
 .Sh RETURN VALUES
 The
 .Nm
