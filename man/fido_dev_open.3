@@ -19,9 +19,10 @@
 .Nm fido_dev_is_winhello ,
 .Nm fido_dev_supports_credman ,
 .Nm fido_dev_supports_cred_prot ,
+.Nm fido_dev_supports_permissions ,
 .Nm fido_dev_supports_pin ,
-.Nm fido_dev_has_pin ,
 .Nm fido_dev_supports_uv ,
+.Nm fido_dev_has_pin ,
 .Nm fido_dev_has_uv ,
 .Nm fido_dev_protocol ,
 .Nm fido_dev_build ,
@@ -58,11 +59,13 @@
 .Ft bool
 .Fn fido_dev_supports_cred_prot "const fido_dev_t *dev"
 .Ft bool
+.Fn fido_dev_supports_permissions "const fido_dev_t *dev"
+.Ft bool
 .Fn fido_dev_supports_pin "const fido_dev_t *dev"
 .Ft bool
-.Fn fido_dev_has_pin "const fido_dev_t *dev"
-.Ft bool
 .Fn fido_dev_supports_uv "const fido_dev_t *dev"
+.Ft bool
+.Fn fido_dev_has_pin "const fido_dev_t *dev"
 .Ft bool
 .Fn fido_dev_has_uv "const fido_dev_t *dev"
 .Ft uint8_t
@@ -205,6 +208,14 @@ if
 supports CTAP 2.1 Credential Protection.
 .Pp
 The
+.Fn fido_dev_supports_permissions
+function returns
+.Dv true
+if
+.Fa dev
+supports CTAP 2.1 UV token permissions.
+.Pp
+The
 .Fn fido_dev_supports_pin
 function returns
 .Dv true
@@ -213,20 +224,20 @@ if
 supports CTAP 2.0 Client PINs.
 .Pp
 The
-.Fn fido_dev_has_pin
-function returns
-.Dv true
-if
-.Fa dev
-has a CTAP 2.0 Client PIN set.
-.Pp
-The
 .Fn fido_dev_supports_uv
 function returns
 .Dv true
 if
 .Fa dev
 supports a built-in user verification method.
+.Pp
+The
+.Fn fido_dev_has_pin
+function returns
+.Dv true
+if
+.Fa dev
+has a CTAP 2.0 Client PIN set.
 .Pp
 The
 .Fn fido_dev_has_uv
