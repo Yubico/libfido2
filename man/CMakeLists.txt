@@ -247,6 +247,7 @@ list(APPEND MAN_ALIAS
 	fido_dev_largeblob_get fido_dev_largeblob_remove
 	fido_dev_largeblob_get fido_dev_largeblob_get_array
 	fido_dev_largeblob_get fido_dev_largeblob_set_array
+	fido_init fido_set_log_handler
 	rs256_pk_new rs256_pk_free
 	rs256_pk_new rs256_pk_from_ptr
 	rs256_pk_new rs256_pk_from_EVP_PKEY
