@@ -50,8 +50,8 @@ then
 .Em libfido2
 will not fallback to U2F in
 .Xr fido_dev_open 3
-if a device claims to be FIDO2 but fails to respond to
-FIDO2 commands.
+if a device claims to support FIDO2 but fails to respond to
+a CTAP 2.0 greeting.
 .Pp
 The
 .Fn fido_set_log_handler
