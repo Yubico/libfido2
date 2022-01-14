@@ -165,6 +165,7 @@ list(APPEND MAN_ALIAS
 	fido_cred_new fido_cred_user_name
 	fido_cred_new fido_cred_x5c_len
 	fido_cred_new fido_cred_x5c_ptr
+	fido_cred_verify fido_cred_verify_self
 	fido_credman_metadata_new fido_credman_del_dev_rk
 	fido_credman_metadata_new fido_credman_get_dev_metadata
 	fido_credman_metadata_new fido_credman_get_dev_rk
