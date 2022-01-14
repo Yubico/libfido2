@@ -215,9 +215,10 @@ bool fido_dev_has_pin(const fido_dev_t *);
 bool fido_dev_has_uv(const fido_dev_t *);
 bool fido_dev_is_fido2(const fido_dev_t *);
 bool fido_dev_is_winhello(const fido_dev_t *);
-bool fido_dev_supports_pin(const fido_dev_t *);
-bool fido_dev_supports_cred_prot(const fido_dev_t *);
 bool fido_dev_supports_credman(const fido_dev_t *);
+bool fido_dev_supports_cred_prot(const fido_dev_t *);
+bool fido_dev_supports_permissions(const fido_dev_t *);
+bool fido_dev_supports_pin(const fido_dev_t *);
 bool fido_dev_supports_uv(const fido_dev_t *);
 
 int fido_dev_largeblob_get(fido_dev_t *, const unsigned char *, size_t,
