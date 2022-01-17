@@ -209,7 +209,7 @@ cbor.c:cbor_add_arg                         13       0 100.00%        21       0
 cbor.c:cbor_add_uint8                       14       0 100.00%        21       0 100.00%
 cbor.c:cbor_encode_largeblob_key_ext         6       0 100.00%         6       0 100.00%
 cbor.c:cbor_encode_hmac_secret_param        59       4  93.22%        66       8  87.88%
-cbor.c:get_cose_alg                         36       1  97.22%        38       3  92.11%
+cbor.c:get_cose_alg                         36       0 100.00%        38       0 100.00%
 cbor.c:find_cose_alg                        35       0 100.00%        33       0 100.00%
 cbor.c:decode_attcred                       25       0 100.00%        44       0 100.00%
 cbor.c:decode_cred_extensions               14       0 100.00%        24       0 100.00%
@@ -222,7 +222,7 @@ cbor.c:decode_cred_id_entry                 10       0 100.00%        19       0
 cbor.c:decode_user_entry                    25       0 100.00%        35       0 100.00%
 cbor.c:decode_rp_entity_entry               15       0 100.00%        25       0 100.00%
 ------------------------------------------------------------------------------------------------------------------
-TOTAL                                     1047      24  97.71%      1237      49  96.04%
+TOTAL                                     1047      23  97.80%      1237      46  96.28%
 
 File '/libfido2/src/compress.c':
 Name                                   Regions    Miss   Cover     Lines    Miss   Cover
@@ -615,7 +615,7 @@ File '/libfido2/src/largeblob.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
 -------------------------------------------------------------------------------------------------------------------
 fido_dev_largeblob_get                       26       2  92.31%        38       4  89.47%
-fido_dev_largeblob_set                       27       2  92.59%        36       4  88.89%
+fido_dev_largeblob_set                       27       0 100.00%        36       0 100.00%
 fido_dev_largeblob_remove                    12       0 100.00%        18       0 100.00%
 fido_dev_largeblob_get_array                 15       2  86.67%        27       4  85.19%
 fido_dev_largeblob_set_array                 14       0 100.00%        19       0 100.00%
@@ -645,7 +645,7 @@ largeblob.c:largeblob_get_uv_token           19       0 100.00%        23       
 largeblob.c:largeblob_set_tx                 35       0 100.00%        36       0 100.00%
 largeblob.c:prepare_hmac                     13       2  84.62%        23       7  69.57%
 -------------------------------------------------------------------------------------------------------------------
-TOTAL                                       513      21  95.91%       684      47  93.13%
+TOTAL                                       513      19  96.30%       684      43  93.71%
 
 File '/libfido2/src/log.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
