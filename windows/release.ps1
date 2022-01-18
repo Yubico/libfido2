@@ -60,13 +60,13 @@ Function Package-PDBs(${SRC}, ${DEST}) {
 }
 
 Function Package-StaticPDBs(${SRC}, ${DEST}) {
-	Copy-Item "${SRC}\${LIBRESSL}\crypto\Release\crypto-${LibCrypto}.pdb" `
+	Copy-Item "${SRC}\${LIBRESSL}\crypto\crypto_obj.dir\${Config}\crypto_obj.pdb" `
 	    "${DEST}\crypto-${LibCrypto}.pdb"
-	Copy-Item "${SRC}\${LIBCBOR}\src\Release\cbor.pdb" `
+	Copy-Item "${SRC}\${LIBCBOR}\src\${Config}\cbor.pdb" `
 	    "${DEST}\cbor.pdb"
-	Copy-Item "${SRC}\${ZLIB}\Release\zlibstatic.pdb" `
+	Copy-Item "${SRC}\${ZLIB}\${Config}\zlibstatic.pdb" `
 	    "${DEST}\zlib.pdb"
-	Copy-Item "${SRC}\src\Release\fido2_static.pdb" `
+	Copy-Item "${SRC}\src\${Config}\fido2_static.pdb" `
 	    "${DEST}\fido2.pdb"
 }
 
