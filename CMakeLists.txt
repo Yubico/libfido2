@@ -345,7 +345,7 @@ else()
 	    " /def:\"${CMAKE_CURRENT_SOURCE_DIR}/src/export.msvc\"")
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${CBOR_INCLUDE_DIRS})
 include_directories(${CRYPTO_INCLUDE_DIRS})
 include_directories(${HIDAPI_INCLUDE_DIRS})

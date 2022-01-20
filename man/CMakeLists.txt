@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Yubico AB. All rights reserved.
+# Copyright (c) 2018-2022 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -263,7 +263,7 @@ math(EXPR MAN_ALIAS_MAX "${MAN_ALIAS_LEN} - 2")
 # man_copy
 foreach(f ${MAN_SOURCES})
 	add_custom_command(OUTPUT ${f}
-		COMMAND cp -f ${CMAKE_SOURCE_DIR}/man/${f} .
+		COMMAND cp -f ${PROJECT_SOURCE_DIR}/man/${f} .
 		DEPENDS ${f})
 	list(APPEND COPY_FILES ${f})
 endforeach()
@@ -289,7 +289,7 @@ endforeach()
 foreach(f ${MAN_SOURCES})
 	string(REGEX REPLACE ".[13]" "" g ${f})
 	add_custom_command(OUTPUT ${g}.partial
-		COMMAND cat ${CMAKE_SOURCE_DIR}/man/dyc.css > ${g}.partial
+		COMMAND cat ${PROJECT_SOURCE_DIR}/man/dyc.css > ${g}.partial
 		COMMAND mandoc -T html -O man="%N.html",fragment ${f} >> ${g}.partial
 		DEPENDS ${f})
 	list(APPEND HTML_PARTIAL_FILES ${g}.partial)
@@ -337,7 +337,7 @@ add_custom_target(man ALL)
 if(MANDOC_PATH)
 	add_dependencies(man man_symlink_html)
 	add_dependencies(man_gzip man_lint)
-	install(FILES ${CMAKE_SOURCE_DIR}/man/style.css
+	install(FILES ${PROJECT_SOURCE_DIR}/man/style.css
 		DESTINATION "${CMAKE_INSTALL_DOCDIR}/html")
 	foreach(f ${MAN_SOURCES})
 		string(REGEX REPLACE ".[13]" "" f ${f})
