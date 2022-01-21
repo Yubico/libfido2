@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+# Copyright (c) 2018-2022 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -402,6 +402,14 @@ message(STATUS "UDEV_VERSION: ${UDEV_VERSION}")
 message(STATUS "USE_HIDAPI: ${USE_HIDAPI}")
 message(STATUS "USE_WINHELLO: ${USE_WINHELLO}")
 message(STATUS "NFC_LINUX: ${NFC_LINUX}")
+
+if(BUILD_SHARED_LIBS)
+	set(_FIDO2_LIBRARY fido2_shared)
+elseif(BUILD_STATIC_LIBS)
+	set(_FIDO2_LIBRARY fido2)
+else()
+	message(FATAL_ERROR "Nothing to build (BUILD_*_LIBS=OFF)")
+endif()
 
 subdirs(src)
 if(BUILD_EXAMPLES)
