@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+# Copyright (c) 2018-2022 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -13,7 +13,7 @@ endmacro()
 
 add_custom_command(TARGET regress POST_BUILD
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
 add_regress_test(regress_cred cred.c)
 add_regress_test(regress_assert assert.c)
