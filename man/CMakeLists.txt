@@ -341,13 +341,13 @@ if(MANDOC_PATH)
 		DESTINATION "${CMAKE_INSTALL_DOCDIR}/html")
 	foreach(f ${MAN_SOURCES})
 		string(REGEX REPLACE ".[13]" "" f ${f})
-		install(FILES ${CMAKE_BINARY_DIR}/man/${f}.html
+		install(FILES ${PROJECT_BINARY_DIR}/man/${f}.html
 			DESTINATION "${CMAKE_INSTALL_DOCDIR}/html")
 	endforeach()
 	foreach(i RANGE 0 ${MAN_ALIAS_MAX} 2)
 		math(EXPR j "${i} + 1")
 		list(GET MAN_ALIAS ${j} DST)
-		install(FILES ${CMAKE_BINARY_DIR}/man/${DST}.html
+		install(FILES ${PROJECT_BINARY_DIR}/man/${DST}.html
 			DESTINATION "${CMAKE_INSTALL_DOCDIR}/html")
 	endforeach()
 endif()
@@ -358,34 +358,34 @@ if(GZIP_PATH)
 	add_dependencies(man man_symlink_gzip)
 	foreach(f ${MAN_SOURCES})
 		if (${f} MATCHES ".1$")
-			install(FILES ${CMAKE_BINARY_DIR}/man/${f}.gz
+			install(FILES ${PROJECT_BINARY_DIR}/man/${f}.gz
 				DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
 		elseif(${f} MATCHES ".3$")
-			install(FILES ${CMAKE_BINARY_DIR}/man/${f}.gz
+			install(FILES ${PROJECT_BINARY_DIR}/man/${f}.gz
 				DESTINATION "${CMAKE_INSTALL_MANDIR}/man3")
 		endif()
 	endforeach()
 	foreach(i RANGE 0 ${MAN_ALIAS_MAX} 2)
 		math(EXPR j "${i} + 1")
 		list(GET MAN_ALIAS ${j} DST)
-		install(FILES ${CMAKE_BINARY_DIR}/man/${DST}.3.gz
+		install(FILES ${PROJECT_BINARY_DIR}/man/${DST}.3.gz
 			DESTINATION "${CMAKE_INSTALL_MANDIR}/man3")
 	endforeach()
 elseif(NOT MSVC)
 	add_dependencies(man man_symlink)
 	foreach(f ${MAN_SOURCES})
 		if (${f} MATCHES ".1$")
-			install(FILES ${CMAKE_BINARY_DIR}/man/${f}
+			install(FILES ${PROJECT_BINARY_DIR}/man/${f}
 				DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
 		elseif(${f} MATCHES ".3$")
-			install(FILES ${CMAKE_BINARY_DIR}/man/${f}
+			install(FILES ${PROJECT_BINARY_DIR}/man/${f}
 				DESTINATION "${CMAKE_INSTALL_MANDIR}/man3")
 		endif()
 	endforeach()
 	foreach(i RANGE 0 ${MAN_ALIAS_MAX} 2)
 		math(EXPR j "${i} + 1")
 		list(GET MAN_ALIAS ${j} DST)
-		install(FILES ${CMAKE_BINARY_DIR}/man/${DST}.3
+		install(FILES ${PROJECT_BINARY_DIR}/man/${DST}.3
 			DESTINATION "${CMAKE_INSTALL_MANDIR}/man3")
 	endforeach()
 endif()
