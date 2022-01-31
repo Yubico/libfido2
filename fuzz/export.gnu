@@ -246,6 +246,7 @@
 		rs256_pk_new;
 		rs256_pk_to_EVP_PKEY;
 		prng_init;
+		prng_up;
 		fuzz_clock_reset;
 		set_netlink_io_functions;
 		set_udev_parameters;
