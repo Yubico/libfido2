@@ -508,7 +508,7 @@ translate_fido_assert(struct winhello_assert *ctx, const fido_assert_t *assert,
 	/* not supported by webauthn.h */
 	if (assert->up == FIDO_OPT_FALSE) {
 		fido_log_debug("%s: up %d", __func__, assert->up);
-		return FIDO_ERR_UNSUPPORTED_OPTION;
+		return FIDO_ERR_USER_PRESENCE_REQUIRED;
 	}
 	/* not implemented */
 	if (assert->ext.mask) {
