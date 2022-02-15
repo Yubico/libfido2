@@ -883,7 +883,7 @@ fido_winhello_get_cbor_info(fido_dev_t *dev, fido_cbor_info_t *ci)
 	const char *v[3] = { "U2F_V2", "FIDO_2_0", "FIDO_2_1_PRE" };
 	const char *e[2] = { "credProtect", "hmac-secret" };
 	const char *t[2] = { "nfc", "usb" };
-	const char *o[4] = { "rk", "up", "plat", "uv" };
+	const char *o[4] = { "rk", "up", "uv", "plat" };
 
 	(void)dev;
 
