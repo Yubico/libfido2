@@ -48,10 +48,14 @@ typedef enum {
 
 typedef void fido_log_handler_t(const char *);
 
+#undef  _FIDO_SIGSET_DEFINED
+#define _FIDO_SIGSET_DEFINED
 #ifdef _WIN32
 typedef int fido_sigset_t;
-#else
+#elif defined(SIG_BLOCK)
 typedef sigset_t fido_sigset_t;
+#else
+#undef _FIDO_SIGSET_DEFINED
 #endif
 
 #ifdef _FIDO_INTERNAL
