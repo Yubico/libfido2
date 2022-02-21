@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -635,3 +635,23 @@ WRAP(int,
 	(sockfd, addr, addrlen),
 	1
 )
+
+int __wrap_asprintf(char **, const char *, ...);
+
+int
+__wrap_asprintf(char **strp, const char *fmt, ...)
+{
+	va_list ap;
+	int r;
+
+	if (uniform_random(400) < 1) {
+		*strp = (void *)0xdeadbeef;
+		return -1;
+	}
+
+	va_start(ap, fmt);
+	r = vasprintf(strp, fmt, ap);
+	va_end(ap);
+
+	return r;
+}
