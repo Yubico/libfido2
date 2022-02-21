@@ -724,7 +724,7 @@ nfc_linux.c:rx_cbor                           4       0 100.00%         6       
 nfc_linux.c:rx_msg                           18       2  88.89%        23       6  73.91%
 nfc_linux.c:rx_apdu                          14       1  92.86%        22       3  86.36%
 nfc_linux.c:tx_get_response                   4       0 100.00%        11       0 100.00%
-nfc_linux.c:copy_info                        41       9  78.05%        44       3  93.18%
+nfc_linux.c:copy_info                        41       9  78.05%        46       5  89.13%
 nfc_linux.c:get_usb_attr                      1       0 100.00%         3       0 100.00%
 nfc_linux.c:get_parent_attr                   6       0 100.00%         9       0 100.00%
 nfc_linux.c:to_int                           21       6  71.43%        14       1  92.86%
@@ -733,7 +733,7 @@ nfc_linux.c:nfc_new                           6       0 100.00%        11       
 nfc_linux.c:nfc_target_connect                9       9   0.00%        21      21   0.00%
 nfc_linux.c:nfc_free                         12       0 100.00%        11       0 100.00%
 -------------------------------------------------------------------------------------------------------------------
-TOTAL                                       327      73  77.68%       458     124  72.93%
+TOTAL                                       327      73  77.68%       460     126  72.61%
 
 File '/libfido2/src/pin.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
