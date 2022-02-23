@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Yubico AB. All rights reserved.
+ * Copyright (c) 2020-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -107,7 +107,7 @@ nfc_do_tx(fido_dev_t *d, const uint8_t *apdu_ptr, size_t apdu_len)
 		fido_log_debug("%s: tx_short_apdu", __func__);
 		return (-1);
 	}
- 
+
 	return (0);
 }
 
@@ -128,7 +128,7 @@ fido_nfc_tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 		}
 		break;
 	case CTAP_CMD_CBOR: /* wrap cbor */
-		if (count > UINT16_MAX || (apdu = iso7816_new(0x80, 0x10, 0x80,
+		if (count > UINT16_MAX || (apdu = iso7816_new(0x80, 0x10, 0x00,
 		    (uint16_t)count)) == NULL ||
 		    iso7816_add(apdu, buf, count) < 0) {
 			fido_log_debug("%s: iso7816", __func__);
