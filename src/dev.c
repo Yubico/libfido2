@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -346,18 +346,9 @@ fido_dev_open(fido_dev_t *dev, const char *path)
 	int ms = dev->timeout_ms;
 
 #ifdef USE_NFC
-	if (strncmp(path, FIDO_NFC_PREFIX, strlen(FIDO_NFC_PREFIX)) == 0) {
-		dev->io_own = true;
-		dev->io = (fido_dev_io_t) {
-			fido_nfc_open,
-			fido_nfc_close,
-			fido_nfc_read,
-			fido_nfc_write,
-		};
-		dev->transport = (fido_dev_transport_t) {
-			fido_nfc_rx,
-			fido_nfc_tx,
-		};
+	if (fido_is_nfc(path) && fido_dev_set_nfc(dev) < 0) {
+		fido_log_debug("%s: fido_dev_set_nfc", __func__);
+		return FIDO_ERR_INTERNAL;
 	}
 #endif
 
