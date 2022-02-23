@@ -41,15 +41,15 @@ get_parent_attr(struct udev_device *dev, const char *subsystem,
 	if ((parent = udev_device_get_parent_with_subsystem_devtype(dev,
 	    subsystem, devtype)) == NULL || (value =
 	    udev_device_get_sysattr_value(parent, attr)) == NULL)
-		return (NULL);
+		return NULL;
 
-	return (strdup(value));
+	return strdup(value);
 }
 
 static char *
 get_usb_attr(struct udev_device *dev, const char *attr)
 {
-	return (get_parent_attr(dev, "usb", "usb_device", attr));
+	return get_parent_attr(dev, "usb", "usb_device", attr);
 }
 
 static int
@@ -60,15 +60,15 @@ to_int(const char *str, int base)
 
 	ll = strtoll(str, &ep, base);
 	if (str == ep || *ep != '\0')
-		return (-1);
+		return -1;
 	else if (ll == LLONG_MIN && errno == ERANGE)
-		return (-1);
+		return -1;
 	else if (ll == LLONG_MAX && errno == ERANGE)
-		return (-1);
+		return -1;
 	else if (ll < 0 || ll > INT_MAX)
-		return (-1);
+		return -1;
 
-	return ((int)ll);
+	return (int)ll;
 }
 
 static int
@@ -125,7 +125,7 @@ fail:
 		explicit_bzero(di, sizeof(*di));
 	}
 
-	return (ok);
+	return ok;
 }
 
 static int
@@ -148,7 +148,7 @@ sysnum_from_syspath(const char *path)
 	if (udev != NULL)
 		udev_unref(udev);
 
-	return (idx);
+	return idx;
 }
 
 int
@@ -163,10 +163,10 @@ fido_nfc_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 	*olen = 0;
 
 	if (ilen == 0)
-		return (FIDO_OK);
+		return FIDO_OK;
 
 	if (devlist == NULL)
-		return (FIDO_ERR_INVALID_ARGUMENT);
+		return FIDO_ERR_INVALID_ARGUMENT;
 
 	if ((udev = udev_new()) == NULL ||
 	    (udev_enum = udev_enumerate_new(udev)) == NULL)
@@ -205,7 +205,7 @@ fail:
 	if (udev != NULL)
 		udev_unref(udev);
 
-	return (r);
+	return r;
 }
 
 static int
@@ -222,17 +222,17 @@ nfc_target_connect(struct nfc_linux *ctx)
 	if ((ctx->fd = socket(AF_NFC, SOCK_SEQPACKET | SOCK_CLOEXEC,
 	    NFC_SOCKPROTO_RAW)) == -1) {
 		fido_log_error(errno, "%s: socket", __func__);
-		return (-1);
+		return -1;
 	}
 	if (connect(ctx->fd, (struct sockaddr *)&sa, sizeof(sa)) == -1) {
 		fido_log_error(errno, "%s: connect", __func__);
 		if (close(ctx->fd) == -1)
 			fido_log_error(errno, "%s: close", __func__);
 		ctx->fd = -1;
-		return (-1);
+		return -1;
 	}
 
-	return (0);
+	return 0;
 }
 
 static void
@@ -259,13 +259,13 @@ nfc_new(uint32_t dev)
 	if ((ctx = calloc(1, sizeof(*ctx))) == NULL ||
 	    (ctx->nl = fido_nl_new()) == NULL) {
 		nfc_free(&ctx);
-		return (NULL);
+		return NULL;
 	}
 
 	ctx->fd = -1;
 	ctx->dev = dev;
 
-	return (ctx);
+	return ctx;
 }
 
 void *
@@ -290,10 +290,10 @@ fido_nfc_open(const char *path)
 		goto fail;
 	}
 
-	return (ctx);
+	return ctx;
 fail:
 	nfc_free(&ctx);
-	return (NULL);
+	return NULL;
 }
 
 void
@@ -312,7 +312,7 @@ fido_nfc_set_sigmask(void *handle, const fido_sigset_t *sigmask)
 	ctx->sigmask = *sigmask;
 	ctx->sigmaskp = &ctx->sigmask;
 
-	return (FIDO_OK);
+	return FIDO_OK;
 }
 
 int
@@ -331,25 +331,25 @@ fido_nfc_read(void *handle, unsigned char *buf, size_t len, int ms)
 
 	if (fido_hid_unix_wait(ctx->fd, ms, ctx->sigmaskp) < 0) {
 		fido_log_debug("%s: fido_hid_unix_wait", __func__);
-		return (-1);
+		return -1;
 	}
 	if ((r = readv(ctx->fd, iov, nitems(iov))) == -1) {
 		fido_log_error(errno, "%s: read", __func__);
-		return (-1);
+		return -1;
 	}
 	if (r < 1) {
 		fido_log_debug("%s: %zd < 1", __func__, r);
-		return (-1);
+		return -1;
 	}
 	if (preamble != 0x00) {
 		fido_log_debug("%s: preamble", __func__);
-		return (-1);
+		return -1;
 	}
 
 	r--;
 	fido_log_xxd(buf, (size_t)r, "%s", __func__);
 
-	return ((int)r);
+	return (int)r;
 }
 
 int
@@ -362,16 +362,16 @@ fido_nfc_write(void *handle, const unsigned char *buf, size_t len)
 
 	if (len > INT_MAX) {
 		fido_log_debug("%s: len", __func__);
-		return (-1);
+		return -1;
 	}
 	if ((r = write(ctx->fd, buf, len)) == -1) {
 		fido_log_error(errno, "%s: write", __func__);
-		return (-1);
+		return -1;
 	}
 	if (r < 0 || (size_t)r != len) {
 		fido_log_debug("%s: %zd != %zu", __func__, r, len);
-		return (-1);
+		return -1;
 	}
 
-	return ((int)r);
+	return (int)r;
 }
