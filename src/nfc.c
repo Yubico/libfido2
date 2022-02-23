@@ -288,3 +288,31 @@ fido_nfc_rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms
 		return (-1);
 	}
 }
+
+bool
+fido_is_nfc(const char *path)
+{
+	return strncmp(path, FIDO_NFC_PREFIX, strlen(FIDO_NFC_PREFIX)) == 0;
+}
+
+int
+fido_dev_set_nfc(fido_dev_t *d)
+{
+	if (d->io_handle != NULL) {
+		fido_log_debug("%s: device open", __func__);
+		return -1;
+	}
+	d->io_own = true;
+	d->io = (fido_dev_io_t) {
+		fido_nfc_open,
+		fido_nfc_close,
+		fido_nfc_read,
+		fido_nfc_write,
+	};
+	d->transport = (fido_dev_transport_t) {
+		fido_nfc_rx,
+		fido_nfc_tx,
+	};
+
+	return 0;
+}

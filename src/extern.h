@@ -118,6 +118,7 @@ size_t fido_hid_report_in_len(void *);
 size_t fido_hid_report_out_len(void *);
 
 /* nfc i/o */
+bool fido_is_nfc(const char *);
 void *fido_nfc_open(const char *);
 void  fido_nfc_close(void *);
 int fido_nfc_read(void *, unsigned char *, size_t, int);
@@ -125,6 +126,7 @@ int fido_nfc_write(void *, const unsigned char *, size_t);
 int fido_nfc_rx(fido_dev_t *, uint8_t, unsigned char *, size_t, int);
 int fido_nfc_tx(fido_dev_t *, uint8_t, const unsigned char *, size_t);
 int fido_nfc_set_sigmask(void *, const fido_sigset_t *);
+int fido_dev_set_nfc(fido_dev_t *);
 
 /* windows hello */
 int fido_winhello_manifest(fido_dev_info_t *, size_t, size_t *);
