@@ -46,7 +46,7 @@ if(FUZZ)
 	list(APPEND FIDO_SOURCES ../fuzz/wrap.c)
 endif()
 if(NFC_LINUX)
-	list(APPEND FIDO_SOURCES netlink.c nfc_linux.c)
+	list(APPEND FIDO_SOURCES netlink.c nfc.c nfc_linux.c)
 endif()
 
 if(USE_HIDAPI)
