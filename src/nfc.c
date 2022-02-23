@@ -55,7 +55,7 @@ tx_short_apdu(fido_dev_t *d, const iso7816_header_t *h, const uint8_t *payload,
 fail:
 	explicit_bzero(apdu, sizeof(apdu));
 
-	return (ok);
+	return ok;
 }
 
 static int
@@ -65,11 +65,11 @@ nfc_do_tx(fido_dev_t *d, const uint8_t *apdu_ptr, size_t apdu_len)
 
 	if (fido_buf_read(&apdu_ptr, &apdu_len, &h, sizeof(h)) < 0) {
 		fido_log_debug("%s: header", __func__);
-		return (-1);
+		return -1;
 	}
 	if (apdu_len < 2) {
 		fido_log_debug("%s: apdu_len %zu", __func__, apdu_len);
-		return (-1);
+		return -1;
 	}
 
 	apdu_len -= 2; /* trim le1 le2 */
@@ -77,7 +77,7 @@ nfc_do_tx(fido_dev_t *d, const uint8_t *apdu_ptr, size_t apdu_len)
 	while (apdu_len > TX_CHUNK_SIZE) {
 		if (tx_short_apdu(d, &h, apdu_ptr, TX_CHUNK_SIZE, 0x10) < 0) {
 			fido_log_debug("%s: chain", __func__);
-			return (-1);
+			return -1;
 		}
 		apdu_ptr += TX_CHUNK_SIZE;
 		apdu_len -= TX_CHUNK_SIZE;
@@ -85,10 +85,10 @@ nfc_do_tx(fido_dev_t *d, const uint8_t *apdu_ptr, size_t apdu_len)
 
 	if (tx_short_apdu(d, &h, apdu_ptr, (uint8_t)apdu_len, 0) < 0) {
 		fido_log_debug("%s: tx_short_apdu", __func__);
-		return (-1);
+		return -1;
 	}
 
-	return (0);
+	return 0;
 }
 
 int
@@ -139,7 +139,7 @@ fido_nfc_tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 fail:
 	iso7816_free(&apdu);
 
-	return (ok);
+	return ok;
 }
 
 static int
@@ -151,7 +151,7 @@ rx_init(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 
 	if (count != sizeof(*attr)) {
 		fido_log_debug("%s: count=%zu", __func__, count);
-		return (-1);
+		return -1;
 	}
 
 	memset(attr, 0, sizeof(*attr));
@@ -159,7 +159,7 @@ rx_init(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 	if ((n = d->io.read(d->io_handle, f, sizeof(f), ms)) < 2 ||
 	    (f[n - 2] << 8 | f[n - 1]) != SW_NO_ERROR) {
 		fido_log_debug("%s: read", __func__);
-		return (-1);
+		return -1;
 	}
 
 	n -= 2;
@@ -173,13 +173,13 @@ rx_init(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 #ifdef FIDO_FUZZ
 		attr->flags = FIDO_CAP_CBOR | FIDO_CAP_NMSG;
 #else
-		return (-1);
+		return -1;
 #endif
 	}
 
 	memcpy(&attr->nonce, &d->nonce, sizeof(attr->nonce)); /* XXX */
 
-	return ((int)count);
+	return (int)count;
 }
 
 static int
@@ -193,10 +193,10 @@ tx_get_response(fido_dev_t *d, uint8_t count)
 
 	if (d->io.write(d->io_handle, apdu, sizeof(apdu)) < 0) {
 		fido_log_debug("%s: write", __func__);
-		return (-1);
+		return -1;
 	}
 
-	return (0);
+	return 0;
 }
 
 static int
@@ -228,7 +228,7 @@ rx_apdu(fido_dev_t *d, uint8_t sw[2], unsigned char **buf, size_t *count, int *m
 fail:
 	explicit_bzero(f, sizeof(f));
 
-	return (ok);
+	return ok;
 }
 
 static int
@@ -239,27 +239,27 @@ rx_msg(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 
 	if (rx_apdu(d, sw, &buf, &count, &ms) < 0) {
 		fido_log_debug("%s: preamble", __func__);
-		return (-1);
+		return -1;
 	}
 
 	while (sw[0] == SW1_MORE_DATA)
 		if (tx_get_response(d, sw[1]) < 0 ||
 		    rx_apdu(d, sw, &buf, &count, &ms) < 0) {
 			fido_log_debug("%s: chain", __func__);
-			return (-1);
+			return -1;
 		}
 
 	if (fido_buf_write(&buf, &count, sw, sizeof(sw)) < 0) {
 		fido_log_debug("%s: sw", __func__);
-		return (-1);
+		return -1;
 	}
 
 	if (bufsiz - count > INT_MAX) {
 		fido_log_debug("%s: bufsiz", __func__);
-		return (-1);
+		return -1;
 	}
 
-	return ((int)(bufsiz - count));
+	return (int)(bufsiz - count);
 }
 
 static int
@@ -268,9 +268,9 @@ rx_cbor(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 	int r;
 
 	if ((r = rx_msg(d, buf, count, ms)) < 2)
-		return (-1);
+		return -1;
 
-	return (r - 2);
+	return r - 2;
 }
 
 int
@@ -278,14 +278,14 @@ fido_nfc_rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms
 {
 	switch (cmd) {
 	case CTAP_CMD_INIT:
-		return (rx_init(d, buf, count, ms));
+		return rx_init(d, buf, count, ms);
 	case CTAP_CMD_CBOR:
-		return (rx_cbor(d, buf, count, ms));
+		return rx_cbor(d, buf, count, ms);
 	case CTAP_CMD_MSG:
-		return (rx_msg(d, buf, count, ms));
+		return rx_msg(d, buf, count, ms);
 	default:
 		fido_log_debug("%s: cmd=%02x", __func__, cmd);
-		return (-1);
+		return -1;
 	}
 }
 
