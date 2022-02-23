@@ -244,7 +244,7 @@ else()
 	endif()
 
 	if(NFC_LINUX)
-		add_definitions(-DNFC_LINUX)
+		add_definitions(-DUSE_NFC)
 	endif()
 
 	if(WIN32)
