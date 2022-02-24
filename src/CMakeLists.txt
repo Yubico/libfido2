@@ -48,6 +48,9 @@ endif()
 if(NFC_LINUX)
 	list(APPEND FIDO_SOURCES netlink.c nfc.c nfc_linux.c)
 endif()
+if(USE_PCSC)
+	list(APPEND FIDO_SOURCES nfc.c pcsc.c)
+endif()
 
 if(USE_HIDAPI)
 	list(APPEND FIDO_SOURCES hid_hidapi.c)
@@ -93,8 +96,15 @@ list(APPEND COMPAT_SOURCES
 
 if(WIN32)
 	list(APPEND BASE_LIBRARIES wsock32 ws2_32 bcrypt setupapi hid)
+	if(USE_PCSC)
+		list(APPEND BASE_LIBRARIES winscard)
+	endif()
 elseif(APPLE)
-	list(APPEND BASE_LIBRARIES "-framework CoreFoundation" "-framework IOKit")
+	list(APPEND BASE_LIBRARIES "-framework CoreFoundation"
+	    "-framework IOKit")
+	if(USE_PCSC)
+		list(APPEND BASE_LIBRARIES "-framework PCSC")
+	endif()
 endif()
 
 list(APPEND TARGET_LIBRARIES
@@ -104,6 +114,7 @@ list(APPEND TARGET_LIBRARIES
 	${BASE_LIBRARIES}
 	${HIDAPI_LIBRARIES}
 	${ZLIB_LIBRARIES}
+	${PCSC_LIBRARIES}
 )
 
 # static library

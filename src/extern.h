@@ -128,6 +128,16 @@ int fido_nfc_tx(fido_dev_t *, uint8_t, const unsigned char *, size_t);
 int fido_nfc_set_sigmask(void *, const fido_sigset_t *);
 int fido_dev_set_nfc(fido_dev_t *);
 
+/* pcsc i/o */
+bool fido_is_pcsc(const char *);
+void *fido_pcsc_open(const char *);
+void  fido_pcsc_close(void *);
+int fido_pcsc_read(void *, unsigned char *, size_t, int);
+int fido_pcsc_write(void *, const unsigned char *, size_t);
+int fido_pcsc_rx(fido_dev_t *, uint8_t, unsigned char *, size_t, int);
+int fido_pcsc_tx(fido_dev_t *, uint8_t, const unsigned char *, size_t);
+int fido_dev_set_pcsc(fido_dev_t *);
+
 /* windows hello */
 int fido_winhello_manifest(fido_dev_info_t *, size_t, size_t *);
 int fido_winhello_open(fido_dev_t *);
@@ -222,6 +232,7 @@ int fido_get_signed_hash_tpm(fido_blob_t *, const fido_blob_t *,
 /* device manifest functions */
 int fido_hid_manifest(fido_dev_info_t *, size_t, size_t *);
 int fido_nfc_manifest(fido_dev_info_t *, size_t, size_t *);
+int fido_pcsc_manifest(fido_dev_info_t *, size_t, size_t *);
 
 /* device manifest registration */
 typedef int (*dev_manifest_func_t)(fido_dev_info_t *, size_t, size_t *);
@@ -252,6 +263,7 @@ uint32_t uniform_random(uint32_t);
 #define FIDO_DUMMY_USER_ID	1
 #define FIDO_WINHELLO_PATH	"windows://hello"
 #define FIDO_NFC_PREFIX		"nfc:"
+#define FIDO_PCSC_PREFIX	"pcsc:"
 
 #ifdef __cplusplus
 } /* extern "C" */

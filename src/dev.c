@@ -314,6 +314,10 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 	if (fido_dev_register_manifest_func(fido_winhello_manifest) != FIDO_OK)
 		return (FIDO_ERR_INTERNAL);
 #endif
+#ifdef USE_PCSC
+	if (fido_dev_register_manifest_func(fido_pcsc_manifest) != FIDO_OK)
+		return (FIDO_ERR_INTERNAL);
+#endif
 
 	for (curr = manifest_funcs; curr != NULL; curr = curr->next) {
 		curr_olen = 0;
@@ -348,6 +352,12 @@ fido_dev_open(fido_dev_t *dev, const char *path)
 #ifdef USE_NFC
 	if (fido_is_nfc(path) && fido_dev_set_nfc(dev) < 0) {
 		fido_log_debug("%s: fido_dev_set_nfc", __func__);
+		return FIDO_ERR_INTERNAL;
+	}
+#endif
+#ifdef USE_PCSC
+	if (fido_is_pcsc(path) && fido_dev_set_pcsc(dev) < 0) {
+		fido_log_debug("%s: fido_dev_set_pcsc", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
 #endif
