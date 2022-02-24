@@ -289,6 +289,7 @@ fido_nfc_rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms
 	}
 }
 
+#ifdef USE_NFC
 bool
 fido_is_nfc(const char *path)
 {
@@ -316,3 +317,4 @@ fido_dev_set_nfc(fido_dev_t *d)
 
 	return 0;
 }
+#endif /* USE_NFC */
