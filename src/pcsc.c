@@ -12,6 +12,8 @@
 #include <winscard.h>
 #endif /* __APPLE__ */
 
+#include <errno.h>
+
 #include "fido.h"
 #include "fido/param.h"
 #include "iso7816.h"
@@ -25,6 +27,9 @@
 #define SCARD_PROTOCOL_Tx SCARD_PROTOCOL_ANY
 #endif
 
+#define BUFSIZE 1024	/* in bytes; passed to SCardListReaders() */
+#define READERS 8	/* maximum number of readers */
+
 struct pcsc {
 	SCARDCONTEXT     ctx;
 	SCARDHANDLE      h;
@@ -33,25 +38,87 @@ struct pcsc {
 	size_t           rx_len;
 };
 
-static char *
-get_reader(const char *path)
+static int
+to_int(const char *str, int base)
 {
-	char *o = NULL, *p;
-	char *reader = NULL;
-	const char prefix[] = FIDO_PCSC_PREFIX "{";
+	char *ep;
+	long long ll;
+
+	ll = strtoll(str, &ep, base);
+	if (str == ep || *ep != '\0')
+		return -1;
+	else if (ll == LLONG_MIN && errno == ERANGE)
+		return -1;
+	else if (ll == LLONG_MAX && errno == ERANGE)
+		return -1;
+	else if (ll < 0 || ll > INT_MAX)
+		return -1;
+
+	return (int)ll;
+}
+
+static LONG
+list_readers(SCARDCONTEXT ctx, char **buf)
+{
+	LONG s;
+	DWORD len;
+
+	len = BUFSIZE;
+	if ((*buf = calloc(1, len)) == NULL) {
+		s = (LONG)SCARD_E_NO_MEMORY;
+		goto fail;
+	}
+	if ((s = SCardListReaders(ctx, NULL, *buf, &len)) != SCARD_S_SUCCESS) {
+		fido_log_debug("%s: SCardListReaders 0x%lx", __func__, (long)s);
+		goto fail;
+	}
+	/* sanity check "multi-string" */
+	if (len > BUFSIZE || len < 2) {
+		fido_log_debug("%s: bogus len=%u", __func__, (unsigned)len);
+		s = (LONG)SCARD_E_UNEXPECTED;
+		goto fail;
+	}
+	if ((*buf)[len - 1] != 0 || (*buf)[len - 2] != '\0') {
+		fido_log_debug("%s: bogus buf", __func__);
+		s = (LONG)SCARD_E_INVALID_VALUE;
+		goto fail;
+	}
+fail:
+	if (s != SCARD_S_SUCCESS) {
+		free(*buf);
+		*buf = NULL;
+	}
+
+	return s;
+}
+
+static char *
+get_reader(SCARDCONTEXT ctx, const char *path)
+{
+	char *reader = NULL, *buf = NULL;
+	int n;
 
 	if (path == NULL)
 		goto out;
-	if ((o = p = strdup(path)) == NULL ||
-	    strncmp(p, prefix, strlen(prefix)) != 0)
+	if (strncmp(path, FIDO_PCSC_PREFIX, strlen(FIDO_PCSC_PREFIX)) != 0 ||
+	    (n = to_int(path + strlen(FIDO_PCSC_PREFIX), 10)) < 0 ||
+	    n > READERS - 1) {
+		fido_log_debug("%s: invalid path %s", __func__, path);
 		goto out;
-	p += strlen(prefix);
-	if (strlen(p) == 0 || p[strlen(p) - 1] != '}')
+	}
+	if (list_readers(ctx, &buf) != SCARD_S_SUCCESS) {
+		fido_log_debug("%s: list_readers", __func__);
 		goto out;
-	p[strlen(p) - 1] = '\0';
-	reader = strdup(p);
+	}
+	for (const char *name = buf; *name != 0; name += strlen(name) + 1) {
+		if (n-- == 0) {
+			reader = strdup(name);
+			goto out;
+		}
+	}
+	fido_log_debug("%s: failed to find reader %s", __func__, path);
 out:
-	free(o);
+	free(buf);
 
 	return reader;
 }
@@ -78,7 +145,7 @@ prepare_io_request(DWORD prot, SCARD_IO_REQUEST *req)
 }
 
 static int
-copy_info(fido_dev_info_t *di, SCARDCONTEXT ctx, const char *reader)
+copy_info(fido_dev_info_t *di, SCARDCONTEXT ctx, const char *reader, size_t idx)
 {
 	SCARDHANDLE h = 0;
 	SCARD_IO_REQUEST req;
@@ -99,8 +166,8 @@ copy_info(fido_dev_info_t *di, SCARDCONTEXT ctx, const char *reader)
 		fido_log_debug("%s: prepare_io_request", __func__);
 		goto fail;
 	}
-	if ((r = snprintf(path, sizeof(path), "%s{%s}", FIDO_PCSC_PREFIX,
-	    reader)) < 0 || (size_t)r >= sizeof(path)) {
+	if ((r = snprintf(path, sizeof(path), "%s%zu", FIDO_PCSC_PREFIX,
+	    idx)) < 0 || (size_t)r >= sizeof(path)) {
 		fido_log_debug("%s: snprintf", __func__);
 		goto fail;
 	}
@@ -129,9 +196,8 @@ fido_pcsc_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
 	SCARDCONTEXT ctx = 0;
 	char *buf = NULL;
-	const char *reader;
-	DWORD len;
 	LONG s;
+	size_t idx = 0;
 	int r = FIDO_ERR_INTERNAL;
 
 	*olen = 0;
@@ -150,25 +216,21 @@ fido_pcsc_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 			r = FIDO_OK; /* suppress error */
 		goto out;
 	}
-	len = 1024; /* XXX */
-	if ((buf = calloc(1, len)) == NULL)
-		goto out;
-	if ((s = SCardListReaders(ctx, NULL, buf,
-	    &len)) != SCARD_S_SUCCESS || buf == NULL) {
-		fido_log_debug("%s: SCardListReaders 0x%lx", __func__, (long)s);
+	if ((s = list_readers(ctx, &buf)) != SCARD_S_SUCCESS) {
+		fido_log_debug("%s: list_readers 0x%lx", __func__, (long)s);
 		if (s == (LONG)SCARD_E_NO_READERS_AVAILABLE)
 			r = FIDO_OK; /* suppress error */
 		goto out;
 	}
-	/* sanity check "multi-string" */
-	if (len < 2 || buf[len - 1] != 0 || buf[len - 2] != '\0') {
-		fido_log_debug("%s: can't parse buf returned by "
-		    "SCardListReaders", __func__);
-		goto out;
-	}
 
-	for (reader = buf; *reader != 0; reader += strlen(reader) + 1) {
-		if (copy_info(&devlist[*olen], ctx, reader) == 0) {
+	for (const char *name = buf; *name != 0; name += strlen(name) + 1) {
+		if (idx == READERS) {
+			fido_log_debug("%s: stopping at %zu readers", __func__,
+			    idx);
+			r = FIDO_OK;
+			goto out;
+		}
+		if (copy_info(&devlist[*olen], ctx, name, idx++) == 0) {
 			devlist[*olen].io = (fido_dev_io_t) {
 				fido_pcsc_open,
 				fido_pcsc_close,
@@ -196,7 +258,7 @@ out:
 void *
 fido_pcsc_open(const char *path)
 {
-	char *reader;
+	char *reader = NULL;
 	struct pcsc *dev = NULL;
 	SCARDCONTEXT ctx = 0;
 	SCARDHANDLE h = 0;
@@ -206,16 +268,16 @@ fido_pcsc_open(const char *path)
 
 	memset(&req, 0, sizeof(req));
 
-	if ((reader = get_reader(path)) == NULL) {
-		fido_log_debug("%s: get_reader(%s)", __func__, path);
-		goto fail;
-	}
 	if ((s = SCardEstablishContext(SCARD_SCOPE_SYSTEM, NULL, NULL,
 	    &ctx)) != SCARD_S_SUCCESS || ctx == 0) {
 		fido_log_debug("%s: SCardEstablishContext 0x%lx", __func__,
 		    (long)s);
 		goto fail;
 
+	}
+	if ((reader = get_reader(ctx, path)) == NULL) {
+		fido_log_debug("%s: get_reader(%s)", __func__, path);
+		goto fail;
 	}
 	if ((s = SCardConnect(ctx, reader, SCARD_SHARE_SHARED,
 	    SCARD_PROTOCOL_Tx, &h, &prot)) != SCARD_S_SUCCESS) {
