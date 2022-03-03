@@ -36,6 +36,7 @@ list(APPEND FIDO_SOURCES
 	tpm.c
 	types.c
 	u2f.c
+	util.c
 )
 
 if(FUZZ)
