@@ -212,6 +212,7 @@ int fido_get_random(void *, size_t);
 int fido_sha256(fido_blob_t *, const u_char *, size_t);
 int fido_time_now(struct timespec *);
 int fido_time_delta(const struct timespec *, int *);
+int fido_to_uint64(const char *, int, uint64_t *);
 
 /* crypto */
 int es256_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
