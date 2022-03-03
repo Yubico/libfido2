@@ -53,25 +53,6 @@ get_usb_attr(struct udev_device *dev, const char *attr)
 }
 
 static int
-to_int(const char *str, int base)
-{
-	char *ep;
-	long long ll;
-
-	ll = strtoll(str, &ep, base);
-	if (str == ep || *ep != '\0')
-		return -1;
-	else if (ll == LLONG_MIN && errno == ERANGE)
-		return -1;
-	else if (ll == LLONG_MAX && errno == ERANGE)
-		return -1;
-	else if (ll < 0 || ll > INT_MAX)
-		return -1;
-
-	return (int)ll;
-}
-
-static int
 copy_info(fido_dev_info_t *di, struct udev *udev,
     struct udev_list_entry *udev_entry)
 {
@@ -79,7 +60,8 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 	char *str;
 	struct udev_device *dev = NULL;
 	void *ctx = NULL;
-	int id, ok = -1;
+	uint64_t id;
+	int ok = -1;
 
 	memset(di, 0, sizeof(*di));
 
@@ -98,11 +80,11 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 		goto fail;
 	/* XXX assumes USB for vendor/product info */
 	if ((str = get_usb_attr(dev, "idVendor")) != NULL &&
-	    (id = to_int(str, 16)) > 0 && id <= UINT16_MAX)
+	    fido_to_uint64(str, 16, &id) == 0 && id <= UINT16_MAX)
 		di->vendor_id = (int16_t)id;
 	free(str);
 	if ((str = get_usb_attr(dev, "idProduct")) != NULL &&
-	    (id = to_int(str, 16)) > 0 && id <= UINT16_MAX)
+	    fido_to_uint64(str, 16, &id) == 0 && id <= UINT16_MAX)
 		di->product_id = (int16_t)id;
 	free(str);
 
@@ -134,14 +116,14 @@ sysnum_from_syspath(const char *path)
 	struct udev *udev = NULL;
 	struct udev_device *dev = NULL;
 	const char *str;
-	int idx;
+	uint64_t idx64;
+	int idx = -1;
 
-	if ((udev = udev_new()) == NULL ||
-	    (dev = udev_device_new_from_syspath(udev, path)) == NULL ||
-	    (str = udev_device_get_sysnum(dev)) == NULL)
-		idx = -1;
-	else
-		idx = to_int(str, 10);
+	if ((udev = udev_new()) != NULL &&
+	    (dev = udev_device_new_from_syspath(udev, path)) != NULL &&
+	    (str = udev_device_get_sysnum(dev)) != NULL &&
+	    fido_to_uint64(str, 10, &idx64) == 0 && idx64 < INT_MAX)
+		idx = (int)idx64;
 
 	if (dev != NULL)
 		udev_device_unref(dev);
