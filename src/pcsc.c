@@ -38,25 +38,6 @@ struct pcsc {
 	size_t           rx_len;
 };
 
-static int
-to_int(const char *str, int base)
-{
-	char *ep;
-	long long ll;
-
-	ll = strtoll(str, &ep, base);
-	if (str == ep || *ep != '\0')
-		return -1;
-	else if (ll == LLONG_MIN && errno == ERANGE)
-		return -1;
-	else if (ll == LLONG_MAX && errno == ERANGE)
-		return -1;
-	else if (ll < 0 || ll > INT_MAX)
-		return -1;
-
-	return (int)ll;
-}
-
 static LONG
 list_readers(SCARDCONTEXT ctx, char **buf)
 {
@@ -96,12 +77,12 @@ static char *
 get_reader(SCARDCONTEXT ctx, const char *path)
 {
 	char *reader = NULL, *buf = NULL;
-	int n;
+	uint64_t n;
 
 	if (path == NULL)
 		goto out;
 	if (strncmp(path, FIDO_PCSC_PREFIX, strlen(FIDO_PCSC_PREFIX)) != 0 ||
-	    (n = to_int(path + strlen(FIDO_PCSC_PREFIX), 10)) < 0 ||
+	    fido_to_uint64(path + strlen(FIDO_PCSC_PREFIX), 10, &n) < 0 ||
 	    n > READERS - 1) {
 		fido_log_debug("%s: invalid path %s", __func__, path);
 		goto out;
