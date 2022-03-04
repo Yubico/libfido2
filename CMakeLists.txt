@@ -40,7 +40,7 @@ option(BUILD_TOOLS       "Build tool programs"                     ON)
 option(FUZZ              "Enable fuzzing instrumentation"          OFF)
 option(LIBFUZZER         "Build libfuzzer harnesses"               OFF)
 option(USE_HIDAPI        "Use hidapi as the HID backend"           OFF)
-option(USE_PCSC          "Enable experimental PCSC support"        OFF)
+option(USE_PCSC          "Enable experimental PCSC support"        ON)
 option(USE_WINHELLO      "Abstract Windows Hello as a FIDO device" ON)
 option(NFC_LINUX         "Enable NFC support on Linux"             ON)
 
@@ -50,6 +50,10 @@ add_definitions(-D_FIDO_PATCH=${FIDO_PATCH})
 
 if(CYGWIN OR MSYS OR MINGW)
 	set(WIN32 1)
+endif()
+
+if(FUZZ)
+	set(USE_PCSC OFF) # XXX not yet
 endif()
 
 if(WIN32)

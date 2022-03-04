@@ -27,7 +27,8 @@ jobs:
         CC: gcc
       run: |
         sudo apt -q update
-        sudo apt install -q -y libcbor-dev libudev-dev libz-dev original-awk
+        sudo apt install -q -y libcbor-dev libudev-dev libz-dev original-awk \
+         libpcsclite-dev
         ./.actions/build-linux-gcc
     - name: perform codeql analysis
       uses: github/codeql-action/analyze@v1

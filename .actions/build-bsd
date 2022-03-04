@@ -10,6 +10,7 @@ image: ${IMAGE}
 packages:
   - cmake
   - llvm
+  - pcsc-lite
 EOF
 
 case "${IMAGE}" in

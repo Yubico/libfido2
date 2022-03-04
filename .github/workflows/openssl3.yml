@@ -30,7 +30,7 @@ jobs:
       run: |
         sudo apt -q update
         sudo apt install -q -y libcbor-dev libudev-dev libz-dev \
-          original-awk mandoc
+          original-awk mandoc libpcsclite-dev
         sudo apt remove -y libssl-dev
         if [ "${CC%-*}" == "clang" ]; then
           sudo apt install -q -y ${CC%-*}-tools-${CC#clang-}
