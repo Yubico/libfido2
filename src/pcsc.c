@@ -73,12 +73,13 @@ static char *
 get_reader(SCARDCONTEXT ctx, const char *path)
 {
 	char *reader = NULL, *buf = NULL;
+	const char prefix[] = FIDO_PCSC_PREFIX "//slot";
 	uint64_t n;
 
 	if (path == NULL)
 		goto out;
-	if (strncmp(path, FIDO_PCSC_PREFIX, strlen(FIDO_PCSC_PREFIX)) != 0 ||
-	    fido_to_uint64(path + strlen(FIDO_PCSC_PREFIX), 10, &n) < 0 ||
+	if (strncmp(path, prefix, strlen(prefix)) != 0 ||
+	    fido_to_uint64(path + strlen(prefix), 10, &n) < 0 ||
 	    n > READERS - 1) {
 		fido_log_debug("%s: invalid path %s", __func__, path);
 		goto out;
@@ -143,7 +144,7 @@ copy_info(fido_dev_info_t *di, SCARDCONTEXT ctx, const char *reader, size_t idx)
 		fido_log_debug("%s: prepare_io_request", __func__);
 		goto fail;
 	}
-	if ((r = snprintf(path, sizeof(path), "%s%zu", FIDO_PCSC_PREFIX,
+	if ((r = snprintf(path, sizeof(path), "%s//slot%zu", FIDO_PCSC_PREFIX,
 	    idx)) < 0 || (size_t)r >= sizeof(path)) {
 		fido_log_debug("%s: snprintf", __func__);
 		goto fail;
