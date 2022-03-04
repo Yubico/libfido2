@@ -45,10 +45,8 @@ list_readers(SCARDCONTEXT ctx, char **buf)
 	DWORD len;
 
 	len = BUFSIZE;
-	if ((*buf = calloc(1, len)) == NULL) {
-		s = (LONG)SCARD_E_NO_MEMORY;
+	if ((*buf = calloc(1, len)) == NULL)
 		goto fail;
-	}
 	if ((s = SCardListReaders(ctx, NULL, *buf, &len)) != SCARD_S_SUCCESS) {
 		fido_log_debug("%s: SCardListReaders 0x%lx", __func__, (long)s);
 		goto fail;
@@ -56,21 +54,18 @@ list_readers(SCARDCONTEXT ctx, char **buf)
 	/* sanity check "multi-string" */
 	if (len > BUFSIZE || len < 2) {
 		fido_log_debug("%s: bogus len=%u", __func__, (unsigned)len);
-		s = (LONG)SCARD_E_UNEXPECTED;
 		goto fail;
 	}
 	if ((*buf)[len - 1] != 0 || (*buf)[len - 2] != '\0') {
 		fido_log_debug("%s: bogus buf", __func__);
-		s = (LONG)SCARD_E_INVALID_VALUE;
 		goto fail;
 	}
+	return (LONG)SCARD_S_SUCCESS;
 fail:
-	if (s != SCARD_S_SUCCESS) {
-		free(*buf);
-		*buf = NULL;
-	}
+	free(*buf);
+	*buf = NULL;
 
-	return s;
+	return (LONG)SCARD_E_NO_READERS_AVAILABLE;
 }
 
 static char *
