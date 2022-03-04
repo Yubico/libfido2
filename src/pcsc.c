@@ -28,13 +28,14 @@
 #endif
 
 #define BUFSIZE 1024	/* in bytes; passed to SCardListReaders() */
+#define APDULEN 264	/* 261 rounded up to the nearest multiple of 8 */
 #define READERS 8	/* maximum number of readers */
 
 struct pcsc {
 	SCARDCONTEXT     ctx;
 	SCARDHANDLE      h;
 	SCARD_IO_REQUEST req;
-	uint8_t          rx_buf[FIDO_MAXMSG];
+	uint8_t          rx_buf[APDULEN];
 	size_t           rx_len;
 };
 
