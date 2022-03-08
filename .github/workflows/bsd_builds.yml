@@ -3,7 +3,7 @@ name: bsd
 on:
   push:
     branches:
-    - master
+    - main
     - '*-ci'
 
 jobs:
