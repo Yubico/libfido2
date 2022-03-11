@@ -1,6 +1,6 @@
 #!/bin/sh -eux
 
-# Copyright (c) 2020 Yubico AB. All rights reserved.
+# Copyright (c) 2020-2022 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -82,7 +82,7 @@ mkdir corpus
 curl -s https://storage.googleapis.com/yubico-libfido2/corpus.tgz |
     tar -C corpus -zxf -
 export UBSAN_OPTIONS ASAN_OPTIONS MSAN_OPTIONS
-for f in assert bio cred credman hid largeblob mgmt netlink; do
+for f in assert bio cred credman hid largeblob mgmt netlink pcsc; do
 	build/fuzz/fuzz_${f} -use_value_profile=1 -reload=30 -print_pcs=1 \
 	    -print_funcs=30 -timeout=10 -runs=1 corpus/fuzz_${f}
 done
