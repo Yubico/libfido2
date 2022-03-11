@@ -327,14 +327,13 @@ fido_pcsc_write(void *handle, const unsigned char *buf, size_t len)
 		fido_log_debug("%s: len", __func__);
 		return -1;
 	}
-	if (dev->rx_len) {
-		fido_log_xxd(dev->rx_buf, dev->rx_len, "%s: dropping %zu bytes "
-		    "from input buffer", __func__, dev->rx_len);
-	}
+
 	explicit_bzero(dev->rx_buf, sizeof(dev->rx_buf));
 	dev->rx_len = 0;
 	n = (DWORD)sizeof(dev->rx_buf);
+
 	fido_log_xxd(buf, len, "%s: writing", __func__);
+
 	if ((s = SCardTransmit(dev->h, &dev->req, buf, (DWORD)len, NULL,
 	    dev->rx_buf, &n)) != SCARD_S_SUCCESS) {
 		fido_log_debug("%s: SCardTransmit 0x%lx", __func__, (long)s);
@@ -342,6 +341,7 @@ fido_pcsc_write(void *handle, const unsigned char *buf, size_t len)
 		return -1;
 	}
 	dev->rx_len = (size_t)n;
+
 	fido_log_xxd(dev->rx_buf, dev->rx_len, "%s: read", __func__);
 
 	return (int)len;
