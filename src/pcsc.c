@@ -129,8 +129,7 @@ copy_info(fido_dev_info_t *di, SCARDCONTEXT ctx, const char *reader, size_t idx)
 	SCARD_IO_REQUEST req;
 	DWORD prot = 0;
 	LONG s;
-	char path[512];
-	int r, ok = -1;
+	int ok = -1;
 
 	memset(di, 0, sizeof(*di));
 	memset(&req, 0, sizeof(req));
@@ -144,15 +143,13 @@ copy_info(fido_dev_info_t *di, SCARDCONTEXT ctx, const char *reader, size_t idx)
 		fido_log_debug("%s: prepare_io_request", __func__);
 		goto fail;
 	}
-	if ((r = snprintf(path, sizeof(path), "%s//slot%zu", FIDO_PCSC_PREFIX,
-	    idx)) < 0 || (size_t)r >= sizeof(path)) {
-		fido_log_debug("%s: snprintf", __func__);
+	if (asprintf(&di->path, "%s//slot%zu", FIDO_PCSC_PREFIX, idx) == -1) {
+		di->path = NULL;
+		fido_log_debug("%s: asprintf", __func__);
 		goto fail;
 	}
-	di->path = strdup(path);
-	di->manufacturer = strdup("PC/SC");
-	di->product = strdup(reader);
-	if (di->path == NULL || di->manufacturer == NULL || di->product == NULL)
+	if ((di->manufacturer = strdup("PC/SC")) == NULL ||
+	    (di->product = strdup(reader)) == NULL)
 		goto fail;
 
 	ok = 0;
