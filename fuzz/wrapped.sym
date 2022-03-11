@@ -72,6 +72,12 @@ realloc
 RSA_new
 RSA_pkey_ctx_ctrl
 RSA_set0_key
+SCardConnect
+SCardDisconnect
+SCardEstablishContext
+SCardListReaders
+SCardReleaseContext
+SCardTransmit
 SHA1
 SHA256
 strdup

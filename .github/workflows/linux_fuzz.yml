@@ -26,6 +26,7 @@ jobs:
       run: |
         sudo apt -q update
         sudo apt install -q -y libudev-dev ${CC%-*}-tools-${CC#clang-}
+        sudo apt install -q -y libpcsclite-dev
     - name: fuzz
       env:
         CC: ${{ matrix.cc }}
