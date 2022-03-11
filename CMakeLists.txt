@@ -96,6 +96,7 @@ check_include_files(sys/random.h HAVE_SYS_RANDOM_H)
 check_include_files(unistd.h HAVE_UNISTD_H)
 
 check_symbol_exists(arc4random_buf stdlib.h HAVE_ARC4RANDOM_BUF)
+check_symbol_exists(asprintf stdio.h HAVE_ASPRINTF)
 check_symbol_exists(clock_gettime time.h HAVE_CLOCK_GETTIME)
 check_symbol_exists(explicit_bzero string.h HAVE_EXPLICIT_BZERO)
 check_symbol_exists(freezero stdlib.h HAVE_FREEZERO)
@@ -121,6 +122,7 @@ try_compile(HAVE_POSIX_IOCTL
 
 list(APPEND CHECK_VARIABLES
 	HAVE_ARC4RANDOM_BUF
+	HAVE_ASPRINTF
 	HAVE_CBOR_H
 	HAVE_CLOCK_GETTIME
 	HAVE_ENDIAN_H
