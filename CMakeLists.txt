@@ -52,8 +52,8 @@ if(CYGWIN OR MSYS OR MINGW)
 	set(WIN32 1)
 endif()
 
-if(FUZZ)
-	set(USE_PCSC OFF) # XXX not yet
+if(FUZZ AND NOT FUZZ_PCSC)
+	set(USE_PCSC OFF)
 endif()
 
 if(WIN32)
