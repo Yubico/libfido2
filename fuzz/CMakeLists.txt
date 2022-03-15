@@ -63,9 +63,7 @@ set_target_properties(fuzz_largeblob PROPERTIES LINK_FLAGS ${FUZZ_LDFLAGS})
 target_link_libraries(fuzz_largeblob fido2_shared)
 
 # fuzz_pcsc
-if(FUZZ_PCSC)
-	add_executable(fuzz_pcsc fuzz_pcsc.c ${COMMON_SOURCES} ${COMPAT_SOURCES})
-	target_compile_options(fuzz_pcsc PRIVATE ${FUZZ_LDFLAGS})
-	set_target_properties(fuzz_pcsc PROPERTIES LINK_FLAGS ${FUZZ_LDFLAGS})
-	target_link_libraries(fuzz_pcsc fido2_shared)
-endif()
+add_executable(fuzz_pcsc fuzz_pcsc.c ${COMMON_SOURCES} ${COMPAT_SOURCES})
+target_compile_options(fuzz_pcsc PRIVATE ${FUZZ_LDFLAGS})
+set_target_properties(fuzz_pcsc PROPERTIES LINK_FLAGS ${FUZZ_LDFLAGS})
+target_link_libraries(fuzz_pcsc fido2_shared)

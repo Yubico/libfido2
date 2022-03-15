@@ -52,10 +52,6 @@ if(CYGWIN OR MSYS OR MINGW)
 	set(WIN32 1)
 endif()
 
-if(FUZZ AND NOT FUZZ_PCSC)
-	set(USE_PCSC OFF)
-endif()
-
 if(WIN32)
 	add_definitions(-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600)
 endif()
