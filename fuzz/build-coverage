@@ -26,6 +26,6 @@ make -C "${LIBCBOR}/build" VERBOSE=1 all install
 mkdir -p "${LIBFIDO2}/build"
 export CFLAGS="-fprofile-instr-generate -fcoverage-mapping"
 export LDFLAGS="${CFLAGS}"
-(cd "${LIBFIDO2}/build" && cmake -DFUZZ=ON -DFUZZ_PCSC=ON -DLIBFUZZER=ON \
+(cd "${LIBFIDO2}/build" && cmake -DFUZZ=ON -DLIBFUZZER=ON \
     -DCMAKE_BUILD_TYPE=Debug ..)
 make -C "${LIBFIDO2}/build"
