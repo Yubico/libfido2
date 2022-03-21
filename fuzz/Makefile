@@ -50,18 +50,19 @@ profdata: run
 report.tgz: profdata
 	docker exec ${RUNNER} /bin/sh -c 'rm -rf /report && mkdir /report && \
 		${COV} show -format=html -tab-size=8 -instr-profile=/$< \
-		--show-branch-summary=false -output-dir=/report \
-		/libfido2/build/src/libfido2.so'
+		-ignore-filename-regex=pcsclite.h --show-branch-summary=false \
+		-output-dir=/report /libfido2/build/src/libfido2.so'
 	docker exec -i ${RUNNER} tar Czcf / - report > $@
 
 summary.txt: profdata
 	docker exec ${RUNNER} ${COV} report -use-color=false \
-		--show-branch-summary=false /libfido2/build/src/libfido2.so \
-		-instr-profile=/$< > $@
+		-ignore-filename-regex=pcsclite.h --show-branch-summary=false \
+		libfido2/build/src/libfido2.so -instr-profile=/$< > $@
 
 functions.txt: profdata
 	docker exec ${RUNNER} /bin/sh -c '${COV} report -use-color=false \
-		-show-functions --show-branch-summary=false -instr-profile=/$< \
+		-ignore-filename-regex=pcsclite.h -show-functions \
+		--show-branch-summary=false -instr-profile=/$< \
 		/libfido2/build/src/libfido2.so /libfido2/src/*.[ch]' > $@
 
 clean: run
