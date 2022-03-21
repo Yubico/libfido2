@@ -57,7 +57,7 @@ report.tgz: profdata
 summary.txt: profdata
 	docker exec ${RUNNER} ${COV} report -use-color=false \
 		-ignore-filename-regex=pcsclite.h --show-branch-summary=false \
-		libfido2/build/src/libfido2.so -instr-profile=/$< > $@
+		/libfido2/build/src/libfido2.so -instr-profile=/$< > $@
 
 functions.txt: profdata
 	docker exec ${RUNNER} /bin/sh -c '${COV} report -use-color=false \
