@@ -15,6 +15,7 @@ add_custom_command(TARGET regress POST_BUILD
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
-add_regress_test(regress_cred cred.c)
 add_regress_test(regress_assert assert.c)
+add_regress_test(regress_cred cred.c)
 add_regress_test(regress_dev dev.c)
+add_regress_test(regress_es256 es256.c)
