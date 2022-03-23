@@ -17,6 +17,8 @@
 #define get0_EC_KEY(x)	EVP_PKEY_get0((x))
 #endif
 
+static const int es256_nid = NID_X9_62_prime256v1;
+
 static int
 decode_coord(const cbor_item_t *item, void *xy, size_t xy_len)
 {
@@ -223,13 +225,12 @@ es256_sk_create(es256_sk_t *key)
 	EVP_PKEY	*k = NULL;
 	const EC_KEY	*ec;
 	const BIGNUM	*d;
-	const int	 nid = NID_X9_62_prime256v1;
 	int		 n;
 	int		 ok = -1;
 
 	if ((pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL)) == NULL ||
 	    EVP_PKEY_paramgen_init(pctx) <= 0 ||
-	    EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pctx, nid) <= 0 ||
+	    EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pctx, es256_nid) <= 0 ||
 	    EVP_PKEY_paramgen(pctx, &p) <= 0) {
 		fido_log_debug("%s: EVP_PKEY_paramgen", __func__);
 		goto fail;
@@ -273,7 +274,6 @@ es256_pk_to_EVP_PKEY(const es256_pk_t *k)
 	BIGNUM		*x = NULL;
 	BIGNUM		*y = NULL;
 	const EC_GROUP	*g = NULL;
-	const int	 nid = NID_X9_62_prime256v1;
 	int		 ok = -1;
 
 	if ((bnctx = BN_CTX_new()) == NULL)
@@ -291,7 +291,7 @@ es256_pk_to_EVP_PKEY(const es256_pk_t *k)
 		goto fail;
 	}
 
-	if ((ec = EC_KEY_new_by_curve_name(nid)) == NULL ||
+	if ((ec = EC_KEY_new_by_curve_name(es256_nid)) == NULL ||
 	    (g = EC_KEY_get0_group(ec)) == NULL) {
 		fido_log_debug("%s: EC_KEY init", __func__);
 		goto fail;
@@ -347,7 +347,7 @@ es256_pk_from_EC_KEY(es256_pk_t *pk, const EC_KEY *ec)
 	int		 ny;
 
 	if ((q = EC_KEY_get0_public_key(ec)) == NULL ||
-	    (g = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1)) == NULL ||
+	    (g = EC_GROUP_new_by_curve_name(es256_nid)) == NULL ||
 	    (bnctx = BN_CTX_new()) == NULL)
 		goto fail;
 
@@ -411,7 +411,6 @@ es256_sk_to_EVP_PKEY(const es256_sk_t *k)
 	EC_KEY		*ec = NULL;
 	EVP_PKEY	*pkey = NULL;
 	BIGNUM		*d = NULL;
-	const int	 nid = NID_X9_62_prime256v1;
 	int		 ok = -1;
 
 	if ((bnctx = BN_CTX_new()) == NULL)
@@ -425,7 +424,7 @@ es256_sk_to_EVP_PKEY(const es256_sk_t *k)
 		goto fail;
 	}
 
-	if ((ec = EC_KEY_new_by_curve_name(nid)) == NULL ||
+	if ((ec = EC_KEY_new_by_curve_name(es256_nid)) == NULL ||
 	    EC_KEY_set_private_key(ec, d) == 0) {
 		fido_log_debug("%s: EC_KEY_set_private_key", __func__);
 		goto fail;
@@ -464,11 +463,10 @@ es256_derive_pk(const es256_sk_t *sk, es256_pk_t *pk)
 	EC_KEY		*ec = NULL;
 	EC_POINT	*q = NULL;
 	const EC_GROUP	*g = NULL;
-	const int	 nid = NID_X9_62_prime256v1;
 	int		 ok = -1;
 
 	if ((d = BN_bin2bn(sk->d, (int)sizeof(sk->d), NULL)) == NULL ||
-	    (ec = EC_KEY_new_by_curve_name(nid)) == NULL ||
+	    (ec = EC_KEY_new_by_curve_name(es256_nid)) == NULL ||
 	    (g = EC_KEY_get0_group(ec)) == NULL ||
 	    (q = EC_POINT_new(g)) == NULL) {
 		fido_log_debug("%s: get", __func__);
