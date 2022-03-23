@@ -176,7 +176,8 @@ es256_pk_free(es256_pk_t **pkp)
 int
 es256_pk_from_ptr(es256_pk_t *pk, const void *ptr, size_t len)
 {
-	const uint8_t *p = ptr;
+	const uint8_t	*p = ptr;
+	EVP_PKEY	*pkey;
 
 	if (len < sizeof(*pk))
 		return (FIDO_ERR_INVALID_ARGUMENT);
@@ -185,6 +186,14 @@ es256_pk_from_ptr(es256_pk_t *pk, const void *ptr, size_t len)
 		memcpy(pk, ++p, sizeof(*pk)); /* uncompressed format */
 	else
 		memcpy(pk, ptr, sizeof(*pk)); /* libfido2 x||y format */
+
+	if ((pkey = es256_pk_to_EVP_PKEY(pk)) == NULL) {
+		fido_log_debug("%s: es256_pk_to_EVP_PKEY", __func__);
+		explicit_bzero(pk, sizeof(*pk));
+		return (FIDO_ERR_INVALID_ARGUMENT);
+	}
+
+	EVP_PKEY_free(pkey);
 
 	return (FIDO_OK);
 }
