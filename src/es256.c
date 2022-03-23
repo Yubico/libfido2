@@ -330,7 +330,7 @@ es256_pk_from_EC_KEY(es256_pk_t *pk, const EC_KEY *ec)
 	BIGNUM		*x = NULL;
 	BIGNUM		*y = NULL;
 	const EC_POINT	*q = NULL;
-	const EC_GROUP	*g = NULL;
+	EC_GROUP	*g = NULL;
 	size_t		 dx;
 	size_t		 dy;
 	int		 ok = FIDO_ERR_INTERNAL;
@@ -338,7 +338,7 @@ es256_pk_from_EC_KEY(es256_pk_t *pk, const EC_KEY *ec)
 	int		 ny;
 
 	if ((q = EC_KEY_get0_public_key(ec)) == NULL ||
-	    (g = EC_KEY_get0_group(ec)) == NULL ||
+	    (g = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1)) == NULL ||
 	    (bnctx = BN_CTX_new()) == NULL)
 		goto fail;
 
@@ -347,6 +347,12 @@ es256_pk_from_EC_KEY(es256_pk_t *pk, const EC_KEY *ec)
 	if ((x = BN_CTX_get(bnctx)) == NULL ||
 	    (y = BN_CTX_get(bnctx)) == NULL)
 		goto fail;
+
+	if (EC_POINT_is_on_curve(g, q, bnctx) != 1) {
+		fido_log_debug("%s: EC_POINT_is_on_curve", __func__);
+		ok = FIDO_ERR_INVALID_ARGUMENT;
+		goto fail;
+	}
 
 	if (EC_POINT_get_affine_coordinates_GFp(g, q, x, y, bnctx) == 0 ||
 	    (nx = BN_num_bytes(x)) < 0 || (size_t)nx > sizeof(pk->x) ||
@@ -367,6 +373,8 @@ es256_pk_from_EC_KEY(es256_pk_t *pk, const EC_KEY *ec)
 
 	ok = FIDO_OK;
 fail:
+	EC_GROUP_free(g);
+
 	if (bnctx != NULL) {
 		BN_CTX_end(bnctx);
 		BN_CTX_free(bnctx);
