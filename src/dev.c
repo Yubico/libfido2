@@ -295,6 +295,24 @@ fido_dev_unregister_manifest_func(const dev_manifest_func_t f)
 	free(curr);
 }
 
+static void
+run_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen,
+    const char *type, dev_manifest_func_t manifest)
+{
+	size_t ndevs = 0;
+	int r;
+
+	if (*olen >= ilen) {
+		fido_log_debug("%s: skipping %s", __func__, type);
+		return;
+	}
+	if ((r = manifest(devlist + *olen, ilen - *olen, &ndevs)) != FIDO_OK)
+		fido_log_debug("%s: %s: 0x%x", __func__, type, r);
+	fido_log_debug("%s: found %zu %s device%s", __func__, ndevs, type,
+	    ndevs == 1 ? "" : "s");
+	*olen += ndevs;
+}
+
 int
 fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
@@ -305,19 +323,15 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 
 	*olen = 0;
 
-	if (fido_dev_register_manifest_func(fido_hid_manifest) != FIDO_OK)
-		return (FIDO_ERR_INTERNAL);
+	run_manifest(devlist, ilen, olen, "hid", fido_hid_manifest);
 #ifdef USE_NFC
-	if (fido_dev_register_manifest_func(fido_nfc_manifest) != FIDO_OK)
-		return (FIDO_ERR_INTERNAL);
-#endif
-#ifdef USE_WINHELLO
-	if (fido_dev_register_manifest_func(fido_winhello_manifest) != FIDO_OK)
-		return (FIDO_ERR_INTERNAL);
+	run_manifest(devlist, ilen, olen, "nfc", fido_nfc_manifest);
 #endif
 #ifdef USE_PCSC
-	if (fido_dev_register_manifest_func(fido_pcsc_manifest) != FIDO_OK)
-		return (FIDO_ERR_INTERNAL);
+	run_manifest(devlist, ilen, olen, "pcsc", fido_pcsc_manifest);
+#endif
+#ifdef USE_WINHELLO
+	run_manifest(devlist, ilen, olen, "winhello", fido_winhello_manifest);
 #endif
 
 	for (curr = manifest_funcs; curr != NULL; curr = curr->next) {
