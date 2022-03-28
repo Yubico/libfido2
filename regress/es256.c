@@ -126,7 +126,7 @@ invalid_curve(void)
 int
 main(void)
 {
-	fido_init(FIDO_DEBUG);
+	fido_init(0);
 
 	short_coord();
 	invalid_curve();
