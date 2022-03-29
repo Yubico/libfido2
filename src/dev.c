@@ -63,13 +63,15 @@ fido_dev_set_option_flags(fido_dev_t *dev, const fido_cbor_info_t *info)
 
 	for (size_t i = 0; i < len; i++)
 		if (strcmp(ptr[i], "clientPin") == 0) {
-			dev->flags |= val[i] ? FIDO_DEV_PIN_SET : FIDO_DEV_PIN_UNSET;
+			dev->flags |= val[i] ?
+			    FIDO_DEV_PIN_SET : FIDO_DEV_PIN_UNSET;
 		} else if (strcmp(ptr[i], "credMgmt") == 0 ||
 			   strcmp(ptr[i], "credentialMgmtPreview") == 0) {
 			if (val[i])
 				dev->flags |= FIDO_DEV_CREDMAN;
 		} else if (strcmp(ptr[i], "uv") == 0) {
-			dev->flags |= val[i] ? FIDO_DEV_UV_SET : FIDO_DEV_UV_UNSET;
+			dev->flags |= val[i] ?
+			    FIDO_DEV_UV_SET : FIDO_DEV_UV_UNSET;
 		} else if (strcmp(ptr[i], "pinUvAuthToken") == 0) {
 			if (val[i])
 				dev->flags |= FIDO_DEV_TOKEN_PERMS;
