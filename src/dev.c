@@ -10,26 +10,7 @@
 #define TLS
 #endif
 
-typedef struct dev_manifest_func_node {
-	dev_manifest_func_t manifest_func;
-	struct dev_manifest_func_node *next;
-} dev_manifest_func_node_t;
-
-static TLS dev_manifest_func_node_t *manifest_funcs = NULL;
 static TLS bool disable_u2f_fallback;
-
-static void
-find_manifest_func_node(dev_manifest_func_t f, dev_manifest_func_node_t **curr,
-    dev_manifest_func_node_t **prev)
-{
-	*prev = NULL;
-	*curr = manifest_funcs;
-
-	while (*curr != NULL && (*curr)->manifest_func != f) {
-		*prev = *curr;
-		*curr = (*curr)->next;
-	}
-}
 
 #ifdef FIDO_FUZZ
 static void
@@ -258,46 +239,9 @@ fido_dev_open_wait(fido_dev_t *dev, const char *path, int *ms)
 	return (FIDO_OK);
 }
 
-int
-fido_dev_register_manifest_func(const dev_manifest_func_t f)
-{
-	dev_manifest_func_node_t *prev, *curr, *n;
-
-	find_manifest_func_node(f, &curr, &prev);
-	if (curr != NULL)
-		return (FIDO_OK);
-
-	if ((n = calloc(1, sizeof(*n))) == NULL) {
-		fido_log_debug("%s: calloc", __func__);
-		return (FIDO_ERR_INTERNAL);
-	}
-
-	n->manifest_func = f;
-	n->next = manifest_funcs;
-	manifest_funcs = n;
-
-	return (FIDO_OK);
-}
-
-void
-fido_dev_unregister_manifest_func(const dev_manifest_func_t f)
-{
-	dev_manifest_func_node_t *prev, *curr;
-
-	find_manifest_func_node(f, &curr, &prev);
-	if (curr == NULL)
-		return;
-	if (prev != NULL)
-		prev->next = curr->next;
-	else
-		manifest_funcs = curr->next;
-
-	free(curr);
-}
-
 static void
 run_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen,
-    const char *type, dev_manifest_func_t manifest)
+    const char *type, int (*manifest)(fido_dev_info_t *, size_t, size_t *))
 {
 	size_t ndevs = 0;
 	int r;
@@ -316,11 +260,6 @@ run_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen,
 int
 fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 {
-	dev_manifest_func_node_t	*curr = NULL;
-	dev_manifest_func_t		 m_func;
-	size_t				 curr_olen;
-	int				 r;
-
 	*olen = 0;
 
 	run_manifest(devlist, ilen, olen, "hid", fido_hid_manifest);
@@ -333,17 +272,6 @@ fido_dev_info_manifest(fido_dev_info_t *devlist, size_t ilen, size_t *olen)
 #ifdef USE_WINHELLO
 	run_manifest(devlist, ilen, olen, "winhello", fido_winhello_manifest);
 #endif
-
-	for (curr = manifest_funcs; curr != NULL; curr = curr->next) {
-		curr_olen = 0;
-		m_func = curr->manifest_func;
-		r = m_func(devlist + *olen, ilen - *olen, &curr_olen);
-		if (r != FIDO_OK)
-			return (r);
-		*olen += curr_olen;
-		if (*olen == ilen)
-			break;
-	}
 
 	return (FIDO_OK);
 }
