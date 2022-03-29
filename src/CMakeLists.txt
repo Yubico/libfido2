@@ -33,6 +33,7 @@ list(APPEND FIDO_SOURCES
 	rs1.c
 	rs256.c
 	time.c
+	touch.c
 	tpm.c
 	types.c
 	u2f.c
