@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -234,11 +234,6 @@ int fido_get_signed_hash_tpm(fido_blob_t *, const fido_blob_t *,
 int fido_hid_manifest(fido_dev_info_t *, size_t, size_t *);
 int fido_nfc_manifest(fido_dev_info_t *, size_t, size_t *);
 int fido_pcsc_manifest(fido_dev_info_t *, size_t, size_t *);
-
-/* device manifest registration */
-typedef int (*dev_manifest_func_t)(fido_dev_info_t *, size_t, size_t *);
-int fido_dev_register_manifest_func(const dev_manifest_func_t);
-void fido_dev_unregister_manifest_func(const dev_manifest_func_t);
 
 /* fuzzing instrumentation */
 #ifdef FIDO_FUZZ
