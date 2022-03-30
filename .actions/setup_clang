@@ -1,0 +1,11 @@
+#!/bin/sh -eu
+
+CC="$1"
+APT="http://apt.llvm.org"
+CODENAME="$(lsb_release -cs)"
+VERSION="${CC#*-}"
+apt-key add ./.actions/llvm.gpg
+add-apt-repository \
+    "deb ${APT}/${CODENAME}/ llvm-toolchain-${CODENAME}-${VERSION} main"
+apt-get update -q
+apt-get install -q -y "${CC}" "clang-tools-${VERSION}"

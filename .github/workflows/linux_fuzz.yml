@@ -16,19 +16,21 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-20.04 ]
-        cc: [ clang-12 ]
+        cc: [ clang-14 ]
         sanitizer: [ asan, msan ]
     steps:
     - uses: actions/checkout@v2
     - name: dependencies
+      run: |
+        sudo apt -q update
+        sudo apt install -q -y libudev-dev libpcsclite-dev
+    - name: compiler
       env:
         CC: ${{ matrix.cc }}
       run: |
-        sudo apt -q update
-        sudo apt install -q -y libudev-dev ${CC%-*}-tools-${CC#clang-}
-        sudo apt install -q -y libpcsclite-dev
+        sudo ./.actions/setup_clang "${CC}"
     - name: fuzz
       env:
         CC: ${{ matrix.cc }}
         SANITIZER: ${{ matrix.sanitizer }}
-      run: ./.actions/fuzz-linux ${SANITIZER}
+      run: ./.actions/fuzz-linux "${SANITIZER}"
