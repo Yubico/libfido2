@@ -156,6 +156,8 @@ eddsa_pk_from_EVP_PKEY(eddsa_pk_t *pk, const EVP_PKEY *pkey)
 {
 	size_t len = 0;
 
+	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_ED25519)
+		return (FIDO_ERR_INVALID_ARGUMENT);
 	if (EVP_PKEY_get_raw_public_key(pkey, NULL, &len) != 1 ||
 	    len != sizeof(pk->x))
 		return (FIDO_ERR_INTERNAL);
