@@ -169,7 +169,7 @@ if(MSVC)
 		   "building under msvc")
 	endif()
 	set(CBOR_LIBRARIES cbor)
-	set(ZLIB_LIBRARIES zlib)
+	set(ZLIB_LIBRARIES zlib1)
 	set(CRYPTO_LIBRARIES crypto-47)
 	set(MSVC_DISABLED_WARNINGS_LIST
 		"C4152" # nonstandard extension used: function/data pointer
