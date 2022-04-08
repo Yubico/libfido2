@@ -13,7 +13,7 @@
 
 #include <fido.h>
 
-#define FAKE_DEV_HANDLE	((void *)0xdeadbeef)
+static int fake_dev_handle;
 
 static const unsigned char cdh[32] = {
 	0xf9, 0x64, 0x57, 0xe7, 0x2d, 0x97, 0xf6, 0xbb,
@@ -1388,13 +1388,13 @@ dummy_open(const char *path)
 {
 	(void)path;
 
-	return (FAKE_DEV_HANDLE);
+	return (&fake_dev_handle);
 }
 
 static void
 dummy_close(void *handle)
 {
-	assert(handle == FAKE_DEV_HANDLE);
+	assert(handle == &fake_dev_handle);
 }
 
 static int

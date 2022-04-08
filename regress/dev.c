@@ -16,12 +16,12 @@
 
 #include "../fuzz/wiredata_fido2.h"
 
-#define FAKE_DEV_HANDLE	((void *)0xdeadbeef)
 #define REPORT_LEN	(64 + 1)
 
 static uint8_t	 ctap_nonce[8];
 static uint8_t	*wiredata_ptr;
 static size_t	 wiredata_len;
+static int	 fake_dev_handle;
 static int	 initialised;
 static long	 interval_ms;
 
@@ -30,13 +30,13 @@ dummy_open(const char *path)
 {
 	(void)path;
 
-	return (FAKE_DEV_HANDLE);
+	return (&fake_dev_handle);
 }
 
 static void
 dummy_close(void *handle)
 {
-	assert(handle == FAKE_DEV_HANDLE);
+	assert(handle == &fake_dev_handle);
 }
 
 static int
@@ -46,7 +46,7 @@ dummy_read(void *handle, unsigned char *ptr, size_t len, int ms)
 	size_t		n;
 	long		d;
 
-	assert(handle == FAKE_DEV_HANDLE);
+	assert(handle == &fake_dev_handle);
 	assert(ptr != NULL);
 	assert(len == REPORT_LEN - 1);
 
@@ -91,7 +91,7 @@ dummy_write(void *handle, const unsigned char *ptr, size_t len)
 {
 	struct timespec tv;
 
-	assert(handle == FAKE_DEV_HANDLE);
+	assert(handle == &fake_dev_handle);
 	assert(ptr != NULL);
 	assert(len == REPORT_LEN);
 
