@@ -11,9 +11,25 @@ macro(add_regress_test NAME SOURCES)
 	add_dependencies(regress ${NAME})
 endmacro()
 
-add_custom_command(TARGET regress POST_BUILD
-    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+if(MSVC AND BUILD_SHARED_LIBS)
+	add_custom_command(TARGET regress POST_BUILD
+	    COMMAND "${CMAKE_COMMAND}" -E copy
+		"${CBOR_BIN_DIRS}/${CBOR_LIBRARIES}.dll"
+		"${CRYPTO_BIN_DIRS}/${CRYPTO_LIBRARIES}.dll"
+		"${ZLIB_BIN_DIRS}/${ZLIB_LIBRARIES}.dll"
+		"${CMAKE_CURRENT_BINARY_DIR}")
+endif()
+
+if(CMAKE_CROSSCOMPILING OR (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "AMD64" AND
+    CMAKE_GENERATOR_PLATFORM MATCHES "^ARM.*$"))
+	add_custom_command(TARGET regress POST_BUILD
+	    COMMAND "${CMAKE_COMMAND}" -E echo
+		"Cross-compilation detected. Skipping regress tests.")
+else()
+	add_custom_command(TARGET regress POST_BUILD
+	    COMMAND "${CMAKE_CTEST_COMMAND}" --output-on-failure
+	    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+endif()
 
 add_regress_test(regress_assert assert.c)
 add_regress_test(regress_cred cred.c)
