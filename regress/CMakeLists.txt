@@ -6,7 +6,7 @@ add_custom_target(regress ALL)
 
 macro(add_regress_test NAME SOURCES)
 	add_executable(${NAME} ${SOURCES})
-	target_link_libraries(${NAME} ${_FIDO2_LIBRARY})
+	target_link_libraries(${NAME} fido2)
 	add_test(${NAME} ${NAME})
 	add_dependencies(regress ${NAME})
 endmacro()
