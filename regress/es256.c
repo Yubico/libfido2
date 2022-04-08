@@ -8,9 +8,11 @@
 
 #include <assert.h>
 
-#include <err.h>
+#define _FIDO_INTERNAL
+
 #include <fido.h>
 #include <fido/es256.h>
+
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 

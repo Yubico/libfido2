@@ -7,10 +7,11 @@
 #undef NDEBUG
 
 #include <assert.h>
-
-#include <cbor.h>
-#include <fido.h>
 #include <string.h>
+
+#define _FIDO_INTERNAL
+
+#include <fido.h>
 
 #define FAKE_DEV_HANDLE	((void *)0xdeadbeef)
 
