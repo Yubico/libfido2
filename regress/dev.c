@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -24,6 +24,21 @@ static size_t	 wiredata_len;
 static int	 fake_dev_handle;
 static int	 initialised;
 static long	 interval_ms;
+
+#if defined(_MSC_VER)
+static int
+nanosleep(const struct timespec *rqtp, struct timespec *rmtp)
+{
+	if (rmtp != NULL) {
+		errno = EINVAL;
+		return (-1);
+	}
+
+	Sleep((DWORD)(rqtp->tv_sec * 1000) + (DWORD)(rqtp->tv_nsec / 1000000));
+
+	return (0);
+}
+#endif
 
 static void *
 dummy_open(const char *path)
