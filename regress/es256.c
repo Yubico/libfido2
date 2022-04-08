@@ -9,6 +9,7 @@
 
 #include <fido.h>
 #include <fido/es256.h>
+#include <openssl/bio.h>
 #include <openssl/pem.h>
 
 #define ASSERT_NOT_NULL(e)	assert((e) != NULL)
@@ -47,17 +48,21 @@ static const unsigned char p256k1_raw[] = {
 static EVP_PKEY *
 EVP_PKEY_from_PEM(char *ptr, size_t len)
 {
-	FILE *f;
-	EVP_PKEY *pkey;
+	BIO *bio = NULL;
+	EVP_PKEY *pkey = NULL;
 
-	if ((f = fmemopen(ptr, len, "r")) == NULL) {
-		warn("fmemopen");
-		return NULL;
+	if ((bio = BIO_new(BIO_s_mem())) == NULL) {
+		warnx("BIO_new");
+		goto out;
 	}
-	if ((pkey = PEM_read_PUBKEY(f, NULL, NULL, NULL)) == NULL)
-		warnx("PEM_read_PUBKEY");
-
-	fclose(f);
+	if (len > INT_MAX || BIO_write(bio, ptr, (int)len) != (int)len) {
+		warnx("BIO_write");
+		goto out;
+	}
+	if ((pkey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL)) == NULL)
+		warnx("PEM_read_bio_PUBKEY");
+out:
+	BIO_free(bio);
 
 	return pkey;
 }
