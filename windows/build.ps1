@@ -223,6 +223,8 @@ try {
 	    -DCMAKE_INSTALL_PREFIX="${PREFIX}" "${CMAKE_SYSTEM_VERSION}"; `
 	    ExitOnError
 	& $CMake --build . --config ${Config} --verbose; ExitOnError
+	& $CMake --build . --config ${Config} --target regress --verbose; `
+	    ExitOnError
 	& $CMake --build . --config ${Config} --target install --verbose; `
 	    ExitOnError
 	# Copy DLLs.
