@@ -38,10 +38,10 @@ tasks:
         mkdir build-\$T
         (cd build-\$T && \${SCAN} cmake -DCMAKE_BUILD_TYPE=\$T ..)
         \${SCAN} make -j"\$(sysctl -n hw.ncpu)" -C build-\$T
+        make -C build-\$T regress
         \${SUDO} make -C build-\$T install
       done
 EOF
-
 
 q() {
 	curl \

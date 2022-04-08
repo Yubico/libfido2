@@ -18,5 +18,6 @@ for T in Debug Release; do
 	export PKG_CONFIG_PATH="${FAKEROOT}/lib/pkgconfig"
 	(cd build-$T && cmake -DCMAKE_BUILD_TYPE=$T ..)
 	make -j"$(nproc)" -C build-$T
+	make -C build-$T regress
 	sudo make -C build-$T install
 done

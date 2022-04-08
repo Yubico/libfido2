@@ -9,5 +9,6 @@ for T in Debug Release; do
 	(cd build-$T && ${SCAN} cmake -DCMAKE_BUILD_TYPE=$T ..)
 	${SCAN} --status-bugs make -j"$(sysctl -n hw.ncpu)" -C build-$T
 	make -C build-$T man_symlink_html
+	make -C build-$T regress
 	sudo make -C build-$T install
 done
