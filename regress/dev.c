@@ -132,7 +132,14 @@ wiredata_setup(const uint8_t *data, size_t len)
 	assert(SIZE_MAX - len > sizeof(ctap_init_data));
 	assert((wiredata_ptr = malloc(sizeof(ctap_init_data) + len)) != NULL);
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:6386)
+#endif
 	memcpy(wiredata_ptr, ctap_init_data, sizeof(ctap_init_data));
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 	if (len)
 		memcpy(wiredata_ptr + sizeof(ctap_init_data), data, len);
