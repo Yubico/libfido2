@@ -4,14 +4,17 @@
  * license that can be found in the LICENSE file.
  */
 
-#define _FIDO_INTERNAL
+#undef NDEBUG
 
 #include <assert.h>
+#include <string.h>
+
+#define _FIDO_INTERNAL
+
 #include <fido.h>
 #include <fido/es256.h>
 #include <fido/rs256.h>
 #include <fido/eddsa.h>
-#include <string.h>
 
 #define FAKE_DEV_HANDLE	((void *)0xdeadbeef)
 

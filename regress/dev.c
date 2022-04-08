@@ -4,7 +4,10 @@
  * license that can be found in the LICENSE file.
  */
 
+#undef NDEBUG
+
 #include <assert.h>
+
 #include <err.h>
 #include <fido.h>
 #include <string.h>

@@ -4,9 +4,11 @@
  * license that can be found in the LICENSE file.
  */
 
-#include <assert.h>
-#include <err.h>
+#undef NDEBUG
 
+#include <assert.h>
+
+#include <err.h>
 #include <fido.h>
 #include <fido/es256.h>
 #include <openssl/bio.h>
