@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-add_custom_target(regress ALL)
+add_custom_target(regress)
 
 macro(add_regress_test NAME SOURCES)
 	add_executable(${NAME} ${SOURCES})
