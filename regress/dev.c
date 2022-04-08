@@ -7,11 +7,12 @@
 #undef NDEBUG
 
 #include <assert.h>
-
-#include <err.h>
-#include <fido.h>
 #include <string.h>
 #include <time.h>
+
+#define _FIDO_INTERNAL
+
+#include <fido.h>
 
 #include "../fuzz/wiredata_fido2.h"
 
