@@ -32,6 +32,7 @@ else()
 endif()
 
 add_regress_test(regress_assert assert.c)
+add_regress_test(regress_compress compress.c)
 add_regress_test(regress_cred cred.c)
 add_regress_test(regress_dev dev.c)
 add_regress_test(regress_es256 es256.c)
