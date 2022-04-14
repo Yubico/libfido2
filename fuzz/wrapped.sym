@@ -25,6 +25,8 @@ cbor_new_definite_bytestring
 cbor_new_definite_map
 cbor_serialize_alloc
 clock_gettime
+deflate
+deflateInit2_
 EC_KEY_get0_group
 EC_KEY_get0_private_key
 EC_KEY_new_by_curve_name

@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <zlib.h>
 
 #include "mutator_aux.h"
 
@@ -635,6 +636,33 @@ WRAP(int,
 	(sockfd, addr, addrlen),
 	1
 )
+
+WRAP(int,
+	deflateInit2_,
+	(z_streamp strm, int level, int method, int windowBits, int memLevel,
+	    int strategy, const char *version, int stream_size),
+	Z_STREAM_ERROR,
+	(strm, level, method, windowBits, memLevel, strategy, version,
+	    stream_size),
+	1
+)
+
+int __wrap_deflate(z_streamp, int);
+
+int
+__wrap_deflate(z_streamp strm, int flush)
+{
+	if (uniform_random(400) < 1) {
+		return Z_BUF_ERROR;
+	}
+	/* should never happen, but we check for it */
+	if (uniform_random(400) < 1) {
+		strm->avail_out = UINT_MAX;
+		return Z_STREAM_END;
+	}
+
+	return deflate(strm, flush);
+}
 
 int __wrap_asprintf(char **, const char *, ...);
 
