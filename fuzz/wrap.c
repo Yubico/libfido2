@@ -648,6 +648,7 @@ WRAP(int,
 )
 
 int __wrap_deflate(z_streamp, int);
+int __real_deflate(z_streamp, int);
 
 int
 __wrap_deflate(z_streamp strm, int flush)
@@ -661,7 +662,7 @@ __wrap_deflate(z_streamp strm, int flush)
 		return Z_STREAM_END;
 	}
 
-	return deflate(strm, flush);
+	return __real_deflate(strm, flush);
 }
 
 int __wrap_asprintf(char **, const char *, ...);
