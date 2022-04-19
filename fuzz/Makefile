@@ -24,7 +24,7 @@ run: build
 
 sync: run
 	tar Ccf .. - src fuzz | docker exec -i ${RUNNER} tar Cxf /libfido2 -
-	docker exec ${RUNNER} make -C libfido2/build
+	docker exec ${RUNNER} make -C /libfido2/build
 
 corpus: sync
 	docker exec ${RUNNER} /bin/sh -c 'cd /libfido2/fuzz && rm -rf ${TARGETS}'
@@ -45,7 +45,7 @@ corpus.tgz-: ${MINIFY}
 
 profdata: run
 	docker exec ${RUNNER} /bin/sh -c 'rm -f /$@ && ${PROFDATA} \
-		merge -sparse profraw/* -o $@'
+		merge -sparse /profraw/* -o /$@'
 
 report.tgz: profdata
 	docker exec ${RUNNER} /bin/sh -c 'rm -rf /report && mkdir /report && \
