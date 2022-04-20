@@ -89,10 +89,11 @@ get_reader(SCARDCONTEXT ctx, const char *path)
 		goto out;
 	}
 	for (const char *name = buf; *name != 0; name += strlen(name) + 1) {
-		if (n-- == 0) {
+		if (n == 0) {
 			reader = strdup(name);
 			goto out;
 		}
+		n--;
 	}
 	fido_log_debug("%s: failed to find reader %s", __func__, path);
 out:
