@@ -59,11 +59,8 @@ $ fido2-token -I &lt;device&gt;
 
 <!--
 
-You are strongly encouraged to only capture debug output using dummy
-credentials. Failure to do so can disclose information such as 'I am
-trying to enroll a credential for bob@silo19.nukes.military.gov' or 'I
-am trying to authenticate as alice@secretserver.megaconglomerate.com,
-here's a hashed challenge and signature'.
+You are strongly encouraged to only capture debug output using test
+credentials. Failure to do so can disclose sensitive information.
 
 -->
 
