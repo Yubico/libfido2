@@ -7,7 +7,7 @@
 
 #include "openbsd-compat.h"
 
-#if !defined(HAVE_EXPLICIT_BZERO) && !defined(_WIN32)
+#if !defined(HAVE_EXPLICIT_BZERO) && !defined(_WIN32) && !defined(CRYPTO_EXPLICIT_BZERO)
 
 #include <string.h>
 

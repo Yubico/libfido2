@@ -62,7 +62,7 @@ char *strsep(char **, const char *);
 void *recallocarray(void *, size_t, size_t, size_t);
 #endif
 
-#if !defined(HAVE_EXPLICIT_BZERO)
+#if !defined(HAVE_EXPLICIT_BZERO) || defined(CRYPTO_EXPLICIT_BZERO)
 void explicit_bzero(void *, size_t);
 #endif
 
