@@ -122,7 +122,7 @@ officially supported.
 | LIBFUZZER         | Build libfuzzer harnesses               | OFF
 | NFC_LINUX         | Enable netlink NFC support on Linux     | ON
 | USE_HIDAPI        | Use hidapi as the HID backend           | OFF
-| USE_PCSC          | Enable experimental PCSC support        | ON
+| USE_PCSC          | Enable experimental PCSC support        | OFF
 | USE_WINHELLO      | Abstract Windows Hello as a FIDO device | ON
 |===
 
