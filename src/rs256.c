@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -162,6 +162,11 @@ rs256_pk_to_EVP_PKEY(const rs256_pk_t *k)
 	/* at this point, n and e belong to rsa */
 	n = NULL;
 	e = NULL;
+
+	if (RSA_bits(rsa) != 2048) {
+		fido_log_debug("%s: invalid key length", __func__);
+		goto fail;
+	}
 
 	if ((pkey = EVP_PKEY_new()) == NULL ||
 	    EVP_PKEY_assign_RSA(pkey, rsa) == 0) {
