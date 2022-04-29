@@ -37,6 +37,7 @@ add_regress_test(regress_cred cred.c)
 add_regress_test(regress_dev dev.c)
 add_regress_test(regress_eddsa eddsa.c)
 add_regress_test(regress_es256 es256.c)
+add_regress_test(regress_rs256 rs256.c)
 
 if(MINGW)
 	# needed for nanosleep() in mingw
