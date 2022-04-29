@@ -22,13 +22,13 @@
 #define ASSERT_INVAL(e)		assert((e) == FIDO_ERR_INVALID_ARGUMENT)
 #define ASSERT_OK(e)		assert((e) == FIDO_OK)
 
-static char ecdsa[] = \
+static const char ecdsa[] = \
 "-----BEGIN PUBLIC KEY-----\n"
 "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOwiq14c80b7C1Jzsx5w1zMvk2GgW\n"
 "5kfGMOKXjwF/U+51ZfBDKehs3ivdeXAJBkxIh7E3iA32s+HyNqk+ntl9fg==\n"
 "-----END PUBLIC KEY-----\n";
 
-static char eddsa[] = \
+static const char eddsa[] = \
 "-----BEGIN PUBLIC KEY-----\n"
 "MCowBQYDK2VwAyEADt/RHErAxAHxH9FUmsjOhQ2ALl6Y8nE0m3zQxkEE2iM=\n"
 "-----END PUBLIC KEY-----\n";
@@ -41,7 +41,7 @@ static const unsigned char eddsa_raw[] = {
 };
 
 static EVP_PKEY *
-EVP_PKEY_from_PEM(char *ptr, size_t len)
+EVP_PKEY_from_PEM(const char *ptr, size_t len)
 {
 	BIO *bio = NULL;
 	EVP_PKEY *pkey = NULL;
@@ -63,7 +63,7 @@ out:
 }
 
 static int
-eddsa_pk_cmp(char *ptr, size_t len)
+eddsa_pk_cmp(const char *ptr, size_t len)
 {
 	EVP_PKEY *pkA = NULL;
 	EVP_PKEY *pkB = NULL;

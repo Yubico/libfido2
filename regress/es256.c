@@ -22,25 +22,25 @@
 #define ASSERT_INVAL(e)		assert((e) == FIDO_ERR_INVALID_ARGUMENT)
 #define ASSERT_OK(e)		assert((e) == FIDO_OK)
 
-static char short_x[] = \
+static const char short_x[] = \
 "-----BEGIN PUBLIC KEY-----\n"
 "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEAAeeHTZj4LEbt7Czs+u5gEZJfnGE\n"
 "6Z+YLe4AYu7SoGY7IH/2jKifsA7w+lkURL4DL63oEjd3f8foH9bX4eaVug==\n"
 "-----END PUBLIC KEY-----";
 
-static char short_y[] = \
+static const char short_y[] = \
 "-----BEGIN PUBLIC KEY-----\n"
 "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEL8CWUP1r0tpJ5QmkzLc69O74C/Ti\n"
 "83hTiys/JFNVkp0ArW3pKt5jNRrgWSZYE4S/D3AMtpqifFXz/FLCzJqojQ==\n"
 "-----END PUBLIC KEY-----\n";
 
-static char p256k1[] = \
+static const char p256k1[] = \
 "-----BEGIN PUBLIC KEY-----\n"
 "MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEU1y8c0Jg9FGr3vYChpEo9c4dpkijriYM\n"
 "QzU/DeskC89hZjLNH1Sj8ra2MsBlVGGJTNPCZSyx8Jo7ERapxdN7UQ==\n"
 "-----END PUBLIC KEY-----\n";
 
-static char p256v1[] = \
+static const char p256v1[] = \
 "-----BEGIN PUBLIC KEY-----\n"
 "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOwiq14c80b7C1Jzsx5w1zMvk2GgW\n"
 "5kfGMOKXjwF/U+51ZfBDKehs3ivdeXAJBkxIh7E3iA32s+HyNqk+ntl9fg==\n"
@@ -71,7 +71,7 @@ static const unsigned char p256v1_raw[] = {
 };
 
 static EVP_PKEY *
-EVP_PKEY_from_PEM(char *ptr, size_t len)
+EVP_PKEY_from_PEM(const char *ptr, size_t len)
 {
 	BIO *bio = NULL;
 	EVP_PKEY *pkey = NULL;
@@ -93,7 +93,7 @@ out:
 }
 
 static int
-es256_pk_cmp(char *ptr, size_t len)
+es256_pk_cmp(const char *ptr, size_t len)
 {
 	EVP_PKEY *pkA = NULL;
 	EVP_PKEY *pkB = NULL;
