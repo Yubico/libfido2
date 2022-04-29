@@ -40,7 +40,7 @@ option(BUILD_TOOLS       "Build tool programs"                     ON)
 option(FUZZ              "Enable fuzzing instrumentation"          OFF)
 option(LIBFUZZER         "Build libfuzzer harnesses"               OFF)
 option(USE_HIDAPI        "Use hidapi as the HID backend"           OFF)
-option(USE_PCSC          "Enable experimental PCSC support"        ON)
+option(USE_PCSC          "Enable experimental PCSC support"        OFF)
 option(USE_WINHELLO      "Abstract Windows Hello as a FIDO device" ON)
 option(NFC_LINUX         "Enable NFC support on Linux"             ON)
 
@@ -240,6 +240,11 @@ else()
 		add_compile_options(-Wno-unused-parameter)
 	endif()
 
+	if(FUZZ)
+		set(USE_PCSC ON)
+		add_definitions(-DFIDO_FUZZ)
+	endif()
+
 	# If building with PCSC, look for pcsc-lite.
 	if(USE_PCSC AND NOT (APPLE OR CYGWIN OR MSYS OR MINGW))
 		pkg_search_module(PCSC libpcsclite REQUIRED)
@@ -292,10 +297,6 @@ else()
 
 	if(CRYPTO_VERSION VERSION_GREATER_EQUAL 3.0)
 		add_definitions(-DOPENSSL_API_COMPAT=0x10100000L)
-	endif()
-
-	if(FUZZ)
-		add_definitions(-DFIDO_FUZZ)
 	endif()
 
 	if(LIBFUZZER)
