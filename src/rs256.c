@@ -11,6 +11,12 @@
 #include "fido.h"
 #include "fido/rs256.h"
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+#define get0_RSA(x)	EVP_PKEY_get0_RSA((x))
+#else
+#define get0_RSA(x)	EVP_PKEY_get0((x))
+#endif
+
 #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x3050200fL
 static EVP_MD *
 rs256_get_EVP_MD(void)
@@ -239,10 +245,10 @@ rs256_pk_from_RSA(rs256_pk_t *pk, const RSA *rsa)
 int
 rs256_pk_from_EVP_PKEY(rs256_pk_t *pk, const EVP_PKEY *pkey)
 {
-	RSA *rsa;
+	const RSA *rsa;
 
 	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA ||
-	    (rsa = EVP_PKEY_get0(pkey)) == NULL)
+	    (rsa = get0_RSA(pkey)) == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	return (rs256_pk_from_RSA(pk, rsa));
