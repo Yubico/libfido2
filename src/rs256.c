@@ -128,10 +128,19 @@ rs256_pk_free(rs256_pk_t **pkp)
 int
 rs256_pk_from_ptr(rs256_pk_t *pk, const void *ptr, size_t len)
 {
+	EVP_PKEY *pkey;
+
 	if (len < sizeof(*pk))
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	memcpy(pk, ptr, sizeof(*pk));
+
+	if ((pkey = rs256_pk_to_EVP_PKEY(pk)) == NULL) {
+		fido_log_debug("%s: rs256_pk_to_EVP_PKEY", __func__);
+		return (FIDO_ERR_INVALID_ARGUMENT);
+	}
+
+	EVP_PKEY_free(pkey);
 
 	return (FIDO_OK);
 }
