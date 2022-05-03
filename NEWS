@@ -1,4 +1,4 @@
-* Version 1.11.0 (unreleased)
+* Version 1.11.0 (2022-05-03)
  ** Experimental PCSC support; enable with -DUSE_PCSC.
  ** Improved OpenSSL 3.0 compatibility.
  ** Use RFC1951 raw deflate to compress CTAP 2.1 largeBlobs.
