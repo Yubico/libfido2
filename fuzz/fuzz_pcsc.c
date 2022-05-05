@@ -116,7 +116,7 @@ size_t
 pack_dummy(uint8_t *ptr, size_t len)
 {
 	struct param dummy;
-	uint8_t	blob[4096];
+	uint8_t	blob[MAXCORPUS];
 	size_t blob_len;
 
 	memset(&dummy, 0, sizeof(dummy));

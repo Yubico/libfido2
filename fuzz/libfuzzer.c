@@ -32,7 +32,7 @@ save_seed(const char *opt)
 	const char *path;
 	int fd = -1, status = 1;
 	void *buf = NULL;
-	const size_t buflen = 4096;
+	const size_t buflen = MAXCORPUS;
 	size_t n;
 	struct param *p = NULL;
 
@@ -116,7 +116,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
 	struct param *p;
 
-	if (size > 4096)
+	if (size > MAXCORPUS)
 		return 0;
 
 	if (++test_total % 100000 == 0 && debug) {
@@ -140,7 +140,7 @@ LLVMFuzzerCustomMutator(uint8_t *data, size_t size, size_t maxsize,
     unsigned int seed) NO_MSAN
 {
 	struct param *p;
-	uint8_t blob[4096];
+	uint8_t blob[MAXCORPUS];
 	size_t blob_len;
 
 	memset(&p, 0, sizeof(p));
