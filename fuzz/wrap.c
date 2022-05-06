@@ -5,6 +5,7 @@
  */
 
 #include <sys/types.h>
+#include <sys/random.h>
 #include <sys/socket.h>
 
 #include <openssl/bn.h>
@@ -67,6 +68,14 @@ WRAP(char *,
 	(const char *s),
 	NULL,
 	(s),
+	1
+)
+
+WRAP(ssize_t,
+	getrandom,
+	(void *buf, size_t buflen, unsigned int flags),
+	-1,
+	(buf, buflen, flags),
 	1
 )
 
