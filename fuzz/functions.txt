@@ -5,12 +5,12 @@ aes256_cbc_enc                     4       0 100.00%         4       0 100.00%
 aes256_cbc_dec                     4       0 100.00%         4       0 100.00%
 aes256_gcm_enc                     1       0 100.00%         3       0 100.00%
 aes256_gcm_dec                     1       0 100.00%         3       0 100.00%
-aes256.c:aes256_cbc_fips          26       2  92.31%        42       7  83.33%
+aes256.c:aes256_cbc_fips          26       2  92.31%        42       5  88.10%
 aes256.c:aes256_cbc               29       1  96.55%        36       3  91.67%
 aes256.c:aes256_cbc_proto1         1       0 100.00%         5       0 100.00%
 aes256.c:aes256_gcm               52       1  98.08%        60       4  93.33%
 --------------------------------------------------------------------------------------------------------
-TOTAL                            118       4  96.61%       157      14  91.08%
+TOTAL                            118       4  96.61%       157      12  92.36%
 
 File '/libfido2/src/assert.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -208,12 +208,12 @@ cbor.c:check_key_type                        8       0 100.00%         7       0
 cbor.c:cbor_add_arg                         13       0 100.00%        21       0 100.00%
 cbor.c:cbor_add_uint8                       14       0 100.00%        21       0 100.00%
 cbor.c:cbor_encode_largeblob_key_ext         6       0 100.00%         6       0 100.00%
-cbor.c:cbor_encode_hmac_secret_param        59       4  93.22%        66       8  87.88%
+cbor.c:cbor_encode_hmac_secret_param        59       5  91.53%        66       8  87.88%
 cbor.c:get_cose_alg                         36       0 100.00%        38       0 100.00%
 cbor.c:find_cose_alg                        35       0 100.00%        33       0 100.00%
 cbor.c:decode_attcred                       25       0 100.00%        44       0 100.00%
 cbor.c:decode_cred_extensions               14       0 100.00%        24       0 100.00%
-cbor.c:decode_cred_extension                49      10  79.59%        49      17  65.31%
+cbor.c:decode_cred_extension                49      12  75.51%        49      17  65.31%
 cbor.c:decode_assert_extensions             14       0 100.00%        23       0 100.00%
 cbor.c:decode_assert_extension              19       0 100.00%        27       0 100.00%
 cbor.c:decode_attstmt_entry                 52       0 100.00%        50       0 100.00%
@@ -222,7 +222,7 @@ cbor.c:decode_cred_id_entry                 10       0 100.00%        19       0
 cbor.c:decode_user_entry                    25       0 100.00%        35       0 100.00%
 cbor.c:decode_rp_entity_entry               15       0 100.00%        25       0 100.00%
 ------------------------------------------------------------------------------------------------------------------
-TOTAL                                     1049      23  97.81%      1237      45  96.36%
+TOTAL                                     1049      26  97.52%      1237      45  96.36%
 
 File '/libfido2/src/compress.c':
 Name                                   Regions    Miss   Cover     Lines    Miss   Cover
@@ -410,15 +410,15 @@ fido_dev_maxmsgsize                           1       0 100.00%         3       
 fido_dev_set_timeout                          6       2  66.67%         6       1  83.33%
 dev.c:run_manifest                           10       0 100.00%        13       0 100.00%
 dev.c:fido_dev_open_wait                     10       0 100.00%         7       0 100.00%
-dev.c:fido_dev_open_tx                       56      15  73.21%        56      26  53.57%
+dev.c:fido_dev_open_tx                       56      13  76.79%        56      23  58.93%
 dev.c:set_random_report_len                  11       0 100.00%         6       0 100.00%
 dev.c:fido_dev_open_rx                       36       1  97.22%        53       1  98.11%
 dev.c:fido_dev_set_flags                      1       0 100.00%         5       0 100.00%
 dev.c:fido_dev_set_extension_flags            7       0 100.00%         7       0 100.00%
-dev.c:fido_dev_set_option_flags              31       0 100.00%        20       0 100.00%
+dev.c:fido_dev_set_option_flags              31       1  96.77%        20       0 100.00%
 dev.c:fido_dev_set_protocol_flags            11       0 100.00%        17       0 100.00%
 -------------------------------------------------------------------------------------------------------------------
-TOTAL                                       332      71  78.61%       378      86  77.25%
+TOTAL                                       332      70  78.92%       378      83  78.04%
 
 File '/libfido2/src/ecdh.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -635,7 +635,7 @@ largeblob.c:largeblob_reset                   1       0 100.00%         5       
 largeblob.c:largeblob_encode                 16       0 100.00%        21       0 100.00%
 largeblob.c:largeblob_new                     1       0 100.00%         3       0 100.00%
 largeblob.c:largeblob_seal                   20       0 100.00%        32       0 100.00%
-largeblob.c:largeblob_get_nonce               8       1  87.50%        16       3  81.25%
+largeblob.c:largeblob_get_nonce               8       0 100.00%        16       0 100.00%
 largeblob.c:largeblob_free                    6       0 100.00%         8       0 100.00%
 largeblob.c:largeblob_add                    27       2  92.59%        35       3  91.43%
 largeblob.c:largeblob_drop                   21       0 100.00%        27       0 100.00%
@@ -644,7 +644,7 @@ largeblob.c:largeblob_get_uv_token           19       0 100.00%        23       
 largeblob.c:largeblob_set_tx                 35       0 100.00%        36       0 100.00%
 largeblob.c:prepare_hmac                     13       2  84.62%        23       7  69.57%
 -------------------------------------------------------------------------------------------------------------------
-TOTAL                                       514      19  96.30%       684      46  93.27%
+TOTAL                                       514      18  96.50%       684      43  93.71%
 
 File '/libfido2/src/log.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -795,9 +795,9 @@ TOTAL                                         403       3  99.26%       495     
 File '/libfido2/src/random.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
 ---------------------------------------------------------------------------------------------------------------------
-fido_get_random                                 6       1  83.33%         6       1  83.33%
+fido_get_random                                 6       0 100.00%         6       0 100.00%
 ---------------------------------------------------------------------------------------------------------------------
-TOTAL                                           6       1  83.33%         6       1  83.33%
+TOTAL                                           6       0 100.00%         6       0 100.00%
 
 File '/libfido2/src/reset.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
@@ -812,10 +812,10 @@ File '/libfido2/src/rs1.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
 ---------------------------------------------------------------------------------------------------------------------
 rs1_verify_sig                                 20       1  95.00%        30       3  90.00%
-rs1.c:rs1_get_EVP_MD                            4       1  75.00%         6       1  83.33%
+rs1.c:rs1_get_EVP_MD                            4       0 100.00%         6       0 100.00%
 rs1.c:rs1_free_EVP_MD                           1       0 100.00%         3       0 100.00%
 ---------------------------------------------------------------------------------------------------------------------
-TOTAL                                          25       2  92.00%        39       4  89.74%
+TOTAL                                          25       1  96.00%        39       3  92.31%
 
 File '/libfido2/src/rs256.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
@@ -823,10 +823,10 @@ Name                                      Regions    Miss   Cover     Lines    M
 rs256_pk_decode                                 8       0 100.00%         9       0 100.00%
 rs256_pk_new                                    1       0 100.00%         3       0 100.00%
 rs256_pk_free                                   6       0 100.00%         7       0 100.00%
-rs256_pk_from_ptr                               6       0 100.00%         6       0 100.00%
-rs256_pk_to_EVP_PKEY                           32       0 100.00%        39       0 100.00%
-rs256_pk_from_RSA                              32       4  87.50%        26       6  76.92%
-rs256_pk_from_EVP_PKEY                          7       2  71.43%         7       1  85.71%
+rs256_pk_from_ptr                              10       0 100.00%        12       0 100.00%
+rs256_pk_to_EVP_PKEY                           35       0 100.00%        43       0 100.00%
+rs256_pk_from_RSA                              32       6  81.25%        26       9  65.38%
+rs256_pk_from_EVP_PKEY                          8       2  75.00%         7       1  85.71%
 rs256_verify_sig                               20       1  95.00%        30       2  93.33%
 rs256_pk_verify_sig                             7       1  85.71%        13       2  84.62%
 rs256.c:decode_rsa_pubkey                       9       0 100.00%        13       0 100.00%
@@ -834,7 +834,7 @@ rs256.c:decode_bignum                           8       0 100.00%        10     
 rs256.c:rs256_get_EVP_MD                        4       0 100.00%         6       0 100.00%
 rs256.c:rs256_free_EVP_MD                       1       0 100.00%         3       0 100.00%
 ---------------------------------------------------------------------------------------------------------------------
-TOTAL                                         141       8  94.33%       172      11  93.60%
+TOTAL                                         149      10  93.29%       182      14  92.31%
 
 File '/libfido2/src/time.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
@@ -856,17 +856,17 @@ TOTAL                                          67       0 100.00%        79     
 File '/libfido2/src/tpm.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
 ---------------------------------------------------------------------------------------------------------------------
-fido_get_signed_hash_tpm                       25       1  96.00%        39       3  92.31%
-tpm.c:check_es256_pubarea                      19       1  94.74%        30       3  90.00%
+fido_get_signed_hash_tpm                       25       0 100.00%        39       0 100.00%
+tpm.c:check_es256_pubarea                      19       0 100.00%        30       0 100.00%
 tpm.c:bswap_es256_pubarea                       1       0 100.00%        12       0 100.00%
-tpm.c:check_rs256_pubarea                      17       1  94.12%        28       3  89.29%
+tpm.c:check_rs256_pubarea                      17       0 100.00%        28       0 100.00%
 tpm.c:bswap_rs256_pubarea                       1       0 100.00%        10       0 100.00%
 tpm.c:check_sha1_certinfo                      15       0 100.00%        38       0 100.00%
 tpm.c:get_signed_sha1                          17       0 100.00%        19       0 100.00%
 tpm.c:get_signed_name                           7       0 100.00%        10       0 100.00%
 tpm.c:bswap_sha1_certinfo                       1       0 100.00%         8       0 100.00%
 ---------------------------------------------------------------------------------------------------------------------
-TOTAL                                         103       3  97.09%       194       9  95.36%
+TOTAL                                         103       0 100.00%       194       0 100.00%
 
 File '/libfido2/src/types.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
