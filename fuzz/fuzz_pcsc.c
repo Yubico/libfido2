@@ -231,7 +231,9 @@ test(const struct param *p)
 	set_pcsc_parameters(&p->pcsc_list);
 	set_pcsc_io_functions(nfc_read, nfc_write, consume);
 
+	set_wire_data(p->wiredata_init.body, p->wiredata_init.len);
 	test_manifest();
+
 	test_misc();
 
 	set_wire_data(p->wiredata_init.body, p->wiredata_init.len);
