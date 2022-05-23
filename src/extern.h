@@ -119,6 +119,7 @@ size_t fido_hid_report_out_len(void *);
 
 /* nfc i/o */
 bool fido_is_nfc(const char *);
+bool nfc_is_fido(const char *);
 void *fido_nfc_open(const char *);
 void  fido_nfc_close(void *);
 int fido_nfc_read(void *, unsigned char *, size_t, int);
