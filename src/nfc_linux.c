@@ -59,7 +59,6 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 	const char *name;
 	char *str;
 	struct udev_device *dev = NULL;
-	void *ctx = NULL;
 	uint64_t id;
 	int ok = -1;
 
@@ -70,6 +69,10 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 		goto fail;
 	if (asprintf(&di->path, "%s/%s", FIDO_NFC_PREFIX, name) == -1) {
 		di->path = NULL;
+		goto fail;
+	}
+	if (nfc_is_fido(di->path) == false) {
+		fido_log_debug("%s: nfc_is_fido: %s", __func__, di->path);
 		goto fail;
 	}
 	if ((di->manufacturer = get_usb_attr(dev, "manufacturer")) == NULL)
@@ -88,17 +91,10 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 		di->product_id = (int16_t)id;
 	free(str);
 
-	if ((ctx = fido_nfc_open(di->path)) == NULL) {
-		fido_log_debug("%s: fido_nfc_open", __func__);
-		goto fail;
-	}
-
 	ok = 0;
 fail:
 	if (dev != NULL)
 		udev_device_unref(dev);
-	if (ctx != NULL)
-		fido_nfc_close(ctx);
 
 	if (ok < 0) {
 		free(di->path);
