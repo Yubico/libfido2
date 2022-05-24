@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -27,7 +27,7 @@ WINSETUPAPI WINBOOL WINAPI SetupDiGetDevicePropertyW(HDEVINFO,
     DWORD, PDWORD, DWORD);
 #endif
 
-#if defined(__MINGW32__)
+#if defined(__MINGW32__) &&  __MINGW64_VERSION_MAJOR < 8
 DEFINE_DEVPROPKEY(DEVPKEY_Device_Parent, 0x4340a6c5, 0x93fa, 0x4706, 0x97,
     0x2c, 0x7b, 0x64, 0x80, 0x08, 0xa5, 0xa7, 8);
 #endif
