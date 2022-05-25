@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-FROM ubuntu:focal
+FROM ubuntu:jammy
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CC=clang-14
 ENV CXX=clang++-14
