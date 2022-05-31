@@ -72,7 +72,7 @@ pad64(const char *pin, fido_blob_t **ppin)
 	size_t	ppin_len;
 
 	pin_len = strlen(pin);
-	if (pin_len < 4 || pin_len > 255) {
+	if (pin_len < 4 || pin_len > 63) {
 		fido_log_debug("%s: invalid pin length", __func__);
 		return (FIDO_ERR_PIN_POLICY_VIOLATION);
 	}
