@@ -55,6 +55,11 @@ pin_set(char *path)
 		goto out;
 	}
 
+	if (strlen(pin1) < 4 || strlen(pin1) > 63) {
+		fprintf(stderr, "invalid PIN length\n");
+		goto out;
+	}
+
 	if ((r = fido_dev_set_pin(dev, pin1, NULL)) != FIDO_OK) {
 		warnx("fido_dev_set_pin: %s", fido_strerr(r));
 		goto out;
@@ -98,6 +103,11 @@ pin_change(char *path)
 		goto out;
 	}
 
+	if (strlen(pin0) < 4 || strlen(pin0) > 63) {
+		warnx("invalid PIN length");
+		goto out;
+	}
+
 	r = snprintf(prompt, sizeof(prompt), "Enter new PIN for %s: ", path);
 	if (r < 0 || (size_t)r >= sizeof(prompt)) {
 		warnx("snprintf");
@@ -122,6 +132,11 @@ pin_change(char *path)
 
 	if (strcmp(pin1, pin2) != 0) {
 		fprintf(stderr, "PINs do not match. Try again.\n");
+		goto out;
+	}
+
+	if (strlen(pin1) < 4 || strlen(pin1) > 63) {
+		fprintf(stderr, "invalid PIN length\n");
 		goto out;
 	}
 
