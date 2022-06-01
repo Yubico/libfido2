@@ -81,7 +81,8 @@ pad64(const char *pin, fido_blob_t **ppin)
 		return (FIDO_ERR_INTERNAL);
 
 	ppin_len = (pin_len + 63U) & ~63U;
-	if (ppin_len < pin_len || ((*ppin)->ptr = calloc(1, ppin_len)) == NULL) {
+	if (ppin_len < pin_len ||
+	    ((*ppin)->ptr = calloc(1, ppin_len)) == NULL) {
 		fido_blob_free(ppin);
 		return (FIDO_ERR_INTERNAL);
 	}
