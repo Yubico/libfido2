@@ -284,6 +284,10 @@ assert_get(int argc, char **argv)
 			errx(1, "snprintf");
 		if (!readpassphrase(prompt, pin, sizeof(pin), RPP_ECHO_OFF))
 			errx(1, "readpassphrase");
+		if (strlen(pin) < 4 || strlen(pin) > 63) {
+			explicit_bzero(pin, sizeof(pin));
+			errx(1, "invalid PIN length");
+		}
 		r = fido_dev_get_assert(dev, assert, pin);
 	} else
 		r = fido_dev_get_assert(dev, assert, NULL);
