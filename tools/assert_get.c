@@ -209,8 +209,8 @@ assert_get(int argc, char **argv)
 	fido_dev_t *dev = NULL;
 	fido_assert_t *assert = NULL;
 	struct toggle opt;
-	char pin[1024];
 	char prompt[1024];
+	char pin[128];
 	char *in_path = NULL;
 	char *out_path = NULL;
 	FILE *in_f = NULL;
