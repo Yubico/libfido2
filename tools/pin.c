@@ -21,8 +21,8 @@ pin_set(char *path)
 {
 	fido_dev_t *dev = NULL;
 	char prompt[1024];
-	char pin1[1024];
-	char pin2[1024];
+	char pin1[128];
+	char pin2[128];
 	int r;
 	int status = 1;
 
@@ -76,9 +76,9 @@ pin_change(char *path)
 {
 	fido_dev_t *dev = NULL;
 	char prompt[1024];
-	char pin0[1024];
-	char pin1[1024];
-	char pin2[1024];
+	char pin0[128];
+	char pin1[128];
+	char pin2[128];
 	int r;
 	int status = 1;
 

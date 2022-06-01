@@ -137,7 +137,7 @@ cred_make(int argc, char **argv)
 	fido_dev_t *dev = NULL;
 	fido_cred_t *cred = NULL;
 	char prompt[1024];
-	char pin[1024];
+	char pin[128];
 	char *in_path = NULL;
 	char *out_path = NULL;
 	FILE *in_f = NULL;
