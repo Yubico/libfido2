@@ -193,12 +193,12 @@ fido_dev_get_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int *ms)
 	}
 
 	/* parse the first assertion */
-	if ((r = cbor_parse_reply(msg, (size_t)msglen,
-	    &assert->stmt[assert->stmt_len], parse_assert_reply)) != FIDO_OK) {
+	if ((r = cbor_parse_reply(msg, (size_t)msglen, &assert->stmt[0],
+	    parse_assert_reply)) != FIDO_OK) {
 		fido_log_debug("%s: parse_assert_reply", __func__);
 		goto out;
 	}
-	assert->stmt_len++;
+	assert->stmt_len = 1;
 
 	r = FIDO_OK;
 out:
