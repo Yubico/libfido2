@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -160,42 +160,51 @@ fail:
 static int
 fido_dev_get_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int *ms)
 {
-	unsigned char	reply[FIDO_MAXMSG];
-	int		reply_len;
-	int		r;
+	unsigned char	*msg;
+	int		 msglen;
+	int		 r;
 
 	fido_assert_reset_rx(assert);
 
-	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
-	    ms)) < 0) {
+	if ((msg = malloc(FIDO_MAXMSG)) == NULL) {
+		r = FIDO_ERR_INTERNAL;
+		goto out;
+	}
+
+	if ((msglen = fido_rx(dev, CTAP_CMD_CBOR, msg, FIDO_MAXMSG, ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
-		return (FIDO_ERR_RX);
+		r = FIDO_ERR_RX;
+		goto out;
 	}
 
 	/* start with room for a single assertion */
-	if ((assert->stmt = calloc(1, sizeof(fido_assert_stmt))) == NULL)
-		return (FIDO_ERR_INTERNAL);
-
+	if ((assert->stmt = calloc(1, sizeof(fido_assert_stmt))) == NULL) {
+		r = FIDO_ERR_INTERNAL;
+		goto out;
+	}
 	assert->stmt_len = 0;
 	assert->stmt_cnt = 1;
 
 	/* adjust as needed */
-	if ((r = cbor_parse_reply(reply, (size_t)reply_len, assert,
+	if ((r = cbor_parse_reply(msg, (size_t)msglen, assert,
 	    adjust_assert_count)) != FIDO_OK) {
 		fido_log_debug("%s: adjust_assert_count", __func__);
-		return (r);
+		goto out;
 	}
 
 	/* parse the first assertion */
-	if ((r = cbor_parse_reply(reply, (size_t)reply_len,
+	if ((r = cbor_parse_reply(msg, (size_t)msglen,
 	    &assert->stmt[assert->stmt_len], parse_assert_reply)) != FIDO_OK) {
 		fido_log_debug("%s: parse_assert_reply", __func__);
-		return (r);
+		goto out;
 	}
-
 	assert->stmt_len++;
 
-	return (FIDO_OK);
+	r = FIDO_OK;
+out:
+	freezero(msg, FIDO_MAXMSG);
+
+	return (r);
 }
 
 static int
@@ -214,30 +223,40 @@ fido_get_next_assert_tx(fido_dev_t *dev, int *ms)
 static int
 fido_get_next_assert_rx(fido_dev_t *dev, fido_assert_t *assert, int *ms)
 {
-	unsigned char	reply[FIDO_MAXMSG];
-	int		reply_len;
-	int		r;
+	unsigned char	*msg;
+	int		 msglen;
+	int		 r;
 
-	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
-	    ms)) < 0) {
+	if ((msg = malloc(FIDO_MAXMSG)) == NULL) {
+		r = FIDO_ERR_INTERNAL;
+		goto out;
+	}
+
+	if ((msglen = fido_rx(dev, CTAP_CMD_CBOR, msg, FIDO_MAXMSG, ms)) < 0) {
 		fido_log_debug("%s: fido_rx", __func__);
-		return (FIDO_ERR_RX);
+		r = FIDO_ERR_RX;
+		goto out;
 	}
 
 	/* sanity check */
 	if (assert->stmt_len >= assert->stmt_cnt) {
 		fido_log_debug("%s: stmt_len=%zu, stmt_cnt=%zu", __func__,
 		    assert->stmt_len, assert->stmt_cnt);
-		return (FIDO_ERR_INTERNAL);
+		r = FIDO_ERR_INTERNAL;
+		goto out;
 	}
 
-	if ((r = cbor_parse_reply(reply, (size_t)reply_len,
+	if ((r = cbor_parse_reply(msg, (size_t)msglen,
 	    &assert->stmt[assert->stmt_len], parse_assert_reply)) != FIDO_OK) {
 		fido_log_debug("%s: parse_assert_reply", __func__);
-		return (r);
+		goto out;
 	}
 
-	return (FIDO_OK);
+	r = FIDO_OK;
+out:
+	freezero(msg, FIDO_MAXMSG);
+
+	return (r);
 }
 
 static int
