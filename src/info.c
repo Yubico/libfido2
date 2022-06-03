@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -298,22 +298,31 @@ fido_dev_get_cbor_info_tx(fido_dev_t *dev, int *ms)
 static int
 fido_dev_get_cbor_info_rx(fido_dev_t *dev, fido_cbor_info_t *ci, int *ms)
 {
-	unsigned char	reply[FIDO_MAXMSG];
-	int		reply_len;
+	unsigned char	*msg;
+	int		 msglen;
+	int		 r;
 
 	fido_log_debug("%s: dev=%p, ci=%p, ms=%d", __func__, (void *)dev,
 	    (void *)ci, *ms);
 
 	fido_cbor_info_reset(ci);
 
-	if ((reply_len = fido_rx(dev, CTAP_CMD_CBOR, &reply, sizeof(reply),
-	    ms)) < 0) {
-		fido_log_debug("%s: fido_rx", __func__);
-		return (FIDO_ERR_RX);
+	if ((msg = malloc(FIDO_MAXMSG)) == NULL) {
+		r = FIDO_ERR_INTERNAL;
+		goto out;
 	}
 
-	return (cbor_parse_reply(reply, (size_t)reply_len, ci,
-	    parse_reply_element));
+	if ((msglen = fido_rx(dev, CTAP_CMD_CBOR, msg, FIDO_MAXMSG, ms)) < 0) {
+		fido_log_debug("%s: fido_rx", __func__);
+		r = FIDO_ERR_RX;
+		goto out;
+	}
+
+	r = cbor_parse_reply(msg, (size_t)msglen, ci, parse_reply_element);
+out:
+	freezero(msg, FIDO_MAXMSG);
+
+	return (r);
 }
 
 int
