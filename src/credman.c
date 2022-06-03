@@ -19,7 +19,7 @@
 #define CMD_UPDATE_CRED		0x07
 
 static int
-credman_grow_array(void **ptr, size_t *n_alloc, size_t *n_rx, size_t n,
+credman_grow_array(void **ptr, size_t *n_alloc, const size_t *n_rx, size_t n,
     size_t size)
 {
 	void *new_ptr;
@@ -370,7 +370,7 @@ credman_rx_rk(fido_dev_t *dev, fido_credman_rk_t *rk, int *ms)
 		fido_log_debug("%s: credman_parse_rk", __func__);
 		goto out;
 	}
-	rk->n_rx++;
+	rk->n_rx = 1;
 
 	r = FIDO_OK;
 out:
@@ -598,7 +598,7 @@ credman_rx_rp(fido_dev_t *dev, fido_credman_rp_t *rp, int *ms)
 		fido_log_debug("%s: credman_parse_rp", __func__);
 		goto out;
 	}
-	rp->n_rx++;
+	rp->n_rx = 1;
 
 	r = FIDO_OK;
 out:
