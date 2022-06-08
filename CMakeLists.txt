@@ -280,13 +280,17 @@ else()
 	add_compile_options(-pedantic)
 	add_compile_options(-pedantic-errors)
 
+	set(EXTRA_CFLAGS "-Wconversion -Wsign-conversion")
+
 	if(WIN32)
 		add_compile_options(-Wno-type-limits)
 		add_compile_options(-Wno-cast-function-type)
 	endif()
+
 	if(HAVE_SHORTEN_64_TO_32)
 		add_compile_options(-Wshorten-64-to-32)
 	endif()
+
 	if(HAVE_STACK_PROTECTOR_ALL)
 		add_compile_options(-fstack-protector-all)
 	endif()
@@ -301,6 +305,8 @@ else()
 
 	if(LIBFUZZER)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=fuzzer-no-link")
+	else()
+		set(EXTRA_CFLAGS "${EXTRA_CFLAGS} -Wframe-larger-than=2047")
 	endif()
 endif()
 
