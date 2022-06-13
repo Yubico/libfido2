@@ -14,6 +14,7 @@
 
 #include "fido.h"
 #include "fido/es256.h"
+#include "fallthrough.h"
 
 #define U2F_PACE_MS (100)
 
@@ -832,7 +833,7 @@ u2f_authenticate(fido_dev_t *dev, fido_assert_t *fa, int *ms)
 		    &fa->allow_list.ptr[i], fa, nfound, ms))) {
 		case FIDO_OK:
 			nauth_ok++;
-			/* FALLTHROUGH */
+			FALLTHROUGH
 		case FIDO_ERR_USER_PRESENCE_REQUIRED:
 			nfound++;
 			break;
