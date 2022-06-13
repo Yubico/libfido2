@@ -133,14 +133,14 @@ static bool
 is_fido(const struct hid_device_info *hdi)
 {
 	uint32_t usage_page = 0;
-	struct hidraw_report_descriptor hrd;
+	struct hidraw_report_descriptor *hrd;
 
-	memset(&hrd, 0, sizeof(hrd));
+	if ((hrd = calloc(1, sizeof(*hrd))) == NULL ||
+	    get_report_descriptor(hdi->path, hrd) < 0 ||
+	    fido_hid_get_usage(hrd->value, hrd->size, &usage_page) < 0)
+		usage_page = 0;
 
-	if (get_report_descriptor(hdi->path, &hrd) < 0 ||
-	    fido_hid_get_usage(hrd.value, hrd.size, &usage_page) < 0) {
-		return false;
-	}
+	free(hrd);
 
 	return usage_page == 0xf1d0;
 }
