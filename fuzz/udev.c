@@ -241,7 +241,7 @@ __wrap_ioctl(int fd, unsigned long request, ...)
 
 	va_start(ap, request);
 
-	switch (request) {
+	switch (IOCTL_REQ(request)) {
 	case IOCTL_REQ(HIDIOCGRDESCSIZE):
 		*va_arg(ap, int *) = (int)report_descriptor->len;
 		break;

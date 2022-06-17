@@ -7,6 +7,8 @@
 #ifndef _MUTATOR_AUX_H
 #define _MUTATOR_AUX_H
 
+#include <sys/types.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <cbor.h>
