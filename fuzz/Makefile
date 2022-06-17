@@ -2,10 +2,10 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-IMAGE		:= libfido2-coverage:1.12.1
+IMAGE		:= libfido2-coverage:1.12.2
 RUNNER		:= libfido2-runner
-PROFDATA	:= llvm-profdata-14
-COV		:= llvm-cov-14
+PROFDATA	:= llvm-profdata
+COV		:= llvm-cov
 TARGETS		:= fuzz_assert fuzz_bio fuzz_cred fuzz_credman fuzz_hid \
 		   fuzz_largeblob fuzz_netlink fuzz_mgmt fuzz_pcsc
 CORPORA		:= $(foreach f,${TARGETS},${f}/corpus)
