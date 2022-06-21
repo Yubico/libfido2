@@ -287,7 +287,7 @@ by default, allowing the authenticator to use its default settings.
 .Pp
 The
 .Fn fido_cred_set_fmt
-function sets the attestation format of
+function sets the attestation statement format identifier of
 .Fa cred
 to
 .Fa fmt ,
@@ -297,7 +297,7 @@ must be
 .Vt "packed"
 .Pq the format used in FIDO2 ,
 .Vt "fido-u2f"
-.Pq the format used by U2F ,
+.Pq the format used in U2F ,
 .Vt "tpm"
 .Pq the format used by TPM-based authenticators ,
 or
@@ -305,9 +305,10 @@ or
 A copy of
 .Fa fmt
 is made, and no references to the passed pointer are kept.
-Note that not all authenticators support FIDO2 and therefore may not
+Note that not all authenticators support FIDO2 and therefore may only
 be able to generate
-.Vt "packed" .
+.Vt fido-u2f
+attestation statements.
 .Pp
 The
 .Fn fido_cred_set_type
