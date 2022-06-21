@@ -26,7 +26,7 @@ extern int prng_up;
 /*
  * Build wrappers around functions of interest, and have them fail
  * in a pseudo-random manner. A uniform probability of 0.25% (1/400)
- * allows for a depth of log(0.5)/log(399/400) = 276 operations
+ * allows for a depth of log(0.5)/log(399/400) > 276 operations
  * before simulated errors become statistically more likely. 
  */
 
