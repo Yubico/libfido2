@@ -662,11 +662,11 @@ int __real_deflate(z_streamp, int);
 int
 __wrap_deflate(z_streamp strm, int flush)
 {
-	if (uniform_random(400) < 1) {
+	if (prng_up && uniform_random(400) < 1) {
 		return Z_BUF_ERROR;
 	}
 	/* should never happen, but we check for it */
-	if (uniform_random(400) < 1) {
+	if (prng_up && uniform_random(400) < 1) {
 		strm->avail_out = UINT_MAX;
 		return Z_STREAM_END;
 	}
@@ -682,7 +682,7 @@ __wrap_asprintf(char **strp, const char *fmt, ...)
 	va_list ap;
 	int r;
 
-	if (uniform_random(400) < 1) {
+	if (prng_up && uniform_random(400) < 1) {
 		*strp = (void *)0xdeadbeef;
 		return -1;
 	}
