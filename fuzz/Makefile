@@ -75,8 +75,15 @@ ${CORPORA}:
 	-mkdir -p $@
 	gsutil -q -m rsync -d -r ${REMOTE}/libFuzzer/libfido2_$(@:/corpus=) $@
 
-corpus.tgz: ${CORPORA}
+fetch-oss-fuzz: ${CORPORA}
+	find ${TARGETS} -type f -size +8192c -print0 | xargs -0 rm
+
+fetch-franz:
+	ssh franz tar -C corpus -cf- . | tar -xf-
+
+corpus.tgz:
 	tar zcf $@ ${TARGETS}
 
 .PHONY: build run sync corpus ${TARGETS} ${CORPORA}
 .PHONY: report.tgz summary.txt functions.txt
+.PHONY: fetch-oss-fuzz fetch-franz corpus.tgz
