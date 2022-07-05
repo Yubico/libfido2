@@ -88,6 +88,7 @@ if(NOT MSVC)
 endif()
 
 list(APPEND COMPAT_SOURCES
+	../openbsd-compat/bsd-asprintf.c
 	../openbsd-compat/bsd-getpagesize.c
 	../openbsd-compat/clock_gettime.c
 	../openbsd-compat/endian_win32.c
