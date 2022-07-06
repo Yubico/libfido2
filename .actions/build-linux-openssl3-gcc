@@ -3,8 +3,8 @@
 ${CC} --version
 FAKEROOT="$(mktemp -d)"
 
-# Build and install OpenSSL 3.0.4.
-git clone --branch openssl-3.0.4 \
+# Build and install OpenSSL 3.0.5.
+git clone --branch openssl-3.0.5 \
 	--depth=1 https://github.com/openssl/openssl
 cd openssl
 ./Configure linux-x86_64 --prefix="${FAKEROOT}" \
