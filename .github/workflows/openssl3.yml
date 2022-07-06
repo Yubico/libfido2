@@ -16,11 +16,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-20.04
             cc: gcc-11
-          - os: ubuntu-22.04
+          - os: ubuntu-20.04
             cc: clang-14
-          - os: ubuntu-22.04
+          - os: ubuntu-20.04
             cc: i686-w64-mingw32-gcc-10
     steps:
     - uses: actions/checkout@v2
@@ -33,7 +33,7 @@ jobs:
           original-awk mandoc libpcsclite-dev
         sudo apt remove -y libssl-dev
         if [ "${CC%-*}" == "clang" ]; then
-          sudo apt install -q -y ${CC%-*}-tools-${CC#clang-}
+          sudo ./.actions/setup_clang "${CC}"
         elif [ "${CC%-*}" == "i686-w64-mingw32-gcc" ]; then
           sudo apt install -q -y binutils-mingw-w64-i686 gcc-mingw-w64 \
            g++-mingw-w64 mingw-w64-i686-dev
