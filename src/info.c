@@ -68,10 +68,8 @@ decode_option(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	fido_opt_array_t	*o = arg;
 	const size_t		 i = o->len;
 
-	if (cbor_isa_float_ctrl(val) == false ||
-	    cbor_float_get_width(val) != CBOR_FLOAT_0 ||
-	    cbor_is_bool(val) == false) {
-		fido_log_debug("%s: cbor type", __func__);
+	if (cbor_decode_bool(val, NULL) < 0) {
+		fido_log_debug("%s: cbor_decode_bool", __func__);
 		return (0); /* ignore */
 	}
 

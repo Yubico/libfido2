@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -1135,10 +1135,8 @@ decode_cred_extension(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	}
 
 	if (strcmp(type, "hmac-secret") == 0) {
-		if (cbor_isa_float_ctrl(val) == false ||
-		    cbor_float_get_width(val) != CBOR_FLOAT_0 ||
-		    cbor_is_bool(val) == false) {
-			fido_log_debug("%s: cbor type", __func__);
+		if (cbor_decode_bool(val, NULL) < 0) {
+			fido_log_debug("%s: cbor_decode_bool", __func__);
 			goto out;
 		}
 		if (cbor_ctrl_value(val) == CBOR_CTRL_TRUE)
@@ -1152,10 +1150,8 @@ decode_cred_extension(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		authdata_ext->mask |= FIDO_EXT_CRED_PROTECT;
 		authdata_ext->prot = cbor_get_uint8(val);
 	} else if (strcmp(type, "credBlob") == 0) {
-		if (cbor_isa_float_ctrl(val) == false ||
-		    cbor_float_get_width(val) != CBOR_FLOAT_0 ||
-		    cbor_is_bool(val) == false) {
-			fido_log_debug("%s: cbor type", __func__);
+		if (cbor_decode_bool(val, NULL) < 0) {
+			fido_log_debug("%s: cbor_decode_bool", __func__);
 			goto out;
 		}
 		if (cbor_ctrl_value(val) == CBOR_CTRL_TRUE)
@@ -1615,6 +1611,22 @@ cbor_decode_rp_entity(const cbor_item_t *item, fido_rp_t *rp)
 		fido_log_debug("%s: cbor type", __func__);
 		return (-1);
 	}
+
+	return (0);
+}
+
+int
+cbor_decode_bool(const cbor_item_t *item, bool *v)
+{
+	if (cbor_isa_float_ctrl(item) == false ||
+	    cbor_float_get_width(item) != CBOR_FLOAT_0 ||
+	    cbor_is_bool(item) == false) {
+		fido_log_debug("%s: cbor type", __func__);
+		return (-1);
+	}
+
+	if (v != NULL)
+		*v = cbor_ctrl_value(item) == CBOR_CTRL_TRUE;
 
 	return (0);
 }
