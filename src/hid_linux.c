@@ -244,6 +244,10 @@ fido_hid_open(const char *path)
 	struct hidraw_report_descriptor *hrd;
 	struct timespec tv_pause;
 	long interval_ms, retries = 0;
+	bool looped;
+
+retry:
+	looped = false;
 
 	if ((ctx = calloc(1, sizeof(*ctx))) == NULL ||
 	    (ctx->fd = fido_hid_unix_open(path)) == -1) {
@@ -257,7 +261,8 @@ fido_hid_open(const char *path)
 			fido_hid_close(ctx);
 			return (NULL);
 		}
-		if (retries++ >= 15) {
+		looped = true;
+		if (retries++ >= 20) {
 			fido_log_debug("%s: flock timeout", __func__);
 			fido_hid_close(ctx);
 			return (NULL);
@@ -270,6 +275,12 @@ fido_hid_open(const char *path)
 			fido_hid_close(ctx);
 			return (NULL);
 		}
+	}
+
+	if (looped) {
+		fido_log_debug("%s: retrying", __func__);
+		fido_hid_close(ctx);
+		goto retry;
 	}
 
 	if ((hrd = calloc(1, sizeof(*hrd))) == NULL ||
