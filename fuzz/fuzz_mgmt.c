@@ -295,6 +295,9 @@ dev_get_cbor_info(const struct param *p)
 	n = fido_cbor_info_fwversion(ci);
 	consume(&n, sizeof(n));
 
+	n = fido_cbor_info_minpinlen(ci);
+	consume(&n, sizeof(n));
+
 	consume(fido_cbor_info_aaguid_ptr(ci), fido_cbor_info_aaguid_len(ci));
 	consume(fido_cbor_info_protocols_ptr(ci),
 	    fido_cbor_info_protocols_len(ci));
