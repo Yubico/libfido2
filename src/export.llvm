@@ -89,6 +89,7 @@ _fido_cbor_info_maxcredcntlst
 _fido_cbor_info_maxcredidlen
 _fido_cbor_info_maxlargeblob
 _fido_cbor_info_maxmsgsiz
+_fido_cbor_info_minpinlen
 _fido_cbor_info_new
 _fido_cbor_info_new_pin_required
 _fido_cbor_info_options_len
