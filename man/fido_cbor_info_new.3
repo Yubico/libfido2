@@ -30,7 +30,8 @@
 .Nm fido_cbor_info_maxcredcntlst ,
 .Nm fido_cbor_info_maxcredidlen ,
 .Nm fido_cbor_info_maxlargeblob ,
-.Nm fido_cbor_info_fwversion
+.Nm fido_cbor_info_fwversion ,
+.Nm fido_cbor_info_new_pin_required
 .Nd FIDO2 CBOR Info API
 .Sh SYNOPSIS
 .In fido.h
@@ -84,6 +85,8 @@
 .Fn fido_cbor_info_maxlargeblob "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_fwversion "const fido_cbor_info_t *ci"
+.Ft bool
+.Fn fido_cbor_info_new_pin_required "const fido_cbor_info_t *ci"
 .Sh DESCRIPTION
 The
 .Fn fido_cbor_info_new
@@ -214,6 +217,19 @@ The
 function returns the firmware version attribute of
 .Fa ci .
 .Pp
+The
+.Fn fido_cbor_info_new_pin_required
+function returns whether a new PIN is required by the authenticator
+as reported in
+.Fa ci .
+If
+.Fn fido_cbor_info_new_pin_required
+returns true, operations requiring PIN authentication will fail
+until a new PIN is set on the authenticator.
+The
+.Xr fido_dev_set_pin 3
+function can be used to set a new PIN.
+.Pp
 A complete example of how to use these functions can be found in the
 .Pa example/info.c
 file shipped with
@@ -238,4 +254,5 @@ without the
 .Em const
 qualifier is invoked.
 .Sh SEE ALSO
-.Xr fido_dev_open 3
+.Xr fido_dev_open 3 ,
+.Xr fido_dev_set_pin 3
