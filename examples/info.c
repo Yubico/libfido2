@@ -193,6 +193,16 @@ print_maxlargeblob(uint64_t maxlargeblob)
 }
 
 /*
+ * Auxiliary function to print the minimum pin length observed by the
+ * authenticator.
+ */
+static void
+print_minpinlen(uint64_t minpinlen)
+{
+	printf("minpinlen: %d\n", (int)minpinlen);
+}
+
+/*
  * Auxiliary function to print an authenticator's firmware version on stdout.
  */
 static void
@@ -265,6 +275,9 @@ getinfo(const char *path)
 	    fido_cbor_info_options_value_ptr(ci),
 	    fido_cbor_info_options_len(ci));
 
+	/* print firmware version */
+	print_fwversion(fido_cbor_info_fwversion(ci));
+
 	/* print maximum message size */
 	print_maxmsgsiz(fido_cbor_info_maxmsgsiz(ci));
 
@@ -277,8 +290,8 @@ getinfo(const char *path)
 	/* print maximum length of largeBlob array */
 	print_maxlargeblob(fido_cbor_info_maxlargeblob(ci));
 
-	/* print firmware version */
-	print_fwversion(fido_cbor_info_fwversion(ci));
+	/* print minimum pin length */
+	print_minpinlen(fido_cbor_info_minpinlen(ci));
 
 	/* print supported pin protocols */
 	print_byte_array("pin protocols", fido_cbor_info_protocols_ptr(ci),
