@@ -284,6 +284,10 @@ getinfo(const char *path)
 	print_byte_array("pin protocols", fido_cbor_info_protocols_ptr(ci),
 	    fido_cbor_info_protocols_len(ci));
 
+	/* print whether a new pin is required */
+	printf("pin change required: %s\n",
+	    fido_cbor_info_new_pin_required(ci) ? "true" : "false");
+
 	fido_cbor_info_free(&ci);
 end:
 	if ((r = fido_dev_close(dev)) != FIDO_OK)
