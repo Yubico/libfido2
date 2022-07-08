@@ -162,6 +162,13 @@ print_maxlargeblob(uint64_t maxlargeblob)
 }
 
 static void
+print_minpinlen(uint64_t minpinlen)
+{
+	if (minpinlen > 0)
+		printf("minpinlen: %d\n", (int)minpinlen);
+}
+
+static void
 print_fwversion(uint64_t fwversion)
 {
 	printf("fwversion: 0x%x\n", (int)fwversion);
@@ -256,6 +263,9 @@ token_info(int argc, char **argv, char *path)
 	    fido_cbor_info_options_value_ptr(ci),
 	    fido_cbor_info_options_len(ci));
 
+	/* print firmware version */
+	print_fwversion(fido_cbor_info_fwversion(ci));
+
 	/* print maximum message size */
 	print_maxmsgsiz(fido_cbor_info_maxmsgsiz(ci));
 
@@ -268,8 +278,8 @@ token_info(int argc, char **argv, char *path)
 	/* print maximum length of serialized largeBlob array */
 	print_maxlargeblob(fido_cbor_info_maxlargeblob(ci));
 
-	/* print firmware version */
-	print_fwversion(fido_cbor_info_fwversion(ci));
+	/* print minimum pin length */
+	print_minpinlen(fido_cbor_info_minpinlen(ci));
 
 	/* print supported pin protocols */
 	print_byte_array("pin protocols", fido_cbor_info_protocols_ptr(ci),
