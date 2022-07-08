@@ -223,6 +223,7 @@ dev_get_cbor_info(const struct param *p)
 	fido_cbor_info_t *ci;
 	uint64_t n;
 	uint8_t proto, major, minor, build, flags;
+	bool v;
 
 	set_wire_data(p->info_wire_data.body, p->info_wire_data.len);
 
@@ -297,6 +298,9 @@ dev_get_cbor_info(const struct param *p)
 	consume(fido_cbor_info_aaguid_ptr(ci), fido_cbor_info_aaguid_len(ci));
 	consume(fido_cbor_info_protocols_ptr(ci),
 	    fido_cbor_info_protocols_len(ci));
+
+	v = fido_cbor_info_new_pin_required(ci);
+	consume(&v, sizeof(v));
 
 out:
 	fido_dev_close(dev);
