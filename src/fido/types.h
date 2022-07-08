@@ -233,6 +233,7 @@ typedef struct fido_cbor_info {
 	uint64_t          fwversion;      /* firmware version */
 	uint64_t          maxcredbloblen; /* max credBlob length */
 	uint64_t          maxlargeblob;   /* max largeBlob array length */
+	bool              new_pin_reqd;   /* new pin required */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {
