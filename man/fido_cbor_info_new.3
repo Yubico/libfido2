@@ -30,6 +30,7 @@
 .Nm fido_cbor_info_maxcredcntlst ,
 .Nm fido_cbor_info_maxcredidlen ,
 .Nm fido_cbor_info_maxlargeblob ,
+.Nm fido_cbor_info_maxrpid_minpinlen ,
 .Nm fido_cbor_info_minpinlen ,
 .Nm fido_cbor_info_fwversion ,
 .Nm fido_cbor_info_new_pin_required
@@ -84,6 +85,8 @@
 .Fn fido_cbor_info_maxcredidlen "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_maxlargeblob "const fido_cbor_info_t *ci"
+.Ft uint64_t
+.Fn fido_cbor_info_maxrpid_minpinlen "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_minpinlen "const fido_cbor_info_t *ci"
 .Ft uint64_t
@@ -210,6 +213,17 @@ as reported in
 .Fa ci .
 .Pp
 The
+.Fn fido_cbor_info_maxrpid_minpinlen
+function returns the maximum number of RP IDs that may be passed to
+.Xr fido_dev_set_pin_minlen_rpid 3 ,
+as reported in
+.Fa ci .
+The minimum PIN length attribute is a CTAP 2.1 addition.
+If the attribute is not advertised by the authenticator, the
+.Fn fido_cbor_info_maxrpid_minpinlen
+function returns zero.
+.Pp
+The
 .Fn fido_cbor_info_maxlargeblob
 function returns the maximum length in bytes of an authenticator's
 serialized largeBlob array as reported in
@@ -268,4 +282,5 @@ without the
 qualifier is invoked.
 .Sh SEE ALSO
 .Xr fido_dev_open 3 ,
-.Xr fido_dev_set_pin 3
+.Xr fido_dev_set_pin 3 ,
+.Xr fido_dev_set_pin_minlen_rpid 3

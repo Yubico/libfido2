@@ -123,6 +123,7 @@ list(APPEND MAN_ALIAS
 	fido_cbor_info_new fido_cbor_info_maxcredidlen
 	fido_cbor_info_new fido_cbor_info_maxlargeblob
 	fido_cbor_info_new fido_cbor_info_maxmsgsiz
+	fido_cbor_info_new fido_cbor_info_maxrpid_minpinlen
 	fido_cbor_info_new fido_cbor_info_minpinlen
 	fido_cbor_info_new fido_cbor_info_new_pin_required
 	fido_cbor_info_new fido_cbor_info_options_len
