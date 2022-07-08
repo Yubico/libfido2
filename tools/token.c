@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -279,6 +279,9 @@ token_info(int argc, char **argv, char *path)
 		printf("pin retries: undefined\n");
 	else
 		printf("pin retries: %d\n", retrycnt);
+
+	printf("pin change required: %s\n",
+	    fido_cbor_info_new_pin_required(ci) ? "true" : "false");
 
 	if (fido_dev_get_uv_retry_count(dev, &retrycnt) != FIDO_OK)
 		printf("uv retries: undefined\n");
