@@ -1,4 +1,4 @@
-.\" Copyright (c) 2020 Yubico AB. All rights reserved.
+.\" Copyright (c) 2020-2022 Yubico AB. All rights reserved.
 .\" Use of this source code is governed by a BSD-style
 .\" license that can be found in the LICENSE file.
 .\"
@@ -97,6 +97,10 @@ NUL-terminated UTF-8 strings.
 A copy of
 .Fa rpid
 is made, and no reference to it or its contents is kept.
+The maximum value of
+.Fa n
+supported by the authenticator can be obtained using
+.Xr fido_cbor_info_maxrpid_minpinlen 3 .
 .Pp
 Configuration settings are reflected in the payload returned by the
 authenticator in response to a
@@ -116,6 +120,7 @@ On success,
 .Dv FIDO_OK
 is returned.
 .Sh SEE ALSO
+.Xr fido_cbor_info_maxrpid_minpinlen 3 ,
 .Xr fido_cred_pin_minlen 3 ,
 .Xr fido_dev_get_cbor_info 3 ,
 .Xr fido_dev_reset 3
