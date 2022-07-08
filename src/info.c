@@ -270,6 +270,8 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (cbor_decode_uint64(val, &ci->maxlargeblob));
 	case 12: /* forcePINChange */
 		return (cbor_decode_bool(val, &ci->new_pin_reqd));
+	case 13: /* minPINLength */
+		return (cbor_decode_uint64(val, &ci->minpinlen));
 	case 14: /* fwVersion */
 		return (cbor_decode_uint64(val, &ci->fwversion));
 	case 15: /* maxCredBlobLen */
@@ -482,6 +484,12 @@ uint64_t
 fido_cbor_info_fwversion(const fido_cbor_info_t *ci)
 {
 	return (ci->fwversion);
+}
+
+uint64_t
+fido_cbor_info_minpinlen(const fido_cbor_info_t *ci)
+{
+	return (ci->minpinlen);
 }
 
 const uint8_t *

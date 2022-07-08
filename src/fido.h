@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -207,12 +207,13 @@ uint8_t  fido_dev_build(const fido_dev_t *);
 uint8_t  fido_dev_flags(const fido_dev_t *);
 int16_t  fido_dev_info_vendor(const fido_dev_info_t *);
 int16_t  fido_dev_info_product(const fido_dev_info_t *);
+uint64_t fido_cbor_info_fwversion(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_maxcredbloblen(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_maxcredcntlst(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_maxcredidlen(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_maxlargeblob(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_maxmsgsiz(const fido_cbor_info_t *);
-uint64_t fido_cbor_info_fwversion(const fido_cbor_info_t *);
+uint64_t fido_cbor_info_minpinlen(const fido_cbor_info_t *);
 
 bool fido_dev_has_pin(const fido_dev_t *);
 bool fido_dev_has_uv(const fido_dev_t *);
