@@ -162,6 +162,13 @@ print_maxlargeblob(uint64_t maxlargeblob)
 }
 
 static void
+print_maxrpid_minpinlen(uint64_t maxrpid)
+{
+	if (maxrpid > 0)
+		printf("maxrpids in minpinlen: %d\n", (int)maxrpid);
+}
+
+static void
 print_minpinlen(uint64_t minpinlen)
 {
 	if (minpinlen > 0)
@@ -277,6 +284,9 @@ token_info(int argc, char **argv, char *path)
 
 	/* print maximum length of serialized largeBlob array */
 	print_maxlargeblob(fido_cbor_info_maxlargeblob(ci));
+
+	/* print maximum number of RP IDs in fido_dev_set_pin_minlen_rpid() */
+	print_maxrpid_minpinlen(fido_cbor_info_maxrpid_minpinlen(ci));
 
 	/* print minimum pin length */
 	print_minpinlen(fido_cbor_info_minpinlen(ci));
