@@ -223,6 +223,7 @@ bool fido_dev_supports_cred_prot(const fido_dev_t *);
 bool fido_dev_supports_permissions(const fido_dev_t *);
 bool fido_dev_supports_pin(const fido_dev_t *);
 bool fido_dev_supports_uv(const fido_dev_t *);
+bool fido_cbor_info_new_pin_required(const fido_cbor_info_t *);
 
 int fido_dev_largeblob_get(fido_dev_t *, const unsigned char *, size_t,
     unsigned char **, size_t *);
