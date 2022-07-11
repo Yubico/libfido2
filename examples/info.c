@@ -203,6 +203,16 @@ print_minpinlen(uint64_t minpinlen)
 }
 
 /*
+ * Auxiliary function to print the authenticator's preferred (platform)
+ * UV attempts.
+ */
+static void
+print_uv_attempts(uint64_t uv_attempts)
+{
+	printf("platform uv attempt(s): %d\n", (int)uv_attempts);
+}
+
+/*
  * Auxiliary function to print an authenticator's firmware version on stdout.
  */
 static void
@@ -300,6 +310,9 @@ getinfo(const char *path)
 	/* print whether a new pin is required */
 	printf("pin change required: %s\n",
 	    fido_cbor_info_new_pin_required(ci) ? "true" : "false");
+
+	/* print platform uv attempts */
+	print_uv_attempts(fido_cbor_info_uv_attempts(ci));
 
 	fido_cbor_info_free(&ci);
 end:
