@@ -280,6 +280,8 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (cbor_decode_uint64(val, &ci->maxrpid_minlen));
 	case 17: /* preferredPlatformUvAttempts */
 		return (cbor_decode_uint64(val, &ci->uv_attempts));
+	case 18: /* uvModality */
+		return (cbor_decode_uint64(val, &ci->uv_modality));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type", __func__);
 		return (0);
@@ -506,6 +508,12 @@ uint64_t
 fido_cbor_info_uv_attempts(const fido_cbor_info_t *ci)
 {
 	return (ci->uv_attempts);
+}
+
+uint64_t
+fido_cbor_info_uv_modality(const fido_cbor_info_t *ci)
+{
+	return (ci->uv_modality);
 }
 
 const uint8_t *
