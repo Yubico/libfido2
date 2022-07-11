@@ -193,6 +193,21 @@ print_maxlargeblob(uint64_t maxlargeblob)
 }
 
 /*
+ * Auxiliary function to print the authenticator's estimated number of
+ * remaining resident credentials.
+ */
+static void
+print_rk_remaining(int64_t rk_remaining)
+{
+	printf("remaining rk(s): ");
+
+	if (rk_remaining == -1)
+		printf("undefined\n");
+	else
+		printf("%d\n", (int)rk_remaining);
+}
+
+/*
  * Auxiliary function to print the minimum pin length observed by the
  * authenticator.
  */
@@ -299,6 +314,9 @@ getinfo(const char *path)
 
 	/* print maximum length of largeBlob array */
 	print_maxlargeblob(fido_cbor_info_maxlargeblob(ci));
+
+	/* print number of remaining resident credentials */
+	print_rk_remaining(fido_cbor_info_rk_remaining(ci));
 
 	/* print minimum pin length */
 	print_minpinlen(fido_cbor_info_minpinlen(ci));
