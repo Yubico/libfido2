@@ -279,23 +279,19 @@ dev_get_cbor_info(const struct param *p)
 
 	n = fido_cbor_info_maxmsgsiz(ci);
 	consume(&n, sizeof(n));
-
 	n = fido_cbor_info_maxcredbloblen(ci);
 	consume(&n, sizeof(n));
-
 	n = fido_cbor_info_maxcredcntlst(ci);
 	consume(&n, sizeof(n));
-
 	n = fido_cbor_info_maxcredidlen(ci);
 	consume(&n, sizeof(n));
-
 	n = fido_cbor_info_maxlargeblob(ci);
 	consume(&n, sizeof(n));
-
 	n = fido_cbor_info_fwversion(ci);
 	consume(&n, sizeof(n));
-
 	n = fido_cbor_info_minpinlen(ci);
+	consume(&n, sizeof(n));
+	n = fido_cbor_info_uv_attempts(ci);
 	consume(&n, sizeof(n));
 
 	n = fido_cbor_info_maxrpid_minpinlen(ci);
