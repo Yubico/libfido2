@@ -34,6 +34,7 @@
 .Nm fido_cbor_info_minpinlen ,
 .Nm fido_cbor_info_fwversion ,
 .Nm fido_cbor_info_uv_attempts ,
+.Nm fido_cbor_info_uv_modality ,
 .Nm fido_cbor_info_new_pin_required
 .Nd FIDO2 CBOR Info API
 .Sh SYNOPSIS
@@ -94,6 +95,8 @@
 .Fn fido_cbor_info_fwversion "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_uv_attempts "const fido_cbor_info_t *ci"
+.Ft uint64_t
+.Fn fido_cbor_info_uv_modality "const fido_cbor_info_t *ci"
 .Ft bool
 .Fn fido_cbor_info_new_pin_required "const fido_cbor_info_t *ci"
 .Sh DESCRIPTION
@@ -262,6 +265,23 @@ the
 function returns zero.
 .Pp
 The
+.Fn fido_cbor_info_uv_modality
+function returns a bitmask representing different UV modes
+supported by the authenticator, as defined in the FIDO Registry of
+Predefined Values and reported in
+.Fa ci .
+See the
+.Em FIDO_UV_MODE_*
+definitions in
+.In fido/param.h
+for the set of values defined by libfido2 and a brief description
+of each.
+The UV modality attribute is a CTAP 2.1 addition.
+If the attribute is not advertised by the authenticator, the
+.Fn fido_cbor_info_uv_modality
+function returns zero.
+.Pp
+The
 .Fn fido_cbor_info_new_pin_required
 function returns whether a new PIN is required by the authenticator
 as reported in
@@ -302,3 +322,10 @@ qualifier is invoked.
 .Xr fido_dev_open 3 ,
 .Xr fido_dev_set_pin 3 ,
 .Xr fido_dev_set_pin_minlen_rpid 3
+.Rs
+.%D 2021-05-25
+.%O Review Draft, Version 2.2
+.%Q FIDO Alliance
+.%R FIDO Registry of Predefined Values
+.%U https://fidoalliance.org/specs/common-specs/fido-registry-v2.2-rd-20210525.html
+.Re
