@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -117,5 +117,20 @@
 				 FIDO_EXT_LARGEBLOB_KEY|FIDO_EXT_CRED_BLOB| \
 				 FIDO_EXT_MINPINLEN)
 #endif /* _FIDO_INTERNAL */
+
+/* Recognised UV modes. */
+#define FIDO_UV_MODE_TUP	0x0001	/* internal test of user presence */
+#define FIDO_UV_MODE_FP		0x0002	/* internal fingerprint check */
+#define FIDO_UV_MODE_PIN	0x0004	/* internal pin check */
+#define FIDO_UV_MODE_VOICE	0x0008	/* internal voice recognition */
+#define FIDO_UV_MODE_FACE	0x0010	/* internal face recognition */
+#define FIDO_UV_MODE_LOCATION	0x0020	/* internal location check */
+#define FIDO_UV_MODE_EYE	0x0040	/* internal eyeprint check */
+#define FIDO_UV_MODE_DRAWN	0x0080	/* internal drawn pattern check */
+#define FIDO_UV_MODE_HAND	0x0100	/* internal handprint verification */
+#define FIDO_UV_MODE_NONE	0x0200	/* TUP/UV not required */
+#define FIDO_UV_MODE_ALL	0x0400	/* all supported UV modes required */
+#define FIDO_UV_MODE_EXT_PIN	0x0800	/* external pin verification */
+#define FIDO_UV_MODE_EXT_DRAWN	0x1000	/* external drawn pattern check */
 
 #endif /* !_FIDO_PARAM_H */
