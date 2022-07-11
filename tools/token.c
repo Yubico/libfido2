@@ -176,6 +176,13 @@ print_minpinlen(uint64_t minpinlen)
 }
 
 static void
+print_uv_attempts(uint64_t uv_attempts)
+{
+	if (uv_attempts > 0)
+		printf("platform uv attempt(s): %d\n", (int)uv_attempts);
+}
+
+static void
 print_fwversion(uint64_t fwversion)
 {
 	printf("fwversion: 0x%x\n", (int)fwversion);
@@ -307,6 +314,9 @@ token_info(int argc, char **argv, char *path)
 		printf("uv retries: undefined\n");
 	else
 		printf("uv retries: %d\n", retrycnt);
+
+	/* print platform uv attempts */
+	print_uv_attempts(fido_cbor_info_uv_attempts(ci));
 
 	bio_info(dev);
 
