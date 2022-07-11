@@ -238,6 +238,7 @@ static int
 parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
 	fido_cbor_info_t *ci = arg;
+	uint64_t x;
 
 	if (cbor_isa_uint(key) == false ||
 	    cbor_int_get_width(key) != CBOR_INT_8) {
@@ -282,6 +283,13 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (cbor_decode_uint64(val, &ci->uv_attempts));
 	case 18: /* uvModality */
 		return (cbor_decode_uint64(val, &ci->uv_modality));
+	case 20: /* remainingDiscoverableCredentials */
+		if (cbor_decode_uint64(val, &x) < 0 || x > INT64_MAX) {
+			fido_log_debug("%s: cbor_decode_uint64", __func__);
+			return (-1);
+		}
+		ci->rk_remaining = (int64_t)x;
+		return (0);
 	default: /* ignore */
 		fido_log_debug("%s: cbor type", __func__);
 		return (0);
@@ -364,7 +372,14 @@ fido_dev_get_cbor_info(fido_dev_t *dev, fido_cbor_info_t *ci)
 fido_cbor_info_t *
 fido_cbor_info_new(void)
 {
-	return (calloc(1, sizeof(fido_cbor_info_t)));
+	fido_cbor_info_t *ci;
+
+	if ((ci = calloc(1, sizeof(fido_cbor_info_t))) == NULL)
+		return (NULL);
+
+	fido_cbor_info_reset(ci);
+
+	return (ci);
 }
 
 void
@@ -376,6 +391,7 @@ fido_cbor_info_reset(fido_cbor_info_t *ci)
 	fido_opt_array_free(&ci->options);
 	fido_byte_array_free(&ci->protocols);
 	fido_algo_array_free(&ci->algorithms);
+	ci->rk_remaining = -1;
 }
 
 void
@@ -514,6 +530,12 @@ uint64_t
 fido_cbor_info_uv_modality(const fido_cbor_info_t *ci)
 {
 	return (ci->uv_modality);
+}
+
+int64_t
+fido_cbor_info_rk_remaining(const fido_cbor_info_t *ci)
+{
+	return (ci->rk_remaining);
 }
 
 const uint8_t *
