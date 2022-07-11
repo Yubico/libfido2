@@ -250,6 +250,13 @@ print_uv_modality(uint64_t uv_modality)
 }
 
 static void
+print_rk_remaining(int64_t rk_remaining)
+{
+	if (rk_remaining != -1)
+		printf("remaining rk(s): %d\n", (int)rk_remaining);
+}
+
+static void
 print_fwversion(uint64_t fwversion)
 {
 	printf("fwversion: 0x%x\n", (int)fwversion);
@@ -361,6 +368,9 @@ token_info(int argc, char **argv, char *path)
 
 	/* print maximum number of RP IDs in fido_dev_set_pin_minlen_rpid() */
 	print_maxrpid_minpinlen(fido_cbor_info_maxrpid_minpinlen(ci));
+
+	/* print estimated number of resident credentials */
+	print_rk_remaining(fido_cbor_info_rk_remaining(ci));
 
 	/* print minimum pin length */
 	print_minpinlen(fido_cbor_info_minpinlen(ci));
