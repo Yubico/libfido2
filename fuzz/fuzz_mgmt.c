@@ -291,10 +291,11 @@ dev_get_cbor_info(const struct param *p)
 	consume(&n, sizeof(n));
 	n = fido_cbor_info_minpinlen(ci);
 	consume(&n, sizeof(n));
+	n = fido_cbor_info_maxrpid_minpinlen(ci);
+	consume(&n, sizeof(n));
 	n = fido_cbor_info_uv_attempts(ci);
 	consume(&n, sizeof(n));
-
-	n = fido_cbor_info_maxrpid_minpinlen(ci);
+	n = fido_cbor_info_uv_modality(ci);
 	consume(&n, sizeof(n));
 
 	consume(fido_cbor_info_aaguid_ptr(ci), fido_cbor_info_aaguid_len(ci));
