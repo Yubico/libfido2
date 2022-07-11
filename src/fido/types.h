@@ -237,6 +237,7 @@ typedef struct fido_cbor_info {
 	uint64_t          minpinlen;      /* min pin len enforced */
 	uint64_t          uv_attempts;    /* platform uv attempts */
 	uint64_t          uv_modality;    /* bitmask of supported uv types */
+	int64_t           rk_remaining;   /* remaining resident credentials */
 	bool              new_pin_reqd;   /* new pin required */
 } fido_cbor_info_t;
 
