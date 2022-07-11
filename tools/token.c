@@ -183,6 +183,73 @@ print_uv_attempts(uint64_t uv_attempts)
 }
 
 static void
+print_uv_modality(uint64_t uv_modality)
+{
+	uint64_t mode;
+	bool printed = false;
+
+	if (uv_modality == 0)
+		return;
+
+	printf("uv modality: 0x%x (", (int)uv_modality);
+
+	for (size_t i = 0; i < 64; i++) {
+		mode = 1ULL << i;
+		if ((uv_modality & mode) == 0)
+			continue;
+		if (printed)
+			printf(", ");
+		switch (mode) {
+		case FIDO_UV_MODE_TUP:
+			printf("test of user presence");
+			break;
+		case FIDO_UV_MODE_FP:
+			printf("fingerprint check");
+			break;
+		case FIDO_UV_MODE_PIN:
+			printf("pin check");
+			break;
+		case FIDO_UV_MODE_VOICE:
+			printf("voice recognition");
+			break;
+		case FIDO_UV_MODE_FACE:
+			printf("face recognition");
+			break;
+		case FIDO_UV_MODE_LOCATION:
+			printf("location check");
+			break;
+		case FIDO_UV_MODE_EYE:
+			printf("eyeprint check");
+			break;
+		case FIDO_UV_MODE_DRAWN:
+			printf("drawn pattern check");
+			break;
+		case FIDO_UV_MODE_HAND:
+			printf("handprint verification");
+			break;
+		case FIDO_UV_MODE_NONE:
+			printf("none");
+			break;
+		case FIDO_UV_MODE_ALL:
+			printf("all required");
+			break;
+		case FIDO_UV_MODE_EXT_PIN:
+			printf("external pin");
+			break;
+		case FIDO_UV_MODE_EXT_DRAWN:
+			printf("external drawn pattern check");
+			break;
+		default:
+			printf("unknown 0x%llx", (unsigned long long)mode);
+			break;
+		}
+		printed = true;
+	}
+
+	printf(")\n");
+}
+
+static void
 print_fwversion(uint64_t fwversion)
 {
 	printf("fwversion: 0x%x\n", (int)fwversion);
@@ -317,6 +384,9 @@ token_info(int argc, char **argv, char *path)
 
 	/* print platform uv attempts */
 	print_uv_attempts(fido_cbor_info_uv_attempts(ci));
+
+	/* print supported uv mechanisms */
+	print_uv_modality(fido_cbor_info_uv_modality(ci));
 
 	bio_info(dev);
 
