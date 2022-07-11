@@ -278,6 +278,8 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (cbor_decode_uint64(val, &ci->maxcredbloblen));
 	case 16: /* maxRPIDsForSetMinPINLength */
 		return (cbor_decode_uint64(val, &ci->maxrpid_minlen));
+	case 17: /* preferredPlatformUvAttempts */
+		return (cbor_decode_uint64(val, &ci->uv_attempts));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type", __func__);
 		return (0);
@@ -498,6 +500,12 @@ uint64_t
 fido_cbor_info_maxrpid_minpinlen(const fido_cbor_info_t *ci)
 {
 	return (ci->maxrpid_minlen);
+}
+
+uint64_t
+fido_cbor_info_uv_attempts(const fido_cbor_info_t *ci)
+{
+	return (ci->uv_attempts);
 }
 
 const uint8_t *

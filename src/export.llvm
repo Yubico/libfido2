@@ -100,6 +100,7 @@ _fido_cbor_info_protocols_len
 _fido_cbor_info_protocols_ptr
 _fido_cbor_info_transports_len
 _fido_cbor_info_transports_ptr
+_fido_cbor_info_uv_attempts
 _fido_cbor_info_versions_len
 _fido_cbor_info_versions_ptr
 _fido_cred_attstmt_len

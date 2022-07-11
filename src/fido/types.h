@@ -235,6 +235,7 @@ typedef struct fido_cbor_info {
 	uint64_t          maxlargeblob;   /* max largeBlob array length */
 	uint64_t          maxrpid_minlen; /* max rpid in set_pin_minlen_rpid */
 	uint64_t          minpinlen;      /* min pin len enforced */
+	uint64_t          uv_attempts;    /* platform uv attempts */
 	bool              new_pin_reqd;   /* new pin required */
 } fido_cbor_info_t;
 
