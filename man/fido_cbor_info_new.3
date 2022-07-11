@@ -35,6 +35,7 @@
 .Nm fido_cbor_info_fwversion ,
 .Nm fido_cbor_info_uv_attempts ,
 .Nm fido_cbor_info_uv_modality ,
+.Nm fido_cbor_info_rk_remaining ,
 .Nm fido_cbor_info_new_pin_required
 .Nd FIDO2 CBOR Info API
 .Sh SYNOPSIS
@@ -97,6 +98,8 @@
 .Fn fido_cbor_info_uv_attempts "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_uv_modality "const fido_cbor_info_t *ci"
+.Ft int64_t
+.Fn fido_cbor_info_rk_remaining "const fido_cbor_info_t *ci"
 .Ft bool
 .Fn fido_cbor_info_new_pin_required "const fido_cbor_info_t *ci"
 .Sh DESCRIPTION
@@ -280,6 +283,18 @@ The UV modality attribute is a CTAP 2.1 addition.
 If the attribute is not advertised by the authenticator, the
 .Fn fido_cbor_info_uv_modality
 function returns zero.
+.Pp
+The
+.Fn fido_cbor_info_rk_remaining
+function returns the estimated number of additional
+resident/discoverable credentials that can be stored on the
+authenticator as reported in
+.Fa ci .
+The estimated number of remaining resident credentials is a
+CTAP 2.1 addition.
+If the attribute is not advertised by the authenticator, the
+.Fn fido_cbor_info_rk_remaining
+function returns -1.
 .Pp
 The
 .Fn fido_cbor_info_new_pin_required
