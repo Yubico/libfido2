@@ -33,6 +33,7 @@
 .Nm fido_cbor_info_maxrpid_minpinlen ,
 .Nm fido_cbor_info_minpinlen ,
 .Nm fido_cbor_info_fwversion ,
+.Nm fido_cbor_info_uv_attempts ,
 .Nm fido_cbor_info_new_pin_required
 .Nd FIDO2 CBOR Info API
 .Sh SYNOPSIS
@@ -91,6 +92,8 @@
 .Fn fido_cbor_info_minpinlen "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_fwversion "const fido_cbor_info_t *ci"
+.Ft uint64_t
+.Fn fido_cbor_info_uv_attempts "const fido_cbor_info_t *ci"
 .Ft bool
 .Fn fido_cbor_info_new_pin_required "const fido_cbor_info_t *ci"
 .Sh DESCRIPTION
@@ -245,6 +248,20 @@ function returns the firmware version attribute of
 .Fa ci .
 .Pp
 The
+.Fn fido_cbor_info_uv_attempts
+function returns the number of UV attempts that the platform may
+attempt before falling back to PIN authentication.
+If 1, then all
+.Xr fido_dev_get_uv_retry_count 3
+retries are handled internally by the authenticator and the
+platform may only attempt non-PIN UV once.
+The UV attempts attribute is a CTAP 2.1 addition.
+If the attribute is not advertised by the authenticator,
+the
+.Fn fido_cbor_info_uv_attempts
+function returns zero.
+.Pp
+The
 .Fn fido_cbor_info_new_pin_required
 function returns whether a new PIN is required by the authenticator
 as reported in
@@ -281,6 +298,7 @@ without the
 .Em const
 qualifier is invoked.
 .Sh SEE ALSO
+.Xr fido_dev_get_uv_retry_count 3 ,
 .Xr fido_dev_open 3 ,
 .Xr fido_dev_set_pin 3 ,
 .Xr fido_dev_set_pin_minlen_rpid 3
