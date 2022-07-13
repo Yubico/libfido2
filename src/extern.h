@@ -196,6 +196,7 @@ int fido_do_ecdh(fido_dev_t *, es256_pk_t **, fido_blob_t **, int *);
 /* types */
 void fido_algo_array_free(fido_algo_array_t *);
 void fido_byte_array_free(fido_byte_array_t *);
+void fido_cert_array_free(fido_cert_array_t *);
 void fido_opt_array_free(fido_opt_array_t *);
 void fido_str_array_free(fido_str_array_t *);
 void fido_algo_free(fido_algo_t *);

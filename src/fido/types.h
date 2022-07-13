@@ -219,6 +219,12 @@ typedef struct fido_algo_array {
 	size_t len;
 } fido_algo_array_t;
 
+typedef struct fido_cert_array {
+	char **name;
+	uint64_t *value;
+	size_t len;
+} fido_cert_array_t;
+
 typedef struct fido_cbor_info {
 	fido_str_array_t  versions;       /* supported versions: fido2|u2f */
 	fido_str_array_t  extensions;     /* list of supported extensions */
@@ -239,6 +245,7 @@ typedef struct fido_cbor_info {
 	uint64_t          uv_modality;    /* bitmask of supported uv types */
 	int64_t           rk_remaining;   /* remaining resident credentials */
 	bool              new_pin_reqd;   /* new pin required */
+	fido_cert_array_t certs;          /* associated certifications */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {
