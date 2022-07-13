@@ -277,6 +277,13 @@ dev_get_cbor_info(const struct param *p)
 		consume(&cose, sizeof(cose));
 	}
 
+	for (size_t i = 0; i < fido_cbor_info_certs_len(ci); i++) {
+		char * const *na = fido_cbor_info_certs_name_ptr(ci);
+		const uint64_t *va = fido_cbor_info_certs_value_ptr(ci);
+		consume(na[i], strlen(na[i]));
+		consume(&va[i], sizeof(va[i]));
+	}
+
 	n = fido_cbor_info_maxmsgsiz(ci);
 	consume(&n, sizeof(n));
 	n = fido_cbor_info_maxcredbloblen(ci);
