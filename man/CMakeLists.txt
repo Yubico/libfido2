@@ -114,6 +114,9 @@ list(APPEND MAN_ALIAS
 	fido_cbor_info_new fido_cbor_info_algorithm_cose
 	fido_cbor_info_new fido_cbor_info_algorithm_count
 	fido_cbor_info_new fido_cbor_info_algorithm_type
+	fido_cbor_info_new fido_cbor_info_certs_len
+	fido_cbor_info_new fido_cbor_info_certs_name_ptr
+	fido_cbor_info_new fido_cbor_info_certs_value_ptr
 	fido_cbor_info_new fido_cbor_info_extensions_len
 	fido_cbor_info_new fido_cbor_info_extensions_ptr
 	fido_cbor_info_new fido_cbor_info_free
