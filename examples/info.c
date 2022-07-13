@@ -104,6 +104,25 @@ print_opt_array(const char *label, char * const *name, const bool *value,
 }
 
 /*
+ * Auxiliary function to print (char *, uint64_t) pairs on stdout.
+ */
+static void
+print_cert_array(const char *label, char * const *name, const uint64_t *value,
+    size_t len)
+{
+	if (len == 0)
+		return;
+
+	printf("%s: ", label);
+
+	for (size_t i = 0; i < len; i++)
+		printf("%s%s %llu", i > 0 ? ", " : "", name[i],
+		    (unsigned long long)value[i]);
+
+	printf("\n");
+}
+
+/*
  * Auxiliary function to print a list of supported COSE algorithms on stdout.
  */
 static void
@@ -299,6 +318,11 @@ getinfo(const char *path)
 	print_opt_array("options", fido_cbor_info_options_name_ptr(ci),
 	    fido_cbor_info_options_value_ptr(ci),
 	    fido_cbor_info_options_len(ci));
+
+	/* print certifications */
+	print_cert_array("certifications", fido_cbor_info_certs_name_ptr(ci),
+	    fido_cbor_info_certs_value_ptr(ci),
+	    fido_cbor_info_certs_len(ci));
 
 	/* print firmware version */
 	print_fwversion(fido_cbor_info_fwversion(ci));
