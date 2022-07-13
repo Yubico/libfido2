@@ -27,6 +27,7 @@ fido_opt_array_free(fido_opt_array_t *oa)
 	free(oa->value);
 	oa->name = NULL;
 	oa->value = NULL;
+	oa->len = 0;
 }
 
 void
