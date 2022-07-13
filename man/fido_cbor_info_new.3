@@ -19,6 +19,9 @@
 .Nm fido_cbor_info_algorithm_type ,
 .Nm fido_cbor_info_algorithm_cose ,
 .Nm fido_cbor_info_algorithm_count ,
+.Nm fido_cbor_info_certs_name_ptr ,
+.Nm fido_cbor_info_certs_value_ptr ,
+.Nm fido_cbor_info_certs_len ,
 .Nm fido_cbor_info_aaguid_len ,
 .Nm fido_cbor_info_extensions_len ,
 .Nm fido_cbor_info_protocols_len ,
@@ -66,6 +69,12 @@
 .Fn fido_cbor_info_algorithm_cose "const fido_cbor_info_t *ci" "size_t idx"
 .Ft size_t
 .Fn fido_cbor_info_algorithm_count "const fido_cbor_info_t *ci"
+.Ft char **
+.Fn fido_cbor_info_certs_name_ptr "const fido_cbor_info_t *ci"
+.Ft const uint64_t *
+.Fn fido_cbor_info_certs_value_ptr "const fido_cbor_info_t *ci"
+.Ft size_t
+.Fn fido_cbor_info_certs_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_aaguid_len "const fido_cbor_info_t *ci"
 .Ft size_t
@@ -196,6 +205,17 @@ Please note that the first algorithm in
 has an
 .Fa idx
 (index) value of 0.
+.Pp
+The
+.Fn fido_cbor_info_certs_name_ptr
+and
+.Fn fido_cbor_info_certs_value_ptr
+functions return pointers to the array of certification names and their
+respective values
+in
+.Fa ci .
+The length of the certifications array is returned by
+.Fn fido_cbor_info_certs_len .
 .Pp
 The
 .Fn fido_cbor_info_maxmsgsiz
