@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -965,8 +965,10 @@ fido_cred_set_fmt(fido_cred_t *cred, const char *fmt)
 int
 fido_cred_set_type(fido_cred_t *cred, int cose_alg)
 {
-	if ((cose_alg != COSE_ES256 && cose_alg != COSE_RS256 &&
-	    cose_alg != COSE_EDDSA) || cred->type != 0)
+	if (cred->type != 0)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+	if (cose_alg != COSE_ES256 && cose_alg != COSE_ES384 &&
+	    cose_alg != COSE_RS256 && cose_alg != COSE_EDDSA)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	cred->type = cose_alg;
@@ -1073,6 +1075,9 @@ fido_cred_pubkey_ptr(const fido_cred_t *cred)
 	case COSE_ES256:
 		ptr = &cred->attcred.pubkey.es256;
 		break;
+	case COSE_ES384:
+		ptr = &cred->attcred.pubkey.es384;
+		break;
 	case COSE_RS256:
 		ptr = &cred->attcred.pubkey.rs256;
 		break;
@@ -1095,6 +1100,9 @@ fido_cred_pubkey_len(const fido_cred_t *cred)
 	switch (cred->attcred.type) {
 	case COSE_ES256:
 		len = sizeof(cred->attcred.pubkey.es256);
+		break;
+	case COSE_ES384:
+		len = sizeof(cred->attcred.pubkey.es384);
 		break;
 	case COSE_RS256:
 		len = sizeof(cred->attcred.pubkey.rs256);

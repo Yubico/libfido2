@@ -48,8 +48,8 @@ The following examples are provided:
 	Configures <pin> as the new PIN of <device>. If [oldpin] is provided,
 	the device's PIN is changed from [oldpin] to <pin>.
 
-- cred [-t ecdsa|rsa|eddsa] [-k pubkey] [-ei cred_id] [-P pin] [-T seconds]
-       [-b blobkey] [-hruv] <device>
+- cred [-t es256|es384|rsa|eddsa] [-k pubkey] [-ei cred_id] [-P pin]
+       [-T seconds] [-b blobkey] [-hruv] <device>
 
 	Creates a new credential on <device> and verify that the credential
 	was signed by the authenticator. The device's attestation certificate

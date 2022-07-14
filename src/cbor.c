@@ -998,7 +998,13 @@ get_cose_alg(const cbor_item_t *item, int *cose_alg)
 			fido_log_debug("%s: invalid kty/crv", __func__);
 			return (-1);
 		}
-
+		break;
+	case COSE_ES384:
+		if (cose_key.kty != COSE_KTY_EC2 ||
+		    cose_key.crv != COSE_P384) {
+			fido_log_debug("%s: invalid kty/crv", __func__);
+			return (-1);
+		}
 		break;
 	case COSE_EDDSA:
 		if (cose_key.kty != COSE_KTY_OKP ||
@@ -1006,14 +1012,12 @@ get_cose_alg(const cbor_item_t *item, int *cose_alg)
 			fido_log_debug("%s: invalid kty/crv", __func__);
 			return (-1);
 		}
-
 		break;
 	case COSE_RS256:
 		if (cose_key.kty != COSE_KTY_RSA) {
 			fido_log_debug("%s: invalid kty/crv", __func__);
 			return (-1);
 		}
-
 		break;
 	default:
 		fido_log_debug("%s: unknown alg %d", __func__, cose_key.alg);
@@ -1038,6 +1042,12 @@ cbor_decode_pubkey(const cbor_item_t *item, int *type, void *key)
 	case COSE_ES256:
 		if (es256_pk_decode(item, key) < 0) {
 			fido_log_debug("%s: es256_pk_decode", __func__);
+			return (-1);
+		}
+		break;
+	case COSE_ES384:
+		if (es384_pk_decode(item, key) < 0) {
+			fido_log_debug("%s: es384_pk_decode", __func__);
 			return (-1);
 		}
 		break;

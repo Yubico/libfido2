@@ -69,6 +69,7 @@ int cbor_decode_rp_entity(const cbor_item_t *, fido_rp_t *);
 int cbor_decode_uint64(const cbor_item_t *, uint64_t *);
 int cbor_decode_user(const cbor_item_t *, fido_user_t *);
 int es256_pk_decode(const cbor_item_t *, es256_pk_t *);
+int es384_pk_decode(const cbor_item_t *, es384_pk_t *);
 int rs256_pk_decode(const cbor_item_t *, rs256_pk_t *);
 int eddsa_pk_decode(const cbor_item_t *, eddsa_pk_t *);
 
