@@ -717,7 +717,8 @@ fido_assert_reset_tx(fido_assert_t *assert)
 	assert->uv = FIDO_OPT_OMIT;
 }
 
-static void fido_assert_reset_extattr(fido_assert_extattr_t *ext)
+static void
+fido_assert_reset_extattr(fido_assert_extattr_t *ext)
 {
 	fido_blob_reset(&ext->hmac_secret_enc);
 	fido_blob_reset(&ext->blob);
