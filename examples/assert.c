@@ -30,7 +30,7 @@ static const unsigned char cd[32] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: assert [-t ecdsa|rsa|eddsa] [-a cred_id] "
+	fprintf(stderr, "usage: assert [-t es256|rs256|eddsa] [-a cred_id] "
 	    "[-h hmac_secret] [-s hmac_salt] [-P pin] [-T seconds] "
 	    "[-b blobkey] [-puv] <pubkey> <device>\n");
 	exit(EXIT_FAILURE);
@@ -219,9 +219,9 @@ main(int argc, char **argv)
 			body = NULL;
 			break;
 		case 't':
-			if (strcmp(optarg, "ecdsa") == 0)
+			if (strcmp(optarg, "es256") == 0)
 				type = COSE_ES256;
-			else if (strcmp(optarg, "rsa") == 0)
+			else if (strcmp(optarg, "rs256") == 0)
 				type = COSE_RS256;
 			else if (strcmp(optarg, "eddsa") == 0)
 				type = COSE_EDDSA;
