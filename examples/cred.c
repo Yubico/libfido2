@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -34,7 +34,7 @@ static const unsigned char user_id[32] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: cred [-t ecdsa|rsa|eddsa] [-k pubkey] "
+	fprintf(stderr, "usage: cred [-t es256|es384|rsa|eddsa] [-k pubkey] "
 	    "[-ei cred_id] [-P pin] [-T seconds] [-b blobkey] [-hruv] "
 	    "<device>\n");
 	exit(EXIT_FAILURE);
@@ -193,8 +193,10 @@ main(int argc, char **argv)
 			rk = true;
 			break;
 		case 't':
-			if (strcmp(optarg, "ecdsa") == 0)
+			if (strcmp(optarg, "es256") == 0)
 				type = COSE_ES256;
+			else if (strcmp(optarg, "es384") == 0)
+				type = COSE_ES384;
 			else if (strcmp(optarg, "rsa") == 0)
 				type = COSE_RS256;
 			else if (strcmp(optarg, "eddsa") == 0)

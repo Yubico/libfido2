@@ -82,12 +82,13 @@
 #define FIDO_CAP_NMSG	0x08 /* if set, device doesn't support CTAP_CMD_MSG */
 
 /* Supported COSE algorithms. */
-#define	COSE_UNSPEC	0
-#define	COSE_ES256	-7
-#define	COSE_EDDSA	-8
-#define	COSE_ECDH_ES256	-25
-#define	COSE_RS256	-257
-#define	COSE_RS1	-65535
+#define COSE_UNSPEC	0
+#define COSE_ES256	-7
+#define COSE_EDDSA	-8
+#define COSE_ECDH_ES256	-25
+#define COSE_ES384	-35
+#define COSE_RS256	-257
+#define COSE_RS1	-65535
 
 /* Supported COSE types. */
 #define COSE_KTY_OKP	1
@@ -96,6 +97,7 @@
 
 /* Supported curves. */
 #define COSE_P256	1
+#define COSE_P384	2
 #define COSE_ED25519	6
 
 /* Supported extensions. */

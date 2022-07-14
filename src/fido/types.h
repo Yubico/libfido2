@@ -73,6 +73,12 @@ typedef struct es256_sk {
 	unsigned char	d[32];
 } es256_sk_t;
 
+/* COSE ES384 (ECDSA over P-384 with SHA-384) public key */
+typedef struct es384_pk {
+	unsigned char	x[48];
+	unsigned char	y[48];
+} es384_pk_t;
+
 /* COSE RS256 (2048-bit RSA with PKCS1 padding and SHA-256) public key */
 typedef struct rs256_pk {
 	unsigned char n[256];
@@ -105,6 +111,7 @@ typedef struct fido_attcred {
 	int           type;       /* credential's cose algorithm */
 	union {                   /* credential's public key */
 		es256_pk_t es256;
+		es384_pk_t es384;
 		rs256_pk_t rs256;
 		eddsa_pk_t eddsa;
 	} pubkey;
@@ -294,6 +301,7 @@ typedef struct fido_dev fido_dev_t;
 typedef struct fido_dev_info fido_dev_info_t;
 typedef struct es256_pk es256_pk_t;
 typedef struct es256_sk es256_sk_t;
+typedef struct es384_pk es384_pk_t;
 typedef struct rs256_pk rs256_pk_t;
 typedef struct eddsa_pk eddsa_pk_t;
 #endif /* _FIDO_INTERNAL */

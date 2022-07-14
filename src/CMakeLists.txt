@@ -21,6 +21,7 @@ list(APPEND FIDO_SOURCES
 	eddsa.c
 	err.c
 	es256.c
+	es384.c
 	hid.c
 	info.c
 	io.c
