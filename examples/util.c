@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -158,7 +158,7 @@ fail:
 }
 
 int
-write_ec_pubkey(const char *path, const void *ptr, size_t len)
+write_es256_pubkey(const char *path, const void *ptr, size_t len)
 {
 	FILE *fp = NULL;
 	EVP_PKEY *pkey = NULL;
@@ -247,7 +247,7 @@ fail:
 }
 
 int
-write_rsa_pubkey(const char *path, const void *ptr, size_t len)
+write_rs256_pubkey(const char *path, const void *ptr, size_t len)
 {
 	FILE *fp = NULL;
 	EVP_PKEY *pkey = NULL;

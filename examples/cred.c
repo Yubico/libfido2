@@ -107,15 +107,18 @@ out:
 	if (key_out != NULL) {
 		/* extract the credential pubkey */
 		if (type == COSE_ES256) {
-			if (write_ec_pubkey(key_out, fido_cred_pubkey_ptr(cred),
+			if (write_es256_pubkey(key_out,
+			    fido_cred_pubkey_ptr(cred),
 			    fido_cred_pubkey_len(cred)) < 0)
 				errx(1, "write_ec_pubkey");
 		} else if (type == COSE_RS256) {
-			if (write_rsa_pubkey(key_out, fido_cred_pubkey_ptr(cred),
+			if (write_rs256_pubkey(key_out,
+			    fido_cred_pubkey_ptr(cred),
 			    fido_cred_pubkey_len(cred)) < 0)
 				errx(1, "write_rsa_pubkey");
 		} else if (type == COSE_EDDSA) {
-			if (write_eddsa_pubkey(key_out, fido_cred_pubkey_ptr(cred),
+			if (write_eddsa_pubkey(key_out,
+			    fido_cred_pubkey_ptr(cred),
 			    fido_cred_pubkey_len(cred)) < 0)
 				errx(1, "write_eddsa_pubkey");
 		}
