@@ -220,10 +220,13 @@ int fido_to_uint64(const char *, int, uint64_t *);
 
 /* crypto */
 int es256_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
+int es384_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
 int rs256_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
 int eddsa_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
 int rs1_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
 int es256_pk_verify_sig(const fido_blob_t *, const es256_pk_t *,
+    const fido_blob_t *);
+int es384_pk_verify_sig(const fido_blob_t *, const es384_pk_t *,
     const fido_blob_t *);
 int rs256_pk_verify_sig(const fido_blob_t *, const rs256_pk_t *,
     const fido_blob_t *);

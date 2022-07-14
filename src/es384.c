@@ -168,3 +168,110 @@ fail:
 
 	return (pkey);
 }
+
+int
+es384_pk_from_EC_KEY(es384_pk_t *pk, const EC_KEY *ec)
+{
+	BN_CTX		*bnctx = NULL;
+	BIGNUM		*x = NULL;
+	BIGNUM		*y = NULL;
+	const EC_POINT	*q = NULL;
+	EC_GROUP	*g = NULL;
+	size_t		 dx;
+	size_t		 dy;
+	int		 ok = FIDO_ERR_INTERNAL;
+	int		 nx;
+	int		 ny;
+
+	if ((q = EC_KEY_get0_public_key(ec)) == NULL ||
+	    (g = EC_GROUP_new_by_curve_name(NID_secp384r1)) == NULL ||
+	    (bnctx = BN_CTX_new()) == NULL)
+		goto fail;
+
+	BN_CTX_start(bnctx);
+
+	if ((x = BN_CTX_get(bnctx)) == NULL ||
+	    (y = BN_CTX_get(bnctx)) == NULL)
+		goto fail;
+
+	if (EC_POINT_is_on_curve(g, q, bnctx) != 1) {
+		fido_log_debug("%s: EC_POINT_is_on_curve", __func__);
+		ok = FIDO_ERR_INVALID_ARGUMENT;
+		goto fail;
+	}
+
+	if (EC_POINT_get_affine_coordinates_GFp(g, q, x, y, bnctx) == 0 ||
+	    (nx = BN_num_bytes(x)) < 0 || (size_t)nx > sizeof(pk->x) ||
+	    (ny = BN_num_bytes(y)) < 0 || (size_t)ny > sizeof(pk->y)) {
+		fido_log_debug("%s: EC_POINT_get_affine_coordinates_GFp",
+		    __func__);
+		goto fail;
+	}
+
+	dx = sizeof(pk->x) - (size_t)nx;
+	dy = sizeof(pk->y) - (size_t)ny;
+
+	if ((nx = BN_bn2bin(x, pk->x + dx)) < 0 || (size_t)nx > sizeof(pk->x) ||
+	    (ny = BN_bn2bin(y, pk->y + dy)) < 0 || (size_t)ny > sizeof(pk->y)) {
+		fido_log_debug("%s: BN_bn2bin", __func__);
+		goto fail;
+	}
+
+	ok = FIDO_OK;
+fail:
+	EC_GROUP_free(g);
+
+	if (bnctx != NULL) {
+		BN_CTX_end(bnctx);
+		BN_CTX_free(bnctx);
+	}
+
+	return (ok);
+}
+
+int
+es384_verify_sig(const fido_blob_t *dgst, EVP_PKEY *pkey,
+    const fido_blob_t *sig)
+{
+	EVP_PKEY_CTX	*pctx = NULL;
+	int		 ok = -1;
+
+	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_EC) {
+		fido_log_debug("%s: EVP_PKEY_base_id", __func__);
+		goto fail;
+	}
+
+	if ((pctx = EVP_PKEY_CTX_new(pkey, NULL)) == NULL ||
+	    EVP_PKEY_verify_init(pctx) != 1 ||
+	    EVP_PKEY_verify(pctx, sig->ptr, sig->len, dgst->ptr,
+	    dgst->len) != 1) {
+		fido_log_debug("%s: EVP_PKEY_verify", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	EVP_PKEY_CTX_free(pctx);
+
+	return (ok);
+}
+
+int
+es384_pk_verify_sig(const fido_blob_t *dgst, const es384_pk_t *pk,
+    const fido_blob_t *sig)
+{
+	EVP_PKEY	*pkey;
+	int		 ok = -1;
+
+	if ((pkey = es384_pk_to_EVP_PKEY(pk)) == NULL ||
+	    es384_verify_sig(dgst, pkey, sig) < 0) {
+		fido_log_debug("%s: es384_verify_sig", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	EVP_PKEY_free(pkey);
+
+	return (ok);
+}
