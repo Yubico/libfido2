@@ -384,17 +384,55 @@ check_extensions(int authdata_ext, int ext)
 	return (0);
 }
 
+static int
+get_eddsa_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
+    const fido_blob_t *authdata)
+{
+	if (SIZE_MAX - authdata->len < clientdata->len ||
+	    dgst->len < authdata->len + clientdata->len)
+		return (-1);
+
+	memcpy(dgst->ptr, authdata->ptr, authdata->len);
+	memcpy(dgst->ptr + authdata->len, clientdata->ptr, clientdata->len);
+	dgst->len = authdata->len + clientdata->len;
+
+	return (0);
+}
+
+static int
+get_es256_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
+    const fido_blob_t *authdata)
+{
+	const EVP_MD	*md;
+	EVP_MD_CTX	*ctx = NULL;
+
+	if (dgst->len < SHA256_DIGEST_LENGTH ||
+	    (md = EVP_sha256()) == NULL ||
+	    (ctx = EVP_MD_CTX_new()) == NULL ||
+	    EVP_DigestInit_ex(ctx, md, NULL) != 1 ||
+	    EVP_DigestUpdate(ctx, authdata->ptr, authdata->len) != 1 ||
+	    EVP_DigestUpdate(ctx, clientdata->ptr, clientdata->len) != 1 ||
+	    EVP_DigestFinal_ex(ctx, dgst->ptr, NULL) != 1) {
+		EVP_MD_CTX_free(ctx);
+		return (-1);
+	}
+	dgst->len = SHA256_DIGEST_LENGTH;
+
+	EVP_MD_CTX_free(ctx);
+
+	return (0);
+}
+
 int
 fido_get_signed_hash(int cose_alg, fido_blob_t *dgst,
     const fido_blob_t *clientdata, const fido_blob_t *authdata_cbor)
 {
 	cbor_item_t		*item = NULL;
-	unsigned char		*authdata_ptr = NULL;
-	size_t			 authdata_len;
+	fido_blob_t		 authdata;
 	struct cbor_load_result	 cbor;
-	const EVP_MD		*md = NULL;
-	EVP_MD_CTX		*ctx = NULL;
 	int			 ok = -1;
+
+	fido_log_debug("%s: cose_alg=%d", __func__, cose_alg);
 
 	if ((item = cbor_load(authdata_cbor->ptr, authdata_cbor->len,
 	    &cbor)) == NULL || cbor_isa_bytestring(item) == false ||
@@ -402,40 +440,24 @@ fido_get_signed_hash(int cose_alg, fido_blob_t *dgst,
 		fido_log_debug("%s: authdata", __func__);
 		goto fail;
 	}
+	authdata.ptr = cbor_bytestring_handle(item);
+	authdata.len = cbor_bytestring_length(item);
 
-	authdata_ptr = cbor_bytestring_handle(item);
-	authdata_len = cbor_bytestring_length(item);
-
-	if (cose_alg != COSE_EDDSA) {
-		if (dgst->len < SHA256_DIGEST_LENGTH ||
-		    (md = EVP_sha256()) == NULL ||
-		    (ctx = EVP_MD_CTX_new()) == NULL ||
-		    EVP_DigestInit_ex(ctx, md, NULL) != 1 ||
-		    EVP_DigestUpdate(ctx, authdata_ptr, authdata_len) != 1 ||
-		    EVP_DigestUpdate(ctx, clientdata->ptr, clientdata->len) != 1 ||
-		    EVP_DigestFinal_ex(ctx, dgst->ptr, NULL) != 1) {
-			fido_log_debug("%s: sha256", __func__);
-			goto fail;
-		}
-		dgst->len = SHA256_DIGEST_LENGTH;
-	} else {
-		if (SIZE_MAX - authdata_len < clientdata->len ||
-		    dgst->len < authdata_len + clientdata->len) {
-			fido_log_debug("%s: memcpy", __func__);
-			goto fail;
-		}
-		memcpy(dgst->ptr, authdata_ptr, authdata_len);
-		memcpy(dgst->ptr + authdata_len, clientdata->ptr,
-		    clientdata->len);
-		dgst->len = authdata_len + clientdata->len;
+	switch (cose_alg) {
+	case COSE_ES256:
+	case COSE_RS256:
+		ok = get_es256_hash(dgst, clientdata, &authdata);
+		break;
+	case COSE_EDDSA:
+		ok = get_eddsa_hash(dgst, clientdata, &authdata);
+		break;
+	default:
+		fido_log_debug("%s: unknown cose_alg", __func__);
+		break;
 	}
-
-	ok = 0;
 fail:
 	if (item != NULL)
 		cbor_decref(&item);
-
-	EVP_MD_CTX_free(ctx);
 
 	return (ok);
 }
