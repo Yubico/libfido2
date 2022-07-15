@@ -111,6 +111,11 @@ out:
 			    fido_cred_pubkey_ptr(cred),
 			    fido_cred_pubkey_len(cred)) < 0)
 				errx(1, "write_es256_pubkey");
+		} else if (type == COSE_ES384) {
+			if (write_es384_pubkey(key_out,
+			    fido_cred_pubkey_ptr(cred),
+			    fido_cred_pubkey_len(cred)) < 0)
+				errx(1, "write_es384_pubkey");
 		} else if (type == COSE_RS256) {
 			if (write_rs256_pubkey(key_out,
 			    fido_cred_pubkey_ptr(cred),

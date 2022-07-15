@@ -19,6 +19,7 @@ int base10(const char *, long long *);
 int read_blob(const char *, unsigned char **, size_t *);
 int write_blob(const char *, const unsigned char *, size_t);
 int write_es256_pubkey(const char *, const void *, size_t);
+int write_es384_pubkey(const char *, const void *, size_t);
 int write_rs256_pubkey(const char *, const void *, size_t);
 int write_eddsa_pubkey(const char *, const void *, size_t);
 
