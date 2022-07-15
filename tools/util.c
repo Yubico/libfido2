@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -13,6 +13,7 @@
 
 #include <fido.h>
 #include <fido/es256.h>
+#include <fido/es384.h>
 #include <fido/rs256.h>
 #include <fido/eddsa.h>
 
@@ -281,6 +282,44 @@ fail:
 	return (ok);
 }
 
+int
+write_es384_pubkey(FILE *f, const void *ptr, size_t len)
+{
+	EVP_PKEY *pkey = NULL;
+	es384_pk_t *pk = NULL;
+	int ok = -1;
+
+	if ((pk = es384_pk_new()) == NULL) {
+		warnx("es384_pk_new");
+		goto fail;
+	}
+
+	if (es384_pk_from_ptr(pk, ptr, len) != FIDO_OK) {
+		warnx("es384_pk_from_ptr");
+		goto fail;
+	}
+
+	if ((pkey = es384_pk_to_EVP_PKEY(pk)) == NULL) {
+		warnx("es384_pk_to_EVP_PKEY");
+		goto fail;
+	}
+
+	if (PEM_write_PUBKEY(f, pkey) == 0) {
+		warnx("PEM_write_PUBKEY");
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	es384_pk_free(&pk);
+
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+
+	return (ok);
+}
+
 RSA *
 read_rsa_pubkey(const char *path)
 {
@@ -430,6 +469,10 @@ print_cred(FILE *out_f, int type, const fido_cred_t *cred)
 		write_es256_pubkey(out_f, fido_cred_pubkey_ptr(cred),
 		    fido_cred_pubkey_len(cred));
 		break;
+	case COSE_ES384:
+		write_es384_pubkey(out_f, fido_cred_pubkey_ptr(cred),
+		    fido_cred_pubkey_len(cred));
+		break;
 	case COSE_RS256:
 		write_rsa_pubkey(out_f, fido_cred_pubkey_ptr(cred),
 		    fido_cred_pubkey_len(cred));
@@ -450,6 +493,8 @@ cose_type(const char *str, int *type)
 {
 	if (strcmp(str, "es256") == 0)
 		*type = COSE_ES256;
+	else if (strcmp(str, "es384") == 0)
+		*type = COSE_ES384;
 	else if (strcmp(str, "rs256") == 0)
 		*type = COSE_RS256;
 	else if (strcmp(str, "eddsa") == 0)
@@ -468,6 +513,8 @@ cose_string(int type)
 	switch (type) {
 	case COSE_ES256:
 		return ("es256");
+	case COSE_ES384:
+		return ("es384");
 	case COSE_RS256:
 		return ("rs256");
 	case COSE_EDDSA:

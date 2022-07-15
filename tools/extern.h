@@ -86,6 +86,7 @@ int token_list(int, char **, char *);
 int token_reset(char *);
 int token_set(int, char **, char *);
 int write_es256_pubkey(FILE *, const void *, size_t);
+int write_es384_pubkey(FILE *, const void *, size_t);
 int write_rsa_pubkey(FILE *, const void *, size_t);
 int read_file(const char *, u_char **, size_t *);
 int write_file(const char *, const u_char *, size_t);
