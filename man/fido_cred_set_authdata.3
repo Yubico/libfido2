@@ -1,8 +1,8 @@
-.\" Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+.\" Copyright (c) 2018-2022 Yubico AB. All rights reserved.
 .\" Use of this source code is governed by a BSD-style
 .\" license that can be found in the LICENSE file.
 .\"
-.Dd $Mdocdate: May 23 2018 $
+.Dd $Mdocdate: July 15 2022 $
 .Dt FIDO_CRED_SET_AUTHDATA 3
 .Os
 .Sh NAME
@@ -319,11 +319,13 @@ where
 .Fa cose_alg
 is
 .Dv COSE_ES256 ,
+.Dv COSE_ES384 ,
 .Dv COSE_RS256 ,
 or
 .Dv COSE_EDDSA .
 The type of a credential may only be set once.
-Note that not all authenticators support COSE_RS256 or COSE_EDDSA.
+Note that not all authenticators support COSE_RS256, COSE_ES384, or
+COSE_EDDSA.
 .Pp
 Use of the
 .Nm
