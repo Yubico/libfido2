@@ -385,21 +385,6 @@ check_extensions(int authdata_ext, int ext)
 }
 
 static int
-get_eddsa_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
-    const fido_blob_t *authdata)
-{
-	if (SIZE_MAX - authdata->len < clientdata->len ||
-	    dgst->len < authdata->len + clientdata->len)
-		return (-1);
-
-	memcpy(dgst->ptr, authdata->ptr, authdata->len);
-	memcpy(dgst->ptr + authdata->len, clientdata->ptr, clientdata->len);
-	dgst->len = authdata->len + clientdata->len;
-
-	return (0);
-}
-
-static int
 get_es256_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
     const fido_blob_t *authdata)
 {
@@ -419,6 +404,21 @@ get_es256_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
 	dgst->len = SHA256_DIGEST_LENGTH;
 
 	EVP_MD_CTX_free(ctx);
+
+	return (0);
+}
+
+static int
+get_eddsa_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
+    const fido_blob_t *authdata)
+{
+	if (SIZE_MAX - authdata->len < clientdata->len ||
+	    dgst->len < authdata->len + clientdata->len)
+		return (-1);
+
+	memcpy(dgst->ptr, authdata->ptr, authdata->len);
+	memcpy(dgst->ptr + authdata->len, clientdata->ptr, clientdata->len);
+	dgst->len = authdata->len + clientdata->len;
 
 	return (0);
 }
