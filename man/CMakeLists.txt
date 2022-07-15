@@ -11,6 +11,7 @@ message(STATUS "GZIP_PATH: ${GZIP_PATH}")
 list(APPEND MAN_SOURCES
 	eddsa_pk_new.3
 	es256_pk_new.3
+	es384_pk_new.3
 	fido2-assert.1
 	fido2-cred.1
 	fido2-token.1
@@ -52,6 +53,11 @@ list(APPEND MAN_ALIAS
 	es256_pk_new es256_pk_from_EVP_PKEY
 	es256_pk_new es256_pk_from_ptr
 	es256_pk_new es256_pk_to_EVP_PKEY
+	es384_pk_new es384_pk_free
+	es384_pk_new es384_pk_from_EC_KEY
+	es384_pk_new es384_pk_from_EVP_PKEY
+	es384_pk_new es384_pk_from_ptr
+	es384_pk_new es384_pk_to_EVP_PKEY
 	fido_assert_new fido_assert_authdata_len
 	fido_assert_new fido_assert_authdata_ptr
 	fido_assert_new fido_assert_blob_len
