@@ -127,6 +127,9 @@ print_algorithms(const fido_cbor_info_t *ci)
 		case COSE_ES256:
 			cose = "es256";
 			break;
+		case COSE_ES384:
+			cose = "es384";
+			break;
 		case COSE_RS256:
 			cose = "rs256";
 			break;

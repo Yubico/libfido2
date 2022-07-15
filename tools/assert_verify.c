@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2018 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
 
 #include <fido.h>
 #include <fido/es256.h>
+#include <fido/es384.h>
 #include <fido/rs256.h>
 #include <fido/eddsa.h>
 
@@ -93,6 +94,7 @@ load_pubkey(int type, const char *file)
 	RSA *rsa = NULL;
 	EVP_PKEY *eddsa = NULL;
 	es256_pk_t *es256_pk = NULL;
+	es384_pk_t *es384_pk = NULL;
 	rs256_pk_t *rs256_pk = NULL;
 	eddsa_pk_t *eddsa_pk = NULL;
 	void *pk = NULL;
@@ -106,6 +108,16 @@ load_pubkey(int type, const char *file)
 		if (es256_pk_from_EC_KEY(es256_pk, ec) != FIDO_OK)
 			errx(1, "es256_pk_from_EC_KEY");
 		pk = es256_pk;
+		EC_KEY_free(ec);
+		break;
+	case COSE_ES384:
+		if ((ec = read_ec_pubkey(file)) == NULL)
+			errx(1, "read_ec_pubkey");
+		if ((es384_pk = es384_pk_new()) == NULL)
+			errx(1, "es384_pk_new");
+		if (es384_pk_from_EC_KEY(es384_pk, ec) != FIDO_OK)
+			errx(1, "es384_pk_from_EC_KEY");
+		pk = es384_pk;
 		EC_KEY_free(ec);
 		break;
 	case COSE_RS256:
