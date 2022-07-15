@@ -11,6 +11,12 @@
 #include "fido.h"
 #include "fido/es384.h"
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+#define get0_EC_KEY(x)	EVP_PKEY_get0_EC_KEY((x))
+#else
+#define get0_EC_KEY(x)	EVP_PKEY_get0((x))
+#endif
+
 static int
 decode_coord(const cbor_item_t *item, void *xy, size_t xy_len)
 {
@@ -227,6 +233,18 @@ fail:
 	}
 
 	return (ok);
+}
+
+int
+es384_pk_from_EVP_PKEY(es384_pk_t *pk, const EVP_PKEY *pkey)
+{
+	const EC_KEY *ec;
+
+	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_EC ||
+	    (ec = get0_EC_KEY(pkey)) == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	return (es384_pk_from_EC_KEY(pk, ec));
 }
 
 int

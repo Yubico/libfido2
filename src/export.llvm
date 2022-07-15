@@ -11,6 +11,7 @@ _es256_pk_new
 _es256_pk_to_EVP_PKEY
 _es384_pk_free
 _es384_pk_from_EC_KEY
+_es384_pk_from_EVP_PKEY
 _es384_pk_from_ptr
 _es384_pk_new
 _es384_pk_to_EVP_PKEY

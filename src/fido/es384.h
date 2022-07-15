@@ -27,6 +27,7 @@ void es384_pk_free(es384_pk_t **);
 EVP_PKEY *es384_pk_to_EVP_PKEY(const es384_pk_t *);
 
 int es384_pk_from_EC_KEY(es384_pk_t *, const EC_KEY *);
+int es384_pk_from_EVP_PKEY(es384_pk_t *, const EVP_PKEY *);
 int es384_pk_from_ptr(es384_pk_t *, const void *, size_t);
 
 #ifdef __cplusplus
