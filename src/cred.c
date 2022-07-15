@@ -302,6 +302,9 @@ verify_attstmt(const fido_blob_t *dgst, const fido_attstmt_t *attstmt)
 	case COSE_ES256:
 		ok = es256_verify_sig(dgst, pkey, &attstmt->sig);
 		break;
+	case COSE_ES384:
+		ok = es384_verify_sig(dgst, pkey, &attstmt->sig);
+		break;
 	case COSE_RS256:
 		ok = rs256_verify_sig(dgst, pkey, &attstmt->sig);
 		break;
@@ -329,6 +332,7 @@ fido_cred_verify(const fido_cred_t *cred)
 {
 	unsigned char	buf[SHA256_DIGEST_LENGTH];
 	fido_blob_t	dgst;
+	int		cose_alg;
 	int		r;
 
 	dgst.ptr = buf;
@@ -368,8 +372,11 @@ fido_cred_verify(const fido_cred_t *cred)
 		goto out;
 	}
 
+	if ((cose_alg = cred->attstmt.alg) == COSE_UNSPEC)
+		cose_alg = COSE_ES256; /* backwards compat */
+
 	if (!strcmp(cred->fmt, "packed")) {
-		if (fido_get_signed_hash(COSE_ES256, &dgst, &cred->cdh,
+		if (fido_get_signed_hash(cose_alg, &dgst, &cred->cdh,
 		    &cred->authdata_cbor) < 0) {
 			fido_log_debug("%s: fido_get_signed_hash", __func__);
 			r = FIDO_ERR_INTERNAL;
@@ -478,6 +485,10 @@ fido_cred_verify_self(const fido_cred_t *cred)
 	switch (cred->attcred.type) {
 	case COSE_ES256:
 		ok = es256_pk_verify_sig(&dgst, &cred->attcred.pubkey.es256,
+		    &cred->attstmt.sig);
+		break;
+	case COSE_ES384:
+		ok = es384_pk_verify_sig(&dgst, &cred->attcred.pubkey.es384,
 		    &cred->attstmt.sig);
 		break;
 	case COSE_RS256:

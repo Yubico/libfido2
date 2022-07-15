@@ -1413,8 +1413,9 @@ decode_attstmt_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			goto out;
 		}
 		attstmt->alg = -(int)cbor_get_int(val) - 1;
-		if (attstmt->alg != COSE_ES256 && attstmt->alg != COSE_RS256 &&
-		    attstmt->alg != COSE_EDDSA && attstmt->alg != COSE_RS1) {
+		if (attstmt->alg != COSE_ES256 && attstmt->alg != COSE_ES384 &&
+		    attstmt->alg != COSE_RS256 && attstmt->alg != COSE_EDDSA &&
+		    attstmt->alg != COSE_RS1) {
 			fido_log_debug("%s: unsupported attstmt->alg=%d",
 			    __func__, attstmt->alg);
 			goto out;
