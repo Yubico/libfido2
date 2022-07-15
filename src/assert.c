@@ -409,6 +409,30 @@ get_es256_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
 }
 
 static int
+get_es384_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
+    const fido_blob_t *authdata)
+{
+	const EVP_MD	*md;
+	EVP_MD_CTX	*ctx = NULL;
+
+	if (dgst->len < SHA384_DIGEST_LENGTH ||
+	    (md = EVP_sha384()) == NULL ||
+	    (ctx = EVP_MD_CTX_new()) == NULL ||
+	    EVP_DigestInit_ex(ctx, md, NULL) != 1 ||
+	    EVP_DigestUpdate(ctx, authdata->ptr, authdata->len) != 1 ||
+	    EVP_DigestUpdate(ctx, clientdata->ptr, clientdata->len) != 1 ||
+	    EVP_DigestFinal_ex(ctx, dgst->ptr, NULL) != 1) {
+		EVP_MD_CTX_free(ctx);
+		return (-1);
+	}
+	dgst->len = SHA384_DIGEST_LENGTH;
+
+	EVP_MD_CTX_free(ctx);
+
+	return (0);
+}
+
+static int
 get_eddsa_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
     const fido_blob_t *authdata)
 {
@@ -447,6 +471,9 @@ fido_get_signed_hash(int cose_alg, fido_blob_t *dgst,
 	case COSE_ES256:
 	case COSE_RS256:
 		ok = get_es256_hash(dgst, clientdata, &authdata);
+		break;
+	case COSE_ES384:
+		ok = get_es384_hash(dgst, clientdata, &authdata);
 		break;
 	case COSE_EDDSA:
 		ok = get_eddsa_hash(dgst, clientdata, &authdata);
@@ -521,6 +548,9 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 	switch (cose_alg) {
 	case COSE_ES256:
 		ok = es256_pk_verify_sig(&dgst, pk, &stmt->sig);
+		break;
+	case COSE_ES384:
+		ok = es384_pk_verify_sig(&dgst, pk, &stmt->sig);
 		break;
 	case COSE_RS256:
 		ok = rs256_pk_verify_sig(&dgst, pk, &stmt->sig);
