@@ -244,7 +244,7 @@ fail:
 }
 
 int
-write_ec_pubkey(FILE *f, const void *ptr, size_t len)
+write_es256_pubkey(FILE *f, const void *ptr, size_t len)
 {
 	EVP_PKEY *pkey = NULL;
 	es256_pk_t *pk = NULL;
@@ -425,16 +425,20 @@ print_cred(FILE *out_f, int type, const fido_cred_t *cred)
 
 	fprintf(out_f, "%s\n", id);
 
-	if (type == COSE_ES256) {
-		write_ec_pubkey(out_f, fido_cred_pubkey_ptr(cred),
+	switch (type) {
+	case COSE_ES256:
+		write_es256_pubkey(out_f, fido_cred_pubkey_ptr(cred),
 		    fido_cred_pubkey_len(cred));
-	} else if (type == COSE_RS256) {
+		break;
+	case COSE_RS256:
 		write_rsa_pubkey(out_f, fido_cred_pubkey_ptr(cred),
 		    fido_cred_pubkey_len(cred));
-	} else if (type == COSE_EDDSA) {
+		break;
+	case COSE_EDDSA:
 		write_eddsa_pubkey(out_f, fido_cred_pubkey_ptr(cred),
 		    fido_cred_pubkey_len(cred));
-	} else {
+		break;
+	default:
 		errx(1, "print_cred: unknown type");
 	}
 
@@ -462,12 +466,12 @@ const char *
 cose_string(int type)
 {
 	switch (type) {
-	case COSE_EDDSA:
-		return ("eddsa");
 	case COSE_ES256:
 		return ("es256");
 	case COSE_RS256:
 		return ("rs256");
+	case COSE_EDDSA:
+		return ("eddsa");
 	default:
 		return ("unknown");
 	}

@@ -124,14 +124,14 @@ print_algorithms(const fido_cbor_info_t *ci)
 	for (size_t i = 0; i < len; i++) {
 		cose = type = "unknown";
 		switch (fido_cbor_info_algorithm_cose(ci, i)) {
-		case COSE_EDDSA:
-			cose = "eddsa";
-			break;
 		case COSE_ES256:
 			cose = "es256";
 			break;
 		case COSE_RS256:
 			cose = "rs256";
+			break;
+		case COSE_EDDSA:
+			cose = "eddsa";
 			break;
 		}
 		if (fido_cbor_info_algorithm_type(ci, i) != NULL)

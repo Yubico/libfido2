@@ -97,36 +97,39 @@ load_pubkey(int type, const char *file)
 	eddsa_pk_t *eddsa_pk = NULL;
 	void *pk = NULL;
 
-	if (type == COSE_ES256) {
+	switch (type) {
+	case COSE_ES256:
 		if ((ec = read_ec_pubkey(file)) == NULL)
 			errx(1, "read_ec_pubkey");
 		if ((es256_pk = es256_pk_new()) == NULL)
 			errx(1, "es256_pk_new");
 		if (es256_pk_from_EC_KEY(es256_pk, ec) != FIDO_OK)
 			errx(1, "es256_pk_from_EC_KEY");
-
 		pk = es256_pk;
 		EC_KEY_free(ec);
-	} else if (type == COSE_RS256) {
+		break;
+	case COSE_RS256:
 		if ((rsa = read_rsa_pubkey(file)) == NULL)
 			errx(1, "read_rsa_pubkey");
 		if ((rs256_pk = rs256_pk_new()) == NULL)
 			errx(1, "rs256_pk_new");
 		if (rs256_pk_from_RSA(rs256_pk, rsa) != FIDO_OK)
 			errx(1, "rs256_pk_from_RSA");
-
 		pk = rs256_pk;
 		RSA_free(rsa);
-	} else if (type == COSE_EDDSA) {
+		break;
+	case COSE_EDDSA:
 		if ((eddsa = read_eddsa_pubkey(file)) == NULL)
 			errx(1, "read_eddsa_pubkey");
 		if ((eddsa_pk = eddsa_pk_new()) == NULL)
 			errx(1, "eddsa_pk_new");
 		if (eddsa_pk_from_EVP_PKEY(eddsa_pk, eddsa) != FIDO_OK)
 			errx(1, "eddsa_pk_from_EVP_PKEY");
-
 		pk = eddsa_pk;
 		EVP_PKEY_free(eddsa);
+		break;
+	default:
+		errx(1, "invalid type %d", type);
 	}
 
 	return (pk);
