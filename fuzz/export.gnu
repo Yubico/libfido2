@@ -11,6 +11,11 @@
 		es256_pk_from_ptr;
 		es256_pk_new;
 		es256_pk_to_EVP_PKEY;
+		es384_pk_free;
+		es384_pk_from_EC_KEY;
+		es384_pk_from_ptr;
+		es384_pk_new;
+		es384_pk_to_EVP_PKEY;
 		fido_assert_allow_cred;
 		fido_assert_authdata_len;
 		fido_assert_authdata_ptr;
