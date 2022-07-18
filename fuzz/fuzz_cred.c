@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
@@ -360,6 +360,9 @@ test_cred(const struct param *p)
 		break;
 	case 1:
 		cose_alg = COSE_RS256;
+		break;
+	case 2:
+		cose_alg = COSE_ES384;
 		break;
 	default:
 		cose_alg = COSE_EDDSA;

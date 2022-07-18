@@ -19,7 +19,7 @@
 #include "../src/fido/credman.h"
 #include "../src/fido/eddsa.h"
 #include "../src/fido/es256.h"
-#include "../src/fido/es256.h"
+#include "../src/fido/es384.h"
 #include "../src/fido/rs256.h"
 #include "../src/netlink.h"
 
