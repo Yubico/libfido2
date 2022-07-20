@@ -251,7 +251,7 @@ get_signed_hash_u2f(fido_blob_t *dgst, const unsigned char *rp_id,
 	EVP_MD_CTX	*ctx = NULL;
 	int		 ok = -1;
 
-	if (dgst->len != SHA256_DIGEST_LENGTH ||
+	if (dgst->len < SHA256_DIGEST_LENGTH ||
 	    (md = EVP_sha256()) == NULL ||
 	    (ctx = EVP_MD_CTX_new()) == NULL ||
 	    EVP_DigestInit_ex(ctx, md, NULL) != 1 ||
@@ -266,6 +266,7 @@ get_signed_hash_u2f(fido_blob_t *dgst, const unsigned char *rp_id,
 		fido_log_debug("%s: sha256", __func__);
 		goto fail;
 	}
+	dgst->len = SHA256_DIGEST_LENGTH;
 
 	ok = 0;
 fail:
@@ -330,7 +331,7 @@ fail:
 int
 fido_cred_verify(const fido_cred_t *cred)
 {
-	unsigned char	buf[SHA256_DIGEST_LENGTH];
+	unsigned char	buf[1024]; /* XXX */
 	fido_blob_t	dgst;
 	int		cose_alg;
 	int		r;
