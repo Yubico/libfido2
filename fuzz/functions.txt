@@ -195,7 +195,7 @@ cbor_encode_pin_opt                          4       0 100.00%         8       0
 cbor_encode_change_pin_auth                 32       1  96.88%        36       3  91.67%
 cbor_encode_assert_ext                      33       0 100.00%        32       0 100.00%
 cbor_decode_fmt                             13       0 100.00%        15       0 100.00%
-cbor_decode_pubkey                          26       2  92.31%        36       5  86.11%
+cbor_decode_pubkey                          26       1  96.15%        36       2  94.44%
 cbor_decode_cred_authdata                   31       1  96.77%        35       3  91.43%
 cbor_decode_assert_authdata                 21       0 100.00%        32       0 100.00%
 cbor_decode_attstmt                         13       0 100.00%        16       0 100.00%
@@ -206,7 +206,7 @@ cbor_decode_rp_entity                        8       0 100.00%         9       0
 cbor_decode_bool                            10       0 100.00%        11       0 100.00%
 cbor_build_uint                             10       1  90.00%         9       1  88.89%
 cbor_array_append                           17       0 100.00%        21       0 100.00%
-cbor_array_drop                             18       2  88.89%        17       3  82.35%
+cbor_array_drop                             18       0 100.00%        17       0 100.00%
 cbor.c:ctap_check_cbor                      28       0 100.00%        26       0 100.00%
 cbor.c:check_key_type                        8       0 100.00%         7       0 100.00%
 cbor.c:cbor_add_arg                         13       0 100.00%        21       0 100.00%
@@ -217,7 +217,7 @@ cbor.c:get_cose_alg                         46       1  97.83%        45       3
 cbor.c:find_cose_alg                        35       0 100.00%        33       0 100.00%
 cbor.c:decode_attcred                       25       0 100.00%        44       0 100.00%
 cbor.c:decode_cred_extensions               14       0 100.00%        24       0 100.00%
-cbor.c:decode_cred_extension                41      12  70.73%        45      17  62.22%
+cbor.c:decode_cred_extension                41       1  97.56%        45       3  93.33%
 cbor.c:decode_assert_extensions             14       0 100.00%        23       0 100.00%
 cbor.c:decode_assert_extension              19       0 100.00%        27       0 100.00%
 cbor.c:decode_attstmt_entry                 56       0 100.00%        51       0 100.00%
@@ -226,7 +226,7 @@ cbor.c:decode_cred_id_entry                 10       0 100.00%        19       0
 cbor.c:decode_user_entry                    25       0 100.00%        35       0 100.00%
 cbor.c:decode_rp_entity_entry               15       0 100.00%        25       0 100.00%
 ------------------------------------------------------------------------------------------------------------------
-TOTAL                                     1070      27  97.48%      1258      51  95.95%
+TOTAL                                     1070      13  98.79%      1258      31  97.54%
 
 File '/libfido2/src/compress.c':
 Name                                   Regions    Miss   Cover     Lines    Miss   Cover
@@ -324,12 +324,12 @@ cred.c:fido_dev_make_cred_tx                 64       0 100.00%        70       
 cred.c:fido_dev_make_cred_rx                 29       0 100.00%        32       0 100.00%
 cred.c:parse_makecred_reply                  14       0 100.00%        27       0 100.00%
 cred.c:check_extensions                       2       0 100.00%         6       0 100.00%
-cred.c:get_signed_hash_u2f                   27       0 100.00%        26       0 100.00%
-cred.c:verify_attstmt                        25       6  76.00%        43      12  72.09%
+cred.c:get_signed_hash_u2f                   27       0 100.00%        27       0 100.00%
+cred.c:verify_attstmt                        25       2  92.00%        43       6  86.05%
 cred.c:fido_cred_clean_authdata               1       0 100.00%         8       0 100.00%
 cred.c:fido_cred_clean_attstmt                1       0 100.00%         8       0 100.00%
 -------------------------------------------------------------------------------------------------------------------
-TOTAL                                       651      42  93.55%       848      49  94.22%
+TOTAL                                       651      38  94.16%       849      43  94.94%
 
 File '/libfido2/src/credman.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -443,12 +443,12 @@ eddsa_pk_free                                 6       0 100.00%         7       
 eddsa_pk_from_ptr                            10       0 100.00%        12       0 100.00%
 eddsa_pk_to_EVP_PKEY                          3       0 100.00%         7       0 100.00%
 eddsa_pk_from_EVP_PKEY                       18       2  88.89%        12       1  91.67%
-eddsa_verify_sig                             19       3  84.21%        30       9  70.00%
+eddsa_verify_sig                             19       2  89.47%        30       6  80.00%
 eddsa_pk_verify_sig                           7       1  85.71%        13       2  84.62%
 eddsa.c:decode_pubkey_point                   8       0 100.00%        11       0 100.00%
 eddsa.c:decode_coord                          8       0 100.00%        10       0 100.00%
 -------------------------------------------------------------------------------------------------------------------
-TOTAL                                        88       6  93.18%       114      12  89.47%
+TOTAL                                        88       5  94.32%       114       9  92.11%
 
 File '/libfido2/src/err.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -485,19 +485,19 @@ TOTAL                                       315       7  97.78%       372      1
 File '/libfido2/src/es384.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
 -------------------------------------------------------------------------------------------------------------------
-es384_pk_decode                               8       1  87.50%         9       3  66.67%
+es384_pk_decode                               8       0 100.00%         9       0 100.00%
 es384_pk_new                                  1       0 100.00%         3       0 100.00%
 es384_pk_free                                 6       0 100.00%         7       0 100.00%
 es384_pk_from_ptr                            15       0 100.00%        17       0 100.00%
 es384_pk_to_EVP_PKEY                         42       0 100.00%        53       0 100.00%
 es384_pk_from_EC_KEY                         42       2  95.24%        47       4  91.49%
 es384_pk_from_EVP_PKEY                        8       2  75.00%         7       1  85.71%
-es384_verify_sig                             12      12   0.00%        19      19   0.00%
-es384_pk_verify_sig                           7       2  71.43%        13       2  84.62%
+es384_verify_sig                             12       2  83.33%        19       5  73.68%
+es384_pk_verify_sig                           7       1  85.71%        13       2  84.62%
 es384.c:decode_pubkey_point                   9       0 100.00%        13       0 100.00%
 es384.c:decode_coord                          8       1  87.50%        10       3  70.00%
 -------------------------------------------------------------------------------------------------------------------
-TOTAL                                       158      20  87.34%       198      32  83.84%
+TOTAL                                       158       8  94.94%       198      15  92.42%
 
 File '/libfido2/src/extern.h':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -698,8 +698,8 @@ TOTAL                                        39       5  87.18%        63       
 File '/libfido2/src/netlink.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
 -------------------------------------------------------------------------------------------------------------------
-fido_nl_power_nfc                            18       1  94.44%        24       3  87.50%
-fido_nl_get_nfc_target                       17       1  94.12%        31       3  90.32%
+fido_nl_power_nfc                            18       0 100.00%        24       0 100.00%
+fido_nl_get_nfc_target                       17       0 100.00%        31       0 100.00%
 fido_nl_free                                 10       2  80.00%         9       2  77.78%
 fido_nl_new                                  16       1  93.75%        26       3  88.46%
 set_netlink_io_functions                      1       0 100.00%         4       0 100.00%
@@ -711,7 +711,7 @@ netlink.c:nlmsg_setattr                      15       1  93.33%        17       
 netlink.c:nlmsg_tx                           10       1  90.00%        13       3  76.92%
 netlink.c:nlmsg_ptr                           1       0 100.00%         3       0 100.00%
 netlink.c:nlmsg_len                           1       0 100.00%         3       0 100.00%
-netlink.c:nlmsg_rx                           11       3  72.73%        17       9  47.06%
+netlink.c:nlmsg_rx                           11       2  81.82%        17       6  64.71%
 netlink.c:nl_parse_reply                     20       0 100.00%        28       0 100.00%
 netlink.c:nlmsg_from_buf                     15       0 100.00%        17       0 100.00%
 netlink.c:nlmsg_type                          1       0 100.00%         3       0 100.00%
@@ -721,14 +721,14 @@ netlink.c:nlmsg_get_genl                      6       0 100.00%         7       
 netlink.c:nlmsg_iter                          6       0 100.00%        13       0 100.00%
 netlink.c:nlmsg_getattr                       1       0 100.00%         3       0 100.00%
 netlink.c:nla_from_buf                       17       0 100.00%        21       0 100.00%
-netlink.c:nl_nfc_poll                        18       1  94.44%        25       3  88.00%
+netlink.c:nl_nfc_poll                        18       0 100.00%        25       0 100.00%
 netlink.c:parse_nfc_event                    10       0 100.00%        17       0 100.00%
 netlink.c:nla_type                            1       0 100.00%         3       0 100.00%
 netlink.c:nla_get_u32                         1       0 100.00%         3       0 100.00%
 netlink.c:nla_read                            6       0 100.00%         7       0 100.00%
-netlink.c:nl_dump_nfc_target                 19       1  94.74%        31       3  90.32%
+netlink.c:nl_dump_nfc_target                 19       0 100.00%        31       0 100.00%
 netlink.c:parse_target                        9       0 100.00%        13       0 100.00%
-netlink.c:nl_get_nfc_family                  23       1  95.65%        33       3  90.91%
+netlink.c:nl_get_nfc_family                  23       0 100.00%        33       0 100.00%
 netlink.c:nlmsg_set_u16                       1       0 100.00%         3       0 100.00%
 netlink.c:nlmsg_set_str                       1       0 100.00%         3       0 100.00%
 netlink.c:parse_family                       10       0 100.00%        17       0 100.00%
@@ -739,7 +739,7 @@ netlink.c:parse_mcastgrps                     1       0 100.00%         3       
 netlink.c:parse_mcastgrp                     15       0 100.00%        24       0 100.00%
 netlink.c:nla_get_str                        10       0 100.00%        11       0 100.00%
 -------------------------------------------------------------------------------------------------------------------
-TOTAL                                       329      14  95.74%       498      33  93.37%
+TOTAL                                       329       8  97.57%       498      15  96.99%
 
 File '/libfido2/src/nfc.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
