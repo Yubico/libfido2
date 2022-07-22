@@ -23,6 +23,8 @@
 
 extern int prng_up;
 
+int fuzz_save_corpus;
+
 /*
  * Build wrappers around functions of interest, and have them fail
  * in a pseudo-random manner. A uniform probability of 0.25% (1/400)

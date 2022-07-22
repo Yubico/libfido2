@@ -272,6 +272,7 @@
 		prng_init;
 		prng_up;
 		fuzz_clock_reset;
+		fuzz_save_corpus;
 		set_netlink_io_functions;
 		set_pcsc_parameters;
 		set_pcsc_io_functions;

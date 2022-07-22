@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2019 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2022 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
+
+#include <openssl/sha.h>
 
 #include <err.h>
 #include <fcntl.h>
@@ -14,6 +16,8 @@
 #include <unistd.h>
 
 #include "mutator_aux.h"
+
+extern int fuzz_save_corpus;
 
 static bool debug;
 static unsigned int flags = MUTATE_ALL;
@@ -73,6 +77,50 @@ fail:
 	return status;
 }
 
+static int
+save_corpus(const struct param *p)
+{
+	uint8_t blob[MAXCORPUS], dgst[SHA256_DIGEST_LENGTH];
+	size_t blob_len;
+	char path[PATH_MAX];
+	int r, fd;
+
+	if ((blob_len = pack(blob, sizeof(blob), p)) == 0 ||
+	    blob_len > sizeof(blob)) {
+		warnx("pack");
+		return -1;
+	}
+
+	if (SHA256(blob, blob_len, dgst) != dgst) {
+		warnx("sha256");
+		return -1;
+	}
+
+	if ((r = snprintf(path, sizeof(path), "saved_corpus_%02x%02x%02x%02x"
+	    "%02x%02x%02x%02x", dgst[0], dgst[1], dgst[2], dgst[3], dgst[4],
+	    dgst[5], dgst[6], dgst[7])) < 0 || (size_t)r >= sizeof(path)) {
+		warnx("snprintf");
+		return -1;
+	}
+
+	if ((fd = open(path, O_CREAT|O_TRUNC|O_WRONLY, 0644)) == -1) {
+		warn("open %s", path);
+		return -1;
+	}
+
+	if (write(fd, blob, blob_len) != (ssize_t)blob_len) {
+		warn("write");
+		r = -1;
+	} else {
+		warnx("wrote %s", path);
+		r = 0;
+	}
+
+	close(fd);
+
+	return r;
+}
+
 static void
 parse_mutate_flags(const char *opt, unsigned int *mutate_flags)
 {
@@ -128,7 +176,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	if ((p = unpack(data, size)) == NULL)
 		test_fail++;
 	else {
+		fuzz_save_corpus = 0;
 		test(p);
+		if (fuzz_save_corpus && save_corpus(p) < 0)
+			fprintf(stderr, "%s: failed to save corpus\n",
+			    __func__);
 		free(p);
 	}
 
