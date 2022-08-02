@@ -3,6 +3,7 @@
 # Copyright (c) 2021-2022 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
+# SPDX-License-Identifier: BSD-2-Clause
 
 # usage: ./test.sh "$(mktemp -d fido2test-XXXXXXXX)" device
 
