@@ -17,15 +17,17 @@ static int
 config_prepare_hmac(uint8_t subcmd, const cbor_item_t *item, fido_blob_t *hmac)
 {
 	uint8_t prefix[32 + 2 * sizeof(uint8_t)], cbor[128];
-	size_t cbor_len;
+	size_t cbor_len = 0;
 
 	memset(prefix, 0xff, sizeof(prefix));
 	prefix[sizeof(prefix) - 2] = CTAP_CBOR_CONFIG;
 	prefix[sizeof(prefix) - 1] = subcmd;
 
-	if ((cbor_len = cbor_serialize(item, cbor, sizeof(cbor))) == 0) {
-		fido_log_debug("%s: cbor_serialize", __func__);
-		return -1;
+	if (item != NULL) {
+		if ((cbor_len = cbor_serialize(item, cbor, sizeof(cbor))) == 0) {
+			fido_log_debug("%s: cbor_serialize", __func__);
+			return -1;
+		}
 	}
 	if ((hmac->ptr = malloc(cbor_len + sizeof(prefix))) == NULL) {
 		fido_log_debug("%s: malloc", __func__);
@@ -66,8 +68,8 @@ config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
 	}
 
 	/* pinProtocol, pinAuth */
-	if (argv[1] != NULL && (pin != NULL ||
-	    (fido_dev_supports_permissions(dev) && fido_dev_has_uv(dev)))) {
+	if (pin != NULL ||
+	    (fido_dev_supports_permissions(dev) && fido_dev_has_uv(dev))) {
 		if (config_prepare_hmac(subcmd, argv[1], &hmac) < 0) {
 			fido_log_debug("%s: config_prepare_hmac", __func__);
 			goto fail;
