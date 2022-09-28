@@ -295,7 +295,7 @@ endforeach()
 
 # man_html
 foreach(f ${MAN_SOURCES})
-	string(REGEX REPLACE "\\.[13]" "" g ${f})
+	string(REGEX REPLACE "\\.[13]$" "" g ${f})
 	add_custom_command(OUTPUT ${g}.html
 		COMMAND mandoc -T html -O man="%N.html",style=style.css -I os="Yubico AB" ${f} > ${g}.html
 		DEPENDS ${f})
@@ -304,7 +304,7 @@ endforeach()
 
 # man_html_partial
 foreach(f ${MAN_SOURCES})
-	string(REGEX REPLACE "\\.[13]" "" g ${f})
+	string(REGEX REPLACE "\\.[13]$" "" g ${f})
 	add_custom_command(OUTPUT ${g}.partial
 		COMMAND cat ${PROJECT_SOURCE_DIR}/man/dyc.css > ${g}.partial
 		COMMAND mandoc -T html -O man="%N.html",fragment ${f} >> ${g}.partial
@@ -357,7 +357,7 @@ if(MANDOC_PATH)
 	install(FILES ${PROJECT_SOURCE_DIR}/man/style.css
 		DESTINATION "${CMAKE_INSTALL_DOCDIR}/html")
 	foreach(f ${MAN_SOURCES})
-		string(REGEX REPLACE "\\.[13]" "" f ${f})
+		string(REGEX REPLACE "\\.[13]$" "" f ${f})
 		install(FILES ${PROJECT_BINARY_DIR}/man/${f}.html
 			DESTINATION "${CMAKE_INSTALL_DOCDIR}/html")
 	endforeach()
