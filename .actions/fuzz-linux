@@ -12,7 +12,7 @@ LIBCBOR_MSAN="memory"
 OPENSSL_URL="https://github.com/openssl/openssl"
 OPENSSL_TAG="OpenSSL_1_1_1q"
 ZLIB_URL="https://github.com/madler/zlib"
-ZLIB_TAG="v1.2.12"
+ZLIB_TAG="v1.2.13"
 ZLIB_ASAN="address alignment bounds undefined"
 ZLIB_MSAN="memory"
 FIDO2_ASAN="address bounds implicit-conversion leak pointer-compare pointer-subtract undefined"
@@ -65,7 +65,7 @@ cd -
 # zlib
 git clone --depth=1 "${ZLIB_URL}" -b "${ZLIB_TAG}"
 cd zlib
-CFLAGS="${ZLIB_CFLAGS}" LDFLAGS="${ZLIB_CFLAGS}" cc="$CC" ./configure \
+CFLAGS="${ZLIB_CFLAGS}" LDFLAGS="${ZLIB_CFLAGS}" ./configure \
     --prefix="${FAKEROOT}"
 make install
 cd -
