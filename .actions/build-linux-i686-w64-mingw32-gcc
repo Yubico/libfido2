@@ -32,8 +32,8 @@ make -j"$(nproc)" -C build
 sudo make -C build install
 cd ..
 
-# Build and install OpenSSL 1.1.1q.
-git clone --depth=1 https://github.com/openssl/openssl -b OpenSSL_1_1_1q
+# Build and install OpenSSL 1.1.1s.
+git clone --depth=1 https://github.com/openssl/openssl -b OpenSSL_1_1_1s
 cd openssl
 ./Configure mingw --prefix=/fakeroot --openssldir=/fakeroot/openssl \
 	--cross-compile-prefix=i686-w64-mingw32-
