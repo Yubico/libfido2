@@ -7,7 +7,7 @@
 New-Variable -Name 'LIBRESSL_URL' `
     -Value 'https://fastly.cdn.openbsd.org/pub/OpenBSD/LibreSSL' `
     -Option Constant
-New-Variable -Name 'LIBRESSL' -Value 'libressl-3.5.3' -Option Constant
+New-Variable -Name 'LIBRESSL' -Value 'libressl-3.6.1' -Option Constant
 
 # libcbor coordinates.
 New-Variable -Name 'LIBCBOR' -Value 'libcbor-0.9.0' -Option Constant
