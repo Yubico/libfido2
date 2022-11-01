@@ -171,7 +171,7 @@ if(MSVC)
 	endif()
 	set(CBOR_LIBRARIES cbor)
 	set(ZLIB_LIBRARIES zlib1)
-	set(CRYPTO_LIBRARIES crypto-49)
+	set(CRYPTO_LIBRARIES crypto-50)
 	set(MSVC_DISABLED_WARNINGS_LIST
 		"C4152" # nonstandard extension used: function/data pointer
 			# conversion in expression;
