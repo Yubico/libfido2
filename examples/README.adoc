@@ -71,7 +71,8 @@ The following examples are provided:
 	Asks <device> for a FIDO2 assertion corresponding to [cred_id],
 	which may be omitted for resident keys. The obtained assertion
 	is verified using <pubkey>. The -p option requests that the user
-	be present.  User verification may be requested through the -v
+	be present and checks whether the user presence bit was signed by the
+	authenticator. User verification may be requested through the -v
 	option. If option -u is specified, the assertion is generated using
 	U2F (CTAP1) instead of FIDO2 (CTAP2) commands. If option -s is
 	specified, a FIDO2 hmac-secret is requested from the authenticator,
