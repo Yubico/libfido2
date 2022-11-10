@@ -20,8 +20,7 @@ The following definitions are used in the description below:
 
 - <pubkey>
 
-	The file system path of a file containing a NIST P-256 public key in
-	PEM format.
+	The file system path of a file containing a public key in PEM format.
 
 - <blobkey>
 
