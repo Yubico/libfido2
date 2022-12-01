@@ -673,7 +673,15 @@ fail:
 	free(id.ptr);
 
 	return (r);
+}
 
+int
+fido_assert_empty_allow_list(fido_assert_t *assert)
+{
+	fido_free_blob_array(&assert->allow_list);
+	memset(&assert->allow_list, 0, sizeof(assert->allow_list));
+
+	return (FIDO_OK);
 }
 
 int

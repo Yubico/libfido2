@@ -124,6 +124,7 @@ const unsigned char *fido_cred_user_id_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_x5c_ptr(const fido_cred_t *);
 
 int fido_assert_allow_cred(fido_assert_t *, const unsigned char *, size_t);
+int fido_assert_empty_allow_list(fido_assert_t *);
 int fido_assert_set_authdata(fido_assert_t *, size_t, const unsigned char *,
     size_t);
 int fido_assert_set_authdata_raw(fido_assert_t *, size_t, const unsigned char *,
