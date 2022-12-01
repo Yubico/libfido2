@@ -766,6 +766,15 @@ fido_cred_exclude(fido_cred_t *cred, const unsigned char *id_ptr, size_t id_len)
 }
 
 int
+fido_cred_empty_exclude_list(fido_cred_t *cred)
+{
+	fido_free_blob_array(&cred->excl);
+	memset(&cred->excl, 0, sizeof(cred->excl));
+
+	return (FIDO_OK);
+}
+
+int
 fido_cred_set_clientdata(fido_cred_t *cred, const unsigned char *data,
     size_t data_len)
 {

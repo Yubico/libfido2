@@ -126,6 +126,7 @@
 		fido_cred_clientdata_hash_len;
 		fido_cred_clientdata_hash_ptr;
 		fido_cred_display_name;
+		fido_cred_empty_exclude_list;
 		fido_cred_exclude;
 		fido_cred_flags;
 		fido_cred_largeblob_key_len;
