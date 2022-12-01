@@ -748,9 +748,8 @@ fido_assert_reset_tx(fido_assert_t *assert)
 	fido_blob_reset(&assert->cd);
 	fido_blob_reset(&assert->cdh);
 	fido_blob_reset(&assert->ext.hmac_salt);
-	fido_free_blob_array(&assert->allow_list);
+	fido_assert_empty_allow_list(assert);
 	memset(&assert->ext, 0, sizeof(assert->ext));
-	memset(&assert->allow_list, 0, sizeof(assert->allow_list));
 	assert->rp_id = NULL;
 	assert->up = FIDO_OPT_OMIT;
 	assert->uv = FIDO_OPT_OMIT;
