@@ -150,6 +150,7 @@ list(APPEND MAN_ALIAS
 	fido_cbor_info_new fido_cbor_info_versions_len
 	fido_cbor_info_new fido_cbor_info_versions_ptr
 	fido_cbor_info_new fido_dev_get_cbor_info
+	fido_cred_exclude fido_cred_empty_exclude_list
 	fido_cred_new fido_cred_aaguid_len
 	fido_cred_new fido_cred_aaguid_ptr
 	fido_cred_new fido_cred_attstmt_len
