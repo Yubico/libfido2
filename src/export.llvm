@@ -23,6 +23,7 @@ _fido_assert_blob_ptr
 _fido_assert_clientdata_hash_len
 _fido_assert_clientdata_hash_ptr
 _fido_assert_count
+_fido_assert_empty_allow_list
 _fido_assert_flags
 _fido_assert_free
 _fido_assert_hmac_secret_len
