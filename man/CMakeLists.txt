@@ -59,6 +59,7 @@ list(APPEND MAN_ALIAS
 	es384_pk_new es384_pk_from_EVP_PKEY
 	es384_pk_new es384_pk_from_ptr
 	es384_pk_new es384_pk_to_EVP_PKEY
+	fido_assert_allow_cred fido_assert_empty_allow_list
 	fido_assert_new fido_assert_authdata_len
 	fido_assert_new fido_assert_authdata_ptr
 	fido_assert_new fido_assert_blob_len
