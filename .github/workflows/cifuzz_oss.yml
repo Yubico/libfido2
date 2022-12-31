@@ -16,7 +16,7 @@ on:
 
 jobs:
   fuzzing:
-    if: github.repository == 'Yubico/libfido2'
+    if: ${{ false }}
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
