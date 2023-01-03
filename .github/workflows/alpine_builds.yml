@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Yubico AB. All rights reserved.
+# Copyright (c) 2022-2023 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 # SPDX-License-Identifier: BSD-2-Clause
@@ -27,20 +27,12 @@ jobs:
       run: |
         apk -q update
         apk add build-base clang clang-analyzer cmake coreutils eudev-dev
-        apk add git linux-headers openssl-dev sudo zlib-dev pcsc-lite-dev
+        apk add git linux-headers openssl-dev sudo zlib-dev pcsc-lite-dev \
+          libcbor-dev
     - name: fix permissions on workdir
       run: chown root:wheel "${GITHUB_WORKSPACE}"
     - name: checkout libfido2
       uses: actions/checkout@v2
-    - name: checkout libcbor
-      uses: actions/checkout@v2
-      with:
-        repository: PJK/libcbor
-        path: libcbor
-        ref: v0.9.0
-    - name: build libcbor
-      run: cmake -DCMAKE_BUILD_TYPE=Release . && make -j"$(nproc)" && sudo make install
-      working-directory: libcbor
     - name: build libfido2
       env:
         CC: ${{ matrix.cc }}
