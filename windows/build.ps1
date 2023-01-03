@@ -163,8 +163,8 @@ try {
 	& $CMake ..\..\..\${LIBCBOR} -A "${Arch}" `
 	    -DWITH_EXAMPLES=OFF `
 	    -DBUILD_SHARED_LIBS="${SHARED}" `
-	    -DCMAKE_C_FLAGS_DEBUG="${CFLAGS_DEBUG}" `
-	    -DCMAKE_C_FLAGS_RELEASE="${CFLAGS_RELEASE}" `
+	    -DCMAKE_C_FLAGS_DEBUG="${CFLAGS_DEBUG} /wd4703" `
+	    -DCMAKE_C_FLAGS_RELEASE="${CFLAGS_RELEASE} /wd4703" `
 	    -DCMAKE_INSTALL_PREFIX="${PREFIX}" "${CMAKE_SYSTEM_VERSION}"; `
 	    ExitOnError
 	& $CMake --build . --config ${Config} --verbose; ExitOnError
