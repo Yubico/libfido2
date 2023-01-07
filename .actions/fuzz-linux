@@ -28,6 +28,7 @@ asan)
 	LIBCBOR_CFLAGS="-fsanitize=$(echo "${LIBCBOR_ASAN}" | tr ' ' ',')"
 	ZLIB_CFLAGS="-fsanitize=$(echo "${ZLIB_ASAN}" | tr ' ' ',')"
 	FIDO2_CFLAGS="-fsanitize=$(echo "${FIDO2_ASAN}" | tr ' ' ',')"
+	FIDO2_CFLAGS="${FIDO2_CFLAGS} -fsanitize-address-use-after-scope"
 	;;
 msan)
 	LIBCBOR_CFLAGS="-fsanitize=$(echo "${LIBCBOR_MSAN}" | tr ' ' ',')"
