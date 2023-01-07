@@ -119,7 +119,6 @@ officially supported.
 | BUILD_STATIC_LIBS | Build a static library                  | ON
 | BUILD_TOOLS       | Build auxiliary tools                   | ON
 | FUZZ              | Enable fuzzing instrumentation          | OFF
-| LIBFUZZER         | Build libfuzzer harnesses               | OFF
 | NFC_LINUX         | Enable netlink NFC support on Linux     | ON
 | USE_HIDAPI        | Use hidapi as the HID backend           | OFF
 | USE_PCSC          | Enable experimental PCSC support        | OFF

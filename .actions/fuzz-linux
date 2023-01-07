@@ -76,7 +76,7 @@ mkdir build
 export PKG_CONFIG_PATH="${FAKEROOT}/lib/pkgconfig"
 (cd build && cmake -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_FLAGS_DEBUG="${FIDO2_CFLAGS} ${COMMON_CFLAGS}" -DFUZZ=ON \
-    -DLIBFUZZER=ON -DFUZZ_LDFLAGS="-fsanitize=fuzzer" "${WORKDIR}")
+    -DFUZZ_LDFLAGS="-fsanitize=fuzzer" "${WORKDIR}")
 make -j"$(nproc)" -C build
 
 # fuzz
