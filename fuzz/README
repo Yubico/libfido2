@@ -8,7 +8,8 @@ use preload-fuzz.c to read device data from stdin.
 
 libFuzzer is better suited for bespoke fuzzers; see fuzz_cred.c, fuzz_credman.c,
 fuzz_assert.c, fuzz_hid.c, and fuzz_mgmt.c for examples. To build these
-harnesses, use -DFUZZ=ON -DLIBFUZZER=ON.
+harnesses, use -DCMAKE_C_FLAGS=-fsanitize=fuzzer-no-link
+-DFUZZ_LDFLAGS=-fsanitize=fuzzer -DFUZZ=ON -DLIBFUZZER=ON.
 
 If -DFUZZ=ON is enabled, symbols listed in wrapped.sym are wrapped in the
 resulting shared object. The wrapper functions simulate failure according to a
