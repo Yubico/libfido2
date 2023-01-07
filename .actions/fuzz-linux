@@ -15,8 +15,9 @@ ZLIB_URL="https://github.com/madler/zlib"
 ZLIB_TAG="v1.2.13"
 ZLIB_ASAN="address alignment bounds undefined"
 ZLIB_MSAN="memory"
-FIDO2_ASAN="address bounds implicit-conversion leak pointer-compare pointer-subtract undefined"
-FIDO2_MSAN="memory"
+FIDO2_ASAN="address bounds fuzzer-no-link implicit-conversion leak"
+FIDO2_ASAN="${FIDO2_ASAN} pointer-compare pointer-subtract undefined"
+FIDO2_MSAN="fuzzer-no-link memory"
 COMMON_CFLAGS="-g2 -fno-omit-frame-pointer"
 UBSAN_OPTIONS="halt_on_error=1:print_stacktrace=1:strict_string_checks=1"
 ASAN_OPTIONS="${UBSAN_OPTIONS}:detect_invalid_pointer_pairs=2:detect_leaks=1"
@@ -75,7 +76,7 @@ mkdir build
 export PKG_CONFIG_PATH="${FAKEROOT}/lib/pkgconfig"
 (cd build && cmake -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_FLAGS_DEBUG="${FIDO2_CFLAGS} ${COMMON_CFLAGS}" -DFUZZ=ON \
-    -DLIBFUZZER=ON "${WORKDIR}")
+    -DLIBFUZZER=ON -DFUZZ_LDFLAGS="-fsanitize=fuzzer" "${WORKDIR}")
 make -j"$(nproc)" -C build
 
 # fuzz
