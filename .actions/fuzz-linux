@@ -34,7 +34,8 @@ asan)
 msan)
 	LIBCBOR_CFLAGS="-fsanitize=$(echo "${LIBCBOR_MSAN}" | tr ' ' ',')"
 	ZLIB_CFLAGS="-fsanitize=$(echo "${ZLIB_MSAN}" | tr ' ' ',')"
-	FIDO2_CFLAGS="-fsanitize=$(echo "${FIDO2_MSAN}" | tr ' ' ',') -fsanitize-memory-track-origins"
+	FIDO2_CFLAGS="-fsanitize=$(echo "${FIDO2_MSAN}" | tr ' ' ',')"
+	FIDO2_CFLAGS="${FIDO2_CFLAGS} -fsanitize-memory-track-origins"
 	;;
 *)
 	echo "unknown sanitiser \"$1\"" 1>&2 && exit 1
