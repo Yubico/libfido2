@@ -38,6 +38,7 @@ option(BUILD_MANPAGES    "Build man pages"                         ON)
 option(BUILD_SHARED_LIBS "Build a shared library"                  ON)
 option(BUILD_STATIC_LIBS "Build a static library"                  ON)
 option(BUILD_TOOLS       "Build tool programs"                     ON)
+option(BUILD_TESTS       "Build test programs"                     ON)
 option(FUZZ              "Enable fuzzing instrumentation"          OFF)
 option(USE_HIDAPI        "Use hidapi as the HID backend"           OFF)
 option(USE_PCSC          "Enable experimental PCSC support"        ON)
@@ -68,6 +69,9 @@ if(NOT MSVC)
 		set(FIDO_CFLAGS "${FIDO_CFLAGS} -D_DARWIN_C_SOURCE")
 		set(FIDO_CFLAGS "${FIDO_CFLAGS} -D__STDC_WANT_LIB_EXT1__=1")
 	elseif((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR MINGW OR CYGWIN)
+		set(FIDO_CFLAGS "${FIDO_CFLAGS} -D_GNU_SOURCE")
+		set(FIDO_CFLAGS "${FIDO_CFLAGS} -D_DEFAULT_SOURCE")
+	elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
 		set(FIDO_CFLAGS "${FIDO_CFLAGS} -D_GNU_SOURCE")
 		set(FIDO_CFLAGS "${FIDO_CFLAGS} -D_DEFAULT_SOURCE")
 	elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
@@ -109,6 +113,11 @@ check_symbol_exists(strsep string.h HAVE_STRSEP)
 check_symbol_exists(sysconf unistd.h HAVE_SYSCONF)
 check_symbol_exists(timespecsub sys/time.h HAVE_TIMESPECSUB)
 check_symbol_exists(timingsafe_bcmp string.h HAVE_TIMINGSAFE_BCMP)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+    set(HAVE_EXPLICIT_BZERO OFF)
+    add_definitions(-DCRYPTO_EXPLICIT_BZERO)
+endif()
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 try_compile(HAVE_POSIX_IOCTL
@@ -229,6 +238,23 @@ else()
 				set(BASE_LIBRARIES ${BASE_LIBRARIES} rt)
 			endif()
 		endif()
+	elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+		if(UDEV_ROOT_DIR)
+			list(PREPEND CMAKE_FIND_ROOT_PATH ${UDEV_ROOT_DIR})
+		endif()
+
+		find_path(UDEV_INCLUDE_DIR
+			NAMES "libudev.h")
+
+		find_library(UDEV_LIBRARY
+			NAMES libudev-zero.a libudev)
+
+		add_library(udev STATIC IMPORTED GLOBAL)
+		set_target_properties(udev PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${UDEV_INCLUDE_DIR}")
+		set_target_properties(udev PROPERTIES IMPORTED_LOCATION "${UDEV_LIBRARY}")
+
+		set(UDEV_INCLUDE_DIRS "${UDEV_INCLUDE_DIR}")
+		set(UDEV_LIBRARIES "udev")
 	else()
 		set(NFC_LINUX OFF)
 	endif()
@@ -444,10 +470,13 @@ else()
 	message(FATAL_ERROR "Nothing to build (BUILD_*_LIBS=OFF)")
 endif()
 
-enable_testing()
-
 subdirs(src)
-subdirs(regress)
+
+if(BUILD_TESTS)
+	enable_testing()
+	subdirs(regress)
+endif()
+
 if(BUILD_EXAMPLES)
 	subdirs(examples)
 endif()
