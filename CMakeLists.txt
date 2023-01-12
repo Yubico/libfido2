@@ -33,6 +33,7 @@ set(FIDO_MINOR "13")
 set(FIDO_PATCH "0")
 set(FIDO_VERSION ${FIDO_MAJOR}.${FIDO_MINOR}.${FIDO_PATCH})
 
+option(BUILD_TESTS       "Build the regress tests"                 ON)
 option(BUILD_EXAMPLES    "Build example programs"                  ON)
 option(BUILD_MANPAGES    "Build man pages"                         ON)
 option(BUILD_SHARED_LIBS "Build a shared library"                  ON)
@@ -158,15 +159,19 @@ if(UNIX)
 	add_definitions(-DHAVE_DEV_URANDOM)
 endif()
 
+
 if(MSVC)
 	if((NOT CBOR_INCLUDE_DIRS) OR (NOT CBOR_LIBRARY_DIRS) OR
-	   (NOT CBOR_BIN_DIRS) OR (NOT CRYPTO_INCLUDE_DIRS) OR
-	   (NOT CRYPTO_LIBRARY_DIRS) OR (NOT CRYPTO_BIN_DIRS) OR
-	   (NOT ZLIB_INCLUDE_DIRS) OR (NOT ZLIB_LIBRARY_DIRS) OR
-	   (NOT ZLIB_BIN_DIRS))
+	   (NOT CRYPTO_INCLUDE_DIRS) OR (NOT CRYPTO_LIBRARY_DIRS) OR
+	   (NOT ZLIB_INCLUDE_DIRS) OR (NOT ZLIB_LIBRARY_DIRS))
 		message(FATAL_ERROR "please define "
-		   "{CBOR,CRYPTO,ZLIB}_{INCLUDE,LIBRARY,BIN}_DIRS when "
+		   "{CBOR,CRYPTO,ZLIB}_{INCLUDE,LIBRARY}_DIRS when "
 		   "building under msvc")
+	endif()
+	if(BUILD_TESTS AND BUILD_SHARED_LIBS AND
+	   ((NOT CBOR_BIN_DIRS) OR (NOT ZLIB_BIN_DIRS) OR (NOT CRYPTO_BIN_DIRS)))
+		message(FATAL_ERROR "please define {CBOR,CRYPTO,ZLIB}_BIN_DIRS "
+		   "when building tests")
 	endif()
 	if(NOT CBOR_LIBRARIES)
 		set(CBOR_LIBRARIES cbor)
@@ -399,6 +404,9 @@ message(STATUS "BUILD_TOOLS: ${BUILD_TOOLS}")
 message(STATUS "CBOR_INCLUDE_DIRS: ${CBOR_INCLUDE_DIRS}")
 message(STATUS "CBOR_LIBRARIES: ${CBOR_LIBRARIES}")
 message(STATUS "CBOR_LIBRARY_DIRS: ${CBOR_LIBRARY_DIRS}")
+if(BUILD_TESTS)
+	message(STATUS "CBOR_BIN_DIRS: ${CBOR_BIN_DIRS}")
+endif()
 message(STATUS "CBOR_VERSION: ${CBOR_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
@@ -416,6 +424,9 @@ message(STATUS "CMAKE_SYSTEM_VERSION: ${CMAKE_SYSTEM_VERSION}")
 message(STATUS "CRYPTO_INCLUDE_DIRS: ${CRYPTO_INCLUDE_DIRS}")
 message(STATUS "CRYPTO_LIBRARIES: ${CRYPTO_LIBRARIES}")
 message(STATUS "CRYPTO_LIBRARY_DIRS: ${CRYPTO_LIBRARY_DIRS}")
+if(BUILD_TESTS)
+	message(STATUS "CRYPTO_BIN_DIRS: ${CRYPTO_BIN_DIRS}")
+endif()
 message(STATUS "CRYPTO_VERSION: ${CRYPTO_VERSION}")
 message(STATUS "FIDO_VERSION: ${FIDO_VERSION}")
 message(STATUS "FUZZ: ${FUZZ}")
@@ -425,6 +436,9 @@ endif()
 message(STATUS "ZLIB_INCLUDE_DIRS: ${ZLIB_INCLUDE_DIRS}")
 message(STATUS "ZLIB_LIBRARIES: ${ZLIB_LIBRARIES}")
 message(STATUS "ZLIB_LIBRARY_DIRS: ${ZLIB_LIBRARY_DIRS}")
+if(BUILD_TESTS)
+	message(STATUS "ZLIB_BIN_DIRS: ${ZLIB_BIN_DIRS}")
+endif()
 message(STATUS "ZLIB_VERSION: ${ZLIB_VERSION}")
 if(USE_HIDAPI)
 	message(STATUS "HIDAPI_INCLUDE_DIRS: ${HIDAPI_INCLUDE_DIRS}")
@@ -455,10 +469,15 @@ else()
 	message(FATAL_ERROR "Nothing to build (BUILD_*_LIBS=OFF)")
 endif()
 
-enable_testing()
+if(BUILD_TESTS)
+	enable_testing()
+endif()
 
 add_subdirectory(src)
-add_subdirectory(regress)
+
+if(BUILD_TESTS)
+	add_subdirectory(regress)
+endif()
 if(BUILD_EXAMPLES)
 	add_subdirectory(examples)
 endif()
