@@ -168,9 +168,16 @@ if(MSVC)
 		   "{CBOR,CRYPTO,ZLIB}_{INCLUDE,LIBRARY,BIN}_DIRS when "
 		   "building under msvc")
 	endif()
-	set(CBOR_LIBRARIES cbor)
-	set(ZLIB_LIBRARIES zlib1)
-	set(CRYPTO_LIBRARIES crypto-50)
+	if(NOT CBOR_LIBRARIES)
+		set(CBOR_LIBRARIES cbor)
+	endif()
+	if(NOT ZLIB_LIBRARIES)
+		set(ZLIB_LIBRARIES zlib1)
+	endif()
+	if(NOT CRYPTO_LIBRARIES)
+		set(CRYPTO_LIBRARIES crypto)
+	endif()
+
 	set(MSVC_DISABLED_WARNINGS_LIST
 		"C4152" # nonstandard extension used: function/data pointer
 			# conversion in expression;
@@ -212,8 +219,12 @@ else()
 		message(FATAL_ERROR "could not find zlib")
 	endif()
 
-	set(CBOR_LIBRARIES "cbor")
-	set(CRYPTO_LIBRARIES "crypto")
+	if(NOT CBOR_LIBRARIES)
+		set(CBOR_LIBRARIES "cbor")
+	endif()
+	if(NOT CRYPTO_LIBRARIES)
+		set(CRYPTO_LIBRARIES "crypto")
+	endif()
 
 	if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		pkg_search_module(UDEV libudev REQUIRED)
