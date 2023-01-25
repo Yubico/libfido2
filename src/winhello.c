@@ -9,6 +9,14 @@
 
 #include <stdlib.h>
 #include <windows.h>
+#if defined(_WIN32) || defined(__CYGWIN__)
+	// Name clashes between windows.h and openssl
+	#undef X509_NAME
+	#undef X509_CERT_PAIR
+	#undef X509_EXTENSIONS
+	#undef OCSP_REQUEST
+	#undef OCSP_RESPONSE
+#endif
 
 #include "fido.h"
 #include "webauthn.h"
