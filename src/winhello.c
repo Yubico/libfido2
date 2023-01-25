@@ -472,10 +472,6 @@ unpack_assert_authdata(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
 	int r;
 
-	if (wa->cbAuthenticatorData > SIZE_MAX) {
-		fido_log_debug("%s: cbAuthenticatorData", __func__);
-		return -1;
-	}
 	if ((r = fido_assert_set_authdata_raw(assert, 0, wa->pbAuthenticatorData,
 	    (size_t)wa->cbAuthenticatorData)) != FIDO_OK) {
 		fido_log_debug("%s: fido_assert_set_authdata_raw: %s", __func__,
@@ -491,10 +487,6 @@ unpack_assert_sig(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
 	int r;
 
-	if (wa->cbSignature > SIZE_MAX) {
-		fido_log_debug("%s: cbSignature", __func__);
-		return -1;
-	}
 	if ((r = fido_assert_set_sig(assert, 0, wa->pbSignature,
 	    (size_t)wa->cbSignature)) != FIDO_OK) {
 		fido_log_debug("%s: fido_assert_set_sig: %s", __func__,
@@ -508,10 +500,6 @@ unpack_assert_sig(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 static int
 unpack_cred_id(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
-	if (wa->Credential.cbId > SIZE_MAX) {
-		fido_log_debug("%s: Credential.cbId", __func__);
-		return -1;
-	}
 	if (fido_blob_set(&assert->stmt[0].id, wa->Credential.pbId,
 	    (size_t)wa->Credential.cbId) < 0) {
 		fido_log_debug("%s: fido_blob_set", __func__);
@@ -526,10 +514,6 @@ unpack_user_id(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
 	if (wa->cbUserId == 0)
 		return 0; /* user id absent */
-	if (wa->cbUserId > SIZE_MAX) {
-		fido_log_debug("%s: cbUserId", __func__);
-		return -1;
-	}
 	if (fido_blob_set(&assert->stmt[0].user.id, wa->pbUserId,
 	    (size_t)wa->cbUserId) < 0) {
 		fido_log_debug("%s: fido_blob_set", __func__);
@@ -549,7 +533,6 @@ unpack_hmac_secret(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 	}
 	if (wa->pHmacSecret == NULL ||
 	    wa->pHmacSecret->cbFirst == 0 ||
-	    wa->pHmacSecret->cbFirst > SIZE_MAX ||
 	    wa->pHmacSecret->pbFirst == NULL) {
 		fido_log_debug("%s: hmac-secret absent", __func__);
 		return 0; /* proceed without hmac-secret */
@@ -752,8 +735,7 @@ translate_winhello_cred(fido_cred_t *cred,
 	struct cbor_load_result cbor;
 	int r = FIDO_ERR_INTERNAL;
 
-	if (att->pbAttestationObject == NULL ||
-	    att->cbAttestationObject > SIZE_MAX) {
+	if (att->pbAttestationObject == NULL) {
 		fido_log_debug("%s: pbAttestationObject", __func__);
 		goto fail;
 	}
