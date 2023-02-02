@@ -473,7 +473,7 @@ unpack_assert_authdata(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 	int r;
 
 	if ((r = fido_assert_set_authdata_raw(assert, 0, wa->pbAuthenticatorData,
-	    (size_t)wa->cbAuthenticatorData)) != FIDO_OK) {
+	    wa->cbAuthenticatorData)) != FIDO_OK) {
 		fido_log_debug("%s: fido_assert_set_authdata_raw: %s", __func__,
 		    fido_strerr(r));
 		return -1;
@@ -488,7 +488,7 @@ unpack_assert_sig(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 	int r;
 
 	if ((r = fido_assert_set_sig(assert, 0, wa->pbSignature,
-	    (size_t)wa->cbSignature)) != FIDO_OK) {
+	    wa->cbSignature)) != FIDO_OK) {
 		fido_log_debug("%s: fido_assert_set_sig: %s", __func__,
 		    fido_strerr(r));
 		return -1;
@@ -501,7 +501,7 @@ static int
 unpack_cred_id(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
 	if (fido_blob_set(&assert->stmt[0].id, wa->Credential.pbId,
-	    (size_t)wa->Credential.cbId) < 0) {
+	    wa->Credential.cbId) < 0) {
 		fido_log_debug("%s: fido_blob_set", __func__);
 		return -1;
 	}
@@ -515,7 +515,7 @@ unpack_user_id(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 	if (wa->cbUserId == 0)
 		return 0; /* user id absent */
 	if (fido_blob_set(&assert->stmt[0].user.id, wa->pbUserId,
-	    (size_t)wa->cbUserId) < 0) {
+	    wa->cbUserId) < 0) {
 		fido_log_debug("%s: fido_blob_set", __func__);
 		return -1;
 	}
@@ -547,7 +547,7 @@ unpack_hmac_secret(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 		return -1;
 	}
 	if (fido_blob_set(&assert->stmt[0].hmac_secret,
-	    wa->pHmacSecret->pbFirst, (size_t)wa->pHmacSecret->cbFirst) < 0) {
+	    wa->pHmacSecret->pbFirst, wa->pHmacSecret->cbFirst) < 0) {
 		fido_log_debug("%s: fido_blob_set", __func__);
 		return -1;
 	}
@@ -740,7 +740,7 @@ translate_winhello_cred(fido_cred_t *cred,
 		goto fail;
 	}
 	if ((item = cbor_load(att->pbAttestationObject,
-	    (size_t)att->cbAttestationObject, &cbor)) == NULL) {
+	    att->cbAttestationObject, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
 		goto fail;
 	}
