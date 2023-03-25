@@ -22,6 +22,9 @@
 #ifndef NTE_DEVICE_NOT_FOUND
 #define NTE_DEVICE_NOT_FOUND	_HRESULT_TYPEDEF_(0x80090035)
 #endif
+#ifndef NTE_USER_CANCELLED
+#define NTE_USER_CANCELLED	_HRESULT_TYPEDEF_(0x80090036L)
+#endif
 
 #define MAXCHARS	128
 #define MAXCREDS	128
@@ -194,6 +197,9 @@ to_fido(HRESULT hr)
 	case NTE_DEVICE_NOT_FOUND:
 	case NTE_NOT_FOUND:
 		return FIDO_ERR_NOT_ALLOWED;
+	case  __HRESULT_FROM_WIN32(ERROR_CANCELLED):
+	case NTE_USER_CANCELLED:
+		return FIDO_ERR_OPERATION_DENIED;
 	default:
 		fido_log_debug("%s: hr=0x%lx", __func__, (u_long)hr);
 		return FIDO_ERR_INTERNAL;
