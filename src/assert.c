@@ -643,6 +643,34 @@ fido_assert_set_rp(fido_assert_t *assert, const char *id)
 	return (FIDO_OK);
 }
 
+#ifdef USE_WINHELLO
+int
+fido_assert_set_winhello_appid(fido_assert_t *assert, const char *id)
+{
+	if (assert->appid != NULL) {
+		free(assert->appid);
+		assert->appid = NULL;
+	}
+
+	if (id == NULL)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	if ((assert->appid = strdup(id)) == NULL)
+		return (FIDO_ERR_INTERNAL);
+
+	return (FIDO_OK);
+}
+#else
+int
+fido_assert_set_winhello_appid(fido_assert_t *assert, const char *id)
+{
+	(void)assert;
+	(void)id;
+
+	return (FIDO_ERR_UNSUPPORTED_EXTENSION);
+}
+#endif /* USE_WINHELLO */
+
 int
 fido_assert_allow_cred(fido_assert_t *assert, const unsigned char *ptr,
     size_t len)
@@ -745,12 +773,14 @@ void
 fido_assert_reset_tx(fido_assert_t *assert)
 {
 	free(assert->rp_id);
+	free(assert->appid);
 	fido_blob_reset(&assert->cd);
 	fido_blob_reset(&assert->cdh);
 	fido_blob_reset(&assert->ext.hmac_salt);
 	fido_assert_empty_allow_list(assert);
 	memset(&assert->ext, 0, sizeof(assert->ext));
 	assert->rp_id = NULL;
+	assert->appid = NULL;
 	assert->up = FIDO_OPT_OMIT;
 	assert->uv = FIDO_OPT_OMIT;
 }
