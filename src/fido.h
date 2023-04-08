@@ -142,6 +142,7 @@ int fido_assert_set_rp(fido_assert_t *, const char *);
 int fido_assert_set_up(fido_assert_t *, fido_opt_t);
 int fido_assert_set_uv(fido_assert_t *, fido_opt_t);
 int fido_assert_set_sig(fido_assert_t *, size_t, const unsigned char *, size_t);
+int fido_assert_set_winhello_appid(fido_assert_t *, const char *);
 int fido_assert_verify(const fido_assert_t *, size_t, int, const void *);
 int fido_cbor_info_algorithm_cose(const fido_cbor_info_t *, size_t);
 int fido_cred_empty_exclude_list(fido_cred_t *);

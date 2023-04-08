@@ -95,6 +95,7 @@ list(APPEND MAN_ALIAS
 	fido_assert_set_authdata fido_assert_set_sig
 	fido_assert_set_authdata fido_assert_set_up
 	fido_assert_set_authdata fido_assert_set_uv
+	fido_assert_set_authdata fido_assert_set_winhello_appid
 	fido_bio_dev_get_info fido_bio_dev_enroll_begin
 	fido_bio_dev_get_info fido_bio_dev_enroll_cancel
 	fido_bio_dev_get_info fido_bio_dev_enroll_continue

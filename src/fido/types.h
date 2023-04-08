@@ -211,6 +211,7 @@ typedef struct fido_assert_ext {
 
 typedef struct fido_assert {
 	char              *rp_id;        /* relying party id */
+	char              *appid;        /* winhello u2f appid */
 	fido_blob_t        cd;           /* client data */
 	fido_blob_t        cdh;          /* client data hash */
 	fido_blob_array_t  allow_list;   /* list of allowed credentials */
