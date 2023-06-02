@@ -28,7 +28,7 @@ jobs:
         apk -q update
         apk add build-base clang clang-analyzer cmake coreutils eudev-dev
         apk add git linux-headers openssl-dev sudo zlib-dev pcsc-lite-dev \
-          libcbor-dev
+          libcbor-dev elogind-dev
     - name: fix permissions on workdir
       run: chown root:wheel "${GITHUB_WORKSPACE}"
     - name: checkout libfido2
