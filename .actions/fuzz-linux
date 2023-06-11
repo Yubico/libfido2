@@ -10,7 +10,7 @@ LIBCBOR_TAG="v0.10.1"
 LIBCBOR_ASAN="address alignment bounds"
 LIBCBOR_MSAN="memory"
 OPENSSL_URL="https://github.com/openssl/openssl"
-OPENSSL_TAG="OpenSSL_1_1_1u"
+OPENSSL_TAG="openssl-3.0.9"
 ZLIB_URL="https://github.com/madler/zlib"
 ZLIB_TAG="v1.2.13"
 ZLIB_ASAN="address alignment bounds undefined"
@@ -62,7 +62,7 @@ cd -
 git clone --depth=1 "${OPENSSL_URL}" -b "${OPENSSL_TAG}"
 cd openssl
 ./Configure linux-x86_64-clang "enable-$1" --prefix="${FAKEROOT}" \
-    --openssldir="${FAKEROOT}/openssl"
+    --openssldir="${FAKEROOT}/openssl" --libdir=lib
 make install_sw
 cd -
 
