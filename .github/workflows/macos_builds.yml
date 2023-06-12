@@ -25,7 +25,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: dependencies
-      run: brew install libcbor llvm mandoc pkg-config zlib
+      run: brew install libcbor llvm mandoc openssl@3.0 pkg-config zlib
     - name: build
       env:
         CC: ${{ matrix.cc }}
