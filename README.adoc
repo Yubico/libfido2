@@ -44,11 +44,17 @@ https://developers.yubico.com/libfido2/Releases[release page].
 
 === Dependencies
 
-*libfido2* depends on https://github.com/pjk/libcbor[libcbor],
+*libfido2* depends on https://www.cmake.org[cmake] 3.18 or newer,
+https://github.com/pjk/libcbor[libcbor],
 https://www.openssl.org[OpenSSL] 1.1 or newer, and https://zlib.net[zlib].
 On Linux, libudev
 (part of https://www.freedesktop.org/wiki/Software/systemd[systemd]) is also
 required.
+
+==== Smart Card Support
+
+On supporting Unix systems, e.g., *BSD, Linux, etc,
+pcsclite[https://pcsclite.apdu.fr] is required for Smart Card support.
 
 === Installation
 

@@ -7,7 +7,8 @@
 cmake_policy(SET CMP0025 NEW)
 
 project(libfido2 C)
-cmake_minimum_required(VERSION 3.0)
+# 3.18+ supports OpenSSL 3 detection with FindOpenSSL.
+cmake_minimum_required(VERSION 3.18)
 # Set PIE flags for POSITION_INDEPENDENT_CODE targets, added in CMake 3.14.
 if(POLICY CMP0083)
 	cmake_policy(SET CMP0083 NEW)
@@ -95,7 +96,6 @@ check_c_compiler_flag("-Werror -fstack-protector-all" HAVE_STACK_PROTECTOR_ALL)
 check_include_files(cbor.h HAVE_CBOR_H)
 check_include_files(endian.h HAVE_ENDIAN_H)
 check_include_files(err.h HAVE_ERR_H)
-check_include_files(openssl/opensslv.h HAVE_OPENSSLV_H)
 check_include_files(signal.h HAVE_SIGNAL_H)
 check_include_files(sys/random.h HAVE_SYS_RANDOM_H)
 check_include_files(unistd.h HAVE_UNISTD_H)
@@ -138,7 +138,6 @@ list(APPEND CHECK_VARIABLES
 	HAVE_GETPAGESIZE
 	HAVE_GETRANDOM
 	HAVE_MEMSET_S
-	HAVE_OPENSSLV_H
 	HAVE_POSIX_IOCTL
 	HAVE_READPASSPHRASE
 	HAVE_RECALLOCARRAY
@@ -217,15 +216,16 @@ if(MSVC)
 	endif()
 	set(NFC_LINUX OFF)
 else()
+	include(FindOpenSSL)
 	include(FindPkgConfig)
+
 	pkg_search_module(CBOR libcbor)
-	pkg_search_module(CRYPTO libcrypto)
 	pkg_search_module(ZLIB zlib)
 
 	if(NOT CBOR_FOUND AND NOT HAVE_CBOR_H)
 		message(FATAL_ERROR "could not find libcbor")
 	endif()
-	if(NOT CRYPTO_FOUND AND NOT HAVE_OPENSSLV_H)
+	if(!${OPENSSL_FOUND})
 		message(FATAL_ERROR "could not find libcrypto")
 	endif()
 	if(NOT ZLIB_FOUND)
