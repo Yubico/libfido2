@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2023 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -44,7 +44,8 @@ usage(void)
 static void
 verify_cred(int type, const char *fmt, const unsigned char *authdata_ptr,
     size_t authdata_len, const unsigned char *attstmt_ptr, size_t attstmt_len,
-    bool rk, bool uv, int ext, long long cred_protect, const char *key_out, const char *id_out)
+    bool rk, bool uv, int ext, int cred_protect, const char *key_out,
+    const char *id_out)
 {
 	fido_cred_t	*cred;
 	int		 r;
@@ -86,9 +87,10 @@ verify_cred(int type, const char *fmt, const unsigned char *authdata_ptr,
 		errx(1, "fido_cred_set_uv: %s (0x%x)", fido_strerr(r), r);
 
 	/* credProt */
-	if (cred_protect != 0 && (r = fido_cred_set_prot(cred, (int)cred_protect)) != FIDO_OK)
+	if (cred_protect != 0 && (r = fido_cred_set_prot(cred,
+	    cred_protect)) != FIDO_OK)
 		errx(1, "fido_cred_set_prot: %s (0x%x)", fido_strerr(r), r);
-	
+
 	/* fmt */
 	r = fido_cred_set_fmt(cred, fmt);
 	if (r != FIDO_OK)
@@ -288,7 +290,8 @@ main(int argc, char **argv)
 		errx(1, "fido_cred_set_uv: %s (0x%x)", fido_strerr(r), r);
 
 	/* credProt */
-	if (cred_protect != 0 && (r = fido_cred_set_prot(cred, (int)cred_protect)) != FIDO_OK)
+	if (cred_protect != 0 && (r = fido_cred_set_prot(cred,
+	    (int)cred_protect)) != FIDO_OK)
 		errx(1, "fido_cred_set_prot: %s (0x%x)", fido_strerr(r), r);
 	
 	/* timeout */
@@ -312,7 +315,8 @@ main(int argc, char **argv)
 
 	verify_cred(type, fido_cred_fmt(cred), fido_cred_authdata_ptr(cred),
 	    fido_cred_authdata_len(cred), fido_cred_attstmt_ptr(cred),
-	    fido_cred_attstmt_len(cred), rk, uv, ext, cred_protect, key_out, id_out);
+	    fido_cred_attstmt_len(cred), rk, uv, ext, fido_cred_prot(cred),
+	    key_out, id_out);
 
 	if (blobkey_out != NULL) {
 		/* extract the "largeBlob" key */
