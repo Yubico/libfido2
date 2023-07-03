@@ -63,7 +63,7 @@ The following examples are provided:
 	is generated using U2F (CTAP1) instead of FIDO2 (CTAP2) commands.
 	The -T option may be used to enforce a timeout of <seconds>. If the
 	option -b is specified, the credential's "largeBlob" key is stored in
-	<blobkey>. If the option -c is specified the the generated credential 
+	<blobkey>. If the option -c is specified the the generated credential
 	will be bound by the specified protection policy.
 
 - assert [-t es256|es384|rs256|eddsa] [-a cred_id] [-h hmac_secret] [-P pin]
