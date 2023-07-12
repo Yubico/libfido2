@@ -1,0 +1,8 @@
+set(FIDO_VERSION @FIDO_VERSION@)
+
+@PACKAGE_INIT@
+
+set_and_check(FIDO_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set_and_check(FIDO_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+
+check_required_components(libfido2)

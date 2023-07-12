@@ -156,3 +156,23 @@ if(NOT MSVC)
 	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libfido2.pc"
 		DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+	libfido2Config.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/libfido2Config.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libfido2
+	PATH_VARS CMAKE_INSTALL_INCLUDEDIR
+)
+write_basic_package_version_file(
+	${CMAKE_CURRENT_BINARY_DIR}/libfido2ConfigVersion.cmake
+	VERSION ${FIDO_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+install(
+	FILES
+		${CMAKE_CURRENT_BINARY_DIR}/libfido2Config.cmake
+		${CMAKE_CURRENT_BINARY_DIR}/libfido2ConfigVersion.cmake
+	DESTINATION
+		${CMAKE_INSTALL_LIBDIR}/cmake/libfido2
+	)
