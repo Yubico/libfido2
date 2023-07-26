@@ -260,7 +260,7 @@ fido_hid_open(const char *path)
 	struct hid_linux *ctx;
 	struct hidraw_report_descriptor *hrd;
 	struct timespec tv_pause;
-	long interval_ms, retries = 0;
+	long interval_ns, retries = 0;
 	bool looped;
 
 retry:
@@ -273,6 +273,9 @@ retry:
 	}
 
 	while (flock(ctx->fd, LOCK_EX|LOCK_NB) == -1) {
+		if (errno == EINTR) {
+			continue;
+		}
 		if (errno != EWOULDBLOCK) {
 			fido_log_error(errno, "%s: flock", __func__);
 			fido_hid_close(ctx);
@@ -284,11 +287,27 @@ retry:
 			fido_hid_close(ctx);
 			return (NULL);
 		}
-		interval_ms = retries * 100000000L;
-		tv_pause.tv_sec = interval_ms / 1000000000L;
-		tv_pause.tv_nsec = interval_ms % 1000000000L;
-		if (nanosleep(&tv_pause, NULL) == -1) {
-			fido_log_error(errno, "%s: nanosleep", __func__);
+		// Take the current time and add the required timeout so that we can use it with `TIMER_ABSTIME`
+		// below. We can't use nanosleep with a relative timer, because we might be interrupted multiple
+		// times and would then have to adjust for the time difference after the interrupt.
+		if (clock_gettime(CLOCK_MONOTONIC, &tv_pause) == -1) {
+			fido_log_error(errno, "%s: clock_gettime", __func__);
+			fido_hid_close(ctx);
+			return (NULL);
+		}
+		interval_ns = retries * 100000000L;
+		tv_pause.tv_sec += (interval_ns / 1000000000L);
+		tv_pause.tv_nsec += interval_ns % 1000000000L;
+		if (tv_pause.tv_nsec >= 1000000000L) {
+			tv_pause.tv_sec += 1;
+			tv_pause.tv_nsec -= 1000000000L;
+		}
+		int r;
+		do {
+			r = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &tv_pause, NULL);
+		} while (r == EINTR);
+		if (r != 0) {
+			fido_log_error(r, "%s: clock_nanosleep", __func__);
 			fido_hid_close(ctx);
 			return (NULL);
 		}

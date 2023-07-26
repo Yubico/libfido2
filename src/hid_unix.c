@@ -50,7 +50,7 @@ fido_hid_unix_open(const char *path)
 int
 fido_hid_unix_wait(int fd, int ms, const fido_sigset_t *sigmask)
 {
-	struct timespec ts;
+	struct timespec ts, ts_end, ts_now;
 	struct pollfd pfd;
 	int r;
 
@@ -61,12 +61,42 @@ fido_hid_unix_wait(int fd, int ms, const fido_sigset_t *sigmask)
 #ifdef FIDO_FUZZ
 	return (0);
 #endif
+
 	if (ms > -1) {
-		ts.tv_sec = ms / 1000;
-		ts.tv_nsec = (ms % 1000) * 1000000;
+		// Calculate the absolute time at which the timeout expires
+		if (clock_gettime(CLOCK_MONOTONIC, &ts_end) == -1) {
+			fido_log_error(errno, "%s: clock_gettime", __func__);
+			return (-1);
+		}
+		ts_end.tv_sec += ms / 1000;
+		ts_end.tv_nsec += (ms % 1000) * 1000000;
+		if (ts_end.tv_nsec >= 1000000000L) {
+			ts_end.tv_sec += 1;
+			ts_end.tv_nsec -= 1000000000L;
+		}
 	}
 
-	if ((r = ppoll(&pfd, 1, ms > -1 ? &ts : NULL, sigmask)) < 1) {
+	do {
+		if (ms > -1) {
+			// Calculate the remaining timeout
+			if (clock_gettime(CLOCK_MONOTONIC, &ts_now) == -1) {
+				fido_log_error(errno, "%s: clock_gettime", __func__);
+				return (-1);
+			}
+			ts.tv_sec = ts_end.tv_sec - ts_now.tv_sec;
+			ts.tv_nsec = ts_end.tv_nsec - ts_now.tv_nsec;
+			if (ts.tv_nsec < 0) {
+				ts.tv_sec -= 1;
+				ts.tv_nsec += 1000000000L;
+			}
+			if (ts.tv_sec < 0) {
+				return (-1); // Timeout expired
+			}
+		}
+		r = ppoll(&pfd, 1, ms > -1 ? &ts : NULL, sigmask);
+	} while (r == -1 && errno == EINTR);
+
+	if (r < 1) {
 		if (r == -1)
 			fido_log_error(errno, "%s: ppoll", __func__);
 		return (-1);
