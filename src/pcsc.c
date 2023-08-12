@@ -6,12 +6,12 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#if __APPLE__
+#if __APPLE__ || __UNIX__
 #include <PCSC/wintypes.h>
 #include <PCSC/winscard.h>
 #else
 #include <winscard.h>
-#endif /* __APPLE__ */
+#endif /* __APPLE__ || __UNIX__ */
 
 #include <errno.h>
 
