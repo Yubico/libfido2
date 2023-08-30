@@ -2,12 +2,12 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 # SPDX-License-Identifier: BSD-2-Clause
+cmake_minimum_required(VERSION 3.0)
 
 # detect AppleClang; needs to come before project()
 cmake_policy(SET CMP0025 NEW)
 
 project(libfido2 C)
-cmake_minimum_required(VERSION 3.0)
 # Set PIE flags for POSITION_INDEPENDENT_CODE targets, added in CMake 3.14.
 if(POLICY CMP0083)
 	cmake_policy(SET CMP0083 NEW)
