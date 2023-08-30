@@ -1133,6 +1133,80 @@ fail:
 }
 
 static int
+decode_attcred_multiple_cose(const unsigned char **buf, size_t *len, fido_blob_t *cose_algs,
+							 fido_attcred_t *attcred)
+{
+	cbor_item_t		*item = NULL;
+	struct cbor_load_result	 cbor;
+	uint16_t		 id_len;
+	int			 ok = -1;
+	size_t cose_count = 0;
+	int *cose_algs_arr = NULL;
+	bool cose_match = false;
+
+	fido_log_xxd(*buf, *len, "%s", __func__);
+
+	if (fido_buf_read(buf, len, &attcred->aaguid,
+					  sizeof(attcred->aaguid)) < 0) {
+		fido_log_debug("%s: fido_buf_read aaguid", __func__);
+		return (-1);
+	}
+
+	if (fido_buf_read(buf, len, &id_len, sizeof(id_len)) < 0) {
+		fido_log_debug("%s: fido_buf_read id_len", __func__);
+		return (-1);
+	}
+
+	attcred->id.len = (size_t)be16toh(id_len);
+	if ((attcred->id.ptr = malloc(attcred->id.len)) == NULL)
+		return (-1);
+
+	fido_log_debug("%s: attcred->id.len=%zu", __func__, attcred->id.len);
+
+	if (fido_buf_read(buf, len, attcred->id.ptr, attcred->id.len) < 0) {
+		fido_log_debug("%s: fido_buf_read id", __func__);
+		return (-1);
+	}
+
+	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
+		fido_log_debug("%s: cbor_load", __func__);
+		goto fail;
+	}
+
+	if (cbor_decode_pubkey(item, &attcred->type, &attcred->pubkey) < 0) {
+		fido_log_debug("%s: cbor_decode_pubkey", __func__);
+		goto fail;
+	}
+
+	cose_count = cose_algs->len / sizeof(int);
+	cose_algs_arr = (int*)cose_algs->ptr;
+	for (size_t i = 0; i < cose_count; i++) {
+		int cose_alg = cose_algs_arr[i];
+		if (attcred->type != cose_alg) {
+			fido_log_debug("%s: cose_algs mismatch (%d != %d)", __func__,
+						   attcred->type, cose_alg);
+		} else {
+			cose_match = true;
+		}
+	}
+
+	if (!cose_match) {
+		fido_log_debug("%s: cose_alg failed to match any", __func__);
+		goto fail;
+	}
+
+	*buf += cbor.read;
+	*len -= cbor.read;
+
+	ok = 0;
+fail:
+	if (item != NULL)
+		cbor_decref(&item);
+
+	return (ok);
+}
+
+static int
 decode_cred_extension(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
 	fido_cred_ext_t	*authdata_ext = arg;
@@ -1329,6 +1403,56 @@ cbor_decode_cred_authdata(const cbor_item_t *item, int cose_alg,
 	if (authdata_ext != NULL) {
 		if ((authdata->flags & CTAP_AUTHDATA_EXT_DATA) != 0 &&
 		    decode_cred_extensions(&buf, &len, authdata_ext) < 0)
+			return (-1);
+	}
+
+	/* XXX we should probably ensure that len == 0 at this point */
+
+	return (FIDO_OK);
+}
+
+int
+cbor_decode_cred_authdata_multiple_cose(const cbor_item_t *item, fido_blob_t *cose_algs,
+										fido_blob_t *authdata_cbor, fido_authdata_t *authdata,
+										fido_attcred_t *attcred, fido_cred_ext_t *authdata_ext)
+{
+	const unsigned char	*buf = NULL;
+	size_t			 len;
+	size_t			 alloc_len;
+
+	if (cbor_isa_bytestring(item) == false ||
+		cbor_bytestring_is_definite(item) == false) {
+		fido_log_debug("%s: cbor type", __func__);
+		return (-1);
+	}
+
+	if (authdata_cbor->ptr != NULL ||
+		(authdata_cbor->len = cbor_serialize_alloc(item,
+												   &authdata_cbor->ptr, &alloc_len)) == 0) {
+		fido_log_debug("%s: cbor_serialize_alloc", __func__);
+		return (-1);
+	}
+
+	buf = cbor_bytestring_handle(item);
+	len = cbor_bytestring_length(item);
+	fido_log_xxd(buf, len, "%s", __func__);
+
+	if (fido_buf_read(&buf, &len, authdata, sizeof(*authdata)) < 0) {
+		fido_log_debug("%s: fido_buf_read", __func__);
+		return (-1);
+	}
+
+	authdata->sigcount = be32toh(authdata->sigcount);
+
+	if (attcred != NULL) {
+		if ((authdata->flags & CTAP_AUTHDATA_ATT_CRED) == 0 ||
+			decode_attcred_multiple_cose(&buf, &len, cose_algs, attcred) < 0)
+			return (-1);
+	}
+
+	if (authdata_ext != NULL) {
+		if ((authdata->flags & CTAP_AUTHDATA_EXT_DATA) != 0 &&
+			decode_cred_extensions(&buf, &len, authdata_ext) < 0)
 			return (-1);
 	}
 

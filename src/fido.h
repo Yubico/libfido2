@@ -122,6 +122,7 @@ const unsigned char *fido_cred_id_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_largeblob_key_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_pubkey_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_sig_ptr(const fido_cred_t *);
+const unsigned char *fido_cred_type_winhello_ptr(const fido_cred_t *cred);
 const unsigned char *fido_cred_user_id_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_x5c_ptr(const fido_cred_t *);
 
@@ -166,6 +167,7 @@ int fido_cred_set_rk(fido_cred_t *, fido_opt_t);
 int fido_cred_set_rp(fido_cred_t *, const char *, const char *);
 int fido_cred_set_sig(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_type(fido_cred_t *, int);
+int fido_cred_set_type_winhello(fido_cred_t *cred, const unsigned char *ptr, size_t len);
 int fido_cred_set_uv(fido_cred_t *, fido_opt_t);
 int fido_cred_type(const fido_cred_t *);
 int fido_cred_set_user(fido_cred_t *, const unsigned char *, size_t,
@@ -224,6 +226,7 @@ size_t fido_cred_largeblob_key_len(const fido_cred_t *);
 size_t fido_cred_pin_minlen(const fido_cred_t *);
 size_t fido_cred_pubkey_len(const fido_cred_t *);
 size_t fido_cred_sig_len(const fido_cred_t *);
+size_t fido_cred_type_winhello_len(const fido_cred_t *cred);
 size_t fido_cred_user_id_len(const fido_cred_t *);
 size_t fido_cred_x5c_len(const fido_cred_t *);
 

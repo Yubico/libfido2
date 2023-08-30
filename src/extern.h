@@ -61,6 +61,8 @@ int cbor_decode_attstmt(const cbor_item_t *, fido_attstmt_t *);
 int cbor_decode_bool(const cbor_item_t *, bool *);
 int cbor_decode_cred_authdata(const cbor_item_t *, int, fido_blob_t *,
     fido_authdata_t *, fido_attcred_t *, fido_cred_ext_t *);
+int cbor_decode_cred_authdata_multiple_cose(const cbor_item_t *, 
+    fido_blob_t *, fido_blob_t *, fido_authdata_t *, fido_attcred_t *, fido_cred_ext_t *);
 int cbor_decode_assert_authdata(const cbor_item_t *, fido_blob_t *,
     fido_authdata_t *, fido_assert_extattr_t *);
 int cbor_decode_cred_id(const cbor_item_t *, fido_blob_t *);
