@@ -358,11 +358,15 @@ pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETERS *out, const fido_cred_t *cred)
 {
 	if (!fido_blob_is_empty(&cred->type_winhello)) {
 		/* array of credential types was set */
+		WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg = NULL;
 		size_t count = cred->type_winhello.len / sizeof(int);
 		int *cose_algos = (int*)cred->type_winhello.ptr;
-		WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg = calloc(count, sizeof(WEBAUTHN_COSE_CREDENTIAL_PARAMETER));
+		if ((alg = calloc(count, sizeof(WEBAUTHN_COSE_CREDENTIAL_PARAMETER))) == NULL) {
+			fido_log_debug("%s: calloc", __func__);
+			return -1;
+		}
 
-		fido_log_debug("%s: cose algo count:%d", __func__, count);
+		fido_log_debug("%s: cose algo count:%zu", __func__, count);
 		for(size_t i = 0; i < count; i++) {
 			alg[i].lAlg = cose_algos[i];
 			alg[i].dwVersion = WEBAUTHN_COSE_CREDENTIAL_PARAMETER_CURRENT_VERSION;
@@ -373,7 +377,11 @@ pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETERS *out, const fido_cred_t *cred)
 		out->pCredentialParameters = alg;
 	} else {
 		/* Only single credential type */
-		WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg = calloc(1, sizeof(WEBAUTHN_COSE_CREDENTIAL_PARAMETER));
+		WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg = NULL;
+		if ((alg = calloc(1, sizeof(WEBAUTHN_COSE_CREDENTIAL_PARAMETER))) == NULL) {
+			fido_log_debug("%s: calloc", __func__);
+			return -1;
+		}
 		alg->lAlg = cred->type;
 		alg->dwVersion = WEBAUTHN_COSE_CREDENTIAL_PARAMETER_CURRENT_VERSION;
 		alg->pwszCredentialType = WEBAUTHN_CREDENTIAL_TYPE_PUBLIC_KEY;
