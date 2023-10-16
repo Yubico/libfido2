@@ -154,7 +154,7 @@ cred_make(int argc, char **argv)
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "bc:dhi:o:qruvw")) != -1) {
+	while ((ch = getopt(argc, argv, "bc:dhi:o:qru2vw")) != -1) {
 		switch (ch) {
 		case 'b':
 			flags |= FLAG_LARGEBLOB;
@@ -184,6 +184,9 @@ cred_make(int argc, char **argv)
 		case 'u':
 			flags |= FLAG_U2F;
 			break;
+		case '2':
+			flags |= FLAG_FIDO2;
+			break;
 		case 'v':
 			flags |= FLAG_UV;
 			break;
@@ -212,8 +215,13 @@ cred_make(int argc, char **argv)
 	cred = prepare_cred(in_f, type, flags);
 
 	dev = open_dev(argv[0]);
-	if (flags & FLAG_U2F)
+	if (flags & FLAG_U2F) {
 		fido_dev_force_u2f(dev);
+		if (flags & FLAG_DEBUG) fprintf(stderr, "Forcing U2F (CTAP1).\n");
+	} else if (flags & FLAG_FIDO2) {
+		fido_dev_force_fido2(dev);
+		if (flags & FLAG_DEBUG) fprintf(stderr, "Forcing FIDO2 (CTAP2).\n");
+	}
 
 	if (cred_protect > 0) {
 		r = fido_cred_set_prot(cred, cred_protect);

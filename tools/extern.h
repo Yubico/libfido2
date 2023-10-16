@@ -32,6 +32,7 @@ struct blob {
 #define FLAG_UP		0x040
 #define FLAG_LARGEBLOB	0x080
 #define FLAG_CD		0x100
+#define FLAG_FIDO2	0x200
 
 #define PINBUF_LEN	256
 

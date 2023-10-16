@@ -226,7 +226,7 @@ assert_get(int argc, char **argv)
 
 	opt.up = opt.uv = opt.pin = FIDO_OPT_OMIT;
 
-	while ((ch = getopt(argc, argv, "bdhi:o:prt:uvw")) != -1) {
+	while ((ch = getopt(argc, argv, "bdhi:o:prt:u2vw")) != -1) {
 		switch (ch) {
 		case 'b':
 			flags |= FLAG_LARGEBLOB;
@@ -255,6 +255,9 @@ assert_get(int argc, char **argv)
 		case 'u':
 			flags |= FLAG_U2F;
 			break;
+		case '2':
+			flags |= FLAG_FIDO2;
+			break;
 		case 'v':
 			/* -v implies both pin and uv for historical reasons */
 			opt.pin = FIDO_OPT_TRUE;
@@ -282,8 +285,13 @@ assert_get(int argc, char **argv)
 	assert = prepare_assert(in_f, flags, &opt);
 
 	dev = open_dev(argv[0]);
-	if (flags & FLAG_U2F)
+	if (flags & FLAG_U2F) {
 		fido_dev_force_u2f(dev);
+		if (flags & FLAG_DEBUG) fprintf(stderr, "Forcing U2F (CTAP1).\n");
+	} else if (flags & FLAG_FIDO2) {
+		fido_dev_force_fido2(dev);
+		if (flags & FLAG_DEBUG) fprintf(stderr, "Forcing FIDO2 (CTAP2).\n");
+	}
 
 	if (opt.pin == FIDO_OPT_TRUE) {
 		r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ",

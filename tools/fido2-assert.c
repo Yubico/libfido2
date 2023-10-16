@@ -29,7 +29,7 @@ void
 usage(void)
 {
 	fprintf(stderr,
-"usage: fido2-assert -G [-bdhpruvw] [-t option] [-i input_file] [-o output_file] device\n"
+"usage: fido2-assert -G [-bdhpru2vw] [-t option] [-i input_file] [-o output_file] device\n"
 "       fido2-assert -V [-dhpv] [-i input_file] key_file [type]\n"
 	);
 
