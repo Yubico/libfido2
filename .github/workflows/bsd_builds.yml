@@ -20,7 +20,7 @@ jobs:
       matrix:
         image: [freebsd/13.x, openbsd/7.2]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: dependencies
       run: |
         sudo apt -q update

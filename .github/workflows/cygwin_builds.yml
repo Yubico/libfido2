@@ -24,7 +24,7 @@ jobs:
         arch: [ x64 ]
         config: [ "Debug", "Release" ]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: build
       run: |
         .\windows\cygwin.ps1 -Config ${{ matrix.config }}

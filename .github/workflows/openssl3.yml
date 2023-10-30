@@ -28,7 +28,7 @@ jobs:
           - os: ubuntu-22.04
             cc: i686-w64-mingw32-gcc-10
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: dependencies
       env:
         CC: ${{ matrix.cc }}

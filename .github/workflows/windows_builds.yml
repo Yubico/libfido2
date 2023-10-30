@@ -25,7 +25,7 @@ jobs:
         type: [ dynamic, static ]
         config: [ "Release" ]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: build
       run: |
         .\windows\build.ps1 -Fido2Flags '/analyze' -Arch ${{ matrix.arch }} `
