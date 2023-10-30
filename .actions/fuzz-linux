@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 LIBCBOR_URL="https://github.com/pjk/libcbor"
-LIBCBOR_TAG="v0.10.1"
+LIBCBOR_TAG="v0.10.2"
 LIBCBOR_ASAN="address alignment bounds"
 LIBCBOR_MSAN="memory"
 OPENSSL_URL="https://github.com/openssl/openssl"
