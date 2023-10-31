@@ -709,9 +709,13 @@ cbor_encode_pin_auth(const fido_dev_t *dev, const fido_blob_t *secret,
 	if (prot == CTAP_PIN_PROTOCOL2 && key.len > 32)
 		key.len = 32;
 
-	if ((md = EVP_sha256()) == NULL || HMAC(md, key.ptr,
-	    (int)key.len, data->ptr, data->len, dgst,
-	    &dgst_len) == NULL || dgst_len != SHA256_DIGEST_LENGTH)
+	if ((md = EVP_sha256()) == NULL ||
+#ifdef OPENSSL_IS_BORINGSSL
+	    HMAC(md, key.ptr, key.len, data->ptr, data->len, dgst, &dgst_len) == NULL ||
+#else
+	    HMAC(md, key.ptr, (int)key.len, data->ptr, data->len, dgst, &dgst_len) == NULL ||
+#endif
+	    dgst_len != SHA256_DIGEST_LENGTH)
 		return (NULL);
 
 	outlen = (prot == CTAP_PIN_PROTOCOL1) ? 16 : dgst_len;
@@ -758,7 +762,11 @@ cbor_encode_change_pin_auth(const fido_dev_t *dev, const fido_blob_t *secret,
 
 	if ((ctx = HMAC_CTX_new()) == NULL ||
 	    (md = EVP_sha256())  == NULL ||
+#ifdef OPENSSL_IS_BORINGSSL
+	    HMAC_Init_ex(ctx, key.ptr, key.len, md, NULL) == 0 ||
+#else
 	    HMAC_Init_ex(ctx, key.ptr, (int)key.len, md, NULL) == 0 ||
+#endif
 	    HMAC_Update(ctx, new_pin_enc->ptr, new_pin_enc->len) == 0 ||
 	    HMAC_Update(ctx, pin_hash_enc->ptr, pin_hash_enc->len) == 0 ||
 	    HMAC_Final(ctx, dgst, &dgst_len) == 0 ||

@@ -28,6 +28,27 @@ rs1_free_EVP_MD(EVP_MD *md)
 {
 	freezero(md, sizeof(*md));
 }
+#elif defined(OPENSSL_IS_BORINGSSL)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wcast-qual"
+static EVP_MD *
+rs1_get_EVP_MD(void)
+{
+	const EVP_MD *md;
+
+	if ((md = EVP_sha1()) == NULL)
+		return (NULL);
+
+	return (EVP_MD *)md;
+}
+# pragma GCC diagnostic pop
+
+static void
+rs1_free_EVP_MD(EVP_MD *md)
+{
+	// Do not free it
+	(void)md;
+}
 #elif OPENSSL_VERSION_NUMBER >= 0x30000000
 static EVP_MD *
 rs1_get_EVP_MD(void)

@@ -44,6 +44,7 @@ option(USE_HIDAPI        "Use hidapi as the HID backend"           OFF)
 option(USE_PCSC          "Enable experimental PCSC support"        ON)
 option(USE_WINHELLO      "Abstract Windows Hello as a FIDO device" ON)
 option(NFC_LINUX         "Enable NFC support on Linux"             ON)
+option(USE_BORINGSSL     "Build with BoringSSL"                    OFF)
 
 add_definitions(-D_FIDO_MAJOR=${FIDO_MAJOR})
 add_definitions(-D_FIDO_MINOR=${FIDO_MINOR})
@@ -85,7 +86,12 @@ if(NOT MSVC)
 	elseif(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
 		set(FIDO_CFLAGS "${FIDO_CFLAGS} -D_NETBSD_SOURCE")
 	endif()
-	set(FIDO_CFLAGS "${FIDO_CFLAGS} -std=c99")
+
+	# With BoringSSL we need a newer standard than c99
+	if(NOT USE_BORINGSSL)
+		set(FIDO_CFLAGS "${FIDO_CFLAGS} -std=c99")
+	endif()
+
 	set(CMAKE_C_FLAGS "${FIDO_CFLAGS} ${CMAKE_C_FLAGS}")
 endif()
 
@@ -219,8 +225,17 @@ if(MSVC)
 else()
 	include(FindPkgConfig)
 	pkg_search_module(CBOR libcbor)
-	pkg_search_module(CRYPTO libcrypto)
 	pkg_search_module(ZLIB zlib)
+
+	if(USE_BORINGSSL)
+		if((NOT CRYPTO_INCLUDE_DIRS) OR (NOT CRYPTO_LIBRARY_DIRS))
+			message(FATAL_ERROR "please define "
+			   "{CBOR,CRYPTO,ZLIB}_{INCLUDE,LIBRARY}_DIRS when "
+			   "building with BoringSSL")
+		endif()
+	else()
+		pkg_search_module(CRYPTO libcrypto)
+	endif()
 
 	if(NOT CBOR_FOUND AND NOT HAVE_CBOR_H)
 		message(FATAL_ERROR "could not find libcbor")

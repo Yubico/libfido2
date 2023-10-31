@@ -15,6 +15,55 @@
 #include "../openbsd-compat/openbsd-compat.h"
 #include "extern.h"
 
+#ifdef OPENSSL_IS_BORINGSSL
+int
+base64_encode(const void *ptr, size_t len, char **out)
+{
+	size_t out_len;
+
+	if (ptr == NULL || out == NULL || len > INT_MAX)
+		return (-1);
+
+	*out = NULL;
+
+	if (!EVP_EncodedLength(&out_len, len))
+		return (-1);
+
+	if ((*out = calloc(1, (size_t)out_len + 1)) == NULL)
+		return (-1);
+
+	return EVP_EncodeBlock((uint8_t *)*out, (const uint8_t *)ptr, len) > 0 ? 1 : -1;
+}
+
+int
+base64_decode(const char *in, void **ptr, size_t *len)
+{
+	size_t  alloc_len;
+	size_t  in_len;
+	int     ok = -1;
+
+	if (in == NULL || ptr == NULL || len == NULL || strlen(in) > INT_MAX)
+		return (-1);
+
+	in_len = strlen(in);
+	if (!EVP_DecodedLength(&alloc_len, in_len))
+		goto fail;
+
+	if ((*ptr = calloc(1, alloc_len + 1)) == NULL)
+		goto fail;
+
+	ok = EVP_DecodeBase64(*ptr, len, alloc_len, (const uint8_t *)in, alloc_len);
+
+fail:
+	if (ok < 0) {
+		free(*ptr);
+		*ptr = NULL;
+		*len = 0;
+	}
+
+	return (ok);
+}
+#else
 int
 base64_encode(const void *ptr, size_t len, char **out)
 {
@@ -107,6 +156,7 @@ fail:
 
 	return (ok);
 }
+#endif // OPENSSL_IS_BORINGSSL
 
 int
 base64_read(FILE *f, struct blob *out)

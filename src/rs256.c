@@ -36,6 +36,27 @@ rs256_free_EVP_MD(EVP_MD *md)
 {
 	freezero(md, sizeof(*md));
 }
+#elif defined(OPENSSL_IS_BORINGSSL)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wcast-qual"
+static EVP_MD *
+rs256_get_EVP_MD(void)
+{
+	const EVP_MD *md;
+
+	if ((md = EVP_sha256()) == NULL)
+		return (NULL);
+
+	return (EVP_MD *)md;
+}
+# pragma GCC diagnostic pop
+
+static void
+rs256_free_EVP_MD(EVP_MD *md)
+{
+	// Do not free it
+	(void)md;
+}
 #elif OPENSSL_VERSION_NUMBER >= 0x30000000
 static EVP_MD *
 rs256_get_EVP_MD(void)
@@ -214,7 +235,13 @@ rs256_pk_from_RSA(rs256_pk_t *pk, const RSA *rsa)
 	const BIGNUM	*n = NULL;
 	const BIGNUM	*e = NULL;
 	const BIGNUM	*d = NULL;
-	int		 k;
+#ifdef OPENSSL_IS_BORINGSSL
+	size_t		 nx;
+	size_t		 ny;
+#else
+	int		 nx;
+	int		 ny;
+#endif
 
 	if (RSA_bits(rsa) != 2048) {
 		fido_log_debug("%s: invalid key length", __func__);
@@ -228,14 +255,28 @@ rs256_pk_from_RSA(rs256_pk_t *pk, const RSA *rsa)
 		return (FIDO_ERR_INTERNAL);
 	}
 
-	if ((k = BN_num_bytes(n)) < 0 || (size_t)k > sizeof(pk->n) ||
-	    (k = BN_num_bytes(e)) < 0 || (size_t)k > sizeof(pk->e)) {
+	nx = BN_num_bytes(n);
+	ny = BN_num_bytes(e);
+#ifdef OPENSSL_IS_BORINGSSL
+	if (nx > sizeof(pk->n) ||
+	    ny > sizeof(pk->e)) {
+#else
+	if (nx < 0 || (size_t)nx > sizeof(pk->n) ||
+	    ny < 0 || (size_t)ny > sizeof(pk->e)) {
+#endif
 		fido_log_debug("%s: invalid key", __func__);
 		return (FIDO_ERR_INTERNAL);
 	}
 
-	if ((k = BN_bn2bin(n, pk->n)) < 0 || (size_t)k > sizeof(pk->n) ||
-	    (k = BN_bn2bin(e, pk->e)) < 0 || (size_t)k > sizeof(pk->e)) {
+	nx = BN_bn2bin(n, pk->n);
+	ny = BN_bn2bin(e, pk->e);
+#ifdef OPENSSL_IS_BORINGSSL
+	if (nx > sizeof(pk->n) ||
+	    ny > sizeof(pk->e)) {
+#else
+	if (nx < 0 || (size_t)nx > sizeof(pk->n) ||
+	    ny < 0 || (size_t)ny > sizeof(pk->e)) {
+#endif
 		fido_log_debug("%s: BN_bn2bin", __func__);
 		return (FIDO_ERR_INTERNAL);
 	}

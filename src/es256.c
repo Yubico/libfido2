@@ -226,8 +226,10 @@ es256_sk_create(es256_sk_t *key)
 	EVP_PKEY	*k = NULL;
 	const EC_KEY	*ec;
 	const BIGNUM	*d;
-	int		 n;
 	int		 ok = -1;
+#ifndef OPENSSL_IS_BORINGSSL
+	int              n;
+#endif
 
 	if ((pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL)) == NULL ||
 	    EVP_PKEY_paramgen_init(pctx) <= 0 ||
@@ -245,8 +247,13 @@ es256_sk_create(es256_sk_t *key)
 
 	if ((ec = EVP_PKEY_get0_EC_KEY(k)) == NULL ||
 	    (d = EC_KEY_get0_private_key(ec)) == NULL ||
+#ifdef OPENSSL_IS_BORINGSSL
+	    (BN_num_bytes(d) > sizeof(key->d)) ||
+	    (BN_bn2bin(d, key->d) > sizeof(key->d))) {
+#else
 	    (n = BN_num_bytes(d)) < 0 || (size_t)n > sizeof(key->d) ||
 	    (n = BN_bn2bin(d, key->d)) < 0 || (size_t)n > sizeof(key->d)) {
+#endif
 		fido_log_debug("%s: EC_KEY_get0_private_key", __func__);
 		goto fail;
 	}
@@ -344,8 +351,13 @@ es256_pk_from_EC_KEY(es256_pk_t *pk, const EC_KEY *ec)
 	size_t		 dx;
 	size_t		 dy;
 	int		 ok = FIDO_ERR_INTERNAL;
+#ifdef OPENSSL_IS_BORINGSSL
+	size_t		 nx;
+	size_t		 ny;
+#else
 	int		 nx;
 	int		 ny;
+#endif
 
 	if ((q = EC_KEY_get0_public_key(ec)) == NULL ||
 	    (g = EC_GROUP_new_by_curve_name(es256_nid)) == NULL ||
@@ -364,9 +376,16 @@ es256_pk_from_EC_KEY(es256_pk_t *pk, const EC_KEY *ec)
 		goto fail;
 	}
 
+	nx = BN_num_bytes(x);
+	ny = BN_num_bytes(y);
 	if (EC_POINT_get_affine_coordinates_GFp(g, q, x, y, bnctx) == 0 ||
-	    (nx = BN_num_bytes(x)) < 0 || (size_t)nx > sizeof(pk->x) ||
-	    (ny = BN_num_bytes(y)) < 0 || (size_t)ny > sizeof(pk->y)) {
+#ifdef OPENSSL_IS_BORINGSSL
+	    nx > sizeof(pk->x) ||
+	    ny > sizeof(pk->y)) {
+#else
+	    nx < 0 || (size_t)nx > sizeof(pk->x) ||
+	    ny < 0 || (size_t)ny > sizeof(pk->y)) {
+#endif
 		fido_log_debug("%s: EC_POINT_get_affine_coordinates_GFp",
 		    __func__);
 		goto fail;
@@ -375,8 +394,15 @@ es256_pk_from_EC_KEY(es256_pk_t *pk, const EC_KEY *ec)
 	dx = sizeof(pk->x) - (size_t)nx;
 	dy = sizeof(pk->y) - (size_t)ny;
 
-	if ((nx = BN_bn2bin(x, pk->x + dx)) < 0 || (size_t)nx > sizeof(pk->x) ||
-	    (ny = BN_bn2bin(y, pk->y + dy)) < 0 || (size_t)ny > sizeof(pk->y)) {
+	nx = BN_bn2bin(x, pk->x + dx);
+	ny = BN_bn2bin(y, pk->y + dy);
+#ifdef OPENSSL_IS_BORINGSSL
+	if (nx > sizeof(pk->x) ||
+	    ny > sizeof(pk->y)) {
+#else
+	if (nx < 0 || (size_t)nx > sizeof(pk->x) ||
+	    ny < 0 || (size_t)ny > sizeof(pk->y)) {
+#endif
 		fido_log_debug("%s: BN_bn2bin", __func__);
 		goto fail;
 	}

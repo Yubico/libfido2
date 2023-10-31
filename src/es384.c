@@ -187,8 +187,13 @@ es384_pk_from_EC_KEY(es384_pk_t *pk, const EC_KEY *ec)
 	size_t		 dx;
 	size_t		 dy;
 	int		 ok = FIDO_ERR_INTERNAL;
+#ifdef OPENSSL_IS_BORINGSSL
+	size_t		 nx;
+	size_t		 ny;
+#else
 	int		 nx;
 	int		 ny;
+#endif
 
 	if ((q = EC_KEY_get0_public_key(ec)) == NULL ||
 	    (g = EC_GROUP_new_by_curve_name(NID_secp384r1)) == NULL ||
@@ -207,9 +212,16 @@ es384_pk_from_EC_KEY(es384_pk_t *pk, const EC_KEY *ec)
 		goto fail;
 	}
 
+	nx = BN_num_bytes(x);
+	ny = BN_num_bytes(y);
 	if (EC_POINT_get_affine_coordinates_GFp(g, q, x, y, bnctx) == 0 ||
-	    (nx = BN_num_bytes(x)) < 0 || (size_t)nx > sizeof(pk->x) ||
-	    (ny = BN_num_bytes(y)) < 0 || (size_t)ny > sizeof(pk->y)) {
+#ifdef OPENSSL_IS_BORINGSSL
+	    nx > sizeof(pk->x) ||
+	    ny > sizeof(pk->y)) {
+#else
+	    nx < 0 || (size_t)nx > sizeof(pk->x) ||
+	    ny < 0 || (size_t)ny > sizeof(pk->y)) {
+#endif
 		fido_log_debug("%s: EC_POINT_get_affine_coordinates_GFp",
 		    __func__);
 		goto fail;
@@ -218,8 +230,16 @@ es384_pk_from_EC_KEY(es384_pk_t *pk, const EC_KEY *ec)
 	dx = sizeof(pk->x) - (size_t)nx;
 	dy = sizeof(pk->y) - (size_t)ny;
 
-	if ((nx = BN_bn2bin(x, pk->x + dx)) < 0 || (size_t)nx > sizeof(pk->x) ||
-	    (ny = BN_bn2bin(y, pk->y + dy)) < 0 || (size_t)ny > sizeof(pk->y)) {
+	nx = BN_bn2bin(x, pk->x + dx);
+	ny = BN_bn2bin(y, pk->y + dy);
+	if (
+#ifdef OPENSSL_IS_BORINGSSL
+	    nx > sizeof(pk->x) ||
+	    ny > sizeof(pk->y)) {
+#else
+	    nx < 0 || (size_t)nx > sizeof(pk->x) ||
+	    ny < 0 || (size_t)ny > sizeof(pk->y)) {
+#endif
 		fido_log_debug("%s: BN_bn2bin", __func__);
 		goto fail;
 	}

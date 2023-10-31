@@ -7,7 +7,7 @@
 
 #include <openssl/evp.h>
 #include <openssl/sha.h>
-#if defined(LIBRESSL_VERSION_NUMBER)
+#if defined(LIBRESSL_VERSION_NUMBER) || defined(OPENSSL_IS_BORINGSSL)
 #include <openssl/hkdf.h>
 #else
 #include <openssl/kdf.h>
@@ -16,7 +16,7 @@
 #include "fido.h"
 #include "fido/es256.h"
 
-#if defined(LIBRESSL_VERSION_NUMBER)
+#if defined(LIBRESSL_VERSION_NUMBER) || defined(OPENSSL_IS_BORINGSSL)
 static int
 hkdf_sha256(uint8_t *key, const char *info, const fido_blob_t *secret)
 {
