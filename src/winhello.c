@@ -570,7 +570,7 @@ unpack_user_id(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 static int
 unpack_hmac_secret(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
-	if (wa->dwVersion != WEBAUTHN_ASSERTION_VERSION_3) {
+	if (wa->dwVersion < WEBAUTHN_ASSERTION_VERSION_3) {
 		fido_log_debug("%s: dwVersion %u", __func__,
 		    (unsigned)wa->dwVersion);
 		return 0; /* proceed without hmac-secret */
