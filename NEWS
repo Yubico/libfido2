@@ -1,4 +1,4 @@
-* Version 1.14.0 (unreleased)
+* Version 1.14.0 (2023-11-13)
  ** fido2-cred -M, fido2-token -G: support raw client data via -w flag.
  ** winhello: support U2F AppID extension for assertions.
  ** winhello: fix restrictive parsing of the hmac-secret on assertions.
