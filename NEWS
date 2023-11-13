@@ -1,6 +1,6 @@
 * Version 1.14.0 (unreleased)
  ** fido2-cred -M, fido2-token -G: support raw client data via -w flag.
- ** winhello: support appid extension for assertions.
+ ** winhello: support U2F AppID extension for assertions.
  ** winhello: fix restrictive parsing of the hmac-secret on assertions.
  ** winhello: translate NTE_USER_CANCELLED to FIDO_ERR_OPERATION_DENIED; gh#685.
  ** New API calls:
