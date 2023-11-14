@@ -4,9 +4,9 @@
  ** winhello: fix restrictive parsing of the hmac-secret on assertions.
  ** winhello: translate NTE_USER_CANCELLED to FIDO_ERR_OPERATION_DENIED; gh#685.
  ** New API calls:
-    ** fido_assert_authdata_raw_len;
-    ** fido_assert_authdata_raw_ptr;
-    ** fido_assert_set_winhello_appid.
+  - fido_assert_authdata_raw_len;
+  - fido_assert_authdata_raw_ptr;
+  - fido_assert_set_winhello_appid.
 
 * Version 1.13.0 (2023-02-20)
  ** Support for linking against OpenSSL on Windows; gh#668.
