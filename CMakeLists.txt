@@ -41,7 +41,7 @@ option(BUILD_STATIC_LIBS "Build a static library"                  ON)
 option(BUILD_TOOLS       "Build tool programs"                     ON)
 option(FUZZ              "Enable fuzzing instrumentation"          OFF)
 option(USE_HIDAPI        "Use hidapi as the HID backend"           OFF)
-option(USE_PCSC          "Enable experimental PCSC support"        OFF)
+option(USE_PCSC          "Enable experimental PCSC support"        ON)
 option(USE_WINHELLO      "Abstract Windows Hello as a FIDO device" ON)
 option(NFC_LINUX         "Enable NFC support on Linux"             ON)
 
