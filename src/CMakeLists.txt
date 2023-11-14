@@ -132,8 +132,11 @@ if(BUILD_STATIC_LIBS)
 		set_target_properties(fido2 PROPERTIES OUTPUT_NAME fido2_static)
 	endif()
 	target_link_libraries(fido2 ${TARGET_LIBRARIES})
-	install(TARGETS fido2 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+	install(TARGETS fido2
+		EXPORT libfido2Targets
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	)
 endif()
 
 # dynamic library
@@ -143,9 +146,11 @@ if(BUILD_SHARED_LIBS)
 		VERSION ${FIDO_VERSION} SOVERSION ${FIDO_MAJOR})
 	target_link_libraries(fido2_shared ${TARGET_LIBRARIES})
 	install(TARGETS fido2_shared
+		EXPORT libfido2Targets
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	)
 endif()
 
 install(FILES fido.h DESTINATION include)
@@ -156,3 +161,25 @@ if(NOT MSVC)
 	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libfido2.pc"
 		DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
+
+include(CMakePackageConfigHelpers)
+export(PACKAGE libfido2)
+configure_package_config_file(
+	libfido2Config.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/libfido2Config.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libfido2
+	PATH_VARS CMAKE_INSTALL_INCLUDEDIR
+)
+write_basic_package_version_file(
+	${CMAKE_CURRENT_BINARY_DIR}/libfido2ConfigVersion.cmake
+	VERSION ${FIDO_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+install(EXPORT libfido2Targets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libfido2)
+install(
+	FILES
+		${CMAKE_CURRENT_BINARY_DIR}/libfido2Config.cmake
+		${CMAKE_CURRENT_BINARY_DIR}/libfido2ConfigVersion.cmake
+	DESTINATION
+		${CMAKE_INSTALL_LIBDIR}/cmake/libfido2
+	)
