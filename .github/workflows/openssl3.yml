@@ -22,7 +22,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
-            cc: gcc-11
+            cc: gcc-12
           - os: ubuntu-22.04
             cc: clang-16
           - os: ubuntu-22.04
