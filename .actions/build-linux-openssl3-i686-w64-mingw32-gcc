@@ -32,7 +32,7 @@ make -j"$(nproc)" -C build
 sudo make -C build install
 cd ..
 
-# Build and install OpenSSL 3.0.11.
+# Build and install OpenSSL 3.0.12.
 git clone --branch openssl-3.0.12 \
 	--depth=1 https://github.com/openssl/openssl
 cd openssl
