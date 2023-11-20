@@ -16,13 +16,16 @@ on:
   schedule:
     - cron: '0 0 * * 0'
 
+permissions:
+  security-events: write
+
 jobs:
   codeql-build:
     if: github.repository == 'Yubico/libfido2'
     runs-on: ubuntu-22.04
     steps:
     - name: checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 2
     - name: init codeql

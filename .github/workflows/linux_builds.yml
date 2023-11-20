@@ -33,7 +33,7 @@ jobs:
           - { os: ubuntu-20.04, cc: i686-w64-mingw32-gcc-9 }
           - { os: ubuntu-22.04, cc: i686-w64-mingw32-gcc-10 }
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: dependencies
       run: |
         sudo apt -q update

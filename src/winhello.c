@@ -417,6 +417,10 @@ pack_cred_ext(WEBAUTHN_EXTENSIONS *out, const fido_cred_ext_t *in)
 	}
 	out->cExtensions = (DWORD)n;
 	if (in->mask & FIDO_EXT_HMAC_SECRET) {
+		/*
+		 * NOTE: webauthn.dll ignores requests to enable hmac-secret
+		 * unless a discoverable credential is also requested.
+		 */
 		if ((b = calloc(1, sizeof(*b))) == NULL) {
 			fido_log_debug("%s: calloc", __func__);
 			return -1;
@@ -579,7 +583,7 @@ unpack_user_id(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 static int
 unpack_hmac_secret(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
-	if (wa->dwVersion != WEBAUTHN_ASSERTION_VERSION_3) {
+	if (wa->dwVersion < WEBAUTHN_ASSERTION_VERSION_3) {
 		fido_log_debug("%s: dwVersion %u", __func__,
 		    (unsigned)wa->dwVersion);
 		return 0; /* proceed without hmac-secret */
