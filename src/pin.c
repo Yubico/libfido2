@@ -131,6 +131,7 @@ encode_uv_permission(uint8_t cmd)
 	case CTAP_CBOR_ASSERT:
 		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_ASSERT));
 	case CTAP_CBOR_BIO_ENROLL_PRE:
+	case CTAP_CBOR_BIO_ENROLL:
 		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_BIO));
 	case CTAP_CBOR_CONFIG:
 		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_CONFIG));
