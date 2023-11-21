@@ -259,6 +259,7 @@ uint32_t uniform_random(uint32_t);
 #define FIDO_DEV_UV_UNSET	0x080
 #define FIDO_DEV_TOKEN_PERMS	0x100
 #define FIDO_DEV_WINHELLO	0x200
+#define FIDO_DEV_CREDMAN_PRE	0x400
 
 /* miscellanea */
 #define FIDO_DUMMY_CLIENTDATA	""
