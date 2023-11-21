@@ -58,6 +58,9 @@ fido_dev_set_option_flags(fido_dev_t *dev, const fido_cbor_info_t *info)
 		} else if (strcmp(ptr[i], "pinUvAuthToken") == 0) {
 			if (val[i])
 				dev->flags |= FIDO_DEV_TOKEN_PERMS;
+		} else if (strcmp(ptr[i], "bioEnroll") == 0) {
+			dev->flags |= val[i] ?
+			    FIDO_DEV_BIO_SET : FIDO_DEV_BIO_UNSET;
 		}
 }
 
