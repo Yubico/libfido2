@@ -302,6 +302,8 @@ else()
 	add_compile_options(-Wmissing-prototypes)
 	add_compile_options(-Wbad-function-cast)
 	add_compile_options(-Wimplicit-fallthrough)
+	# TODO: remove the following line after we stop supporting OpenSSL@1.1
+	add_compile_options(-Wno-deprecated-declarations)
 	add_compile_options(-pedantic)
 	add_compile_options(-pedantic-errors)
 
