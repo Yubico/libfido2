@@ -7,8 +7,8 @@
 New-Variable -Name 'LIBRESSL_URL' `
     -Value 'https://cloudflare.cdn.openbsd.org/pub/OpenBSD/LibreSSL' `
     -Option Constant
-New-Variable -Name 'LIBRESSL' -Value 'libressl-3.7.3' -Option Constant
-New-Variable -Name 'CRYPTO_LIBRARIES' -Value 'crypto-50' -Option Constant
+New-Variable -Name 'LIBRESSL' -Value 'libressl-3.8.2' -Option Constant
+New-Variable -Name 'CRYPTO_LIBRARIES' -Value 'crypto' -Option Constant
 
 # libcbor coordinates.
 New-Variable -Name 'LIBCBOR' -Value 'libcbor-0.10.2' -Option Constant
