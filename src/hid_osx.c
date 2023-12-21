@@ -552,11 +552,19 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 
-	schedule_io_loop(ctx, ms);
-
+	/* check for pending frame  */
 	if ((r = read(ctx->report_pipe[0], buf, len)) == -1) {
-		fido_log_error(errno, "%s: read", __func__);
-		return (-1);
+		if (errno != EAGAIN && errno != EWOULDBLOCK) {
+			fido_log_error(errno, "%s: read", __func__);
+			return (-1);
+		}
+
+		schedule_io_loop(ctx, ms);
+
+		if ((r = read(ctx->report_pipe[0], buf, len)) == -1) {
+			fido_log_error(errno, "%s: read", __func__);
+			return (-1);
+		}
 	}
 
 	if (r < 0 || (size_t)r != len) {
