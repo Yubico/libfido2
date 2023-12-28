@@ -25,6 +25,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: dependencies
+      env:
+        HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
       run: brew install libcbor llvm mandoc openssl@3.0 pkg-config zlib
     - name: build
       env:
