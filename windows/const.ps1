@@ -5,7 +5,7 @@
 
 # LibreSSL coordinates.
 New-Variable -Name 'LIBRESSL_URL' `
-    -Value 'https://cloudflare.cdn.openbsd.org/pub/OpenBSD/LibreSSL' `
+    -Value 'https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/' `
     -Option Constant
 New-Variable -Name 'LIBRESSL' -Value 'libressl-3.8.2' -Option Constant
 New-Variable -Name 'CRYPTO_LIBRARIES' -Value 'crypto' -Option Constant
