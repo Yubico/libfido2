@@ -356,11 +356,10 @@ pack_user(wchar_t **name, wchar_t **icon, wchar_t **display_name,
 static int
 pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETERS *out, const fido_cred_t *cred)
 {
-	if (!fido_blob_is_empty(&cred->type_winhello)) {
-		/* array of credential types was set */
+	if (!fido_int_array_is_empty(&cred->type)) {
 		WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg = NULL;
-		size_t count = cred->type_winhello.len / sizeof(int);
-		int *cose_algos = (int*)cred->type_winhello.ptr;
+		size_t count = fido_int_array_get_count(&cred->type);
+		int *cose_algos = cred->type.ptr;
 		if ((alg = calloc(count, sizeof(WEBAUTHN_COSE_CREDENTIAL_PARAMETER))) == NULL) {
 			fido_log_debug("%s: calloc", __func__);
 			return -1;
@@ -375,21 +374,10 @@ pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETERS *out, const fido_cred_t *cred)
 		}
 		out->cCredentialParameters = (DWORD)count;
 		out->pCredentialParameters = alg;
-	} else {
-		/* Only single credential type */
-		WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg = NULL;
-		if ((alg = calloc(1, sizeof(WEBAUTHN_COSE_CREDENTIAL_PARAMETER))) == NULL) {
-			fido_log_debug("%s: calloc", __func__);
-			return -1;
-		}
-		alg->lAlg = cred->type;
-		alg->dwVersion = WEBAUTHN_COSE_CREDENTIAL_PARAMETER_CURRENT_VERSION;
-		alg->pwszCredentialType = WEBAUTHN_CREDENTIAL_TYPE_PUBLIC_KEY;
-		out->cCredentialParameters = 1;
-		out->pCredentialParameters = alg;
-	}
 
-	return 0;
+        return 0;
+	}
+    return -1;
 }
 
 static int
@@ -777,29 +765,12 @@ decode_attobj(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			goto fail;
 		}
 
-		if (!fido_blob_is_empty(&cred->type_winhello)) {
-			/* array of credential types was set */
-			if (cbor_decode_cred_authdata_multiple_cose(val, &cred->type_winhello,
-														&cred->authdata_cbor, &cred->authdata, &cred->attcred,
-														&cred->authdata_ext) < 0) {
-				fido_log_debug("%s: cbor_decode_cred_authdata_multiple_cose failed",
-							   __func__);
-				goto fail;
-			}
-			fido_log_debug("%s: cbor_decode_cred_authdata_multiple_cose returned attcred.type %d, cred.type %d",
-						   __func__,
-						   cred->attcred.type,
-						   cred->type);
-			cred->type = cred->attcred.type;
-		} else {
-			/* Only single credential type */
-			if (cbor_decode_cred_authdata(val, cred->type,
-										  &cred->authdata_cbor, &cred->authdata, &cred->attcred,
-										  &cred->authdata_ext) < 0) {
-				fido_log_debug("%s: cbor_decode_cred_authdata",
-							   __func__);
-				goto fail;
-			}
+		if (cbor_decode_cred_authdata(val, &cred->type,
+										&cred->authdata_cbor, &cred->authdata, &cred->attcred,
+										&cred->authdata_ext) < 0) {
+			fido_log_debug("%s: cbor_decode_cred_authdata",
+							__func__);
+			goto fail;
 		}
 	}
 

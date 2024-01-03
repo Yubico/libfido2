@@ -20,12 +20,15 @@ fido_dev_get_touch_begin(fido_dev_t *dev)
 	fido_user_t	 user;
 	int		 ms = dev->timeout_ms;
 	int		 r = FIDO_ERR_INTERNAL;
+    int cose[1] = { COSE_ES256 };
+    fido_int_array_t cose_array;
 
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
 	memset(cdh, 0, sizeof(cdh));
 	memset(&rp, 0, sizeof(rp));
 	memset(&user, 0, sizeof(user));
+    memset(&cose_array, 0, sizeof(cose_array));
 
 	if (fido_dev_is_fido2(dev) == false)
 		return (u2f_get_touch_begin(dev, &ms));
@@ -46,10 +49,12 @@ fido_dev_get_touch_begin(fido_dev_t *dev)
 		goto fail;
 	}
 
+    fido_int_array_set(&cose_array, cose, 1);
+
 	if ((argv[0] = cbor_build_bytestring(cdh, sizeof(cdh))) == NULL ||
 	    (argv[1] = cbor_encode_rp_entity(&rp)) == NULL ||
 	    (argv[2] = cbor_encode_user_entity(&user)) == NULL ||
-	    (argv[3] = cbor_encode_pubkey_param(COSE_ES256)) == NULL) {
+	    (argv[3] = cbor_encode_pubkey_param(&cose_array)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		goto fail;
 	}

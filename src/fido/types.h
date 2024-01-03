@@ -175,7 +175,7 @@ typedef struct fido_cred {
 	fido_opt_t        rk;             /* resident key */
 	fido_opt_t        uv;             /* user verification */
 	fido_cred_ext_t   ext;            /* extensions */
-	int               type;           /* cose algorithm */
+	fido_int_array_t  type;           /* cose algorithm */
 	char             *fmt;            /* credential format */
 	fido_cred_ext_t   authdata_ext;   /* decoded extensions */
 	fido_blob_t       authdata_cbor;  /* cbor-encoded payload */
@@ -336,3 +336,4 @@ typedef struct eddsa_pk eddsa_pk_t;
 #endif /* __cplusplus */
 
 #endif /* !_FIDO_TYPES_H */
+ 

@@ -469,7 +469,7 @@ cbor_encode_user_entity(const fido_user_t *user)
 }
 
 cbor_item_t *
-cbor_encode_pubkey_param(int cose_alg)
+cbor_encode_pubkey_param(fido_int_array_t *cose_alg_array)
 {
 	cbor_item_t		*item = NULL;
 	cbor_item_t		*body = NULL;
@@ -478,29 +478,46 @@ cbor_encode_pubkey_param(int cose_alg)
 
 	memset(&alg, 0, sizeof(alg));
 
-	if ((item = cbor_new_definite_array(1)) == NULL ||
-	    (body = cbor_new_definite_map(2)) == NULL ||
-	    cose_alg > -1 || cose_alg < INT16_MIN)
-		goto fail;
+    if ((item = cbor_new_definite_array(1)) == NULL)
+        goto fail;
 
-	alg.key = cbor_build_string("alg");
+    for (size_t i = 0; i < fido_int_array_get_count(cose_alg_array); i++) {
+        int cose_alg = cose_alg_array->ptr[i];
 
-	if (-cose_alg - 1 > UINT8_MAX)
-		alg.value = cbor_build_negint16((uint16_t)(-cose_alg - 1));
-	else
-		alg.value = cbor_build_negint8((uint8_t)(-cose_alg - 1));
+        if ((body = cbor_new_definite_map(2)) == NULL ||
+            cose_alg > -1 || cose_alg < INT16_MIN)
+            goto fail;
 
-	if (alg.key == NULL || alg.value == NULL) {
-		fido_log_debug("%s: cbor_build", __func__);
-		goto fail;
-	}
+        alg.key = cbor_build_string("alg");
 
-	if (cbor_map_add(body, alg) == false ||
-	    cbor_add_string(body, "type", "public-key") < 0 ||
-	    cbor_array_push(item, body) == false)
-		goto fail;
+        if (-cose_alg - 1 > UINT8_MAX)
+            alg.value = cbor_build_negint16((uint16_t)(-cose_alg - 1));
+        else
+            alg.value = cbor_build_negint8((uint8_t)(-cose_alg - 1));
+
+        if (alg.key == NULL || alg.value == NULL) {
+            fido_log_debug("%s: cbor_build", __func__);
+            goto fail;
+        }
+
+        if (cbor_map_add(body, alg) == false ||
+            cbor_add_string(body, "type", "public-key") < 0 ||
+            cbor_array_push(item, body) == false)
+            goto fail;
+
+        if (body != NULL)
+            cbor_decref(&body);
+        if (alg.key != NULL)
+            cbor_decref(&alg.key);
+        if (alg.value != NULL)
+            cbor_decref(&alg.value);
+
+        memset(&alg, 0, sizeof(alg));
+    }
 
 	ok  = 0;
+
+    return (item);
 fail:
 	if (ok < 0) {
 		if (item != NULL) {
@@ -1073,13 +1090,14 @@ cbor_decode_pubkey(const cbor_item_t *item, int *type, void *key)
 }
 
 static int
-decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
+decode_attcred(const unsigned char **buf, size_t *len, fido_int_array_t *cose_alg_array,
     fido_attcred_t *attcred)
 {
 	cbor_item_t		*item = NULL;
 	struct cbor_load_result	 cbor;
 	uint16_t		 id_len;
 	int			 ok = -1;
+    bool cose_match = false;
 
 	fido_log_xxd(*buf, *len, "%s", __func__);
 
@@ -1115,85 +1133,27 @@ decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
 		goto fail;
 	}
 
-	if (attcred->type != cose_alg) {
-		fido_log_debug("%s: cose_alg mismatch (%d != %d)", __func__,
-		    attcred->type, cose_alg);
-		goto fail;
-	}
+    for (size_t i = 0; i < fido_int_array_get_count(cose_alg_array); i++) {
+        int cose_alg = cose_alg_array->ptr[i];
+        if (attcred->type != cose_alg) {
+            fido_log_debug("%s: cose_alg mismatch (%d != %d)", __func__,
+                attcred->type, cose_alg);
+        }
+        else {
+            cose_match = true;
+        }
+    }
 
-	*buf += cbor.read;
-	*len -= cbor.read;
+    if (!cose_match) {
+        fido_log_debug("%s: cose_alg failed to match any", __func__);
+        goto fail;
+    }
+    
+    /* set the credential type to the attested credential type */
+    int cose[1] = { attcred->type };
+    fido_int_array_set(cose_alg_array, cose, 1);
 
-	ok = 0;
-fail:
-	if (item != NULL)
-		cbor_decref(&item);
 
-	return (ok);
-}
-
-static int
-decode_attcred_multiple_cose(const unsigned char **buf, size_t *len, fido_blob_t *cose_algs,
-							 fido_attcred_t *attcred)
-{
-	cbor_item_t		*item = NULL;
-	struct cbor_load_result	 cbor;
-	uint16_t		 id_len;
-	int			 ok = -1;
-	size_t cose_count = 0;
-	int *cose_algs_arr = NULL;
-	bool cose_match = false;
-
-	fido_log_xxd(*buf, *len, "%s", __func__);
-
-	if (fido_buf_read(buf, len, &attcred->aaguid,
-					  sizeof(attcred->aaguid)) < 0) {
-		fido_log_debug("%s: fido_buf_read aaguid", __func__);
-		return (-1);
-	}
-
-	if (fido_buf_read(buf, len, &id_len, sizeof(id_len)) < 0) {
-		fido_log_debug("%s: fido_buf_read id_len", __func__);
-		return (-1);
-	}
-
-	attcred->id.len = (size_t)be16toh(id_len);
-	if ((attcred->id.ptr = malloc(attcred->id.len)) == NULL)
-		return (-1);
-
-	fido_log_debug("%s: attcred->id.len=%zu", __func__, attcred->id.len);
-
-	if (fido_buf_read(buf, len, attcred->id.ptr, attcred->id.len) < 0) {
-		fido_log_debug("%s: fido_buf_read id", __func__);
-		return (-1);
-	}
-
-	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
-		fido_log_debug("%s: cbor_load", __func__);
-		goto fail;
-	}
-
-	if (cbor_decode_pubkey(item, &attcred->type, &attcred->pubkey) < 0) {
-		fido_log_debug("%s: cbor_decode_pubkey", __func__);
-		goto fail;
-	}
-
-	cose_count = cose_algs->len / sizeof(int);
-	cose_algs_arr = (int*)cose_algs->ptr;
-	for (size_t i = 0; i < cose_count; i++) {
-		int cose_alg = cose_algs_arr[i];
-		if (attcred->type != cose_alg) {
-			fido_log_debug("%s: cose_algs mismatch (%d != %d)", __func__,
-						   attcred->type, cose_alg);
-		} else {
-			cose_match = true;
-		}
-	}
-
-	if (!cose_match) {
-		fido_log_debug("%s: cose_alg failed to match any", __func__);
-		goto fail;
-	}
 
 	*buf += cbor.read;
 	*len -= cbor.read;
@@ -1362,7 +1322,7 @@ fail:
 }
 
 int
-cbor_decode_cred_authdata(const cbor_item_t *item, int cose_alg,
+cbor_decode_cred_authdata(const cbor_item_t *item, fido_int_array_t *cose_alg,
     fido_blob_t *authdata_cbor, fido_authdata_t *authdata,
     fido_attcred_t *attcred, fido_cred_ext_t *authdata_ext)
 {
@@ -1403,56 +1363,6 @@ cbor_decode_cred_authdata(const cbor_item_t *item, int cose_alg,
 	if (authdata_ext != NULL) {
 		if ((authdata->flags & CTAP_AUTHDATA_EXT_DATA) != 0 &&
 		    decode_cred_extensions(&buf, &len, authdata_ext) < 0)
-			return (-1);
-	}
-
-	/* XXX we should probably ensure that len == 0 at this point */
-
-	return (FIDO_OK);
-}
-
-int
-cbor_decode_cred_authdata_multiple_cose(const cbor_item_t *item, fido_blob_t *cose_algs,
-										fido_blob_t *authdata_cbor, fido_authdata_t *authdata,
-										fido_attcred_t *attcred, fido_cred_ext_t *authdata_ext)
-{
-	const unsigned char	*buf = NULL;
-	size_t			 len;
-	size_t			 alloc_len;
-
-	if (cbor_isa_bytestring(item) == false ||
-		cbor_bytestring_is_definite(item) == false) {
-		fido_log_debug("%s: cbor type", __func__);
-		return (-1);
-	}
-
-	if (authdata_cbor->ptr != NULL ||
-		(authdata_cbor->len = cbor_serialize_alloc(item,
-												   &authdata_cbor->ptr, &alloc_len)) == 0) {
-		fido_log_debug("%s: cbor_serialize_alloc", __func__);
-		return (-1);
-	}
-
-	buf = cbor_bytestring_handle(item);
-	len = cbor_bytestring_length(item);
-	fido_log_xxd(buf, len, "%s", __func__);
-
-	if (fido_buf_read(&buf, &len, authdata, sizeof(*authdata)) < 0) {
-		fido_log_debug("%s: fido_buf_read", __func__);
-		return (-1);
-	}
-
-	authdata->sigcount = be32toh(authdata->sigcount);
-
-	if (attcred != NULL) {
-		if ((authdata->flags & CTAP_AUTHDATA_ATT_CRED) == 0 ||
-			decode_attcred_multiple_cose(&buf, &len, cose_algs, attcred) < 0)
-			return (-1);
-	}
-
-	if (authdata_ext != NULL) {
-		if ((authdata->flags & CTAP_AUTHDATA_EXT_DATA) != 0 &&
-			decode_cred_extensions(&buf, &len, authdata_ext) < 0)
 			return (-1);
 	}
 

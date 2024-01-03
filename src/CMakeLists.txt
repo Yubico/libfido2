@@ -25,6 +25,7 @@ list(APPEND FIDO_SOURCES
 	es384.c
 	hid.c
 	info.c
+	int_array.c
 	io.c
 	iso7816.c
 	largeblob.c

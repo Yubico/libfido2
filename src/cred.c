@@ -34,7 +34,7 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			fido_log_debug("%s: fido_blob_decode", __func__);
 			return (-1);
 		}
-		return (cbor_decode_cred_authdata(val, cred->type,
+		return (cbor_decode_cred_authdata(val, &cred->type,
 		    &cred->authdata_cbor, &cred->authdata, &cred->attcred,
 		    &cred->authdata_ext));
 	case 3: /* attestation statement */
@@ -62,7 +62,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
 
-	if (cred->cdh.ptr == NULL || cred->type == 0) {
+	if (cred->cdh.ptr == NULL || fido_int_array_is_empty(&cred->type)) {
 		fido_log_debug("%s: cdh=%p, type=%d", __func__,
 		    (void *)cred->cdh.ptr, cred->type);
 		r = FIDO_ERR_INVALID_ARGUMENT;
@@ -72,7 +72,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 	if ((argv[0] = fido_blob_encode(&cred->cdh)) == NULL ||
 	    (argv[1] = cbor_encode_rp_entity(&cred->rp)) == NULL ||
 	    (argv[2] = cbor_encode_user_entity(&cred->user)) == NULL ||
-	    (argv[3] = cbor_encode_pubkey_param(cred->type)) == NULL) {
+	    (argv[3] = cbor_encode_pubkey_param(&cred->type)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -569,7 +569,7 @@ fido_cred_reset_tx(fido_cred_t *cred)
 	memset(&cred->user, 0, sizeof(cred->user));
 	memset(&cred->ext, 0, sizeof(cred->ext));
 
-	cred->type = 0;
+	fido_int_array_reset(&cred->type);
 	cred->rk = FIDO_OPT_OMIT;
 	cred->uv = FIDO_OPT_OMIT;
 }
@@ -619,7 +619,7 @@ fido_cred_set_authdata(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 		goto fail;
 	}
 
-	if (cbor_decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
+	if (cbor_decode_cred_authdata(item, &cred->type, &cred->authdata_cbor,
 	    &cred->authdata, &cred->attcred, &cred->authdata_ext) < 0) {
 		fido_log_debug("%s: cbor_decode_cred_authdata", __func__);
 		goto fail;
@@ -660,7 +660,7 @@ fido_cred_set_authdata_raw(fido_cred_t *cred, const unsigned char *ptr,
 		goto fail;
 	}
 
-	if (cbor_decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
+	if (cbor_decode_cred_authdata(item, &cred->type, &cred->authdata_cbor,
 	    &cred->authdata, &cred->attcred, &cred->authdata_ext) < 0) {
 		fido_log_debug("%s: cbor_decode_cred_authdata", __func__);
 		goto fail;
@@ -987,52 +987,24 @@ fido_cred_set_fmt(fido_cred_t *cred, const char *fmt)
 int
 fido_cred_set_type(fido_cred_t *cred, int cose_alg)
 {
-	if (cred->type != 0)
-		return (FIDO_ERR_INVALID_ARGUMENT);
+    int cose_array[1] = { cose_alg };
 	if (cose_alg != COSE_ES256 && cose_alg != COSE_ES384 &&
 	    cose_alg != COSE_RS256 && cose_alg != COSE_EDDSA)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	cred->type = cose_alg;
+    if (fido_int_array_set(&cred->type, cose_array, 1) != 0)
+        return (FIDO_ERR_INTERNAL);
 
     return (FIDO_OK);
-}
-
-int fido_cred_set_type_winhello(fido_cred_t *cred, const unsigned char *ptr, size_t len)
-{
-	int *cose_algos = NULL;
-	size_t count = len / sizeof(int);
-
-	if (cred->type != 0)
-		return (FIDO_ERR_INVALID_ARGUMENT);
-
-	if (!fido_blob_is_empty(&cred->type_winhello))
-		return (FIDO_ERR_INVALID_ARGUMENT);
-
-	if (fido_blob_set(&cred->type_winhello, ptr, len) < 0)
-		return (FIDO_ERR_INVALID_ARGUMENT);
-
-	cose_algos = (int*)cred->type_winhello.ptr;
-	
-	for (size_t i = 0; i < count; i++) {
-		int cose_alg = cose_algos[i];
-
-		if (cose_alg != COSE_ES256 && cose_alg != COSE_ES384 &&
-			cose_alg != COSE_RS256 && cose_alg != COSE_EDDSA) {
-			fido_blob_reset(&cred->type_winhello);
-			return (FIDO_ERR_INVALID_ARGUMENT);
-		}
-	}
-
-	cred->type = cose_algos[0];
-
-	return (FIDO_OK);
 }
 
 int
 fido_cred_type(const fido_cred_t *cred)
 {
-	return (cred->type);
+    if (fido_int_array_is_empty(&cred->type))
+        return 0;
+
+    return cred->type.ptr[0];
 }
 
 const unsigned char *

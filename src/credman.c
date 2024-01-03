@@ -284,7 +284,9 @@ credman_parse_rk(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		if (cbor_decode_pubkey(val, &cred->attcred.type,
 		    &cred->attcred.pubkey) < 0)
 			return (-1);
-		cred->type = cred->attcred.type; /* XXX */
+        /* set cred type to what is returned by attested cred */
+        int cred_type[1] = { cred->attcred.type };
+        fido_int_array_set(&cred->type, cred_type, 1);
 		return (0);
 	case 10:
 		if (cbor_decode_uint64(val, &prot) < 0 || prot > INT_MAX ||
