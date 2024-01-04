@@ -556,7 +556,6 @@ fido_cred_reset_tx(fido_cred_t *cred)
 	fido_blob_reset(&cred->cdh);
 	fido_blob_reset(&cred->user.id);
 	fido_blob_reset(&cred->blob);
-    fido_blob_reset(&cred->type_winhello);
 
 	free(cred->rp.id);
 	free(cred->rp.name);
@@ -999,24 +998,50 @@ fido_cred_set_type(fido_cred_t *cred, int cose_alg)
 }
 
 int
+fido_cred_set_type_array(fido_cred_t* cred, int *cose_alg_array, size_t count)
+{
+	if (cose_alg_array == NULL || count == 0)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+	
+	for (size_t i = 0; i < count; i++) {
+		int cose_alg = cose_alg_array[i];
+
+		if (cose_alg != COSE_ES256 && cose_alg != COSE_ES384 &&
+			cose_alg != COSE_RS256 && cose_alg != COSE_EDDSA)
+			return (FIDO_ERR_INVALID_ARGUMENT);
+	}
+
+	if (fido_int_array_set(&cred->type, cose_alg_array, count) != 0)
+		return (FIDO_ERR_INTERNAL);
+
+	return (FIDO_OK);
+}
+
+int
 fido_cred_type(const fido_cred_t *cred)
 {
     if (fido_int_array_is_empty(&cred->type))
         return 0;
-
+	/* return only the first, to ensure backwards compatibility */
     return cred->type.ptr[0];
 }
 
-const unsigned char *
-fido_cred_type_winhello_ptr(const fido_cred_t *cred)
+const int *
+fido_cred_type_array_ptr(const fido_cred_t* cred)
 {
-	return (cred->type_winhello.ptr);
+	if (fido_int_array_is_empty(&cred->type))
+		return 0;
+		
+	return (cred->type.ptr);
 }
 
 size_t
-fido_cred_type_winhello_len(const fido_cred_t *cred)
+fido_cred_type_array_len(const fido_cred_t* cred)
 {
-	return (cred->type_winhello.len);
+	if (fido_int_array_is_empty(&cred->type))
+		return 0;
+
+	return (cred->type.count);
 }
 
 uint8_t

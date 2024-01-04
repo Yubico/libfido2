@@ -175,7 +175,7 @@ typedef struct fido_cred {
 	fido_opt_t        rk;             /* resident key */
 	fido_opt_t        uv;             /* user verification */
 	fido_cred_ext_t   ext;            /* extensions */
-	fido_int_array_t  type;           /* cose algorithm */
+	fido_int_array_t  type;           /* cose algorithm array */
 	char             *fmt;            /* credential format */
 	fido_cred_ext_t   authdata_ext;   /* decoded extensions */
 	fido_blob_t       authdata_cbor;  /* cbor-encoded payload */
@@ -185,7 +185,6 @@ typedef struct fido_cred {
 	fido_attstmt_t    attstmt;        /* attestation statement (x509 + sig) */
 	fido_blob_t       largeblob_key;  /* decoded large blob key */
 	fido_blob_t       blob;           /* CTAP 2.1 credBlob */
-    fido_blob_t       type_winhello;  /* list of cose algorithms, windows hello supports multiple */
 } fido_cred_t;
 
 typedef struct fido_assert_extattr {
