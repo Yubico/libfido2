@@ -16,7 +16,6 @@ extern "C" {
 
 typedef struct fido_int_array {
 	int         *ptr;
-	size_t		 len;
     size_t       count;
 } fido_int_array_t;
 
@@ -29,6 +28,7 @@ void fido_int_array_free(fido_int_array_t *);
 void fido_int_array_reset(fido_int_array_t *);
 void fido_free_int_array(fido_int_array_t *);
 size_t fido_int_array_get_count(const fido_int_array_t *);
+bool fido_int_array_contains(const fido_int_array_t* array, int element);
 
 #ifdef __cplusplus
 } /* extern "C" */

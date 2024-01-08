@@ -986,15 +986,7 @@ fido_cred_set_fmt(fido_cred_t *cred, const char *fmt)
 int
 fido_cred_set_type(fido_cred_t *cred, int cose_alg)
 {
-    int cose_array[1] = { cose_alg };
-	if (cose_alg != COSE_ES256 && cose_alg != COSE_ES384 &&
-	    cose_alg != COSE_RS256 && cose_alg != COSE_EDDSA)
-		return (FIDO_ERR_INVALID_ARGUMENT);
-
-    if (fido_int_array_set(&cred->type, cose_array, 1) != 0)
-        return (FIDO_ERR_INTERNAL);
-
-    return (FIDO_OK);
+	return fido_cred_set_type_array(cred, &cose_alg, 1);
 }
 
 int
@@ -1020,28 +1012,10 @@ fido_cred_set_type_array(fido_cred_t* cred, int *cose_alg_array, size_t count)
 int
 fido_cred_type(const fido_cred_t *cred)
 {
-    if (fido_int_array_is_empty(&cred->type))
-        return 0;
-	/* return only the first, to ensure backwards compatibility */
-    return cred->type.ptr[0];
-}
+	if (cred->attcred.type != 0 || cred->type.count == 0)
+		return (cred->attcred.type);
 
-const int *
-fido_cred_type_array_ptr(const fido_cred_t* cred)
-{
-	if (fido_int_array_is_empty(&cred->type))
-		return 0;
-		
-	return (cred->type.ptr);
-}
-
-size_t
-fido_cred_type_array_len(const fido_cred_t* cred)
-{
-	if (fido_int_array_is_empty(&cred->type))
-		return 0;
-
-	return (cred->type.count);
+	return (cred->type.ptr[0]); /* compat: return requested type */
 }
 
 uint8_t

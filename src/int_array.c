@@ -16,7 +16,7 @@ fido_int_array_new(void)
 void
 fido_int_array_reset(fido_int_array_t *array)
 {
-	freezero(array->ptr, array->len);
+	freezero(array->ptr, array->count);
 	explicit_bzero(array, sizeof(*array));
 }
 
@@ -38,7 +38,6 @@ fido_int_array_set(fido_int_array_t *array, const int *ptr, size_t count)
 	}
 
 	memcpy(array->ptr, ptr, len);
-	array->len = len;
     array->count = count;
 
 	return 0;
@@ -56,17 +55,16 @@ fido_int_array_append(fido_int_array_t *array, const int *ptr, size_t count)
         return -1;
     }
 
-	if (SIZE_MAX - array->len < len) {
+	if (SIZE_MAX - (array->count * sizeof(int)) < len) {
 		fido_log_debug("%s: overflow", __func__);
 		return -1;
 	}
-	if ((tmp = realloc(array->ptr, array->len + len)) == NULL) {
+	if ((tmp = realloc(array->ptr, (array->count * sizeof(int)) + len)) == NULL) {
 		fido_log_debug("%s: realloc", __func__);
 		return -1;
 	}
 	array->ptr = tmp;
-	memcpy(&array->ptr[array->len], ptr, len);
-	array->len += len;
+	memcpy(&array->ptr[(array->count * sizeof(int))], ptr, len);
     array->count += count;
 
 	return 0;
@@ -80,14 +78,13 @@ fido_int_array_free(fido_int_array_t *array)
 
     free(array->ptr);
     array->ptr = NULL;
-    array->len = 0;
     array->count = 0;
 }
 
 int
 fido_int_array_is_empty(const fido_int_array_t *array)
 {
-	return array == NULL || array->ptr == NULL || array->len == 0;
+	return array == NULL || array->ptr == NULL || array->count == 0;
 }
 
 size_t
@@ -97,4 +94,18 @@ fido_int_array_get_count(const fido_int_array_t *array)
         return 0;
     else
         return array->count;
+}
+
+bool 
+fido_int_array_contains(const fido_int_array_t* array, int element)
+{
+	if (array == NULL || array->ptr == NULL || array->count == 0)
+		return false;
+
+    for (size_t i = 0; i < array->count; i++) {
+        if (element == array->ptr[i])
+			return true;
+    }
+
+	return false;
 }

@@ -21,7 +21,7 @@ fido_dev_get_touch_begin(fido_dev_t *dev)
 	int		 ms = dev->timeout_ms;
 	int		 r = FIDO_ERR_INTERNAL;
     int cose[1] = { COSE_ES256 };
-    fido_int_array_t cose_array;
+	fido_int_array_t cose_array = { cose, 1 };
 
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
@@ -49,7 +49,6 @@ fido_dev_get_touch_begin(fido_dev_t *dev)
 		goto fail;
 	}
 
-    fido_int_array_set(&cose_array, cose, 1);
 
 	if ((argv[0] = cbor_build_bytestring(cdh, sizeof(cdh))) == NULL ||
 	    (argv[1] = cbor_encode_rp_entity(&rp)) == NULL ||

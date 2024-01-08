@@ -478,7 +478,7 @@ cbor_encode_pubkey_param(fido_int_array_t *cose_alg_array)
 
 	memset(&alg, 0, sizeof(alg));
 
-    if ((item = cbor_new_definite_array(1)) == NULL)
+    if ((item = cbor_new_definite_array(cose_alg_array->count)) == NULL)
         goto fail;
 
     for (size_t i = 0; i < fido_int_array_get_count(cose_alg_array); i++) {
@@ -1097,7 +1097,6 @@ decode_attcred(const unsigned char **buf, size_t *len, fido_int_array_t *cose_al
 	struct cbor_load_result	 cbor;
 	uint16_t		 id_len;
 	int			 ok = -1;
-    bool cose_match = false;
 
 	fido_log_xxd(*buf, *len, "%s", __func__);
 
@@ -1133,28 +1132,11 @@ decode_attcred(const unsigned char **buf, size_t *len, fido_int_array_t *cose_al
 		goto fail;
 	}
 
-    for (size_t i = 0; i < fido_int_array_get_count(cose_alg_array); i++) {
-        int cose_alg = cose_alg_array->ptr[i];
-        if (attcred->type != cose_alg) {
-            fido_log_debug("%s: cose_alg mismatch (%d != %d)", __func__,
-                attcred->type, cose_alg);
-        }
-        else {
-            cose_match = true;
-        }
-    }
-
-    if (!cose_match) {
-        fido_log_debug("%s: cose_alg failed to match any", __func__);
-        goto fail;
-    }
+	if (!fido_int_array_contains(cose_alg_array, attcred->type)) {
+		fido_log_debug("%s: attcred->type=%d failed to match any in cose_alg_array", __func__, attcred->type);
+		goto fail;
+	}
     
-    /* set the credential type to the attested credential type */
-    int cose[1] = { attcred->type };
-    fido_int_array_set(cose_alg_array, cose, 1);
-
-
-
 	*buf += cbor.read;
 	*len -= cbor.read;
 

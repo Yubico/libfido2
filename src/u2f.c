@@ -677,10 +677,13 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int *ms)
 		return (FIDO_ERR_UNSUPPORTED_OPTION);
 	}
 
-	if (fido_cred_type(cred) != COSE_ES256 || cred->cdh.ptr == NULL ||
+	if (!fido_int_array_contains((const fido_int_array_t *)&cred->type, COSE_ES256) || cred->cdh.ptr == NULL ||
 	    cred->rp.id == NULL || cred->cdh.len != SHA256_DIGEST_LENGTH) {
-		fido_log_debug("%s: type=%d, cdh=(%p,%zu)" , __func__,
-		    cred->type, (void *)cred->cdh.ptr, cred->cdh.len);
+		for (size_t i = 0; i < cred->type.count; i++) {
+			fido_log_debug("%s: types=%d", __func__, cred->type.ptr[i]);
+		}
+		fido_log_debug("%s: cdh=(%p,%zu)" , __func__,
+		    (void *)cred->cdh.ptr, cred->cdh.len);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
