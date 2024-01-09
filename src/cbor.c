@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2024 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -468,18 +468,16 @@ cbor_encode_user_entity(const fido_user_t *user)
 	return (item);
 }
 
-cbor_item_t *
+static cbor_item_t *
 cbor_encode_pubkey_param(int cose_alg)
 {
-	cbor_item_t		*item = NULL;
 	cbor_item_t		*body = NULL;
 	struct cbor_pair	 alg;
 	int			 ok = -1;
 
 	memset(&alg, 0, sizeof(alg));
 
-	if ((item = cbor_new_definite_array(1)) == NULL ||
-	    (body = cbor_new_definite_map(2)) == NULL ||
+	if ((body = cbor_new_definite_map(2)) == NULL ||
 	    cose_alg > -1 || cose_alg < INT16_MIN)
 		goto fail;
 
@@ -496,25 +494,53 @@ cbor_encode_pubkey_param(int cose_alg)
 	}
 
 	if (cbor_map_add(body, alg) == false ||
-	    cbor_add_string(body, "type", "public-key") < 0 ||
-	    cbor_array_push(item, body) == false)
+	    cbor_add_string(body, "type", "public-key") < 0)
 		goto fail;
 
 	ok  = 0;
 fail:
 	if (ok < 0) {
+		if (body != NULL) {
+			cbor_decref(&body);
+			body = NULL;
+		}
+	}
+
+	if (alg.key != NULL)
+		cbor_decref(&alg.key);
+	if (alg.value != NULL)
+		cbor_decref(&alg.value);
+
+	return (body);
+}
+
+cbor_item_t *
+cbor_encode_pubkey_param_array(int cose_alg)
+{
+	cbor_item_t		*item = NULL;
+	cbor_item_t		*body = NULL;
+	bool			 r = false;
+
+	if ((item = cbor_new_definite_array(1)) == NULL) {
+		fido_log_debug("%s: cbor_new_definite_array", __func__);
+		goto fail;
+	}
+
+	if ((body = cbor_encode_pubkey_param(cose_alg)) == NULL) {
+		fido_log_debug("%s: cbor_encode_pubkey_param", __func__);
+		goto fail;
+	}
+
+	r = cbor_array_push(item, body);
+	cbor_decref(&body);
+
+fail:
+	if (r != true) {
 		if (item != NULL) {
 			cbor_decref(&item);
 			item = NULL;
 		}
 	}
-
-	if (body != NULL)
-		cbor_decref(&body);
-	if (alg.key != NULL)
-		cbor_decref(&alg.key);
-	if (alg.value != NULL)
-		cbor_decref(&alg.value);
 
 	return (item);
 }

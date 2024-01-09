@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2024 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -50,7 +50,7 @@ cbor_item_t *cbor_encode_pin_auth(const fido_dev_t *, const fido_blob_t *,
 cbor_item_t *cbor_encode_pin_opt(const fido_dev_t *);
 cbor_item_t *cbor_encode_pubkey(const fido_blob_t *);
 cbor_item_t *cbor_encode_pubkey_list(const fido_blob_array_t *);
-cbor_item_t *cbor_encode_pubkey_param(int);
+cbor_item_t *cbor_encode_pubkey_param_array(int);
 cbor_item_t *cbor_encode_rp_entity(const fido_rp_t *);
 cbor_item_t *cbor_encode_str_array(const fido_str_array_t *);
 cbor_item_t *cbor_encode_user_entity(const fido_user_t *);

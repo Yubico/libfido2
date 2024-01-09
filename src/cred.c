@@ -74,7 +74,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 	if ((argv[0] = fido_blob_encode(&cred->cdh)) == NULL ||
 	    (argv[1] = cbor_encode_rp_entity(&cred->rp)) == NULL ||
 	    (argv[2] = cbor_encode_user_entity(&cred->user)) == NULL ||
-	    (argv[3] = cbor_encode_pubkey_param(cred->type)) == NULL) {
+	    (argv[3] = cbor_encode_pubkey_param_array(cred->type)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
