@@ -1071,7 +1071,7 @@ fido_cred_set_fmt(fido_cred_t *cred, const char *fmt)
 	return (FIDO_OK);
 }
 
-static int
+int
 fido_cred_append_type(fido_cred_t *cred, int cose_alg)
 {
 	int *list_ptr;
