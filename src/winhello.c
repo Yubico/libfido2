@@ -43,7 +43,6 @@ struct winhello_assert {
 struct winhello_cred {
 	WEBAUTHN_RP_ENTITY_INFORMATION			 rp;
 	WEBAUTHN_USER_ENTITY_INFORMATION		 user;
-	WEBAUTHN_COSE_CREDENTIAL_PARAMETER		 alg;
 	WEBAUTHN_COSE_CREDENTIAL_PARAMETERS		 cose;
 	WEBAUTHN_CLIENT_DATA				 cd;
 	WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS	 opt;
@@ -355,9 +354,11 @@ pack_user(wchar_t **name, wchar_t **icon, wchar_t **display_name,
 }
 
 static int
-pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg,
-    WEBAUTHN_COSE_CREDENTIAL_PARAMETERS *cose, int type)
+pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg, int type)
 {
+	alg->dwVersion = WEBAUTHN_COSE_CREDENTIAL_PARAMETER_CURRENT_VERSION;
+	alg->pwszCredentialType = WEBAUTHN_CREDENTIAL_TYPE_PUBLIC_KEY;
+
 	switch (type) {
 	case COSE_ES256:
 		alg->lAlg = WEBAUTHN_COSE_ALGORITHM_ECDSA_P256_WITH_SHA256;
@@ -366,7 +367,7 @@ pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg,
 		alg->lAlg = WEBAUTHN_COSE_ALGORITHM_ECDSA_P384_WITH_SHA384;
 		break;
 	case COSE_EDDSA:
-		alg->lAlg = -8; /* XXX */;
+		alg->lAlg = -8; /* XXX */
 		break;
 	case COSE_RS256:
 		alg->lAlg = WEBAUTHN_COSE_ALGORITHM_RSASSA_PKCS1_V1_5_WITH_SHA256;
@@ -375,10 +376,21 @@ pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg,
 		fido_log_debug("%s: type %d", __func__, type);
 		return -1;
 	}
-	alg->dwVersion = WEBAUTHN_COSE_CREDENTIAL_PARAMETER_CURRENT_VERSION;
-	alg->pwszCredentialType = WEBAUTHN_CREDENTIAL_TYPE_PUBLIC_KEY;
+
+	return 0;
+}
+
+static int
+pack_cose_array(WEBAUTHN_COSE_CREDENTIAL_PARAMETERS *cose, int type)
+{
+	if ((cose->pCredentialParameters = calloc(1,
+	    sizeof(*cose->pCredentialParameters))) == NULL) {
+		fido_log_debug("%s: calloc", __func__);
+		return -1;
+	}
 	cose->cCredentialParameters = 1;
-	cose->pCredentialParameters = alg;
+	if (pack_cose(cose->pCredentialParameters[0], type) != 0)
+		return -1;
 
 	return 0;
 }
@@ -705,8 +717,8 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
 		fido_log_debug("%s: pack_user", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
-	if (pack_cose(&ctx->alg, &ctx->cose, cred->type) < 0) {
-		fido_log_debug("%s: pack_cose", __func__);
+	if (pack_cose_array(&ctx->cose, cred->type) < 0) {
+		fido_log_debug("%s: pack_cose_array", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
 	if (pack_cd(&ctx->cd, &cred->cd) < 0) {
@@ -844,6 +856,7 @@ winhello_cred_free(struct winhello_cred *ctx)
 		free(e->pvExtension);
 	}
 	free(ctx->opt.Extensions.pExtensions);
+	free(ctx->cose.pCredentialParameters);
 	free(ctx);
 }
 
