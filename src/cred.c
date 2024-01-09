@@ -1087,7 +1087,10 @@ fido_cred_set_type(fido_cred_t *cred, int cose_alg)
 int
 fido_cred_type(const fido_cred_t *cred)
 {
-	return (cred->type);
+	if (cred->attcred.type != 0)
+		return (cred->attcred.type);
+
+	return (cred->type); /* compat: return requested type */
 }
 
 uint8_t
