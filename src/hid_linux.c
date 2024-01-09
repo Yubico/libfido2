@@ -77,7 +77,7 @@ out:
 
 static int
 parse_uevent(const char *uevent, int *bus, int16_t *vendor_id,
-    int16_t *product_id)
+    int16_t *product_id, char **hid_name)
 {
 	char			*cp;
 	char			*p;
@@ -97,8 +97,12 @@ parse_uevent(const char *uevent, int *bus, int16_t *vendor_id,
 				*vendor_id = (int16_t)y;
 				*product_id = (int16_t)z;
 				ok = 0;
-				break;
 			}
+			continue;
+		}
+		if (strncmp(p, "HID_NAME=", 9) == 0 && hid_name != NULL && *hid_name == NULL) {
+			*hid_name = strdup(p + 9);
+			continue;
 		}
 	}
 
@@ -137,6 +141,7 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 	char			*uevent = NULL;
 	struct udev_device	*dev = NULL;
 	int			 bus = 0;
+	char		*hid_name = NULL;
 	int			 ok = -1;
 
 	memset(di, 0, sizeof(*di));
@@ -148,7 +153,7 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 		goto fail;
 
 	if ((uevent = get_parent_attr(dev, "hid", NULL, "uevent")) == NULL ||
-	    parse_uevent(uevent, &bus, &di->vendor_id, &di->product_id) < 0) {
+	    parse_uevent(uevent, &bus, &di->vendor_id, &di->product_id, &hid_name) < 0) {
 		fido_log_debug("%s: uevent", __func__);
 		goto fail;
 	}
@@ -165,6 +170,13 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 		di->manufacturer = strdup("");
 	if ((di->product = get_usb_attr(dev, "product")) == NULL)
 		di->product = strdup("");
+	if ( di->manufacturer != NULL && *di->manufacturer == '\0' && 
+		 di->product != NULL && *di->product == '\0' && 
+		 hid_name != NULL ) {
+		
+		free(di->product);
+		di->product = strdup(hid_name);
+	}
 	if (di->path == NULL || di->manufacturer == NULL || di->product == NULL)
 		goto fail;
 
@@ -174,6 +186,7 @@ fail:
 		udev_device_unref(dev);
 
 	free(uevent);
+	free(hid_name);
 
 	if (ok < 0) {
 		free(di->path);
