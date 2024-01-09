@@ -64,7 +64,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 
 	if (cred->cdh.ptr == NULL || fido_int_array_is_empty(&cred->type)) {
 		fido_log_debug("%s: cdh=%p, type=%d", __func__,
-		    (void *)cred->cdh.ptr, cred->type);
+		    (void *)cred->cdh.ptr, fido_cred_type(&cred));
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
