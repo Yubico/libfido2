@@ -205,6 +205,14 @@ void fido_opt_array_free(fido_opt_array_t *);
 void fido_str_array_free(fido_str_array_t *);
 void fido_algo_free(fido_algo_t *);
 int fido_str_array_pack(fido_str_array_t *, const char * const *, size_t);
+int fido_int_array_is_empty(const fido_int_array_t *);
+int fido_int_array_set(fido_int_array_t *, const int *, size_t);
+int fido_int_array_append(fido_int_array_t *, const int *, size_t);
+void fido_int_array_free(fido_int_array_t *);
+void fido_int_array_reset(fido_int_array_t *);
+void fido_free_int_array(fido_int_array_t *);
+size_t fido_int_array_get_count(const fido_int_array_t *);
+bool fido_int_array_contains(const fido_int_array_t* array, int element);
 
 /* misc */
 void fido_assert_reset_rx(fido_assert_t *);

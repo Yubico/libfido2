@@ -44,7 +44,6 @@
 
 #include "../openbsd-compat/openbsd-compat.h"
 #include "blob.h"
-#include "int_array.h"
 #include "iso7816.h"
 #include "extern.h"
 #endif

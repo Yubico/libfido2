@@ -166,6 +166,11 @@ typedef struct fido_cred_ext {
 	size_t minpinlen; /* minimum pin length */
 } fido_cred_ext_t;
 
+typedef struct fido_int_array {
+	int* ptr;
+	size_t       count;
+} fido_int_array_t;
+
 typedef struct fido_cred {
 	fido_blob_t       cd;             /* client data */
 	fido_blob_t       cdh;            /* client data hash */
