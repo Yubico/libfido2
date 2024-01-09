@@ -203,6 +203,7 @@ void fido_cert_array_free(fido_cert_array_t *);
 void fido_opt_array_free(fido_opt_array_t *);
 void fido_str_array_free(fido_str_array_t *);
 void fido_algo_free(fido_algo_t *);
+bool fido_int_array_contains(const fido_int_array_t *, int);
 int fido_str_array_pack(fido_str_array_t *, const char * const *, size_t);
 
 /* misc */

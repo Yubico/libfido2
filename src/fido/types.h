@@ -171,6 +171,11 @@ typedef struct fido_cred_ea {
 	bool att;
 } fido_cred_ea_t;
 
+typedef struct fido_int_array {
+	int *ptr;
+	size_t len;
+} fido_int_array_t;
+
 typedef struct fido_cred {
 	fido_blob_t       cd;            /* client data */
 	fido_blob_t       cdh;           /* client data hash */

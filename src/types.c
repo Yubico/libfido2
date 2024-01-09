@@ -89,3 +89,12 @@ fido_str_array_pack(fido_str_array_t *sa, const char * const *v, size_t n)
 
 	return 0;
 }
+
+bool
+fido_int_array_contains(const fido_int_array_t *ia, int v)
+{
+	for (size_t i = 0; i < ia->len; i++)
+		if (ia->ptr[i] == v)
+			return true;
+	return false;
+}
