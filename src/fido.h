@@ -110,7 +110,6 @@ const char *fido_dev_info_manufacturer_string(const fido_dev_info_t *);
 const char *fido_dev_info_path(const fido_dev_info_t *);
 const char *fido_dev_info_product_string(const fido_dev_info_t *);
 const fido_dev_info_t *fido_dev_info_ptr(const fido_dev_info_t *, size_t);
-const int *fido_cred_type_array_ptr(const fido_cred_t* cred);
 const uint8_t *fido_cbor_info_protocols_ptr(const fido_cbor_info_t *);
 const uint64_t *fido_cbor_info_certs_value_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cbor_info_aaguid_ptr(const fido_cbor_info_t *);
