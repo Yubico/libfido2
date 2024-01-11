@@ -474,7 +474,6 @@ cbor_encode_pubkey_param(fido_int_array_t *cose_alg_array)
 	cbor_item_t		*item = NULL;
 	cbor_item_t		*body = NULL;
 	struct cbor_pair	 alg;
-	int			 ok = -1;
 
 	memset(&alg, 0, sizeof(alg));
 
@@ -515,15 +514,12 @@ cbor_encode_pubkey_param(fido_int_array_t *cose_alg_array)
         memset(&alg, 0, sizeof(alg));
     }
 
-	ok  = 0;
-
     return (item);
 fail:
-	if (ok < 0) {
-		if (item != NULL) {
-			cbor_decref(&item);
-			item = NULL;
-		}
+
+	if (item != NULL) {
+		cbor_decref(&item);
+		item = NULL;
 	}
 
 	if (body != NULL)
