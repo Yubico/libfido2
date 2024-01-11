@@ -64,7 +64,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 
 	if (cred->cdh.ptr == NULL || fido_int_array_is_empty(&cred->type)) {
 		fido_log_debug("%s: cdh=%p, type=%d", __func__,
-		    (void *)cred->cdh.ptr, fido_cred_type(&cred));
+		    (void *)cred->cdh.ptr, fido_cred_type((const fido_cred_t *) & cred));
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
@@ -1005,6 +1005,24 @@ fido_cred_set_type_array(fido_cred_t* cred, int *cose_alg_array, size_t count)
 
 	if (fido_int_array_set(&cred->type, cose_alg_array, count) != 0)
 		return (FIDO_ERR_INTERNAL);
+
+	return (FIDO_OK);
+}
+
+int fido_cred_add_type(fido_cred_t *cred, int cose_alg)
+{
+	if (cose_alg != COSE_ES256 && cose_alg != COSE_ES384 &&
+		cose_alg != COSE_RS256 && cose_alg != COSE_EDDSA)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	if (cred->type.ptr == NULL || cred->type.count == 0) {
+		if (fido_int_array_set(&cred->type, &cose_alg, 1) != 0)
+			return (FIDO_ERR_INTERNAL);
+	}
+	else {
+		if (fido_int_array_append(&cred->type, &cose_alg, 1) != 0)
+			return (FIDO_ERR_INTERNAL);
+	}
 
 	return (FIDO_OK);
 }

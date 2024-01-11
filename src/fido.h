@@ -168,6 +168,7 @@ int fido_cred_set_rp(fido_cred_t *, const char *, const char *);
 int fido_cred_set_sig(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_type(fido_cred_t *, int);
 int fido_cred_set_type_array(fido_cred_t* cred, int* cose_alg_array, size_t count);
+int fido_cred_add_type(fido_cred_t*, int);
 int fido_cred_set_uv(fido_cred_t *, fido_opt_t);
 int fido_cred_type(const fido_cred_t *);
 int fido_cred_set_user(fido_cred_t *, const unsigned char *, size_t,
