@@ -340,4 +340,3 @@ typedef struct eddsa_pk eddsa_pk_t;
 #endif /* __cplusplus */
 
 #endif /* !_FIDO_TYPES_H */
- 
