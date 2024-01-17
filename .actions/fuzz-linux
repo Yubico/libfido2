@@ -63,6 +63,7 @@ git clone --depth=1 "${OPENSSL_URL}" -b "${OPENSSL_TAG}"
 cd openssl
 ./Configure linux-x86_64-clang "enable-$1" --prefix="${FAKEROOT}" \
     --openssldir="${FAKEROOT}/openssl" --libdir=lib
+make -j"$(nproc)" build_sw
 make install_sw
 cd -
 
@@ -71,7 +72,7 @@ git clone --depth=1 "${ZLIB_URL}" -b "${ZLIB_TAG}"
 cd zlib
 CFLAGS="${ZLIB_CFLAGS}" LDFLAGS="${ZLIB_CFLAGS}" ./configure \
     --prefix="${FAKEROOT}"
-make install
+make -j"$(nproc)" install
 cd -
 
 # libfido2
