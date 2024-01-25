@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2024 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -82,7 +82,8 @@ parse_uevent(const char *uevent, int *bus, int16_t *vendor_id,
 	char			*cp;
 	char			*p;
 	char			*s;
-	int			 ok = -1;
+	bool			 found_id = false;
+	bool			 found_name = false;
 	short unsigned int	 x;
 	short unsigned int	 y;
 	short unsigned int	 z;
@@ -91,24 +92,25 @@ parse_uevent(const char *uevent, int *bus, int16_t *vendor_id,
 		return (-1);
 
 	while ((p = strsep(&cp, "\n")) != NULL && *p != '\0') {
-		if (strncmp(p, "HID_ID=", 7) == 0) {
+		if (!found_id && strncmp(p, "HID_ID=", 7) == 0) {
 			if (sscanf(p + 7, "%hx:%hx:%hx", &x, &y, &z) == 3) {
 				*bus = (int)x;
 				*vendor_id = (int16_t)y;
 				*product_id = (int16_t)z;
-				ok = 0;
+				found_id = true;
 			}
-			continue;
-		}
-		if (strncmp(p, "HID_NAME=", 9) == 0 && hid_name != NULL && *hid_name == NULL) {
-			*hid_name = strdup(p + 9);
-			continue;
+		} else if (!found_name && strncmp(p, "HID_NAME=", 9) == 0) {
+			if ((*hid_name = strdup(p + 9)) != NULL)
+				found_name = true;
 		}
 	}
 
 	free(s);
 
-	return (ok);
+	if (!found_name || !found_id)
+		return (-1);
+
+	return (0);
 }
 
 static char *
@@ -141,7 +143,7 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 	char			*uevent = NULL;
 	struct udev_device	*dev = NULL;
 	int			 bus = 0;
-	char		*hid_name = NULL;
+	char			*hid_name = NULL;
 	int			 ok = -1;
 
 	memset(di, 0, sizeof(*di));
@@ -153,7 +155,8 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 		goto fail;
 
 	if ((uevent = get_parent_attr(dev, "hid", NULL, "uevent")) == NULL ||
-	    parse_uevent(uevent, &bus, &di->vendor_id, &di->product_id, &hid_name) < 0) {
+	    parse_uevent(uevent, &bus, &di->vendor_id, &di->product_id,
+	    &hid_name) < 0) {
 		fido_log_debug("%s: uevent", __func__);
 		goto fail;
 	}
@@ -166,17 +169,17 @@ copy_info(fido_dev_info_t *di, struct udev *udev,
 #endif
 
 	di->path = strdup(path);
-	if ((di->manufacturer = get_usb_attr(dev, "manufacturer")) == NULL)
-		di->manufacturer = strdup("");
-	if ((di->product = get_usb_attr(dev, "product")) == NULL)
-		di->product = strdup("");
-	if ( di->manufacturer != NULL && *di->manufacturer == '\0' && 
-		 di->product != NULL && *di->product == '\0' && 
-		 hid_name != NULL ) {
-		
-		free(di->product);
-		di->product = strdup(hid_name);
+	di->manufacturer = get_usb_attr(dev, "manufacturer");
+	di->product = get_usb_attr(dev, "product");
+
+	if (di->manufacturer == NULL && di->product == NULL) {
+		di->product = hid_name;  /* fallback */
+		hid_name = NULL;
 	}
+	if (di->manufacturer == NULL)
+		di->manufacturer = strdup("");
+	if (di->product == NULL)
+		di->product = strdup("");
 	if (di->path == NULL || di->manufacturer == NULL || di->product == NULL)
 		goto fail;
 
