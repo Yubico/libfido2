@@ -42,7 +42,7 @@ sudo make install_sw
 cd ..
 
 # Build and install zlib.
-git clone --depth=1 https://github.com/madler/zlib -b v1.3
+git clone --depth=1 https://github.com/madler/zlib -b v1.3.1
 cd zlib
 make -fwin32/Makefile.gcc PREFIX=i686-w64-mingw32-
 sudo make -fwin32/Makefile.gcc PREFIX=i686-w64-mingw32- DESTDIR=/fakeroot \

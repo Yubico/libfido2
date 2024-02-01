@@ -17,8 +17,8 @@ New-Variable -Name 'LIBCBOR_GIT' -Value 'https://github.com/pjk/libcbor' `
     -Option Constant
 
 # zlib coordinates.
-New-Variable -Name 'ZLIB' -Value 'zlib-1.3' -Option Constant
-New-Variable -Name 'ZLIB_BRANCH' -Value 'v1.3' -Option Constant
+New-Variable -Name 'ZLIB' -Value 'zlib-1.3.1' -Option Constant
+New-Variable -Name 'ZLIB_BRANCH' -Value 'v1.3.1' -Option Constant
 New-Variable -Name 'ZLIB_GIT' -Value 'https://github.com/madler/zlib' `
     -Option Constant
 
