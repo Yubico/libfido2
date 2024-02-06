@@ -1386,12 +1386,32 @@ cbor_decode_assert_authdata(const cbor_item_t *item, fido_blob_t *authdata_cbor,
 static int
 decode_x5c(const cbor_item_t *item, void *arg)
 {
-	fido_blob_t *x5c = arg;
+	fido_blob_array_t *x5c = arg;
+	fido_blob_t *list_ptr = NULL;
+	fido_blob_t x5c_blob;
 
-	if (x5c->len)
-		return (0); /* ignore */
+	memset(&x5c_blob, 0, sizeof(x5c_blob));
 
-	return (fido_blob_decode(item, x5c));
+	if (fido_blob_decode(item, &x5c_blob) < 0) {
+		fido_log_debug("%s: fido_blob_decode", __func__);
+		return (-1);
+	}
+
+	if (x5c->len == SIZE_MAX) {
+		fido_blob_reset(&x5c_blob);
+		return (-1);
+	}
+
+	if ((list_ptr = recallocarray(x5c->ptr, x5c->len,
+	    x5c->len + 1, sizeof(x5c_blob))) == NULL) {
+		fido_blob_reset(&x5c_blob);
+		return (-1);
+	}
+
+	list_ptr[x5c->len++] = x5c_blob;
+	x5c->ptr = list_ptr;
+
+	return (0);
 }
 
 static int
