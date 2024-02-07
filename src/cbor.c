@@ -1132,6 +1132,53 @@ fail:
 	return (ok);
 }
 
+int
+cbor_decode_attobj(const cbor_item_t *key, const cbor_item_t *val, void *arg)
+{
+	fido_cred_t *cred = arg;
+	char		*name = NULL;
+	int			 r = -1;
+
+	if (cbor_string_copy(key, &name) < 0) {
+		fido_log_debug("%s: cbor type", __func__);
+		return (0); /* ignore */
+	}
+
+	if (!strcmp(name, "fmt")) {
+		if (cbor_decode_fmt(val, &cred->fmt) < 0) {
+			fido_log_debug("%s: cbor_decode_fmt", __func__);
+			goto fail;
+		}
+	} else if (!strcmp(name, "attStmt")) {
+		if (cbor_decode_attstmt(val, &cred->attstmt) < 0) {
+			fido_log_debug("%s: cbor_decode_attstmt", __func__);
+			goto fail;
+		}
+	}
+	else if (!strcmp(name, "authData")) {
+		if (fido_blob_decode(val, &cred->authdata_raw) < 0) {
+			fido_log_debug("%s: fido_blob_decode", __func__);
+			goto fail;
+		} 
+
+		if (cbor_decode_cred_authdata(val, cred->type,
+			&cred->authdata_cbor, &cred->authdata, &cred->attcred,
+			&cred->authdata_ext) < 0) {
+			fido_log_debug("%s: cbor_decode_cred_authdata", __func__);
+			goto fail;
+		}
+	} else { /* ignore */
+		fido_log_debug("%s: unknown name", __func__);
+	}
+
+	r = FIDO_OK;
+fail:
+	if (name!= NULL)
+		free(name);
+
+	return (r);
+}
+
 static int
 decode_cred_extension(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {

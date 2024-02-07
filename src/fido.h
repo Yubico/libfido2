@@ -152,6 +152,7 @@ int fido_cred_empty_exclude_list(fido_cred_t *);
 int fido_cred_exclude(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_prot(const fido_cred_t *);
 int fido_cred_set_attstmt(fido_cred_t *, const unsigned char *, size_t);
+int fido_cred_set_attobj(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_authdata(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_authdata_raw(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_blob(fido_cred_t *, const unsigned char *, size_t);
