@@ -167,6 +167,7 @@ _fido_cred_pubkey_ptr
 _fido_cred_rp_id
 _fido_cred_rp_name
 _fido_cred_set_attstmt
+_fido_cred_set_attobj
 _fido_cred_set_authdata
 _fido_cred_set_authdata_raw
 _fido_cred_set_blob

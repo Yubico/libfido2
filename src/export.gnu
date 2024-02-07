@@ -169,6 +169,7 @@
 		fido_cred_rp_id;
 		fido_cred_rp_name;
 		fido_cred_set_attstmt;
+		fido_cred_set_attobj;
 		fido_cred_set_authdata;
 		fido_cred_set_authdata_raw;
 		fido_cred_set_blob;
