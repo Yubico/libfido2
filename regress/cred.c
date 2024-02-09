@@ -2568,6 +2568,61 @@ valid_tpm_es256_cred(bool xfail)
 	free_cred(c);
 }
 
+static void
+push_kv(cbor_item_t *map, const char *key, cbor_item_t *value)
+{
+	struct cbor_pair kv;
+	cbor_item_t *tmp;
+
+	memset(&kv, 0, sizeof(kv));
+	assert(map != NULL && key != NULL && value != NULL);
+	assert((tmp = cbor_build_string(key)) != NULL);
+	/* XXX transfers ownership */
+	kv.key = cbor_move(tmp);
+	kv.value = cbor_move(value);
+	assert(cbor_map_add(map, kv));
+}
+
+static void
+attestation_object(void)
+{
+	struct cbor_load_result cbor;
+	unsigned char *attobj = NULL;
+	size_t len, alloclen = 0;
+	cbor_item_t *map;
+	fido_cred_t *c;
+
+	assert((map = cbor_new_definite_map(3)) != NULL);
+	push_kv(map, "fmt", cbor_build_string("tpm"));
+	push_kv(map, "attStmt", cbor_load(attstmt_tpm_es256,
+	    sizeof(attstmt_tpm_es256), &cbor));
+	push_kv(map, "authData", cbor_load(authdata_tpm_es256,
+	    sizeof(authdata_tpm_es256), &cbor));
+	assert((len = cbor_serialize_alloc(map, &attobj, &alloclen)));
+	cbor_decref(&map);
+
+	c = alloc_cred();
+	assert(fido_cred_set_type(c, COSE_ES256) == FIDO_OK);
+	assert(fido_cred_set_clientdata(c, cdh, sizeof(cdh)) == FIDO_OK);
+	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_TRUE) == FIDO_OK);
+	assert(fido_cred_set_attobj(c, attobj, len) == FIDO_OK);
+	assert(strcmp(fido_cred_fmt(c), "tpm") == 0);
+	assert(fido_cred_attstmt_len(c) == sizeof(attstmt_tpm_es256));
+	assert(memcmp(fido_cred_attstmt_ptr(c), attstmt_tpm_es256, sizeof(attstmt_tpm_es256)) == 0);
+	assert(fido_cred_authdata_len(c) == sizeof(authdata_tpm_es256));
+	assert(memcmp(fido_cred_authdata_ptr(c), authdata_tpm_es256, sizeof(authdata_tpm_es256)) == 0);
+	assert(fido_cred_pubkey_len(c) == sizeof(pubkey_tpm_es256));
+	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey_tpm_es256, sizeof(pubkey_tpm_es256)) == 0);
+	assert(fido_cred_id_len(c) == sizeof(id_tpm_es256));
+	assert(memcmp(fido_cred_id_ptr(c), id_tpm_es256, sizeof(id_tpm_es256)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid_tpm));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid_tpm, sizeof(aaguid_tpm)) == 0);
+	free_cred(c);
+	free(attobj);
+}
+
 int
 main(void)
 {
@@ -2601,6 +2656,7 @@ main(void)
 	fmt_none();
 	valid_tpm_rs256_cred(xfail);
 	valid_tpm_es256_cred(xfail);
+	attestation_object();
 
 	exit(0);
 }
