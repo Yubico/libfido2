@@ -1132,8 +1132,8 @@ fail:
 	return (ok);
 }
 
-int
-cbor_decode_attobj(const cbor_item_t *key, const cbor_item_t *val, void *arg)
+static int
+decode_attobj(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
 	fido_cred_t *cred = arg;
 	char *name = NULL;
@@ -1174,6 +1174,20 @@ fail:
 	free(name);
 
 	return (ok);
+}
+
+/* XXX introduce fido_attobj_t? */
+int
+cbor_decode_attobj(const cbor_item_t *item, fido_cred_t *cred)
+{
+	if (cbor_isa_map(item) == false ||
+	    cbor_map_is_definite(item) == false ||
+	    cbor_map_iter(item, cred, decode_attobj) < 0) {
+		fido_log_debug("%s: cbor type", __func__);
+		return (-1);
+	}
+
+	return (0);
 }
 
 static int

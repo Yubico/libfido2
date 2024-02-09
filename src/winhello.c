@@ -756,10 +756,8 @@ translate_winhello_cred(fido_cred_t *cred,
 		fido_log_debug("%s: cbor_load", __func__);
 		goto fail;
 	}
-	if (cbor_isa_map(item) == false ||
-	    cbor_map_is_definite(item) == false ||
-	    cbor_map_iter(item, cred, cbor_decode_attobj) < 0) {
-		fido_log_debug("%s: cbor type", __func__);
+	if (cbor_decode_attobj(item, cred) != 0) {
+		fido_log_debug("%s: cbor_decode_attobj", __func__);
 		goto fail;
 	}
 
