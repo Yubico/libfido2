@@ -279,14 +279,31 @@ The
 function returns the length of the x509 certificate chain in
 .Fa cred
 and the
-.Fn fido_cred_x5c_list_ptr ,
-.Fn fido_cred_x5c_list_len ,
+.Fn fido_cred_x5c_list_ptr
+and
+.Fn fido_cred_x5c_list_len
 functions return a pointer to and length of the x509 certificate at index
 .Fa idx
 respectively.
 Please note that the leaf certificate has an
 .Fa idx
-(index) value of 0.
+(index) value of 0 and calling
+.Fn fido_cred_x5c_list_ptr cred 0
+and
+.Fn fido_cred_x5c_list_len cred 0
+is equivalent to
+.Fn fido_cred_x5c_ptr cred
+and
+.Fn fido_cred_x5c_len cred
+respectively.
+If
+.Fa idx
+exceeds the return value of
+.Fn fido_cred_x5c_list_count ,
+.Fn fido_cred_x5c_list_ptr
+returns NULL and
+.Fn fido_cred_x5c_list_len
+returns 0.
 .Pp
 The authenticator data, x509 certificate, and signature parts of a
 credential are typically passed to a FIDO2 server for verification.
