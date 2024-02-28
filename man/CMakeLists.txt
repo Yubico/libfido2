@@ -396,7 +396,7 @@ if(GZIP_PATH)
 		install(FILES ${PROJECT_BINARY_DIR}/man/${DST}.3.gz
 			DESTINATION "${CMAKE_INSTALL_MANDIR}/man3")
 	endforeach()
-elseif(NOT MSVC)
+else()
 	add_dependencies(man man_symlink)
 	foreach(f ${MAN_SOURCES})
 		if (${f} MATCHES ".1$")

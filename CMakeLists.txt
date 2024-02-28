@@ -484,7 +484,7 @@ endif()
 if(BUILD_TOOLS)
 	add_subdirectory(tools)
 endif()
-if(BUILD_MANPAGES)
+if(BUILD_MANPAGES AND NOT MSVC)
 	add_subdirectory(man)
 endif()
 
