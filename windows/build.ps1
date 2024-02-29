@@ -98,6 +98,13 @@ New-Item -Type Directory "${STAGE}\${LIBRESSL}" -Force
 New-Item -Type Directory "${STAGE}\${LIBCBOR}" -Force
 New-Item -Type Directory "${STAGE}\${ZLIB}" -Force
 
+# Create GNUPGHOME with an empty common.conf to disable use-keyboxd.
+# Recent default is to enable keyboxd which in turn ignores --keyring
+# arguments.
+$GpgHome = "${BUILD}\.gnupg"
+New-Item -Type Directory "${GpgHome}" -Force
+New-Item -Type File "${GpgHome}\common.conf" -Force
+
 # Create output directories.
 New-Item -Type Directory "${OUTPUT}" -Force
 New-Item -Type Directory "${OUTPUT}\${Arch}" -Force
@@ -117,8 +124,9 @@ try {
 		}
 
 		Copy-Item "$PSScriptRoot\libressl.gpg" -Destination "${BUILD}"
-		& $GPG --list-keys
-		& $GPG --quiet --no-default-keyring --keyring ./libressl.gpg `
+		& $GPG --homedir ${GpgHome} --list-keys
+		& $GPG --homedir ${GpgHome} --quiet --no-default-keyring `
+		    --keyring ./libressl.gpg `
 		    --verify .\${LIBRESSL}.tar.gz.asc .\${LIBRESSL}.tar.gz
 		if ($LastExitCode -ne 0) {
 			throw "GPG signature verification failed"
