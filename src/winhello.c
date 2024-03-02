@@ -43,7 +43,6 @@ struct winhello_assert {
 struct winhello_cred {
 	WEBAUTHN_RP_ENTITY_INFORMATION			 rp;
 	WEBAUTHN_USER_ENTITY_INFORMATION		 user;
-	WEBAUTHN_COSE_CREDENTIAL_PARAMETER		 alg;
 	WEBAUTHN_COSE_CREDENTIAL_PARAMETERS		 cose;
 	WEBAUTHN_CLIENT_DATA				 cd;
 	WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS	 opt;
@@ -355,32 +354,30 @@ pack_user(wchar_t **name, wchar_t **icon, wchar_t **display_name,
 }
 
 static int
-pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg,
-    WEBAUTHN_COSE_CREDENTIAL_PARAMETERS *cose, int type)
+pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETERS *out, const fido_cred_t *cred)
 {
-	switch (type) {
-	case COSE_ES256:
-		alg->lAlg = WEBAUTHN_COSE_ALGORITHM_ECDSA_P256_WITH_SHA256;
-		break;
-	case COSE_ES384:
-		alg->lAlg = WEBAUTHN_COSE_ALGORITHM_ECDSA_P384_WITH_SHA384;
-		break;
-	case COSE_EDDSA:
-		alg->lAlg = -8; /* XXX */;
-		break;
-	case COSE_RS256:
-		alg->lAlg = WEBAUTHN_COSE_ALGORITHM_RSASSA_PKCS1_V1_5_WITH_SHA256;
-		break;
-	default:
-		fido_log_debug("%s: type %d", __func__, type);
-		return -1;
-	}
-	alg->dwVersion = WEBAUTHN_COSE_CREDENTIAL_PARAMETER_CURRENT_VERSION;
-	alg->pwszCredentialType = WEBAUTHN_CREDENTIAL_TYPE_PUBLIC_KEY;
-	cose->cCredentialParameters = 1;
-	cose->pCredentialParameters = alg;
+	if (!fido_int_array_is_empty(&cred->type)) {
+		WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg = NULL;
+		size_t count = fido_int_array_get_count(&cred->type);
+		int *cose_algos = cred->type.ptr;
+		if ((alg = calloc(count, sizeof(WEBAUTHN_COSE_CREDENTIAL_PARAMETER))) == NULL) {
+			fido_log_debug("%s: calloc", __func__);
+			return -1;
+		}
 
-	return 0;
+		fido_log_debug("%s: cose algo count:%zu", __func__, count);
+		for(size_t i = 0; i < count; i++) {
+			alg[i].lAlg = cose_algos[i];
+			alg[i].dwVersion = WEBAUTHN_COSE_CREDENTIAL_PARAMETER_CURRENT_VERSION;
+			alg[i].pwszCredentialType = WEBAUTHN_CREDENTIAL_TYPE_PUBLIC_KEY;
+			fido_log_debug("%s: cose algo:%d", __func__, cose_algos[i]);
+		}
+		out->cCredentialParameters = (DWORD)count;
+		out->pCredentialParameters = alg;
+
+        return 0;
+	}
+    return -1;
 }
 
 static int
@@ -705,7 +702,7 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
 		fido_log_debug("%s: pack_user", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
-	if (pack_cose(&ctx->alg, &ctx->cose, cred->type) < 0) {
+	if (pack_cose(&ctx->cose, cred) < 0) {
 		fido_log_debug("%s: pack_cose", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
@@ -767,11 +764,12 @@ decode_attobj(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			fido_log_debug("%s: fido_blob_decode", __func__);
 			goto fail;
 		}
-		if (cbor_decode_cred_authdata(val, cred->type,
-		    &cred->authdata_cbor, &cred->authdata, &cred->attcred,
-		    &cred->authdata_ext) < 0) {
+
+		if (cbor_decode_cred_authdata(val, &cred->type,
+										&cred->authdata_cbor, &cred->authdata, &cred->attcred,
+										&cred->authdata_ext) < 0) {
 			fido_log_debug("%s: cbor_decode_cred_authdata",
-			    __func__);
+							__func__);
 			goto fail;
 		}
 	}
@@ -884,6 +882,8 @@ winhello_cred_free(struct winhello_cred *ctx)
 		free(e->pvExtension);
 	}
 	free(ctx->opt.Extensions.pExtensions);
+	if (ctx->cose.cCredentialParameters > 0)
+		free(ctx->cose.pCredentialParameters);
 	free(ctx);
 }
 
