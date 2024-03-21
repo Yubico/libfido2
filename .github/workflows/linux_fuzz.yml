@@ -28,7 +28,7 @@ jobs:
     - name: dependencies
       run: |
         sudo apt -q update
-        sudo apt install -q -y libudev-dev libpcsclite-dev
+        sudo apt install -q -y libudev-dev libpcsclite-dev libsystemd-dev
     - name: compiler
       env:
         CC: ${{ matrix.cc }}
