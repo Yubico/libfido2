@@ -127,6 +127,8 @@ print_rk(const fido_credman_rk_t *rk, size_t idx)
 	if (base64_encode(fido_cred_id_ptr(cred), fido_cred_id_len(cred),
 	    &id) < 0 || base64_encode(fido_cred_user_id_ptr(cred),
 	    fido_cred_user_id_len(cred), &user_id) < 0) {
+		free(user_id);
+		free(id);
 		warnx("output error");
 		return -1;
 	}
