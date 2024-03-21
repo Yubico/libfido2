@@ -34,9 +34,6 @@ jobs:
         CC: ${{ matrix.cc }}
       run: |
         sudo ./.actions/setup_clang "${CC}"
-    # XXX https://github.com/actions/runner-images/issues/9491
-    - name: workaround
-      run: sudo sysctl vm.mmap_rnd_bits=28
     - name: fuzz
       env:
         CC: ${{ matrix.cc }}
