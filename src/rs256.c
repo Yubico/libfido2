@@ -18,13 +18,19 @@
 #define get0_RSA(x)	EVP_PKEY_get0((x))
 #endif
 
+#if defined(__GNUC__)
+#define PRAGMA(s) _Pragma(s)
+#else
+#define PRAGMA(s)
+#endif
+
 static EVP_MD *
 rs256_get_EVP_MD(void)
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
+PRAGMA("GCC diagnostic push")
+PRAGMA("GCC diagnostic ignored \"-Wcast-qual\"")
 	return ((EVP_MD *)EVP_sha256());
-#pragma GCC diagnostic pop
+PRAGMA("GCC diagnostic pop")
 }
 
 static int
