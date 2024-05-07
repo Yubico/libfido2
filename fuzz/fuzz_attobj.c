@@ -247,6 +247,7 @@ pack_dummy(uint8_t *ptr, size_t len)
 	uint8_t blob[MAXCORPUS];
 	size_t blob_len;
 
+	memset(&dummy, 0, sizeof(dummy));
 	dummy.type = 1;
 
 	strlcpy(dummy.rp_id, dummy_rp_id, sizeof(dummy.rp_id));
