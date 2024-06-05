@@ -32,8 +32,8 @@ make -j"$(nproc)" -C build
 sudo make -C build install
 cd ..
 
-# Build and install OpenSSL 3.0.13.
-git clone --branch openssl-3.0.13 \
+# Build and install OpenSSL 3.0.14.
+git clone --branch openssl-3.0.14 \
 	--depth=1 https://github.com/openssl/openssl
 cd openssl
 ./Configure mingw --prefix=/fakeroot --openssldir=/fakeroot/openssl \
