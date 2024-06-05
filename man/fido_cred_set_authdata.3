@@ -176,6 +176,10 @@ does not need to call
 .Fn fido_cred_set_authdata ,
 or
 .Fn fido_cred_set_authdata_raw .
+.Fn fido_cred_set_attobj
+may be useful in applications interfacing with the WebAuthn API,
+removing the need to first parse the attestation object to verify the
+credential.
 .Pp
 The
 .Fn fido_cred_set_clientdata
