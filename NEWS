@@ -1,7 +1,7 @@
 * Version 1.15.0 (unreleased)
  ** 1.15.0 will be the last release to support OpenSSL 1.1.
  ** bio, credman: improved CTAP 2.1 support.
- ** hid_osx: fix issue where fido_hid_read() may block longer than necessary.
+ ** hid_osx: fix issue where fido_hid_read() may block unnecessarily; gh#757.
  ** fido2-token -I: print maxcredbloblen.
  ** hid_linux: improved support for uhid devices.
  ** New API calls:
