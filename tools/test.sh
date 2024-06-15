@@ -85,6 +85,7 @@ make_cred no.tld "-h" wrap-hs
 verify_cred "--" wrap-hs /dev/null /dev/null && exit 1
 verify_cred "-h" wrap-hs wrap-hs-cred wrap-hs-pubkey
 verify_cred "-v" wrap-hs /dev/null /dev/null && exit 1
+verify_cred "-hv" wrap-hs /dev/null /dev/null && exit 1
 verify_cred "-hc0" wrap-hs /dev/null /dev/null
 verify_cred "-c0" wrap-hs /dev/null /dev/null && exit 1
 verify_cred "-c1" wrap-hs /dev/null /dev/null && exit 1
@@ -96,6 +97,7 @@ make_cred no.tld "-r" rk
 verify_cred "--" rk rk-cred rk-pubkey
 verify_cred "-h" rk /dev/null /dev/null && exit 1
 verify_cred "-v" rk /dev/null /dev/null
+verify_cred "-hv" rk /dev/null /dev/null && exit 1
 verify_cred "-c0" rk /dev/null /dev/null
 verify_cred "-c1" rk /dev/null /dev/null && exit 1
 verify_cred "-c2" rk /dev/null /dev/null && exit 1
@@ -106,6 +108,7 @@ make_cred no.tld "-hr" rk-hs
 verify_cred  "--" rk-hs rk-hs-cred rk-hs-pubkey && exit 1
 verify_cred "-h" rk-hs /dev/null /dev/null
 verify_cred "-v" rk-hs /dev/null /dev/null && exit 1
+verify_cred "-hv" rk-hs /dev/null /dev/null
 verify_cred "-hc0" rk-hs /dev/null /dev/null
 verify_cred "-c0" rk-hs /dev/null /dev/null && exit 1
 verify_cred "-c1" rk-hs /dev/null /dev/null && exit 1
