@@ -95,7 +95,7 @@ verify_cred "-c3" wrap-hs /dev/null /dev/null && exit 1
 make_cred no.tld "-r" rk
 verify_cred "--" rk rk-cred rk-pubkey
 verify_cred "-h" rk /dev/null /dev/null && exit 1
-verify_cred "-v" rk /dev/null /dev/null && exit 1
+verify_cred "-v" rk /dev/null /dev/null
 verify_cred "-c0" rk /dev/null /dev/null
 verify_cred "-c1" rk /dev/null /dev/null && exit 1
 verify_cred "-c2" rk /dev/null /dev/null && exit 1
