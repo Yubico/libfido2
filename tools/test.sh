@@ -28,11 +28,11 @@ $1
 some user name
 $(dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64)
 EOF
-	fido2-cred -M $2 "${DEV}" "${TYPE}" > "$3" < cred_param
+	fido2-cred -M "$2" "${DEV}" "${TYPE}" > "$3" < cred_param
 }
 
 verify_cred() {
-	fido2-cred -V $1 "${TYPE}" > cred_out < "$2" || return 1
+	fido2-cred -V "$1" "${TYPE}" > cred_out < "$2" || return 1
 	head -1 cred_out > "$3"
 	tail -n +2 cred_out > "$4"
 }
@@ -41,20 +41,22 @@ get_assert() {
 	sed /^$/d > assert_param << EOF
 $(dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64)
 $1
-$(cat $3)
-$(cat $4)
+$(cat "$3")
+$(cat "$4")
 EOF
+	# we want to expand $2
+	# shellcheck disable=SC2086
 	fido2-assert -G $2 "${DEV}" > "$5" < assert_param
 }
 
 verify_assert() {
-	fido2-assert -V $1 "$2" "${TYPE}" < "$3"
+	fido2-assert -V "$1" "$2" "${TYPE}" < "$3"
 }
 
 dd if=/dev/urandom bs=32 count=1 | base64 > hmac-salt
 
 # u2f
-if [ "x${TYPE}" = "xes256" ]; then
+if [ "${TYPE}" = "es256" ]; then
 	make_cred no.tld "-u" u2f
 	make_cred no.tld "-ru" /dev/null && exit 1
 	make_cred no.tld "-uc1" /dev/null && exit 1
@@ -111,7 +113,7 @@ verify_cred "-c2" rk-hs /dev/null /dev/null && exit 1
 verify_cred "-c3" rk-hs /dev/null /dev/null && exit 1
 
 # u2f
-if [ "x${TYPE}" = "xes256" ]; then
+if [ "${TYPE}" = "es256" ]; then
 	get_assert no.tld "-u" u2f-cred /dev/null u2f-assert
 	get_assert no.tld "-u -t up=false" u2f-cred /dev/null /dev/null && exit 1
 	verify_assert "--"  u2f-pubkey u2f-assert
