@@ -56,64 +56,64 @@ dd if=/dev/urandom bs=32 count=1 | base64 > hmac-salt
 # u2f
 if [ "x${TYPE}" = "xes256" ]; then
 	make_cred no.tld "-u" u2f
-	! make_cred no.tld "-ru" /dev/null
-	! make_cred no.tld "-uc1" /dev/null
-	! make_cred no.tld "-uc2" /dev/null
+	make_cred no.tld "-ru" /dev/null && exit 1
+	make_cred no.tld "-uc1" /dev/null && exit 1
+	make_cred no.tld "-uc2" /dev/null && exit 1
 	verify_cred "--"  u2f u2f-cred u2f-pubkey
-	! verify_cred "-h" u2f /dev/null /dev/null
-	! verify_cred "-v" u2f /dev/null /dev/null
+	verify_cred "-h" u2f /dev/null /dev/null && exit 1
+	verify_cred "-v" u2f /dev/null /dev/null && exit 1
 	verify_cred "-c0" u2f /dev/null /dev/null
-	! verify_cred "-c1" u2f /dev/null /dev/null
-	! verify_cred "-c2" u2f /dev/null /dev/null
-	! verify_cred "-c3" u2f /dev/null /dev/null
+	verify_cred "-c1" u2f /dev/null /dev/null && exit 1
+	verify_cred "-c2" u2f /dev/null /dev/null && exit 1
+	verify_cred "-c3" u2f /dev/null /dev/null && exit 1
 fi
 
 # wrap (non-resident)
 make_cred no.tld "--" wrap
 verify_cred "--" wrap wrap-cred wrap-pubkey
-! verify_cred "-h" wrap /dev/null /dev/null
-! verify_cred "-v" wrap /dev/null /dev/null
+verify_cred "-h" wrap /dev/null /dev/null && exit 1
+verify_cred "-v" wrap /dev/null /dev/null && exit 1
 verify_cred "-c0" wrap /dev/null /dev/null
-! verify_cred "-c1" wrap /dev/null /dev/null
-! verify_cred "-c2" wrap /dev/null /dev/null
-! verify_cred "-c3" wrap /dev/null /dev/null
+verify_cred "-c1" wrap /dev/null /dev/null && exit 1
+verify_cred "-c2" wrap /dev/null /dev/null && exit 1
+verify_cred "-c3" wrap /dev/null /dev/null && exit 1
 
 # wrap (non-resident) + hmac-secret
 make_cred no.tld "-h" wrap-hs
-! verify_cred "--" wrap-hs /dev/null /dev/null
+verify_cred "--" wrap-hs /dev/null /dev/null && exit 1
 verify_cred "-h" wrap-hs wrap-hs-cred wrap-hs-pubkey
-! verify_cred "-v" wrap-hs /dev/null /dev/null
+verify_cred "-v" wrap-hs /dev/null /dev/null && exit 1
 verify_cred "-hc0" wrap-hs /dev/null /dev/null
-! verify_cred "-c0" wrap-hs /dev/null /dev/null
-! verify_cred "-c1" wrap-hs /dev/null /dev/null
-! verify_cred "-c2" wrap-hs /dev/null /dev/null
-! verify_cred "-c3" wrap-hs /dev/null /dev/null
+verify_cred "-c0" wrap-hs /dev/null /dev/null && exit 1
+verify_cred "-c1" wrap-hs /dev/null /dev/null && exit 1
+verify_cred "-c2" wrap-hs /dev/null /dev/null && exit 1
+verify_cred "-c3" wrap-hs /dev/null /dev/null && exit 1
 
 # resident
 make_cred no.tld "-r" rk
 verify_cred "--" rk rk-cred rk-pubkey
-! verify_cred "-h" rk /dev/null /dev/null
-! verify_cred "-v" rk /dev/null /dev/null
+verify_cred "-h" rk /dev/null /dev/null && exit 1
+verify_cred "-v" rk /dev/null /dev/null && exit 1
 verify_cred "-c0" rk /dev/null /dev/null
-! verify_cred "-c1" rk /dev/null /dev/null
-! verify_cred "-c2" rk /dev/null /dev/null
-! verify_cred "-c3" rk /dev/null /dev/null
+verify_cred "-c1" rk /dev/null /dev/null && exit 1
+verify_cred "-c2" rk /dev/null /dev/null && exit 1
+verify_cred "-c3" rk /dev/null /dev/null && exit 1
 
 # resident + hmac-secret
 make_cred no.tld "-hr" rk-hs
-! verify_cred  "--" rk-hs rk-hs-cred rk-hs-pubkey
+verify_cred  "--" rk-hs rk-hs-cred rk-hs-pubkey && exit 1
 verify_cred "-h" rk-hs /dev/null /dev/null
-! verify_cred "-v" rk-hs /dev/null /dev/null
+verify_cred "-v" rk-hs /dev/null /dev/null && exit 1
 verify_cred "-hc0" rk-hs /dev/null /dev/null
-! verify_cred "-c0" rk-hs /dev/null /dev/null
-! verify_cred "-c1" rk-hs /dev/null /dev/null
-! verify_cred "-c2" rk-hs /dev/null /dev/null
-! verify_cred "-c3" rk-hs /dev/null /dev/null
+verify_cred "-c0" rk-hs /dev/null /dev/null && exit 1
+verify_cred "-c1" rk-hs /dev/null /dev/null && exit 1
+verify_cred "-c2" rk-hs /dev/null /dev/null && exit 1
+verify_cred "-c3" rk-hs /dev/null /dev/null && exit 1
 
 # u2f
 if [ "x${TYPE}" = "xes256" ]; then
 	get_assert no.tld "-u" u2f-cred /dev/null u2f-assert
-	! get_assert no.tld "-u -t up=false" u2f-cred /dev/null /dev/null
+	get_assert no.tld "-u -t up=false" u2f-cred /dev/null /dev/null && exit 1
 	verify_assert "--"  u2f-pubkey u2f-assert
 	verify_assert "-p"  u2f-pubkey u2f-assert
 fi
@@ -138,40 +138,40 @@ verify_assert "--" wrap-pubkey wrap-assert
 verify_assert "-p" wrap-pubkey wrap-assert
 get_assert no.tld "-t up=false" wrap-cred /dev/null wrap-assert
 verify_assert "--" wrap-pubkey wrap-assert
-! verify_assert "-p" wrap-pubkey wrap-assert
+verify_assert "-p" wrap-pubkey wrap-assert && exit 1
 get_assert no.tld "-t up=false -t pin=true" wrap-cred /dev/null wrap-assert
-! verify_assert "-p" wrap-pubkey wrap-assert
+verify_assert "-p" wrap-pubkey wrap-assert && exit 1
 verify_assert "-v" wrap-pubkey wrap-assert
-! verify_assert "-pv" wrap-pubkey wrap-assert
+verify_assert "-pv" wrap-pubkey wrap-assert && exit 1
 get_assert no.tld "-t up=false -t pin=false" wrap-cred /dev/null wrap-assert
-! verify_assert "-p" wrap-pubkey wrap-assert
+verify_assert "-p" wrap-pubkey wrap-assert && exit 1
 get_assert no.tld "-h" wrap-cred hmac-salt wrap-assert
-! verify_assert "--" wrap-pubkey wrap-assert
+verify_assert "--" wrap-pubkey wrap-assert && exit 1
 verify_assert "-h" wrap-pubkey wrap-assert
 get_assert no.tld "-h -t pin=true" wrap-cred hmac-salt wrap-assert
-! verify_assert "--" wrap-pubkey wrap-assert
+verify_assert "--" wrap-pubkey wrap-assert && exit 1
 verify_assert "-h" wrap-pubkey wrap-assert
 verify_assert "-hv" wrap-pubkey wrap-assert
 get_assert no.tld "-h -t pin=false" wrap-cred hmac-salt wrap-assert
-! verify_assert "--" wrap-pubkey wrap-assert
+verify_assert "--" wrap-pubkey wrap-assert && exit 1
 verify_assert "-h" wrap-pubkey wrap-assert
 get_assert no.tld "-h -t up=true" wrap-cred hmac-salt wrap-assert
-! verify_assert "--" wrap-pubkey wrap-assert
+verify_assert "--" wrap-pubkey wrap-assert && exit 1
 verify_assert "-h" wrap-pubkey wrap-assert
 verify_assert "-hp" wrap-pubkey wrap-assert
 get_assert no.tld "-h -t up=true -t pin=true" wrap-cred hmac-salt wrap-assert
-! verify_assert "--" wrap-pubkey wrap-assert
+verify_assert "--" wrap-pubkey wrap-assert && exit 1
 verify_assert "-h" wrap-pubkey wrap-assert
 verify_assert "-hp" wrap-pubkey wrap-assert
 verify_assert "-hv" wrap-pubkey wrap-assert
 verify_assert "-hpv" wrap-pubkey wrap-assert
 get_assert no.tld "-h -t up=true -t pin=false" wrap-cred hmac-salt wrap-assert
-! verify_assert "--" wrap-pubkey wrap-assert
+verify_assert "--" wrap-pubkey wrap-assert && exit 1
 verify_assert "-h" wrap-pubkey wrap-assert
 verify_assert "-hp" wrap-pubkey wrap-assert
-! get_assert no.tld "-h -t up=false" wrap-cred hmac-salt wrap-assert
-! get_assert no.tld "-h -t up=false -t pin=true" wrap-cred hmac-salt wrap-assert
-! get_assert no.tld "-h -t up=false -t pin=false" wrap-cred hmac-salt wrap-assert
+get_assert no.tld "-h -t up=false" wrap-cred hmac-salt wrap-assert && exit 1
+get_assert no.tld "-h -t up=false -t pin=true" wrap-cred hmac-salt wrap-assert && exit 1
+get_assert no.tld "-h -t up=false -t pin=false" wrap-cred hmac-salt wrap-assert && exit 1
 
 if [ "x${UV}" != "x" ]; then
 	get_assert no.tld "-t uv=true" wrap-cred /dev/null wrap-assert
@@ -205,11 +205,11 @@ if [ "x${UV}" != "x" ]; then
 	get_assert no.tld "-t up=false -t uv=true -t pin=false" wrap-cred /dev/null wrap-assert
 	verify_assert "-v" wrap-pubkey wrap-assert
 	get_assert no.tld "-t up=false -t uv=false" wrap-cred /dev/null wrap-assert
-	! verify_assert "--" wrap-pubkey wrap-assert
+	verify_assert "--" wrap-pubkey wrap-assert && exit 1
 	get_assert no.tld "-t up=false -t uv=false -t pin=true" wrap-cred /dev/null wrap-assert
 	verify_assert "-v" wrap-pubkey wrap-assert
 	get_assert no.tld "-t up=false -t uv=false -t pin=false" wrap-cred /dev/null wrap-assert
-	! verify_assert "--" wrap-pubkey wrap-assert
+	verify_assert "--" wrap-pubkey wrap-assert && exit 1
 	get_assert no.tld "-h -t uv=true" wrap-cred hmac-salt wrap-assert
 	verify_assert "-hv" wrap-pubkey wrap-assert
 	get_assert no.tld "-h -t uv=true -t pin=true" wrap-cred hmac-salt wrap-assert
@@ -234,12 +234,12 @@ if [ "x${UV}" != "x" ]; then
 	verify_assert "-hpv" wrap-pubkey wrap-assert
 	get_assert no.tld "-h -t up=true -t uv=false -t pin=false" wrap-cred hmac-salt wrap-assert
 	verify_assert "-hp" wrap-pubkey wrap-assert
-	! get_assert no.tld "-h -t up=false -t uv=true" wrap-cred hmac-salt wrap-assert
-	! get_assert no.tld "-h -t up=false -t uv=true -t pin=true" wrap-cred hmac-salt wrap-assert
-	! get_assert no.tld "-h -t up=false -t uv=true -t pin=false" wrap-cred hmac-salt wrap-assert
-	! get_assert no.tld "-h -t up=false -t uv=false" wrap-cred hmac-salt wrap-assert
-	! get_assert no.tld "-h -t up=false -t uv=false -t pin=true" wrap-cred hmac-salt wrap-assert
-	! get_assert no.tld "-h -t up=false -t uv=false -t pin=false" wrap-cred hmac-salt wrap-assert
+	get_assert no.tld "-h -t up=false -t uv=true" wrap-cred hmac-salt wrap-assert && exit 1
+	get_assert no.tld "-h -t up=false -t uv=true -t pin=true" wrap-cred hmac-salt wrap-assert && exit 1
+	get_assert no.tld "-h -t up=false -t uv=true -t pin=false" wrap-cred hmac-salt wrap-assert && exit 1
+	get_assert no.tld "-h -t up=false -t uv=false" wrap-cred hmac-salt wrap-assert && exit 1
+	get_assert no.tld "-h -t up=false -t uv=false -t pin=true" wrap-cred hmac-salt wrap-assert && exit 1
+	get_assert no.tld "-h -t up=false -t uv=false -t pin=false" wrap-cred hmac-salt wrap-assert && exit 1
 fi
 
 # resident
@@ -258,9 +258,9 @@ get_assert no.tld "-r -h -t pin=false" /dev/null hmac-salt wrap-assert
 get_assert no.tld "-r -h -t up=true" /dev/null hmac-salt wrap-assert
 get_assert no.tld "-r -h -t up=true -t pin=true" /dev/null hmac-salt wrap-assert
 get_assert no.tld "-r -h -t up=true -t pin=false" /dev/null hmac-salt wrap-assert
-! get_assert no.tld "-r -h -t up=false" /dev/null hmac-salt wrap-assert
-! get_assert no.tld "-r -h -t up=false -t pin=true" /dev/null hmac-salt wrap-assert
-! get_assert no.tld "-r -h -t up=false -t pin=false" /dev/null hmac-salt wrap-assert
+get_assert no.tld "-r -h -t up=false" /dev/null hmac-salt wrap-assert && exit 1
+get_assert no.tld "-r -h -t up=false -t pin=true" /dev/null hmac-salt wrap-assert && exit 1
+get_assert no.tld "-r -h -t up=false -t pin=false" /dev/null hmac-salt wrap-assert && exit 1
 
 if [ "x${UV}" != "x" ]; then
 	get_assert no.tld "-r -t uv=true" /dev/null /dev/null wrap-assert
@@ -293,12 +293,12 @@ if [ "x${UV}" != "x" ]; then
 	get_assert no.tld "-r -h -t up=true -t uv=false" /dev/null hmac-salt wrap-assert
 	get_assert no.tld "-r -h -t up=true -t uv=false -t pin=true" /dev/null hmac-salt wrap-assert
 	get_assert no.tld "-r -h -t up=true -t uv=false -t pin=false" /dev/null hmac-salt wrap-assert
-	! get_assert no.tld "-r -h -t up=false -t uv=true" /dev/null hmac-salt wrap-assert
-	! get_assert no.tld "-r -h -t up=false -t uv=true -t pin=true" /dev/null hmac-salt wrap-assert
-	! get_assert no.tld "-r -h -t up=false -t uv=true -t pin=false" /dev/null hmac-salt wrap-assert
-	! get_assert no.tld "-r -h -t up=false -t uv=false" /dev/null hmac-salt wrap-assert
-	! get_assert no.tld "-r -h -t up=false -t uv=false -t pin=true" /dev/null hmac-salt wrap-assert
-	! get_assert no.tld "-r -h -t up=false -t uv=false -t pin=false" /dev/null hmac-salt wrap-assert
+	get_assert no.tld "-r -h -t up=false -t uv=true" /dev/null hmac-salt wrap-assert && exit 1
+	get_assert no.tld "-r -h -t up=false -t uv=true -t pin=true" /dev/null hmac-salt wrap-assert && exit 1
+	get_assert no.tld "-r -h -t up=false -t uv=true -t pin=false" /dev/null hmac-salt wrap-assert && exit 1
+	get_assert no.tld "-r -h -t up=false -t uv=false" /dev/null hmac-salt wrap-assert && exit 1
+	get_assert no.tld "-r -h -t up=false -t uv=false -t pin=true" /dev/null hmac-salt wrap-assert && exit 1
+	get_assert no.tld "-r -h -t up=false -t uv=false -t pin=false" /dev/null hmac-salt wrap-assert && exit 1
 fi
 
 exit 0
