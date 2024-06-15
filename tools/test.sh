@@ -70,9 +70,9 @@ fi
 
 # wrap (non-resident)
 make_cred no.tld "--" wrap
-verify_cred "--" wrap wrap-cred	wrap-pubkey
-! verify_cred "-h" wrap	/dev/null /dev/null
-! verify_cred "-v" wrap	/dev/null /dev/null
+verify_cred "--" wrap wrap-cred wrap-pubkey
+! verify_cred "-h" wrap /dev/null /dev/null
+! verify_cred "-v" wrap /dev/null /dev/null
 verify_cred "-c0" wrap /dev/null /dev/null
 ! verify_cred "-c1" wrap /dev/null /dev/null
 ! verify_cred "-c2" wrap /dev/null /dev/null
