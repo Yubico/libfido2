@@ -32,7 +32,7 @@ EOF
 }
 
 verify_cred() {
-	fido2-cred -V $1 "${TYPE}" > cred_out < "$2"
+	fido2-cred -V $1 "${TYPE}" > cred_out < "$2" || return 1
 	head -1 cred_out > "$3"
 	tail -n +2 cred_out > "$4"
 }
