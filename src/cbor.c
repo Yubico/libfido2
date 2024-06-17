@@ -515,34 +515,29 @@ fail:
 }
 
 cbor_item_t *
-cbor_encode_pubkey_param_array(int cose_alg)
+cbor_encode_pubkey_param_array(const fido_int_array_t *algs)
 {
 	cbor_item_t		*item = NULL;
 	cbor_item_t		*body = NULL;
-	bool			 r = false;
 
-	if ((item = cbor_new_definite_array(1)) == NULL) {
-		fido_log_debug("%s: cbor_new_definite_array", __func__);
+	if ((item = cbor_new_definite_array(algs->len)) == NULL)
 		goto fail;
-	}
 
-	if ((body = cbor_encode_pubkey_param(cose_alg)) == NULL) {
-		fido_log_debug("%s: cbor_encode_pubkey_param", __func__);
-		goto fail;
-	}
-
-	r = cbor_array_push(item, body);
-	cbor_decref(&body);
-
-fail:
-	if (r != true) {
-		if (item != NULL) {
-			cbor_decref(&item);
-			item = NULL;
-		}
+	for (size_t i = 0; i < algs->len; i++) {
+		if ((body = cbor_encode_pubkey_param(algs->ptr[i])) == NULL ||
+		     cbor_array_push(item, body) == false)
+			goto fail;
+		cbor_decref(&body);
 	}
 
 	return (item);
+fail:
+	if (body != NULL)
+		cbor_decref(&body);
+	if (item != NULL)
+		cbor_decref(&item);
+
+	return (NULL);
 }
 
 cbor_item_t *

@@ -58,6 +58,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 	fido_opt_t	 uv = cred->uv;
 	es256_pk_t	*pk = NULL;
 	cbor_item_t	*argv[10];
+	const fido_int_array_t algs = { &cred->type, 1 };
 	const uint8_t	 cmd = CTAP_CBOR_MAKECRED;
 	int		 r;
 
@@ -74,7 +75,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 	if ((argv[0] = fido_blob_encode(&cred->cdh)) == NULL ||
 	    (argv[1] = cbor_encode_rp_entity(&cred->rp)) == NULL ||
 	    (argv[2] = cbor_encode_user_entity(&cred->user)) == NULL ||
-	    (argv[3] = cbor_encode_pubkey_param_array(cred->type)) == NULL) {
+	    (argv[3] = cbor_encode_pubkey_param_array(&algs)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;

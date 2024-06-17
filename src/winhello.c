@@ -381,16 +381,25 @@ pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg, int type)
 }
 
 static int
-pack_cose_array(WEBAUTHN_COSE_CREDENTIAL_PARAMETERS *cose, int type)
+pack_cose_array(WEBAUTHN_COSE_CREDENTIAL_PARAMETERS *cose,
+    const fido_int_array_t *algs)
 {
-	if ((cose->pCredentialParameters = calloc(1,
+	if (algs->ptr == NULL || algs->len > ULONG_MAX) {
+		fido_log_debug("%s: algs (%p, %zu)", __func__,
+		    (void *) algs->ptr, algs->len);
+		return -1;
+	}
+	if ((cose->pCredentialParameters = calloc(algs->len,
 	    sizeof(*cose->pCredentialParameters))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
 		return -1;
 	}
-	cose->cCredentialParameters = 1;
-	if (pack_cose(cose->pCredentialParameters[0], type) != 0)
-		return -1;
+	for (size_t i = 0; i < algs->len; i++) {
+		if (pack_cose(&cose->pCredentialParameters[i],
+		    algs->ptr[i]) != 0)
+			return -1;
+		cose->cCredentialParameters++;
+	}
 
 	return 0;
 }
@@ -707,6 +716,7 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
     const char *pin, int ms)
 {
 	WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS *opt;
+	const fido_int_array_t algs = { &cred->type, 1 };
 
 	if (pack_rp(&ctx->rp_id, &ctx->rp_name, &ctx->rp, &cred->rp) < 0) {
 		fido_log_debug("%s: pack_rp", __func__);
@@ -717,7 +727,7 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
 		fido_log_debug("%s: pack_user", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
-	if (pack_cose_array(&ctx->cose, cred->type) < 0) {
+	if (pack_cose_array(&ctx->cose, &algs) < 0) {
 		fido_log_debug("%s: pack_cose_array", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
