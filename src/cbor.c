@@ -1094,8 +1094,8 @@ cbor_decode_pubkey(const cbor_item_t *item, int *type, void *key)
 }
 
 static int
-decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
-    fido_attcred_t *attcred)
+decode_attcred(const unsigned char **buf, size_t *len,
+    const fido_int_array_t *algs, fido_attcred_t *attcred)
 {
 	cbor_item_t		*item = NULL;
 	struct cbor_load_result	 cbor;
@@ -1136,9 +1136,9 @@ decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
 		goto fail;
 	}
 
-	if (attcred->type != cose_alg) {
-		fido_log_debug("%s: cose_alg mismatch (%d != %d)", __func__,
-		    attcred->type, cose_alg);
+	if (!fido_int_array_contains(algs, attcred->type)) {
+		fido_log_debug("%s: unexpected cose alg (%d)", __func__,
+		    attcred->type);
 		goto fail;
 	}
 
@@ -1181,7 +1181,7 @@ decode_attobj(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			fido_log_debug("%s: fido_blob_decode", __func__);
 			goto fail;
 		}
-		if (cbor_decode_cred_authdata(val, cred->type,
+		if (cbor_decode_cred_authdata(val, &cred->type,
 		    &cred->authdata_cbor, &cred->authdata, &cred->attcred,
 		    &cred->authdata_ext) < 0) {
 			fido_log_debug("%s: cbor_decode_cred_authdata",
@@ -1367,7 +1367,7 @@ fail:
 }
 
 int
-cbor_decode_cred_authdata(const cbor_item_t *item, int cose_alg,
+cbor_decode_cred_authdata(const cbor_item_t *item, const fido_int_array_t *algs,
     fido_blob_t *authdata_cbor, fido_authdata_t *authdata,
     fido_attcred_t *attcred, fido_cred_ext_t *authdata_ext)
 {
@@ -1401,7 +1401,7 @@ cbor_decode_cred_authdata(const cbor_item_t *item, int cose_alg,
 
 	if (attcred != NULL) {
 		if ((authdata->flags & CTAP_AUTHDATA_ATT_CRED) == 0 ||
-		    decode_attcred(&buf, &len, cose_alg, attcred) < 0)
+		    decode_attcred(&buf, &len, algs, attcred) < 0)
 			return (-1);
 	}
 

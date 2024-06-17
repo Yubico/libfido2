@@ -716,7 +716,6 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
     const char *pin, int ms)
 {
 	WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS *opt;
-	const fido_int_array_t algs = { &cred->type, 1 };
 
 	if (pack_rp(&ctx->rp_id, &ctx->rp_name, &ctx->rp, &cred->rp) < 0) {
 		fido_log_debug("%s: pack_rp", __func__);
@@ -727,7 +726,7 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
 		fido_log_debug("%s: pack_user", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
-	if (pack_cose_array(&ctx->cose, &algs) < 0) {
+	if (pack_cose_array(&ctx->cose, &cred->type) < 0) {
 		fido_log_debug("%s: pack_cose_array", __func__);
 		return FIDO_ERR_INTERNAL;
 	}

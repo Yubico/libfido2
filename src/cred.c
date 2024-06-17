@@ -34,7 +34,7 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 			fido_log_debug("%s: fido_blob_decode", __func__);
 			return (-1);
 		}
-		return (cbor_decode_cred_authdata(val, cred->type,
+		return (cbor_decode_cred_authdata(val, &cred->type,
 		    &cred->authdata_cbor, &cred->authdata, &cred->attcred,
 		    &cred->authdata_ext));
 	case 3: /* attestation statement */
@@ -58,16 +58,15 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 	fido_opt_t	 uv = cred->uv;
 	es256_pk_t	*pk = NULL;
 	cbor_item_t	*argv[10];
-	const fido_int_array_t algs = { &cred->type, 1 };
 	const uint8_t	 cmd = CTAP_CBOR_MAKECRED;
 	int		 r;
 
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
 
-	if (cred->cdh.ptr == NULL || cred->type == 0) {
-		fido_log_debug("%s: cdh=%p, type=%d", __func__,
-		    (void *)cred->cdh.ptr, cred->type);
+	if (cred->cdh.ptr == NULL || cred->type.len == 0) {
+		fido_log_debug("%s: cdh=%p, type.len=%zu", __func__,
+		    (void *)cred->cdh.ptr, cred->type.len);
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
@@ -75,7 +74,7 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 	if ((argv[0] = fido_blob_encode(&cred->cdh)) == NULL ||
 	    (argv[1] = cbor_encode_rp_entity(&cred->rp)) == NULL ||
 	    (argv[2] = cbor_encode_user_entity(&cred->user)) == NULL ||
-	    (argv[3] = cbor_encode_pubkey_param_array(&algs)) == NULL) {
+	    (argv[3] = cbor_encode_pubkey_param_array(&cred->type)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -589,13 +588,14 @@ fido_cred_reset_tx(fido_cred_t *cred)
 	free(cred->user.icon);
 	free(cred->user.name);
 	free(cred->user.display_name);
+	free(cred->type.ptr);
 	fido_cred_empty_exclude_list(cred);
 
 	memset(&cred->rp, 0, sizeof(cred->rp));
 	memset(&cred->user, 0, sizeof(cred->user));
 	memset(&cred->ext, 0, sizeof(cred->ext));
+	memset(&cred->type, 0, sizeof(cred->type));
 
-	cred->type = 0;
 	cred->rk = FIDO_OPT_OMIT;
 	cred->uv = FIDO_OPT_OMIT;
 	cred->ea.mode = 0;
@@ -644,7 +644,7 @@ fido_cred_set_authdata(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 		goto fail;
 	}
 
-	if (cbor_decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
+	if (cbor_decode_cred_authdata(item, &cred->type, &cred->authdata_cbor,
 	    &cred->authdata, &cred->attcred, &cred->authdata_ext) < 0) {
 		fido_log_debug("%s: cbor_decode_cred_authdata", __func__);
 		goto fail;
@@ -685,7 +685,7 @@ fido_cred_set_authdata_raw(fido_cred_t *cred, const unsigned char *ptr,
 		goto fail;
 	}
 
-	if (cbor_decode_cred_authdata(item, cred->type, &cred->authdata_cbor,
+	if (cbor_decode_cred_authdata(item, &cred->type, &cred->authdata_cbor,
 	    &cred->authdata, &cred->attcred, &cred->authdata_ext) < 0) {
 		fido_log_debug("%s: cbor_decode_cred_authdata", __func__);
 		goto fail;
@@ -1071,27 +1071,47 @@ fido_cred_set_fmt(fido_cred_t *cred, const char *fmt)
 	return (FIDO_OK);
 }
 
-int
-fido_cred_set_type(fido_cred_t *cred, int cose_alg)
+static int
+fido_cred_append_type(fido_cred_t *cred, int cose_alg)
 {
-	if (cred->type != 0)
-		return (FIDO_ERR_INVALID_ARGUMENT);
+	int *list_ptr;
+
 	if (cose_alg != COSE_ES256 && cose_alg != COSE_ES384 &&
 	    cose_alg != COSE_RS256 && cose_alg != COSE_EDDSA)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
-	cred->type = cose_alg;
+	if (cred->type.len == SIZE_MAX)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	if ((list_ptr = recallocarray(cred->type.ptr, cred->type.len,
+	     cred->type.len + 1, sizeof(*list_ptr))) == NULL)
+		return (FIDO_ERR_INTERNAL);
+
+	list_ptr[cred->type.len++] = cose_alg;
+	cred->type.ptr = list_ptr;
 
 	return (FIDO_OK);
 }
 
 int
+fido_cred_set_type(fido_cred_t *cred, int cose_alg)
+{
+	if (cred->type.len != 0)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	return (fido_cred_append_type(cred, cose_alg));
+}
+
+int
 fido_cred_type(const fido_cred_t *cred)
 {
-	if (cred->attcred.type != 0)
+	if (cred->type.len == 0)
+		return (COSE_UNSPEC);
+
+	if (cred->attcred.type != COSE_UNSPEC)
 		return (cred->attcred.type);
 
-	return (cred->type); /* compat: return requested type */
+	return (cred->type.ptr[0]); /* compat: return (first) requested type */
 }
 
 uint8_t
