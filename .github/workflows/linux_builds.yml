@@ -38,7 +38,7 @@ jobs:
       run: |
         sudo apt -q update
         sudo apt install -q -y libcbor-dev libudev-dev libz-dev \
-          original-awk mandoc libpcsclite-dev
+          original-awk mandoc libpcsclite-dev libsystemd-dev
     - name: compiler
       env:
         CC: ${{ matrix.cc }}
