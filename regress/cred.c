@@ -2847,7 +2847,7 @@ valid_tpm_rs256_cred(bool xfail)
 	assert(fido_cred_set_uv(c, FIDO_OPT_TRUE) == FIDO_OK);
 	assert(fido_cred_set_fmt(c, "tpm") == FIDO_OK);
 	assert(fido_cred_set_attstmt(c, attstmt_tpm_rs256, sizeof(attstmt_tpm_rs256)) == FIDO_OK);
-	// XXX: RHEL9 has deprecated SHA-1 for signing.
+	/* XXX: RHEL9 has deprecated SHA-1 for signing */
 	assert(fido_cred_verify(c) == (xfail ? FIDO_ERR_INVALID_SIG : FIDO_OK));
 	assert(fido_cred_prot(c) == 0);
 	assert(fido_cred_pubkey_len(c) == sizeof(pubkey_tpm_rs256));
@@ -2880,7 +2880,7 @@ valid_tpm_es256_cred(bool xfail)
 	assert(memcmp(fido_cred_x5c_list_ptr(c, 1), x509_1_tpm_es256, sizeof(x509_1_tpm_es256)) == 0);
 	assert(fido_cred_x5c_list_len(c, 2) == 0);
 	assert(fido_cred_x5c_list_ptr(c, 2) == NULL);
-	// XXX: RHEL9 has deprecated SHA-1 for signing.
+	/* XXX: RHEL9 has deprecated SHA-1 for signing */
 	assert(fido_cred_verify(c) == (xfail ? FIDO_ERR_INVALID_SIG : FIDO_OK));
 	assert(fido_cred_prot(c) == 0);
 	assert(fido_cred_pubkey_len(c) == sizeof(pubkey_tpm_es256));
@@ -3021,6 +3021,36 @@ entattest(void)
 	assert(fido_dev_close(dev) == FIDO_OK);
 	fido_dev_free(&dev);
 }
+static void
+multiple_cose(void)
+{
+	fido_cred_t *c;
+
+	c = alloc_cred();
+	assert(fido_cred_type(c) == COSE_UNSPEC);
+	assert(fido_cred_append_type(c, COSE_EDDSA) == FIDO_OK);
+	assert(fido_cred_type(c) == COSE_EDDSA); /* compat: only algorithm req. */
+	assert(fido_cred_append_type(c, COSE_ES256) == FIDO_OK);
+	assert(fido_cred_type(c) == COSE_EDDSA); /* compat: first algorithm req. */
+	assert(fido_cred_set_clientdata_hash(c, cdh, sizeof(cdh)) == FIDO_OK);
+	assert(fido_cred_set_rp(c, rp_id, rp_name) == FIDO_OK);
+	assert(fido_cred_set_authdata(c, authdata, sizeof(authdata)) == FIDO_OK);
+	assert(fido_cred_set_rk(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_uv(c, FIDO_OPT_FALSE) == FIDO_OK);
+	assert(fido_cred_set_x509(c, x509, sizeof(x509)) == FIDO_OK);
+	assert(fido_cred_set_sig(c, sig, sizeof(sig)) == FIDO_OK);
+	assert(fido_cred_set_fmt(c, "packed") == FIDO_OK);
+	assert(fido_cred_type(c) == COSE_ES256); /* actual algorithm used */
+	assert(fido_cred_verify(c) == FIDO_OK);
+	assert(fido_cred_prot(c) == 0);
+	assert(fido_cred_pubkey_len(c) == sizeof(pubkey));
+	assert(memcmp(fido_cred_pubkey_ptr(c), pubkey, sizeof(pubkey)) == 0);
+	assert(fido_cred_id_len(c) == sizeof(id));
+	assert(memcmp(fido_cred_id_ptr(c), id, sizeof(id)) == 0);
+	assert(fido_cred_aaguid_len(c) == sizeof(aaguid));
+	assert(memcmp(fido_cred_aaguid_ptr(c), aaguid, sizeof(aaguid)) == 0);
+	free_cred(c);
+}
 
 int
 main(void)
@@ -3058,6 +3088,7 @@ main(void)
 	attestation_object();
 	makecred();
 	entattest();
+	multiple_cose();
 
 	exit(0);
 }
