@@ -39,6 +39,8 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		    &cred->authdata_ext));
 	case 3: /* attestation statement */
 		return (cbor_decode_attstmt(val, &cred->attstmt));
+	case 4: /* enterprise attestation */
+		return (cbor_decode_bool(val, &cred->ea.att));
 	case 5: /* large blob key */
 		return (fido_blob_decode(val, &cred->largeblob_key));
 	default: /* ignore */
@@ -603,6 +605,7 @@ fido_cred_reset_rx(fido_cred_t *cred)
 {
 	fido_cred_clean_attobj(cred);
 	fido_blob_reset(&cred->largeblob_key);
+	cred->ea.att = false;
 }
 
 void
@@ -1335,4 +1338,10 @@ size_t
 fido_cred_largeblob_key_len(const fido_cred_t *cred)
 {
 	return (cred->largeblob_key.len);
+}
+
+bool
+fido_cred_entattest(const fido_cred_t *cred)
+{
+	return (cred->ea.att);
 }
