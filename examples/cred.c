@@ -207,7 +207,7 @@ main(int argc, char **argv)
 			if (base10(optarg, &cred_protect) < 0)
 				errx(1, "base10: %s", optarg);
 			if (cred_protect <= 0 || cred_protect > 3)
-				errx(1, "-c: %s must be in (1,3)", optarg);
+				errx(1, "-c: %s must be in (0,3]", optarg);
 			ext |= FIDO_EXT_CRED_PROTECT;
 			break;
 		case 'i':
