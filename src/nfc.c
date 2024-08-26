@@ -184,11 +184,12 @@ rx_init(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 }
 
 static int
-tx_get_response(fido_dev_t *d, uint8_t count)
+tx_get_response(fido_dev_t *d, uint8_t count, bool cbor)
 {
 	uint8_t apdu[5];
 
 	memset(apdu, 0, sizeof(apdu));
+	apdu[0] = cbor ? 0x80 : 0x00;
 	apdu[1] = 0xc0; /* GET_RESPONSE */
 	apdu[4] = count;
 
@@ -233,7 +234,7 @@ fail:
 }
 
 static int
-rx_msg(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
+rx_msg(fido_dev_t *d, unsigned char *buf, size_t count, int ms, bool cbor)
 {
 	uint8_t sw[2];
 	const size_t bufsiz = count;
@@ -244,7 +245,7 @@ rx_msg(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 	}
 
 	while (sw[0] == SW1_MORE_DATA)
-		if (tx_get_response(d, sw[1]) < 0 ||
+		if (tx_get_response(d, sw[1], cbor) < 0 ||
 		    rx_apdu(d, sw, &buf, &count, &ms) < 0) {
 			fido_log_debug("%s: chain", __func__);
 			return -1;
@@ -268,7 +269,7 @@ rx_cbor(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 {
 	int r;
 
-	if ((r = rx_msg(d, buf, count, ms)) < 2)
+	if ((r = rx_msg(d, buf, count, ms, true)) < 2)
 		return -1;
 
 	return r - 2;
@@ -283,7 +284,7 @@ fido_nfc_rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms
 	case CTAP_CMD_CBOR:
 		return rx_cbor(d, buf, count, ms);
 	case CTAP_CMD_MSG:
-		return rx_msg(d, buf, count, ms);
+		return rx_msg(d, buf, count, ms, false);
 	default:
 		fido_log_debug("%s: cmd=%02x", __func__, cmd);
 		return -1;
