@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2020-2024 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -249,7 +249,7 @@ rx_init(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 
 	memset(attr, 0, sizeof(*attr));
 
-	if ((n = d->io.read(d->io_handle, f, sizeof(f), ms)) < 2 ||
+	if ((n = rx_msg(d, f, sizeof(f), ms, false)) < 2 ||
 	    (f[n - 2] << 8 | f[n - 1]) != SW_NO_ERROR) {
 		fido_log_debug("%s: read", __func__);
 		return -1;
