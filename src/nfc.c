@@ -144,46 +144,6 @@ fail:
 }
 
 static int
-rx_init(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
-{
-	fido_ctap_info_t *attr = (fido_ctap_info_t *)buf;
-	uint8_t f[64];
-	int n;
-
-	if (count != sizeof(*attr)) {
-		fido_log_debug("%s: count=%zu", __func__, count);
-		return -1;
-	}
-
-	memset(attr, 0, sizeof(*attr));
-
-	if ((n = d->io.read(d->io_handle, f, sizeof(f), ms)) < 2 ||
-	    (f[n - 2] << 8 | f[n - 1]) != SW_NO_ERROR) {
-		fido_log_debug("%s: read", __func__);
-		return -1;
-	}
-
-	n -= 2;
-
-	if (n == sizeof(v_u2f) && memcmp(f, v_u2f, sizeof(v_u2f)) == 0)
-		attr->flags = FIDO_CAP_CBOR;
-	else if (n == sizeof(v_fido) && memcmp(f, v_fido, sizeof(v_fido)) == 0)
-		attr->flags = FIDO_CAP_CBOR | FIDO_CAP_NMSG;
-	else {
-		fido_log_debug("%s: unknown version string", __func__);
-#ifdef FIDO_FUZZ
-		attr->flags = FIDO_CAP_CBOR | FIDO_CAP_NMSG;
-#else
-		return -1;
-#endif
-	}
-
-	memcpy(&attr->nonce, &d->nonce, sizeof(attr->nonce)); /* XXX */
-
-	return (int)count;
-}
-
-static int
 tx_get_response(fido_dev_t *d, uint8_t count, bool cbor)
 {
 	uint8_t apdu[5];
@@ -273,6 +233,46 @@ rx_cbor(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 		return -1;
 
 	return r - 2;
+}
+
+static int
+rx_init(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
+{
+	fido_ctap_info_t *attr = (fido_ctap_info_t *)buf;
+	uint8_t f[64];
+	int n;
+
+	if (count != sizeof(*attr)) {
+		fido_log_debug("%s: count=%zu", __func__, count);
+		return -1;
+	}
+
+	memset(attr, 0, sizeof(*attr));
+
+	if ((n = d->io.read(d->io_handle, f, sizeof(f), ms)) < 2 ||
+	    (f[n - 2] << 8 | f[n - 1]) != SW_NO_ERROR) {
+		fido_log_debug("%s: read", __func__);
+		return -1;
+	}
+
+	n -= 2;
+
+	if (n == sizeof(v_u2f) && memcmp(f, v_u2f, sizeof(v_u2f)) == 0)
+		attr->flags = FIDO_CAP_CBOR;
+	else if (n == sizeof(v_fido) && memcmp(f, v_fido, sizeof(v_fido)) == 0)
+		attr->flags = FIDO_CAP_CBOR | FIDO_CAP_NMSG;
+	else {
+		fido_log_debug("%s: unknown version string", __func__);
+#ifdef FIDO_FUZZ
+		attr->flags = FIDO_CAP_CBOR | FIDO_CAP_NMSG;
+#else
+		return -1;
+#endif
+	}
+
+	memcpy(&attr->nonce, &d->nonce, sizeof(attr->nonce)); /* XXX */
+
+	return (int)count;
 }
 
 int
