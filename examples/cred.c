@@ -106,9 +106,13 @@ verify_cred(int type, const char *fmt, const unsigned char *authdata_ptr,
 	if (r != FIDO_OK)
 		errx(1, "fido_cred_set_attstmt: %s (0x%x)", fido_strerr(r), r);
 
-	r = fido_cred_verify(cred);
-	if (r != FIDO_OK)
-		errx(1, "fido_cred_verify: %s (0x%x)", fido_strerr(r), r);
+	if (fido_cred_x5c_ptr(cred) == NULL) {
+		if ((r = fido_cred_verify_self(cred)) != FIDO_OK)
+			errx(1, "fido_cred_verify_self: %s (0x%x)", fido_strerr(r), r);
+	} else {
+		if ((r = fido_cred_verify(cred)) != FIDO_OK)
+			errx(1, "fido_cred_verify: %s (0x%x)", fido_strerr(r), r);
+	}
 
 out:
 	if (key_out != NULL) {
