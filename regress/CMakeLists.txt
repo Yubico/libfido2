@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+# Copyright (c) 2018-2024 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 # SPDX-License-Identifier: BSD-2-Clause
@@ -44,7 +44,7 @@ endif()
 
 add_regress_test(regress_assert SOURCES assert.c LIBS ${_FIDO2_LIBRARY})
 add_regress_test(regress_cred SOURCES cred.c LIBS ${_FIDO2_LIBRARY})
-add_regress_test(regress_dev SOURCES dev.c LIBS ${_FIDO2_LIBRARY})
+add_regress_test(regress_dev SOURCES dev.c mock.c LIBS ${_FIDO2_LIBRARY})
 add_regress_test(regress_eddsa SOURCES eddsa.c LIBS ${_FIDO2_LIBRARY})
 add_regress_test(regress_es256 SOURCES es256.c LIBS ${_FIDO2_LIBRARY})
 add_regress_test(regress_es384 SOURCES es384.c LIBS ${_FIDO2_LIBRARY})
