@@ -15,8 +15,7 @@
 #define _FIDO_INTERNAL
 
 #include <fido.h>
-
-static int fake_dev_handle;
+#include "extern.h"
 
 static const unsigned char cdh[32] = {
 	0xf9, 0x64, 0x57, 0xe7, 0x2d, 0x97, 0xf6, 0xbb,
@@ -1800,43 +1799,6 @@ const unsigned char aaguid_tpm[16] = {
 const char rp_id[] = "localhost";
 const char rp_name[] = "sweet home localhost";
 
-static void *
-dummy_open(const char *path)
-{
-	(void)path;
-
-	return (&fake_dev_handle);
-}
-
-static void
-dummy_close(void *handle)
-{
-	assert(handle == &fake_dev_handle);
-}
-
-static int
-dummy_read(void *handle, unsigned char *buf, size_t len, int ms)
-{
-	(void)handle;
-	(void)buf;
-	(void)len;
-	(void)ms;
-
-	abort();
-	/* NOTREACHED */
-}
-
-static int
-dummy_write(void *handle, const unsigned char *buf, size_t len)
-{
-	(void)handle;
-	(void)buf;
-	(void)len;
-
-	abort();
-	/* NOTREACHED */
-}
-
 static fido_cred_t *
 alloc_cred(void)
 {
@@ -1878,7 +1840,6 @@ empty_cred(void)
 {
 	fido_cred_t *c;
 	fido_dev_t *d;
-	fido_dev_io_t io_f;
 
 	c = alloc_cred();
 	assert(fido_cred_authdata_len(c) == 0);
@@ -1902,23 +1863,15 @@ empty_cred(void)
 	assert(fido_cred_x5c_ptr(c) == NULL);
 	assert(fido_cred_verify(c) == FIDO_ERR_INVALID_ARGUMENT);
 
-	memset(&io_f, 0, sizeof(io_f));
-
-	io_f.open = dummy_open;
-	io_f.close = dummy_close;
-	io_f.read = dummy_read;
-	io_f.write = dummy_write;
-
 	d = alloc_dev();
+	setup_dummy_io(d);
 
 	fido_dev_force_u2f(d);
-	assert(fido_dev_set_io_functions(d, &io_f) == FIDO_OK);
 	assert(fido_dev_make_cred(d, c, NULL) == FIDO_ERR_INVALID_ARGUMENT);
 	assert(fido_dev_make_cred(d, c, "") == FIDO_ERR_UNSUPPORTED_OPTION);
 	assert(fido_cred_verify(c) == FIDO_ERR_INVALID_ARGUMENT);
 
 	fido_dev_force_fido2(d);
-	assert(fido_dev_set_io_functions(d, &io_f) == FIDO_OK);
 	assert(fido_dev_make_cred(d, c, NULL) == FIDO_ERR_INVALID_ARGUMENT);
 	assert(fido_dev_make_cred(d, c, "") == FIDO_ERR_INVALID_ARGUMENT);
 	assert(fido_cred_verify(c) == FIDO_ERR_INVALID_ARGUMENT);
