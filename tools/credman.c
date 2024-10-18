@@ -159,11 +159,11 @@ credman_list_rk(const char *path, const char *rp_id)
 		warnx("fido_credman_rk_new");
 		goto out;
 	}
-	if ((r = fido_credman_get_dev_rk(dev, rp_id, rk, NULL)) != FIDO_OK &&
+	if ((r = fido_credman_get_dev_rk(dev, NULL, 0, rp_id, rk, NULL)) != FIDO_OK &&
 	    should_retry_with_pin(dev, r)) {
 		if ((pin = get_pin(path)) == NULL)
 			goto out;
-		r = fido_credman_get_dev_rk(dev, rp_id, rk, pin);
+		r = fido_credman_get_dev_rk(dev, NULL, 0, rp_id, rk, pin);
 		freezero(pin, PINBUF_LEN);
 		pin = NULL;
 	}
@@ -203,11 +203,11 @@ credman_print_rk(fido_dev_t *dev, const char *path, const char *rp_id,
 		warnx("base64_decode");
 		goto out;
 	}
-	if ((r = fido_credman_get_dev_rk(dev, rp_id, rk, NULL)) != FIDO_OK &&
+	if ((r = fido_credman_get_dev_rk(dev, NULL, 0, rp_id, rk, NULL)) != FIDO_OK &&
 	    should_retry_with_pin(dev, r)) {
 		if ((pin = get_pin(path)) == NULL)
 			goto out;
-		r = fido_credman_get_dev_rk(dev, rp_id, rk, pin);
+		r = fido_credman_get_dev_rk(dev, NULL, 0, rp_id, rk, pin);
 		freezero(pin, PINBUF_LEN);
 		pin = NULL;
 	}

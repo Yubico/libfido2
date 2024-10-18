@@ -429,20 +429,27 @@ out:
 }
 
 static int
-credman_get_rk_wait(fido_dev_t *dev, const char *rp_id, fido_credman_rk_t *rk,
+credman_get_rk_wait(fido_dev_t *dev, const unsigned char *rp_id_hash_ptr,
+    size_t rp_id_hash_len, const char *rp_id, fido_credman_rk_t *rk,
     const char *pin, int *ms)
 {
 	fido_blob_t	rp_dgst;
 	uint8_t		dgst[SHA256_DIGEST_LENGTH];
 	int		r;
 
-	if (SHA256((const unsigned char *)rp_id, strlen(rp_id), dgst) != dgst) {
-		fido_log_debug("%s: sha256", __func__);
-		return (FIDO_ERR_INTERNAL);
-	}
+	if ((rp_id_hash_ptr == NULL) || (rp_id_hash_len == 0)) {
+		if (SHA256((const unsigned char *)rp_id, strlen(rp_id), dgst) != dgst) {
+			fido_log_debug("%s: sha256", __func__);
+			return (FIDO_ERR_INTERNAL);
+		}
+		rp_dgst.ptr = dgst;
+		rp_dgst.len = sizeof(dgst);
+	} else {
+		memset(&rp_dgst, 0, sizeof(rp_dgst));
 
-	rp_dgst.ptr = dgst;
-	rp_dgst.len = sizeof(dgst);
+		if (fido_blob_set(&rp_dgst, rp_id_hash_ptr, rp_id_hash_len) < 0)
+			return (FIDO_ERR_INVALID_ARGUMENT);
+	}
 
 	if ((r = credman_tx(dev, CMD_RK_BEGIN, &rp_dgst, pin, rp_id,
 	    FIDO_OPT_TRUE, ms)) != FIDO_OK ||
@@ -461,12 +468,14 @@ credman_get_rk_wait(fido_dev_t *dev, const char *rp_id, fido_credman_rk_t *rk,
 }
 
 int
-fido_credman_get_dev_rk(fido_dev_t *dev, const char *rp_id,
-    fido_credman_rk_t *rk, const char *pin)
+fido_credman_get_dev_rk(fido_dev_t *dev, const unsigned char *rp_id_hash_ptr,
+    size_t rp_id_hash_len, const char *rp_id, fido_credman_rk_t *rk,
+    const char *pin)
 {
 	int ms = dev->timeout_ms;
 
-	return (credman_get_rk_wait(dev, rp_id, rk, pin, &ms));
+	return (credman_get_rk_wait(dev, rp_id_hash_ptr, rp_id_hash_len,
+                                rp_id, rk, pin, &ms));
 }
 
 static int

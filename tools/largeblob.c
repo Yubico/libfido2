@@ -78,7 +78,7 @@ map_known_rps(fido_dev_t *dev, const char *path, struct rkmap *map)
 			warnx("%s: fido_credman_rk_new", __func__);
 			goto out;
 		}
-		if ((r = fido_credman_get_dev_rk(dev, rp_id, map->rk[i],
+		if ((r = fido_credman_get_dev_rk(dev, NULL, 0, rp_id, map->rk[i],
 		    pin)) != FIDO_OK) {
 			warnx("%s: fido_credman_get_dev_rk %s: %s", __func__,
 			    rp_id, fido_strerr(r));
@@ -106,11 +106,11 @@ lookup_key(const char *path, fido_dev_t *dev, const char *rp_id,
 		warnx("%s: fido_credman_rk_new", __func__);
 		goto out;
 	}
-	if ((r = fido_credman_get_dev_rk(dev, rp_id, rk, *pin)) != FIDO_OK &&
+	if ((r = fido_credman_get_dev_rk(dev, NULL, 0, rp_id, rk, *pin)) != FIDO_OK &&
 	    *pin == NULL && should_retry_with_pin(dev, r)) {
 		if ((*pin = get_pin(path)) == NULL)
 			goto out;
-		r = fido_credman_get_dev_rk(dev, rp_id, rk, *pin);
+		r = fido_credman_get_dev_rk(dev, NULL, 0, rp_id, rk, *pin);
 	}
 	if (r != FIDO_OK) {
 		warnx("%s: fido_credman_get_dev_rk: %s", __func__,

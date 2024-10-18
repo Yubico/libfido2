@@ -90,8 +90,8 @@ int fido_credman_del_dev_rk(fido_dev_t *, const unsigned char *, size_t,
     const char *);
 int fido_credman_get_dev_metadata(fido_dev_t *, fido_credman_metadata_t *,
     const char *);
-int fido_credman_get_dev_rk(fido_dev_t *, const char *, fido_credman_rk_t *,
-    const char *);
+int fido_credman_get_dev_rk(fido_dev_t *, const unsigned char *, size_t,
+    const char *, fido_credman_rk_t *, const char *);
 int fido_credman_get_dev_rp(fido_dev_t *, fido_credman_rp_t *, const char *);
 int fido_credman_set_dev_rk(fido_dev_t *, fido_cred_t *, const char *);
 

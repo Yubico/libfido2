@@ -302,7 +302,7 @@ get_rk_list(const struct param *p)
 		return;
 	}
 
-	fido_credman_get_dev_rk(dev, p->rp_id, rk, p->pin);
+	fido_credman_get_dev_rk(dev, NULL, 0, p->rp_id, rk, p->pin);
 
 	/* +1 on purpose */
 	for (size_t i = 0; i < fido_credman_rk_count(rk) + 1; i++) {
