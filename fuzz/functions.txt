@@ -8,9 +8,9 @@ aes256_gcm_dec                     1       0 100.00%         3       0 100.00%
 aes256.c:aes256_cbc_fips          26       1  96.15%        42       4  90.48%
 aes256.c:aes256_cbc               29       1  96.55%        36       3  91.67%
 aes256.c:aes256_cbc_proto1         1       0 100.00%         5       0 100.00%
-aes256.c:aes256_gcm               52       1  98.08%        60       4  93.33%
+aes256.c:aes256_gcm               55       3  94.55%        64      10  84.38%
 --------------------------------------------------------------------------------------------------------
-TOTAL                            118       3  97.46%       157      11  92.99%
+TOTAL                            121       5  95.87%       161      17  89.44%
 
 File '/libfido2/src/assert.c':
 Name                                  Regions    Miss   Cover     Lines    Miss   Cover
@@ -269,7 +269,7 @@ Name                                    Regions    Miss   Cover     Lines    Mis
 -------------------------------------------------------------------------------------------------------------------
 fido_dev_make_cred                           12       0 100.00%        10       0 100.00%
 fido_check_rp_id                              4       0 100.00%        11       0 100.00%
-fido_cred_verify                             59       2  96.61%        75       4  94.67%
+fido_cred_verify                             59       0 100.00%        75       0 100.00%
 fido_cred_verify_self                        60       4  93.33%        87       7  91.95%
 fido_cred_new                                 1       0 100.00%         3       0 100.00%
 fido_cred_reset_tx                            1       0 100.00%        18       0 100.00%
@@ -343,7 +343,7 @@ cred.c:fido_cred_clean_attobj                 1       0 100.00%         6       
 cred.c:fido_cred_clean_authdata               1       0 100.00%         8       0 100.00%
 cred.c:fido_cred_clean_attstmt                1       0 100.00%         8       0 100.00%
 -------------------------------------------------------------------------------------------------------------------
-TOTAL                                       691      39  94.36%       911      46  94.95%
+TOTAL                                       691      37  94.65%       911      42  95.39%
 
 File '/libfido2/src/credman.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -490,12 +490,12 @@ es256_pk_from_EC_KEY                         42       2  95.24%        47       
 es256_pk_from_EVP_PKEY                        8       0 100.00%         7       0 100.00%
 es256_sk_to_EVP_PKEY                         28       0 100.00%        39       0 100.00%
 es256_derive_pk                              25       0 100.00%        29       0 100.00%
-es256_verify_sig                             12       2  83.33%        19       5  73.68%
+es256_verify_sig                             12       1  91.67%        19       2  89.47%
 es256_pk_verify_sig                           7       1  85.71%        13       2  84.62%
 es256.c:decode_pubkey_point                   9       0 100.00%        13       0 100.00%
 es256.c:decode_coord                          8       0 100.00%        10       0 100.00%
 -------------------------------------------------------------------------------------------------------------------
-TOTAL                                       315       5  98.41%       372      11  97.04%
+TOTAL                                       315       4  98.73%       372       8  97.85%
 
 File '/libfido2/src/es384.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -770,9 +770,9 @@ nfc.c:rx_init                                25       0 100.00%        27       
 nfc.c:rx_cbor                                 4       0 100.00%         6       0 100.00%
 nfc.c:rx_msg                                 18       1  94.44%        23       3  86.96%
 nfc.c:rx_apdu                                14       0 100.00%        22       0 100.00%
-nfc.c:tx_get_response                         4       0 100.00%        11       0 100.00%
+nfc.c:tx_get_response                         7       0 100.00%        12       0 100.00%
 -------------------------------------------------------------------------------------------------------------------
-TOTAL                                       155       3  98.06%       244       9  96.31%
+TOTAL                                       158       3  98.10%       245       9  96.33%
 
 File '/libfido2/src/nfc_linux.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
@@ -938,7 +938,7 @@ u2f_register                                   76       0 100.00%        81     
 u2f_authenticate                               33       0 100.00%        37       0 100.00%
 u2f_get_touch_begin                            37       0 100.00%        45       0 100.00%
 u2f_get_touch_status                           26       0 100.00%        36       0 100.00%
-u2f.c:key_lookup                               51       0 100.00%        65       0 100.00%
+u2f.c:key_lookup                               53       0 100.00%        66       0 100.00%
 u2f.c:send_dummy_register                      37       0 100.00%        45       0 100.00%
 u2f.c:delay_ms                                 13       1  92.31%        15       3  80.00%
 u2f.c:parse_register_reply                     49       0 100.00%        62       0 100.00%
@@ -952,7 +952,7 @@ u2f.c:do_auth                                  56       0 100.00%        67     
 u2f.c:parse_auth_reply                         23       0 100.00%        23       0 100.00%
 u2f.c:authdata_fake                            12       0 100.00%        27       0 100.00%
 ---------------------------------------------------------------------------------------------------------------------
-TOTAL                                         572       4  99.30%       726      12  98.35%
+TOTAL                                         574       4  99.30%       727      12  98.35%
 
 File '/libfido2/src/util.c':
 Name                                      Regions    Miss   Cover     Lines    Miss   Cover
