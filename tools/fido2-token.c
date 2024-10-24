@@ -99,8 +99,8 @@ main(int argc, char **argv)
 	case 'S':
 		return (token_set(argc, argv, device));
 	case 'V':
-		fprintf(stderr, "%d.%d.%d\n", _FIDO_MAJOR, _FIDO_MINOR,
-		    _FIDO_PATCH);
+		fprintf(stderr, "%d.%d.%d-%s\n", _FIDO_MAJOR, _FIDO_MINOR,
+		    _FIDO_PATCH, _FIDO_SUFFIX);
 		exit(0);
 	}
 
