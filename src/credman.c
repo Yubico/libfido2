@@ -442,14 +442,14 @@ credman_get_rk_wait(fido_dev_t *dev, const unsigned char *rp_id_hash_ptr,
 			fido_log_debug("%s: sha256", __func__);
 			return (FIDO_ERR_INTERNAL);
 		}
-		rp_dgst.ptr = dgst;
-		rp_dgst.len = sizeof(dgst);
 	} else {
-		memset(&rp_dgst, 0, sizeof(rp_dgst));
-
-		if (fido_blob_set(&rp_dgst, rp_id_hash_ptr, rp_id_hash_len) < 0)
+		if (rp_id_hash_len != SHA256_DIGEST_LENGTH) {
 			return (FIDO_ERR_INVALID_ARGUMENT);
+		}
+		memcpy(dgst, rp_id_hash_ptr, rp_id_hash_len);
 	}
+	rp_dgst.ptr = dgst;
+	rp_dgst.len = sizeof(dgst);
 
 	if ((r = credman_tx(dev, CMD_RK_BEGIN, &rp_dgst, pin, rp_id,
 	    FIDO_OPT_TRUE, ms)) != FIDO_OK ||
