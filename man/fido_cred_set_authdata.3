@@ -99,6 +99,8 @@ typedef enum {
 .Fn fido_cred_set_fmt "fido_cred_t *cred" "const char *ptr"
 .Ft int
 .Fn fido_cred_set_type "fido_cred_t *cred" "int cose_alg"
+.Ft int
+.Fn fido_cred_append_type "fido_cred_t *cred" "int cose_alg"
 .Sh DESCRIPTION
 The
 .Nm
@@ -391,6 +393,11 @@ or
 The type of a credential may only be set once.
 Note that not all authenticators support COSE_RS256, COSE_ES384, or
 COSE_EDDSA.
+.Pp
+Unlike
+.Fn fido_cred_set_type ,
+.Fn fido_cred_append_type
+may be called repeatedly to request multiple different types.
 .Pp
 Use of the
 .Nm
