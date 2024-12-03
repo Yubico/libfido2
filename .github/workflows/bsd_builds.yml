@@ -20,7 +20,7 @@ jobs:
       matrix:
         include:
           - { image: freebsd/14.x }
-          - { image: openbsd/7.4, llvm_version: 16 }
+          - { image: openbsd/7.6, llvm_version: 16 }
     steps:
     - uses: actions/checkout@v4
     - name: dependencies
