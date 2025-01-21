@@ -152,6 +152,17 @@ int fido_winhello_get_assert(fido_dev_t *, fido_assert_t *, const char *, int);
 int fido_winhello_get_cbor_info(fido_dev_t *, fido_cbor_info_t *);
 int fido_winhello_make_cred(fido_dev_t *, fido_cred_t *, const char *, int);
 
+/* ble */
+bool fido_is_ble(const char *);
+int fido_dev_set_ble(fido_dev_t *);
+void *fido_ble_open(const char *);
+void  fido_ble_close(void *);
+int fido_ble_read(void *, unsigned char *, size_t, int);
+int fido_ble_write(void *, const unsigned char *, size_t);
+int fido_ble_rx(fido_dev_t *, uint8_t, unsigned char *, size_t, int);
+int fido_ble_tx(fido_dev_t *, uint8_t, const unsigned char *, size_t);
+size_t fido_ble_get_cp_size(fido_dev_t *d);
+
 /* generic i/o */
 int fido_rx_cbor_status(fido_dev_t *, int *);
 int fido_rx(fido_dev_t *, uint8_t, void *, size_t, int *);
@@ -240,6 +251,7 @@ int fido_get_signed_hash_tpm(fido_blob_t *, const fido_blob_t *,
     const fido_blob_t *, const fido_attstmt_t *, const fido_attcred_t *);
 
 /* device manifest functions */
+int fido_ble_manifest(fido_dev_info_t *, size_t, size_t *);
 int fido_hid_manifest(fido_dev_info_t *, size_t, size_t *);
 int fido_nfc_manifest(fido_dev_info_t *, size_t, size_t *);
 int fido_pcsc_manifest(fido_dev_info_t *, size_t, size_t *);
@@ -272,6 +284,7 @@ uint32_t uniform_random(uint32_t);
 #define FIDO_WINHELLO_PATH	"windows://hello"
 #define FIDO_NFC_PREFIX		"nfc:"
 #define FIDO_PCSC_PREFIX	"pcsc:"
+#define FIDO_BLE_PREFIX	"ble:"
 
 #ifdef __cplusplus
 } /* extern "C" */
