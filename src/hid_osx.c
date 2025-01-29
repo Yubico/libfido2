@@ -543,6 +543,7 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct hid_osx		*ctx = handle;
 	ssize_t			 r;
+	struct timespec		 ts;
 
 	explicit_bzero(buf, len);
 	explicit_bzero(ctx->report, sizeof(ctx->report));
@@ -552,20 +553,20 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 		return (-1);
 	}
 
-	/* check for pending frame  */
-	if ((r = read(ctx->report_pipe[0], buf, len)) == -1) {
+	if (fido_time_now(&ts) != 0) {
+		fido_log_debug("%s: fido_time_now", __func__);
+		return (-1);
+	}
+
+	do {
+		if ((r = read(ctx->report_pipe[0], buf, len)) >= 0)
+			break;
 		if (errno != EAGAIN && errno != EWOULDBLOCK) {
 			fido_log_error(errno, "%s: read", __func__);
 			return (-1);
 		}
-
-		schedule_io_loop(ctx, ms);
-
-		if ((r = read(ctx->report_pipe[0], buf, len)) == -1) {
-			fido_log_error(errno, "%s: read", __func__);
-			return (-1);
-		}
-	}
+		schedule_io_loop(ctx, ms > 100 ? 100 : ms);
+	} while (fido_time_delta(&ts, &ms) == 0);
 
 	if (r < 0 || (size_t)r != len) {
 		fido_log_debug("%s: %zd != %zu", __func__, r, len);
