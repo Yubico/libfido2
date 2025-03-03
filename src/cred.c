@@ -598,6 +598,7 @@ fido_cred_reset_tx(fido_cred_t *cred)
 	cred->rk = FIDO_OPT_OMIT;
 	cred->uv = FIDO_OPT_OMIT;
 	cred->ea.mode = 0;
+	cred->window = NULL;
 }
 
 void

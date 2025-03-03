@@ -802,6 +802,7 @@ fido_assert_reset_tx(fido_assert_t *assert)
 	memset(&assert->ext, 0, sizeof(assert->ext));
 	assert->rp_id = NULL;
 	assert->appid = NULL;
+	assert->window = NULL;
 	assert->up = FIDO_OPT_OMIT;
 	assert->uv = FIDO_OPT_OMIT;
 }
