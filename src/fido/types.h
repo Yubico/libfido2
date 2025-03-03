@@ -191,6 +191,7 @@ typedef struct fido_cred {
 	fido_blob_t       largeblob_key; /* decoded large blob key */
 	fido_blob_t       blob;          /* CTAP 2.1 credBlob */
 	fido_cred_ea_t    ea;            /* enterprise attestation */
+	void* window;                    /* winhello window handle */
 } fido_cred_t;
 
 typedef struct fido_assert_extattr {
@@ -228,6 +229,7 @@ typedef struct fido_assert {
 	fido_assert_stmt  *stmt;         /* array of expected assertions */
 	size_t             stmt_cnt;     /* number of allocated assertions */
 	size_t             stmt_len;     /* number of received assertions */
+	void              *window;       /* winhello window handle */
 } fido_assert_t;
 
 typedef struct fido_opt_array {

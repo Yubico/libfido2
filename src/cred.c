@@ -741,6 +741,21 @@ fido_cred_set_x509(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 }
 
 int
+fido_cred_set_winhello_window(fido_cred_t *cred, void *window)
+{
+#ifdef USE_WINHELLO
+	cred->window = window;
+
+	return (FIDO_OK);
+#else
+	(void)cred;
+	(void)window;
+
+	return (FIDO_ERR_UNSUPPORTED_EXTENSION);
+#endif
+}
+
+int
 fido_cred_set_sig(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 {
 	if (fido_blob_set(&cred->attstmt.sig, ptr, len) < 0)
