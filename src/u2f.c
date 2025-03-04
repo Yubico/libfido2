@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2024 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -678,10 +678,15 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int *ms)
 		return (FIDO_ERR_UNSUPPORTED_OPTION);
 	}
 
-	if (cred->type != COSE_ES256 || cred->cdh.ptr == NULL ||
-	    cred->rp.id == NULL || cred->cdh.len != SHA256_DIGEST_LENGTH) {
-		fido_log_debug("%s: type=%d, cdh=(%p,%zu)" , __func__,
-		    cred->type, (void *)cred->cdh.ptr, cred->cdh.len);
+	if (!fido_int_array_contains(&cred->type, COSE_ES256)) {
+		fido_log_debug("%s: type", __func__);
+		return (FIDO_ERR_INVALID_ARGUMENT);
+	}
+
+	if (cred->cdh.ptr == NULL || cred->rp.id == NULL ||
+	    cred->cdh.len != SHA256_DIGEST_LENGTH) {
+		fido_log_debug("%s: cdh=(%p,%zu)" , __func__,
+		    (void *)cred->cdh.ptr, cred->cdh.len);
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	}
 
