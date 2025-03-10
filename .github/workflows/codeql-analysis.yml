@@ -36,7 +36,7 @@ jobs:
       run: |
         sudo apt -q update
         sudo apt install -q -y libcbor-dev libudev-dev libz-dev original-awk \
-         libpcsclite-dev
+         libpcsclite-dev libsystemd-dev
         ./.actions/build-linux-gcc
     - name: perform codeql analysis
       uses: github/codeql-action/analyze@v3
