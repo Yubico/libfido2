@@ -322,6 +322,16 @@ The
 .Fn fido_cred_type
 function returns the COSE algorithm of
 .Fa cred .
+If multiple types were requested through
+.Fn fido_cred_append_type ,
+the return value of
+.Fn fido_cred_type
+may change after a successful call to
+.Fn fido_cred_set_attobj ,
+.Fn fido_cred_set_authdata ,
+.Fn fido_cred_set_authdata_raw ,
+or
+.Fn fido_dev_make_cred .
 .Pp
 The
 .Fn fido_cred_flags
