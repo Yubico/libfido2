@@ -231,7 +231,8 @@ try {
 	    -DCRYPTO_INCLUDE_DIRS="${PREFIX}\include" `
 	    -DCRYPTO_LIBRARY_DIRS="${PREFIX}\lib" `
 	    -DCRYPTO_BIN_DIRS="${PREFIX}\bin" `
-	    -DCRYPTO_LIBRARIES="${CRYPTO_LIBRARIES}" `
+	    -DCRYPTO_LIBRARIES="${CRYPTO_LIB}" `
+	    -DCRYPTO_DLL="${CRYPTO_DLL}" `
 	    -DCMAKE_C_FLAGS_DEBUG="${CFLAGS_DEBUG} ${Fido2Flags}" `
 	    -DCMAKE_C_FLAGS_RELEASE="${CFLAGS_RELEASE} ${Fido2Flags}" `
 	    -DCMAKE_INSTALL_PREFIX="${PREFIX}"; `
@@ -243,7 +244,7 @@ try {
 	    ExitOnError
 	# Copy DLLs.
 	if ("${SHARED}" -eq "ON") {
-		"cbor.dll", "${CRYPTO_LIBRARIES}.dll", "zlib1.dll" | `
+		"cbor.dll", "${CRYPTO_DLL}.dll", "zlib1.dll" | `
 		    %{ Copy-Item "${PREFIX}\bin\$_" `
 		    -Destination "examples\${Config}" }
 	}
