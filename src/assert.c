@@ -664,12 +664,29 @@ fido_assert_set_winhello_appid(fido_assert_t *assert, const char *id)
 
 	return (FIDO_OK);
 }
+
+int
+fido_assert_set_winhello_window(fido_assert_t *assert, void *window)
+{
+	assert->window = window;
+
+	return (FIDO_OK);
+}
 #else
 int
 fido_assert_set_winhello_appid(fido_assert_t *assert, const char *id)
 {
 	(void)assert;
 	(void)id;
+
+	return (FIDO_ERR_UNSUPPORTED_EXTENSION);
+}
+
+int
+fido_assert_set_winhello_window(fido_assert_t *assert, void *window)
+{
+	(void)assert;
+	(void)window;
 
 	return (FIDO_ERR_UNSUPPORTED_EXTENSION);
 }
@@ -785,6 +802,7 @@ fido_assert_reset_tx(fido_assert_t *assert)
 	memset(&assert->ext, 0, sizeof(assert->ext));
 	assert->rp_id = NULL;
 	assert->appid = NULL;
+	assert->window = NULL;
 	assert->up = FIDO_OPT_OMIT;
 	assert->uv = FIDO_OPT_OMIT;
 }
