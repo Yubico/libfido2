@@ -34,7 +34,10 @@ tx_short_apdu(fido_dev_t *d, const iso7816_header_t *h, const uint8_t *payload,
 	apdu[3] = h->p2;
 	apdu[4] = payload_len;
 	memcpy(&apdu[5], payload, payload_len);
-	apdu_len = (size_t)(5 + payload_len + 1);
+	apdu_len = (size_t)(5 + payload_len);
+
+	if (!(cla_flags & 0x10))
+		apdu_len += 1;
 
 	if (d->io.write(d->io_handle, apdu, apdu_len) < 0) {
 		fido_log_debug("%s: write", __func__);
