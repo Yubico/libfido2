@@ -78,10 +78,6 @@ if (-Not (Test-Path $GPG)) {
 if ($Arch -eq "ARM" -and [string]::IsNullOrEmpty($WinSDK)) {
 	$WinSDK = '10.0.22621.0'
 }
-# Override Windows SDK version if $WinSDK is set.
-if (-Not ([string]::IsNullOrEmpty($WinSDK))) {
-	$Arch = "$Arch,version=$WinSDK"
-}
 
 Write-Host "WinSDK: $WinSDK"
 Write-Host "Config: $Config"
@@ -111,6 +107,11 @@ New-Item -Type File "${GpgHome}\common.conf" -Force
 New-Item -Type Directory "${OUTPUT}" -Force
 New-Item -Type Directory "${OUTPUT}\${Arch}" -Force
 New-Item -Type Directory "${OUTPUT}\${Arch}\${Type}" -force
+
+# Override Windows SDK version if $WinSDK is set.
+if (-Not ([string]::IsNullOrEmpty($WinSDK))) {
+	$Arch = "$Arch,version=$WinSDK"
+}
 
 # Fetch and verify dependencies.
 Push-Location ${BUILD}
