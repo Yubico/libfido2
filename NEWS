@@ -1,4 +1,4 @@
-* Version 1.16.0 (unreleased)
+* Version 1.16.0 (2025-05-06)
  ** Added support for enterprise attestation.
  ** Improved handling of invalid key handles in U2F key lookup; gh#819.
  ** Fixed issue where storing small CTAP 2.1 largeBlobs failed; gh#826.
