@@ -167,4 +167,12 @@
 #define FIDO_UV_MODE_EXT_PIN	0x0800	/* external pin verification */
 #define FIDO_UV_MODE_EXT_DRAWN	0x1000	/* external drawn pattern check */
 
+/* Recognised token permissions */
+#define CTAP21_UV_TOKEN_PERM_MAKECRED	0x01
+#define CTAP21_UV_TOKEN_PERM_ASSERT	0x02
+#define CTAP21_UV_TOKEN_PERM_CRED_MGMT	0x04
+#define CTAP21_UV_TOKEN_PERM_BIO	0x08
+#define CTAP21_UV_TOKEN_PERM_LARGEBLOB	0x10
+#define CTAP21_UV_TOKEN_PERM_CONFIG	0x20
+
 #endif /* !_FIDO_PARAM_H */
