@@ -918,7 +918,7 @@ int
 fido_winhello_get_assert(fido_dev_t *dev, fido_assert_t *assert,
     const char *pin, int ms)
 {
-	HWND			 w;
+	HWND			 w = assert->window;
 	struct winhello_assert	*ctx;
 	int			 r = FIDO_ERR_INTERNAL;
 
@@ -930,7 +930,7 @@ fido_winhello_get_assert(fido_dev_t *dev, fido_assert_t *assert,
 		fido_log_debug("%s: calloc", __func__);
 		goto fail;
 	}
-	if ((w = GetForegroundWindow()) == NULL) {
+	if (w == NULL && (w = GetForegroundWindow()) == NULL) {
 		fido_log_debug("%s: GetForegroundWindow", __func__);
 		if ((w = GetTopWindow(NULL)) == NULL) {
 			fido_log_debug("%s: GetTopWindow", __func__);
@@ -995,7 +995,7 @@ int
 fido_winhello_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
     int ms)
 {
-	HWND			 w;
+	HWND			 w = cred->window;
 	struct winhello_cred	*ctx;
 	int			 r = FIDO_ERR_INTERNAL;
 
@@ -1007,7 +1007,7 @@ fido_winhello_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 		fido_log_debug("%s: calloc", __func__);
 		goto fail;
 	}
-	if ((w = GetForegroundWindow()) == NULL) {
+	if (w == NULL && (w = GetForegroundWindow()) == NULL) {
 		fido_log_debug("%s: GetForegroundWindow", __func__);
 		if ((w = GetTopWindow(NULL)) == NULL) {
 			fido_log_debug("%s: GetTopWindow", __func__);
