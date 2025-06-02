@@ -140,8 +140,10 @@ print_rk(const fido_credman_rk_t *rk, size_t idx)
 
 	r = 0;
 out:
-	free(user_id);
-	free(id);
+	if (user_id)
+		free(user_id);
+	if (id)
+		free(id);
 
 	return r;
 }
@@ -299,7 +301,7 @@ credman_update_rk(const char *path, const char *user_id, const char *cred_id,
 		warnx("fido_cred_new");
 		goto out;
 	}
-	if ((r = fido_cred_set_id(cred, cred_id_ptr, cred_id_len)) != FIDO_OK) { 
+	if ((r = fido_cred_set_id(cred, cred_id_ptr, cred_id_len)) != FIDO_OK) {
 		warnx("fido_cred_set_id: %s",  fido_strerr(r));
 		goto out;
 	}
