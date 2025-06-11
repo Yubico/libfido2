@@ -36,6 +36,7 @@
 .Nm fido_dev_largeblob_set_array
 .Nd FIDO2 large blob API
 .Sh SYNOPSIS
+.Lb libfido2 libcbor libcrypto libz
 .In fido.h
 .Ft int
 .Fn fido_dev_largeblob_get "fido_dev_t *dev" "const unsigned char *key_ptr" "size_t key_len" "unsigned char **blob_ptr" "size_t *blob_len"
