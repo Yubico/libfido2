@@ -20,13 +20,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-2022 ]
+        os: [ windows-2022, windows-2025 ]
         arch: [ x64, Win32, ARM64, ARM ]
         type: [ dynamic, static ]
         config: [ "Release" ]
+        # windows-2025 dropped support for 32-bit ARM
+        exclude:
+          - os: windows-2025
+            arch: ARM
     steps:
     - uses: actions/checkout@v4
     - name: build
+      shell: pwsh
       run: |
-        .\windows\build.ps1 -Fido2Flags '/analyze' -Arch ${{ matrix.arch }} `
-          -Type ${{ matrix.type }} -Config ${{ matrix.config }}
+        $buildParams = @{
+          Fido2Flags = '/analyze'
+          Arch       = '${{ matrix.arch }}'
+          Type       = '${{ matrix.type }}'
+          Config     = '${{ matrix.config }}'
+        }
+        if ($buildParams['Arch'] -eq 'ARM') {
+          $buildParams['WinSDK'] = '10.0.22621.0'
+        }
+        .\windows\build.ps1 @buildParams
