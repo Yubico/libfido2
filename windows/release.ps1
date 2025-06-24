@@ -14,7 +14,15 @@ $SDK = '143'
 
 foreach ($Arch in $Architectures) {
 	foreach ($Type in $Types) {
-		./build.ps1 -Arch ${Arch} -Type ${Type} -Config ${Config}
+		$buildParams = @{
+			Arch   = $Arch
+			Type   = $Type
+			Config = $Config
+		}
+		if ($buildParams['Arch'] -eq 'ARM') {
+			$buildParams['WinSDK'] = '10.0.22621.0'
+		}
+		./build.ps1 @buildParams
 	}
 }
 
