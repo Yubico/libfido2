@@ -45,7 +45,7 @@ https://developers.yubico.com/libfido2/Releases[release page].
 === Dependencies
 
 *libfido2* depends on https://github.com/pjk/libcbor[libcbor],
-https://www.openssl.org[OpenSSL] 1.1 or newer, and https://zlib.net[zlib].
+https://www.openssl.org[OpenSSL] 3.0 or newer, and https://zlib.net[zlib].
 On Linux, libudev
 (part of https://www.freedesktop.org/wiki/Software/systemd[systemd]) is also
 required.
