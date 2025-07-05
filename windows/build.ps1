@@ -74,11 +74,6 @@ if (-Not (Test-Path $GPG)) {
 	throw "Unable to find GPG at $GPG"
 }
 
-# 10.0.261000.0 appear to have dropped ARM32 support, pin the SDK version
-if ($Arch -eq "ARM" -and [string]::IsNullOrEmpty($WinSDK)) {
-	$WinSDK = '10.0.22621.0'
-}
-
 Write-Host "WinSDK: $WinSDK"
 Write-Host "Config: $Config"
 Write-Host "Arch: $Arch"
