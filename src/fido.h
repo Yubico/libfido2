@@ -146,6 +146,7 @@ int fido_assert_set_up(fido_assert_t *, fido_opt_t);
 int fido_assert_set_uv(fido_assert_t *, fido_opt_t);
 int fido_assert_set_sig(fido_assert_t *, size_t, const unsigned char *, size_t);
 int fido_assert_set_winhello_appid(fido_assert_t *, const char *);
+int fido_assert_set_winhello_window(fido_assert_t*, void *);
 int fido_assert_verify(const fido_assert_t *, size_t, int, const void *);
 int fido_cbor_info_algorithm_cose(const fido_cbor_info_t *, size_t);
 int fido_cred_empty_exclude_list(fido_cred_t *);
@@ -175,6 +176,7 @@ int fido_cred_type(const fido_cred_t *);
 int fido_cred_set_user(fido_cred_t *, const unsigned char *, size_t,
     const char *, const char *, const char *);
 int fido_cred_set_x509(fido_cred_t *, const unsigned char *, size_t);
+int fido_cred_set_winhello_window(fido_cred_t*, void *);
 int fido_cred_verify(const fido_cred_t *);
 int fido_cred_verify_self(const fido_cred_t *);
 #ifdef _FIDO_SIGSET_DEFINED

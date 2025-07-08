@@ -598,6 +598,7 @@ fido_cred_reset_tx(fido_cred_t *cred)
 	cred->rk = FIDO_OPT_OMIT;
 	cred->uv = FIDO_OPT_OMIT;
 	cred->ea.mode = 0;
+	cred->window = NULL;
 }
 
 void
@@ -738,6 +739,21 @@ fido_cred_set_x509(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 	cred->attstmt.x5c.ptr = list_ptr;
 
 	return (FIDO_OK);
+}
+
+int
+fido_cred_set_winhello_window(fido_cred_t *cred, void *window)
+{
+#ifdef USE_WINHELLO
+	cred->window = window;
+
+	return (FIDO_OK);
+#else
+	(void)cred;
+	(void)window;
+
+	return (FIDO_ERR_UNSUPPORTED_EXTENSION);
+#endif
 }
 
 int
