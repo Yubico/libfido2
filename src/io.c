@@ -50,15 +50,16 @@ tx_pkt(fido_dev_t *d, const void *pkt, size_t len, int *ms)
 static int
 tx_empty(fido_dev_t *d, uint8_t cmd, int *ms)
 {
-	struct frame	*fp;
-	unsigned char	 pkt[sizeof(*fp) + 1];
+	struct frame	 fp;
+	unsigned char	 pkt[sizeof(fp) + 1];
 	const size_t	 len = d->tx_len + 1;
 	int		 n;
 
 	memset(&pkt, 0, sizeof(pkt));
-	fp = (struct frame *)(pkt + 1);
-	fp->cid = d->cid;
-	fp->body.init.cmd = CTAP_FRAME_INIT | cmd;
+	memset(&fp, 0, sizeof(fp));
+	fp.cid = d->cid;
+	fp.body.init.cmd = CTAP_FRAME_INIT | cmd;
+	memcpy(pkt + 1, &fp, sizeof(fp));
 
 	if (len > sizeof(pkt) || (n = tx_pkt(d, pkt, len, ms)) < 0 ||
 	    (size_t)n != len)
@@ -70,22 +71,23 @@ tx_empty(fido_dev_t *d, uint8_t cmd, int *ms)
 static size_t
 tx_preamble(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count, int *ms)
 {
-	struct frame	*fp;
-	unsigned char	 pkt[sizeof(*fp) + 1];
+	struct frame	 fp;
+	unsigned char	 pkt[sizeof(fp) + 1];
 	const size_t	 len = d->tx_len + 1;
 	int		 n;
 
-	if (d->tx_len - CTAP_INIT_HEADER_LEN > sizeof(fp->body.init.data))
+	if (d->tx_len - CTAP_INIT_HEADER_LEN > sizeof(fp.body.init.data))
 		return (0);
 
 	memset(&pkt, 0, sizeof(pkt));
-	fp = (struct frame *)(pkt + 1);
-	fp->cid = d->cid;
-	fp->body.init.cmd = CTAP_FRAME_INIT | cmd;
-	fp->body.init.bcnth = (count >> 8) & 0xff;
-	fp->body.init.bcntl = count & 0xff;
+	memset(&fp, 0, sizeof(fp));
+	fp.cid = d->cid;
+	fp.body.init.cmd = CTAP_FRAME_INIT | cmd;
+	fp.body.init.bcnth = (count >> 8) & 0xff;
+	fp.body.init.bcntl = count & 0xff;
 	count = MIN(count, d->tx_len - CTAP_INIT_HEADER_LEN);
-	memcpy(&fp->body.init.data, buf, count);
+	memcpy(pkt + 1, &fp, sizeof(fp));
+	memcpy(&fp.body.init.data, buf, count);
 
 	if (len > sizeof(pkt) || (n = tx_pkt(d, pkt, len, ms)) < 0 ||
 	    (size_t)n != len)
@@ -97,20 +99,21 @@ tx_preamble(fido_dev_t *d, uint8_t cmd, const void *buf, size_t count, int *ms)
 static size_t
 tx_frame(fido_dev_t *d, uint8_t seq, const void *buf, size_t count, int *ms)
 {
-	struct frame	*fp;
-	unsigned char	 pkt[sizeof(*fp) + 1];
+	struct frame	 fp;
+	unsigned char	 pkt[sizeof(fp) + 1];
 	const size_t	 len = d->tx_len + 1;
 	int		 n;
 
-	if (d->tx_len - CTAP_CONT_HEADER_LEN > sizeof(fp->body.cont.data))
+	if (d->tx_len - CTAP_CONT_HEADER_LEN > sizeof(fp.body.cont.data))
 		return (0);
 
 	memset(&pkt, 0, sizeof(pkt));
-	fp = (struct frame *)(pkt + 1);
-	fp->cid = d->cid;
-	fp->body.cont.seq = seq;
+	memset(&fp, 0, sizeof(fp));
+	fp.cid = d->cid;
+	fp.body.cont.seq = seq;
 	count = MIN(count, d->tx_len - CTAP_CONT_HEADER_LEN);
-	memcpy(&fp->body.cont.data, buf, count);
+	memcpy(pkt + 1, &fp, sizeof(fp));
+	memcpy(&fp.body.cont.data, buf, count);
 
 	if (len > sizeof(pkt) || (n = tx_pkt(d, pkt, len, ms)) < 0 ||
 	    (size_t)n != len)
