@@ -32,7 +32,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(FIDO_MAJOR "1")
 set(FIDO_MINOR "16")
-set(FIDO_PATCH "4")
+set(FIDO_PATCH "5")
 set(FIDO_SUFFIX "swissbit")
 set(FIDO_VERSION ${FIDO_MAJOR}.${FIDO_MINOR}.${FIDO_PATCH}-${FIDO_SUFFIX})
 
@@ -302,6 +302,8 @@ else()
 		set(USE_WINHELLO OFF)
 	endif()
 
+	check_c_compiler_flag("-Wimplicit-fallthrough" HAVE_IMPLICIT_FALLTHROUGH)
+
 	add_compile_options(-Wall)
 	add_compile_options(-Wextra)
 	add_compile_options(-Werror)
@@ -310,7 +312,9 @@ else()
 	add_compile_options(-Wwrite-strings)
 	add_compile_options(-Wmissing-prototypes)
 	add_compile_options(-Wbad-function-cast)
-	add_compile_options(-Wimplicit-fallthrough)
+	if (HAVE_IMPLICIT_FALLTHROUGH)
+		add_compile_options(-Wimplicit-fallthrough)
+	endif()
 	add_compile_options(-pedantic)
 	add_compile_options(-pedantic-errors)
 
