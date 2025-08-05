@@ -1,4 +1,4 @@
-= Examples
+== Examples
 
 === Definitions
 
@@ -6,8 +6,7 @@ The following definitions are used in the description below:
 
 - <device>
 
-	The file system path or subsystem-specific identification string of a
-	FIDO device.
+	The file system path or subsystem-specific identification string of a FIDO device.
 
 - <pin>, [oldpin]
 
@@ -15,8 +14,7 @@ The following definitions are used in the description below:
 
 - <cred_id>
 
-	The file system path of a file containing a FIDO credential ID in
-	binary representation.
+	The file system path of a file containing a FIDO credential ID in binary representation.
 
 - <pubkey>
 
@@ -30,69 +28,107 @@ The following definitions are used in the description below:
 
 The following examples are provided:
 
-- manifest
+==== manifest
 
-	Prints a list of configured FIDO devices.
+Prints a list of configured FIDO devices.
 
-- info <device>
+==== info
 
-	Prints information about <device>.
+	info <device>
 
-- reset <device>
+Prints information about <device>.
 
-	Performs a factory reset on <device>.
+==== reset 
 
-- setpin <pin> [oldpin] <device>
+	reset <device>
 
-	Configures <pin> as the new PIN of <device>. If [oldpin] is provided,
-	the device's PIN is changed from [oldpin] to <pin>.
+Performs a factory reset on <device>.
 
-- cred [-t es256|es384|rs256|eddsa] [-k pubkey] [-ei cred_id] [-P pin]
-       [-T seconds] [-b blobkey] [-hruv] [-c cred_protect] <device>
+==== setpin
+ 
+	setpin <pin> [oldpin] <device>
 
-	Creates a new credential on <device> and verify that the credential
-	was signed by the authenticator. The device's attestation certificate
-	is not verified. If option -k is specified, the credential's public
-	key is stored in <pubkey>. If option -i is specified, the credential
-	ID is stored in <cred_id>. The -e option may be used to add <cred_id>
-	to the list of excluded credentials. If option -h is specified,
-	the hmac-secret FIDO2 extension is enabled on the generated
-	credential. If option -r is specified, the generated credential
-	will involve a resident key. User verification may be requested
-	through the -v option. If option -u is specified, the credential
-	is generated using U2F (CTAP1) instead of FIDO2 (CTAP2) commands.
-	The -T option may be used to enforce a timeout of <seconds>. If the
-	option -b is specified, the credential's "largeBlob" key is stored in
-	<blobkey>. If the option -c is specified the the generated credential
-	will be bound by the specified protection policy. If the option -a is
-	specified, enterprise attestation will be requested.
+Configures <pin> as the new PIN of <device>. If [oldpin] is provided, the device's PIN is changed from [oldpin] to <pin>.
 
-- assert [-t es256|es384|rs256|eddsa] [-a cred_id] [-h hmac_secret] [-P pin]
-         [-s hmac_salt] [-T seconds] [-b blobkey] [-puv] <pubkey> <device>
+==== cred
 
-	Asks <device> for a FIDO2 assertion corresponding to [cred_id],
-	which may be omitted for resident keys. The obtained assertion
-	is verified using <pubkey>. The -p option requests that the user
-	be present and checks whether the user presence bit was signed by the
-	authenticator. The -v option requests user verification and checks
-	whether the user verification bit was signed by the authenticator.
-	If option -u is specified, the assertion is generated using
-	U2F (CTAP1) instead of FIDO2 (CTAP2) commands. If option -s is
-	specified, a FIDO2 hmac-secret is requested from the authenticator,
-	and the contents of <hmac_salt> are used as the salt. If option -h
-	is specified, the resulting hmac-secret is stored in <hmac_secret>.
-	The -T option may be used to enforce a timeout of <seconds>. If the
-	option -b specified, the credential's "largeBlob" key is stored in
-	<blobkey>.
+	cred [-t es256|es384|rs256|eddsa] [-k pubkey] [-ei cred_id] [-P pin] [-T seconds] [-b blobkey] [-hruv] [-c cred_protect] <device>
 
-- retries <device>
-	Get the number of PIN attempts left on <device> before lockout.
+Creates a new credential on <device> and verify that the credential was signed by the authenticator. The device's attestation certificate is not verified. If option -k is specified, the credential's public key is stored in <pubkey>. If option -i is specified, the credential ID is stored in <cred_id>. The -e option may be used to add <cred_id> to the list of excluded credentials. If option -h is specified, the hmac-secret FIDO2 extension is enabled on the generated credential. If option -r is specified, the generated credential will involve a resident key. User verification may be requested through the -v option. If option -u is specified, the credential is generated using U2F (CTAP1) instead of FIDO2 (CTAP2) commands. The -T option may be used to enforce a timeout of <seconds>. If the option -b is specified, the credential's "largeBlob" key is stored in <blobkey>. If the option -c is specified the the generated credential will be bound by the specified protection policy. If the option -a is specified, enterprise attestation will be requested.
 
-- select
+==== assert
 
-	Enumerates available FIDO devices and, if more than one is present,
-	simultaneously requests touch on all of them, printing information
-	about the device touched.
+	assert [-p] [-v] [-u] [-s hmac_salt] [-h hmac_secret] [-T seconds] [-b blobkey] <pubkey> <device>
+
+Asks <device> for a FIDO2 assertion corresponding to [cred_id], which may be omitted for resident keys. The obtained assertion is verified using <pubkey>. The -p option requests that the user be present and checks whether the user presence bit was signed by the authenticator. The -v option requests user verification and checks whether the user verification bit was signed by the authenticator. If option -u is specified, the assertion is generated using U2F (CTAP1) instead of FIDO2 (CTAP2) commands. If option -s is specified, a FIDO2 hmac-secret is requested from the authenticator, and the contents of <hmac_salt> are used as the salt. If option -h is specified, the resulting hmac-secret is stored in <hmac_secret>. The -T option may be used to enforce a timeout of <seconds>. If the option -b specified, the credential's "largeBlob" key is stored in <blobkey>.
+
+==== retries
+
+	retries <device>
+	
+Get the number of PIN attempts left on <device> before lockout.
+
+==== select
+
+	select
+
+Enumerates available FIDO devices and, if more than one is present, simultaneously requests touch on all of them, printing information about the device touched.
+
+==== prf
+
+The `prf` utility is a complete, self-contained example demonstrating the use of the CTAP2 `hmac-secret` extension for hardware-backed, end-to-end encryption.
+
+It shows the full cryptographic lifecycle:
+
+1.  Creating a FIDO2 credential with the `hmac-secret` capability enabled.
+2.  Deriving a raw 32-byte secret from the YubiKey using this credential.
+3.  Using HKDF (via OpenSSL) to transform the raw secret into a purpose-bound AES-256-GCM key.
+4.  Encrypting a plaintext message.
+5.  Decrypting the ciphertext back to the original message.
+
+This tool serves as a reference implementation for developers building native applications that require strong, phishing-resistant, client-side encryption. While this example demonstrates modern cryptographic best practices, it is intended as an educational example. Developers must perform their own security reviews and threat modeling to ensure the patterns and cryptographic choices are appropriate for their specific use case.
+
+===== Usage
+
+The `prf` utility has three modes of operation: Make Credential (`-M`), Encrypt (`-E`), and Decrypt (`-D`).
+
+. **Step 1: Make a PRF-capable credential**
++
+[source,bash]
+----
+# The hmac-secret extension is enabled by default in this tool
+$ ./prf -M /dev/hidraw0
+# Output will be two hex strings:
+# <credential_id_hex>
+# <public_key_hex>
+----
++
+Copy the first hex string, which is the **credential ID**. You will need it for the next steps.
+
+. **Step 2: Encrypt a message**
++
+[source,bash]
+----
+# Pass the device, the credential ID from Step 1, and your message
+$ ./prf -E /dev/hidraw0 <credential_id_hex> "my secret message"
+# Output will be one long hex string, which is a concatenation of:
+# <iv_hex><ciphertext_hex><tag_hex>
+----
++
+This command derives the secret from your YubiKey, creates an AES key, encrypts the message, and outputs the complete data needed for decryption.
+
+. **Step 3: Decrypt the message**
++
+[source,bash]
+----
+# Pass the device, credential ID, and the full hex string from Step 2
+$ ./prf -D /dev/hidraw0 <credential_id_hex> <iv_hex_ciphertext_hex_tag_hex>
+# Expected output:
+my secret message
+----
++
+This command re-derives the exact same key from your YubiKey to decrypt the ciphertext and verify its integrity.
+
 
 Debugging is possible through the use of the FIDO_DEBUG environment variable.
 If set, libfido2 will produce a log of its transactions with the authenticator.

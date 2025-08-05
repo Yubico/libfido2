@@ -6,7 +6,7 @@
  */
 
 /*
- * Example demonstrating the CTAP2 hmac-secret extension (WebAuthn PRF).
+ * Example demonstrating the CTAP2 hmac-secret extension.
  * This shows how to:
  * 1. Create a credential with hmac-secret extension enabled
  * 2. Encrypt a message using PRF-derived key with HKDF + AES-GCM
@@ -16,6 +16,13 @@
  * prf -M <device>                         # Make credential with PRF support
  * prf -E <device> <cred_id_hex> <message>      # Encrypt message
  * prf -D <device> <cred_id_hex> <ciphertext>   # Decrypt message
+ * 
+ * This tool serves as a reference implementation for developers building native 
+ * applications that require strong, phishing-resistant, client-side encryption. 
+ * While this example demonstrates modern cryptographic best practices, it is 
+ * intended as an educational example. Developers must perform their own security 
+ * reviews and threat modeling to ensure the patterns and cryptographic choices 
+ * are appropriate for their specific use case.
  */
 
 #include <errno.h>
