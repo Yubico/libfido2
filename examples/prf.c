@@ -159,10 +159,10 @@ get_prf_secret(const char *device_path, const unsigned char *cred_id, size_t cre
 }
 
 static int
-derive_key_hkdf(const unsigned char *prf_secret, unsigned char *aes_key)
+derive_key_hkdf(unsigned char *prf_secret, unsigned char *aes_key)
 {
     EVP_PKEY_CTX *pctx;
-    const unsigned char info[] = "AES-GCM-256-Key-v1";
+    unsigned char info[] = "AES-GCM-256-Key-v1";
     size_t outlen = 32;
 
     if ((pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, NULL)) == NULL)
@@ -376,7 +376,7 @@ main(int argc, char **argv)
     argc -= optind;
     argv += optind;
 
-    if ((make_cred + encrypt + decrypt) != 1)
+    if (((int)make_cred + (int)encrypt + (int)decrypt) != 1)
         usage();
 
     if (make_cred) {
