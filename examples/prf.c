@@ -170,7 +170,7 @@ derive_key_hkdf(unsigned char *prf_secret, unsigned char *aes_key)
         return -1;
 
     if (EVP_PKEY_derive_init(pctx) <= 0 ||
-        EVP_PKEY_CTX_set_hkdf_md(pctx, (const EVP_MD *)EVP_sha256()) <= 0 ||
+        EVP_PKEY_CTX_set_hkdf_md(pctx, EVP_sha256()) <= 0 ||
         EVP_PKEY_CTX_set1_hkdf_key(pctx, prf_secret, 32) <= 0 ||
         EVP_PKEY_CTX_add1_hkdf_info(pctx, info, sizeof(info) - 1) <= 0 ||
         EVP_PKEY_derive(pctx, aes_key, &outlen) <= 0) {
