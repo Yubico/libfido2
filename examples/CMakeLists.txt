@@ -21,6 +21,11 @@ if(NOT MSVC)
 	    "-Wconversion -Wsign-conversion")
 endif()
 
+# Suppress cast-qual warnings for prf due to OpenSSL macro issues
+if(TARGET prf AND CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(prf PRIVATE -Wno-cast-qual)
+endif()
+
 # manifest
 add_executable(manifest manifest.c ${COMPAT_SOURCES})
 target_link_libraries(manifest ${_FIDO2_LIBRARY})
