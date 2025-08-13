@@ -76,58 +76,35 @@ Enumerates available FIDO devices and, if more than one is present, simultaneous
 
 ==== prf
 
-The `prf` utility is a complete, self-contained example demonstrating the use of the CTAP2 `hmac-secret` extension for hardware-backed, end-to-end encryption.
+	prf -M [-P pin] <device>
+	prf -E [-P pin] <device> <cred_id_hex> <message>
+	prf -D [-P pin] <device> <cred_id_hex> <ciphertext_hex>
 
-It shows the full cryptographic lifecycle:
+Demonstrates hardware-backed, end-to-end encryption using the CTAP2 hmac-secret extension. Creates a FIDO2 credential with PRF capability, then uses it to encrypt and decrypt messages with AES-256-GCM. The -P option specifies the device PIN when required.
 
-1.  Creating a FIDO2 credential with the `hmac-secret` capability enabled.
-2.  Deriving a raw 32-byte secret from the YubiKey using this credential.
-3.  Using HKDF (via OpenSSL) to transform the raw secret into a purpose-bound AES-256-GCM key.
-4.  Encrypting a plaintext message.
-5.  Decrypting the ciphertext back to the original message.
+This tool serves as a reference implementation for developers building applications that require strong, phishing-resistant, client-side encryption. While demonstrating modern cryptographic best practices, it is intended as an educational example requiring security review for production use.
 
-This tool serves as a reference implementation for developers building native applications that require strong, phishing-resistant, client-side encryption. While this example demonstrates modern cryptographic best practices, it is intended as an educational example. Developers must perform their own security reviews and threat modeling to ensure the patterns and cryptographic choices are appropriate for their specific use case.
+Complete workflow:
 
-===== Usage
+Step 1: Create PRF-enabled credential
 
-The `prf` utility has three modes of operation: Make Credential (`-M`), Encrypt (`-E`), and Decrypt (`-D`).
+	$ ./prf -M /dev/hidraw0
+	5c22fd1c8495c766cc3c703942c82f2b83b297fcf3a08702d42ddd44ba4a57e8b26e5e2ce1f3e88de44ea3656074281c325a4616c136a44cfe2f8569115c1b72
+	c981b6a81cdbb892ea111076fd41954886d9597b853bcbb877302e202efdce0492513e27819fa7c8b45b00547fb92cdd963d3cea7340e9a297aec6a1365b496a
 
-. **Step 1: Make a PRF-capable credential**
-+
-[source,bash]
-----
-# The hmac-secret extension is enabled by default in this tool
-$ ./prf -M /dev/hidraw0
-# Output will be two hex strings:
-# <credential_id_hex>
-# <public_key_hex>
-----
-+
-Copy the first hex string, which is the **credential ID**. You will need it for the next steps.
+Save the first line as credential ID
 
-. **Step 2: Encrypt a message**
-+
-[source,bash]
-----
-# Pass the device, the credential ID from Step 1, and your message
-$ ./prf -E /dev/hidraw0 <credential_id_hex> "my secret message"
-# Output will be one long hex string, which is a concatenation of:
-# <iv_hex><ciphertext_hex><tag_hex>
-----
-+
-This command derives the secret from your YubiKey, creates an AES key, encrypts the message, and outputs the complete data needed for decryption.
+Step 2: Encrypt a message
 
-. **Step 3: Decrypt the message**
-+
-[source,bash]
-----
-# Pass the device, credential ID, and the full hex string from Step 2
-$ ./prf -D /dev/hidraw0 <credential_id_hex> <iv_hex_ciphertext_hex_tag_hex>
-# Expected output:
-my secret message
-----
-+
-This command re-derives the exact same key from your YubiKey to decrypt the ciphertext and verify its integrity.
+	$ ./prf -E /dev/hidraw0 5c22fd1c8495c766cc3c703942c82f2b83b297fcf3a08702d42ddd44ba4a57e8b26e5e2ce1f3e88de44ea3656074281c325a4616c136a44cfe2f8569115c1b72 "Hello, secure world"
+	38ff23dbe1e271a09bbf72ca
+	28e4daa98e639cbf66c503fd8e271b331a50e6e7a7
+	fc4b20aefc7890537229e79439f5c89a
+
+Step 3: Decrypt the message (combine the three hex strings)
+
+	$ ./prf -D /dev/hidraw0 5c22fd1c8495c766cc3c703942c82f2b83b297fcf3a08702d42ddd44ba4a57e8b26e5e2ce1f3e88de44ea3656074281c325a4616c136a44cfe2f8569115c1b72 38ff23dbe1e271a09bbf72ca28e4daa98e639cbf66c503fd8e271b331a50e6e7a7fc4b20aefc7890537229e79439f5c89a
+	Hello, secure world
 
 
 Debugging is possible through the use of the FIDO_DEBUG environment variable.

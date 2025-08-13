@@ -13,9 +13,9 @@
  * 3. Decrypt the message back to plaintext
  *
  * Usage:
- * prf -M <device>                         # Make credential with PRF support
- * prf -E <device> <cred_id_hex> <message>      # Encrypt message
- * prf -D <device> <cred_id_hex> <ciphertext>   # Decrypt message
+ * prf -M [-P pin] <device>                         # Make credential with PRF support
+ * prf -E [-P pin] <device> <cred_id_hex> <message>      # Encrypt message
+ * prf -D [-P pin] <device> <cred_id_hex> <ciphertext>   # Decrypt message
  * 
  * This tool serves as a reference implementation for developers building native 
  * applications that require strong, phishing-resistant, client-side encryption. 
@@ -58,13 +58,14 @@ static const unsigned char user_id[32] = {
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: prf -M <device>\n");
-    fprintf(stderr, "       prf -E <device> <cred_id_hex> <message>\n");
-    fprintf(stderr, "       prf -D <device> <cred_id_hex> <ciphertext_hex>\n");
+    fprintf(stderr, "usage: prf -M [-P pin] <device>\n");
+    fprintf(stderr, "       prf -E [-P pin] <device> <cred_id_hex> <message>\n");
+    fprintf(stderr, "       prf -D [-P pin] <device> <cred_id_hex> <ciphertext_hex>\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "  -M          make a new PRF-capable credential\n");
     fprintf(stderr, "  -E          encrypt a message using a PRF-derived key\n");
     fprintf(stderr, "  -D          decrypt a message using a PRF-derived key\n");
+    fprintf(stderr, "  -P pin      use PIN for authentication\n");
     exit(EXIT_FAILURE);
 }
 
@@ -102,59 +103,13 @@ hex_decode(const char *hex_str, size_t *len)
     return buf;
 }
 
-static char *
-read_pin(const char *prompt)
-{
-    char *pin;
-    char buf[1024];
-    
-    if (readpassphrase(prompt, buf, sizeof(buf), RPP_ECHO_OFF) == NULL)
-        errx(1, "failed to read PIN");
-    
-    if ((pin = strdup(buf)) == NULL)
-        errx(1, "strdup");
-    
-    memset(pin, 0, strlen(pin));
-    return pin;
-}
-
-static bool
-device_has_pin(fido_dev_t *dev)
-{
-    fido_cbor_info_t *ci;
-    char *const *name_ptr;
-    const bool *value_ptr;
-    size_t options_len;
-    bool has_pin = false;
-    
-    if ((ci = fido_cbor_info_new()) == NULL)
-        return false;
-        
-    if (fido_dev_get_cbor_info(dev, ci) == FIDO_OK) {
-        name_ptr = fido_cbor_info_options_name_ptr(ci);
-        value_ptr = fido_cbor_info_options_value_ptr(ci);
-        options_len = fido_cbor_info_options_len(ci);
-        
-        for (size_t i = 0; i < options_len; i++) {
-            if (name_ptr[i] && strcmp(name_ptr[i], "clientPin") == 0) {
-                has_pin = value_ptr[i];
-                break;
-            }
-        }
-    }
-    
-    fido_cbor_info_free(&ci);
-    return has_pin;
-}
-
 static unsigned char *
-get_prf_secret(const char *device_path, const unsigned char *cred_id, size_t cred_id_len)
+get_prf_secret(const char *device_path, const unsigned char *cred_id, size_t cred_id_len, const char *pin)
 {
     fido_dev_t *dev;
     fido_assert_t *assert;
     unsigned char salt[32];
     unsigned char *secret;
-    char *pin = NULL;
     int r;
 
     /* Create application-specific salt */
@@ -165,10 +120,6 @@ get_prf_secret(const char *device_path, const unsigned char *cred_id, size_t cre
         errx(1, "fido_dev_new");
     if ((r = fido_dev_open(dev, device_path)) != FIDO_OK)
         errx(1, "fido_dev_open: %s (0x%x)", fido_strerr(r), r);
-
-    if (device_has_pin(dev)) {
-        pin = read_pin("Enter PIN: ");
-    }
 
     if ((assert = fido_assert_new()) == NULL)
         errx(1, "fido_assert_new");
@@ -201,11 +152,6 @@ get_prf_secret(const char *device_path, const unsigned char *cred_id, size_t cre
         errx(1, "malloc");
     memcpy(secret, fido_assert_hmac_secret_ptr(assert, 0), 32);
 
-    if (pin) {
-        memset(pin, 0, strlen(pin));
-        free(pin);
-    }
-
     fido_assert_free(&assert);
     fido_dev_close(dev);
     fido_dev_free(&dev);
@@ -237,7 +183,7 @@ derive_key_hkdf(unsigned char *prf_secret, unsigned char *aes_key)
 }
 
 static int
-prf_encrypt(const char *device_path, const char *cred_id_hex, const char *message)
+prf_encrypt(const char *device_path, const char *cred_id_hex, const char *message, const char *pin)
 {
     unsigned char *cred_id, *prf_secret, aes_key[32];
     unsigned char iv[12], tag[16], *ciphertext;
@@ -249,7 +195,7 @@ prf_encrypt(const char *device_path, const char *cred_id_hex, const char *messag
     cred_id = hex_decode(cred_id_hex, &cred_id_len);
 
     /* Get PRF secret */
-    prf_secret = get_prf_secret(device_path, cred_id, cred_id_len);
+    prf_secret = get_prf_secret(device_path, cred_id, cred_id_len, pin);
 
     /* Derive AES key using HKDF */
     if (derive_key_hkdf(prf_secret, aes_key) != 0)
@@ -294,7 +240,7 @@ prf_encrypt(const char *device_path, const char *cred_id_hex, const char *messag
 }
 
 static int
-prf_decrypt(const char *device_path, const char *cred_id_hex, const char *ciphertext_hex)
+prf_decrypt(const char *device_path, const char *cred_id_hex, const char *ciphertext_hex, const char *pin)
 {
     unsigned char *cred_id, *prf_secret, aes_key[32];
     unsigned char *combined_data, iv[12], tag[16], *ciphertext, *plaintext;
@@ -319,7 +265,7 @@ prf_decrypt(const char *device_path, const char *cred_id_hex, const char *cipher
         errx(1, "malloc");
 
     /* Get PRF secret */
-    prf_secret = get_prf_secret(device_path, cred_id, cred_id_len);
+    prf_secret = get_prf_secret(device_path, cred_id, cred_id_len, pin);
 
     /* Derive AES key using HKDF */
     if (derive_key_hkdf(prf_secret, aes_key) != 0)
@@ -357,21 +303,16 @@ prf_decrypt(const char *device_path, const char *cred_id_hex, const char *cipher
 }
 
 static int
-prf_make(const char *path)
+prf_make(const char *path, const char *pin)
 {
     fido_dev_t *dev;
     fido_cred_t *cred;
-    char *pin = NULL;
     int r;
 
     if ((dev = fido_dev_new()) == NULL)
         errx(1, "fido_dev_new");
     if ((r = fido_dev_open(dev, path)) != FIDO_OK)
         errx(1, "fido_dev_open: %s (0x%x)", fido_strerr(r), r);
-
-    if (device_has_pin(dev)) {
-        pin = read_pin("Enter PIN: ");
-    }
 
     if ((cred = fido_cred_new()) == NULL)
         errx(1, "fido_cred_new");
@@ -402,11 +343,6 @@ prf_make(const char *path)
     print_hex("", fido_cred_id_ptr(cred), fido_cred_id_len(cred));
     print_hex("", fido_cred_pubkey_ptr(cred), fido_cred_pubkey_len(cred));
 
-    if (pin) {
-        memset(pin, 0, strlen(pin));
-        free(pin);
-    }
-
     fido_cred_free(&cred);
     fido_dev_close(dev);
     fido_dev_free(&dev);
@@ -420,9 +356,10 @@ main(int argc, char **argv)
     bool make_cred = false;
     bool encrypt = false;
     bool decrypt = false;
+    char *pin = NULL;
     int ch;
 
-    while ((ch = getopt(argc, argv, "MED")) != -1) {
+    while ((ch = getopt(argc, argv, "MEDP:")) != -1) {
         switch (ch) {
         case 'M':
             make_cred = true;
@@ -432,6 +369,9 @@ main(int argc, char **argv)
             break;
         case 'D':
             decrypt = true;
+            break;
+        case 'P':
+            pin = optarg;
             break;
         default:
             usage();
@@ -447,14 +387,14 @@ main(int argc, char **argv)
     if (make_cred) {
         if (argc != 1)
             usage();
-        return prf_make(argv[0]);
+        return prf_make(argv[0], pin);
     } else if (encrypt) {
         if (argc != 3)
             usage();
-        return prf_encrypt(argv[0], argv[1], argv[2]);
+        return prf_encrypt(argv[0], argv[1], argv[2], pin);
     } else { /* decrypt */
         if (argc != 3)
             usage();
-        return prf_decrypt(argv[0], argv[1], argv[2]);
+        return prf_decrypt(argv[0], argv[1], argv[2], pin);
     }
 }
