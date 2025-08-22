@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#undef NDEBUG
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>

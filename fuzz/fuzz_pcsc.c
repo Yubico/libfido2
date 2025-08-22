@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#undef NDEBUG
 #define _FIDO_INTERNAL
 
 #include <assert.h>

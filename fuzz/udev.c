@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#undef NDEBUG
+
 #include <sys/types.h>
 
 #include <linux/hidraw.h>
