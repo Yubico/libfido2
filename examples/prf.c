@@ -16,12 +16,12 @@
  * prf -M [-P pin] <device>                         # Make credential with PRF support
  * prf -E [-P pin] <device> <cred_id_hex> <message>      # Encrypt message
  * prf -D [-P pin] <device> <cred_id_hex> <ciphertext>   # Decrypt message
- * 
- * This tool serves as a reference implementation for developers building native 
- * applications that require strong, phishing-resistant, client-side encryption. 
- * While this example demonstrates modern cryptographic best practices, it is 
- * intended as an educational example. Developers must perform their own security 
- * reviews and threat modeling to ensure the patterns and cryptographic choices 
+ *
+ * This tool serves as a reference implementation for developers building native
+ * applications that require strong, phishing-resistant, client-side encryption.
+ * While this example demonstrates modern cryptographic best practices, it is
+ * intended as an educational example. Developers must perform their own security
+ * reviews and threat modeling to ensure the patterns and cryptographic choices
  * are appropriate for their specific use case.
  */
 
@@ -229,8 +229,8 @@ prf_encrypt(const char *device_path, const char *cred_id_hex, const char *messag
     print_hex("", tag, sizeof(tag));
 
     /* Clean up */
-    memset(prf_secret, 0, 32);
-    memset(aes_key, 0, sizeof(aes_key));
+    OPENSSL_cleanse(prf_secret, 32);
+    OPENSSL_cleanse(aes_key, sizeof(aes_key));
     free(cred_id);
     free(prf_secret);
     free(ciphertext);
@@ -291,8 +291,8 @@ prf_decrypt(const char *device_path, const char *cred_id_hex, const char *cipher
     printf("%s\n", plaintext);
 
     /* Clean up */
-    memset(prf_secret, 0, 32);
-    memset(aes_key, 0, sizeof(aes_key));
+    OPENSSL_cleanse(prf_secret, 32);
+    OPENSSL_cleanse(aes_key, sizeof(aes_key));
     free(cred_id);
     free(prf_secret);
     free(combined_data);
