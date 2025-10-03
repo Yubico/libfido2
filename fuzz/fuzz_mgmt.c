@@ -323,6 +323,8 @@ dev_get_cbor_info(const struct param *p)
 
 	v = fido_cbor_info_new_pin_required(ci);
 	consume(&v, sizeof(v));
+	v = fido_cbor_info_long_touch_reset(ci);
+	consume(&v, sizeof(v));
 
 out:
 	fido_dev_close(dev);

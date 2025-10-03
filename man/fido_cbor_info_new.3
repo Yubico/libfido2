@@ -53,6 +53,7 @@
 .Nm fido_cbor_info_transports_len ,
 .Nm fido_cbor_info_versions_len ,
 .Nm fido_cbor_info_options_len ,
+.Nm fido_cbor_info_long_touch_reset ,
 .Nm fido_cbor_info_maxmsgsiz ,
 .Nm fido_cbor_info_maxcredbloblen ,
 .Nm fido_cbor_info_maxcredcntlst ,
@@ -117,6 +118,8 @@
 .Fn fido_cbor_info_versions_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_options_len "const fido_cbor_info_t *ci"
+.Ft bool
+.Fn fido_cbor_info_long_touch_reset "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_maxmsgsiz "const fido_cbor_info_t *ci"
 .Ft uint64_t
@@ -371,6 +374,15 @@ until a new PIN is set on the authenticator.
 The
 .Xr fido_dev_set_pin 3
 function can be used to set a new PIN.
+.Pp
+The
+.Fn fido_cbor_info_long_touch_reset
+function returns true if a long touch is required to reset the
+authenticator.
+The long touch for reset attribute is a CTAP 2.3 addition.
+If the attribute is not advertised by the authenticator, the
+.Fn fido_cbor_info_long_touch_reset
+function returns false.
 .Pp
 A complete example of how to use these functions can be found in the
 .Pa example/info.c
