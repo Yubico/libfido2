@@ -446,6 +446,10 @@ token_info(int argc, char **argv, char *path)
 	/* print uv count since last pin entry */
 	print_uv_count_since_pin(fido_cbor_info_uv_count_since_pin(ci));
 
+	/* long touch for reset */
+	printf("long touch for reset: %s\n",
+	    fido_cbor_info_long_touch_reset(ci) ? "true" : "false");
+
 	bio_info(dev);
 
 	fido_cbor_info_free(&ci);

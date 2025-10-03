@@ -346,6 +346,8 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		}
 		ci->uv_since_pin = (int64_t)x;
 		return (0);
+	case 24: /* longTouchForReset */
+		return (cbor_decode_bool(val, &ci->long_reset));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type: 0x%02x", __func__, cbor_get_uint8(key));
 		return (0);
@@ -643,6 +645,12 @@ bool
 fido_cbor_info_new_pin_required(const fido_cbor_info_t *ci)
 {
 	return (ci->new_pin_reqd);
+}
+
+bool
+fido_cbor_info_long_touch_reset(const fido_cbor_info_t *ci)
+{
+	return (ci->long_reset);
 }
 
 char **
