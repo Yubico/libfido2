@@ -117,6 +117,7 @@
 		fido_cbor_info_transports_len;
 		fido_cbor_info_transports_ptr;
 		fido_cbor_info_uv_attempts;
+		fido_cbor_info_uv_count_since_pin;
 		fido_cbor_info_uv_modality;
 		fido_cbor_info_versions_len;
 		fido_cbor_info_versions_ptr;

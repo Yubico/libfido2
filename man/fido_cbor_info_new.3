@@ -63,6 +63,7 @@
 .Nm fido_cbor_info_fwversion ,
 .Nm fido_cbor_info_uv_attempts ,
 .Nm fido_cbor_info_uv_modality ,
+.Nm fido_cbor_info_uv_count_since_pin ,
 .Nm fido_cbor_info_rk_remaining ,
 .Nm fido_cbor_info_new_pin_required
 .Nd FIDO2 CBOR Info API
@@ -136,6 +137,8 @@
 .Fn fido_cbor_info_uv_attempts "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_uv_modality "const fido_cbor_info_t *ci"
+.Ft int64_t
+.Fn fido_cbor_info_uv_count_since_pin "const fido_cbor_info_t *ci"
 .Ft int64_t
 .Fn fido_cbor_info_rk_remaining "const fido_cbor_info_t *ci"
 .Ft bool
@@ -317,6 +320,15 @@ If the attribute is not advertised by the authenticator,
 the
 .Fn fido_cbor_info_uv_attempts
 function returns zero.
+.Pp
+The
+.Fn fido_cbor_info_uv_count_since_pin
+function returns the number of built-in UV operations since the last
+PIN entry.
+The UV count since last PIN entry attribute is a CTAP 2.3 addition.
+If the attribute is not advertised by the authenticator, the
+.Fn fido_cbor_info_uv_count_since_pin
+function returns -1.
 .Pp
 The
 .Fn fido_cbor_info_uv_modality

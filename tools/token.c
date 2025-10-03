@@ -209,6 +209,13 @@ print_uv_attempts(uint64_t uv_attempts)
 }
 
 static void
+print_uv_count_since_pin(int64_t count)
+{
+	if (count != -1)
+		printf("uv count since last pin: %d\n", (int)count);
+}
+
+static void
 print_uv_modality(uint64_t uv_modality)
 {
 	uint64_t mode;
@@ -435,6 +442,9 @@ token_info(int argc, char **argv, char *path)
 
 	/* print supported uv mechanisms */
 	print_uv_modality(fido_cbor_info_uv_modality(ci));
+
+	/* print uv count since last pin entry */
+	print_uv_count_since_pin(fido_cbor_info_uv_count_since_pin(ci));
 
 	bio_info(dev);
 

@@ -339,6 +339,13 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (0);
 	case 22: /* attestationFormats */
 		return (decode_string_array(val, &ci->attfmts));
+	case 23: /* uvCountSinceLastPinEntry */
+		if (cbor_decode_uint64(val, &x) || x > INT64_MAX) {
+			fido_log_debug("%s: cbor_decode_uint64", __func__);
+			return (-1);
+		}
+		ci->uv_since_pin = (int64_t)x;
+		return (0);
 	default: /* ignore */
 		fido_log_debug("%s: cbor type: 0x%02x", __func__, cbor_get_uint8(key));
 		return (0);
@@ -443,6 +450,7 @@ fido_cbor_info_reset(fido_cbor_info_t *ci)
 	fido_algo_array_free(&ci->algorithms);
 	fido_cert_array_free(&ci->certs);
 	ci->rk_remaining = -1;
+	ci->uv_since_pin = -1;
 }
 
 void
@@ -575,6 +583,12 @@ uint64_t
 fido_cbor_info_uv_attempts(const fido_cbor_info_t *ci)
 {
 	return (ci->uv_attempts);
+}
+
+int64_t
+fido_cbor_info_uv_count_since_pin(const fido_cbor_info_t *ci)
+{
+	return (ci->uv_since_pin);
 }
 
 uint64_t

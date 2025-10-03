@@ -284,6 +284,7 @@ typedef struct fido_cbor_info {
 	bool              new_pin_reqd;   /* new pin required */
 	fido_cert_array_t certs;          /* associated certifications */
 	fido_str_array_t  attfmts;        /* attestation formats */
+	int64_t           uv_since_pin;   /* uv count since last pin entry */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {
