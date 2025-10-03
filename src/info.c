@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -337,6 +337,8 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		}
 		ci->rk_remaining = (int64_t)x;
 		return (0);
+	case 22: /* attestationFormats */
+		return (decode_string_array(val, &ci->attfmts));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type: 0x%02x", __func__, cbor_get_uint8(key));
 		return (0);
@@ -435,6 +437,7 @@ fido_cbor_info_reset(fido_cbor_info_t *ci)
 	fido_str_array_free(&ci->versions);
 	fido_str_array_free(&ci->extensions);
 	fido_str_array_free(&ci->transports);
+	fido_str_array_free(&ci->attfmts);
 	fido_opt_array_free(&ci->options);
 	fido_byte_array_free(&ci->protocols);
 	fido_algo_array_free(&ci->algorithms);
@@ -644,4 +647,16 @@ size_t
 fido_cbor_info_certs_len(const fido_cbor_info_t *ci)
 {
 	return (ci->certs.len);
+}
+
+char **
+fido_cbor_info_attfmts_ptr(const fido_cbor_info_t *ci)
+{
+	return (ci->attfmts.ptr);
+}
+
+size_t
+fido_cbor_info_attfmts_len(const fido_cbor_info_t *ci)
+{
+	return (ci->attfmts.len);
 }

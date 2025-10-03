@@ -382,6 +382,10 @@ token_info(int argc, char **argv, char *path)
 	    fido_cbor_info_certs_value_ptr(ci),
 	    fido_cbor_info_certs_len(ci));
 
+	/* print attestation formats */
+	print_str_array("attestation formats", fido_cbor_info_attfmts_ptr(ci),
+	    fido_cbor_info_attfmts_len(ci));
+
 	/* print firmware version */
 	print_fwversion(fido_cbor_info_fwversion(ci));
 

@@ -283,6 +283,7 @@ typedef struct fido_cbor_info {
 	int64_t           rk_remaining;   /* remaining resident credentials */
 	bool              new_pin_reqd;   /* new pin required */
 	fido_cert_array_t certs;          /* associated certifications */
+	fido_str_array_t  attfmts;        /* attestation formats */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {
