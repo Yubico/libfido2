@@ -147,9 +147,9 @@ print_algorithms(const fido_cbor_info_t *ci)
 }
 
 static void
-print_aaguid(const unsigned char *buf, size_t buflen)
+print_bytes(const char *prefix, const unsigned char *buf, size_t buflen)
 {
-	printf("aaguid: ");
+	printf("%s: ", prefix);
 
 	while (buflen--)
 		printf("%02x", *buf++);
@@ -376,8 +376,12 @@ token_info(int argc, char **argv, char *path)
 	print_algorithms(ci);
 
 	/* print aaguid */
-	print_aaguid(fido_cbor_info_aaguid_ptr(ci),
+	print_bytes("aaguid", fido_cbor_info_aaguid_ptr(ci),
 	    fido_cbor_info_aaguid_len(ci));
+
+	/* print encid */
+	print_bytes("encid", fido_cbor_info_encid_ptr(ci),
+	    fido_cbor_info_encid_len(ci));
 
 	/* print supported options */
 	print_opt_array("options", fido_cbor_info_options_name_ptr(ci),

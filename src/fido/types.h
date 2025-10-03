@@ -286,6 +286,7 @@ typedef struct fido_cbor_info {
 	fido_str_array_t  attfmts;        /* attestation formats */
 	int64_t           uv_since_pin;   /* uv count since last pin entry */
 	bool              long_reset;     /* long touch for reset */
+	unsigned char     encid[32];      /* encrypted identifier */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {
