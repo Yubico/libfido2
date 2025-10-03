@@ -1,4 +1,4 @@
-.\" Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+.\" Copyright (c) 2018-2025 Yubico AB. All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions are
@@ -33,6 +33,7 @@
 .Nm fido_cbor_info_free ,
 .Nm fido_dev_get_cbor_info ,
 .Nm fido_cbor_info_aaguid_ptr ,
+.Nm fido_cbor_info_attfmts_ptr ,
 .Nm fido_cbor_info_extensions_ptr ,
 .Nm fido_cbor_info_protocols_ptr ,
 .Nm fido_cbor_info_transports_ptr ,
@@ -46,6 +47,7 @@
 .Nm fido_cbor_info_certs_value_ptr ,
 .Nm fido_cbor_info_certs_len ,
 .Nm fido_cbor_info_aaguid_len ,
+.Nm fido_cbor_info_attfmts_len ,
 .Nm fido_cbor_info_extensions_len ,
 .Nm fido_cbor_info_protocols_len ,
 .Nm fido_cbor_info_transports_len ,
@@ -75,6 +77,8 @@
 .Ft const unsigned char *
 .Fn fido_cbor_info_aaguid_ptr "const fido_cbor_info_t *ci"
 .Ft char **
+.Fn fido_cbor_info_attfmts_ptr "const fido_cbor_info_t *ci"
+.Ft char **
 .Fn fido_cbor_info_extensions_ptr "const fido_cbor_info_t *ci"
 .Ft const uint8_t *
 .Fn fido_cbor_info_protocols_ptr "const fido_cbor_info_t *ci"
@@ -100,6 +104,8 @@
 .Fn fido_cbor_info_certs_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_aaguid_len "const fido_cbor_info_t *ci"
+.Ft size_t
+.Fn fido_cbor_info_attfmts_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_extensions_len "const fido_cbor_info_t *ci"
 .Ft size_t
@@ -176,18 +182,20 @@ function may block.
 .Pp
 The
 .Fn fido_cbor_info_aaguid_ptr ,
+.Fn fido_cbor_info_attfmts_ptr ,
 .Fn fido_cbor_info_extensions_ptr ,
 .Fn fido_cbor_info_protocols_ptr ,
 .Fn fido_cbor_info_transports_ptr ,
 and
 .Fn fido_cbor_info_versions_ptr
 functions return pointers to the authenticator attestation GUID,
-supported extensions, PIN protocol, transports, and CTAP version
-strings of
+supported attestation formats, supported extensions, PIN protocol,
+transports, and CTAP version strings of
 .Fa ci .
 The corresponding length of a given attribute can be
 obtained by
 .Fn fido_cbor_info_aaguid_len ,
+.Fn fido_cbor_info_attfmts_len ,
 .Fn fido_cbor_info_extensions_len ,
 .Fn fido_cbor_info_protocols_len ,
 .Fn fido_cbor_info_transports_len ,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -262,6 +262,11 @@ dev_get_cbor_info(const struct param *p)
 
 	for (size_t i = 0; i < fido_cbor_info_transports_len(ci); i++) {
 		char * const *sa = fido_cbor_info_transports_ptr(ci);
+		consume(sa[i], strlen(sa[i]));
+	}
+
+	for (size_t i = 0; i < fido_cbor_info_attfmts_len(ci); i++) {
+		char * const *sa = fido_cbor_info_attfmts_ptr(ci);
 		consume(sa[i], strlen(sa[i]));
 	}
 

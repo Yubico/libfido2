@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -381,6 +381,10 @@ token_info(int argc, char **argv, char *path)
 	print_cert_array("certifications", fido_cbor_info_certs_name_ptr(ci),
 	    fido_cbor_info_certs_value_ptr(ci),
 	    fido_cbor_info_certs_len(ci));
+
+	/* print attestation formats */
+	print_str_array("attestation formats", fido_cbor_info_attfmts_ptr(ci),
+	    fido_cbor_info_attfmts_len(ci));
 
 	/* print firmware version */
 	print_fwversion(fido_cbor_info_fwversion(ci));
