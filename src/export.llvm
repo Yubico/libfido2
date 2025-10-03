@@ -95,6 +95,8 @@ _fido_cbor_info_attfmts_ptr
 _fido_cbor_info_certs_len
 _fido_cbor_info_certs_name_ptr
 _fido_cbor_info_certs_value_ptr
+_fido_cbor_info_encid_len
+_fido_cbor_info_encid_ptr
 _fido_cbor_info_extensions_len
 _fido_cbor_info_extensions_ptr
 _fido_cbor_info_free

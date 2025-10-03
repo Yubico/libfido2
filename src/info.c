@@ -49,16 +49,16 @@ decode_string_array(const cbor_item_t *item, fido_str_array_t *v)
 }
 
 static int
-decode_aaguid(const cbor_item_t *item, unsigned char *aaguid, size_t aaguid_len)
+decode_bytes(const cbor_item_t *item, unsigned char *ptr, size_t len)
 {
 	if (cbor_isa_bytestring(item) == false ||
 	    cbor_bytestring_is_definite(item) == false ||
-	    cbor_bytestring_length(item) != aaguid_len) {
+	    cbor_bytestring_length(item) != len) {
 		fido_log_debug("%s: cbor type", __func__);
 		return (-1);
 	}
 
-	memcpy(aaguid, cbor_bytestring_handle(item), aaguid_len);
+	memcpy(ptr, cbor_bytestring_handle(item), len);
 
 	return (0);
 }
@@ -297,7 +297,7 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	case 2: /* extensions */
 		return (decode_string_array(val, &ci->extensions));
 	case 3: /* aaguid */
-		return (decode_aaguid(val, ci->aaguid, sizeof(ci->aaguid)));
+		return (decode_bytes(val, ci->aaguid, sizeof(ci->aaguid)));
 	case 4: /* options */
 		return (decode_options(val, &ci->options));
 	case 5: /* maxMsgSize */
@@ -348,6 +348,8 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (0);
 	case 24: /* longTouchForReset */
 		return (cbor_decode_bool(val, &ci->long_reset));
+	case 25: /* encIdentifier */
+		return (decode_bytes(val, ci->encid, sizeof(ci->encid)));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type: 0x%02x", __func__, cbor_get_uint8(key));
 		return (0);
@@ -513,6 +515,18 @@ size_t
 fido_cbor_info_aaguid_len(const fido_cbor_info_t *ci)
 {
 	return (sizeof(ci->aaguid));
+}
+
+const unsigned char *
+fido_cbor_info_encid_ptr(const fido_cbor_info_t *ci)
+{
+	return (ci->encid);
+}
+
+size_t
+fido_cbor_info_encid_len(const fido_cbor_info_t *ci)
+{
+	return (sizeof(ci->encid));
 }
 
 char **

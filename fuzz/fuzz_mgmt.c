@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include "fido.h"
 #undef NDEBUG
 
 #include <assert.h>
@@ -320,6 +321,7 @@ dev_get_cbor_info(const struct param *p)
 	consume(fido_cbor_info_aaguid_ptr(ci), fido_cbor_info_aaguid_len(ci));
 	consume(fido_cbor_info_protocols_ptr(ci),
 	    fido_cbor_info_protocols_len(ci));
+	consume(fido_cbor_info_encid_ptr(ci), fido_cbor_info_encid_len(ci));
 
 	v = fido_cbor_info_new_pin_required(ci);
 	consume(&v, sizeof(v));
