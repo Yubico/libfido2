@@ -90,6 +90,8 @@
 		fido_cbor_info_algorithm_cose;
 		fido_cbor_info_algorithm_count;
 		fido_cbor_info_algorithm_type;
+		fido_cbor_info_attfmts_len;
+		fido_cbor_info_attfmts_ptr;
 		fido_cbor_info_certs_len;
 		fido_cbor_info_certs_name_ptr;
 		fido_cbor_info_certs_value_ptr;
