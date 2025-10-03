@@ -348,6 +348,8 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (0);
 	case 24: /* longTouchForReset */
 		return (cbor_decode_bool(val, &ci->long_reset));
+	case 25: /* encIdentifier */
+		return (fido_blob_decode(val, &ci->encid));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type: 0x%02x", __func__, cbor_get_uint8(key));
 		return (0);
@@ -451,6 +453,7 @@ fido_cbor_info_reset(fido_cbor_info_t *ci)
 	fido_byte_array_free(&ci->protocols);
 	fido_algo_array_free(&ci->algorithms);
 	fido_cert_array_free(&ci->certs);
+	fido_blob_reset(&ci->encid);
 	ci->rk_remaining = -1;
 	ci->uv_since_pin = -1;
 }
@@ -513,6 +516,18 @@ size_t
 fido_cbor_info_aaguid_len(const fido_cbor_info_t *ci)
 {
 	return (sizeof(ci->aaguid));
+}
+
+const unsigned char *
+fido_cbor_info_encid_ptr(const fido_cbor_info_t *ci)
+{
+	return (ci->encid.ptr);
+}
+
+size_t
+fido_cbor_info_encid_len(const fido_cbor_info_t *ci)
+{
+	return (ci->encid.len);
 }
 
 char **
