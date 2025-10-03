@@ -150,6 +150,8 @@ list(APPEND MAN_ALIAS
 	fido_cbor_info_new fido_cbor_info_options_value_ptr
 	fido_cbor_info_new fido_cbor_info_protocols_len
 	fido_cbor_info_new fido_cbor_info_protocols_ptr
+	fido_cbor_info_new fido_cbor_info_reset_transports_len
+	fido_cbor_info_new fido_cbor_info_reset_transports_ptr
 	fido_cbor_info_new fido_cbor_info_rk_remaining
 	fido_cbor_info_new fido_cbor_info_transports_len
 	fido_cbor_info_new fido_cbor_info_transports_ptr

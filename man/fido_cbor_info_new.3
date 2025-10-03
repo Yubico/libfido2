@@ -37,6 +37,7 @@
 .Nm fido_cbor_info_encid_ptr ,
 .Nm fido_cbor_info_extensions_ptr ,
 .Nm fido_cbor_info_protocols_ptr ,
+.Nm fido_cbor_info_reset_transports_ptr ,
 .Nm fido_cbor_info_transports_ptr ,
 .Nm fido_cbor_info_versions_ptr ,
 .Nm fido_cbor_info_options_name_ptr ,
@@ -52,6 +53,7 @@
 .Nm fido_cbor_info_encid_len ,
 .Nm fido_cbor_info_extensions_len ,
 .Nm fido_cbor_info_protocols_len ,
+.Nm fido_cbor_info_reset_transports_len ,
 .Nm fido_cbor_info_transports_len ,
 .Nm fido_cbor_info_versions_len ,
 .Nm fido_cbor_info_options_len ,
@@ -194,12 +196,14 @@ The
 .Fn fido_cbor_info_encid_ptr ,
 .Fn fido_cbor_info_extensions_ptr ,
 .Fn fido_cbor_info_protocols_ptr ,
+.Fn fido_cbor_info_reset_transports_ptr ,
 .Fn fido_cbor_info_transports_ptr ,
 and
 .Fn fido_cbor_info_versions_ptr
 functions return pointers to the authenticator attestation GUID,
 supported attestation formats, encrypted identifier, supported
-extensions, PIN protocol, transports, and CTAP version strings of
+extensions, PIN protocol, transports for authenticator reset,
+transports, and CTAP version strings of
 .Fa ci .
 The corresponding length of a given attribute can be
 obtained by
@@ -208,6 +212,7 @@ obtained by
 .Fn fido_cbor_info_encid_len ,
 .Fn fido_cbor_info_extensions_len ,
 .Fn fido_cbor_info_protocols_len ,
+.Fn fido_cbor_info_reset_transports_len ,
 .Fn fido_cbor_info_transports_len ,
 or
 .Fn fido_cbor_info_versions_len .

@@ -457,6 +457,11 @@ token_info(int argc, char **argv, char *path)
 	printf("long touch for reset: %s\n",
 	    fido_cbor_info_long_touch_reset(ci) ? "true" : "false");
 
+	/* print transports for reset */
+	print_str_array("transports for reset",
+	    fido_cbor_info_reset_transports_ptr(ci),
+	    fido_cbor_info_reset_transports_len(ci));
+
 	bio_info(dev);
 
 	fido_cbor_info_free(&ci);

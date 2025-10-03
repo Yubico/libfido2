@@ -350,6 +350,8 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (cbor_decode_bool(val, &ci->long_reset));
 	case 25: /* encIdentifier */
 		return (fido_blob_decode(val, &ci->encid));
+	case 26: /* transportsForReset */
+		return (decode_string_array(val, &ci->rsttransports));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type: 0x%02x", __func__, cbor_get_uint8(key));
 		return (0);
@@ -449,6 +451,7 @@ fido_cbor_info_reset(fido_cbor_info_t *ci)
 	fido_str_array_free(&ci->extensions);
 	fido_str_array_free(&ci->transports);
 	fido_str_array_free(&ci->attfmts);
+	fido_str_array_free(&ci->rsttransports);
 	fido_opt_array_free(&ci->options);
 	fido_byte_array_free(&ci->protocols);
 	fido_algo_array_free(&ci->algorithms);
@@ -696,4 +699,16 @@ size_t
 fido_cbor_info_attfmts_len(const fido_cbor_info_t *ci)
 {
 	return (ci->attfmts.len);
+}
+
+char **
+fido_cbor_info_reset_transports_ptr(const fido_cbor_info_t *ci)
+{
+	return (ci->rsttransports.ptr);
+}
+
+size_t
+fido_cbor_info_reset_transports_len(const fido_cbor_info_t *ci)
+{
+	return (ci->rsttransports.len);
 }
