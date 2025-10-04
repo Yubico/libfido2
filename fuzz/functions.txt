@@ -767,14 +767,14 @@ nfc_is_fido                                  17       1  94.12%        21       
 fido_is_nfc                                   3       0 100.00%         3       0 100.00%
 fido_dev_set_nfc                              6       1  83.33%        18       3  83.33%
 nfc.c:nfc_do_tx                              20       0 100.00%        25       0 100.00%
-nfc.c:tx_short_apdu                          14       0 100.00%        32       0 100.00%
+nfc.c:tx_short_apdu                          16       0 100.00%        34       0 100.00%
 nfc.c:rx_init                                26       0 100.00%        27       0 100.00%
 nfc.c:rx_cbor                                 5       0 100.00%         6       0 100.00%
 nfc.c:rx_msg                                 19       1  94.74%        23       3  86.96%
 nfc.c:rx_apdu                                14       0 100.00%        22       0 100.00%
 nfc.c:tx_get_response                         7       0 100.00%        12       0 100.00%
 -----------------------------------------------------------------------------------------
-TOTAL                                       176       3  98.30%       245       9  96.33%
+TOTAL                                       178       3  98.31%       247       9  96.36%
 
 File '/libfido2/src/nfc_linux.c':
 Name                                    Regions    Miss   Cover     Lines    Miss   Cover
