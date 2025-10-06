@@ -46,24 +46,28 @@ New-Item -Type Directory "${GpgHome}" -Force
 New-Item -Type File "${GpgHome}\common.conf" -Force
 
 # Fetch and verify Cygwin.
+Push-Location ${Cygwin}
 try {
-	if (-Not (Test-Path ${Cygwin}\${Setup} -PathType leaf)) {
+	if (-Not (Test-Path .\${Setup} -PathType leaf)) {
 		Invoke-WebRequest ${URL}/${Setup} `
-		    -OutFile ${Cygwin}\${Setup}
+		    -OutFile .\${Setup}
 	}
-	if (-Not (Test-Path ${Cygwin}\${Setup}.sig -PathType leaf)) {
+	if (-Not (Test-Path .\${Setup}.sig -PathType leaf)) {
 		Invoke-WebRequest ${URL}/${Setup}.sig `
-		    -OutFile ${Cygwin}\${Setup}.sig
+		    -OutFile .\${Setup}.sig
 	}
-	& $GPG --homedir ${GpgHome} --list-keys
-	& $GPG --homedir ${GpgHome} --quiet --no-default-keyring `
-	    --keyring ${PSScriptRoot}/cygwin.gpg `
-	    --verify ${Cygwin}\${Setup}.sig ${Cygwin}\${Setup}
+	Copy-Item "$PSScriptRoot\cygwin.gpg" -Destination "${Cygwin}"
+	& $GPG --homedir ./.gnupg --list-keys
+	& $GPG --homedir ./.gnupg --quiet --no-default-keyring `
+	    --keyring ./cygwin.gpg `
+	    --verify ./${Setup}.sig ./${Setup}
 	if ($LastExitCode -ne 0) {
 		throw "GPG signature verification failed"
 	}
 } catch {
 	throw "Failed to fetch and verify Cygwin"
+} finally {
+	Pop-Location
 }
 
 # Bootstrap Cygwin.
