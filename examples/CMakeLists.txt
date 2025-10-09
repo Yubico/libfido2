@@ -53,6 +53,15 @@ target_link_libraries(retries ${_FIDO2_LIBRARY})
 add_executable(select select.c ${COMPAT_SOURCES})
 target_link_libraries(select ${_FIDO2_LIBRARY})
 
+# prf
+add_executable(prf prf.c extern.h ${COMPAT_SOURCES})
+target_link_libraries(prf ${_FIDO2_LIBRARY})
+
+# Suppress cast-qual warnings for prf due to OpenSSL macro issues
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(prf PRIVATE -Wno-cast-qual)
+endif()
+
 if(MINGW)
 	# needed for nanosleep() in mingw
 	target_link_libraries(select winpthread)
