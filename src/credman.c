@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2024 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -281,11 +281,8 @@ credman_parse_rk(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	case 7:
 		return (cbor_decode_cred_id(val, &cred->attcred.id));
 	case 8:
-		if (cbor_decode_pubkey(val, &cred->attcred.type,
-		    &cred->attcred.pubkey) < 0)
-			return (-1);
-		cred->type = cred->attcred.type; /* XXX */
-		return (0);
+		return (cbor_decode_pubkey(val, &cred->attcred.type,
+		    &cred->attcred.pubkey));
 	case 10:
 		if (cbor_decode_uint64(val, &prot) < 0 || prot > INT_MAX ||
 		    fido_cred_set_prot(cred, (int)prot) != FIDO_OK)
