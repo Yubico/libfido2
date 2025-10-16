@@ -65,6 +65,7 @@
 .Nm fido_cbor_info_maxlargeblob ,
 .Nm fido_cbor_info_maxrpid_minpinlen ,
 .Nm fido_cbor_info_minpinlen ,
+.Nm fido_cbor_info_pin_policy ,
 .Nm fido_cbor_info_fwversion ,
 .Nm fido_cbor_info_uv_attempts ,
 .Nm fido_cbor_info_uv_modality ,
@@ -138,6 +139,8 @@
 .Fn fido_cbor_info_maxrpid_minpinlen "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_minpinlen "const fido_cbor_info_t *ci"
+.Ft int
+.Fn fido_cbor_info_pin_policy "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_fwversion "const fido_cbor_info_t *ci"
 .Ft uint64_t
@@ -313,6 +316,16 @@ The minimum PIN length attribute is a CTAP 2.1 addition.
 If the attribute is not advertised by the authenticator, the
 .Fn fido_cbor_info_minpinlen
 function returns zero.
+.Pp
+The
+.Fn fido_cbor_info_pin_policy
+function returns information about whether an additional PIN complexity
+policy is enforced, as reported by
+.Fa ci.
+The PIN complexity policy attribute is a CTAP 2.3 addition.
+The value is 1 if an additional policy is enforced, 0 if no such
+policy is enforced, or -1 if the attribute is not advertised by the
+authenticator.
 .Pp
 The
 .Fn fido_cbor_info_fwversion

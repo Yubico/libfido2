@@ -321,6 +321,8 @@ dev_get_cbor_info(const struct param *p)
 	consume(&n, sizeof(n));
 	n = (uint64_t)fido_cbor_info_uv_count_since_pin(ci);
 	consume(&n, sizeof(n));
+	n = (uint64_t)fido_cbor_info_pin_policy(ci);
+	consume(&n, sizeof(n));
 
 	consume(fido_cbor_info_aaguid_ptr(ci), fido_cbor_info_aaguid_len(ci));
 	consume(fido_cbor_info_protocols_ptr(ci),

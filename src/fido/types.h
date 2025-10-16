@@ -288,6 +288,7 @@ typedef struct fido_cbor_info {
 	bool              long_reset;     /* long touch for reset */
 	fido_blob_t       encid;          /* encrypted identifier */
 	fido_str_array_t  rsttransports;  /* transports for reset */
+	int               pinpolicy;      /* enforces pin complexity */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {

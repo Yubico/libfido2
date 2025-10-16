@@ -439,6 +439,12 @@ token_info(int argc, char **argv, char *path)
 	printf("pin change required: %s\n",
 	    fido_cbor_info_new_pin_required(ci) ? "true" : "false");
 
+	/* print pin complexity policy */
+	if (fido_cbor_info_pin_policy(ci) != -1) {
+		printf("pin complexity policy: %s\n",
+		    fido_cbor_info_pin_policy(ci) ? "true" : "false");
+	}
+
 	if (fido_dev_get_uv_retry_count(dev, &retrycnt) != FIDO_OK)
 		printf("uv retries: undefined\n");
 	else

@@ -151,6 +151,7 @@ int fido_assert_set_sig(fido_assert_t *, size_t, const unsigned char *, size_t);
 int fido_assert_set_winhello_appid(fido_assert_t *, const char *);
 int fido_assert_verify(const fido_assert_t *, size_t, int, const void *);
 int fido_cbor_info_algorithm_cose(const fido_cbor_info_t *, size_t);
+int fido_cbor_info_pin_policy(const fido_cbor_info_t *);
 int fido_cred_empty_exclude_list(fido_cred_t *);
 bool fido_cred_entattest(const fido_cred_t *);
 int fido_cred_exclude(fido_cred_t *, const unsigned char *, size_t);

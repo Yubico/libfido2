@@ -114,6 +114,7 @@
 		fido_cbor_info_options_len;
 		fido_cbor_info_options_name_ptr;
 		fido_cbor_info_options_value_ptr;
+		fido_cbor_info_pin_policy;
 		fido_cbor_info_protocols_len;
 		fido_cbor_info_protocols_ptr;
 		fido_cbor_info_reset_transports_len;
