@@ -284,6 +284,7 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
 	fido_cbor_info_t *ci = arg;
 	uint64_t x;
+	bool b;
 
 	if (cbor_isa_uint(key) == false ||
 	    cbor_int_get_width(key) != CBOR_INT_8) {
@@ -352,6 +353,13 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (decode_bytes(val, ci->encid, sizeof(ci->encid)));
 	case 26: /* transportsForReset */
 		return (decode_string_array(val, &ci->rsttransports));
+	case 27: /* pinComplexityPolicy */
+		if (cbor_decode_bool(val, &b)) {
+			fido_log_debug("%s: cbor_decode_bool", __func__);
+			return (-1);
+		}
+		ci->pinpolicy = b;
+		return (0);
 	default: /* ignore */
 		fido_log_debug("%s: cbor type: 0x%02x", __func__, cbor_get_uint8(key));
 		return (0);
@@ -458,6 +466,7 @@ fido_cbor_info_reset(fido_cbor_info_t *ci)
 	fido_cert_array_free(&ci->certs);
 	ci->rk_remaining = -1;
 	ci->uv_since_pin = -1;
+	ci->pinpolicy = -1;
 }
 
 void
@@ -712,4 +721,8 @@ fido_cbor_info_reset_transports_len(const fido_cbor_info_t *ci)
 	return (ci->rsttransports.len);
 }
 
-
+int
+fido_cbor_info_pin_policy(const fido_cbor_info_t *ci)
+{
+	return (ci->pinpolicy);
+}
