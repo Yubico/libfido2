@@ -289,6 +289,7 @@ typedef struct fido_cbor_info {
 	fido_blob_t       encid;          /* encrypted identifier */
 	fido_str_array_t  rsttransports;  /* transports for reset */
 	int               pinpolicy;      /* enforces pin complexity */
+	fido_blob_t       pinpolicyurl;   /* url to pin policy */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {

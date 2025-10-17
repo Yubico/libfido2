@@ -36,6 +36,7 @@
 .Nm fido_cbor_info_attfmts_ptr ,
 .Nm fido_cbor_info_encid_ptr ,
 .Nm fido_cbor_info_extensions_ptr ,
+.Nm fido_cbor_info_pin_policy_url_ptr ,
 .Nm fido_cbor_info_protocols_ptr ,
 .Nm fido_cbor_info_reset_transports_ptr ,
 .Nm fido_cbor_info_transports_ptr ,
@@ -52,6 +53,7 @@
 .Nm fido_cbor_info_attfmts_len ,
 .Nm fido_cbor_info_encid_len ,
 .Nm fido_cbor_info_extensions_len ,
+.Nm fido_cbor_info_pin_policy_url_len ,
 .Nm fido_cbor_info_protocols_len ,
 .Nm fido_cbor_info_reset_transports_len ,
 .Nm fido_cbor_info_transports_len ,
@@ -88,6 +90,8 @@
 .Ft char **
 .Fn fido_cbor_info_extensions_ptr "const fido_cbor_info_t *ci"
 .Ft const uint8_t *
+.Fn fido_cbor_info_pin_policy_url_ptr "const fido_cbor_info_t *ci"
+.Ft const uint8_t *
 .Fn fido_cbor_info_protocols_ptr "const fido_cbor_info_t *ci"
 .Ft char **
 .Fn fido_cbor_info_transports_ptr "const fido_cbor_info_t *ci"
@@ -115,6 +119,8 @@
 .Fn fido_cbor_info_attfmts_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_extensions_len "const fido_cbor_info_t *ci"
+.Ft size_t
+.Fn fido_cbor_info_pin_policy_url_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_protocols_len "const fido_cbor_info_t *ci"
 .Ft size_t
@@ -198,6 +204,7 @@ The
 .Fn fido_cbor_info_attfmts_ptr ,
 .Fn fido_cbor_info_encid_ptr ,
 .Fn fido_cbor_info_extensions_ptr ,
+.Fn fido_cbor_info_pin_policy_url_ptr ,
 .Fn fido_cbor_info_protocols_ptr ,
 .Fn fido_cbor_info_reset_transports_ptr ,
 .Fn fido_cbor_info_transports_ptr ,
@@ -205,8 +212,8 @@ and
 .Fn fido_cbor_info_versions_ptr
 functions return pointers to the authenticator attestation GUID,
 supported attestation formats, encrypted identifier, supported
-extensions, PIN protocol, transports for authenticator reset,
-transports, and CTAP version strings of
+extensions, PIN complexity policy URL, PIN protocol, transports for
+authenticator reset, transports, and CTAP version strings of
 .Fa ci .
 The corresponding length of a given attribute can be
 obtained by
@@ -214,6 +221,7 @@ obtained by
 .Fn fido_cbor_info_attfmts_len ,
 .Fn fido_cbor_info_encid_len ,
 .Fn fido_cbor_info_extensions_len ,
+.Fn fido_cbor_info_pin_policy_url_len ,
 .Fn fido_cbor_info_protocols_len ,
 .Fn fido_cbor_info_reset_transports_len ,
 .Fn fido_cbor_info_transports_len ,
