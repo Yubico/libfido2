@@ -260,6 +260,7 @@ uint64_t fido_cbor_info_maxcredidlen(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_maxlargeblob(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_maxmsgsiz(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_maxrpid_minpinlen(const fido_cbor_info_t *);
+uint64_t fido_cbor_info_maxpinlen(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_minpinlen(const fido_cbor_info_t *);
 uint64_t fido_cbor_info_uv_attempts(const fido_cbor_info_t *);
 int64_t  fido_cbor_info_uv_count_since_pin(const fido_cbor_info_t *);

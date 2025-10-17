@@ -66,6 +66,7 @@
 .Nm fido_cbor_info_maxcredidlen ,
 .Nm fido_cbor_info_maxlargeblob ,
 .Nm fido_cbor_info_maxrpid_minpinlen ,
+.Nm fido_cbor_info_maxpinlen ,
 .Nm fido_cbor_info_minpinlen ,
 .Nm fido_cbor_info_pin_policy ,
 .Nm fido_cbor_info_fwversion ,
@@ -143,6 +144,8 @@
 .Fn fido_cbor_info_maxlargeblob "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_maxrpid_minpinlen "const fido_cbor_info_t *ci"
+.Ft uint64_t
+.Fn fido_cbor_info_maxpinlen "const fido_cbor_info_t *ci"
 .Ft uint64_t
 .Fn fido_cbor_info_minpinlen "const fido_cbor_info_t *ci"
 .Ft int
@@ -314,6 +317,16 @@ The
 function returns the maximum length in bytes of an authenticator's
 serialized largeBlob array as reported in
 .Fa ci .
+.Pp
+The
+.Fn fido_cbor_info_maxpinlen
+function returns the maximum PIN length enforced by the
+authenticator as reported in
+.Fa ci .
+The maximum PIN length attribute is a CTAP 2.3 addition.
+If the attribute is not advertised by the authenticator, the
+.Fn fido_cbor_info_maxpinlen
+function returns zero.
 .Pp
 The
 .Fn fido_cbor_info_minpinlen

@@ -362,6 +362,8 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (0);
 	case 28: /* pinComplexityPolicyUrl */
 		return (fido_blob_decode(val, &ci->pinpolicyurl));
+	case 29: /* maxPINLength */
+		return (cbor_decode_uint64(val, &ci->maxpinlen));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type: 0x%02x", __func__, cbor_get_uint8(key));
 		return (0);
@@ -741,4 +743,10 @@ size_t
 fido_cbor_info_pin_policy_url_len(const fido_cbor_info_t *ci)
 {
 	return (ci->pinpolicyurl.len);
+}
+
+uint64_t
+fido_cbor_info_maxpinlen(const fido_cbor_info_t *ci)
+{
+	return (ci->maxpinlen);
 }

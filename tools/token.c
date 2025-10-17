@@ -208,10 +208,10 @@ print_maxrpid_minpinlen(uint64_t maxrpid)
 }
 
 static void
-print_minpinlen(uint64_t minpinlen)
+print_pinlen(const char *prefix, uint64_t minpinlen)
 {
 	if (minpinlen > 0)
-		printf("minpinlen: %d\n", (int)minpinlen);
+		printf("%s: %d\n", prefix, (int)minpinlen);
 }
 
 static void
@@ -435,7 +435,10 @@ token_info(int argc, char **argv, char *path)
 	print_rk_remaining(fido_cbor_info_rk_remaining(ci));
 
 	/* print minimum pin length */
-	print_minpinlen(fido_cbor_info_minpinlen(ci));
+	print_pinlen("minpinlen", fido_cbor_info_minpinlen(ci));
+
+	/* print maximum pin length */
+	print_pinlen("maxpinlen", fido_cbor_info_maxpinlen(ci));
 
 	/* print supported pin protocols */
 	print_byte_array("pin protocols", fido_cbor_info_protocols_ptr(ci),

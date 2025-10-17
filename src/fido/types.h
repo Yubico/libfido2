@@ -290,6 +290,7 @@ typedef struct fido_cbor_info {
 	fido_str_array_t  rsttransports;  /* transports for reset */
 	int               pinpolicy;      /* enforces pin complexity */
 	fido_blob_t       pinpolicyurl;   /* url to pin policy */
+	uint64_t          maxpinlen;      /* non-default max pin length */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {
