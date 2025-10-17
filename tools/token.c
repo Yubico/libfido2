@@ -158,6 +158,15 @@ print_bytes(const char *prefix, const unsigned char *buf, size_t buflen)
 }
 
 static void
+print_pin_policy_url(const unsigned char *ptr, size_t len)
+{
+	if (len > INT_MAX)
+		return;
+	printf("pin complexity policy url: %.*s\n", (int)len,
+	    (const char *)ptr);
+}
+
+static void
 print_maxmsgsiz(uint64_t maxmsgsiz)
 {
 	printf("maxmsgsiz: %d\n", (int)maxmsgsiz);
@@ -439,6 +448,11 @@ token_info(int argc, char **argv, char *path)
 	if (fido_cbor_info_pin_policy(ci) != -1) {
 		printf("pin complexity policy: %s\n",
 		    fido_cbor_info_pin_policy(ci) ? "true" : "false");
+	}
+
+	if (fido_cbor_info_pin_policy_url_ptr(ci)) {
+		print_pin_policy_url(fido_cbor_info_pin_policy_url_ptr(ci),
+		    fido_cbor_info_pin_policy_url_len(ci));
 	}
 
 	if (fido_dev_get_uv_retry_count(dev, &retrycnt) != FIDO_OK)
