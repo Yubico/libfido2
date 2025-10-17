@@ -107,6 +107,7 @@
 		fido_cbor_info_maxcredidlen;
 		fido_cbor_info_maxlargeblob;
 		fido_cbor_info_maxmsgsiz;
+		fido_cbor_info_maxpinlen;
 		fido_cbor_info_maxrpid_minpinlen;
 		fido_cbor_info_minpinlen;
 		fido_cbor_info_new;
