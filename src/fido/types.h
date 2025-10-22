@@ -171,6 +171,11 @@ typedef struct fido_cred_ea {
 	bool att;
 } fido_cred_ea_t;
 
+typedef struct fido_int_array {
+	int *ptr;
+	size_t len;
+} fido_int_array_t;
+
 typedef struct fido_cred {
 	fido_blob_t       cd;            /* client data */
 	fido_blob_t       cdh;           /* client data hash */
@@ -180,7 +185,7 @@ typedef struct fido_cred {
 	fido_opt_t        rk;            /* resident key */
 	fido_opt_t        uv;            /* user verification */
 	fido_cred_ext_t   ext;           /* extensions */
-	int               type;          /* cose algorithm */
+	fido_int_array_t  type;          /* cose algorithm(s) */
 	char             *fmt;           /* credential format */
 	fido_cred_ext_t   authdata_ext;  /* decoded extensions */
 	fido_blob_t       authdata_cbor; /* cbor-encoded payload */
