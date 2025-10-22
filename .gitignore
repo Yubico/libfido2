@@ -1,4 +1,6 @@
 build/
+build-Debug/
+build-Release/
 cscope.out
 fuzz/build/
 fuzz/corpus.tgz-
