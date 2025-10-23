@@ -899,6 +899,8 @@ cbor_encode_assert_ext(fido_dev_t *dev, const fido_assert_ext_t *ext,
 		size++;
 	if (ext->mask & FIDO_EXT_LARGEBLOB_KEY)
 		size++;
+	if (ext->mask & FIDO_EXT_PAYMENT)
+		size++;
 	if (size == 0 || (item = cbor_new_definite_map(size)) == NULL)
 		return (NULL);
 
@@ -917,6 +919,12 @@ cbor_encode_assert_ext(fido_dev_t *dev, const fido_assert_ext_t *ext,
 	}
 	if (ext->mask & FIDO_EXT_LARGEBLOB_KEY) {
 		if (cbor_encode_largeblob_key_ext(item) < 0) {
+			cbor_decref(&item);
+			return (NULL);
+		}
+	}
+	if (ext->mask & FIDO_EXT_PAYMENT) {
+		if (cbor_add_bool(item, "thirdPartyPayment", FIDO_OPT_TRUE) < 0) {
 			cbor_decref(&item);
 			return (NULL);
 		}
@@ -1329,6 +1337,13 @@ decode_assert_extension(const cbor_item_t *key, const cbor_item_t *val,
 			goto out;
 		}
 		authdata_ext->mask |= FIDO_EXT_CRED_BLOB;
+	} else if (strcmp(type, "thirdPartyPayment") == 0) {
+		if (cbor_decode_bool(val, NULL) < 0) {
+			fido_log_debug("%s: cbor_decode_bool", __func__);
+			goto out;
+		}
+		if (cbor_ctrl_value(val) == CBOR_CTRL_TRUE)
+			authdata_ext->mask |= FIDO_EXT_PAYMENT;
 	}
 
 	ok = 0;
