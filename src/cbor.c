@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -613,6 +613,8 @@ cbor_encode_cred_ext(const fido_cred_ext_t *ext, const fido_blob_t *blob)
 		size++;
 	if (ext->mask & FIDO_EXT_MINPINLEN)
 		size++;
+	if (ext->mask & FIDO_EXT_PAYMENT)
+		size++;
 
 	if (size == 0 || (item = cbor_new_definite_map(size)) == NULL)
 		return (NULL);
@@ -646,6 +648,12 @@ cbor_encode_cred_ext(const fido_cred_ext_t *ext, const fido_blob_t *blob)
 	}
 	if (ext->mask & FIDO_EXT_MINPINLEN) {
 		if (cbor_add_bool(item, "minPinLength", FIDO_OPT_TRUE) < 0) {
+			cbor_decref(&item);
+			return (NULL);
+		}
+	}
+	if (ext->mask & FIDO_EXT_PAYMENT) {
+		if (cbor_add_bool(item, "thirdPartyPayment", FIDO_OPT_TRUE) < 0) {
 			cbor_decref(&item);
 			return (NULL);
 		}

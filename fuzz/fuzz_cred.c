@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -243,6 +243,8 @@ make_cred(fido_cred_t *cred, uint8_t opt, int type, const struct blob *cdh,
 		fido_cred_set_extensions(cred, FIDO_EXT_LARGEBLOB_KEY);
 	if (ext & FIDO_EXT_MINPINLEN)
 		fido_cred_set_pin_minlen(cred, strlen(pin));
+	if (ext & FIDO_EXT_PAYMENT)
+		fido_cred_set_extensions(cred, FIDO_EXT_PAYMENT);
 
 	if (rk & 1)
 		fido_cred_set_rk(cred, FIDO_OPT_TRUE);
