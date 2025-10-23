@@ -251,11 +251,14 @@ static int
 check_extensions(const fido_cred_ext_t *authdata_ext,
     const fido_cred_ext_t *ext)
 {
-	fido_cred_ext_t	 tmp;
+	fido_cred_ext_t tmp;
 
-	/* XXX: largeBlobKey is not part of the extensions map */
+	/*
+	 * XXX: largeBlobKey is not part of the extensions map
+	 * XXX: thirdPartyPayment has no output for make credential
+	 */
 	memcpy(&tmp, ext, sizeof(tmp));
-	tmp.mask &= ~FIDO_EXT_LARGEBLOB_KEY;
+	tmp.mask &= ~(FIDO_EXT_LARGEBLOB_KEY | FIDO_EXT_PAYMENT);
 
 	return (timingsafe_bcmp(authdata_ext, &tmp, sizeof(*authdata_ext)));
 }
