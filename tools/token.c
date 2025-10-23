@@ -396,6 +396,10 @@ token_info(int argc, char **argv, char *path)
 	print_bytes("encid", fido_cbor_info_encid_ptr(ci),
 	    fido_cbor_info_encid_len(ci));
 
+	/* print encstate */
+	print_bytes("encstate", fido_cbor_info_encstate_ptr(ci),
+	    fido_cbor_info_encstate_len(ci));
+
 	/* print supported options */
 	print_opt_array("options", fido_cbor_info_options_name_ptr(ci),
 	    fido_cbor_info_options_value_ptr(ci),

@@ -291,6 +291,7 @@ typedef struct fido_cbor_info {
 	int               pinpolicy;      /* enforces pin complexity */
 	fido_blob_t       pinpolicyurl;   /* url to pin policy */
 	uint64_t          maxpinlen;      /* non-default max pin length */
+	fido_blob_t       encstate;       /* encrypted credential store state */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {

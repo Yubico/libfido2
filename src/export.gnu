@@ -99,6 +99,8 @@
 		fido_cbor_info_certs_value_ptr;
 		fido_cbor_info_encid_len;
 		fido_cbor_info_encid_ptr;
+		fido_cbor_info_encstate_len;
+		fido_cbor_info_encstate_ptr;
 		fido_cbor_info_extensions_len;
 		fido_cbor_info_extensions_ptr;
 		fido_cbor_info_free;

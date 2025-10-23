@@ -35,6 +35,7 @@
 .Nm fido_cbor_info_aaguid_ptr ,
 .Nm fido_cbor_info_attfmts_ptr ,
 .Nm fido_cbor_info_encid_ptr ,
+.Nm fido_cbor_info_encstate_ptr ,
 .Nm fido_cbor_info_extensions_ptr ,
 .Nm fido_cbor_info_pin_policy_url_ptr ,
 .Nm fido_cbor_info_protocols_ptr ,
@@ -52,6 +53,7 @@
 .Nm fido_cbor_info_aaguid_len ,
 .Nm fido_cbor_info_attfmts_len ,
 .Nm fido_cbor_info_encid_len ,
+.Nm fido_cbor_info_encstate_len ,
 .Nm fido_cbor_info_extensions_len ,
 .Nm fido_cbor_info_pin_policy_url_len ,
 .Nm fido_cbor_info_protocols_len ,
@@ -206,6 +208,7 @@ The
 .Fn fido_cbor_info_aaguid_ptr ,
 .Fn fido_cbor_info_attfmts_ptr ,
 .Fn fido_cbor_info_encid_ptr ,
+.Fn fido_cbor_info_encstate_ptr ,
 .Fn fido_cbor_info_extensions_ptr ,
 .Fn fido_cbor_info_pin_policy_url_ptr ,
 .Fn fido_cbor_info_protocols_ptr ,
@@ -214,15 +217,17 @@ The
 and
 .Fn fido_cbor_info_versions_ptr
 functions return pointers to the authenticator attestation GUID,
-supported attestation formats, encrypted identifier, supported
-extensions, PIN complexity policy URL, PIN protocol, transports for
-authenticator reset, transports, and CTAP version strings of
+supported attestation formats, encrypted identifier, encrypted
+credential store state, supported extensions, PIN complexity policy URL,
+PIN protocol, transports for authenticator reset, transports, and CTAP
+version strings of
 .Fa ci .
 The corresponding length of a given attribute can be
 obtained by
 .Fn fido_cbor_info_aaguid_len ,
 .Fn fido_cbor_info_attfmts_len ,
 .Fn fido_cbor_info_encid_len ,
+.Fn fido_cbor_info_encstate_len ,
 .Fn fido_cbor_info_extensions_len ,
 .Fn fido_cbor_info_pin_policy_url_len ,
 .Fn fido_cbor_info_protocols_len ,
