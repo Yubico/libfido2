@@ -703,6 +703,8 @@ cbor_encode_cred_ext(const fido_dev_t *dev, const fido_cred_extin_t *ext,
 		size++;
 	if (ext->attr.mask & FIDO_EXT_HMAC_SECRET_MC)
 		size++;
+	if (ext->attr.mask & FIDO_EXT_PAYMENT)
+		size++;
 
 	if (size == 0 || (item = cbor_new_definite_map(size)) == NULL)
 		return (NULL);
@@ -743,6 +745,13 @@ cbor_encode_cred_ext(const fido_dev_t *dev, const fido_cred_extin_t *ext,
 	if (ext->attr.mask & FIDO_EXT_HMAC_SECRET_MC) {
 		if (cbor_encode_hmac_secret_param("hmac-secret-mc", dev, item,
 		    ecdh, pk, &ext->hmac_salt) < 0) {
+			cbor_decref(&item);
+			return (NULL);
+		}
+	}
+	if (ext->attr.mask & FIDO_EXT_PAYMENT) {
+		if (cbor_add_bool(item, "thirdPartyPayment",
+		    FIDO_OPT_TRUE) < 0) {
 			cbor_decref(&item);
 			return (NULL);
 		}
