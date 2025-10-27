@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -89,9 +89,8 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 		}
 
 	/* extensions */
-	if (cred->ext.mask)
-		if ((argv[5] = cbor_encode_cred_ext(&cred->ext,
-		    &cred->blob)) == NULL) {
+	if (cred->ext.attr.mask)
+		if ((argv[5] = cbor_encode_cred_ext(&cred->ext)) == NULL) {
 			fido_log_debug("%s: cbor_encode_cred_ext", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
@@ -214,7 +213,7 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 #endif
 	if (fido_dev_is_fido2(dev) == false) {
 		if (pin != NULL || cred->rk == FIDO_OPT_TRUE ||
-		    cred->ext.mask != 0)
+		    cred->ext.attr.mask != 0)
 			return (FIDO_ERR_UNSUPPORTED_OPTION);
 		return (u2f_register(dev, cred, &ms));
 	}
@@ -385,7 +384,7 @@ fido_cred_verify(const fido_cred_t *cred)
 		goto out;
 	}
 
-	if (check_extensions(&cred->authdata_ext, &cred->ext) != 0) {
+	if (check_extensions(&cred->authdata_ext.attr, &cred->ext.attr) != 0) {
 		fido_log_debug("%s: check_extensions", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
 		goto out;
@@ -474,7 +473,7 @@ fido_cred_verify_self(const fido_cred_t *cred)
 		goto out;
 	}
 
-	if (check_extensions(&cred->authdata_ext, &cred->ext) != 0) {
+	if (check_extensions(&cred->authdata_ext.attr, &cred->ext.attr) != 0) {
 		fido_log_debug("%s: check_extensions", __func__);
 		r = FIDO_ERR_INVALID_PARAM;
 		goto out;
@@ -581,7 +580,7 @@ fido_cred_reset_tx(fido_cred_t *cred)
 	fido_blob_reset(&cred->cd);
 	fido_blob_reset(&cred->cdh);
 	fido_blob_reset(&cred->user.id);
-	fido_blob_reset(&cred->blob);
+	fido_blob_reset(&cred->ext.blob);
 
 	free(cred->rp.id);
 	free(cred->rp.name);
@@ -959,11 +958,11 @@ int
 fido_cred_set_extensions(fido_cred_t *cred, int ext)
 {
 	if (ext == 0)
-		cred->ext.mask = 0;
+		cred->ext.attr.mask = 0;
 	else {
 		if ((ext & FIDO_EXT_CRED_MASK) != ext)
 			return (FIDO_ERR_INVALID_ARGUMENT);
-		cred->ext.mask |= ext;
+		cred->ext.attr.mask |= ext;
 	}
 
 	return (FIDO_OK);
@@ -1010,16 +1009,16 @@ int
 fido_cred_set_prot(fido_cred_t *cred, int prot)
 {
 	if (prot == 0) {
-		cred->ext.mask &= ~FIDO_EXT_CRED_PROTECT;
-		cred->ext.prot = 0;
+		cred->ext.attr.mask &= ~FIDO_EXT_CRED_PROTECT;
+		cred->ext.attr.prot = 0;
 	} else {
 		if (prot != FIDO_CRED_PROT_UV_OPTIONAL &&
 		    prot != FIDO_CRED_PROT_UV_OPTIONAL_WITH_ID &&
 		    prot != FIDO_CRED_PROT_UV_REQUIRED)
 			return (FIDO_ERR_INVALID_ARGUMENT);
 
-		cred->ext.mask |= FIDO_EXT_CRED_PROTECT;
-		cred->ext.prot = prot;
+		cred->ext.attr.mask |= FIDO_EXT_CRED_PROTECT;
+		cred->ext.attr.prot = prot;
 	}
 
 	return (FIDO_OK);
@@ -1029,11 +1028,11 @@ int
 fido_cred_set_pin_minlen(fido_cred_t *cred, size_t len)
 {
 	if (len == 0)
-		cred->ext.mask &= ~FIDO_EXT_MINPINLEN;
+		cred->ext.attr.mask &= ~FIDO_EXT_MINPINLEN;
 	else
-		cred->ext.mask |= FIDO_EXT_MINPINLEN;
+		cred->ext.attr.mask |= FIDO_EXT_MINPINLEN;
 
-	cred->ext.minpinlen = len;
+	cred->ext.attr.minpinlen = len;
 
 	return (FIDO_OK);
 }
@@ -1043,10 +1042,10 @@ fido_cred_set_blob(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 {
 	if (ptr == NULL || len == 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
-	if (fido_blob_set(&cred->blob, ptr, len) < 0)
+	if (fido_blob_set(&cred->ext.blob, ptr, len) < 0)
 		return (FIDO_ERR_INTERNAL);
 
-	cred->ext.mask |= FIDO_EXT_CRED_BLOB;
+	cred->ext.attr.mask |= FIDO_EXT_CRED_BLOB;
 
 	return (FIDO_OK);
 }
@@ -1277,13 +1276,13 @@ fido_cred_aaguid_len(const fido_cred_t *cred)
 int
 fido_cred_prot(const fido_cred_t *cred)
 {
-	return (cred->ext.prot);
+	return (cred->ext.attr.prot);
 }
 
 size_t
 fido_cred_pin_minlen(const fido_cred_t *cred)
 {
-	return (cred->ext.minpinlen);
+	return (cred->ext.attr.minpinlen);
 }
 
 const char *

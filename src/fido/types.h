@@ -166,31 +166,39 @@ typedef struct fido_cred_ext {
 	size_t minpinlen; /* minimum pin length */
 } fido_cred_ext_t;
 
+typedef struct fido_cred_extin {
+	fido_cred_ext_t attr;
+	fido_blob_t     blob; /* CTAP 2.1 credBlob */
+} fido_cred_extin_t;
+
+typedef struct fido_cred_extout {
+	fido_cred_ext_t attr;
+} fido_cred_extout_t;
+
 typedef struct fido_cred_ea {
 	int mode;
 	bool att;
 } fido_cred_ea_t;
 
 typedef struct fido_cred {
-	fido_blob_t       cd;            /* client data */
-	fido_blob_t       cdh;           /* client data hash */
-	fido_rp_t         rp;            /* relying party */
-	fido_user_t       user;          /* user entity */
-	fido_blob_array_t excl;          /* list of credential ids to exclude */
-	fido_opt_t        rk;            /* resident key */
-	fido_opt_t        uv;            /* user verification */
-	fido_cred_ext_t   ext;           /* extensions */
-	int               type;          /* cose algorithm */
-	char             *fmt;           /* credential format */
-	fido_cred_ext_t   authdata_ext;  /* decoded extensions */
-	fido_blob_t       authdata_cbor; /* cbor-encoded payload */
-	fido_blob_t       authdata_raw;  /* cbor-decoded payload */
-	fido_authdata_t   authdata;      /* decoded authdata payload */
-	fido_attcred_t    attcred;       /* returned credential (key + id) */
-	fido_attstmt_t    attstmt;       /* attestation statement (x509 + sig) */
-	fido_blob_t       largeblob_key; /* decoded large blob key */
-	fido_blob_t       blob;          /* CTAP 2.1 credBlob */
-	fido_cred_ea_t    ea;            /* enterprise attestation */
+	fido_blob_t        cd;            /* client data */
+	fido_blob_t        cdh;           /* client data hash */
+	fido_rp_t          rp;            /* relying party */
+	fido_user_t        user;          /* user entity */
+	fido_blob_array_t  excl;          /* list of credential ids to exclude */
+	fido_opt_t         rk;            /* resident key */
+	fido_opt_t         uv;            /* user verification */
+	fido_cred_extin_t  ext;           /* extensions */
+	int                type;          /* cose algorithm */
+	char               *fmt;          /* credential format */
+	fido_cred_extout_t authdata_ext;  /* decoded extensions */
+	fido_blob_t        authdata_cbor; /* cbor-encoded payload */
+	fido_blob_t        authdata_raw;  /* cbor-decoded payload */
+	fido_authdata_t    authdata;      /* decoded authdata payload */
+	fido_attcred_t     attcred;       /* returned credential (key + id) */
+	fido_attstmt_t     attstmt;       /* attestation statement (x509 + sig) */
+	fido_blob_t        largeblob_key; /* decoded large blob key */
+	fido_cred_ea_t     ea;            /* enterprise attestation */
 } fido_cred_t;
 
 typedef struct fido_assert_extattr {

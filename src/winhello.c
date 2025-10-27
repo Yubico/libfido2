@@ -384,30 +384,30 @@ pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg,
 }
 
 static int
-pack_cred_ext(WEBAUTHN_EXTENSIONS *out, const fido_cred_ext_t *in)
+pack_cred_ext(WEBAUTHN_EXTENSIONS *out, const fido_cred_extin_t *in)
 {
 	WEBAUTHN_EXTENSION *e;
 	WEBAUTHN_CRED_PROTECT_EXTENSION_IN *p;
 	BOOL *b;
 	size_t n = 0, i = 0;
 
-	if (in->mask == 0) {
+	if (in->attr.mask == 0) {
 		return 0; /* nothing to do */
 	}
-	if (in->mask & ~(FIDO_EXT_HMAC_SECRET | FIDO_EXT_CRED_PROTECT)) {
-		fido_log_debug("%s: mask 0x%x", __func__, in->mask);
+	if (in->attr.mask & ~(FIDO_EXT_HMAC_SECRET | FIDO_EXT_CRED_PROTECT)) {
+		fido_log_debug("%s: mask 0x%x", __func__, in->attr.mask);
 		return -1;
 	}
-	if (in->mask & FIDO_EXT_HMAC_SECRET)
+	if (in->attr.mask & FIDO_EXT_HMAC_SECRET)
 		n++;
-	if (in->mask & FIDO_EXT_CRED_PROTECT)
+	if (in->attr.mask & FIDO_EXT_CRED_PROTECT)
 		n++;
 	if ((out->pExtensions = calloc(n, sizeof(*e))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
 		return -1;
 	}
 	out->cExtensions = (DWORD)n;
-	if (in->mask & FIDO_EXT_HMAC_SECRET) {
+	if (in->attr.mask & FIDO_EXT_HMAC_SECRET) {
 		/*
 		 * NOTE: webauthn.dll ignores requests to enable hmac-secret
 		 * unless a discoverable credential is also requested.
@@ -424,12 +424,12 @@ pack_cred_ext(WEBAUTHN_EXTENSIONS *out, const fido_cred_ext_t *in)
 		e->cbExtension = sizeof(*b);
 		i++;
 	}
-	if (in->mask & FIDO_EXT_CRED_PROTECT) {
+	if (in->attr.mask & FIDO_EXT_CRED_PROTECT) {
 		if ((p = calloc(1, sizeof(*p))) == NULL) {
 			fido_log_debug("%s: calloc", __func__);
 			return -1;
 		}
-		p->dwCredProtect = (DWORD)in->prot;
+		p->dwCredProtect = (DWORD)in->attr.prot;
 		p->bRequireCredProtect = true;
 		e = &out->pExtensions[i];
 		e->pwszExtensionIdentifier =
@@ -727,7 +727,7 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
 		fido_log_debug("%s: pack_cred_ext", __func__);
 		return FIDO_ERR_UNSUPPORTED_EXTENSION;
 	}
-	if (set_cred_uv(&opt->dwUserVerificationRequirement, (cred->ext.mask &
+	if (set_cred_uv(&opt->dwUserVerificationRequirement, (cred->ext.attr.mask &
 	    FIDO_EXT_CRED_PROTECT) ? FIDO_OPT_TRUE : cred->uv, pin) < 0) {
 		fido_log_debug("%s: set_cred_uv", __func__);
 		return FIDO_ERR_INTERNAL;

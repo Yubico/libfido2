@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -41,7 +41,7 @@ cbor_item_t *cbor_flatten_vector(cbor_item_t **, size_t);
 cbor_item_t *cbor_encode_assert_opt(fido_opt_t, fido_opt_t);
 cbor_item_t *cbor_encode_change_pin_auth(const fido_dev_t *,
     const fido_blob_t *, const fido_blob_t *, const fido_blob_t *);
-cbor_item_t *cbor_encode_cred_ext(const fido_cred_ext_t *, const fido_blob_t *);
+cbor_item_t *cbor_encode_cred_ext(const fido_cred_extin_t *);
 cbor_item_t *cbor_encode_assert_ext(fido_dev_t *,
     const fido_assert_ext_t *, const fido_blob_t *, const es256_pk_t *);
 cbor_item_t *cbor_encode_cred_opt(fido_opt_t, fido_opt_t);
@@ -61,7 +61,7 @@ int cbor_decode_attstmt(const cbor_item_t *, fido_attstmt_t *);
 int cbor_decode_attobj(const cbor_item_t *, fido_cred_t *);
 int cbor_decode_bool(const cbor_item_t *, bool *);
 int cbor_decode_cred_authdata(const cbor_item_t *, int, fido_blob_t *,
-    fido_authdata_t *, fido_attcred_t *, fido_cred_ext_t *);
+    fido_authdata_t *, fido_attcred_t *, fido_cred_extout_t *);
 int cbor_decode_assert_authdata(const cbor_item_t *, fido_blob_t *,
     fido_authdata_t *, fido_assert_extattr_t *);
 int cbor_decode_cred_id(const cbor_item_t *, fido_blob_t *);
