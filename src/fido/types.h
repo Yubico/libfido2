@@ -168,11 +168,13 @@ typedef struct fido_cred_ext {
 
 typedef struct fido_cred_extin {
 	fido_cred_ext_t attr;
-	fido_blob_t     blob; /* CTAP 2.1 credBlob */
+	fido_blob_t     blob;      /* CTAP 2.1 credBlob */
+	fido_blob_t     hmac_salt; /* CTAP 2.2 hmac-secret-mc salt */
 } fido_cred_extin_t;
 
 typedef struct fido_cred_extout {
 	fido_cred_ext_t attr;
+	fido_blob_t     hmac_secret_enc; /* CTAP 2.2 hmac-secret-mc, encrypted */
 } fido_cred_extout_t;
 
 typedef struct fido_cred_ea {
@@ -199,6 +201,7 @@ typedef struct fido_cred {
 	fido_attstmt_t     attstmt;       /* attestation statement (x509 + sig) */
 	fido_blob_t        largeblob_key; /* decoded large blob key */
 	fido_cred_ea_t     ea;            /* enterprise attestation */
+	fido_blob_t        hmac_secret;   /* CTAP 2.2 hmac-secret-mc */
 } fido_cred_t;
 
 typedef struct fido_assert_extattr {

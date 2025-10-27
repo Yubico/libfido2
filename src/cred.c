@@ -81,7 +81,8 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred,
 
 	/* extensions */
 	if (cred->ext.attr.mask)
-		if ((argv[5] = cbor_encode_cred_ext(&cred->ext)) == NULL) {
+		if ((argv[5] = cbor_encode_cred_ext(dev, &cred->ext, ecdh,
+		    pk)) == NULL) {
 			fido_log_debug("%s: cbor_encode_cred_ext", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
@@ -187,6 +188,14 @@ fido_dev_make_cred_wait(fido_dev_t *dev, fido_cred_t *cred,
 	return (FIDO_OK);
 }
 
+static int
+decrypt_hmac_secret(const fido_dev_t *dev, fido_cred_t *cred,
+    const fido_blob_t *key)
+{
+	return (aes256_cbc_dec(dev, key, &cred->authdata_ext.hmac_secret_enc,
+	    &cred->hmac_secret));
+}
+
 int
 fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 {
@@ -214,7 +223,8 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 	}
 
 	if (pin != NULL || (cred->uv == FIDO_OPT_TRUE &&
-	    fido_dev_supports_permissions(dev))) {
+	    fido_dev_supports_permissions(dev)) ||
+	    (cred->ext.attr.mask & FIDO_EXT_HMAC_SECRET_MC)) {
 		if ((r = fido_do_ecdh(dev, &pk, &ecdh, &ms)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
@@ -222,6 +232,14 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 	}
 
 	r = fido_dev_make_cred_wait(dev, cred, pk, ecdh, pin, &ms);
+	if (r == FIDO_OK && (cred->ext.attr.mask & FIDO_EXT_HMAC_SECRET_MC)) {
+		if (decrypt_hmac_secret(dev, cred, ecdh) < 0) {
+			fido_log_debug("%s: decrypt_hmac_secret", __func__);
+			r = FIDO_ERR_INTERNAL;
+			goto fail;
+		}
+	}
+
 fail:
 	es256_pk_free(&pk);
 	fido_blob_free(&ecdh);
@@ -555,6 +573,7 @@ fido_cred_clean_authdata(fido_cred_t *cred)
 	fido_blob_reset(&cred->authdata_cbor);
 	fido_blob_reset(&cred->authdata_raw);
 	fido_blob_reset(&cred->attcred.id);
+	fido_blob_reset(&cred->authdata_ext.hmac_secret_enc);
 
 	memset(&cred->authdata_ext, 0, sizeof(cred->authdata_ext));
 	memset(&cred->authdata, 0, sizeof(cred->authdata));
@@ -589,6 +608,7 @@ fido_cred_reset_tx(fido_cred_t *cred)
 	fido_blob_reset(&cred->cdh);
 	fido_blob_reset(&cred->user.id);
 	fido_blob_reset(&cred->ext.blob);
+	fido_blob_reset(&cred->ext.hmac_salt);
 
 	free(cred->rp.id);
 	free(cred->rp.name);
@@ -612,6 +632,7 @@ fido_cred_reset_rx(fido_cred_t *cred)
 {
 	fido_cred_clean_attobj(cred);
 	fido_blob_reset(&cred->largeblob_key);
+	fido_blob_reset(&cred->hmac_secret);
 	cred->ea.att = false;
 }
 
@@ -960,6 +981,40 @@ fail:
 	up->icon = NULL;
 
 	return (FIDO_ERR_INTERNAL);
+}
+
+int
+fido_cred_set_hmac_salt(fido_cred_t *cred, const unsigned char *salt,
+    size_t salt_len)
+{
+	if ((salt_len != 32 && salt_len != 64) ||
+	    fido_blob_set(&cred->ext.hmac_salt, salt, salt_len) < 0)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	return (FIDO_OK);
+}
+
+int
+fido_cred_set_hmac_secret(fido_cred_t *cred,
+    const unsigned char *secret, size_t secret_len)
+{
+	if ((secret_len != 32 && secret_len != 64) ||
+	    fido_blob_set(&cred->hmac_secret, secret, secret_len) < 0)
+		return (FIDO_ERR_INVALID_ARGUMENT);
+
+	return (FIDO_OK);
+}
+
+const unsigned char *
+fido_cred_hmac_secret_ptr(const fido_cred_t *cred)
+{
+	return (cred->hmac_secret.ptr);
+}
+
+size_t
+fido_cred_hmac_secret_len(const fido_cred_t *cred)
+{
+	return (cred->hmac_secret.len);
 }
 
 int

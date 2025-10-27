@@ -41,7 +41,8 @@ cbor_item_t *cbor_flatten_vector(cbor_item_t **, size_t);
 cbor_item_t *cbor_encode_assert_opt(fido_opt_t, fido_opt_t);
 cbor_item_t *cbor_encode_change_pin_auth(const fido_dev_t *,
     const fido_blob_t *, const fido_blob_t *, const fido_blob_t *);
-cbor_item_t *cbor_encode_cred_ext(const fido_cred_extin_t *);
+cbor_item_t *cbor_encode_cred_ext(const fido_dev_t *, const fido_cred_extin_t *,
+    const fido_blob_t *, const es256_pk_t *);
 cbor_item_t *cbor_encode_assert_ext(fido_dev_t *,
     const fido_assert_ext_t *, const fido_blob_t *, const es256_pk_t *);
 cbor_item_t *cbor_encode_cred_opt(fido_opt_t, fido_opt_t);

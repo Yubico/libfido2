@@ -685,7 +685,8 @@ fail:
 }
 
 cbor_item_t *
-cbor_encode_cred_ext(const fido_cred_extin_t *ext)
+cbor_encode_cred_ext(const fido_dev_t *dev, const fido_cred_extin_t *ext,
+    const fido_blob_t *ecdh, const es256_pk_t *pk)
 {
 	cbor_item_t *item = NULL;
 	size_t size = 0;
@@ -699,6 +700,8 @@ cbor_encode_cred_ext(const fido_cred_extin_t *ext)
 	if (ext->attr.mask & FIDO_EXT_LARGEBLOB_KEY)
 		size++;
 	if (ext->attr.mask & FIDO_EXT_MINPINLEN)
+		size++;
+	if (ext->attr.mask & FIDO_EXT_HMAC_SECRET_MC)
 		size++;
 
 	if (size == 0 || (item = cbor_new_definite_map(size)) == NULL)
@@ -733,6 +736,13 @@ cbor_encode_cred_ext(const fido_cred_extin_t *ext)
 	}
 	if (ext->attr.mask & FIDO_EXT_MINPINLEN) {
 		if (cbor_add_bool(item, "minPinLength", FIDO_OPT_TRUE) < 0) {
+			cbor_decref(&item);
+			return (NULL);
+		}
+	}
+	if (ext->attr.mask & FIDO_EXT_HMAC_SECRET_MC) {
+		if (cbor_encode_hmac_secret_param("hmac-secret-mc", dev, item,
+		    ecdh, pk, &ext->hmac_salt) < 0) {
 			cbor_decref(&item);
 			return (NULL);
 		}
@@ -1211,6 +1221,12 @@ decode_cred_extension(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		}
 		if (cbor_ctrl_value(val) == CBOR_CTRL_TRUE)
 			ext->attr.mask |= FIDO_EXT_HMAC_SECRET;
+	} else if (strcmp(type, "hmac-secret-mc") == 0) {
+		if (fido_blob_decode(val, &ext->hmac_secret_enc) < 0) {
+			fido_log_debug("%s: fido_blob_decode", __func__);
+			goto out;
+		}
+		ext->attr.mask |= FIDO_EXT_HMAC_SECRET_MC;
 	} else if (strcmp(type, "credProtect") == 0) {
 		if (cbor_isa_uint(val) == false ||
 		    cbor_int_get_width(val) != CBOR_INT_8) {
