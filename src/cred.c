@@ -50,26 +50,17 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 }
 
 static int
-fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
-    int *ms)
+fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred,
+    const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin, int *ms)
 {
 	fido_blob_t	 f;
-	fido_blob_t	*ecdh = NULL;
 	fido_opt_t	 uv = cred->uv;
-	es256_pk_t	*pk = NULL;
 	cbor_item_t	*argv[10];
 	const uint8_t	 cmd = CTAP_CBOR_MAKECRED;
 	int		 r;
 
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
-
-	if (cred->cdh.ptr == NULL || cred->type == 0) {
-		fido_log_debug("%s: cdh=%p, type=%d", __func__,
-		    (void *)cred->cdh.ptr, cred->type);
-		r = FIDO_ERR_INVALID_ARGUMENT;
-		goto fail;
-	}
 
 	if ((argv[0] = fido_blob_encode(&cred->cdh)) == NULL ||
 	    (argv[1] = cbor_encode_rp_entity(&cred->rp)) == NULL ||
@@ -99,10 +90,6 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 	/* user verification */
 	if (pin != NULL || (uv == FIDO_OPT_TRUE &&
 	    fido_dev_supports_permissions(dev))) {
-		if ((r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
-			fido_log_debug("%s: fido_do_ecdh", __func__);
-			goto fail;
-		}
 		if ((r = cbor_add_uv_params(dev, cmd, &cred->cdh, pk, ecdh,
 		    pin, cred->rp.id, &argv[7], &argv[8], ms)) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
@@ -138,8 +125,6 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 
 	r = FIDO_OK;
 fail:
-	es256_pk_free(&pk);
-	fido_blob_free(&ecdh);
 	cbor_vector_free(argv, nitems(argv));
 	free(f.ptr);
 
@@ -190,12 +175,12 @@ fail:
 }
 
 static int
-fido_dev_make_cred_wait(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
-    int *ms)
+fido_dev_make_cred_wait(fido_dev_t *dev, fido_cred_t *cred,
+    const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin, int *ms)
 {
 	int  r;
 
-	if ((r = fido_dev_make_cred_tx(dev, cred, pin, ms)) != FIDO_OK ||
+	if ((r = fido_dev_make_cred_tx(dev, cred, pk, ecdh, pin, ms)) != FIDO_OK ||
 	    (r = fido_dev_make_cred_rx(dev, cred, ms)) != FIDO_OK)
 		return (r);
 
@@ -205,7 +190,10 @@ fido_dev_make_cred_wait(fido_dev_t *dev, fido_cred_t *cred, const char *pin,
 int
 fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 {
-	int ms = dev->timeout_ms;
+	fido_blob_t	*ecdh = NULL;
+	es256_pk_t	*pk = NULL;
+	int		 ms = dev->timeout_ms;
+	int 		 r;
 
 #ifdef USE_WINHELLO
 	if (dev->flags & FIDO_DEV_WINHELLO)
@@ -218,7 +206,27 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 		return (u2f_register(dev, cred, &ms));
 	}
 
-	return (fido_dev_make_cred_wait(dev, cred, pin, &ms));
+	if (cred->cdh.ptr == NULL || cred->type == 0) {
+		fido_log_debug("%s: cdh=%p, type=%d", __func__,
+		    (void *)cred->cdh.ptr, cred->type);
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto fail;
+	}
+
+	if (pin != NULL || (cred->uv == FIDO_OPT_TRUE &&
+	    fido_dev_supports_permissions(dev))) {
+		if ((r = fido_do_ecdh(dev, &pk, &ecdh, &ms)) != FIDO_OK) {
+			fido_log_debug("%s: fido_do_ecdh", __func__);
+			goto fail;
+		}
+	}
+
+	r = fido_dev_make_cred_wait(dev, cred, pk, ecdh, pin, &ms);
+fail:
+	es256_pk_free(&pk);
+	fido_blob_free(&ecdh);
+
+	return (r);
 }
 
 static int
