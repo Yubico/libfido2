@@ -235,6 +235,10 @@ obtained by
 .Fn fido_cbor_info_transports_len ,
 or
 .Fn fido_cbor_info_versions_len .
+The supported attestation formats, encrypted identifier, PIN complexity
+policy URL, and transports for authenticator reset attributes are CTAP
+2.2 additions.
+The encrypted credential store state attribute is a CTAP 2.3 addition.
 .Pp
 The
 .Fn fido_cbor_info_options_name_ptr
@@ -328,7 +332,7 @@ The
 function returns the maximum PIN length enforced by the
 authenticator as reported in
 .Fa ci .
-The maximum PIN length attribute is a CTAP 2.3 addition.
+The maximum PIN length attribute is a CTAP 2.2 addition.
 If the attribute is not advertised by the authenticator, the
 .Fn fido_cbor_info_maxpinlen
 function returns zero.
@@ -348,7 +352,7 @@ The
 function returns information about whether an additional PIN complexity
 policy is enforced, as reported by
 .Fa ci.
-The PIN complexity policy attribute is a CTAP 2.3 addition.
+The PIN complexity policy attribute is a CTAP 2.2 addition.
 The value is 1 if an additional policy is enforced, 0 if no such
 policy is enforced, or -1 if the attribute is not advertised by the
 authenticator.
@@ -376,7 +380,7 @@ The
 .Fn fido_cbor_info_uv_count_since_pin
 function returns the number of built-in UV operations since the last
 PIN entry.
-The UV count since last PIN entry attribute is a CTAP 2.3 addition.
+The UV count since last PIN entry attribute is a CTAP 2.2 addition.
 If the attribute is not advertised by the authenticator, the
 .Fn fido_cbor_info_uv_count_since_pin
 function returns -1.
@@ -427,7 +431,7 @@ The
 .Fn fido_cbor_info_long_touch_reset
 function returns true if a long touch is required to reset the
 authenticator.
-The long touch for reset attribute is a CTAP 2.3 addition.
+The long touch for reset attribute is a CTAP 2.2 addition.
 If the attribute is not advertised by the authenticator, the
 .Fn fido_cbor_info_long_touch_reset
 function returns false.
