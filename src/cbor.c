@@ -597,6 +597,92 @@ cbor_encode_largeblob_key_ext(cbor_item_t *map)
 	return (0);
 }
 
+static int
+cbor_encode_hmac_secret_param(const fido_dev_t *dev, cbor_item_t *item,
+    const fido_blob_t *ecdh, const es256_pk_t *pk, const fido_blob_t *salt)
+{
+	cbor_item_t		*param = NULL;
+	cbor_item_t		*argv[4];
+	struct cbor_pair	 pair;
+	fido_blob_t		*enc = NULL;
+	uint8_t			 prot;
+	int			 r;
+
+	memset(argv, 0, sizeof(argv));
+	memset(&pair, 0, sizeof(pair));
+
+	if (item == NULL || ecdh == NULL || pk == NULL || salt->ptr == NULL) {
+		fido_log_debug("%s: ecdh=%p, pk=%p, salt->ptr=%p", __func__,
+		    (const void *)ecdh, (const void *)pk,
+		    (const void *)salt->ptr);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if (salt->len != 32 && salt->len != 64) {
+		fido_log_debug("%s: salt->len=%zu", __func__, salt->len);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if ((enc = fido_blob_new()) == NULL ||
+	    aes256_cbc_enc(dev, ecdh, salt, enc) < 0) {
+		fido_log_debug("%s: aes256_cbc_enc", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if ((prot = fido_dev_get_pin_protocol(dev)) == 0) {
+		fido_log_debug("%s: fido_dev_get_pin_protocol", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	/* XXX not pin, but salt */
+	if ((argv[0] = es256_pk_encode(pk, 1)) == NULL ||
+	    (argv[1] = fido_blob_encode(enc)) == NULL ||
+	    (argv[2] = cbor_encode_pin_auth(dev, ecdh, enc)) == NULL ||
+	    (prot != 1 && (argv[3] = cbor_build_uint8(prot)) == NULL)) {
+		fido_log_debug("%s: cbor encode", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if ((param = cbor_flatten_vector(argv, nitems(argv))) == NULL) {
+		fido_log_debug("%s: cbor_flatten_vector", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if ((pair.key = cbor_build_string("hmac-secret")) == NULL) {
+		fido_log_debug("%s: cbor_build", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	pair.value = param;
+
+	if (!cbor_map_add(item, pair)) {
+		fido_log_debug("%s: cbor_map_add", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	r = FIDO_OK;
+
+fail:
+	cbor_vector_free(argv, nitems(argv));
+
+	if (param != NULL)
+		cbor_decref(&param);
+	if (pair.key != NULL)
+		cbor_decref(&pair.key);
+
+	fido_blob_free(&enc);
+
+	return (r);
+}
+
 cbor_item_t *
 cbor_encode_cred_ext(const fido_cred_extin_t *ext)
 {
@@ -778,92 +864,6 @@ fail:
 	HMAC_CTX_free(ctx);
 
 	return (item);
-}
-
-static int
-cbor_encode_hmac_secret_param(const fido_dev_t *dev, cbor_item_t *item,
-    const fido_blob_t *ecdh, const es256_pk_t *pk, const fido_blob_t *salt)
-{
-	cbor_item_t		*param = NULL;
-	cbor_item_t		*argv[4];
-	struct cbor_pair	 pair;
-	fido_blob_t		*enc = NULL;
-	uint8_t			 prot;
-	int			 r;
-
-	memset(argv, 0, sizeof(argv));
-	memset(&pair, 0, sizeof(pair));
-
-	if (item == NULL || ecdh == NULL || pk == NULL || salt->ptr == NULL) {
-		fido_log_debug("%s: ecdh=%p, pk=%p, salt->ptr=%p", __func__,
-		    (const void *)ecdh, (const void *)pk,
-		    (const void *)salt->ptr);
-		r = FIDO_ERR_INTERNAL;
-		goto fail;
-	}
-
-	if (salt->len != 32 && salt->len != 64) {
-		fido_log_debug("%s: salt->len=%zu", __func__, salt->len);
-		r = FIDO_ERR_INTERNAL;
-		goto fail;
-	}
-
-	if ((enc = fido_blob_new()) == NULL ||
-	    aes256_cbc_enc(dev, ecdh, salt, enc) < 0) {
-		fido_log_debug("%s: aes256_cbc_enc", __func__);
-		r = FIDO_ERR_INTERNAL;
-		goto fail;
-	}
-
-	if ((prot = fido_dev_get_pin_protocol(dev)) == 0) {
-		fido_log_debug("%s: fido_dev_get_pin_protocol", __func__);
-		r = FIDO_ERR_INTERNAL;
-		goto fail;
-	}
-
-	/* XXX not pin, but salt */
-	if ((argv[0] = es256_pk_encode(pk, 1)) == NULL ||
-	    (argv[1] = fido_blob_encode(enc)) == NULL ||
-	    (argv[2] = cbor_encode_pin_auth(dev, ecdh, enc)) == NULL ||
-	    (prot != 1 && (argv[3] = cbor_build_uint8(prot)) == NULL)) {
-		fido_log_debug("%s: cbor encode", __func__);
-		r = FIDO_ERR_INTERNAL;
-		goto fail;
-	}
-
-	if ((param = cbor_flatten_vector(argv, nitems(argv))) == NULL) {
-		fido_log_debug("%s: cbor_flatten_vector", __func__);
-		r = FIDO_ERR_INTERNAL;
-		goto fail;
-	}
-
-	if ((pair.key = cbor_build_string("hmac-secret")) == NULL) {
-		fido_log_debug("%s: cbor_build", __func__);
-		r = FIDO_ERR_INTERNAL;
-		goto fail;
-	}
-
-	pair.value = param;
-
-	if (!cbor_map_add(item, pair)) {
-		fido_log_debug("%s: cbor_map_add", __func__);
-		r = FIDO_ERR_INTERNAL;
-		goto fail;
-	}
-
-	r = FIDO_OK;
-
-fail:
-	cbor_vector_free(argv, nitems(argv));
-
-	if (param != NULL)
-		cbor_decref(&param);
-	if (pair.key != NULL)
-		cbor_decref(&pair.key);
-
-	fido_blob_free(&enc);
-
-	return (r);
 }
 
 cbor_item_t *
