@@ -213,8 +213,9 @@ list(APPEND MAN_ALIAS
 	fido_credman_metadata_new fido_credman_rp_name
 	fido_credman_metadata_new fido_credman_rp_new
 	fido_credman_metadata_new fido_credman_set_dev_rk
-	fido_cred_set_authdata fido_cred_set_attstmt
+	fido_cred_set_authdata fido_cred_append_type
 	fido_cred_set_authdata fido_cred_set_attobj
+	fido_cred_set_authdata fido_cred_set_attstmt
 	fido_cred_set_authdata fido_cred_set_authdata_raw
 	fido_cred_set_authdata fido_cred_set_blob
 	fido_cred_set_authdata fido_cred_set_clientdata

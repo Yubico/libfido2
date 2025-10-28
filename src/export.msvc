@@ -121,6 +121,7 @@ fido_cbor_info_uv_attempts
 fido_cbor_info_uv_modality
 fido_cbor_info_versions_len
 fido_cbor_info_versions_ptr
+fido_cred_append_type
 fido_cred_attstmt_len
 fido_cred_attstmt_ptr
 fido_cred_authdata_len

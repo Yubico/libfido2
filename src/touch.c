@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2024 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -20,6 +20,8 @@ fido_dev_get_touch_begin(fido_dev_t *dev)
 	fido_user_t	 user;
 	int		 ms = dev->timeout_ms;
 	int		 r = FIDO_ERR_INTERNAL;
+	int		 alg = COSE_ES256;
+	const fido_int_array_t algs = { &alg, 1 };
 
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
@@ -49,7 +51,7 @@ fido_dev_get_touch_begin(fido_dev_t *dev)
 	if ((argv[0] = cbor_build_bytestring(cdh, sizeof(cdh))) == NULL ||
 	    (argv[1] = cbor_encode_rp_entity(&rp)) == NULL ||
 	    (argv[2] = cbor_encode_user_entity(&user)) == NULL ||
-	    (argv[3] = cbor_encode_pubkey_param(COSE_ES256)) == NULL) {
+	    (argv[3] = cbor_encode_pubkey_param_array(&algs)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		goto fail;
 	}
