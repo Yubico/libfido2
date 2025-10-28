@@ -341,7 +341,7 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	case 22: /* attestationFormats */
 		return (decode_string_array(val, &ci->attfmts));
 	case 23: /* uvCountSinceLastPinEntry */
-		if (cbor_decode_uint64(val, &x) || x > INT64_MAX) {
+		if (cbor_decode_uint64(val, &x) < 0 || x > INT64_MAX) {
 			fido_log_debug("%s: cbor_decode_uint64", __func__);
 			return (-1);
 		}
