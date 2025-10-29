@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -293,6 +293,8 @@ credman_parse_rk(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (0);
 	case 11:
 		return (fido_blob_decode(val, &cred->largeblob_key));
+	case 12:
+		return (cbor_decode_bool(val, &cred->payment));
 	default:
 		fido_log_debug("%s: cbor type", __func__);
 		return (0); /* ignore */

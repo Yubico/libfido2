@@ -191,6 +191,7 @@ typedef struct fido_cred {
 	fido_blob_t       largeblob_key; /* decoded large blob key */
 	fido_blob_t       blob;          /* CTAP 2.1 credBlob */
 	fido_cred_ea_t    ea;            /* enterprise attestation */
+	bool              payment;       /* third party payment */
 } fido_cred_t;
 
 typedef struct fido_assert_extattr {
