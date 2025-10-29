@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -321,6 +321,8 @@ get_rk_list(const struct param *p)
 		consume_str(fido_cred_user_name(cred));
 		consume_str(fido_cred_display_name(cred));
 		val = fido_cred_prot(cred);
+		consume(&val, sizeof(val));
+		val = fido_cred_payment(cred);
 		consume(&val, sizeof(val));
 	}
 

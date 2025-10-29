@@ -1,4 +1,4 @@
-.\" Copyright (c) 2018-2024 Yubico AB. All rights reserved.
+.\" Copyright (c) 2018-2025 Yubico AB. All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions are
@@ -31,6 +31,7 @@
 .Sh NAME
 .Nm fido_cred_new ,
 .Nm fido_cred_free ,
+.Nm fido_cred_payment ,
 .Nm fido_cred_pin_minlen ,
 .Nm fido_cred_prot ,
 .Nm fido_cred_fmt ,
@@ -74,6 +75,8 @@
 .Fn fido_cred_new "void"
 .Ft void
 .Fn fido_cred_free "fido_cred_t **cred_p"
+.Ft bool
+.Fn fido_cred_payment "const fido_cred_t *cred"
 .Ft size_t
 .Fn fido_cred_pin_minlen "const fido_cred_t *cred"
 .Ft int
@@ -189,6 +192,21 @@ or
 may be NULL, in which case
 .Fn fido_cred_free
 is a NOP.
+.Pp
+If the CTAP 2.2
+.Dv FIDO_EXT_PAYMENT
+extension is enabled on
+.Fa cred ,
+then the
+.Fn fido_cred_payment
+function returns
+.Dv true .
+The
+.Fn fido_cred_payment
+function is mostly useful if
+.Fa cred
+was retrieved via
+.Xr fido_credman_rk 3 .
 .Pp
 If the CTAP 2.1
 .Dv FIDO_EXT_MINPINLEN
@@ -362,5 +380,6 @@ qualifier is invoked.
 .Xr fido_cred_set_prot 3 ,
 .Xr fido_cred_verify 3 ,
 .Xr fido_credman_metadata_new 3 ,
+.Xr fido_credman_rk 3 ,
 .Xr fido_dev_largeblob_get 3 ,
 .Xr fido_dev_make_cred 3

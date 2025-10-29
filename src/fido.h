@@ -158,6 +158,7 @@ int fido_cbor_info_pin_policy(const fido_cbor_info_t *);
 int fido_cred_empty_exclude_list(fido_cred_t *);
 bool fido_cred_entattest(const fido_cred_t *);
 int fido_cred_exclude(fido_cred_t *, const unsigned char *, size_t);
+bool fido_cred_payment(const fido_cred_t *);
 int fido_cred_prot(const fido_cred_t *);
 int fido_cred_set_attstmt(fido_cred_t *, const unsigned char *, size_t);
 int fido_cred_set_attobj(fido_cred_t *, const unsigned char *, size_t);

@@ -1410,3 +1410,10 @@ fido_cred_entattest(const fido_cred_t *cred)
 {
 	return (cred->ea.att);
 }
+
+/* XXX mainly useful for credentials retrieved via fido_credman_rk() */
+bool
+fido_cred_payment(const fido_cred_t *cred)
+{
+	return (cred->ext.attr.mask & FIDO_EXT_PAYMENT);
+}

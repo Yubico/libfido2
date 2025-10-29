@@ -177,6 +177,7 @@ _fido_credman_rp_name
 _fido_credman_rp_new
 _fido_credman_set_dev_rk
 _fido_cred_new
+_fido_cred_payment
 _fido_cred_pin_minlen
 _fido_cred_prot
 _fido_cred_pubkey_len
