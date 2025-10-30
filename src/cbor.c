@@ -598,8 +598,9 @@ cbor_encode_largeblob_key_ext(cbor_item_t *map)
 }
 
 static int
-cbor_encode_hmac_secret_param(const fido_dev_t *dev, cbor_item_t *item,
-    const fido_blob_t *ecdh, const es256_pk_t *pk, const fido_blob_t *salt)
+cbor_encode_hmac_secret_param(const char *key, const fido_dev_t *dev,
+    cbor_item_t *item, const fido_blob_t *ecdh, const es256_pk_t *pk,
+    const fido_blob_t *salt)
 {
 	cbor_item_t		*param = NULL;
 	cbor_item_t		*argv[4];
@@ -654,7 +655,7 @@ cbor_encode_hmac_secret_param(const fido_dev_t *dev, cbor_item_t *item,
 		goto fail;
 	}
 
-	if ((pair.key = cbor_build_string("hmac-secret")) == NULL) {
+	if ((pair.key = cbor_build_string(key)) == NULL) {
 		fido_log_debug("%s: cbor_build", __func__);
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
@@ -889,8 +890,8 @@ cbor_encode_assert_ext(fido_dev_t *dev, const fido_assert_ext_t *ext,
 		}
 	}
 	if (ext->mask & FIDO_EXT_HMAC_SECRET) {
-		if (cbor_encode_hmac_secret_param(dev, item, ecdh, pk,
-		    &ext->hmac_salt) < 0) {
+		if (cbor_encode_hmac_secret_param("hmac-secret", dev, item,
+		    ecdh, pk, &ext->hmac_salt) < 0) {
 			cbor_decref(&item);
 			return (NULL);
 		}
