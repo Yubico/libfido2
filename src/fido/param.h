@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
  * SPDX-License-Identifier: BSD-2-Clause
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -131,6 +131,7 @@
 #define FIDO_EXT_LARGEBLOB_KEY	0x04
 #define FIDO_EXT_CRED_BLOB	0x08
 #define FIDO_EXT_MINPINLEN	0x10
+#define FIDO_EXT_HMAC_SECRET_MC	0x20
 
 /* Supported credential protection policies. */
 #define FIDO_CRED_PROT_UV_OPTIONAL		0x01
@@ -146,7 +147,7 @@
 				 FIDO_EXT_CRED_BLOB)
 #define FIDO_EXT_CRED_MASK	(FIDO_EXT_HMAC_SECRET|FIDO_EXT_CRED_PROTECT| \
 				 FIDO_EXT_LARGEBLOB_KEY|FIDO_EXT_CRED_BLOB| \
-				 FIDO_EXT_MINPINLEN)
+				 FIDO_EXT_MINPINLEN|FIDO_EXT_HMAC_SECRET_MC)
 #endif /* _FIDO_INTERNAL */
 
 /* Recognised UV modes. */

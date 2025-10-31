@@ -144,6 +144,8 @@
 		fido_cred_entattest;
 		fido_cred_exclude;
 		fido_cred_flags;
+		fido_cred_hmac_secret_len;
+		fido_cred_hmac_secret_ptr;
 		fido_cred_largeblob_key_len;
 		fido_cred_largeblob_key_ptr;
 		fido_cred_sigcount;
@@ -190,6 +192,8 @@
 		fido_cred_set_entattest;
 		fido_cred_set_extensions;
 		fido_cred_set_fmt;
+		fido_cred_set_hmac_salt;
+		fido_cred_set_hmac_secret;
 		fido_cred_set_id;
 		fido_cred_set_options;
 		fido_cred_set_pin_minlen;

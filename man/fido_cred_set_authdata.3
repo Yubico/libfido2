@@ -1,4 +1,4 @@
-.\" Copyright (c) 2018-2024 Yubico AB. All rights reserved.
+.\" Copyright (c) 2018-2025 Yubico AB. All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions are
@@ -43,6 +43,7 @@
 .Nm fido_cred_set_entattest ,
 .Nm fido_cred_set_extensions ,
 .Nm fido_cred_set_blob ,
+.Nm fido_cred_set_hmac_salt ,
 .Nm fido_cred_set_pin_minlen ,
 .Nm fido_cred_set_prot ,
 .Nm fido_cred_set_rk ,
@@ -270,6 +271,7 @@ At the moment, only the
 .Dv FIDO_EXT_CRED_BLOB ,
 .Dv FIDO_EXT_CRED_PROTECT ,
 .Dv FIDO_EXT_HMAC_SECRET ,
+.Dv FIDO_EXT_HMAC_SECRET_MC ,
 .Dv FIDO_EXT_MINPINLEN ,
 and
 .Dv FIDO_EXT_LARGEBLOB_KEY
@@ -291,6 +293,31 @@ to the data pointed to by
 which must be
 .Fa len
 bytes long.
+.Pp
+The
+.Fn fido_cred_set_hmac_salt
+and
+.Fn fido_cred_set_hmac_secret
+functions set the hmac-salt and hmac-secret parts of
+.Fa cred
+to
+.Fa ptr ,
+where
+.Fa ptr
+points to
+.Fa len
+bytes.
+A copy of
+.Fa ptr
+is made and no references to the passed pointer are kept.
+The HMAC secret MakeCredential
+.Pq hmac-secret-mc
+extension is a CTAP 2.2 extension.
+Note that the resulting hmac-secret varies according to whether user
+verification was performed by the authenticator.
+The
+.Fn fido_cred_set_hmac_secret
+function is normally only useful when writing tests.
 .Pp
 The
 .Fn fido_cred_set_pin_minlen
