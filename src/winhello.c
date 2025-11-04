@@ -389,7 +389,8 @@ pack_hmac_salt(const fido_blob_t *in)
 	WEBAUTHN_HMAC_SECRET_SALT *s;
 
 	if (in->ptr == NULL ||
-	    in->len != WEBAUTHN_CTAP_ONE_HMAC_SECRET_LENGTH) {
+	    (in->len != WEBAUTHN_CTAP_ONE_HMAC_SECRET_LENGTH &&
+	     in->len != 2 * WEBAUTHN_CTAP_ONE_HMAC_SECRET_LENGTH)) {
 		fido_log_debug("%s: salt %p/%zu", __func__,
 		    (const void *)in->ptr, in->len);
 		return NULL;
@@ -398,9 +399,15 @@ pack_hmac_salt(const fido_blob_t *in)
 		fido_log_debug("%s: calloc", __func__);
 		return NULL;
 	}
-
-	s->cbFirst = (DWORD)in->len;
-	s->pbFirst = in->ptr;
+	if (in->len == WEBAUTHN_CTAP_ONE_HMAC_SECRET_LENGTH) {
+		s->cbFirst = (DWORD)in->len;
+		s->pbFirst = in->ptr;
+	} else { /* 2 * WEBAUTHN_CTAP_ONE_HMAC_SECRET_LENGTH */
+		s->cbFirst = (DWORD)in->len / 2;
+		s->pbFirst = in->ptr;
+		s->cbSecond = (DWORD)in->len / 2;
+		s->pbSecond = in->ptr + in->len / 2;
+	}
 
 	return s;
 }
@@ -607,10 +614,6 @@ unpack_hmac_secret(fido_blob_t *blob,
 		fido_log_debug("%s: hmac-secret absent", __func__);
 		return 0; /* proceed without hmac-secret */
 	}
-	if (pHmacSecret->cbSecond != 0 || pHmacSecret->pbSecond != NULL) {
-		fido_log_debug("%s: 64-byte hmac-secret", __func__);
-		return 0; /* proceed without hmac-secret */
-	}
 	if (!fido_blob_is_empty(blob)) {
 		fido_log_debug("%s: fido_blob_is_empty", __func__);
 		return -1;
@@ -618,6 +621,12 @@ unpack_hmac_secret(fido_blob_t *blob,
 	if (fido_blob_set(blob, pHmacSecret->pbFirst,
 	    pHmacSecret->cbFirst) < 0) {
 		fido_log_debug("%s: fido_blob_set", __func__);
+		return -1;
+	}
+	if (pHmacSecret->cbSecond != 0 && pHmacSecret->pbSecond != NULL &&
+	    fido_blob_append(blob, pHmacSecret->pbSecond,
+	    pHmacSecret->cbSecond) < 0) {
+		fido_log_debug("%s: fido_blob_append", __func__);
 		return -1;
 	}
 
