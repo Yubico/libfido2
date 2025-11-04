@@ -390,13 +390,15 @@ pack_cred_ext(WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS *opt,
 	WEBAUTHN_EXTENSIONS *exts = &opt->Extensions;
 	WEBAUTHN_EXTENSION *e;
 	WEBAUTHN_CRED_PROTECT_EXTENSION_IN *p;
+	WEBAUTHN_HMAC_SECRET_SALT *s;
 	BOOL *b;
 	size_t n = 0, i = 0;
 
 	if (in->attr.mask == 0) {
 		return 0; /* nothing to do */
 	}
-	if (in->attr.mask & ~(FIDO_EXT_HMAC_SECRET | FIDO_EXT_CRED_PROTECT)) {
+	if (in->attr.mask & ~(FIDO_EXT_HMAC_SECRET | FIDO_EXT_CRED_PROTECT |
+	    FIDO_EXT_HMAC_SECRET_MC)) {
 		fido_log_debug("%s: mask 0x%x", __func__, in->attr.mask);
 		return -1;
 	}
@@ -439,6 +441,23 @@ pack_cred_ext(WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS *opt,
 		e->pvExtension = p;
 		e->cbExtension = sizeof(*p);
 		i++;
+	}
+	if (in->attr.mask & FIDO_EXT_HMAC_SECRET_MC) {
+		if (in->hmac_salt.ptr == NULL ||
+		    in->hmac_salt.len != WEBAUTHN_CTAP_ONE_HMAC_SECRET_LENGTH) {
+			fido_log_debug("%s: salt %p/%zu", __func__,
+			    (const void *)in->hmac_salt.ptr, in->hmac_salt.len);
+			return -1;
+		}
+		if ((s = calloc(1, sizeof(*s))) == NULL) {
+			fido_log_debug("%s: calloc", __func__);
+			return -1;
+		}
+		s->cbFirst = (DWORD)in->hmac_salt.len;
+		s->pbFirst = in->hmac_salt.ptr;
+		opt->pPRFGlobalEval = s;
+		opt->dwFlags |= WEBAUTHN_AUTHENTICATOR_HMAC_SECRET_VALUES_FLAG;
+		opt->dwVersion = WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_VERSION_8;
 	}
 
 	return 0;
@@ -612,6 +631,18 @@ unpack_assert_hmac_secret(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 }
 
 static int
+unpack_cred_hmac_secret(fido_cred_t *cred,
+    const WEBAUTHN_CREDENTIAL_ATTESTATION *att)
+{
+	if (att->dwVersion < WEBAUTHN_CREDENTIAL_ATTESTATION_VERSION_7) {
+		fido_log_debug("%s: dwVersion %u", __func__,
+		    (unsigned)att->dwVersion);
+		return 0; /* proceed without hmac-secret */
+	}
+	return unpack_hmac_secret(&cred->hmac_secret, att->pHmacSecret);
+}
+
+static int
 translate_fido_assert(struct winhello_assert *ctx, const fido_assert_t *assert,
     const char *pin, int ms)
 {
@@ -744,7 +775,9 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
 		opt->bRequireResidentKey = true;
 	}
 	if (cred->ea.mode != 0) {
-		opt->dwVersion = WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_VERSION_4;
+		if (opt->dwVersion < WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_VERSION_4) {
+			opt->dwVersion = WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_VERSION_4;
+		}
 		opt->dwEnterpriseAttestation = (DWORD)cred->ea.mode;
 	}
 
@@ -774,6 +807,12 @@ translate_winhello_cred(fido_cred_t *cred,
 	}
 	if (att->dwVersion >= WEBAUTHN_CREDENTIAL_ATTESTATION_VERSION_4)
 		cred->ea.att = att->bEpAtt;
+
+	if (cred->ext.attr.mask & FIDO_EXT_HMAC_SECRET_MC &&
+	    unpack_cred_hmac_secret(cred, att) < 0) {
+		fido_log_debug("%s: unpack_hmac_secret", __func__);
+		return FIDO_ERR_INTERNAL;
+	}
 
 	r = FIDO_OK;
 fail:
@@ -852,6 +891,7 @@ winhello_cred_free(struct winhello_cred *ctx)
 		free(e->pvExtension);
 	}
 	free(ctx->opt.Extensions.pExtensions);
+	free(ctx->opt.pPRFGlobalEval);
 	free(ctx);
 }
 
@@ -967,8 +1007,8 @@ fail:
 int
 fido_winhello_get_cbor_info(fido_dev_t *dev, fido_cbor_info_t *ci)
 {
-	const char *v[3] = { "U2F_V2", "FIDO_2_0", "FIDO_2_1_PRE" };
-	const char *e[2] = { "credProtect", "hmac-secret" };
+	const char *v[4] = { "U2F_V2", "FIDO_2_0", "FIDO_2_1_PRE", "FIDO_2_2" };
+	const char *e[3] = { "credProtect", "hmac-secret", "hmac-secret-mc" };
 	const char *t[2] = { "nfc", "usb" };
 	const char *o[4] = { "rk", "up", "uv", "plat" };
 
