@@ -574,35 +574,41 @@ unpack_user_id(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 }
 
 static int
-unpack_hmac_secret(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
+unpack_hmac_secret(fido_blob_t *blob,
+    const WEBAUTHN_HMAC_SECRET_SALT *pHmacSecret)
+{
+	if (pHmacSecret == NULL || pHmacSecret->cbFirst == 0 ||
+	    pHmacSecret->pbFirst == NULL) {
+		fido_log_debug("%s: hmac-secret absent", __func__);
+		return 0; /* proceed without hmac-secret */
+	}
+	if (pHmacSecret->cbSecond != 0 || pHmacSecret->pbSecond != NULL) {
+		fido_log_debug("%s: 64-byte hmac-secret", __func__);
+		return 0; /* proceed without hmac-secret */
+	}
+	if (!fido_blob_is_empty(blob)) {
+		fido_log_debug("%s: fido_blob_is_empty", __func__);
+		return -1;
+	}
+	if (fido_blob_set(blob, pHmacSecret->pbFirst,
+	    pHmacSecret->cbFirst) < 0) {
+		fido_log_debug("%s: fido_blob_set", __func__);
+		return -1;
+	}
+
+	return 0;
+}
+
+static int
+unpack_assert_hmac_secret(fido_assert_t *assert, const WEBAUTHN_ASSERTION *wa)
 {
 	if (wa->dwVersion < WEBAUTHN_ASSERTION_VERSION_3) {
 		fido_log_debug("%s: dwVersion %u", __func__,
 		    (unsigned)wa->dwVersion);
 		return 0; /* proceed without hmac-secret */
 	}
-	if (wa->pHmacSecret == NULL ||
-	    wa->pHmacSecret->cbFirst == 0 ||
-	    wa->pHmacSecret->pbFirst == NULL) {
-		fido_log_debug("%s: hmac-secret absent", __func__);
-		return 0; /* proceed without hmac-secret */
-	}
-	if (wa->pHmacSecret->cbSecond != 0 ||
-	    wa->pHmacSecret->pbSecond != NULL) {
-		fido_log_debug("%s: 64-byte hmac-secret", __func__);
-		return 0; /* proceed without hmac-secret */
-	}
-	if (!fido_blob_is_empty(&assert->stmt[0].hmac_secret)) {
-		fido_log_debug("%s: fido_blob_is_empty", __func__);
-		return -1;
-	}
-	if (fido_blob_set(&assert->stmt[0].hmac_secret,
-	    wa->pHmacSecret->pbFirst, wa->pHmacSecret->cbFirst) < 0) {
-		fido_log_debug("%s: fido_blob_set", __func__);
-		return -1;
-	}
-
-	return 0;
+	return unpack_hmac_secret(&assert->stmt[0].hmac_secret,
+	    wa->pHmacSecret);
 }
 
 static int
@@ -684,7 +690,7 @@ translate_winhello_assert(fido_assert_t *assert,
 		return FIDO_ERR_INTERNAL;
 	}
 	if (assert->ext.mask & FIDO_EXT_HMAC_SECRET &&
-	    unpack_hmac_secret(assert, wa) < 0) {
+	    unpack_assert_hmac_secret(assert, wa) < 0) {
 		fido_log_debug("%s: unpack_hmac_secret", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
