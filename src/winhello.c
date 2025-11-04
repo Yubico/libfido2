@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Yubico AB. All rights reserved.
+ * Copyright (c) 2021-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -384,8 +384,10 @@ pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg,
 }
 
 static int
-pack_cred_ext(WEBAUTHN_EXTENSIONS *out, const fido_cred_extin_t *in)
+pack_cred_ext(WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS *opt,
+    const fido_cred_extin_t *in)
 {
+	WEBAUTHN_EXTENSIONS *exts = &opt->Extensions;
 	WEBAUTHN_EXTENSION *e;
 	WEBAUTHN_CRED_PROTECT_EXTENSION_IN *p;
 	BOOL *b;
@@ -402,11 +404,11 @@ pack_cred_ext(WEBAUTHN_EXTENSIONS *out, const fido_cred_extin_t *in)
 		n++;
 	if (in->attr.mask & FIDO_EXT_CRED_PROTECT)
 		n++;
-	if ((out->pExtensions = calloc(n, sizeof(*e))) == NULL) {
+	if ((exts->pExtensions = calloc(n, sizeof(*e))) == NULL) {
 		fido_log_debug("%s: calloc", __func__);
 		return -1;
 	}
-	out->cExtensions = (DWORD)n;
+	exts->cExtensions = (DWORD)n;
 	if (in->attr.mask & FIDO_EXT_HMAC_SECRET) {
 		/*
 		 * NOTE: webauthn.dll ignores requests to enable hmac-secret
@@ -417,7 +419,7 @@ pack_cred_ext(WEBAUTHN_EXTENSIONS *out, const fido_cred_extin_t *in)
 			return -1;
 		}
 		*b = true;
-		e = &out->pExtensions[i];
+		e = &exts->pExtensions[i];
 		e->pwszExtensionIdentifier =
 		    WEBAUTHN_EXTENSIONS_IDENTIFIER_HMAC_SECRET;
 		e->pvExtension = b;
@@ -431,7 +433,7 @@ pack_cred_ext(WEBAUTHN_EXTENSIONS *out, const fido_cred_extin_t *in)
 		}
 		p->dwCredProtect = (DWORD)in->attr.prot;
 		p->bRequireCredProtect = true;
-		e = &out->pExtensions[i];
+		e = &exts->pExtensions[i];
 		e->pwszExtensionIdentifier =
 		    WEBAUTHN_EXTENSIONS_IDENTIFIER_CRED_PROTECT;
 		e->pvExtension = p;
@@ -723,7 +725,7 @@ translate_fido_cred(struct winhello_cred *ctx, const fido_cred_t *cred,
 		fido_log_debug("%s: pack_credlist", __func__);
 		return FIDO_ERR_INTERNAL;
 	}
-	if (pack_cred_ext(&opt->Extensions, &cred->ext) < 0) {
+	if (pack_cred_ext(opt, &cred->ext) < 0) {
 		fido_log_debug("%s: pack_cred_ext", __func__);
 		return FIDO_ERR_UNSUPPORTED_EXTENSION;
 	}
