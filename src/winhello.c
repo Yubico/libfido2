@@ -383,6 +383,28 @@ pack_cose(WEBAUTHN_COSE_CREDENTIAL_PARAMETER *alg,
 	return 0;
 }
 
+static WEBAUTHN_HMAC_SECRET_SALT *
+pack_hmac_salt(const fido_blob_t *in)
+{
+	WEBAUTHN_HMAC_SECRET_SALT *s;
+
+	if (in->ptr == NULL ||
+	    in->len != WEBAUTHN_CTAP_ONE_HMAC_SECRET_LENGTH) {
+		fido_log_debug("%s: salt %p/%zu", __func__,
+		    (const void *)in->ptr, in->len);
+		return NULL;
+	}
+	if ((s = calloc(1, sizeof(*s))) == NULL) {
+		fido_log_debug("%s: calloc", __func__);
+		return NULL;
+	}
+
+	s->cbFirst = (DWORD)in->len;
+	s->pbFirst = in->ptr;
+
+	return s;
+}
+
 static int
 pack_cred_ext(WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS *opt,
     const fido_cred_extin_t *in)
@@ -443,18 +465,10 @@ pack_cred_ext(WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS *opt,
 		i++;
 	}
 	if (in->attr.mask & FIDO_EXT_HMAC_SECRET_MC) {
-		if (in->hmac_salt.ptr == NULL ||
-		    in->hmac_salt.len != WEBAUTHN_CTAP_ONE_HMAC_SECRET_LENGTH) {
-			fido_log_debug("%s: salt %p/%zu", __func__,
-			    (const void *)in->hmac_salt.ptr, in->hmac_salt.len);
+		if ((s = pack_hmac_salt(&in->hmac_salt)) == NULL) {
+			fido_log_debug("%s: pack_hmac_salt", __func__);
 			return -1;
 		}
-		if ((s = calloc(1, sizeof(*s))) == NULL) {
-			fido_log_debug("%s: calloc", __func__);
-			return -1;
-		}
-		s->cbFirst = (DWORD)in->hmac_salt.len;
-		s->pbFirst = in->hmac_salt.ptr;
 		opt->pPRFGlobalEval = s;
 		opt->dwFlags |= WEBAUTHN_AUTHENTICATOR_HMAC_SECRET_VALUES_FLAG;
 		opt->dwVersion = WEBAUTHN_AUTHENTICATOR_MAKE_CREDENTIAL_OPTIONS_VERSION_8;
@@ -477,20 +491,12 @@ pack_assert_ext(WEBAUTHN_AUTHENTICATOR_GET_ASSERTION_OPTIONS *out,
 		fido_log_debug("%s: mask 0x%x", __func__, in->mask);
 		return -1;
 	}
-	if (in->hmac_salt.ptr == NULL ||
-	    in->hmac_salt.len != WEBAUTHN_CTAP_ONE_HMAC_SECRET_LENGTH) {
-		fido_log_debug("%s: salt %p/%zu", __func__,
-		    (const void *)in->hmac_salt.ptr, in->hmac_salt.len);
-		return -1;
-	}
 	if ((v = calloc(1, sizeof(*v))) == NULL ||
-	    (s = calloc(1, sizeof(*s))) == NULL) {
+	    (s = pack_hmac_salt(&in->hmac_salt)) == NULL) {
 		free(v);
-		fido_log_debug("%s: calloc", __func__);
+		fido_log_debug("%s: pack_hmac_salt", __func__);
 		return -1;
 	}
-	s->cbFirst = (DWORD)in->hmac_salt.len;
-	s->pbFirst = in->hmac_salt.ptr;
 	v->pGlobalHmacSalt = s;
 	out->pHmacSecretSaltValues = v;
 	out->dwFlags |= WEBAUTHN_AUTHENTICATOR_HMAC_SECRET_VALUES_FLAG;
