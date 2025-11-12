@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -221,6 +221,8 @@ get_assert(fido_assert_t *assert, uint8_t opt, const struct blob *cdh,
 		fido_assert_set_extensions(assert, FIDO_EXT_CRED_BLOB);
 	if (ext & FIDO_EXT_LARGEBLOB_KEY)
 		fido_assert_set_extensions(assert, FIDO_EXT_LARGEBLOB_KEY);
+	if (ext & FIDO_EXT_PAYMENT)
+		fido_assert_set_extensions(assert, FIDO_EXT_PAYMENT);
 	if (up & 1)
 		fido_assert_set_up(assert, FIDO_OPT_TRUE);
 	else if (opt & 1)
