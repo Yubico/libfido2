@@ -340,12 +340,18 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 	}
 
 	r = fido_dev_get_assert_wait(dev, assert, pk, ecdh, pin, &ms);
-	if (r == FIDO_OK && (assert->ext.mask & FIDO_EXT_HMAC_SECRET))
+	if (r == FIDO_OK && (assert->ext.mask & FIDO_EXT_HMAC_SECRET)) {
 		if (decrypt_hmac_secrets(dev, assert, ecdh) < 0) {
 			fido_log_debug("%s: decrypt_hmac_secrets", __func__);
 			r = FIDO_ERR_INTERNAL;
 			goto fail;
 		}
+	} else if (r == FIDO_ERR_MISSING_PARAMETER && pin == NULL) {
+		/* When the PIN is required (e.g.: FIPS mode) returning
+		 * FIDO_ERR_PIN_REQUIRED is more helpful than FIDO_ERR_MISSING_PARAMETER */
+		r = FIDO_ERR_PIN_REQUIRED;
+		goto fail;
+	}
 
 fail:
 	es256_pk_free(&pk);
