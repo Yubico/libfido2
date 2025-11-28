@@ -522,6 +522,46 @@ token_reset(char *path)
 	exit(0);
 }
 
+static int
+ppuat_get(const char *path, const char *ppuatf)
+{
+	fido_dev_t *dev = NULL;
+	char prompt[1024];
+	char pin[128];
+	int status = 1;
+	int r;
+
+	dev = open_dev(path);
+
+	r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ", path);
+	if (r < 0 || (size_t)r >= sizeof(prompt)) {
+		warnx("snprintf");
+		goto out;
+	}
+
+	if (!readpassphrase(prompt, pin, sizeof(pin), RPP_ECHO_OFF)) {
+		warnx("readpassphrase");
+		goto out;
+	}
+
+	if ((r = fido_dev_get_puat(dev, CTAP22_UV_TOKEN_PERM_CONFIG_RO, NULL,
+	    pin)) != FIDO_OK) {
+		warnx("fido_dev_get_puat: %s", fido_strerr(r));
+		goto out;
+	}
+
+	if (write_file(ppuatf, fido_dev_puat_ptr(dev),
+	    fido_dev_puat_len(dev)) < 0)
+		goto out;
+
+	status = 0;
+out:
+	explicit_bzero(pin, sizeof(pin));
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+	exit(status);
+}
+
 int
 token_get(int argc, char **argv, char *path)
 {
@@ -529,6 +569,7 @@ token_get(int argc, char **argv, char *path)
 	char	*key = NULL;
 	char	*name = NULL;
 	int	 blob = 0;
+	char    *ppuatf = NULL;
 	int	 ch;
 
 	optind = 1;
@@ -547,6 +588,10 @@ token_get(int argc, char **argv, char *path)
 		case 'n':
 			name = optarg;
 			break;
+		case 'p':
+			/* XXX for compat with TOKEN_OPT */
+			ppuatf = optarg;
+			break;
 		default:
 			break; /* ignore */
 		}
@@ -555,10 +600,19 @@ token_get(int argc, char **argv, char *path)
 	argc -= optind;
 	argv += optind;
 
-	if (blob == 0 || argc != 2)
+	if (ppuatf && blob)
 		usage();
 
-	return blob_get(path, key, name, id, argv[0]);
+	if (blob) {
+		if (argc != 2)
+			usage();
+		return blob_get(path, key, name, id, argv[0]);
+	}
+
+	if (ppuatf == NULL)
+		usage();
+
+	return ppuat_get(path, ppuatf);
 }
 
 int
