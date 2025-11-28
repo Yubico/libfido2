@@ -17,28 +17,29 @@
 #include "fido/es256.h"
 
 #if defined(LIBRESSL_VERSION_NUMBER)
-static int
-hkdf_sha256(uint8_t *key, const char *info, const fido_blob_t *secret)
+int
+hkdf_sha256(uint8_t *key, size_t keylen, const char *info,
+    const fido_blob_t *secret)
 {
 	const EVP_MD *md;
 	uint8_t salt[32];
 
 	memset(salt, 0, sizeof(salt));
 	if ((md = EVP_sha256()) == NULL ||
-	    HKDF(key, SHA256_DIGEST_LENGTH, md, secret->ptr, secret->len, salt,
+	    HKDF(key, keylen, md, secret->ptr, secret->len, salt,
 	    sizeof(salt), (const uint8_t *)info, strlen(info)) != 1)
 		return -1;
 
 	return 0;
 }
 #else
-static int
-hkdf_sha256(uint8_t *key, const char *info, const fido_blob_t *secret)
+int
+hkdf_sha256(uint8_t *key, size_t keylen, const char *info,
+    const fido_blob_t *secret)
 {
 	const EVP_MD *const_md;
 	EVP_MD *md = NULL;
 	EVP_PKEY_CTX *ctx = NULL;
-	size_t keylen = SHA256_DIGEST_LENGTH;
 	uint8_t salt[32];
 	int ok = -1;
 
@@ -98,9 +99,9 @@ kdf(uint8_t prot, fido_blob_t *key, const fido_blob_t *secret)
 		/* use two instances of hkdf-sha256 on the resulting secret */
 		key->len = 2 * SHA256_DIGEST_LENGTH;
 		if ((key->ptr = calloc(1, key->len)) == NULL ||
-		    hkdf_sha256(key->ptr, hmac_info, secret) < 0 ||
-		    hkdf_sha256(key->ptr + SHA256_DIGEST_LENGTH, aes_info,
-		    secret) < 0) {
+		    hkdf_sha256(key->ptr, SHA256_DIGEST_LENGTH, hmac_info, secret) < 0 ||
+		    hkdf_sha256(key->ptr + SHA256_DIGEST_LENGTH, SHA256_DIGEST_LENGTH,
+		    aes_info, secret) < 0) {
 			fido_log_debug("%s: hkdf", __func__);
 			return -1;
 		}
