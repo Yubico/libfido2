@@ -27,7 +27,7 @@ struct toggle {
 	fido_opt_t pin;
 };
 
-#define TOKEN_OPT	"CDGILPRSVabcdefi:k:l:m:n:p:ru"
+#define TOKEN_OPT	"CDGILPRSVabcdefi:k:l:m:n:p:rt:u"
 
 #define FLAG_DEBUG	0x001
 #define FLAG_QUIET	0x002
