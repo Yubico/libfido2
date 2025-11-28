@@ -24,7 +24,7 @@ usage(void)
 "       fido2-token -Du device\n"
 "       fido2-token -Gp [-p ppuat] device\n"
 "       fido2-token -Gb [-k key_path] [-i cred_id -n rp_id] blob_path device\n"
-"       fido2-token -I [-cd] [-k rp_id -i cred_id]  device\n"
+"       fido2-token -I [-cd] [-k rp_id -i cred_id] [-p ppuat] device\n"
 "       fido2-token -L [-bder] [-k rp_id] [device]\n"
 "       fido2-token -R [-d] device\n"
 "       fido2-token -S [-adefu] [-l pin_length] [-i template_id -n template_name] device\n"
