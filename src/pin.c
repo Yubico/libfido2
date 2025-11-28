@@ -206,7 +206,7 @@ fail:
 
 static int
 ctap21_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
-    const es256_pk_t *pk, uint8_t perm, const char *rpid, int *ms)
+    const es256_pk_t *pk, unsigned int perm, const char *rpid, int *ms)
 {
 	fido_blob_t	 f;
 	fido_blob_t	*p = NULL;
@@ -243,7 +243,7 @@ ctap21_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
 	    (argv[1] = cbor_build_uint8(subcmd)) == NULL ||
 	    (argv[2] = es256_pk_encode(pk, 1)) == NULL ||
 	    (phe != NULL && (argv[5] = fido_blob_encode(phe)) == NULL) ||
-	    (argv[8] = cbor_build_uint8(perm)) == NULL ||
+	    (argv[8] = cbor_build_uint(perm)) == NULL ||
 	    (rpid != NULL && (argv[9] = cbor_build_string(rpid)) == NULL)) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
@@ -328,7 +328,7 @@ fail:
 }
 
 static int
-uv_token_wait(fido_dev_t *dev, uint8_t perm, const char *pin,
+uv_token_wait(fido_dev_t *dev, unsigned int perm, const char *pin,
     const fido_blob_t *ecdh, const es256_pk_t *pk, const char *rpid,
     fido_blob_t *token, int *ms)
 {
