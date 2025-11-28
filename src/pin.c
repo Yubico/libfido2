@@ -359,6 +359,33 @@ fido_dev_get_uv_token(fido_dev_t *dev, uint8_t cmd, const char *pin,
 
 	return (uv_token_wait(dev, perm, pin, ecdh, pk, rpid, token, ms));
 }
+
+int
+fido_dev_get_puat(fido_dev_t *dev, unsigned int perm, const char *rpid,
+    const char *pin)
+{
+	fido_blob_t	*ecdh = NULL;
+	es256_pk_t	*pk = NULL;
+	int		 ms = dev->timeout_ms;
+	int		 r;
+
+	if (!fido_dev_is_fido2(dev) || fido_dev_is_winhello(dev)) {
+		r = FIDO_ERR_INVALID_ARGUMENT;
+		goto fail;
+	}
+
+	if ((r = fido_do_ecdh(dev, &pk, &ecdh, &ms)) != FIDO_OK) {
+		fido_log_debug("%s: fido_do_ecdh", __func__);
+		goto fail;
+	}
+
+	fido_blob_reset(&dev->puat);
+	r = uv_token_wait(dev, perm, pin, ecdh, pk, rpid, &dev->puat, &ms);
+fail:
+	es256_pk_free(&pk);
+	fido_blob_free(&ecdh);
+
+	return r;
 }
 
 static int

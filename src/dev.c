@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -474,6 +474,7 @@ fido_dev_free(fido_dev_t **dev_p)
 	if (dev_p == NULL || (dev = *dev_p) == NULL)
 		return;
 
+	fido_blob_reset(&dev->puat);
 	free(dev->path);
 	free(dev);
 

@@ -232,10 +232,11 @@
 		fido_dev_free;
 		fido_dev_get_assert;
 		fido_dev_get_cbor_info;
+		fido_dev_get_puat;
 		fido_dev_get_retry_count;
-		fido_dev_get_uv_retry_count;
 		fido_dev_get_touch_begin;
 		fido_dev_get_touch_status;
+		fido_dev_get_uv_retry_count;
 		fido_dev_has_pin;
 		fido_dev_has_uv;
 		fido_dev_info_free;

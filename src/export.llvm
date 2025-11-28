@@ -233,10 +233,11 @@ _fido_dev_force_u2f
 _fido_dev_free
 _fido_dev_get_assert
 _fido_dev_get_cbor_info
+_fido_dev_get_puat
 _fido_dev_get_retry_count
-_fido_dev_get_uv_retry_count
 _fido_dev_get_touch_begin
 _fido_dev_get_touch_status
+_fido_dev_get_uv_retry_count
 _fido_dev_has_pin
 _fido_dev_has_uv
 _fido_dev_info_free
