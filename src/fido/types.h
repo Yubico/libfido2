@@ -342,6 +342,7 @@ typedef struct fido_dev {
 	fido_dev_transport_t  transport;  /* transport functions */
 	uint64_t	      maxmsgsize; /* max message size */
 	int		      timeout_ms; /* read timeout in ms */
+	fido_blob_t	      puat;       /* only for fido_dev_get_puat() */
 } fido_dev_t;
 
 #else
