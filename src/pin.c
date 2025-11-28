@@ -117,27 +117,33 @@ fail:
 	return (r);
 }
 
-static cbor_item_t *
-encode_uv_permission(uint8_t cmd)
+static int
+cmd_to_permission(uint8_t cmd, uint8_t *perm)
 {
 	switch (cmd) {
 	case CTAP_CBOR_ASSERT:
-		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_ASSERT));
+		*perm = CTAP21_UV_TOKEN_PERM_ASSERT;
+		return 0;
 	case CTAP_CBOR_BIO_ENROLL_PRE:
 	case CTAP_CBOR_BIO_ENROLL:
-		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_BIO));
+		*perm = CTAP21_UV_TOKEN_PERM_BIO;
+		return 0;
 	case CTAP_CBOR_CONFIG:
-		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_CONFIG));
+		*perm = CTAP21_UV_TOKEN_PERM_CONFIG;
+		return 0;
 	case CTAP_CBOR_MAKECRED:
-		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_MAKECRED));
+		*perm = CTAP21_UV_TOKEN_PERM_MAKECRED;
+		return 0;
 	case CTAP_CBOR_CRED_MGMT_PRE:
 	case CTAP_CBOR_CRED_MGMT:
-		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_CRED_MGMT));
+		*perm = CTAP21_UV_TOKEN_PERM_CRED_MGMT;
+		return 0;
 	case CTAP_CBOR_LARGEBLOB:
-		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_LARGEBLOB));
+		*perm = CTAP21_UV_TOKEN_PERM_LARGEBLOB;
+		return 0;
 	default:
 		fido_log_debug("%s: cmd 0x%02x", __func__, cmd);
-		return (NULL);
+		return -1;
 	}
 }
 
@@ -200,7 +206,7 @@ fail:
 
 static int
 ctap21_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
-    const es256_pk_t *pk, uint8_t cmd, const char *rpid, int *ms)
+    const es256_pk_t *pk, uint8_t perm, const char *rpid, int *ms)
 {
 	fido_blob_t	 f;
 	fido_blob_t	*p = NULL;
@@ -237,7 +243,7 @@ ctap21_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
 	    (argv[1] = cbor_build_uint8(subcmd)) == NULL ||
 	    (argv[2] = es256_pk_encode(pk, 1)) == NULL ||
 	    (phe != NULL && (argv[5] = fido_blob_encode(phe)) == NULL) ||
-	    (argv[8] = encode_uv_permission(cmd)) == NULL ||
+	    (argv[8] = cbor_build_uint8(perm)) == NULL ||
 	    (rpid != NULL && (argv[9] = cbor_build_string(rpid)) == NULL)) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
@@ -322,7 +328,7 @@ fail:
 }
 
 static int
-uv_token_wait(fido_dev_t *dev, uint8_t cmd, const char *pin,
+uv_token_wait(fido_dev_t *dev, uint8_t perm, const char *pin,
     const fido_blob_t *ecdh, const es256_pk_t *pk, const char *rpid,
     fido_blob_t *token, int *ms)
 {
@@ -331,7 +337,7 @@ uv_token_wait(fido_dev_t *dev, uint8_t cmd, const char *pin,
 	if (ecdh == NULL || pk == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	if (fido_dev_supports_permissions(dev))
-		r = ctap21_uv_token_tx(dev, pin, ecdh, pk, cmd, rpid, ms);
+		r = ctap21_uv_token_tx(dev, pin, ecdh, pk, perm, rpid, ms);
 	else
 		r = ctap20_uv_token_tx(dev, pin, ecdh, pk, ms);
 	if (r != FIDO_OK)
@@ -345,7 +351,14 @@ fido_dev_get_uv_token(fido_dev_t *dev, uint8_t cmd, const char *pin,
     const fido_blob_t *ecdh, const es256_pk_t *pk, const char *rpid,
     fido_blob_t *token, int *ms)
 {
-	return (uv_token_wait(dev, cmd, pin, ecdh, pk, rpid, token, ms));
+	uint8_t perm;
+
+	if (cmd_to_permission(cmd, &perm) != 0) {
+	    return (FIDO_ERR_INTERNAL);
+	}
+
+	return (uv_token_wait(dev, perm, pin, ecdh, pk, rpid, token, ms));
+}
 }
 
 static int
