@@ -1,11 +1,56 @@
 /*
- * Copyright (c) 2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2021-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #include "fido.h"
+
+/* XXX */
+int
+aes128_cbc_dec(const fido_blob_t *key, const fido_blob_t *in, fido_blob_t *out)
+{
+	EVP_CIPHER_CTX *ctx = NULL;
+	const EVP_CIPHER *cipher;
+	int ok = -1;
+
+	fido_blob_reset(out);
+
+	if (key->len != 16) {
+		fido_log_debug("%s: invalid key len %zu", __func__, key->len);
+		goto fail;
+	}
+	/* iv + single block */
+	if (in->len != 32) {
+		fido_log_debug("%s: invalid input len %zu", __func__, in->len);
+		goto fail;
+	}
+	out->len = 16;
+	if ((out->ptr = calloc(1, out->len)) == NULL) {
+		fido_log_debug("%s: calloc", __func__);
+		goto fail;
+	}
+	if ((ctx = EVP_CIPHER_CTX_new()) == NULL ||
+	    (cipher = EVP_aes_128_cbc()) == NULL) {
+		fido_log_debug("%s: EVP_CIPHER_CTX_new", __func__);
+		goto fail;
+	}
+	if (EVP_CipherInit(ctx, cipher, key->ptr, in->ptr, 0) == 0 ||
+	    EVP_Cipher(ctx, out->ptr, in->ptr + 16, (u_int)out->len) < 0) {
+		fido_log_debug("%s: EVP_Cipher", __func__);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	if (ctx != NULL)
+		EVP_CIPHER_CTX_free(ctx);
+	if (ok < 0)
+		fido_blob_reset(out);
+
+	return ok;
+}
 
 static int
 aes256_cbc(const fido_blob_t *key, const u_char *iv, const fido_blob_t *in,
