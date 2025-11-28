@@ -38,6 +38,9 @@ int aes256_gcm_dec(const fido_blob_t *, const fido_blob_t *,
 int aes256_gcm_enc(const fido_blob_t *, const fido_blob_t *,
     const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 
+/* hdkf-sha256 */
+int hkdf_sha256(uint8_t *, size_t, const char *, const fido_blob_t *);
+
 /* cbor encoding functions */
 cbor_item_t *cbor_build_uint(const uint64_t);
 cbor_item_t *cbor_flatten_vector(cbor_item_t **, size_t);
