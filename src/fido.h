@@ -211,6 +211,8 @@ int fido_dev_set_io_functions(fido_dev_t *, const fido_dev_io_t *);
 int fido_dev_set_pin(fido_dev_t *, const char *, const char *);
 int fido_dev_set_transport_functions(fido_dev_t *, const fido_dev_transport_t *);
 int fido_dev_set_timeout(fido_dev_t *, int);
+const unsigned char *fido_dev_puat_ptr(const fido_dev_t *);
+size_t fido_dev_puat_len(const fido_dev_t *);
 
 size_t fido_assert_authdata_len(const fido_assert_t *, size_t);
 size_t fido_assert_authdata_raw_len(const fido_assert_t *, size_t);

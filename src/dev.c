@@ -605,3 +605,15 @@ fido_dev_set_timeout(fido_dev_t *dev, int ms)
 
 	return (FIDO_OK);
 }
+
+const unsigned char *
+fido_dev_puat_ptr(const fido_dev_t *dev)
+{
+	return dev->puat.ptr;
+}
+
+size_t
+fido_dev_puat_len(const fido_dev_t *dev)
+{
+	return dev->puat.len;
+}
