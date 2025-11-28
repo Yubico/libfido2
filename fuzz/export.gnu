@@ -95,6 +95,7 @@
 		fido_cbor_info_certs_len;
 		fido_cbor_info_certs_name_ptr;
 		fido_cbor_info_certs_value_ptr;
+		fido_cbor_info_decrypt;
 		fido_cbor_info_encid_len;
 		fido_cbor_info_encid_ptr;
 		fido_cbor_info_encstate_len;
@@ -103,6 +104,8 @@
 		fido_cbor_info_extensions_ptr;
 		fido_cbor_info_free;
 		fido_cbor_info_fwversion;
+		fido_cbor_info_id_len;
+		fido_cbor_info_id_ptr;
 		fido_cbor_info_long_touch_reset;
 		fido_cbor_info_maxcredbloblen;
 		fido_cbor_info_maxcredcntlst;
@@ -125,6 +128,8 @@
 		fido_cbor_info_reset_transports_len;
 		fido_cbor_info_reset_transports_ptr;
 		fido_cbor_info_rk_remaining;
+		fido_cbor_info_state_len;
+		fido_cbor_info_state_ptr;
 		fido_cbor_info_transports_len;
 		fido_cbor_info_transports_ptr;
 		fido_cbor_info_uv_attempts;
