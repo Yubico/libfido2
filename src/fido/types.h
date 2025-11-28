@@ -298,12 +298,14 @@ typedef struct fido_cbor_info {
 	int64_t           uv_since_pin;   /* uv count since last pin entry */
 	bool              long_reset;     /* long touch for reset */
 	fido_blob_t       encid;          /* encrypted identifier */
+	fido_blob_t       id;             /* decrypted identifier */
 	fido_str_array_t  rsttransports;  /* transports for reset */
 	int               pinpolicy;      /* enforces pin complexity */
 	fido_blob_t       pinpolicyurl;   /* url to pin policy */
 	uint64_t          maxpinlen;      /* non-default max pin length */
 	fido_blob_t       encstate;       /* encrypted credential store state */
 	fido_byte_array_t cfgcmds;        /* supported config commands */
+	fido_blob_t       state;          /* decrypted credential store state */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {
