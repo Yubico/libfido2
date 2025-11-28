@@ -322,6 +322,27 @@ print_byte_array(const char *label, const uint8_t *ba, size_t len)
 	printf("\n");
 }
 
+static int
+decrypt_info(fido_cbor_info_t *ci, const char *token)
+{
+	struct blob blob;
+	int r, ok = -1;
+
+	if (read_file(token, &blob.ptr, &blob.len) != 0) {
+		warnx("failed to read PPUAT");
+		goto fail;
+	}
+	if ((r = fido_cbor_info_decrypt(ci, blob.ptr, blob.len)) != FIDO_OK) {
+		warnx("fido_cbor_info_decrypt: %s (0x%x)", fido_strerr(r), r);
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	freezero(blob.ptr, blob.len);
+	return ok;
+}
+
 int
 token_info(int argc, char **argv, char *path)
 {
@@ -333,6 +354,7 @@ token_info(int argc, char **argv, char *path)
 	int			 credman = 0;
 	int			 r;
 	int			 retrycnt;
+	const char		*token = NULL;
 
 	optind = 1;
 
@@ -347,19 +369,22 @@ token_info(int argc, char **argv, char *path)
 		case 'k':
 			rp_id = optarg;
 			break;
+		case 't':
+			token = optarg;
+			break;
 		default:
 			break; /* ignore */
 		}
 	}
 
-	if (path == NULL || (credman && (cred_id != NULL || rp_id != NULL)))
+	if (path == NULL || (credman && (cred_id || rp_id || token)))
 		usage();
 
 	dev = open_dev(path);
 
 	if (credman)
 		return (credman_get_metadata(dev, path));
-	if (cred_id && rp_id)
+	if (cred_id && rp_id && !token)
 		return (credman_print_rk(dev, path, rp_id, cred_id));
 	if (cred_id || rp_id)
 		usage();
@@ -372,6 +397,8 @@ token_info(int argc, char **argv, char *path)
 		errx(1, "fido_cbor_info_new");
 	if ((r = fido_dev_get_cbor_info(dev, ci)) != FIDO_OK)
 		errx(1, "fido_dev_get_cbor_info: %s (0x%x)", fido_strerr(r), r);
+	if (token && decrypt_info(ci, token) != 0)
+		exit(1);
 
 	/* print supported protocol versions */
 	print_str_array("version", fido_cbor_info_versions_ptr(ci),
@@ -392,13 +419,21 @@ token_info(int argc, char **argv, char *path)
 	print_bytes("aaguid", fido_cbor_info_aaguid_ptr(ci),
 	    fido_cbor_info_aaguid_len(ci));
 
-	/* print encid */
-	print_bytes("encid", fido_cbor_info_encid_ptr(ci),
-	    fido_cbor_info_encid_len(ci));
+	/* print device identifier */
+	if (fido_cbor_info_id_ptr(ci))
+		print_bytes("id", fido_cbor_info_id_ptr(ci),
+		    fido_cbor_info_id_len(ci));
+	else
+		print_bytes("encid", fido_cbor_info_encid_ptr(ci),
+		    fido_cbor_info_encid_len(ci));
 
-	/* print encstate */
-	print_bytes("encstate", fido_cbor_info_encstate_ptr(ci),
-	    fido_cbor_info_encstate_len(ci));
+	/* print credential store state */
+	if (fido_cbor_info_state_ptr(ci))
+		print_bytes("state", fido_cbor_info_state_ptr(ci),
+		    fido_cbor_info_state_len(ci));
+	else
+		print_bytes("encstate", fido_cbor_info_encstate_ptr(ci),
+		    fido_cbor_info_encstate_len(ci));
 
 	/* print supported options */
 	print_opt_array("options", fido_cbor_info_options_name_ptr(ci),
