@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -24,6 +24,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+/* aes128 */
+int aes128_cbc_dec(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 
 /* aes256 */
 int aes256_cbc_dec(const fido_dev_t *, const fido_blob_t *,
