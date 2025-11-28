@@ -333,7 +333,9 @@ token_info(int argc, char **argv, char *path)
 	int			 credman = 0;
 	int			 r;
 	int			 retrycnt;
+	struct blob		 ppuat;
 
+	memset(&ppuat, 0, sizeof(ppuat));
 	optind = 1;
 
 	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
@@ -346,6 +348,11 @@ token_info(int argc, char **argv, char *path)
 			break;
 		case 'k':
 			rp_id = optarg;
+			break;
+		case 'p':
+			freezero(ppuat.ptr, ppuat.len);
+			if (read_file(optarg, &ppuat.ptr, &ppuat.len) != 0)
+				errx(1, "failed to read ppuat");
 			break;
 		default:
 			break; /* ignore */
@@ -373,6 +380,10 @@ token_info(int argc, char **argv, char *path)
 	if ((r = fido_dev_get_cbor_info(dev, ci)) != FIDO_OK)
 		errx(1, "fido_dev_get_cbor_info: %s (0x%x)", fido_strerr(r), r);
 
+	if (ppuat.ptr && (r = fido_cbor_info_decrypt(ci, ppuat.ptr,
+	    ppuat.len)) != FIDO_OK)
+		warnx("fido_cbor_info_decrypt() failed: %s", fido_strerr(r));
+
 	/* print supported protocol versions */
 	print_str_array("version", fido_cbor_info_versions_ptr(ci),
 	    fido_cbor_info_versions_len(ci));
@@ -392,13 +403,21 @@ token_info(int argc, char **argv, char *path)
 	print_bytes("aaguid", fido_cbor_info_aaguid_ptr(ci),
 	    fido_cbor_info_aaguid_len(ci));
 
-	/* print encid */
-	print_bytes("encid", fido_cbor_info_encid_ptr(ci),
-	    fido_cbor_info_encid_len(ci));
+	/* print device identifier */
+	if (fido_cbor_info_id_ptr(ci))
+		print_bytes("id", fido_cbor_info_id_ptr(ci),
+		    fido_cbor_info_id_len(ci));
+	else
+		print_bytes("encid", fido_cbor_info_encid_ptr(ci),
+		    fido_cbor_info_encid_len(ci));
 
-	/* print encstate */
-	print_bytes("encstate", fido_cbor_info_encstate_ptr(ci),
-	    fido_cbor_info_encstate_len(ci));
+	/* print credential store state */
+	if (fido_cbor_info_state_ptr(ci))
+		print_bytes("state", fido_cbor_info_state_ptr(ci),
+		    fido_cbor_info_state_len(ci));
+	else
+		print_bytes("encstate", fido_cbor_info_encstate_ptr(ci),
+		    fido_cbor_info_encstate_len(ci));
 
 	/* print supported options */
 	print_opt_array("options", fido_cbor_info_options_name_ptr(ci),
