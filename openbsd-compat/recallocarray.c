@@ -57,7 +57,7 @@ recallocarray(void *ptr, size_t oldnmemb, size_t newnmemb, size_t size)
 		return NULL;
 	}
 	oldsize = oldnmemb * size;
-	
+
 	/*
 	 * Don't bother too much if we're shrinking just a bit,
 	 * we do not shrink for series of small steps, oh well.

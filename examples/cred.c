@@ -308,7 +308,7 @@ main(int argc, char **argv)
 
 	if (ea != 0 && (r = fido_cred_set_entattest(cred, (int)ea)) != FIDO_OK)
 		errx(1, "fido_cred_set_entattest: %s (0x%x)", fido_strerr(r), r);
-	
+
 	/* timeout */
 	if (ms != 0 && (r = fido_dev_set_timeout(dev, (int)ms)) != FIDO_OK)
 		errx(1, "fido_dev_set_timeout: %s (0x%x)", fido_strerr(r), r);

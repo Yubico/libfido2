@@ -262,7 +262,7 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 		mutate_blob(&p->pcsc_list);
 		mutate_blob(&p->tx_apdu);
 	}
- 
+
 	if (flags & MUTATE_WIREDATA) {
 		mutate_blob(&p->wiredata_init);
 		mutate_blob(&p->wiredata_msg);

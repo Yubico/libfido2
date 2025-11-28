@@ -2,7 +2,7 @@
 * Author: Manoj Ampalam <manoj.ampalam@microsoft.com>
 *
 * Author: Bryan Berns <berns@uwalumni.com>
-*   Modified group detection use s4u token information 
+*   Modified group detection use s4u token information
 *
 * Copyright(c) 2016 Microsoft Corp.
 * All rights reserved
@@ -31,7 +31,7 @@
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#define UMDF_USING_NTSTATUS 
+#define UMDF_USING_NTSTATUS
 #define SECURITY_WIN32
 #include <windows.h>
 #include <stdio.h>
@@ -90,7 +90,7 @@ readpassphrase(const char *prompt, char *outBuf, size_t outBufLen, int flags)
 
 	while (current_index < outBufLen - 1) {
 		ch = (char)_getch();
-		
+
 		if (ch == '\r') {
 			if (_kbhit()) (void)_getch(); /* read linefeed if its there */
 			break;

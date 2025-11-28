@@ -567,7 +567,7 @@ get_cbor_array(fido_dev_t *dev)
 		goto out;
 	}
 
-	printf("total map size: %zu byte%s\n", cbor_len, plural(cbor_len)); 
+	printf("total map size: %zu byte%s\n", cbor_len, plural(cbor_len));
 
 	ok = 0;
 out:

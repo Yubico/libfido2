@@ -193,8 +193,8 @@ main(void)
 {
 	fido_init(0);
 
-	invalid_size(rsa1024); 
-	invalid_size(rsa3072); 
+	invalid_size(rsa1024);
+	invalid_size(rsa3072);
 	valid_size(rsa2048, rsa2048_raw, sizeof(rsa2048_raw));
 
 	exit(0);
