@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -33,13 +33,13 @@ hkdf_sha256(uint8_t *key, const char *info, const fido_blob_t *secret)
 }
 #else
 static int
-hkdf_sha256(uint8_t *key, char *info, fido_blob_t *secret)
+hkdf_sha256(uint8_t *key, const char *info, const fido_blob_t *secret)
 {
 	const EVP_MD *const_md;
 	EVP_MD *md = NULL;
 	EVP_PKEY_CTX *ctx = NULL;
 	size_t keylen = SHA256_DIGEST_LENGTH;
-	uint8_t	salt[32];
+	uint8_t salt[32];
 	int ok = -1;
 
 	memset(salt, 0, sizeof(salt));
@@ -57,7 +57,8 @@ hkdf_sha256(uint8_t *key, char *info, fido_blob_t *secret)
 	    EVP_PKEY_CTX_set_hkdf_md(ctx, md) < 1 ||
 	    EVP_PKEY_CTX_set1_hkdf_salt(ctx, salt, sizeof(salt)) < 1 ||
 	    EVP_PKEY_CTX_set1_hkdf_key(ctx, secret->ptr, (int)secret->len) < 1 ||
-	    EVP_PKEY_CTX_add1_hkdf_info(ctx, (void *)info, (int)strlen(info)) < 1) {
+	    EVP_PKEY_CTX_add1_hkdf_info(ctx, (const void *)info,
+	    (int)strlen(info)) < 1) {
 		fido_log_debug("%s: EVP_PKEY_CTX", __func__);
 		goto fail;
 	}
@@ -78,10 +79,10 @@ fail:
 #endif /* defined(LIBRESSL_VERSION_NUMBER) */
 
 static int
-kdf(uint8_t prot, fido_blob_t *key, /* const */ fido_blob_t *secret)
+kdf(uint8_t prot, fido_blob_t *key, const fido_blob_t *secret)
 {
-	char hmac_info[] = "CTAP2 HMAC key"; /* const */
-	char aes_info[] = "CTAP2 AES key"; /* const */
+	const char hmac_info[] = "CTAP2 HMAC key";
+	const char aes_info[] = "CTAP2 AES key";
 
 	switch (prot) {
 	case CTAP_PIN_PROTOCOL1:
