@@ -1,4 +1,4 @@
-.\" Copyright (c) 2018-2024 Yubico AB. All rights reserved.
+.\" Copyright (c) 2018-2026 Yubico AB. All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 .Nm
 .Fl M
 .Op Fl bdhqruvw
+.Op Fl t Ar option
 .Op Fl a Ar mode
 .Op Fl c Ar cred_protect
 .Op Fl i Ar input_file
@@ -175,6 +176,27 @@ Create a resident credential.
 Resident credentials are called
 .Dq discoverable credentials
 in CTAP 2.1.
+.It Fl t Ar option
+Toggles a key/value
+.Ar option ,
+where
+.Ar option
+is a string of the form
+.Dq key=value .
+The options supported at present are:
+.Bl -tag -width Ds
+.It Cm uv Ns = Ns Ar true|false
+Asks the authenticator for user verification to be enabled or
+disabled.
+.It Cm pin Ns = Ns Ar true|false
+Tells
+.Nm
+whether to prompt for a PIN and request user verification.
+.El
+.Pp
+The
+.Fl t
+option may be specified multiple times.
 .It Fl u
 Create a U2F credential.
 By default,
