@@ -237,7 +237,7 @@ nfc_new(uint32_t dev)
 
 	if ((ctx = calloc(1, sizeof(*ctx))) == NULL ||
 	    (ctx->nl = fido_nl_new()) == NULL) {
-		nfc_free(&ctx);
+		free(ctx);
 		return NULL;
 	}
 
