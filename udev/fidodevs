@@ -31,6 +31,8 @@ vendor EWBM		0x311f	eWBM Co., Ltd.
 vendor GOTRUST		0x32a3	GoTrustID Inc.
 vendor UNKNOWN1		0x4c4d	Unknown vendor
 vendor SATOSHI		0x534c	SatoshiLabs
+vendor TOKEN2		0x349e	Token2 Sàrl
+
 
 # List of known products. Grouped by vendor; sorted by product ID.
 
@@ -135,3 +137,27 @@ product GOTRUST		0x3201	Idem Key
 product UNKNOWN1	0xf703	Longmai mFIDO
 
 product SATOSHI		0x0001	SatoshiLabs TREZOR
+
+product TOKEN2		0x0010	PIN+ Mini USB A/C R3 FIDO
+product TOKEN2		0x0011	PIN+ Mini USB A/C R3 OTP
+product TOKEN2		0x0012	PIN+ Mini USB A/C R3 FIDO+OTP
+product TOKEN2		0x0013	PIN+ Mini USB A/C R3 OTP+PGP
+product TOKEN2		0x0014	PIN+ Mini USB A/C R3 FIDO+PGP
+product TOKEN2		0x0015	PIN+ Mini USB A/C R3 PGP
+product TOKEN2		0x0016	PIN+ Mini USB A/C R3 OTP+PGP+FIDO
+
+product TOKEN2		0x0020	PIN+ R1/R2/R3 FIDO
+product TOKEN2		0x0021	PIN+ R1/R2/R3 OTP
+product TOKEN2		0x0022	PIN+ R1/R2/R3 FIDO+OTP
+product TOKEN2		0x0023	PIN+ R3 OTP+PGP
+product TOKEN2		0x0024	PIN+ R3 FIDO+PGP
+product TOKEN2		0x0025	PIN+ R3 PGP
+product TOKEN2		0x0026	PIN+ R3 OTP+PGP+FIDO
+
+product TOKEN2		0x0200	PIN+ Bio3 Dual A+C R3.2 FIDO
+product TOKEN2		0x0201	PIN+ Bio3 Dual A+C R3.2 OTP
+product TOKEN2		0x0202	PIN+ Bio3 Dual A+C R3.2 FIDO+OTP
+product TOKEN2		0x0203	PIN+ Bio3 Dual A+C R3.2 OTP+PGP
+product TOKEN2		0x0204	PIN+ Bio3 Dual A+C R3.2 FIDO+PGP
+product TOKEN2		0x0205	PIN+ Bio3 Dual A+C R3.2 PGP
+product TOKEN2		0x0206	PIN+ Bio3 Dual A+C R3.2 OTP+PGP+FIDO
