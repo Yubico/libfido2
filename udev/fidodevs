@@ -29,6 +29,7 @@ vendor LEDGER		0x2c97	LEDGER
 vendor HYPERSECU	0x2ccf	Hypersecu Information Systems, Inc.
 vendor EWBM		0x311f	eWBM Co., Ltd.
 vendor GOTRUST		0x32a3	GoTrustID Inc.
+vendor TOKEN2		0x349e	Token2 Sàrl
 vendor UNKNOWN1		0x4c4d	Unknown vendor
 vendor SATOSHI		0x534c	SatoshiLabs
 
@@ -131,6 +132,30 @@ product EWBM		0xa7f9	TrustKey Solutions FIDO2 T110
 product EWBM		0xf47c	eWBM FIDO2 Goldengate G450
 
 product GOTRUST		0x3201	Idem Key
+
+product TOKEN2		0x0010	PIN+ Mini USB A/C R3 FIDO
+product TOKEN2		0x0011	PIN+ Mini USB A/C R3 OTP
+product TOKEN2		0x0012	PIN+ Mini USB A/C R3 FIDO+OTP
+product TOKEN2		0x0013	PIN+ Mini USB A/C R3 OTP+PGP
+product TOKEN2		0x0014	PIN+ Mini USB A/C R3 FIDO+PGP
+product TOKEN2		0x0015	PIN+ Mini USB A/C R3 PGP
+product TOKEN2		0x0016	PIN+ Mini USB A/C R3 OTP+PGP+FIDO
+
+product TOKEN2		0x0020	PIN+ R1/R2/R3 FIDO
+product TOKEN2		0x0021	PIN+ R1/R2/R3 OTP
+product TOKEN2		0x0022	PIN+ R1/R2/R3 FIDO+OTP
+product TOKEN2		0x0023	PIN+ R3 OTP+PGP
+product TOKEN2		0x0024	PIN+ R3 FIDO+PGP
+product TOKEN2		0x0025	PIN+ R3 PGP
+product TOKEN2		0x0026	PIN+ R3 OTP+PGP+FIDO
+
+product TOKEN2		0x0200	PIN+ Bio3 Dual A+C R3.2 FIDO
+product TOKEN2		0x0201	PIN+ Bio3 Dual A+C R3.2 OTP
+product TOKEN2		0x0202	PIN+ Bio3 Dual A+C R3.2 FIDO+OTP
+product TOKEN2		0x0203	PIN+ Bio3 Dual A+C R3.2 OTP+PGP
+product TOKEN2		0x0204	PIN+ Bio3 Dual A+C R3.2 FIDO+PGP
+product TOKEN2		0x0205	PIN+ Bio3 Dual A+C R3.2 PGP
+product TOKEN2		0x0206	PIN+ Bio3 Dual A+C R3.2 OTP+PGP+FIDO
 
 product UNKNOWN1	0xf703	Longmai mFIDO
 
