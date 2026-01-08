@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -488,6 +488,10 @@ token_info(int argc, char **argv, char *path)
 	print_str_array("transports for reset",
 	    fido_cbor_info_reset_transports_ptr(ci),
 	    fido_cbor_info_reset_transports_len(ci));
+
+	/* print authenticator config commands */
+	print_byte_array("config commands", fido_cbor_info_cfgcmds_ptr(ci),
+	    fido_cbor_info_cfgcmds_len(ci));
 
 	bio_info(dev);
 

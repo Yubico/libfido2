@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2026 Yubico AB. All rights reserved.
  * SPDX-License-Identifier: BSD-2-Clause
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,6 +112,7 @@ const char *fido_dev_info_manufacturer_string(const fido_dev_info_t *);
 const char *fido_dev_info_path(const fido_dev_info_t *);
 const char *fido_dev_info_product_string(const fido_dev_info_t *);
 const fido_dev_info_t *fido_dev_info_ptr(const fido_dev_info_t *, size_t);
+const uint8_t *fido_cbor_info_cfgcmds_ptr(const fido_cbor_info_t *);
 const uint8_t *fido_cbor_info_protocols_ptr(const fido_cbor_info_t *);
 const uint64_t *fido_cbor_info_certs_value_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cbor_info_aaguid_ptr(const fido_cbor_info_t *);
@@ -229,6 +230,7 @@ size_t fido_cbor_info_encstate_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_extensions_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_options_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_pin_policy_url_len(const fido_cbor_info_t *);
+size_t fido_cbor_info_cfgcmds_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_protocols_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_reset_transports_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_transports_len(const fido_cbor_info_t *);

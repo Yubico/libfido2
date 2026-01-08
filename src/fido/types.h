@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2026 Yubico AB. All rights reserved.
  * SPDX-License-Identifier: BSD-2-Clause
  *
  * Redistribution and use in source and binary forms, with or without
@@ -303,6 +303,7 @@ typedef struct fido_cbor_info {
 	fido_blob_t       pinpolicyurl;   /* url to pin policy */
 	uint64_t          maxpinlen;      /* non-default max pin length */
 	fido_blob_t       encstate;       /* encrypted credential store state */
+	fido_byte_array_t cfgcmds;        /* supported config commands */
 } fido_cbor_info_t;
 
 typedef struct fido_dev_info {

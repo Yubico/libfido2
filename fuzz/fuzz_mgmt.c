@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2025 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -329,6 +329,7 @@ dev_get_cbor_info(const struct param *p)
 	consume(fido_cbor_info_aaguid_ptr(ci), fido_cbor_info_aaguid_len(ci));
 	consume(fido_cbor_info_protocols_ptr(ci),
 	    fido_cbor_info_protocols_len(ci));
+	consume(fido_cbor_info_cfgcmds_ptr(ci), fido_cbor_info_cfgcmds_len(ci));
 	consume(fido_cbor_info_encid_ptr(ci), fido_cbor_info_encid_len(ci));
 	consume(fido_cbor_info_encstate_ptr(ci), fido_cbor_info_encstate_len(ci));
 	consume(fido_cbor_info_pin_policy_url_ptr(ci),

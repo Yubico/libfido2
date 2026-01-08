@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2025 Yubico AB. All rights reserved.
+# Copyright (c) 2018-2026 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 # SPDX-License-Identifier: BSD-2-Clause
@@ -130,6 +130,8 @@ list(APPEND MAN_ALIAS
 	fido_cbor_info_new fido_cbor_info_certs_len
 	fido_cbor_info_new fido_cbor_info_certs_name_ptr
 	fido_cbor_info_new fido_cbor_info_certs_value_ptr
+	fido_cbor_info_new fido_cbor_info_cfgcmds_len
+	fido_cbor_info_new fido_cbor_info_cfgcmds_ptr
 	fido_cbor_info_new fido_cbor_info_encid_len
 	fido_cbor_info_new fido_cbor_info_encid_ptr
 	fido_cbor_info_new fido_cbor_info_encstate_len

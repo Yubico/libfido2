@@ -366,6 +366,8 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		return (cbor_decode_uint64(val, &ci->maxpinlen));
 	case 30: /* encCredStoreState */
 		return (fido_blob_decode(val, &ci->encstate));
+	case 31: /* authenticatorConfigCommands */
+		return (decode_byte_array(val, &ci->cfgcmds));
 	default: /* ignore */
 		fido_log_debug("%s: cbor type: 0x%02x", __func__, cbor_get_uint8(key));
 		return (0);
@@ -468,6 +470,7 @@ fido_cbor_info_reset(fido_cbor_info_t *ci)
 	fido_str_array_free(&ci->rsttransports);
 	fido_opt_array_free(&ci->options);
 	fido_byte_array_free(&ci->protocols);
+	fido_byte_array_free(&ci->cfgcmds);
 	fido_algo_array_free(&ci->algorithms);
 	fido_cert_array_free(&ci->certs);
 	fido_blob_reset(&ci->encid);
@@ -764,4 +767,16 @@ uint64_t
 fido_cbor_info_maxpinlen(const fido_cbor_info_t *ci)
 {
 	return (ci->maxpinlen);
+}
+
+const uint8_t *
+fido_cbor_info_cfgcmds_ptr(const fido_cbor_info_t *ci)
+{
+	return (ci->cfgcmds.ptr);
+}
+
+size_t
+fido_cbor_info_cfgcmds_len(const fido_cbor_info_t *ci)
+{
+	return (ci->cfgcmds.len);
 }

@@ -1,4 +1,4 @@
-.\" Copyright (c) 2018-2025 Yubico AB. All rights reserved.
+.\" Copyright (c) 2018-2026 Yubico AB. All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions are
@@ -50,6 +50,8 @@
 .Nm fido_cbor_info_certs_name_ptr ,
 .Nm fido_cbor_info_certs_value_ptr ,
 .Nm fido_cbor_info_certs_len ,
+.Nm fido_cbor_info_cfgcmds_ptr ,
+.Nm fido_cbor_info_cfgcmds_len ,
 .Nm fido_cbor_info_aaguid_len ,
 .Nm fido_cbor_info_attfmts_len ,
 .Nm fido_cbor_info_encid_len ,
@@ -207,6 +209,7 @@ function may block.
 The
 .Fn fido_cbor_info_aaguid_ptr ,
 .Fn fido_cbor_info_attfmts_ptr ,
+.Fn fido_cbor_info_cfgcmds_ptr ,
 .Fn fido_cbor_info_encid_ptr ,
 .Fn fido_cbor_info_encstate_ptr ,
 .Fn fido_cbor_info_extensions_ptr ,
@@ -217,15 +220,16 @@ The
 and
 .Fn fido_cbor_info_versions_ptr
 functions return pointers to the authenticator attestation GUID,
-supported attestation formats, encrypted identifier, encrypted
-credential store state, supported extensions, PIN complexity policy URL,
-PIN protocol, transports for authenticator reset, transports, and CTAP
-version strings of
+supported attestation formats, supported authenticator config commands,
+encrypted identifier, encrypted credential store state, supported extensions,
+PIN complexity policy URL, PIN protocol, transports for authenticator reset,
+transports, and CTAP version strings of
 .Fa ci .
 The corresponding length of a given attribute can be
 obtained by
 .Fn fido_cbor_info_aaguid_len ,
 .Fn fido_cbor_info_attfmts_len ,
+.Fn fido_cbor_info_cfgcmds_ptr ,
 .Fn fido_cbor_info_encid_len ,
 .Fn fido_cbor_info_encstate_len ,
 .Fn fido_cbor_info_extensions_len ,
@@ -238,7 +242,8 @@ or
 The supported attestation formats, encrypted identifier, PIN complexity
 policy URL, and transports for authenticator reset attributes are CTAP
 2.2 additions.
-The encrypted credential store state attribute is a CTAP 2.3 addition.
+The supported authenticator config commands and encrypted credential store state
+attributes are CTAP 2.3 additions.
 .Pp
 The
 .Fn fido_cbor_info_options_name_ptr
