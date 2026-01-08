@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -108,7 +108,7 @@ decode_options(const cbor_item_t *item, fido_opt_array_t *o)
 }
 
 static int
-decode_protocol(const cbor_item_t *item, void *arg)
+decode_byte_array_item(const cbor_item_t *item, void *arg)
 {
 	fido_byte_array_t	*p = arg;
 	const size_t		 i = p->len;
@@ -127,7 +127,7 @@ decode_protocol(const cbor_item_t *item, void *arg)
 }
 
 static int
-decode_protocols(const cbor_item_t *item, fido_byte_array_t *p)
+decode_byte_array(const cbor_item_t *item, fido_byte_array_t *p)
 {
 	p->ptr = NULL;
 	p->len = 0;
@@ -142,8 +142,8 @@ decode_protocols(const cbor_item_t *item, fido_byte_array_t *p)
 	if (p->ptr == NULL)
 		return (-1);
 
-	if (cbor_array_iter(item, p, decode_protocol) < 0) {
-		fido_log_debug("%s: decode_protocol", __func__);
+	if (cbor_array_iter(item, p, decode_byte_array_item) < 0) {
+		fido_log_debug("%s: decode_byte_array_item", __func__);
 		return (-1);
 	}
 
@@ -304,7 +304,7 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 	case 5: /* maxMsgSize */
 		return (cbor_decode_uint64(val, &ci->maxmsgsiz));
 	case 6: /* pinProtocols */
-		return (decode_protocols(val, &ci->protocols));
+		return (decode_byte_array(val, &ci->protocols));
 	case 7: /* maxCredentialCountInList */
 		return (cbor_decode_uint64(val, &ci->maxcredcntlst));
 	case 8: /* maxCredentialIdLength */
