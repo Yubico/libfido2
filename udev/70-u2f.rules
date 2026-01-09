@@ -261,6 +261,69 @@ KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="311f", ATTRS{idProduct
 # Idem Key by GoTrustID Inc.
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="32a3", ATTRS{idProduct}=="3201", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
+# PIN+ Mini USB A/C R3 FIDO by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0010", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Mini USB A/C R3 OTP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0011", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Mini USB A/C R3 FIDO+OTP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0012", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Mini USB A/C R3 OTP+PGP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0013", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Mini USB A/C R3 FIDO+PGP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0014", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Mini USB A/C R3 PGP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0015", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Mini USB A/C R3 OTP+PGP+FIDO by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0016", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ R1/R2/R3 FIDO by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0020", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ R1/R2/R3 OTP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0021", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ R1/R2/R3 FIDO+OTP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0022", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ R3 OTP+PGP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0023", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ R3 FIDO+PGP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0024", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ R3 PGP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0025", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ R3 OTP+PGP+FIDO by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0026", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Bio3 Dual A+C R3.2 FIDO by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0200", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Bio3 Dual A+C R3.2 OTP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0201", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Bio3 Dual A+C R3.2 FIDO+OTP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0202", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Bio3 Dual A+C R3.2 OTP+PGP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0203", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Bio3 Dual A+C R3.2 FIDO+PGP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0204", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Bio3 Dual A+C R3.2 PGP by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0205", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
+# PIN+ Bio3 Dual A+C R3.2 OTP+PGP+FIDO by Token2 Sàrl
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="349e", ATTRS{idProduct}=="0206", TAG+="uaccess", GROUP="plugdev", MODE="0660"
+
 # Longmai mFIDO by Unknown vendor
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="4c4d", ATTRS{idProduct}=="f703", TAG+="uaccess", GROUP="plugdev", MODE="0660"
 
