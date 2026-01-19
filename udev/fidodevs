@@ -95,6 +95,7 @@ product CLAYLOGIC	0x42b1	Nitrokey FIDO2
 product CLAYLOGIC	0x42b2	Nitrokey 3C NFC
 product CLAYLOGIC	0x42b3	Safetech SafeKey
 product CLAYLOGIC	0x42d4	CanoKey
+product CLAYLOGIC	0x42dd	Nitrokey 3A NFC
 
 product ALLADIN		0x0101	JaCarta U2F
 product ALLADIN		0x0501	JaCarta U2F
