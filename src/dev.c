@@ -617,3 +617,20 @@ fido_dev_puat_len(const fido_dev_t *dev)
 {
 	return dev->puat.len;
 }
+
+int
+fido_dev_set_puat(fido_dev_t *dev, const unsigned char *ptr, size_t len)
+{
+	if (fido_dev_is_winhello(dev))
+		return FIDO_ERR_INVALID_ARGUMENT;
+
+	if (ptr == NULL || len == 0) {
+		fido_blob_reset(&dev->puat);
+		return FIDO_OK;
+	}
+
+	if (fido_blob_set(&dev->puat, ptr, len) != 0)
+		return FIDO_ERR_INTERNAL;
+
+	return FIDO_OK;
+}
