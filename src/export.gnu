@@ -275,6 +275,7 @@
 		fido_dev_set_pin;
 		fido_dev_set_pin_minlen;
 		fido_dev_set_pin_minlen_rpid;
+		fido_dev_set_puat;
 		fido_dev_set_sigmask;
 		fido_dev_set_timeout;
 		fido_dev_set_transport_functions;
