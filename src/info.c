@@ -474,8 +474,10 @@ fido_cbor_info_reset(fido_cbor_info_t *ci)
 	fido_algo_array_free(&ci->algorithms);
 	fido_cert_array_free(&ci->certs);
 	fido_blob_reset(&ci->encid);
+	fido_blob_reset(&ci->id);
 	fido_blob_reset(&ci->pinpolicyurl);
 	fido_blob_reset(&ci->encstate);
+	fido_blob_reset(&ci->state);
 	ci->rk_remaining = -1;
 	ci->uv_since_pin = -1;
 	ci->pinpolicy = -1;
@@ -554,6 +556,18 @@ fido_cbor_info_encid_len(const fido_cbor_info_t *ci)
 }
 
 const unsigned char *
+fido_cbor_info_id_ptr(const fido_cbor_info_t *ci)
+{
+	return (ci->id.ptr);
+}
+
+size_t
+fido_cbor_info_id_len(const fido_cbor_info_t *ci)
+{
+	return (ci->id.len);
+}
+
+const unsigned char *
 fido_cbor_info_encstate_ptr(const fido_cbor_info_t *ci)
 {
 	return (ci->encstate.ptr);
@@ -563,6 +577,18 @@ size_t
 fido_cbor_info_encstate_len(const fido_cbor_info_t *ci)
 {
 	return (ci->encstate.len);
+}
+
+const unsigned char *
+fido_cbor_info_state_ptr(const fido_cbor_info_t *ci)
+{
+	return (ci->state.ptr);
+}
+
+size_t
+fido_cbor_info_state_len(const fido_cbor_info_t *ci)
+{
+	return (ci->state.len);
 }
 
 char **
@@ -779,4 +805,62 @@ size_t
 fido_cbor_info_cfgcmds_len(const fido_cbor_info_t *ci)
 {
 	return (ci->cfgcmds.len);
+}
+
+static int
+decrypt(const fido_blob_t *secret, const char *info, const fido_blob_t *in,
+    fido_blob_t *out)
+{
+	fido_blob_t key;
+	unsigned char keybuf[16];
+	int r = FIDO_ERR_INTERNAL;
+
+	key.ptr = keybuf;
+	key.len = sizeof(keybuf);
+
+	if (hkdf_sha256(key.ptr, key.len, info, secret) != 0) {
+		fido_log_debug("%s: hkdf_sha256", __func__);
+		goto fail;
+	}
+	if (aes128_cbc_dec(&key, in, out) != 0) {
+		fido_log_debug("%s: aes128_cbc_dec", __func__);
+		goto fail;
+	}
+
+	r = FIDO_OK;
+fail:
+	explicit_bzero(key.ptr, key.len);
+	return r;
+}
+
+int
+fido_cbor_info_decrypt(fido_cbor_info_t *ci, const unsigned char *ppuat,
+    size_t ppuat_len)
+{
+	fido_blob_t secret;
+	int r = FIDO_OK;
+
+	memset(&secret, 0, sizeof(secret));
+
+	if (fido_blob_set(&secret, ppuat, ppuat_len) != 0) {
+		fido_log_debug("%s: fido_blob_set", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+
+	if (!fido_blob_is_empty(&ci->encid) && (r = decrypt(&secret,
+	    "encIdentifier", &ci->encid, &ci->id)) != FIDO_OK) {
+		fido_log_debug("%s: encIdentifier", __func__);
+		goto fail;
+	}
+
+	if (!fido_blob_is_empty(&ci->encstate) && (r = decrypt(&secret,
+	    "encCredStoreState", &ci->encstate, &ci->state)) != FIDO_OK) {
+		fido_log_debug("%s: encIdentifier", __func__);
+		goto fail;
+	}
+
+fail:
+	fido_blob_reset(&secret);
+	return r;
 }

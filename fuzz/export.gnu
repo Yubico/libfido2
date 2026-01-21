@@ -97,6 +97,7 @@
 		fido_cbor_info_certs_value_ptr;
 		fido_cbor_info_cfgcmds_len;
 		fido_cbor_info_cfgcmds_ptr;
+		fido_cbor_info_decrypt;
 		fido_cbor_info_encid_len;
 		fido_cbor_info_encid_ptr;
 		fido_cbor_info_encstate_len;
@@ -105,6 +106,8 @@
 		fido_cbor_info_extensions_ptr;
 		fido_cbor_info_free;
 		fido_cbor_info_fwversion;
+		fido_cbor_info_id_len;
+		fido_cbor_info_id_ptr;
 		fido_cbor_info_long_touch_reset;
 		fido_cbor_info_maxcredbloblen;
 		fido_cbor_info_maxcredcntlst;
@@ -127,6 +130,8 @@
 		fido_cbor_info_reset_transports_len;
 		fido_cbor_info_reset_transports_ptr;
 		fido_cbor_info_rk_remaining;
+		fido_cbor_info_state_len;
+		fido_cbor_info_state_ptr;
 		fido_cbor_info_transports_len;
 		fido_cbor_info_transports_ptr;
 		fido_cbor_info_uv_attempts;
@@ -232,10 +237,11 @@
 		fido_dev_free;
 		fido_dev_get_assert;
 		fido_dev_get_cbor_info;
+		fido_dev_get_puat;
 		fido_dev_get_retry_count;
-		fido_dev_get_uv_retry_count;
 		fido_dev_get_touch_begin;
 		fido_dev_get_touch_status;
+		fido_dev_get_uv_retry_count;
 		fido_dev_has_pin;
 		fido_dev_has_uv;
 		fido_dev_info_free;
@@ -255,6 +261,8 @@
 		fido_dev_new;
 		fido_dev_open;
 		fido_dev_protocol;
+		fido_dev_puat_len;
+		fido_dev_puat_ptr;
 		fido_dev_reset;
 		fido_dev_set_io_functions;
 		fido_dev_set_pcsc;

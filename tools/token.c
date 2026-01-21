@@ -333,7 +333,9 @@ token_info(int argc, char **argv, char *path)
 	int			 credman = 0;
 	int			 r;
 	int			 retrycnt;
+	struct blob		 ppuat;
 
+	memset(&ppuat, 0, sizeof(ppuat));
 	optind = 1;
 
 	while ((ch = getopt(argc, argv, TOKEN_OPT)) != -1) {
@@ -346,6 +348,11 @@ token_info(int argc, char **argv, char *path)
 			break;
 		case 'k':
 			rp_id = optarg;
+			break;
+		case 'p':
+			freezero(ppuat.ptr, ppuat.len);
+			if (read_file(optarg, &ppuat.ptr, &ppuat.len) != 0)
+				errx(1, "failed to read ppuat");
 			break;
 		default:
 			break; /* ignore */
@@ -373,6 +380,10 @@ token_info(int argc, char **argv, char *path)
 	if ((r = fido_dev_get_cbor_info(dev, ci)) != FIDO_OK)
 		errx(1, "fido_dev_get_cbor_info: %s (0x%x)", fido_strerr(r), r);
 
+	if (ppuat.ptr && (r = fido_cbor_info_decrypt(ci, ppuat.ptr,
+	    ppuat.len)) != FIDO_OK)
+		warnx("fido_cbor_info_decrypt() failed: %s", fido_strerr(r));
+
 	/* print supported protocol versions */
 	print_str_array("version", fido_cbor_info_versions_ptr(ci),
 	    fido_cbor_info_versions_len(ci));
@@ -392,13 +403,21 @@ token_info(int argc, char **argv, char *path)
 	print_bytes("aaguid", fido_cbor_info_aaguid_ptr(ci),
 	    fido_cbor_info_aaguid_len(ci));
 
-	/* print encid */
-	print_bytes("encid", fido_cbor_info_encid_ptr(ci),
-	    fido_cbor_info_encid_len(ci));
+	/* print device identifier */
+	if (fido_cbor_info_id_ptr(ci))
+		print_bytes("id", fido_cbor_info_id_ptr(ci),
+		    fido_cbor_info_id_len(ci));
+	else
+		print_bytes("encid", fido_cbor_info_encid_ptr(ci),
+		    fido_cbor_info_encid_len(ci));
 
-	/* print encstate */
-	print_bytes("encstate", fido_cbor_info_encstate_ptr(ci),
-	    fido_cbor_info_encstate_len(ci));
+	/* print credential store state */
+	if (fido_cbor_info_state_ptr(ci))
+		print_bytes("state", fido_cbor_info_state_ptr(ci),
+		    fido_cbor_info_state_len(ci));
+	else
+		print_bytes("encstate", fido_cbor_info_encstate_ptr(ci),
+		    fido_cbor_info_encstate_len(ci));
 
 	/* print supported options */
 	print_opt_array("options", fido_cbor_info_options_name_ptr(ci),
@@ -522,6 +541,46 @@ token_reset(char *path)
 	exit(0);
 }
 
+static int
+ppuat_get(const char *path, const char *ppuatf)
+{
+	fido_dev_t *dev = NULL;
+	char prompt[1024];
+	char pin[128];
+	int status = 1;
+	int r;
+
+	dev = open_dev(path);
+
+	r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ", path);
+	if (r < 0 || (size_t)r >= sizeof(prompt)) {
+		warnx("snprintf");
+		goto out;
+	}
+
+	if (!readpassphrase(prompt, pin, sizeof(pin), RPP_ECHO_OFF)) {
+		warnx("readpassphrase");
+		goto out;
+	}
+
+	if ((r = fido_dev_get_puat(dev, CTAP22_UV_TOKEN_PERM_CONFIG_RO, NULL,
+	    pin)) != FIDO_OK) {
+		warnx("fido_dev_get_puat: %s", fido_strerr(r));
+		goto out;
+	}
+
+	if (write_file(ppuatf, fido_dev_puat_ptr(dev),
+	    fido_dev_puat_len(dev)) < 0)
+		goto out;
+
+	status = 0;
+out:
+	explicit_bzero(pin, sizeof(pin));
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+	exit(status);
+}
+
 int
 token_get(int argc, char **argv, char *path)
 {
@@ -529,6 +588,7 @@ token_get(int argc, char **argv, char *path)
 	char	*key = NULL;
 	char	*name = NULL;
 	int	 blob = 0;
+	char    *ppuatf = NULL;
 	int	 ch;
 
 	optind = 1;
@@ -547,6 +607,10 @@ token_get(int argc, char **argv, char *path)
 		case 'n':
 			name = optarg;
 			break;
+		case 'p':
+			/* XXX for compat with TOKEN_OPT */
+			ppuatf = optarg;
+			break;
 		default:
 			break; /* ignore */
 		}
@@ -555,10 +619,19 @@ token_get(int argc, char **argv, char *path)
 	argc -= optind;
 	argv += optind;
 
-	if (blob == 0 || argc != 2)
+	if (ppuatf && blob)
 		usage();
 
-	return blob_get(path, key, name, id, argv[0]);
+	if (blob) {
+		if (argc != 2)
+			usage();
+		return blob_get(path, key, name, id, argv[0]);
+	}
+
+	if (ppuatf == NULL)
+		usage();
+
+	return ppuat_get(path, ppuatf);
 }
 
 int

@@ -25,6 +25,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/* aes128 */
+int aes128_cbc_dec(const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
+
 /* aes256 */
 int aes256_cbc_dec(const fido_dev_t *, const fido_blob_t *,
     const fido_blob_t *, fido_blob_t *);
@@ -34,6 +37,9 @@ int aes256_gcm_dec(const fido_blob_t *, const fido_blob_t *,
     const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
 int aes256_gcm_enc(const fido_blob_t *, const fido_blob_t *,
     const fido_blob_t *, const fido_blob_t *, fido_blob_t *);
+
+/* hdkf-sha256 */
+int hkdf_sha256(uint8_t *, size_t, const char *, const fido_blob_t *);
 
 /* cbor encoding functions */
 cbor_item_t *cbor_build_uint(const uint64_t);

@@ -97,6 +97,7 @@ _fido_cbor_info_certs_name_ptr
 _fido_cbor_info_certs_value_ptr
 _fido_cbor_info_cfgcmds_len
 _fido_cbor_info_cfgcmds_ptr
+_fido_cbor_info_decrypt
 _fido_cbor_info_encid_len
 _fido_cbor_info_encid_ptr
 _fido_cbor_info_encstate_len
@@ -105,6 +106,8 @@ _fido_cbor_info_extensions_len
 _fido_cbor_info_extensions_ptr
 _fido_cbor_info_free
 _fido_cbor_info_fwversion
+_fido_cbor_info_id_len
+_fido_cbor_info_id_ptr
 _fido_cbor_info_long_touch_reset
 _fido_cbor_info_maxcredbloblen
 _fido_cbor_info_maxcredcntlst
@@ -127,6 +130,8 @@ _fido_cbor_info_protocols_ptr
 _fido_cbor_info_reset_transports_len
 _fido_cbor_info_reset_transports_ptr
 _fido_cbor_info_rk_remaining
+_fido_cbor_info_state_len
+_fido_cbor_info_state_ptr
 _fido_cbor_info_transports_len
 _fido_cbor_info_transports_ptr
 _fido_cbor_info_uv_attempts
@@ -233,10 +238,11 @@ _fido_dev_force_u2f
 _fido_dev_free
 _fido_dev_get_assert
 _fido_dev_get_cbor_info
+_fido_dev_get_puat
 _fido_dev_get_retry_count
-_fido_dev_get_uv_retry_count
 _fido_dev_get_touch_begin
 _fido_dev_get_touch_status
+_fido_dev_get_uv_retry_count
 _fido_dev_has_pin
 _fido_dev_has_uv
 _fido_dev_info_free
@@ -260,6 +266,8 @@ _fido_dev_new_with_info
 _fido_dev_open
 _fido_dev_open_with_info
 _fido_dev_protocol
+_fido_dev_puat_len
+_fido_dev_puat_ptr
 _fido_dev_reset
 _fido_dev_set_io_functions
 _fido_dev_set_pin

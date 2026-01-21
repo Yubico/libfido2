@@ -79,6 +79,8 @@ void fido_dev_info_free(fido_dev_info_t **, size_t);
 void fido_init(int);
 void fido_set_log_handler(fido_log_handler_t *);
 
+int fido_cbor_info_decrypt(fido_cbor_info_t *, const unsigned char *, size_t);
+
 const unsigned char *fido_assert_authdata_ptr(const fido_assert_t *, size_t);
 const unsigned char *fido_assert_authdata_raw_ptr(const fido_assert_t *,
     size_t);
@@ -118,7 +120,9 @@ const uint64_t *fido_cbor_info_certs_value_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cbor_info_aaguid_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cbor_info_encid_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cbor_info_encstate_ptr(const fido_cbor_info_t *);
+const unsigned char *fido_cbor_info_id_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cbor_info_pin_policy_url_ptr(const fido_cbor_info_t *);
+const unsigned char *fido_cbor_info_state_ptr(const fido_cbor_info_t *);
 const unsigned char *fido_cred_aaguid_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_attstmt_ptr(const fido_cred_t *);
 const unsigned char *fido_cred_authdata_ptr(const fido_cred_t *);
@@ -197,6 +201,7 @@ int fido_dev_get_assert(fido_dev_t *, fido_assert_t *, const char *);
 int fido_dev_get_cbor_info(fido_dev_t *, fido_cbor_info_t *);
 int fido_dev_get_retry_count(fido_dev_t *, int *);
 int fido_dev_get_uv_retry_count(fido_dev_t *, int *);
+int fido_dev_get_puat(fido_dev_t *, unsigned int, const char *, const char *);
 int fido_dev_get_touch_begin(fido_dev_t *);
 int fido_dev_get_touch_status(fido_dev_t *, int *, int);
 int fido_dev_info_manifest(fido_dev_info_t *, size_t, size_t *);
@@ -210,6 +215,9 @@ int fido_dev_set_io_functions(fido_dev_t *, const fido_dev_io_t *);
 int fido_dev_set_pin(fido_dev_t *, const char *, const char *);
 int fido_dev_set_transport_functions(fido_dev_t *, const fido_dev_transport_t *);
 int fido_dev_set_timeout(fido_dev_t *, int);
+const unsigned char *fido_dev_puat_ptr(const fido_dev_t *);
+size_t fido_dev_puat_len(const fido_dev_t *);
+int fido_dev_set_puat(fido_dev_t *, unsigned char *, size_t);
 
 size_t fido_assert_authdata_len(const fido_assert_t *, size_t);
 size_t fido_assert_authdata_raw_len(const fido_assert_t *, size_t);
@@ -227,6 +235,8 @@ size_t fido_cbor_info_attfmts_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_certs_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_encid_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_encstate_len(const fido_cbor_info_t *);
+size_t fido_cbor_info_id_len(const fido_cbor_info_t *);
+size_t fido_cbor_info_state_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_extensions_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_options_len(const fido_cbor_info_t *);
 size_t fido_cbor_info_pin_policy_url_len(const fido_cbor_info_t *);

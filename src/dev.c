@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -474,6 +474,7 @@ fido_dev_free(fido_dev_t **dev_p)
 	if (dev_p == NULL || (dev = *dev_p) == NULL)
 		return;
 
+	fido_blob_reset(&dev->puat);
 	free(dev->path);
 	free(dev);
 
@@ -603,4 +604,33 @@ fido_dev_set_timeout(fido_dev_t *dev, int ms)
 	dev->timeout_ms = ms;
 
 	return (FIDO_OK);
+}
+
+const unsigned char *
+fido_dev_puat_ptr(const fido_dev_t *dev)
+{
+	return dev->puat.ptr;
+}
+
+size_t
+fido_dev_puat_len(const fido_dev_t *dev)
+{
+	return dev->puat.len;
+}
+
+int
+fido_dev_set_puat(fido_dev_t *dev, unsigned char *ptr, size_t len)
+{
+	if (fido_dev_is_winhello(dev))
+		return FIDO_ERR_INVALID_ARGUMENT;
+
+	if (ptr == NULL || len == 0) {
+		fido_blob_reset(&dev->puat);
+		return FIDO_OK;
+	}
+
+	if (fido_blob_set(&dev->puat, ptr, len) != 0)
+		return FIDO_ERR_INTERNAL;
+
+	return FIDO_OK;
 }
