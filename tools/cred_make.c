@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -17,7 +17,7 @@
 #include "extern.h"
 
 static fido_cred_t *
-prepare_cred(FILE *in_f, int type, int flags)
+prepare_cred(FILE *in_f, int type, int flags, const struct toggle *opt)
 {
 	fido_cred_t *cred = NULL;
 	struct blob cdh;
@@ -61,13 +61,12 @@ prepare_cred(FILE *in_f, int type, int flags)
 	    NULL)) != FIDO_OK)
 		errx(1, "fido_cred_set: %s", fido_strerr(r));
 
+	if ((r = fido_cred_set_uv(cred, opt->uv)) != FIDO_OK)
+		errx(1, "fido_cred_set_uv: %s", fido_strerr(r));
+
 	if (flags & FLAG_RK) {
 		if ((r = fido_cred_set_rk(cred, FIDO_OPT_TRUE)) != FIDO_OK)
 			errx(1, "fido_cred_set_rk: %s", fido_strerr(r));
-	}
-	if (flags & FLAG_UV) {
-		if ((r = fido_cred_set_uv(cred, FIDO_OPT_TRUE)) != FIDO_OK)
-			errx(1, "fido_cred_set_uv: %s", fido_strerr(r));
 	}
 	if (flags & FLAG_HMAC) {
 		if ((r = fido_cred_set_extensions(cred,
@@ -142,6 +141,7 @@ cred_make(int argc, char **argv)
 {
 	fido_dev_t *dev = NULL;
 	fido_cred_t *cred = NULL;
+	struct toggle opt;
 	char prompt[1024];
 	char pin[128];
 	char *in_path = NULL;
@@ -155,7 +155,9 @@ cred_make(int argc, char **argv)
 	int ch;
 	int r;
 
-	while ((ch = getopt(argc, argv, "a:bc:dhi:o:qruvw")) != -1) {
+	opt.up = opt.uv = opt.pin = FIDO_OPT_OMIT;
+
+	while ((ch = getopt(argc, argv, "a:bc:dhi:o:qrt:uvw")) != -1) {
 		switch (ch) {
 		case 'a':
 			if ((ea = base10(optarg)) < 0)
@@ -186,11 +188,14 @@ cred_make(int argc, char **argv)
 		case 'r':
 			flags |= FLAG_RK;
 			break;
+		case 't':
+			parse_toggle(optarg, &opt);
+			break;
 		case 'u':
 			flags |= FLAG_U2F;
 			break;
 		case 'v':
-			flags |= FLAG_UV;
+			opt.uv = FIDO_OPT_TRUE;
 			break;
 		case 'w':
 			flags |= FLAG_CD;
@@ -211,10 +216,12 @@ cred_make(int argc, char **argv)
 
 	if (argc > 1 && cose_type(argv[1], &type) < 0)
 		errx(1, "unknown type %s", argv[1]);
+	if (opt.up == FIDO_OPT_FALSE)
+		errx(1, "unsupported toggle: 'up=false'");
 
 	fido_init((flags & FLAG_DEBUG) ? FIDO_DEBUG : 0);
 
-	cred = prepare_cred(in_f, type, flags);
+	cred = prepare_cred(in_f, type, flags, &opt);
 
 	dev = open_dev(argv[0]);
 	if (flags & FLAG_U2F)
@@ -232,8 +239,11 @@ cred_make(int argc, char **argv)
 			errx(1, "fido_cred_set_entattest: %s", fido_strerr(r));
 	}
 
-	r = fido_dev_make_cred(dev, cred, NULL);
-	if (r == FIDO_ERR_PIN_REQUIRED && !(flags & FLAG_QUIET)) {
+	r = FIDO_ERR_PIN_REQUIRED;
+	if (opt.pin != FIDO_OPT_TRUE || opt.uv == FIDO_OPT_TRUE)
+		r = fido_dev_make_cred(dev, cred, NULL);
+	if (r == FIDO_ERR_PIN_REQUIRED && !(flags & FLAG_QUIET) &&
+	    opt.pin != FIDO_OPT_FALSE) {
 		r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ",
 		    argv[0]);
 		if (r < 0 || (size_t)r >= sizeof(prompt))

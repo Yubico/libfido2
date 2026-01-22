@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -19,6 +19,12 @@
 struct blob {
 	unsigned char *ptr;
 	size_t len;
+};
+
+struct toggle {
+	fido_opt_t up;
+	fido_opt_t uv;
+	fido_opt_t pin;
 };
 
 #define TOKEN_OPT	"CDGILPRSVabcdefi:k:l:m:n:p:ru"
@@ -99,5 +105,6 @@ void print_cred(FILE *, int, const fido_cred_t *);
 void usage(void);
 void xxd(const void *, size_t);
 int base10(const char *);
+void parse_toggle(const char *, struct toggle *);
 
 #endif /* _EXTERN_H_ */
