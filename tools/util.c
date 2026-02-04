@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -640,4 +640,42 @@ should_retry_with_pin(const fido_dev_t *dev, int r)
 	}
 
 	return 0;
+}
+
+void
+parse_toggle(const char *str, struct toggle *opt)
+{
+	fido_opt_t *k;
+	fido_opt_t  v;
+	char *assignment;
+	char *key;
+	char *val;
+
+	if ((assignment = strdup(str)) == NULL)
+		err(1, "strdup");
+	if ((val = strchr(assignment, '=')) == NULL)
+		errx(1, "invalid assignment '%s'", assignment);
+
+	key = assignment;
+	*val++ = '\0';
+
+	if (!strcmp(val, "true"))
+		v = FIDO_OPT_TRUE;
+	else if (!strcmp(val, "false"))
+		v = FIDO_OPT_FALSE;
+	else
+		errx(1, "unknown value '%s'", val);
+
+	if (!strcmp(key, "up"))
+		k = &opt->up;
+	else if (!strcmp(key, "uv"))
+		k = &opt->uv;
+	else if (!strcmp(key, "pin"))
+		k = &opt->pin;
+	else
+		errx(1, "unknown key '%s'", key);
+
+	free(assignment);
+
+	*k = v;
 }
