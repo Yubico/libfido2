@@ -729,30 +729,28 @@ cbor_add_uv_params(fido_dev_t *dev, uint8_t cmd, const fido_blob_t *hmac_data,
     const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin,
     const char *rpid, cbor_item_t **auth, cbor_item_t **opt, int *ms)
 {
-	fido_blob_t	*token = NULL;
-	int		 r;
+	fido_blob_t      	 token_store;
+	const fido_blob_t	*token = NULL;
+	int		 	 r;
 
-	if ((token = fido_blob_new()) == NULL) {
-		r = FIDO_ERR_INTERNAL;
-		goto fail;
-	}
-
-	if ((r = fido_dev_get_uv_token(dev, cmd, pin, ecdh, pk, rpid,
-	    token, ms)) != FIDO_OK) {
-		fido_log_debug("%s: fido_dev_get_uv_token", __func__);
-		goto fail;
+	memset(&token_store, 0, sizeof(token_store));
+	if ((token = fido_dev_puat_blob(dev)) == NULL) {
+		if ((r = fido_dev_get_uv_token(dev, cmd, pin, ecdh, pk, rpid,
+		    &token_store, ms)) != FIDO_OK) {
+			fido_log_debug("%s: fido_dev_get_uv_token", __func__);
+			return r;
+		}
+		token = &token_store;
 	}
 
 	if ((*auth = cbor_encode_pin_auth(dev, token, hmac_data)) == NULL ||
 	    (*opt = cbor_encode_pin_opt(dev)) == NULL) {
 		fido_log_debug("%s: cbor encode", __func__);
 		r = FIDO_ERR_INTERNAL;
-		goto fail;
 	}
+	else
+		r = FIDO_OK;
 
-	r = FIDO_OK;
-fail:
-	fido_blob_free(&token);
-
+	fido_blob_reset(&token_store);
 	return (r);
 }
