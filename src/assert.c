@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -128,8 +128,8 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 		}
 
 	/* user verification */
-	if (pin != NULL || (uv == FIDO_OPT_TRUE &&
-	    fido_dev_supports_permissions(dev))) {
+	if (pin != NULL || fido_dev_puat_blob(dev) != NULL ||
+	    (uv == FIDO_OPT_TRUE && fido_dev_supports_permissions(dev))) {
 		if ((r = cbor_add_uv_params(dev, cmd, &assert->cdh, pk, ecdh,
 		    pin, assert->rp_id, &argv[5], &argv[6], ms)) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
@@ -305,6 +305,23 @@ decrypt_hmac_secrets(const fido_dev_t *dev, fido_assert_t *assert,
 	return (0);
 }
 
+static bool
+need_ecdh(const fido_dev_t *dev, const fido_assert_t *assert, const char *pin)
+{
+	if (assert->ext.mask & FIDO_EXT_HMAC_SECRET)
+		return true;
+
+	/* If available, prefer cached PUAT */
+	if (fido_dev_puat_blob(dev) != NULL)
+		return false;
+
+	if (pin != NULL)
+		return true;
+
+	return assert->uv == FIDO_OPT_TRUE &&
+	    fido_dev_supports_permissions(dev);
+}
+
 int
 fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 {
@@ -330,13 +347,10 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 		return (u2f_authenticate(dev, assert, &ms));
 	}
 
-	if (pin != NULL || (assert->uv == FIDO_OPT_TRUE &&
-	    fido_dev_supports_permissions(dev)) ||
-	    (assert->ext.mask & FIDO_EXT_HMAC_SECRET)) {
-		if ((r = fido_do_ecdh(dev, &pk, &ecdh, &ms)) != FIDO_OK) {
-			fido_log_debug("%s: fido_do_ecdh", __func__);
-			goto fail;
-		}
+	if (need_ecdh(dev, assert, pin) && (r = fido_do_ecdh(dev, &pk, &ecdh,
+	    &ms)) != FIDO_OK) {
+		fido_log_debug("%s: fido_do_ecdh", __func__);
+		goto fail;
 	}
 
 	r = fido_dev_get_assert_wait(dev, assert, pk, ecdh, pin, &ms);
