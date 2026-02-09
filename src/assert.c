@@ -128,8 +128,8 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 		}
 
 	/* user verification */
-	if (pin != NULL || (uv == FIDO_OPT_TRUE &&
-	    fido_dev_supports_permissions(dev))) {
+	if (pin != NULL || !fido_blob_is_empty(&dev->puat) ||
+	    (uv == FIDO_OPT_TRUE && fido_dev_supports_permissions(dev))) {
 		if ((r = cbor_add_uv_params(dev, cmd, &assert->cdh, pk, ecdh,
 		    pin, assert->rp_id, &argv[5], &argv[6], ms)) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
@@ -310,6 +310,7 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 {
 	fido_blob_t	*ecdh = NULL;
 	es256_pk_t	*pk = NULL;
+	bool		 need_ecdh = false;
 	int		 ms = dev->timeout_ms;
 	int		 r;
 
@@ -330,13 +331,15 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 		return (u2f_authenticate(dev, assert, &ms));
 	}
 
-	if (pin != NULL || (assert->uv == FIDO_OPT_TRUE &&
-	    fido_dev_supports_permissions(dev)) ||
-	    (assert->ext.mask & FIDO_EXT_HMAC_SECRET)) {
-		if ((r = fido_do_ecdh(dev, &pk, &ecdh, &ms)) != FIDO_OK) {
-			fido_log_debug("%s: fido_do_ecdh", __func__);
-			goto fail;
-		}
+	/* The PUAT will be preferred over the pin, if available. */
+	need_ecdh |= pin != NULL && fido_dev_puat_blob(dev) == NULL;
+
+	need_ecdh |= assert->uv == FIDO_OPT_TRUE && fido_dev_supports_permissions(dev);
+	need_ecdh |= assert->ext.mask & FIDO_EXT_HMAC_SECRET;
+
+	if (need_ecdh && ((r = fido_do_ecdh(dev, &pk, &ecdh, &ms)) != FIDO_OK)) {
+		fido_log_debug("%s: fido_do_ecdh", __func__);
+		goto fail;
 	}
 
 	r = fido_dev_get_assert_wait(dev, assert, pk, ecdh, pin, &ms);
