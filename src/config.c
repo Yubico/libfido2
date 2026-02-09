@@ -68,16 +68,20 @@ config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
 	}
 
 	/* pinProtocol, pinAuth */
-	if (pin != NULL ||
+	if (pin != NULL || fido_dev_puat_blob(dev) != NULL ||
 	    (fido_dev_supports_permissions(dev) && fido_dev_has_uv(dev))) {
 		if (config_prepare_hmac(subcmd, argv[1], &hmac) < 0) {
 			fido_log_debug("%s: config_prepare_hmac", __func__);
 			goto fail;
 		}
-		if ((r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
+
+		/* If available, prefer cached PUAT */
+		if (fido_dev_puat_blob(dev) == NULL &&
+		    (r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
+
 		if ((r = cbor_add_uv_params(dev, cmd, &hmac, pk, ecdh, pin,
 		    NULL, &argv[3], &argv[2], ms)) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
