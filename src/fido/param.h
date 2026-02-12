@@ -78,6 +78,7 @@
 #define SW_CONDITIONS_NOT_SATISFIED	0x6985
 #define SW_WRONG_DATA			0x6a80
 #define SW_NO_ERROR			0x9000
+#define SW_UPDATE			0x9100
 
 /* HID Broadcast channel ID. */
 #define CTAP_CID_BROADCAST		0xffffffff

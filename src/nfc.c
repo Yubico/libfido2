@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "fido.h"
 #include "fido/param.h"
@@ -112,7 +113,7 @@ fido_nfc_tx(fido_dev_t *d, uint8_t cmd, const unsigned char *buf, size_t count)
 		}
 		break;
 	case CTAP_CMD_CBOR: /* wrap cbor */
-		if (count > UINT16_MAX || (apdu = iso7816_new(0x80, 0x10, 0x00,
+		if (count > UINT16_MAX || (apdu = iso7816_new(0x80, 0x10, 0x80,
 		    (uint16_t)count)) == NULL ||
 		    iso7816_add(apdu, buf, count) < 0) {
 			fido_log_debug("%s: iso7816", __func__);
@@ -165,6 +166,19 @@ tx_get_response(fido_dev_t *d, uint8_t count, bool cbor)
 }
 
 static int
+tx_nfcctap_get_response(fido_dev_t *d)
+{
+	const uint8_t apdu[5] = { 0x80, 0x11, 0x00, 0x00 };
+
+	if (d->io.write(d->io_handle, apdu, sizeof(apdu)) < 0) {
+		fido_log_debug("%s: write", __func__);
+		return -1;
+	}
+
+	return 0;
+}
+
+static int
 rx_apdu(fido_dev_t *d, uint8_t sw[2], unsigned char **buf, size_t *count, int *ms)
 {
 	uint8_t f[256 + 2];
@@ -197,19 +211,19 @@ fail:
 }
 
 static int
-rx_msg(fido_dev_t *d, unsigned char *buf, size_t count, int ms, bool cbor)
+rx_msg(fido_dev_t *d, unsigned char *buf, size_t count, int *ms, bool cbor)
 {
 	uint8_t sw[2];
 	const size_t bufsiz = count;
 
-	if (rx_apdu(d, sw, &buf, &count, &ms) < 0) {
+	if (rx_apdu(d, sw, &buf, &count, ms) < 0) {
 		fido_log_debug("%s: preamble", __func__);
 		return -1;
 	}
 
 	while (sw[0] == SW1_MORE_DATA)
 		if (tx_get_response(d, sw[1], cbor) < 0 ||
-		    rx_apdu(d, sw, &buf, &count, &ms) < 0) {
+		    rx_apdu(d, sw, &buf, &count, ms) < 0) {
 			fido_log_debug("%s: chain", __func__);
 			return -1;
 		}
@@ -227,13 +241,40 @@ rx_msg(fido_dev_t *d, unsigned char *buf, size_t count, int ms, bool cbor)
 	return (int)(bufsiz - count);
 }
 
+#if defined(_MSC_VER)
+static int
+nanosleep(const struct timespec *rqtp, struct timespec *rmtp)
+{
+	if (rmtp != NULL) {
+		errno = EINVAL;
+		return (-1);
+	}
+
+	Sleep((DWORD)(rqtp->tv_sec * 1000) + (DWORD)(rqtp->tv_nsec / 1000000));
+
+	return (0);
+}
+#endif
+
 static int
 rx_cbor(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 {
+	struct timespec ts;
 	int r;
 
-	if ((r = rx_msg(d, buf, count, ms, true)) < 2)
-		return -1;
+	ts.tv_sec = 0;
+	ts.tv_nsec = 100000000; /* 100ms */
+
+	for (;;) {
+	    if ((r = rx_msg(d, buf, count, &ms, true)) < 2)
+		    return -1;
+	    if (((buf[r - 2] << 8) | buf[r - 1]) != SW_UPDATE)
+		    break;
+
+	    nanosleep(&ts, NULL);
+	    if (tx_nfcctap_get_response(d) != 0)
+		    return -1;
+	}
 
 	return r - 2;
 }
@@ -252,7 +293,7 @@ rx_init(fido_dev_t *d, unsigned char *buf, size_t count, int ms)
 
 	memset(attr, 0, sizeof(*attr));
 
-	if ((n = rx_msg(d, f, sizeof(f), ms, false)) < 2 ||
+	if ((n = rx_msg(d, f, sizeof(f), &ms, false)) < 2 ||
 	    (f[n - 2] << 8 | f[n - 1]) != SW_NO_ERROR) {
 		fido_log_debug("%s: read", __func__);
 		return -1;
@@ -287,7 +328,7 @@ fido_nfc_rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int ms
 	case CTAP_CMD_CBOR:
 		return rx_cbor(d, buf, count, ms);
 	case CTAP_CMD_MSG:
-		return rx_msg(d, buf, count, ms, false);
+		return rx_msg(d, buf, count, &ms, false);
 	default:
 		fido_log_debug("%s: cmd=%02x", __func__, cmd);
 		return -1;
