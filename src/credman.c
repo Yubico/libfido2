@@ -149,12 +149,19 @@ credman_tx(fido_dev_t *dev, uint8_t subcmd, const void *param, const char *pin,
 	}
 
 	/* pinProtocol, pinAuth */
-	if (pin != NULL || uv == FIDO_OPT_TRUE) {
+	if (pin != NULL || fido_dev_puat_blob(dev) || uv == FIDO_OPT_TRUE) {
+		bool need_ecdh = false;
+
 		if (credman_prepare_hmac(subcmd, param, &argv[1], &hmac) < 0) {
 			fido_log_debug("%s: credman_prepare_hmac", __func__);
 			goto fail;
 		}
-		if ((r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
+
+		/* The PUAT will be preferred over the pin, if available. */
+		need_ecdh |= pin != NULL && fido_dev_puat_blob(dev) == NULL;
+		need_ecdh |= uv == FIDO_OPT_TRUE;
+
+		if (need_ecdh && (r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
 		}
