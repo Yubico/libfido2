@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2025 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -149,14 +149,18 @@ credman_tx(fido_dev_t *dev, uint8_t subcmd, const void *param, const char *pin,
 	}
 
 	/* pinProtocol, pinAuth */
-	if (pin != NULL || uv == FIDO_OPT_TRUE) {
+	if (pin != NULL || fido_dev_puat_blob(dev) != NULL ||
+	    uv == FIDO_OPT_TRUE) {
 		if (credman_prepare_hmac(subcmd, param, &argv[1], &hmac) < 0) {
 			fido_log_debug("%s: credman_prepare_hmac", __func__);
 			goto fail;
 		}
-		if ((r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
-			fido_log_debug("%s: fido_do_ecdh", __func__);
-			goto fail;
+
+		if (fido_dev_puat_blob(dev) == NULL) {
+			if ((r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
+				fido_log_debug("%s: fido_do_ecdh", __func__);
+				goto fail;
+			}
 		}
 		if ((r = cbor_add_uv_params(dev, cmd, &hmac, pk, ecdh, pin,
 		    rp_id, &argv[3], &argv[2], ms)) != FIDO_OK) {
