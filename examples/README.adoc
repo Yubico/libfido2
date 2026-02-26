@@ -94,6 +94,24 @@ The following examples are provided:
 	simultaneously requests touch on all of them, printing information
 	about the device touched.
 
+- puat-bio <pin> <device>
+
+  Demonstrate how to use the PUAT for various BIO operations requiring
+  user verification.
+  The PIN is used only once to instantiate a PUAT.
+  The BIO operations are: enrollment, template rename, template
+  enumeration and removal.
+
+- puat-mcga <pin> <device>
+
+  Demonstrate how to use the PUAT when the authenticator-side operations
+  involve large blobs.
+  A first token is instantiated to create a new credential on <device>, and
+  to bind the credential to a large blob.
+  A second token is instantiated for a FIDO2 assertion on the created
+  credential, and for the extraction of the previously installed large
+  blob.
+
 Debugging is possible through the use of the FIDO_DEBUG environment variable.
 If set, libfido2 will produce a log of its transactions with the authenticator.
 
