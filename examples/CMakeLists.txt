@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Yubico AB. All rights reserved.
+# Copyright (c) 2018-2026 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 # SPDX-License-Identifier: BSD-2-Clause
@@ -52,6 +52,14 @@ target_link_libraries(retries ${_FIDO2_LIBRARY})
 # select
 add_executable(select select.c ${COMPAT_SOURCES})
 target_link_libraries(select ${_FIDO2_LIBRARY})
+
+# bio
+add_executable(bio bio.c ${COMPAT_SOURCES})
+target_link_libraries(bio ${_FIDO2_LIBRARY})
+
+# largeblob
+add_executable(largeblob largeblob.c ${COMPAT_SOURCES})
+target_link_libraries(largeblob ${_FIDO2_LIBRARY})
 
 if(MINGW)
 	# needed for nanosleep() in mingw
