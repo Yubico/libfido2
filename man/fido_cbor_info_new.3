@@ -92,12 +92,18 @@
 .Fn fido_cbor_info_aaguid_ptr "const fido_cbor_info_t *ci"
 .Ft char **
 .Fn fido_cbor_info_attfmts_ptr "const fido_cbor_info_t *ci"
+.Ft const unsigned char *
+.Fn fido_cbor_info_encid_ptr "const fido_cbor_info_t *ci"
+.Ft const unsigned char *
+.Fn fido_cbor_info_encstate_ptr "const fido_cbor_info_t *ci"
 .Ft char **
 .Fn fido_cbor_info_extensions_ptr "const fido_cbor_info_t *ci"
 .Ft const uint8_t *
 .Fn fido_cbor_info_pin_policy_url_ptr "const fido_cbor_info_t *ci"
 .Ft const uint8_t *
 .Fn fido_cbor_info_protocols_ptr "const fido_cbor_info_t *ci"
+.Ft char **
+.Fn fido_cbor_info_reset_transports_ptr "const fido_cbor_info_t *ci"
 .Ft char **
 .Fn fido_cbor_info_transports_ptr "const fido_cbor_info_t *ci"
 .Ft char **
@@ -123,11 +129,17 @@
 .Ft size_t
 .Fn fido_cbor_info_attfmts_len "const fido_cbor_info_t *ci"
 .Ft size_t
+.Fn fido_cbor_info_encid_len "const fido_cbor_info_t *ci"
+.Ft size_t
+.Fn fido_cbor_info_encstate_len "const fido_cbor_info_t *ci"
+.Ft size_t
 .Fn fido_cbor_info_extensions_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_pin_policy_url_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_protocols_len "const fido_cbor_info_t *ci"
+.Ft size_t
+.Fn fido_cbor_info_reset_transports_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_transports_len "const fido_cbor_info_t *ci"
 .Ft size_t
@@ -448,6 +460,8 @@ file shipped with
 .Sh RETURN VALUES
 The
 .Fn fido_cbor_info_aaguid_ptr ,
+.Fn fido_cbor_info_encid_ptr ,
+.Fn fido_cbor_info_enstate_ptr ,
 .Fn fido_cbor_info_extensions_ptr ,
 .Fn fido_cbor_info_protocols_ptr ,
 .Fn fido_cbor_info_transports_ptr ,
