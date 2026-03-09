@@ -257,6 +257,8 @@ list(APPEND MAN_ALIAS
 	fido_dev_enable_entattest fido_dev_set_pin_minlen
 	fido_dev_enable_entattest fido_dev_set_pin_minlen_rpid
 	fido_dev_get_touch_begin fido_dev_get_touch_status
+	fido_dev_get_puat fido_dev_puat_len
+	fido_dev_get_puat fido_dev_puat_ptr
 	fido_dev_info_manifest fido_dev_info_free
 	fido_dev_info_manifest fido_dev_info_manufacturer_string
 	fido_dev_info_manifest fido_dev_info_new
