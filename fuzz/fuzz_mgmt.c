@@ -511,6 +511,40 @@ dev_set_pin_minlen_rpid(const struct param *p)
 	fido_dev_free(&dev);
 }
 
+static void
+dev_get_puat(const struct param *p)
+{
+	fido_dev_t *dev;
+	const char *rpid;
+	const char *pin;
+	unsigned int perm;
+	int r;
+
+	set_wire_data(p->set_pin_wire_data.body, p->set_pin_wire_data.len);
+	if ((dev = open_dev(0)) == NULL)
+		return;
+
+	perm = (unsigned int) uniform_random(32);
+	pin = p->pin1;
+	if (strlen(pin) == 0)
+		pin = NULL;
+	rpid = p->pin2;
+	if (strlen(rpid) == 0)
+		rpid = NULL;
+
+	if (uniform_random(2))
+	    r = fido_dev_get_puat(dev, perm, rpid, pin);
+	else
+	    r = fido_dev_set_puat(dev, p->config_wire_data.body,
+		p->config_wire_data.len); /* XXX */
+
+	consume_str(fido_strerr(r));
+	consume(fido_dev_puat_ptr(dev), fido_dev_puat_len(dev));
+
+	fido_dev_close(dev);
+	fido_dev_free(&dev);
+}
+
 void
 test(const struct param *p)
 {
@@ -530,6 +564,7 @@ test(const struct param *p)
 	dev_force_pin_change(p);
 	dev_set_pin_minlen(p);
 	dev_set_pin_minlen_rpid(p);
+	dev_get_puat(p);
 }
 
 void
