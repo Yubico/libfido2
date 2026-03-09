@@ -30,6 +30,7 @@
 .Os
 .Sh NAME
 .Nm fido_dev_get_puat ,
+.Nm fido_dev_set_puat ,
 .Nm fido_dev_puat_ptr ,
 .Nm fido_dev_puat_len
 .Nd FIDO2 PIN UV Auth token management functions
@@ -37,6 +38,8 @@
 .In fido.h
 .Ft int
 .Fn fido_dev_get_puat "fido_dev_t *dev" "unsigned int perm" "const char *rpid" "const char *pin"
+.Ft int
+.Fn fido_dev_set_puat "fido_dev_t *dev" "const unsigned char *ptr" "size_t len"
 .Ft const unsigned char *
 .Fn fido_dev_puat_ptr "const fido_dev_t *dev"
 .Ft size_t
@@ -108,6 +111,20 @@ is ignored.
 .El
 .Pp
 The
+.Fn fido_dev_set_puat
+function can be used to associate a token retrieved out-of-band with
+.Fa dev .
+No references to
+.Fa ptr
+are kept.
+If
+.Fa ptr
+is NULL or
+.Fa len
+is zero, the token is cleared from
+.Fa dev .
+.Pp
+The
 .Fn fido_dev_puat_ptr
 function returns a pointer to the PIN UV Auth token currently associated with
 .Fa dev .
@@ -116,6 +133,8 @@ The corresponding length can be obtained by calling
 .Sh RETURN VALUES
 On success,
 .Fn fido_dev_get_puat
+and
+.Fn fido_dev_set_puat
 return
 .Dv FIDO_OK .
 On error, a different error code defined in
