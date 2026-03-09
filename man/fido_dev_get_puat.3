@@ -30,11 +30,17 @@
 .Os
 .Sh NAME
 .Nm fido_dev_get_puat ,
+.Nm fido_dev_puat_ptr ,
+.Nm fido_dev_puat_len
 .Nd FIDO2 PIN UV Auth token management functions
 .Sh SYNOPSIS
 .In fido.h
 .Ft int
 .Fn fido_dev_get_puat "fido_dev_t *dev" "unsigned int perm" "const char *rpid" "const char *pin"
+.Ft const unsigned char *
+.Fn fido_dev_puat_ptr "const fido_dev_t *dev"
+.Ft size_t
+.Fn fido_dev_puat_len "const fido_dev_t *dev"
 .Sh DESCRIPTION
 The
 .Fn fido_dev_get_puat
@@ -100,6 +106,13 @@ The
 .Fa rpid
 is ignored.
 .El
+.Pp
+The
+.Fn fido_dev_puat_ptr
+function returns a pointer to the PIN UV Auth token currently associated with
+.Fa dev .
+The corresponding length can be obtained by
+.Fn fido_dev_puat_len .
 .Sh RETURN VALUES
 On success,
 .Fn fido_dev_get_puat
