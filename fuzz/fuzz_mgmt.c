@@ -227,6 +227,7 @@ dev_get_cbor_info(const struct param *p)
 	uint64_t n;
 	uint8_t proto, major, minor, build, flags;
 	bool v;
+	int r;
 
 	set_wire_data(p->info_wire_data.body, p->info_wire_data.len);
 
@@ -248,7 +249,8 @@ dev_get_cbor_info(const struct param *p)
 	if ((ci = fido_cbor_info_new()) == NULL)
 		goto out;
 
-	fido_dev_get_cbor_info(dev, ci);
+	r = fido_dev_get_cbor_info(dev, ci);
+	consume_str(fido_strerr(r));
 
 	for (size_t i = 0; i < fido_cbor_info_versions_len(ci); i++) {
 		char * const *sa = fido_cbor_info_versions_ptr(ci);
