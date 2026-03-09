@@ -33,6 +33,7 @@ list(APPEND MAN_SOURCES
 	fido_cred_verify.3
 	fido_dev_enable_entattest.3
 	fido_dev_get_assert.3
+	fido_dev_get_puat.3
 	fido_dev_get_touch_begin.3
 	fido_dev_info_manifest.3
 	fido_dev_largeblob_get.3

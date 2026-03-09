@@ -1,0 +1,112 @@
+.\" Copyright (c) 2026 Yubico AB. All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are
+.\" met:
+.\"
+.\"    1. Redistributions of source code must retain the above copyright
+.\"       notice, this list of conditions and the following disclaimer.
+.\"    2. Redistributions in binary form must reproduce the above copyright
+.\"       notice, this list of conditions and the following disclaimer in
+.\"       the documentation and/or other materials provided with the
+.\"       distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+.\" "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+.\" LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+.\" A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+.\" HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+.\" SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+.\" LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+.\" DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+.\" THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+.\" (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+.\" OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.Dd $Mdocdate: Mar 09 2026 $
+.Dt FIDO_DEV_GET_PUAT 3
+.Os
+.Sh NAME
+.Nm fido_dev_get_puat ,
+.Nd FIDO2 PIN UV Auth token management functions
+.Sh SYNOPSIS
+.In fido.h
+.Ft int
+.Fn fido_dev_get_puat "fido_dev_t *dev" "unsigned int perm" "const char *rpid" "const char *pin"
+.Sh DESCRIPTION
+The
+.Fn fido_dev_get_puat
+negotiates a FIDO2 PIN UV Auth token with the permission flags specified by
+.Fa perm
+and associates it with
+.Fa dev .
+If
+.Fa perm
+does not require specifying a relying party ID,
+.Fa rpid
+may be NULL.
+Otherwise
+.Fa rpid
+must point to a NUL-terminated UTF-8 string.
+If a PIN is not needed to authenticate against
+.Fa dev ,
+then
+.Fa pin
+may be NULL.
+Otherwise
+.Fa pin
+must point to a NUL-terminated UTF-8 string.
+Supported flags for
+.Fa perm
+are
+.Bl -tag -width Ds
+.It Dv FIDO_PUAT_MAKECRED
+Permission for
+.Fn fido_dev_make_cred .
+An
+.Fa rpid
+is required.
+.It Dv FIDO_PUAT_GETASSERT
+Permission for
+.Fn fido_dev_get_assert .
+An
+.Fa rpid
+is required.
+.It Dv FIDO_PUAT_CREDMAN
+Permission for the credential management API.
+An
+.Fa rpid
+is optional.
+.It Dv FIDO_PUAT_BIOENROLL
+Permission for the biometric enrollment API.
+The
+.Fa rpid
+is ignored.
+.It Dv FIDO_PUAT_LARGEBLOB
+Permission for the large blobs API.
+The
+.Fa rpid
+is ignored.
+.It Dv FIDO_PUAT_CONFIG
+Permission for the authenticator config API.
+The
+.Fa rpid
+is ignored.
+.It Dv FIDO_PUAT_CREDMAN_RO
+Persistent read-only permission for the credential management API.
+The
+.Fa rpid
+is ignored.
+.El
+.Sh RETURN VALUES
+On success,
+.Fn fido_dev_get_puat
+return
+.Dv FIDO_OK .
+On error, a different error code defined in
+.In fido/err.h
+is returned.
+.Sh SEE ALSO
+.Xr fido_dev_new 3
