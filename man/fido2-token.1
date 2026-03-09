@@ -1,4 +1,4 @@
-.\" Copyright (c) 2018-2022 Yubico AB. All rights reserved.
+.\" Copyright (c) 2018-2026 Yubico AB. All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions are
@@ -83,9 +83,14 @@
 .Ar blob_path
 .Ar device
 .Nm
+.Fl G
+.Fl t Ar ppuat_path
+.Ar device
+.Nm
 .Fl I
 .Op Fl cd
 .Op Fl k Ar rp_id Fl i Ar cred_id
+.Op Fl t Ar ppuat_path
 .Ar device
 .Nm
 .Fl L
@@ -203,6 +208,12 @@ Disables the CTAP 2.1
 .Dq user verification always
 feature on
 .Ar device .
+.It Fl G Fl t Ar ppuat_path Ar device
+Retrieves a CTAP 2.2 persistent PIN UV Auth token with read-only
+credential management permissions from
+.Ar device
+and writes it to
+.Ar ppuat_path .
 .It Fl G Fl b Fl k Ar key_path Ar blob_path Ar device
 Gets a CTAP 2.1
 .Dq largeBlob
@@ -234,9 +245,15 @@ is a base64-encoded blob.
 The blob is written to
 .Ar blob_path .
 A PIN or equivalent user-verification gesture is required.
-.It Fl I Ar device
+.It Fl I Ar device Op Fl t Ar ppuat_path
 Retrieves information on
 .Ar device .
+If
+.Fl t Ar ppuat_path
+is given,
+.Nm
+will attempt to use the token contained in the file to decrypt encrypted
+device information.
 .It Fl I Fl c Ar device
 Retrieves resident credential metadata from
 .Ar device .
