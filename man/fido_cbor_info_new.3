@@ -32,10 +32,13 @@
 .Nm fido_cbor_info_new ,
 .Nm fido_cbor_info_free ,
 .Nm fido_dev_get_cbor_info ,
+.Nm fido_cbor_info_decrypt ,
 .Nm fido_cbor_info_aaguid_ptr ,
 .Nm fido_cbor_info_attfmts_ptr ,
 .Nm fido_cbor_info_encid_ptr ,
+.Nm fido_cbor_info_id_ptr ,
 .Nm fido_cbor_info_encstate_ptr ,
+.Nm fido_cbor_info_state_ptr ,
 .Nm fido_cbor_info_extensions_ptr ,
 .Nm fido_cbor_info_pin_policy_url_ptr ,
 .Nm fido_cbor_info_protocols_ptr ,
@@ -55,7 +58,9 @@
 .Nm fido_cbor_info_aaguid_len ,
 .Nm fido_cbor_info_attfmts_len ,
 .Nm fido_cbor_info_encid_len ,
+.Nm fido_cbor_info_id_len ,
 .Nm fido_cbor_info_encstate_len ,
+.Nm fido_cbor_info_state_len ,
 .Nm fido_cbor_info_extensions_len ,
 .Nm fido_cbor_info_pin_policy_url_len ,
 .Nm fido_cbor_info_protocols_len ,
@@ -88,6 +93,8 @@
 .Fn fido_cbor_info_free "fido_cbor_info_t **ci_p"
 .Ft int
 .Fn fido_dev_get_cbor_info "fido_dev_t *dev" "fido_cbor_info_t *ci"
+.Ft int
+.Fn fido_cbor_info_decrypt "fido_cbor_info_t *ci" "const unsigned char *ppuat" "size_t ppuat_len"
 .Ft const unsigned char *
 .Fn fido_cbor_info_aaguid_ptr "const fido_cbor_info_t *ci"
 .Ft char **
@@ -97,7 +104,11 @@
 .Ft const unsigned char *
 .Fn fido_cbor_info_encid_ptr "const fido_cbor_info_t *ci"
 .Ft const unsigned char *
+.Fn fido_cbor_info_id_ptr "const fido_cbor_info_t *ci"
+.Ft const unsigned char *
 .Fn fido_cbor_info_encstate_ptr "const fido_cbor_info_t *ci"
+.Ft const unsigned char *
+.Fn fido_cbor_info_state_ptr "const fido_cbor_info_t *ci"
 .Ft char **
 .Fn fido_cbor_info_extensions_ptr "const fido_cbor_info_t *ci"
 .Ft const unsigned char *
@@ -135,7 +146,11 @@
 .Ft size_t
 .Fn fido_cbor_info_encid_len "const fido_cbor_info_t *ci"
 .Ft size_t
+.Fn fido_cbor_info_id_len "const fido_cbor_info_t *ci"
+.Ft size_t
 .Fn fido_cbor_info_encstate_len "const fido_cbor_info_t *ci"
+.Ft size_t
+.Fn fido_cbor_info_state_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_extensions_len "const fido_cbor_info_t *ci"
 .Ft size_t
@@ -223,11 +238,23 @@ The
 function may block.
 .Pp
 The
+.Fn fido_cbor_info_decrypt
+attempts to decrypt encrypted members of
+.Fa ci
+using the persistent PIN UV Auth token pointed to by
+.Fa ppuat .
+The
+.Fa ppuat_len
+must be 16 bytes.
+.Pp
+The
 .Fn fido_cbor_info_aaguid_ptr ,
 .Fn fido_cbor_info_attfmts_ptr ,
 .Fn fido_cbor_info_cfgcmds_ptr ,
 .Fn fido_cbor_info_encid_ptr ,
+.Fn fido_cbor_info_id_ptr ,
 .Fn fido_cbor_info_encstate_ptr ,
+.Fn fido_cbor_info_state_ptr ,
 .Fn fido_cbor_info_extensions_ptr ,
 .Fn fido_cbor_info_pin_policy_url_ptr ,
 .Fn fido_cbor_info_protocols_ptr ,
@@ -237,9 +264,10 @@ and
 .Fn fido_cbor_info_versions_ptr
 functions return pointers to the authenticator attestation GUID,
 supported attestation formats, supported authenticator config commands,
-encrypted identifier, encrypted credential store state, supported extensions,
-PIN complexity policy URL, PIN protocol, transports for authenticator reset,
-transports, and CTAP version strings of
+encrypted identifier, decrypted identifier, encrypted credential store state,
+decrypted credential store state, supported extensions, PIN complexity policy
+URL, PIN protocol, transports for authenticator reset, transports, and CTAP
+version strings of
 .Fa ci .
 The corresponding length of a given attribute can be
 obtained by
@@ -247,7 +275,9 @@ obtained by
 .Fn fido_cbor_info_attfmts_len ,
 .Fn fido_cbor_info_cfgcmds_len ,
 .Fn fido_cbor_info_encid_len ,
+.Fn fido_cbor_info_id_len ,
 .Fn fido_cbor_info_encstate_len ,
+.Fn fido_cbor_info_state_len ,
 .Fn fido_cbor_info_extensions_len ,
 .Fn fido_cbor_info_pin_policy_url_len ,
 .Fn fido_cbor_info_protocols_len ,
@@ -462,6 +492,16 @@ A complete example of how to use these functions can be found in the
 file shipped with
 .Em libfido2 .
 .Sh RETURN VALUES
+The error codes returned by
+.Fn fido_dev_get_cbor_info
+and
+.Fn fido_cbor_info_decrypt
+are defined in
+.In fido/err.h .
+On success,
+.Dv FIDO_OK
+is returned.
+.Pp
 The
 .Fn fido_cbor_info_aaguid_ptr ,
 .Fn fido_cbor_info_encid_ptr ,
@@ -483,6 +523,7 @@ without the
 .Em const
 qualifier is invoked.
 .Sh SEE ALSO
+.Xr fido_dev_get_puat 3 ,
 .Xr fido_dev_get_uv_retry_count 3 ,
 .Xr fido_dev_open 3 ,
 .Xr fido_dev_set_pin 3 ,
