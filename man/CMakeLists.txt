@@ -240,6 +240,7 @@ list(APPEND MAN_ALIAS
 	fido_cred_set_authdata fido_cred_set_extensions
 	fido_cred_set_authdata fido_cred_set_fmt
 	fido_cred_set_authdata fido_cred_set_hmac_salt
+	fido_cred_set_authdata fido_cred_set_hmac_secret
 	fido_cred_set_authdata fido_cred_set_id
 	fido_cred_set_authdata fido_cred_set_pin_minlen
 	fido_cred_set_authdata fido_cred_set_prot

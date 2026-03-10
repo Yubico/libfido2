@@ -44,6 +44,7 @@
 .Nm fido_cred_set_extensions ,
 .Nm fido_cred_set_blob ,
 .Nm fido_cred_set_hmac_salt ,
+.Nm fido_cred_set_hmac_secret ,
 .Nm fido_cred_set_pin_minlen ,
 .Nm fido_cred_set_prot ,
 .Nm fido_cred_set_rk ,
@@ -90,6 +91,8 @@ typedef enum {
 .Fn fido_cred_set_blob "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
 .Ft int
 .Fn fido_cred_set_hmac_salt "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
+.Ft int
+.Fn fido_cred_set_hmac_secret "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
 .Ft int
 .Fn fido_cred_set_pin_minlen "fido_cred_t *cred" "size_t len"
 .Ft int
