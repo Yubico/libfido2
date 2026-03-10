@@ -44,6 +44,7 @@
 .Nm fido_cred_clientdata_hash_ptr ,
 .Nm fido_cred_id_ptr ,
 .Nm fido_cred_aaguid_ptr ,
+.Nm fido_cred_hmac_secret_ptr ,
 .Nm fido_cred_largeblob_key_ptr ,
 .Nm fido_cred_pubkey_ptr ,
 .Nm fido_cred_sig_ptr ,
@@ -57,6 +58,7 @@
 .Nm fido_cred_clientdata_hash_len ,
 .Nm fido_cred_id_len ,
 .Nm fido_cred_aaguid_len ,
+.Nm fido_cred_hmac_secret_len ,
 .Nm fido_cred_largeblob_key_len ,
 .Nm fido_cred_pubkey_len ,
 .Nm fido_cred_sig_len ,
@@ -102,6 +104,8 @@
 .Ft const unsigned char *
 .Fn fido_cred_aaguid_ptr "const fido_cred_t *cred"
 .Ft const unsigned char *
+.Fn fido_cred_hmac_secret_ptr "const fido_cred_t *cred"
+.Ft const unsigned char *
 .Fn fido_cred_largeblob_key_ptr "const fido_cred_t *cred"
 .Ft const unsigned char *
 .Fn fido_cred_pubkey_ptr "const fido_cred_t *cred"
@@ -127,6 +131,8 @@
 .Fn fido_cred_id_len "const fido_cred_t *cred"
 .Ft size_t
 .Fn fido_cred_aaguid_len "const fido_cred_t *cred"
+.Ft size_t
+.Fn fido_cred_hmac_secret_len "const fido_cred_t *cred"
 .Ft size_t
 .Fn fido_cred_largeblob_key_len "const fido_cred_t *cred"
 .Ft size_t
@@ -281,19 +287,31 @@ statement parts of
 .Fa cred ,
 or NULL if the respective entry is not set.
 .Pp
-The corresponding length can be obtained by
+The
+.Fn fido_cred_hmac_secret_ptr
+function returns a pointer to the hmac-secret attribute of
+.Fa cred .
+The HMAC Secret MC Extension
+.Pq hmac-secret-mc
+is a CTAP 2.2 extension.
+Note that the resulting hmac-secret varies according to whether
+user verification was performed by the authenticator.
+.Pp
+The
 .Fn fido_cred_authdata_len ,
 .Fn fido_cred_authdata_raw_len ,
 .Fn fido_cred_clientdata_hash_len ,
 .Fn fido_cred_id_len ,
 .Fn fido_cred_aaguid_len ,
+.Fn fido_cred_hmac_secret_len ,
 .Fn fido_cred_largeblob_key_len ,
 .Fn fido_cred_pubkey_len ,
 .Fn fido_cred_sig_len ,
 .Fn fido_cred_user_id_len ,
 .Fn fido_cred_x5c_len ,
 and
-.Fn fido_cred_attstmt_len .
+.Fn fido_cred_attstmt_len
+functions return the length of the given attribute.
 .Pp
 The
 .Fn fido_cred_x5c_list_count

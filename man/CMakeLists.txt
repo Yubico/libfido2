@@ -187,6 +187,8 @@ list(APPEND MAN_ALIAS
 	fido_cred_new fido_cred_free
 	fido_cred_new fido_cred_id_len
 	fido_cred_new fido_cred_id_ptr
+	fido_cred_new fido_cred_hmac_secret_len
+	fido_cred_new fido_cred_hmac_secret_ptr
 	fido_cred_new fido_cred_largeblob_key_len
 	fido_cred_new fido_cred_largeblob_key_ptr
 	fido_cred_new fido_cred_payment
