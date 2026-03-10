@@ -89,6 +89,8 @@ typedef enum {
 .Ft int
 .Fn fido_cred_set_blob "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
 .Ft int
+.Fn fido_cred_set_hmac_salt "fido_cred_t *cred" "const unsigned char *ptr" "size_t len"
+.Ft int
 .Fn fido_cred_set_pin_minlen "fido_cred_t *cred" "size_t len"
 .Ft int
 .Fn fido_cred_set_prot "fido_cred_t *cred" "int prot"
