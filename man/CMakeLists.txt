@@ -189,15 +189,16 @@ list(APPEND MAN_ALIAS
 	fido_cred_new fido_cred_id_ptr
 	fido_cred_new fido_cred_largeblob_key_len
 	fido_cred_new fido_cred_largeblob_key_ptr
+	fido_cred_new fido_cred_payment
 	fido_cred_new fido_cred_pin_minlen
 	fido_cred_new fido_cred_prot
 	fido_cred_new fido_cred_pubkey_len
 	fido_cred_new fido_cred_pubkey_ptr
 	fido_cred_new fido_cred_rp_id
 	fido_cred_new fido_cred_rp_name
-	fido_cred_new fido_cred_sigcount
 	fido_cred_new fido_cred_sig_len
 	fido_cred_new fido_cred_sig_ptr
+	fido_cred_new fido_cred_sigcount
 	fido_cred_new fido_cred_type
 	fido_cred_new fido_cred_user_id_len
 	fido_cred_new fido_cred_user_id_ptr
