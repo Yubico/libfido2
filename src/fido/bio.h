@@ -62,7 +62,7 @@ struct fido_bio_template_array {
 struct fido_bio_enroll {
 	uint8_t remaining_samples;
 	uint8_t last_status;
-	fido_blob_t *token;
+	fido_blob_t token;
 };
 
 struct fido_bio_info {
