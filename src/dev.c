@@ -618,6 +618,12 @@ fido_dev_puat_len(const fido_dev_t *dev)
 	return dev->puat.len;
 }
 
+const fido_blob_t *
+fido_dev_puat_blob(const fido_dev_t *dev)
+{
+	return fido_blob_is_empty(&dev->puat) ? NULL : &dev->puat;
+}
+
 int
 fido_dev_set_puat(fido_dev_t *dev, const unsigned char *ptr, size_t len)
 {
