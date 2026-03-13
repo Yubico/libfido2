@@ -89,8 +89,9 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred,
 		}
 
 	/* user verification */
-	if (pin != NULL || (uv == FIDO_OPT_TRUE &&
-	    fido_dev_supports_permissions(dev))) {
+	if (pin != NULL ||
+	    fido_dev_puat_blob(dev) != NULL ||
+	    (uv == FIDO_OPT_TRUE && fido_dev_supports_permissions(dev))) {
 		if ((r = cbor_add_uv_params(dev, cmd, &cred->cdh, pk, ecdh,
 		    pin, cred->rp.id, &argv[7], &argv[8], ms)) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
@@ -196,6 +197,22 @@ decrypt_hmac_secret(const fido_dev_t *dev, fido_cred_t *cred,
 	    &cred->hmac_secret));
 }
 
+static bool
+need_ecdh(const fido_dev_t *dev, const fido_cred_t *cred, const char *pin)
+{
+	if (cred->ext.attr.mask & FIDO_EXT_HMAC_SECRET_MC)
+		return true;
+
+	/* If available, prefer cached PUAT */
+	if (fido_dev_puat_blob(dev) != NULL)
+		return false;
+
+	if (pin != NULL)
+		return true;
+
+	return cred->uv == FIDO_OPT_TRUE && fido_dev_supports_permissions(dev);
+}
+
 int
 fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 {
@@ -222,9 +239,7 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 		goto fail;
 	}
 
-	if (pin != NULL || (cred->uv == FIDO_OPT_TRUE &&
-	    fido_dev_supports_permissions(dev)) ||
-	    (cred->ext.attr.mask & FIDO_EXT_HMAC_SECRET_MC)) {
+	if (need_ecdh(dev, cred, pin)) {
 		if ((r = fido_do_ecdh(dev, &pk, &ecdh, &ms)) != FIDO_OK) {
 			fido_log_debug("%s: fido_do_ecdh", __func__);
 			goto fail;
