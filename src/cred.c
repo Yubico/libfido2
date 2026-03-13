@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -89,8 +89,9 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred,
 		}
 
 	/* user verification */
-	if (pin != NULL || (uv == FIDO_OPT_TRUE &&
-	    fido_dev_supports_permissions(dev))) {
+	if (pin != NULL ||
+	    fido_dev_puat_blob(dev) != NULL ||
+	    (uv == FIDO_OPT_TRUE && fido_dev_supports_permissions(dev))) {
 		if ((r = cbor_add_uv_params(dev, cmd, &cred->cdh, pk, ecdh,
 		    pin, cred->rp.id, &argv[7], &argv[8], ms)) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
@@ -196,6 +197,22 @@ decrypt_hmac_secret(const fido_dev_t *dev, fido_cred_t *cred,
 	    &cred->hmac_secret));
 }
 
+static bool
+need_ecdh(const fido_dev_t *dev, const fido_cred_t *cred, const char *pin)
+{
+	if (cred->ext.attr.mask & FIDO_EXT_HMAC_SECRET_MC)
+		return true;
+
+	/* If available, prefer cached PUAT */
+	if (fido_dev_puat_blob(dev) != NULL)
+		return false;
+
+	if (pin != NULL)
+		return true;
+
+	return cred->uv == FIDO_OPT_TRUE && fido_dev_supports_permissions(dev);
+}
+
 int
 fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 {
@@ -222,13 +239,10 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 		goto fail;
 	}
 
-	if (pin != NULL || (cred->uv == FIDO_OPT_TRUE &&
-	    fido_dev_supports_permissions(dev)) ||
-	    (cred->ext.attr.mask & FIDO_EXT_HMAC_SECRET_MC)) {
-		if ((r = fido_do_ecdh(dev, &pk, &ecdh, &ms)) != FIDO_OK) {
-			fido_log_debug("%s: fido_do_ecdh", __func__);
-			goto fail;
-		}
+	if (need_ecdh(dev, cred, pin) && (r = fido_do_ecdh(dev, &pk, &ecdh,
+	    &ms)) != FIDO_OK) {
+		fido_log_debug("%s: fido_do_ecdh", __func__);
+		goto fail;
 	}
 
 	r = fido_dev_make_cred_wait(dev, cred, pk, ecdh, pin, &ms);
