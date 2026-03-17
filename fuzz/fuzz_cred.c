@@ -20,6 +20,11 @@
 
 #include "../openbsd-compat/openbsd-compat.h"
 
+enum {
+	OPT_FORCE_U2F = 1,
+	OPT_NFC = 2,
+};
+
 /* Parameter set defining a FIDO2 make credential operation. */
 struct param {
 	char pin[MAXSTR];
@@ -221,9 +226,9 @@ make_cred(fido_cred_t *cred, uint8_t opt, int type, const struct blob *cdh,
 {
 	fido_dev_t *dev;
 
-	if ((dev = open_dev(opt & 2)) == NULL)
+	if ((dev = open_dev(opt & OPT_NFC)) == NULL)
 		return;
-	if (opt & 1)
+	if (opt & OPT_FORCE_U2F)
 		fido_dev_force_u2f(dev);
 
 	for (uint8_t i = 0; i < excl_count; i++)
@@ -266,10 +271,10 @@ make_cred(fido_cred_t *cred, uint8_t opt, int type, const struct blob *cdh,
 	/* XXX reuse cred as hmac salt */
 	fido_cred_set_hmac_salt(cred, excl_cred->body, excl_cred->len);
 
-	if (strlen(pin) == 0)
+	if (opt & OPT_FORCE_U2F || strlen(pin) == 0)
 		pin = NULL;
 
-	fido_dev_make_cred(dev, cred, (opt & 1) ? NULL : pin);
+	fido_dev_make_cred(dev, cred, pin);
 
 	fido_dev_cancel(dev);
 	fido_dev_close(dev);
@@ -421,9 +426,9 @@ test_touch(const struct param *p)
 
 	set_wire_data(p->wire_data.body, p->wire_data.len);
 
-	if ((dev = open_dev(p->opt & 2)) == NULL)
+	if ((dev = open_dev(p->opt & OPT_NFC)) == NULL)
 		return;
-	if (p->opt & 1)
+	if (p->opt & OPT_FORCE_U2F)
 		fido_dev_force_u2f(dev);
 
 	r = fido_dev_get_touch_begin(dev);
