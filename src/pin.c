@@ -122,19 +122,19 @@ encode_uv_permission(uint8_t cmd)
 {
 	switch (cmd) {
 	case CTAP_CBOR_ASSERT:
-		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_ASSERT));
+		return (cbor_build_uint8(FIDO_PUAT_GETASSERT));
 	case CTAP_CBOR_BIO_ENROLL_PRE:
 	case CTAP_CBOR_BIO_ENROLL:
-		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_BIO));
+		return (cbor_build_uint8(FIDO_PUAT_BIOENROLL));
 	case CTAP_CBOR_CONFIG:
-		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_CONFIG));
+		return (cbor_build_uint8(FIDO_PUAT_CONFIG));
 	case CTAP_CBOR_MAKECRED:
-		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_MAKECRED));
+		return (cbor_build_uint8(FIDO_PUAT_MAKECRED));
 	case CTAP_CBOR_CRED_MGMT_PRE:
 	case CTAP_CBOR_CRED_MGMT:
-		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_CRED_MGMT));
+		return (cbor_build_uint8(FIDO_PUAT_CREDMAN));
 	case CTAP_CBOR_LARGEBLOB:
-		return (cbor_build_uint8(CTAP21_UV_TOKEN_PERM_LARGEBLOB));
+		return (cbor_build_uint8(FIDO_PUAT_LARGEBLOB));
 	default:
 		fido_log_debug("%s: cmd 0x%02x", __func__, cmd);
 		return (NULL);
