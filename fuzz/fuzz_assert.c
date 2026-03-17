@@ -20,6 +20,11 @@
 
 #include "../openbsd-compat/openbsd-compat.h"
 
+enum {
+	OPT_FORCE_U2F = 1,
+	OPT_NFC = 2,
+};
+
 /* Parameter set defining a FIDO2 get assertion operation. */
 struct param {
 	char pin[MAXSTR];
@@ -211,9 +216,9 @@ get_assert(fido_assert_t *assert, uint8_t opt, const struct blob *cdh,
 {
 	fido_dev_t *dev;
 
-	if ((dev = open_dev(opt & 2)) == NULL)
+	if ((dev = open_dev(opt & OPT_NFC)) == NULL)
 		return;
-	if (opt & 1)
+	if (opt & OPT_FORCE_U2F)
 		fido_dev_force_u2f(dev);
 	if (ext & FIDO_EXT_HMAC_SECRET)
 		fido_assert_set_extensions(assert, FIDO_EXT_HMAC_SECRET);
@@ -225,7 +230,7 @@ get_assert(fido_assert_t *assert, uint8_t opt, const struct blob *cdh,
 		fido_assert_set_extensions(assert, FIDO_EXT_PAYMENT);
 	if (up & 1)
 		fido_assert_set_up(assert, FIDO_OPT_TRUE);
-	else if (opt & 1)
+	else if (opt & OPT_FORCE_U2F)
 		fido_assert_set_up(assert, FIDO_OPT_FALSE);
 	if (uv & 1)
 		fido_assert_set_uv(assert, FIDO_OPT_TRUE);
@@ -243,10 +248,10 @@ get_assert(fido_assert_t *assert, uint8_t opt, const struct blob *cdh,
 	fido_assert_set_rp(assert, rp_id);
 	fido_assert_set_hmac_salt(assert, cred->body, cred->len);
 
-	if (strlen(pin) == 0)
+	if (opt & OPT_FORCE_U2F || strlen(pin) == 0)
 		pin = NULL;
 
-	fido_dev_get_assert(dev, assert, (opt & 1) ? NULL : pin);
+	fido_dev_get_assert(dev, assert, pin);
 
 	fido_dev_cancel(dev);
 	fido_dev_close(dev);
@@ -524,7 +529,7 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 	}
 
 	if (flags & MUTATE_WIREDATA) {
-		if (p->opt & 1) {
+		if (p->opt & OPT_FORCE_U2F) {
 			p->wire_data.len = sizeof(dummy_wire_data_u2f);
 			memcpy(&p->wire_data.body, &dummy_wire_data_u2f,
 			    p->wire_data.len);
