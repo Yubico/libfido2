@@ -140,5 +140,15 @@ return
 On error, a different error code defined in
 .In fido/err.h
 is returned.
+.Pp
+.Fn fido_dev_puat_ptr
+may return NULL if there is no PIN UV Auth token associated with
+.Fa dev .
+If not NULL, the returned pointer is guaranteed to exist until either
+.Fn fido_dev_get_puat
+.Fn fido_dev_set_puat ,
+or
+.Fn fido_dev_free
+is invoked.
 .Sh SEE ALSO
 .Xr fido_dev_new 3
