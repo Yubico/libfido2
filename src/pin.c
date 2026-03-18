@@ -117,30 +117,6 @@ fail:
 	return (r);
 }
 
-static uint8_t
-cmd_to_perm(uint8_t cmd)
-{
-	switch (cmd) {
-	case CTAP_CBOR_ASSERT:
-		return (FIDO_PUAT_GETASSERT);
-	case CTAP_CBOR_BIO_ENROLL_PRE:
-	case CTAP_CBOR_BIO_ENROLL:
-		return (FIDO_PUAT_BIOENROLL);
-	case CTAP_CBOR_CONFIG:
-		return (FIDO_PUAT_CONFIG);
-	case CTAP_CBOR_MAKECRED:
-		return (FIDO_PUAT_MAKECRED);
-	case CTAP_CBOR_CRED_MGMT_PRE:
-	case CTAP_CBOR_CRED_MGMT:
-		return (FIDO_PUAT_CREDMAN);
-	case CTAP_CBOR_LARGEBLOB:
-		return (FIDO_PUAT_LARGEBLOB);
-	default:
-		fido_log_debug("%s: cmd 0x%02x", __func__, cmd);
-		return (0);
-	}
-}
-
 static int
 ctap20_uv_token_tx(fido_dev_t *dev, const char *pin, const fido_blob_t *ecdh,
     const es256_pk_t *pk, int *ms)
@@ -338,6 +314,30 @@ uv_token_wait(fido_dev_t *dev, unsigned int perm, const char *pin,
 		return (r);
 
 	return (uv_token_rx(dev, ecdh, token, ms));
+}
+
+static uint8_t
+cmd_to_perm(uint8_t cmd)
+{
+	switch (cmd) {
+	case CTAP_CBOR_ASSERT:
+		return (FIDO_PUAT_GETASSERT);
+	case CTAP_CBOR_BIO_ENROLL_PRE:
+	case CTAP_CBOR_BIO_ENROLL:
+		return (FIDO_PUAT_BIOENROLL);
+	case CTAP_CBOR_CONFIG:
+		return (FIDO_PUAT_CONFIG);
+	case CTAP_CBOR_MAKECRED:
+		return (FIDO_PUAT_MAKECRED);
+	case CTAP_CBOR_CRED_MGMT_PRE:
+	case CTAP_CBOR_CRED_MGMT:
+		return (FIDO_PUAT_CREDMAN);
+	case CTAP_CBOR_LARGEBLOB:
+		return (FIDO_PUAT_LARGEBLOB);
+	default:
+		fido_log_debug("%s: cmd 0x%02x", __func__, cmd);
+		return (0);
+	}
 }
 
 int
