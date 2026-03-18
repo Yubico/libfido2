@@ -133,22 +133,25 @@ pack_blob(const struct blob *v) NO_MSAN
 	return cbor_build_bytestring(v->body, v->len);
 }
 
+static
+void mutate_mem(void *v, size_t len)
+{
+	LLVMFuzzerMutate(v, len, len);
+#ifdef WITH_MSAN
+	__msan_unpoison(v, len);
+#endif
+}
+
 void
 mutate_byte(uint8_t *b)
 {
-	LLVMFuzzerMutate(b, sizeof(*b), sizeof(*b));
-#ifdef WITH_MSAN
-	__msan_unpoison(b, sizeof(*b));
-#endif
+	mutate_mem(b, sizeof(*b));
 }
 
 void
 mutate_int(int *i)
 {
-	LLVMFuzzerMutate((uint8_t *)i, sizeof(*i), sizeof(*i));
-#ifdef WITH_MSAN
-	__msan_unpoison(i, sizeof(*i));
-#endif
+	mutate_mem(i, sizeof(*i));
 }
 
 void
