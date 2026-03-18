@@ -23,6 +23,7 @@
 enum {
 	OPT_FORCE_U2F = 1,
 	OPT_NFC = 2,
+	OPT_PUAT = 4,
 
 	OPT_EDGE,
 	OPT_MASK = (((OPT_EDGE - 1) << 1) - 1),
@@ -253,6 +254,11 @@ get_assert(fido_assert_t *assert, uint8_t opt, const struct blob *cdh,
 
 	if (opt & OPT_FORCE_U2F || strlen(pin) == 0)
 		pin = NULL;
+
+	if (opt & OPT_PUAT) {
+		/* the actual PUAT permission is not relevant for libfido2 */
+		fido_dev_get_puat(dev, FIDO_PUAT_GETASSERT, rp_id, pin);
+	}
 
 	fido_dev_get_assert(dev, assert, pin);
 
