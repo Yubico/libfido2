@@ -317,7 +317,7 @@ enroll(const struct param *p)
 	consume_enroll(e);
 
 	while (fido_bio_enroll_remaining_samples(e) > 0 && cnt++ < 5) {
-		fido_bio_dev_enroll_continue(dev, t, e, p->seed);
+		fido_bio_dev_enroll_continue(dev, t, e, (uint32_t)p->seed);
 		consume_template(t);
 		consume_enroll(e);
 	}
