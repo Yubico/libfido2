@@ -19,9 +19,12 @@
 
 #include "../openbsd-compat/openbsd-compat.h"
 
+#define PACK_ARRAY_LEN 6
+
 /* Parameter set defining a FIDO2 "large blob" operation. */
 struct param {
 	char pin[MAXSTR];
+	uint8_t opt;
 	int seed;
 	struct blob key;
 	struct blob get_wiredata;
@@ -75,7 +78,7 @@ unpack(const uint8_t *ptr, size_t len)
 	    cbor.read != len ||
 	    cbor_isa_array(item) == false ||
 	    cbor_array_is_definite(item) == false ||
-	    cbor_array_size(item) != 5 ||
+	    cbor_array_size(item) != PACK_ARRAY_LEN ||
 	    (v = cbor_array_handle(item)) == NULL)
 		goto fail;
 
@@ -83,7 +86,8 @@ unpack(const uint8_t *ptr, size_t len)
 	    unpack_string(v[1], p->pin) < 0 ||
 	    unpack_blob(v[2], &p->key) < 0 ||
 	    unpack_blob(v[3], &p->get_wiredata) < 0 ||
-	    unpack_blob(v[4], &p->set_wiredata) < 0)
+	    unpack_blob(v[4], &p->set_wiredata) < 0 ||
+	    unpack_byte(v[5], &p->opt) < 0)
 		goto fail;
 
 	ok = 0;
@@ -102,21 +106,22 @@ fail:
 size_t
 pack(uint8_t *ptr, size_t len, const struct param *p)
 {
-	cbor_item_t *argv[5], *array = NULL;
+	cbor_item_t *argv[PACK_ARRAY_LEN], *array = NULL;
 	size_t cbor_alloc_len, cbor_len = 0;
 	unsigned char *cbor = NULL;
 
 	memset(argv, 0, sizeof(argv));
 
-	if ((array = cbor_new_definite_array(5)) == NULL ||
+	if ((array = cbor_new_definite_array(PACK_ARRAY_LEN)) == NULL ||
 	    (argv[0] = pack_int(p->seed)) == NULL ||
 	    (argv[1] = pack_string(p->pin)) == NULL ||
 	    (argv[2] = pack_blob(&p->key)) == NULL ||
 	    (argv[3] = pack_blob(&p->get_wiredata)) == NULL ||
-	    (argv[4] = pack_blob(&p->set_wiredata)) == NULL)
+	    (argv[4] = pack_blob(&p->set_wiredata)) == NULL ||
+	    (argv[5] = pack_byte(p->opt)) == NULL)
 		goto fail;
 
-	for (size_t i = 0; i < 5; i++)
+	for (size_t i = 0; i < PACK_ARRAY_LEN; i++)
 		if (cbor_array_push(array, argv[i]) == false)
 			goto fail;
 
@@ -128,7 +133,7 @@ pack(uint8_t *ptr, size_t len, const struct param *p)
 
 	memcpy(ptr, cbor, cbor_len);
 fail:
-	for (size_t i = 0; i < 5; i++)
+	for (size_t i = 0; i < PACK_ARRAY_LEN; i++)
 		if (argv[i])
 			cbor_decref(&argv[i]);
 
@@ -265,6 +270,7 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 	if (flags & MUTATE_PARAM) {
 		mutate_blob(&p->key);
 		mutate_string(p->pin);
+		mutate_byte(&p->opt);
 	}
 
 	if (flags & MUTATE_WIREDATA) {
