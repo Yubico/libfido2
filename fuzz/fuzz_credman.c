@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2025 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -20,6 +20,13 @@
 #include "../openbsd-compat/openbsd-compat.h"
 
 #define PACK_ARR_LEN 9
+
+enum {
+	OPT_NO_PIN = 1,
+
+	OPT_EDGE,
+	OPT_MASK = (((OPT_EDGE - 1) << 1) - 1),
+};
 
 /* Parameter set defining a FIDO2 credential management operation. */
 struct param {
@@ -208,6 +215,12 @@ pack_dummy(uint8_t *ptr, size_t len)
 	return blob_len;
 }
 
+static const char *
+maybe_pin(const struct param *p)
+{
+	return p->opt & OPT_NO_PIN ? NULL : p->pin;
+}
+
 static fido_dev_t *
 prepare_dev(const struct blob *wire_data)
 {
@@ -246,7 +259,7 @@ get_metadata(const struct param *p)
 		return;
 	}
 
-	fido_credman_get_dev_metadata(dev, metadata, p->pin);
+	fido_credman_get_dev_metadata(dev, metadata, maybe_pin(p));
 
 	existing = fido_credman_rk_existing(metadata);
 	remaining = fido_credman_rk_remaining(metadata);
@@ -273,7 +286,7 @@ get_rp_list(const struct param *p)
 		return;
 	}
 
-	fido_credman_get_dev_rp(dev, rp, p->pin);
+	fido_credman_get_dev_rp(dev, rp, maybe_pin(p));
 
 	/* +1 on purpose */
 	for (size_t i = 0; i < fido_credman_rp_count(rp) + 1; i++) {
@@ -305,7 +318,7 @@ get_rk_list(const struct param *p)
 		return;
 	}
 
-	fido_credman_get_dev_rk(dev, p->rp_id, rk, p->pin);
+	fido_credman_get_dev_rk(dev, p->rp_id, rk, maybe_pin(p));
 
 	/* +1 on purpose */
 	for (size_t i = 0; i < fido_credman_rk_count(rk) + 1; i++) {
@@ -340,7 +353,7 @@ del_rk(const struct param *p)
 	if ((dev = prepare_dev(&p->del_wire_data)) == NULL)
 		return;
 
-	fido_credman_del_dev_rk(dev, p->cred_id.body, p->cred_id.len, p->pin);
+	fido_credman_del_dev_rk(dev, p->cred_id.body, p->cred_id.len, maybe_pin(p));
 	fido_dev_close(dev);
 	fido_dev_free(&dev);
 }
@@ -350,7 +363,6 @@ set_rk(const struct param *p)
 {
 	fido_dev_t *dev = NULL;
 	fido_cred_t *cred = NULL;
-	const char *pin = p->pin;
 	int r0, r1, r2;
 
 	if ((dev = prepare_dev(&p->del_wire_data)) == NULL)
@@ -360,9 +372,7 @@ set_rk(const struct param *p)
 	r0 = fido_cred_set_id(cred, p->cred_id.body, p->cred_id.len);
 	r1 = fido_cred_set_user(cred, p->cred_id.body, p->cred_id.len, p->rp_id,
 	    NULL, NULL);
-	if (strlen(pin) == 0)
-		pin = NULL;
-	r2 = fido_credman_set_dev_rk(dev, cred, pin);
+	r2 = fido_credman_set_dev_rk(dev, cred, maybe_pin(p));
 	consume(&r0, sizeof(r0));
 	consume(&r1, sizeof(r1));
 	consume(&r2, sizeof(r2));
@@ -398,6 +408,8 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 		mutate_string(p->pin);
 		mutate_string(p->rp_id);
 		mutate_byte(&p->opt);
+
+		p->opt &= OPT_MASK;
 	}
 
 	if (flags & MUTATE_WIREDATA) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Yubico AB. All rights reserved.
+ * Copyright (c) 2020-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -20,6 +20,13 @@
 #include "../openbsd-compat/openbsd-compat.h"
 
 #define PACK_ARRAY_LEN 6
+
+enum {
+	OPT_NO_PIN = 1,
+
+	OPT_EDGE,
+	OPT_MASK = (((OPT_EDGE - 1) << 1) - 1),
+};
 
 /* Parameter set defining a FIDO2 "large blob" operation. */
 struct param {
@@ -178,6 +185,12 @@ pack_dummy(uint8_t *ptr, size_t len)
 	return blob_len;
 }
 
+static const char *
+maybe_pin(const struct param *p)
+{
+	return p->opt & OPT_NO_PIN ? NULL : p->pin;
+}
+
 static fido_dev_t *
 prepare_dev(const struct blob *wire_data)
 {
@@ -217,13 +230,10 @@ static void
 set_blob(const struct param *p, int op)
 {
 	fido_dev_t *dev;
-	const char *pin;
+	const char *pin = maybe_pin(p);
 
 	if ((dev = prepare_dev(&p->set_wiredata)) == NULL)
 		return;
-	pin = p->pin;
-	if (strlen(pin) == 0)
-		pin = NULL;
 
 	switch (op) {
 	case 0:
@@ -269,6 +279,8 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 		mutate_blob(&p->key);
 		mutate_string(p->pin);
 		mutate_byte(&p->opt);
+
+		p->opt &= OPT_MASK;
 	}
 
 	if (flags & MUTATE_WIREDATA) {
