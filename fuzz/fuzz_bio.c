@@ -21,6 +21,13 @@
 
 #define PACK_ARRAY_LEN 10
 
+enum {
+	OPT_NO_PIN = 1,
+
+	OPT_EDGE,
+	OPT_MASK = (((OPT_EDGE - 1) << 1) - 1),
+};
+
 /* Parameter set defining a FIDO2 credential management operation. */
 struct param {
 	char pin[MAXSTR];
@@ -224,6 +231,12 @@ pack_dummy(uint8_t *ptr, size_t len)
 	return blob_len;
 }
 
+static const char *
+maybe_pin(const struct param *p)
+{
+	return p->opt & OPT_NO_PIN ? NULL : p->pin;
+}
+
 static fido_dev_t *
 prepare_dev(const struct blob *wire_data)
 {
@@ -310,7 +323,7 @@ enroll(const struct param *p)
 	    (e = fido_bio_enroll_new()) == NULL)
 		goto done;
 
-	fido_bio_dev_enroll_begin(dev, t, e, (uint32_t)p->seed, p->pin);
+	fido_bio_dev_enroll_begin(dev, t, e, (uint32_t)p->seed, maybe_pin(p));
 
 	consume_template(t);
 	consume_enroll(e);
@@ -341,7 +354,7 @@ list(const struct param *p)
 	    (ta = fido_bio_template_array_new()) == NULL)
 		goto done;
 
-	fido_bio_dev_get_template_array(dev, ta, p->pin);
+	fido_bio_dev_get_template_array(dev, ta, maybe_pin(p));
 
 	/* +1 on purpose */
 	for (size_t i = 0; i < fido_bio_template_array_count(ta) + 1; i++)
@@ -370,7 +383,7 @@ set_name(const struct param *p)
 	fido_bio_template_set_id(t, p->id.body, p->id.len);
 	consume_template(t);
 
-	fido_bio_dev_set_template_name(dev, t, p->pin);
+	fido_bio_dev_set_template_name(dev, t, maybe_pin(p));
 
 done:
 	if (dev)
@@ -395,7 +408,7 @@ del(const struct param *p)
 	consume_template(t);
 	consume_str(fido_strerr(r));
 
-	fido_bio_dev_enroll_remove(dev, t, p->pin);
+	fido_bio_dev_enroll_remove(dev, t, maybe_pin(p));
 
 done:
 	if (dev)
@@ -431,6 +444,8 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 		mutate_string(p->pin);
 		mutate_string(p->name);
 		mutate_byte(&p->opt);
+
+		p->opt &= OPT_MASK;
 	}
 
 	if (flags & MUTATE_WIREDATA) {
