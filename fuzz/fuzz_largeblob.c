@@ -23,6 +23,7 @@
 
 enum {
 	OPT_NO_PIN = 1,
+	OPT_PUAT = 2,
 
 	OPT_EDGE,
 	OPT_MASK = (((OPT_EDGE - 1) << 1) - 1),
@@ -192,7 +193,7 @@ maybe_pin(const struct param *p)
 }
 
 static fido_dev_t *
-prepare_dev(const struct blob *wire_data)
+prepare_dev(const struct blob *wire_data, const struct param *p)
 {
 	fido_dev_t *dev;
 
@@ -200,6 +201,9 @@ prepare_dev(const struct blob *wire_data)
 
 	if ((dev = open_dev(0)) == NULL)
 		return NULL;
+
+	if (p->opt & OPT_PUAT)
+		fido_dev_get_puat(dev, FIDO_PUAT_LARGEBLOB, NULL, maybe_pin(p));
 
 	return dev;
 }
@@ -211,7 +215,7 @@ get_blob(const struct param *p, int array)
 	u_char *ptr = NULL;
 	size_t len = 0;
 
-	if ((dev = prepare_dev(&p->get_wiredata)) == NULL)
+	if ((dev = prepare_dev(&p->get_wiredata, p)) == NULL)
 		return;
 
 	if (array)
@@ -232,7 +236,7 @@ set_blob(const struct param *p, int op)
 	fido_dev_t *dev;
 	const char *pin = maybe_pin(p);
 
-	if ((dev = prepare_dev(&p->set_wiredata)) == NULL)
+	if ((dev = prepare_dev(&p->set_wiredata, p)) == NULL)
 		return;
 
 	switch (op) {
