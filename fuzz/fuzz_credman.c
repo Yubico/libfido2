@@ -23,6 +23,7 @@
 
 enum {
 	OPT_NO_PIN = 1,
+	OPT_PUAT = 2,
 
 	OPT_EDGE,
 	OPT_MASK = (((OPT_EDGE - 1) << 1) - 1),
@@ -222,7 +223,7 @@ maybe_pin(const struct param *p)
 }
 
 static fido_dev_t *
-prepare_dev(const struct blob *wire_data)
+prepare_dev(const struct blob *wire_data, const struct param *p)
 {
 	fido_dev_t *dev;
 	bool x;
@@ -239,6 +240,9 @@ prepare_dev(const struct blob *wire_data)
 	x = fido_dev_supports_credman(dev);
 	consume(&x, sizeof(x));
 
+	if (p->opt & OPT_PUAT)
+		fido_dev_get_puat(dev, FIDO_PUAT_CREDMAN, NULL, maybe_pin(p));
+
 	return dev;
 }
 
@@ -250,7 +254,7 @@ get_metadata(const struct param *p)
 	uint64_t existing;
 	uint64_t remaining;
 
-	if ((dev = prepare_dev(&p->meta_wire_data)) == NULL)
+	if ((dev = prepare_dev(&p->meta_wire_data, p)) == NULL)
 		return;
 
 	if ((metadata = fido_credman_metadata_new()) == NULL) {
@@ -277,7 +281,7 @@ get_rp_list(const struct param *p)
 	fido_dev_t *dev;
 	fido_credman_rp_t *rp;
 
-	if ((dev = prepare_dev(&p->rp_wire_data)) == NULL)
+	if ((dev = prepare_dev(&p->rp_wire_data, p)) == NULL)
 		return;
 
 	if ((rp = fido_credman_rp_new()) == NULL) {
@@ -309,7 +313,7 @@ get_rk_list(const struct param *p)
 	const fido_cred_t *cred;
 	int val;
 
-	if ((dev = prepare_dev(&p->rk_wire_data)) == NULL)
+	if ((dev = prepare_dev(&p->rk_wire_data, p)) == NULL)
 		return;
 
 	if ((rk = fido_credman_rk_new()) == NULL) {
@@ -350,7 +354,7 @@ del_rk(const struct param *p)
 {
 	fido_dev_t *dev;
 
-	if ((dev = prepare_dev(&p->del_wire_data)) == NULL)
+	if ((dev = prepare_dev(&p->del_wire_data, p)) == NULL)
 		return;
 
 	fido_credman_del_dev_rk(dev, p->cred_id.body, p->cred_id.len, maybe_pin(p));
@@ -365,7 +369,7 @@ set_rk(const struct param *p)
 	fido_cred_t *cred = NULL;
 	int r0, r1, r2;
 
-	if ((dev = prepare_dev(&p->del_wire_data)) == NULL)
+	if ((dev = prepare_dev(&p->del_wire_data, p)) == NULL)
 		return;
 	if ((cred = fido_cred_new()) == NULL)
 		goto out;
