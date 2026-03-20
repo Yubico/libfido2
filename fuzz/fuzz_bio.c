@@ -23,6 +23,7 @@
 
 enum {
 	OPT_NO_PIN = 1,
+	OPT_PUAT = 2,
 
 	OPT_EDGE,
 	OPT_MASK = (((OPT_EDGE - 1) << 1) - 1),
@@ -238,7 +239,7 @@ maybe_pin(const struct param *p)
 }
 
 static fido_dev_t *
-prepare_dev(const struct blob *wire_data)
+prepare_dev(const struct blob *wire_data, const struct param *p)
 {
 	fido_dev_t *dev;
 	bool x;
@@ -259,6 +260,9 @@ prepare_dev(const struct blob *wire_data)
 	x = fido_dev_has_uv(dev);
 	consume(&x, sizeof(x));
 
+	if (p->opt & OPT_PUAT)
+		fido_dev_get_puat(dev, FIDO_PUAT_BIOENROLL, NULL, maybe_pin(p));
+
 	return dev;
 }
 
@@ -271,7 +275,7 @@ get_info(const struct param *p)
 	uint8_t max_samples;
 	int r;
 
-	if ((dev = prepare_dev(&p->info_wire_data)) == NULL ||
+	if ((dev = prepare_dev(&p->info_wire_data, p)) == NULL ||
 	    (i = fido_bio_info_new()) == NULL)
 		goto done;
 
@@ -318,7 +322,7 @@ enroll(const struct param *p)
 	fido_bio_enroll_t *e = NULL;
 	size_t cnt = 0;
 
-	if ((dev = prepare_dev(&p->enroll_wire_data)) == NULL ||
+	if ((dev = prepare_dev(&p->enroll_wire_data, p)) == NULL ||
 	    (t = fido_bio_template_new()) == NULL ||
 	    (e = fido_bio_enroll_new()) == NULL)
 		goto done;
@@ -350,7 +354,7 @@ list(const struct param *p)
 	fido_bio_template_array_t *ta = NULL;
 	const fido_bio_template_t *t = NULL;
 
-	if ((dev = prepare_dev(&p->list_wire_data)) == NULL ||
+	if ((dev = prepare_dev(&p->list_wire_data, p)) == NULL ||
 	    (ta = fido_bio_template_array_new()) == NULL)
 		goto done;
 
@@ -375,7 +379,7 @@ set_name(const struct param *p)
 	fido_dev_t *dev = NULL;
 	fido_bio_template_t *t = NULL;
 
-	if ((dev = prepare_dev(&p->set_name_wire_data)) == NULL ||
+	if ((dev = prepare_dev(&p->set_name_wire_data, p)) == NULL ||
 	    (t = fido_bio_template_new()) == NULL)
 		goto done;
 
@@ -400,7 +404,7 @@ del(const struct param *p)
 	fido_bio_template_t *t = NULL;
 	int r;
 
-	if ((dev = prepare_dev(&p->remove_wire_data)) == NULL ||
+	if ((dev = prepare_dev(&p->remove_wire_data, p)) == NULL ||
 	    (t = fido_bio_template_new()) == NULL)
 		goto done;
 
