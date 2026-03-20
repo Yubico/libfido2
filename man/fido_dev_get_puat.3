@@ -33,7 +33,7 @@
 .Nm fido_dev_set_puat ,
 .Nm fido_dev_puat_ptr ,
 .Nm fido_dev_puat_len
-.Nd FIDO2 PIN UV Auth token management functions
+.Nd FIDO2 PIN/UV Auth token management functions
 .Sh SYNOPSIS
 .In fido.h
 .Ft int
@@ -47,7 +47,7 @@
 .Sh DESCRIPTION
 The
 .Fn fido_dev_get_puat
-negotiates a FIDO2 PIN UV Auth token with the permission flags specified by
+negotiates a FIDO2 PIN/UV Auth token with the permission flags specified by
 .Fa perm
 and associates it with
 .Fa dev .
@@ -126,7 +126,7 @@ is zero, the token is cleared from
 .Pp
 The
 .Fn fido_dev_puat_ptr
-function returns a pointer to the PIN UV Auth token currently associated with
+function returns a pointer to the PIN/UV Auth token currently associated with
 .Fa dev .
 The corresponding length can be obtained by calling
 .Fn fido_dev_puat_len .
@@ -142,7 +142,7 @@ On error, a different error code defined in
 is returned.
 .Pp
 .Fn fido_dev_puat_ptr
-may return NULL if there is no PIN UV Auth token associated with
+may return NULL if there is no PIN/UV Auth token associated with
 .Fa dev .
 If not NULL, the returned pointer is guaranteed to exist until either
 .Fn fido_dev_get_puat
