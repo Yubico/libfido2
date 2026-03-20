@@ -209,10 +209,12 @@ pack_dummy(uint8_t *ptr, size_t len)
 }
 
 static fido_dev_t *
-prepare_dev(void)
+prepare_dev(const struct blob *wire_data)
 {
 	fido_dev_t *dev;
 	bool x;
+
+	set_wire_data(wire_data->body, wire_data->len);
 
 	if ((dev = open_dev(0)) == NULL)
 		return NULL;
@@ -235,9 +237,7 @@ get_metadata(const struct param *p)
 	uint64_t existing;
 	uint64_t remaining;
 
-	set_wire_data(p->meta_wire_data.body, p->meta_wire_data.len);
-
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = prepare_dev(&p->meta_wire_data)) == NULL)
 		return;
 
 	if ((metadata = fido_credman_metadata_new()) == NULL) {
@@ -264,9 +264,7 @@ get_rp_list(const struct param *p)
 	fido_dev_t *dev;
 	fido_credman_rp_t *rp;
 
-	set_wire_data(p->rp_wire_data.body, p->rp_wire_data.len);
-
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = prepare_dev(&p->rp_wire_data)) == NULL)
 		return;
 
 	if ((rp = fido_credman_rp_new()) == NULL) {
@@ -298,9 +296,7 @@ get_rk_list(const struct param *p)
 	const fido_cred_t *cred;
 	int val;
 
-	set_wire_data(p->rk_wire_data.body, p->rk_wire_data.len);
-
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = prepare_dev(&p->rk_wire_data)) == NULL)
 		return;
 
 	if ((rk = fido_credman_rk_new()) == NULL) {
@@ -341,9 +337,7 @@ del_rk(const struct param *p)
 {
 	fido_dev_t *dev;
 
-	set_wire_data(p->del_wire_data.body, p->del_wire_data.len);
-
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = prepare_dev(&p->del_wire_data)) == NULL)
 		return;
 
 	fido_credman_del_dev_rk(dev, p->cred_id.body, p->cred_id.len, p->pin);
@@ -359,9 +353,7 @@ set_rk(const struct param *p)
 	const char *pin = p->pin;
 	int r0, r1, r2;
 
-	set_wire_data(p->del_wire_data.body, p->del_wire_data.len);
-
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = prepare_dev(&p->del_wire_data)) == NULL)
 		return;
 	if ((cred = fido_cred_new()) == NULL)
 		goto out;

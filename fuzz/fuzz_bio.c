@@ -225,10 +225,12 @@ pack_dummy(uint8_t *ptr, size_t len)
 }
 
 static fido_dev_t *
-prepare_dev(void)
+prepare_dev(const struct blob *wire_data)
 {
 	fido_dev_t *dev;
 	bool x;
+
+	set_wire_data(wire_data->body, wire_data->len);
 
 	if ((dev = open_dev(0)) == NULL)
 		return NULL;
@@ -256,9 +258,8 @@ get_info(const struct param *p)
 	uint8_t max_samples;
 	int r;
 
-	set_wire_data(p->info_wire_data.body, p->info_wire_data.len);
-
-	if ((dev = prepare_dev()) == NULL || (i = fido_bio_info_new()) == NULL)
+	if ((dev = prepare_dev(&p->info_wire_data)) == NULL ||
+	    (i = fido_bio_info_new()) == NULL)
 		goto done;
 
 	r = fido_bio_dev_get_info(dev, i);
@@ -304,9 +305,7 @@ enroll(const struct param *p)
 	fido_bio_enroll_t *e = NULL;
 	size_t cnt = 0;
 
-	set_wire_data(p->enroll_wire_data.body, p->enroll_wire_data.len);
-
-	if ((dev = prepare_dev()) == NULL ||
+	if ((dev = prepare_dev(&p->enroll_wire_data)) == NULL ||
 	    (t = fido_bio_template_new()) == NULL ||
 	    (e = fido_bio_enroll_new()) == NULL)
 		goto done;
@@ -338,9 +337,7 @@ list(const struct param *p)
 	fido_bio_template_array_t *ta = NULL;
 	const fido_bio_template_t *t = NULL;
 
-	set_wire_data(p->list_wire_data.body, p->list_wire_data.len);
-
-	if ((dev = prepare_dev()) == NULL ||
+	if ((dev = prepare_dev(&p->list_wire_data)) == NULL ||
 	    (ta = fido_bio_template_array_new()) == NULL)
 		goto done;
 
@@ -365,9 +362,7 @@ set_name(const struct param *p)
 	fido_dev_t *dev = NULL;
 	fido_bio_template_t *t = NULL;
 
-	set_wire_data(p->set_name_wire_data.body, p->set_name_wire_data.len);
-
-	if ((dev = prepare_dev()) == NULL ||
+	if ((dev = prepare_dev(&p->set_name_wire_data)) == NULL ||
 	    (t = fido_bio_template_new()) == NULL)
 		goto done;
 
@@ -392,9 +387,7 @@ del(const struct param *p)
 	fido_bio_template_t *t = NULL;
 	int r;
 
-	set_wire_data(p->remove_wire_data.body, p->remove_wire_data.len);
-
-	if ((dev = prepare_dev()) == NULL ||
+	if ((dev = prepare_dev(&p->remove_wire_data)) == NULL ||
 	    (t = fido_bio_template_new()) == NULL)
 		goto done;
 

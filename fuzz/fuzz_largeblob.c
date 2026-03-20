@@ -179,9 +179,11 @@ pack_dummy(uint8_t *ptr, size_t len)
 }
 
 static fido_dev_t *
-prepare_dev(void)
+prepare_dev(const struct blob *wire_data)
 {
 	fido_dev_t *dev;
+
+	set_wire_data(wire_data->body, wire_data->len);
 
 	if ((dev = open_dev(0)) == NULL)
 		return NULL;
@@ -196,9 +198,7 @@ get_blob(const struct param *p, int array)
 	u_char *ptr = NULL;
 	size_t len = 0;
 
-	set_wire_data(p->get_wiredata.body, p->get_wiredata.len);
-
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = prepare_dev(&p->get_wiredata)) == NULL)
 		return;
 
 	if (array)
@@ -219,9 +219,7 @@ set_blob(const struct param *p, int op)
 	fido_dev_t *dev;
 	const char *pin;
 
-	set_wire_data(p->set_wiredata.body, p->set_wiredata.len);
-
-	if ((dev = prepare_dev()) == NULL)
+	if ((dev = prepare_dev(&p->set_wiredata)) == NULL)
 		return;
 	pin = p->pin;
 	if (strlen(pin) == 0)
