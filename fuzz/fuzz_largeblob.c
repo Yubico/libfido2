@@ -85,8 +85,12 @@ unpack(const uint8_t *ptr, size_t len)
 	    (item = cbor_load(ptr, len, &cbor)) == NULL ||
 	    cbor.read != len ||
 	    cbor_isa_array(item) == false ||
-	    cbor_array_is_definite(item) == false ||
-	    cbor_array_size(item) != PACK_ARRAY_LEN ||
+	    cbor_array_is_definite(item) == false)
+		goto fail;
+
+	size_t arrsz = cbor_array_size(item);
+
+	if ((arrsz != PACK_ARRAY_LEN && arrsz != (PACK_ARRAY_LEN - 1)) ||
 	    (v = cbor_array_handle(item)) == NULL)
 		goto fail;
 
@@ -95,7 +99,7 @@ unpack(const uint8_t *ptr, size_t len)
 	    unpack_blob(v[2], &p->key) < 0 ||
 	    unpack_blob(v[3], &p->get_wiredata) < 0 ||
 	    unpack_blob(v[4], &p->set_wiredata) < 0 ||
-	    unpack_byte(v[5], &p->opt) < 0)
+	    (arrsz == PACK_ARRAY_LEN && unpack_byte(v[5], &p->opt) < 0))
 		goto fail;
 
 	ok = 0;
