@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2025 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -23,6 +23,9 @@
 enum {
 	OPT_FORCE_U2F = 1,
 	OPT_NFC = 2,
+
+	OPT_EDGE,
+	OPT_MASK = (((OPT_EDGE - 1) << 1) - 1),
 };
 
 /* Parameter set defining a FIDO2 get assertion operation. */
@@ -526,6 +529,8 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 		mutate_blob(&p->cdh);
 		mutate_string(p->rp_id);
 		mutate_string(p->pin);
+
+		p->opt &= OPT_MASK;
 	}
 
 	if (flags & MUTATE_WIREDATA) {
