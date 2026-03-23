@@ -24,6 +24,7 @@ run: build
 	docker start ${RUNNER}
 
 sync: run
+	[ -e corpus.tgz ] # required
 	tar Ccf .. - src fuzz | docker exec -i ${RUNNER} tar Cxf /libfido2 -
 	docker exec ${RUNNER} make -C /libfido2/build
 
