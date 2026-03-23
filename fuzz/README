@@ -24,6 +24,8 @@ memory utilisation at a manageable level, you can either enforce limits at
 the OS level (e.g. cgroups on Linux), or patch libcbor with the diff below.
 N.B., the patch below is relative to libcbor 0.10.1.
 
+See also README.corpus
+
 diff --git src/cbor/internal/memory_utils.c src/cbor/internal/memory_utils.c
 index bbea63c..3f7c9af 100644
 --- src/cbor/internal/memory_utils.c

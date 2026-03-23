@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 # SPDX-License-Identifier: BSD-2-Clause
+#
+# See README.corpus
 
 IMAGE		:= libfido2-coverage:1.17.0
 RUNNER		:= libfido2-runner
