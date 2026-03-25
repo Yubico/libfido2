@@ -24,7 +24,7 @@ jobs:
         cc: [ clang-20 ]
         sanitizer: [ asan, msan ]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: dependencies
       run: |
         sudo apt -q update
