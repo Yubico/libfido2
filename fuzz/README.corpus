@@ -55,12 +55,18 @@ For example if `p->opt & 1` is set, the `fuzz_assert.c` harness will invoke
 `fido_dev_force_u2f()`, and enable other related execution conditions.
 
 The `p->opt` byte is currently masked to restrict the mutation to those bits
-that are associated with some actual behaviour.  The intention to making the
-fuzzing process more efficient, by reducing the amount of bitwise
-different, yet equivalent input files in a corpus.
+that are associated with some actual behaviour. This has two favourable
+outcomes:
 
-Enabling more bits of `p->opt` requires some level of assistance, as the
-current corpus will by construction always have those bits set to zero.
+1. Improved forwarded compatibility if additional bits of `p->opt` are
+   enabled (existing input files will not result in different behaviours)
+
+2. A plausible minor performance improvement, thanks to the reduction of
+   bitwise different, yet equivalent input files in a corpus.
+
+Enabling more bits of `p->opt` current corpus will by construction always have
+those bits set to zero.
+
 The same applies if input parameters need to be extended for any of the
 harnesses.
 
