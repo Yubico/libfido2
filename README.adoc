@@ -90,6 +90,12 @@ Please consult Yubico's
 https://developers.yubico.com/libfido2/Releases[release page] for ARM, ARM64,
 Win32, and Win64 artefacts.
 
+Safe usage of our libraries assumes that the artefacts are unpacked in a
+trusted, non-writable directory with DLLs alongside the executable. Please refer
+to Microsoft's official documentation for general guidance on DLL deployment and
+safe packaging techniques. Note that our dynamically linked artefacts are built
+with `/MD` and may require the corresponding Visual C++ runtime to be present.
+
 === Building from source
 
 On UNIX-like systems:
