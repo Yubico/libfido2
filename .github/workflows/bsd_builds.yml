@@ -22,7 +22,7 @@ jobs:
           - { image: freebsd/14.x }
           - { image: openbsd/7.7, llvm_version: 19 }
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: dependencies
       run: |
         sudo apt -q update
