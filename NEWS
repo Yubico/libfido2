@@ -1,5 +1,6 @@
 * Version 1.17.0 (unreleased)
  ** Added CTAP 2.3 support.
+ ** Restrict webauthn.dll search paths; YSA-2026-01.
  ** Support application-managed PIN/UV Auth tokens; gh#806.
  ** Support 64-byte hmac-secret salts when using windows://hello.
  ** Fixed a U2F transaction handling bug when a timeout had been set; gh#917.

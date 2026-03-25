@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Yubico AB. All rights reserved.
+ * Copyright (c) 2021-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -89,7 +89,8 @@ webauthn_load(void)
 		fido_log_debug("%s: already loaded", __func__);
 		return -1;
 	}
-	if ((webauthn_handle = LoadLibrary(TEXT("webauthn.dll"))) == NULL) {
+	if ((webauthn_handle = LoadLibraryEx(TEXT("webauthn.dll"), NULL,
+	    LOAD_LIBRARY_SEARCH_SYSTEM32)) == NULL) {
 		fido_log_debug("%s: LoadLibrary", __func__);
 		return -1;
 	}
