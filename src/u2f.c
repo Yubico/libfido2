@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2025 Yubico AB. All rights reserved.
+ * Copyright (c) 2018-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -18,7 +18,7 @@
 #include "fallthrough.h"
 
 #define U2F_PACE_MS (100)
-#define U2F_TRX_MS   (20)
+#define U2F_IO_MS   (20)
 
 #if defined(_MSC_VER)
 static int
@@ -142,9 +142,9 @@ authdata_fake(const char *rp_id, uint8_t flags, uint32_t sigcount,
 }
 
 static int
-check_trx_timeout(int ms)
+check_io_timeout(int ms)
 {
-	if (ms < 0 || ms >= U2F_TRX_MS)
+	if (ms < 0 || ms >= U2F_IO_MS)
 		return FIDO_OK;
 
 	return FIDO_ERR_TIMEOUT;
@@ -180,8 +180,8 @@ send_dummy_register(fido_dev_t *dev, int *ms)
 	}
 
 	do {
-		if ((r = check_trx_timeout(*ms)) != FIDO_OK) {
-			fido_log_debug("%s: check_trx_timeout", __func__);
+		if ((r = check_io_timeout(*ms)) != FIDO_OK) {
+			fido_log_debug("%s: check_io_timeout", __func__);
 			goto fail;
 		}
 		if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
@@ -257,8 +257,8 @@ key_lookup(fido_dev_t *dev, const char *rp_id, const fido_blob_t *key_id,
 		goto fail;
 	}
 
-	if ((r = check_trx_timeout(*ms)) != FIDO_OK) {
-		fido_log_debug("%s: check_trx_timeout", __func__);
+	if ((r = check_io_timeout(*ms)) != FIDO_OK) {
+		fido_log_debug("%s: check_io_timeout", __func__);
 		goto fail;
 	}
 	if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
@@ -378,8 +378,8 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 	}
 
 	do {
-		if ((r = check_trx_timeout(*ms)) != FIDO_OK) {
-			fido_log_debug("%s: check_trx_timeout", __func__);
+		if ((r = check_io_timeout(*ms)) != FIDO_OK) {
+			fido_log_debug("%s: check_io_timeout", __func__);
 			goto fail;
 		}
 		if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
@@ -747,8 +747,8 @@ u2f_register(fido_dev_t *dev, fido_cred_t *cred, int *ms)
 	}
 
 	do {
-		if ((r = check_trx_timeout(*ms)) != FIDO_OK) {
-			fido_log_debug("%s: check_trx_timeout", __func__);
+		if ((r = check_io_timeout(*ms)) != FIDO_OK) {
+			fido_log_debug("%s: check_io_timeout", __func__);
 			goto fail;
 		}
 		if (fido_tx(dev, CTAP_CMD_MSG, iso7816_ptr(apdu),
