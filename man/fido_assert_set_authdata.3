@@ -189,6 +189,12 @@ If
 is zero, the extensions of
 .Fa assert
 are cleared.
+Enabling
+.Dv FIDO_EXT_PAYMENT
+does not affect how
+.Xr fido_assert_verify 3
+verifies the RP ID; the platform is responsible for determining what
+constitutes a payment authentication.
 .Pp
 The
 .Fn fido_assert_set_hmac_salt
