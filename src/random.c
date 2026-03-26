@@ -25,6 +25,12 @@
 
 #include "fido.h"
 
+#ifdef FIDO_FUZZ
+/* XXX: force consistent harnesses */
+#undef HAVE_ARC4RANDOM_BUF
+#undef HAVE_DEV_URANDOM
+#endif
+
 #if defined(_WIN32)
 #include <windows.h>
 
