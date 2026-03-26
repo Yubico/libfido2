@@ -347,8 +347,7 @@ dev_get_cbor_info(const struct param *p)
 	consume(fido_cbor_info_id_ptr(ci), fido_cbor_info_id_len(ci));
 	consume(fido_cbor_info_encstate_ptr(ci), fido_cbor_info_encstate_len(ci));
 	consume(fido_cbor_info_state_ptr(ci), fido_cbor_info_state_len(ci));
-	consume(fido_cbor_info_pin_policy_url_ptr(ci),
-	    fido_cbor_info_pin_policy_url_len(ci));
+	consume_str(fido_cbor_info_pin_policy_url(ci));
 
 	v = fido_cbor_info_new_pin_required(ci);
 	consume(&v, sizeof(v));

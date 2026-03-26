@@ -40,7 +40,7 @@
 .Nm fido_cbor_info_encstate_ptr ,
 .Nm fido_cbor_info_state_ptr ,
 .Nm fido_cbor_info_extensions_ptr ,
-.Nm fido_cbor_info_pin_policy_url_ptr ,
+.Nm fido_cbor_info_pin_policy_url ,
 .Nm fido_cbor_info_protocols_ptr ,
 .Nm fido_cbor_info_reset_transports_ptr ,
 .Nm fido_cbor_info_transports_ptr ,
@@ -62,7 +62,6 @@
 .Nm fido_cbor_info_encstate_len ,
 .Nm fido_cbor_info_state_len ,
 .Nm fido_cbor_info_extensions_len ,
-.Nm fido_cbor_info_pin_policy_url_len ,
 .Nm fido_cbor_info_protocols_len ,
 .Nm fido_cbor_info_reset_transports_len ,
 .Nm fido_cbor_info_transports_len ,
@@ -111,8 +110,8 @@
 .Fn fido_cbor_info_state_ptr "const fido_cbor_info_t *ci"
 .Ft char **
 .Fn fido_cbor_info_extensions_ptr "const fido_cbor_info_t *ci"
-.Ft const unsigned char *
-.Fn fido_cbor_info_pin_policy_url_ptr "const fido_cbor_info_t *ci"
+.Ft const char *
+.Fn fido_cbor_info_pin_policy_url "const fido_cbor_info_t *ci"
 .Ft const uint8_t *
 .Fn fido_cbor_info_protocols_ptr "const fido_cbor_info_t *ci"
 .Ft char **
@@ -153,8 +152,6 @@
 .Fn fido_cbor_info_state_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_extensions_len "const fido_cbor_info_t *ci"
-.Ft size_t
-.Fn fido_cbor_info_pin_policy_url_len "const fido_cbor_info_t *ci"
 .Ft size_t
 .Fn fido_cbor_info_protocols_len "const fido_cbor_info_t *ci"
 .Ft size_t
@@ -256,7 +253,6 @@ The
 .Fn fido_cbor_info_encstate_ptr ,
 .Fn fido_cbor_info_state_ptr ,
 .Fn fido_cbor_info_extensions_ptr ,
-.Fn fido_cbor_info_pin_policy_url_ptr ,
 .Fn fido_cbor_info_protocols_ptr ,
 .Fn fido_cbor_info_reset_transports_ptr ,
 .Fn fido_cbor_info_transports_ptr ,
@@ -265,9 +261,8 @@ and
 functions return pointers to the authenticator attestation GUID,
 supported attestation formats, supported authenticator config commands,
 encrypted identifier, decrypted identifier, encrypted credential store state,
-decrypted credential store state, supported extensions, PIN complexity policy
-URL, PIN protocol, transports for authenticator reset, transports, and CTAP
-version strings of
+decrypted credential store state, supported extensions, PIN protocol, transports
+for authenticator reset, transports, and CTAP version strings of
 .Fa ci .
 The corresponding length of a given attribute can be
 obtained by
@@ -279,15 +274,13 @@ obtained by
 .Fn fido_cbor_info_encstate_len ,
 .Fn fido_cbor_info_state_len ,
 .Fn fido_cbor_info_extensions_len ,
-.Fn fido_cbor_info_pin_policy_url_len ,
 .Fn fido_cbor_info_protocols_len ,
 .Fn fido_cbor_info_reset_transports_len ,
 .Fn fido_cbor_info_transports_len ,
 or
 .Fn fido_cbor_info_versions_len .
-The supported attestation formats, encrypted identifier, PIN complexity
-policy URL, and transports for authenticator reset attributes are CTAP
-2.2 additions.
+The supported attestation formats, encrypted identifier, and transports for
+authenticator reset attributes are CTAP 2.2 additions.
 The supported authenticator config commands and encrypted credential store state
 attributes are CTAP 2.3 additions.
 .Pp
@@ -407,6 +400,11 @@ The PIN complexity policy attribute is a CTAP 2.2 addition.
 The value is 1 if an additional policy is enforced, 0 if no such
 policy is enforced, or -1 if the feature is not supported by the
 authenticator.
+.Pp
+The
+.Fn fido_cbor_info_pin_policy_url
+function returns a pointer to a NUL-terminated string containing an URL to the
+authenticator's PIN complexity policy or NULL if the field was absent.
 .Pp
 The
 .Fn fido_cbor_info_fwversion

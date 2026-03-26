@@ -280,6 +280,21 @@ decode_certs(const cbor_item_t *item, fido_cert_array_t *c)
 }
 
 static int
+decode_pin_policy_url(const cbor_item_t *item, fido_blob_t *url)
+{
+	const unsigned char nul[] = { '\0' };
+
+	if (fido_blob_decode(item, url) != 0 ||
+	    fido_blob_append(url, nul, sizeof(nul)) != 0) {
+		fido_log_debug("%s: fido_blob_decode", __func__);
+		fido_blob_reset(url);
+		return (-1);
+	}
+
+	return (0);
+}
+
+static int
 parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 {
 	fido_cbor_info_t *ci = arg;
@@ -361,7 +376,7 @@ parse_reply_element(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		ci->pinpolicy = b;
 		return (0);
 	case 28: /* pinComplexityPolicyUrl */
-		return (fido_blob_decode(val, &ci->pinpolicyurl));
+		return (decode_pin_policy_url(val, &ci->pinpolicyurl));
 	case 29: /* maxPINLength */
 		return (cbor_decode_uint64(val, &ci->maxpinlen));
 	case 30: /* encCredStoreState */
@@ -777,16 +792,10 @@ fido_cbor_info_pin_policy(const fido_cbor_info_t *ci)
 	return (ci->pinpolicy);
 }
 
-const unsigned char*
-fido_cbor_info_pin_policy_url_ptr(const fido_cbor_info_t *ci)
+const char *
+fido_cbor_info_pin_policy_url(const fido_cbor_info_t *ci)
 {
-	return (ci->pinpolicyurl.ptr);
-}
-
-size_t
-fido_cbor_info_pin_policy_url_len(const fido_cbor_info_t *ci)
-{
-	return (ci->pinpolicyurl.len);
+	return ((const char *)ci->pinpolicyurl.ptr);
 }
 
 uint64_t
