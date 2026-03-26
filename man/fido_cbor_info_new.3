@@ -401,11 +401,11 @@ function returns zero.
 The
 .Fn fido_cbor_info_pin_policy
 function returns information about whether an additional PIN complexity
-policy is enforced, as reported by
+policy is enforced by the authenticator, as reported by
 .Fa ci.
 The PIN complexity policy attribute is a CTAP 2.2 addition.
 The value is 1 if an additional policy is enforced, 0 if no such
-policy is enforced, or -1 if the attribute is not advertised by the
+policy is enforced, or -1 if the feature is not supported by the
 authenticator.
 .Pp
 The
