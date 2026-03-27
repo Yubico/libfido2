@@ -21,6 +21,14 @@
 
 #define PACK_ARRAY_LEN 10
 
+enum {
+	OPT_NO_PIN = 1,
+	OPT_PUAT = 2,
+
+	OPT_EDGE,
+	OPT_MASK = (((OPT_EDGE - 1) << 1) - 1),
+};
+
 /* Parameter set defining a FIDO2 credential management operation. */
 struct param {
 	char pin[MAXSTR];
@@ -224,8 +232,14 @@ pack_dummy(uint8_t *ptr, size_t len)
 	return blob_len;
 }
 
+static const char *
+maybe_pin(const struct param *p)
+{
+	return p->opt & OPT_NO_PIN ? NULL : p->pin;
+}
+
 static fido_dev_t *
-prepare_dev(const struct blob *wire_data)
+prepare_dev(const struct blob *wire_data, const struct param *p)
 {
 	fido_dev_t *dev;
 	bool x;
@@ -246,6 +260,9 @@ prepare_dev(const struct blob *wire_data)
 	x = fido_dev_has_uv(dev);
 	consume(&x, sizeof(x));
 
+	if (p->opt & OPT_PUAT)
+		fido_dev_get_puat(dev, FIDO_PUAT_BIOENROLL, NULL, maybe_pin(p));
+
 	return dev;
 }
 
@@ -258,7 +275,7 @@ get_info(const struct param *p)
 	uint8_t max_samples;
 	int r;
 
-	if ((dev = prepare_dev(&p->info_wire_data)) == NULL ||
+	if ((dev = prepare_dev(&p->info_wire_data, p)) == NULL ||
 	    (i = fido_bio_info_new()) == NULL)
 		goto done;
 
@@ -305,12 +322,12 @@ enroll(const struct param *p)
 	fido_bio_enroll_t *e = NULL;
 	size_t cnt = 0;
 
-	if ((dev = prepare_dev(&p->enroll_wire_data)) == NULL ||
+	if ((dev = prepare_dev(&p->enroll_wire_data, p)) == NULL ||
 	    (t = fido_bio_template_new()) == NULL ||
 	    (e = fido_bio_enroll_new()) == NULL)
 		goto done;
 
-	fido_bio_dev_enroll_begin(dev, t, e, (uint32_t)p->seed, p->pin);
+	fido_bio_dev_enroll_begin(dev, t, e, (uint32_t)p->seed, maybe_pin(p));
 
 	consume_template(t);
 	consume_enroll(e);
@@ -337,11 +354,11 @@ list(const struct param *p)
 	fido_bio_template_array_t *ta = NULL;
 	const fido_bio_template_t *t = NULL;
 
-	if ((dev = prepare_dev(&p->list_wire_data)) == NULL ||
+	if ((dev = prepare_dev(&p->list_wire_data, p)) == NULL ||
 	    (ta = fido_bio_template_array_new()) == NULL)
 		goto done;
 
-	fido_bio_dev_get_template_array(dev, ta, p->pin);
+	fido_bio_dev_get_template_array(dev, ta, maybe_pin(p));
 
 	/* +1 on purpose */
 	for (size_t i = 0; i < fido_bio_template_array_count(ta) + 1; i++)
@@ -362,7 +379,7 @@ set_name(const struct param *p)
 	fido_dev_t *dev = NULL;
 	fido_bio_template_t *t = NULL;
 
-	if ((dev = prepare_dev(&p->set_name_wire_data)) == NULL ||
+	if ((dev = prepare_dev(&p->set_name_wire_data, p)) == NULL ||
 	    (t = fido_bio_template_new()) == NULL)
 		goto done;
 
@@ -370,7 +387,7 @@ set_name(const struct param *p)
 	fido_bio_template_set_id(t, p->id.body, p->id.len);
 	consume_template(t);
 
-	fido_bio_dev_set_template_name(dev, t, p->pin);
+	fido_bio_dev_set_template_name(dev, t, maybe_pin(p));
 
 done:
 	if (dev)
@@ -387,7 +404,7 @@ del(const struct param *p)
 	fido_bio_template_t *t = NULL;
 	int r;
 
-	if ((dev = prepare_dev(&p->remove_wire_data)) == NULL ||
+	if ((dev = prepare_dev(&p->remove_wire_data, p)) == NULL ||
 	    (t = fido_bio_template_new()) == NULL)
 		goto done;
 
@@ -395,7 +412,7 @@ del(const struct param *p)
 	consume_template(t);
 	consume_str(fido_strerr(r));
 
-	fido_bio_dev_enroll_remove(dev, t, p->pin);
+	fido_bio_dev_enroll_remove(dev, t, maybe_pin(p));
 
 done:
 	if (dev)
@@ -431,6 +448,8 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 		mutate_string(p->pin);
 		mutate_string(p->name);
 		mutate_byte(&p->opt);
+
+		p->opt &= OPT_MASK;
 	}
 
 	if (flags & MUTATE_WIREDATA) {

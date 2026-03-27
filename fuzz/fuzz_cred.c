@@ -23,6 +23,10 @@
 enum {
 	OPT_FORCE_U2F = 1,
 	OPT_NFC = 2,
+	OPT_PUAT = 4,
+
+	OPT_EDGE,
+	OPT_MASK = (((OPT_EDGE - 1) << 1) - 1),
 };
 
 /* Parameter set defining a FIDO2 make credential operation. */
@@ -274,6 +278,11 @@ make_cred(fido_cred_t *cred, uint8_t opt, int type, const struct blob *cdh,
 	if (opt & OPT_FORCE_U2F || strlen(pin) == 0)
 		pin = NULL;
 
+	if (opt & OPT_PUAT) {
+		/* the actual PUAT permission is not relevant for libfido2 */
+		fido_dev_get_puat(dev, FIDO_PUAT_MAKECRED, rp_id, pin);
+	}
+
 	fido_dev_make_cred(dev, cred, pin);
 
 	fido_dev_cancel(dev);
@@ -491,6 +500,8 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 		mutate_string(p->user_nick);
 		mutate_string(p->rp_id);
 		mutate_string(p->rp_name);
+
+		p->opt &= OPT_MASK;
 	}
 
 	if (flags & MUTATE_WIREDATA) {
