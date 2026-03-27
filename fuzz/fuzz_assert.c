@@ -23,7 +23,6 @@
 enum {
 	OPT_FORCE_U2F = 1,
 	OPT_NFC = 2,
-	OPT_NO_PIN = 4,
 };
 
 /* Parameter set defining a FIDO2 get assertion operation. */
@@ -249,7 +248,7 @@ get_assert(fido_assert_t *assert, uint8_t opt, const struct blob *cdh,
 	fido_assert_set_rp(assert, rp_id);
 	fido_assert_set_hmac_salt(assert, cred->body, cred->len);
 
-	if (opt & (OPT_NO_PIN | OPT_FORCE_U2F))
+	if (opt & OPT_FORCE_U2F || strlen(pin) == 0)
 		pin = NULL;
 
 	fido_dev_get_assert(dev, assert, pin);
