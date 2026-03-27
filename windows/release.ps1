@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Yubico AB. All rights reserved.
+# Copyright (c) 2021-2026 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 # SPDX-License-Identifier: BSD-2-Clause
@@ -76,15 +76,6 @@ Function Package-StaticPDBs(${SRC}, ${DEST}) {
 	Copy-Item "${SRC}\src\${Config}\fido2_static.pdb" "${DEST}"
 }
 
-Function Package-Tools(${SRC}, ${DEST}) {
-	Copy-Item "${SRC}\tools\${Config}\fido2-assert.exe" `
-	    "${DEST}\fido2-assert.exe"
-	Copy-Item "${SRC}\tools\${Config}\fido2-cred.exe" `
-	    "${DEST}\fido2-cred.exe"
-	Copy-Item "${SRC}\tools\${Config}\fido2-token.exe" `
-	    "${DEST}\fido2-token.exe"
-}
-
 Package-Headers
 
 for ($i = 0; $i -lt $Architectures.Length; $i++) {
@@ -93,8 +84,6 @@ for ($i = 0; $i -lt $Architectures.Length; $i++) {
 	Package-Dynamic "${OUTPUT}\${Arch}\dynamic" `
 	    "${OUTPUT}\pkg\${InstallPrefix}\${Config}\v${SDK}\dynamic"
 	Package-PDBs "${BUILD}\${Arch}\dynamic" `
-	    "${OUTPUT}\pkg\${InstallPrefix}\${Config}\v${SDK}\dynamic"
-	Package-Tools "${BUILD}\${Arch}\dynamic" `
 	    "${OUTPUT}\pkg\${InstallPrefix}\${Config}\v${SDK}\dynamic"
 	Package-Static "${OUTPUT}\${Arch}\static" `
 	    "${OUTPUT}\pkg\${InstallPrefix}\${Config}\v${SDK}\static"

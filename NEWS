@@ -9,6 +9,7 @@
  ** fido2-token: new -I -t mode for deciphering encrypted fields.
  ** fido2-cred -M: support the -t toggle argument
  ** Improved documentation and examples.
+ ** Removed tools from SDK packaging on Windows.
  ** New API calls:
   - fido_cbor_info_attfmts_len;
   - fido_cbor_info_attfmts_ptr;
