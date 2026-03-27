@@ -200,6 +200,7 @@ int fido_dev_get_cbor_info_wait(fido_dev_t *, fido_cbor_info_t *, int *);
 int fido_dev_get_uv_token(fido_dev_t *, uint8_t, const char *,
     const fido_blob_t *, const es256_pk_t *, const char *, fido_blob_t *,
     int *);
+const fido_blob_t *fido_dev_puat_blob(const fido_dev_t *);
 uint64_t fido_dev_maxmsgsize(const fido_dev_t *);
 int fido_do_ecdh(fido_dev_t *, es256_pk_t **, fido_blob_t **, int *);
 

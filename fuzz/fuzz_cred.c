@@ -23,7 +23,6 @@
 enum {
 	OPT_FORCE_U2F = 1,
 	OPT_NFC = 2,
-	OPT_NO_PIN = 4,
 };
 
 /* Parameter set defining a FIDO2 make credential operation. */
@@ -272,7 +271,7 @@ make_cred(fido_cred_t *cred, uint8_t opt, int type, const struct blob *cdh,
 	/* XXX reuse cred as hmac salt */
 	fido_cred_set_hmac_salt(cred, excl_cred->body, excl_cred->len);
 
-	if (opt & (OPT_FORCE_U2F | OPT_NO_PIN))
+	if (opt & OPT_FORCE_U2F || strlen(pin) == 0)
 		pin = NULL;
 
 	fido_dev_make_cred(dev, cred, pin);

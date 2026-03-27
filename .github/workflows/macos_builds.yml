@@ -22,7 +22,7 @@ jobs:
       matrix:
         os: [ macos-15, macos-14 ]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: dependencies
       env:
         HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1

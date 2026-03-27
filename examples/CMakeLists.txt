@@ -53,6 +53,14 @@ target_link_libraries(retries ${_FIDO2_LIBRARY})
 add_executable(select select.c ${COMPAT_SOURCES})
 target_link_libraries(select ${_FIDO2_LIBRARY})
 
+# puat-bio
+add_executable(puat-bio puat-bio.c ${COMPAT_SOURCES})
+target_link_libraries(puat-bio ${_FIDO2_LIBRARY})
+
+# puat-mcga
+add_executable(puat-mcga puat-mcga.c ${COMPAT_SOURCES})
+target_link_libraries(puat-mcga ${_FIDO2_LIBRARY})
+
 if(MINGW)
 	# needed for nanosleep() in mingw
 	target_link_libraries(select winpthread)
