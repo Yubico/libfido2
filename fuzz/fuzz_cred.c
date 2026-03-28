@@ -494,7 +494,7 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 	}
 
 	if (flags & MUTATE_WIREDATA) {
-		if (p->opt & 1) {
+		if (p->opt & OPT_FORCE_U2F) {
 			p->wire_data.len = sizeof(dummy_wire_data_u2f);
 			memcpy(&p->wire_data.body, &dummy_wire_data_u2f,
 			    p->wire_data.len);

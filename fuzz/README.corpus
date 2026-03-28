@@ -1,0 +1,93 @@
+This document provides a few useful hints on the process of running fuzzing
+locally.
+
+1. Quickly run CI scripts
+
+   The simplest way to run a quick round of fuzzing is via
+   the scripts under ".actions/", in the top-level directory.
+
+2. Via fuzz/Makefile
+
+2.1. Obtain a corpus
+
+  A corpus should be available for download at
+  https://storage.googleapis.com/yubico-libfido2/corpus.tgz
+  (check the ../.actions/fuzz-linux file if not)
+
+  Download the file, and place it in this directory, where
+  it is expected by the makefile.
+
+2.2. Run make
+
+  The whole operation will happen in a docker container which
+  is started in detached mode.
+  The container can be used multiple times and terminated manually
+  (`docker stop`) or via `make clean`.
+
+2.3. Export fuzzing results
+
+  The default make target (`all`) will collect coverage
+  information for all harnesses *within the container*.
+
+  The obtained data can be exported with the corresponding
+  make target, e.g. `make report.tgz` will retrieve the
+  report tarball from the container.
+
+  Available result files:
+
+  - report.tgz          Coverage HTML report from "llvm-cov show"
+  - summary.txt         Coverage summary: llvm-cov report
+  - functions.txt       Function coverage: llvm-cov report --show-functions
+  - corpus.tgz-         extract new minified corpus
+
+
+Updating corpus
+---------------
+
+Every file in a corpus.tgz tarball is a CBOR-serialized object, defining
+a collection of input parameters.  Individual harnesses (fuzz_*.c) are in
+control of what the serialized object contains.
+
+At the time of writing, most of the harnesses define an extra byte parameter,
+`p->opt`, that can be used to extend the fuzzing with additional
+(pseudo-)random behaviours.
+For example if `p->opt & 1` is set, the `fuzz_assert.c` harness will invoke
+`fido_dev_force_u2f()`, and enable other related execution conditions.
+
+The `p->opt` byte is currently masked to restrict the mutation to those bits
+that are associated with some actual behaviour. This has two favourable
+outcomes:
+
+1. Improved forwarded compatibility if additional bits of `p->opt` are
+   enabled (existing input files will not result in different behaviours)
+
+2. A plausible minor performance improvement, thanks to the reduction of
+   bitwise different, yet equivalent input files in a corpus.
+
+Enabling more bits of `p->opt` current corpus will by construction always have
+those bits set to zero.
+
+The same applies if input parameters need to be extended for any of the
+harnesses.
+
+One option could be to reconstruct the harness, as mentioned in README.
+This is not trivial as it requires snooping of a session involving a real
+authenticator.
+
+Another option is to derive new inputs from the existing corpus via mutation.
+This can be done efficiently by ensuring that the new bit is allowed to mutate,
+and asserting the `fuzz_save_corpus` value from within a test:
+
+  void
+  test(const struct param *p)
+  {
+    extern int fuzz_save_corpus;
+
+    if (p->opt & NEW_BIT)
+      fuzz_save_corpus = 1;
+
+    // ....
+  }
+
+This will result in the new corpus items to be saved as they are obtained from
+mutation, so they can be later incorporated to the existing corpus.

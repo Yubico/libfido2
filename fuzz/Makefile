@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 # SPDX-License-Identifier: BSD-2-Clause
+#
+# See README.corpus
 
 IMAGE		:= libfido2-coverage:1.17.0
 RUNNER		:= libfido2-runner
@@ -24,6 +26,7 @@ run: build
 	docker start ${RUNNER}
 
 sync: run
+	[ -e corpus.tgz ] # required
 	tar Ccf .. - src fuzz | docker exec -i ${RUNNER} tar Cxf /libfido2 -
 	docker exec ${RUNNER} make -C /libfido2/build
 
