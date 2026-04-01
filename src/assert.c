@@ -83,7 +83,8 @@ parse_assert_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 static int
 fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
-    const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin, int *ms)
+    const es256_pk_t *pk, const fido_blob_t *ecdh, const fido_blob_t *token,
+    int *ms)
 {
 	fido_blob_t	 f;
 	fido_opt_t	 uv = assert->uv;
@@ -128,10 +129,9 @@ fido_dev_get_assert_tx(fido_dev_t *dev, fido_assert_t *assert,
 		}
 
 	/* user verification */
-	if (pin != NULL || fido_dev_puat_blob(dev) != NULL ||
-	    (uv == FIDO_OPT_TRUE && fido_dev_supports_permissions(dev))) {
-		if ((r = cbor_add_uv_params(dev, cmd, &assert->cdh, pk, ecdh,
-		    pin, assert->rp_id, &argv[5], &argv[6], ms)) != FIDO_OK) {
+	if (token != NULL) {
+		if ((r = cbor_add_uv_params(dev, &assert->cdh, token, &argv[5],
+		    &argv[6])) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
@@ -266,11 +266,12 @@ out:
 
 static int
 fido_dev_get_assert_wait(fido_dev_t *dev, fido_assert_t *assert,
-    const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin, int *ms)
+    const es256_pk_t *pk, const fido_blob_t *ecdh, const fido_blob_t *token,
+    int *ms)
 {
 	int r;
 
-	if ((r = fido_dev_get_assert_tx(dev, assert, pk, ecdh, pin,
+	if ((r = fido_dev_get_assert_tx(dev, assert, pk, ecdh, token,
 	    ms)) != FIDO_OK ||
 	    (r = fido_dev_get_assert_rx(dev, assert, ms)) != FIDO_OK)
 		return (r);
@@ -305,30 +306,17 @@ decrypt_hmac_secrets(const fido_dev_t *dev, fido_assert_t *assert,
 	return (0);
 }
 
-static bool
-need_ecdh(const fido_dev_t *dev, const fido_assert_t *assert, const char *pin)
-{
-	if (assert->ext.mask & FIDO_EXT_HMAC_SECRET)
-		return true;
-
-	/* If available, prefer cached PUAT */
-	if (fido_dev_puat_blob(dev) != NULL)
-		return false;
-
-	if (pin != NULL)
-		return true;
-
-	return assert->uv == FIDO_OPT_TRUE &&
-	    fido_dev_supports_permissions(dev);
-}
-
 int
 fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 {
-	fido_blob_t	*ecdh = NULL;
-	es256_pk_t	*pk = NULL;
-	int		 ms = dev->timeout_ms;
-	int		 r;
+	fido_blob_t		 tmp_token;
+	const fido_blob_t	*token = NULL;
+	fido_blob_t		*ecdh = NULL;
+	es256_pk_t		*pk = NULL;
+	int			 ms = dev->timeout_ms;
+	int			 r;
+
+	memset(&tmp_token, 0, sizeof(tmp_token));
 
 #ifdef USE_WINHELLO
 	if (dev->flags & FIDO_DEV_WINHELLO)
@@ -347,13 +335,26 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 		return (u2f_authenticate(dev, assert, &ms));
 	}
 
-	if (need_ecdh(dev, assert, pin) && (r = fido_do_ecdh(dev, &pk, &ecdh,
-	    &ms)) != FIDO_OK) {
+	/* (pk, ecdh) nullable unless the hmac-secret extension is requested */
+	if ((assert->ext.mask & FIDO_EXT_HMAC_SECRET) &&
+	    (r = fido_do_ecdh(dev, &pk, &ecdh, &ms)) != FIDO_OK) {
 		fido_log_debug("%s: fido_do_ecdh", __func__);
 		goto fail;
 	}
 
-	r = fido_dev_get_assert_wait(dev, assert, pk, ecdh, pin, &ms);
+	if (!fido_blob_is_empty(&dev->puat))
+		token = &dev->puat;
+	else if (pin != NULL || (assert->uv == FIDO_OPT_TRUE &&
+	    fido_dev_supports_permissions(dev))) {
+		if ((r = fido_dev_get_uv_token(dev, CTAP_CBOR_ASSERT, pin,
+		    ecdh, pk, assert->rp_id, &tmp_token, &ms)) != FIDO_OK) {
+			fido_log_debug("%s: fido_dev_get_uv_token", __func__);
+			goto fail;
+		}
+		token = &tmp_token;
+	}
+
+	r = fido_dev_get_assert_wait(dev, assert, pk, ecdh, token, &ms);
 	if (r == FIDO_OK && (assert->ext.mask & FIDO_EXT_HMAC_SECRET))
 		if (decrypt_hmac_secrets(dev, assert, ecdh) < 0) {
 			fido_log_debug("%s: decrypt_hmac_secrets", __func__);
@@ -364,6 +365,7 @@ fido_dev_get_assert(fido_dev_t *dev, fido_assert_t *assert, const char *pin)
 fail:
 	es256_pk_free(&pk);
 	fido_blob_free(&ecdh);
+	fido_blob_reset(&tmp_token);
 
 	return (r);
 }
