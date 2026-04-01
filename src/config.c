@@ -44,15 +44,17 @@ static int
 config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
     const char *pin, int *ms)
 {
+	const fido_blob_t *token = fido_dev_puat_blob(dev);
+	fido_blob_t token_store;
 	cbor_item_t *argv[4];
-	es256_pk_t *pk = NULL;
-	fido_blob_t *ecdh = NULL, f, hmac;
+	fido_blob_t f, hmac;
 	const uint8_t cmd = CTAP_CBOR_CONFIG;
 	int r = FIDO_ERR_INTERNAL;
 
 	memset(&f, 0, sizeof(f));
 	memset(&hmac, 0, sizeof(hmac));
 	memset(&argv, 0, sizeof(argv));
+	memset(&token_store, 0, sizeof(token_store));
 
 	/* subCommand */
 	if ((argv[0] = cbor_build_uint8(subcmd)) == NULL) {
@@ -68,22 +70,23 @@ config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
 	}
 
 	/* pinProtocol, pinAuth */
-	if (pin != NULL || fido_dev_puat_blob(dev) != NULL ||
+	if (pin != NULL || token != NULL ||
 	    (fido_dev_supports_permissions(dev) && fido_dev_has_uv(dev))) {
 		if (config_prepare_hmac(subcmd, argv[1], &hmac) < 0) {
 			fido_log_debug("%s: config_prepare_hmac", __func__);
 			goto fail;
 		}
-
-		/* If available, prefer cached PUAT */
-		if (fido_dev_puat_blob(dev) == NULL &&
-		    (r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
-			fido_log_debug("%s: fido_do_ecdh", __func__);
-			goto fail;
+		if (!token) {
+			if ((r = fido_dev_get_uv_token(dev, cmd, pin, NULL, NULL,
+			    NULL, &token_store, ms)) != FIDO_OK) {
+				fido_log_debug("%s: fido_dev_get_uv_token",
+				    __func__);
+				goto fail;
+			}
+			token = &token_store;
 		}
-
-		if ((r = cbor_add_uv_params(dev, cmd, &hmac, pk, ecdh, pin,
-		    NULL, &argv[3], &argv[2], ms)) != FIDO_OK) {
+		if ((r = cbor_add_uv_params(dev, &hmac, token, &argv[3],
+		    &argv[2])) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
@@ -100,8 +103,7 @@ config_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **paramv, size_t paramc,
 	r = FIDO_OK;
 fail:
 	cbor_vector_free(argv, nitems(argv));
-	es256_pk_free(&pk);
-	fido_blob_free(&ecdh);
+	fido_blob_reset(&token_store);
 	free(f.ptr);
 	free(hmac.ptr);
 

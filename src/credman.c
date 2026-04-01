@@ -124,17 +124,18 @@ static int
 credman_tx(fido_dev_t *dev, uint8_t subcmd, const void *param, const char *pin,
     const char *rp_id, fido_opt_t uv, int *ms)
 {
-	fido_blob_t	 f;
-	fido_blob_t	*ecdh = NULL;
-	fido_blob_t	 hmac;
-	es256_pk_t	*pk = NULL;
-	cbor_item_t	*argv[4];
-	const uint8_t	 cmd = credman_get_cmd(dev);
-	int		 r = FIDO_ERR_INTERNAL;
+	const fido_blob_t	*token = fido_dev_puat_blob(dev);
+	fido_blob_t		 token_store;
+	fido_blob_t		 f;
+	fido_blob_t		 hmac;
+	cbor_item_t		*argv[4];
+	const uint8_t		 cmd = credman_get_cmd(dev);
+	int			 r = FIDO_ERR_INTERNAL;
 
 	memset(&f, 0, sizeof(f));
 	memset(&hmac, 0, sizeof(hmac));
 	memset(&argv, 0, sizeof(argv));
+	memset(&token_store, 0, sizeof(token_store));
 
 	if (fido_dev_is_fido2(dev) == false) {
 		fido_log_debug("%s: fido_dev_is_fido2", __func__);
@@ -149,21 +150,22 @@ credman_tx(fido_dev_t *dev, uint8_t subcmd, const void *param, const char *pin,
 	}
 
 	/* pinProtocol, pinAuth */
-	if (pin != NULL || fido_dev_puat_blob(dev) != NULL ||
-	    uv == FIDO_OPT_TRUE) {
+	if (pin != NULL || token != NULL || uv == FIDO_OPT_TRUE) {
 		if (credman_prepare_hmac(subcmd, param, &argv[1], &hmac) < 0) {
 			fido_log_debug("%s: credman_prepare_hmac", __func__);
 			goto fail;
 		}
-
-		if (fido_dev_puat_blob(dev) == NULL) {
-			if ((r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
-				fido_log_debug("%s: fido_do_ecdh", __func__);
+		if (token == NULL) {
+			if ((r = fido_dev_get_uv_token(dev, cmd, pin, NULL,
+			    NULL, rp_id, &token_store, ms)) != FIDO_OK) {
+				fido_log_debug("%s: fido_dev_get_uv_token",
+				    __func__);
 				goto fail;
 			}
+			token = &token_store;
 		}
-		if ((r = cbor_add_uv_params(dev, cmd, &hmac, pk, ecdh, pin,
-		    rp_id, &argv[3], &argv[2], ms)) != FIDO_OK) {
+		if ((r = cbor_add_uv_params(dev, &hmac, token, &argv[3],
+		    &argv[2])) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
@@ -179,9 +181,8 @@ credman_tx(fido_dev_t *dev, uint8_t subcmd, const void *param, const char *pin,
 
 	r = FIDO_OK;
 fail:
-	es256_pk_free(&pk);
-	fido_blob_free(&ecdh);
 	cbor_vector_free(argv, nitems(argv));
+	fido_blob_reset(&token_store);
 	free(f.ptr);
 	free(hmac.ptr);
 

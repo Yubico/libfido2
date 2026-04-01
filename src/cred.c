@@ -51,7 +51,8 @@ parse_makecred_reply(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 static int
 fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred,
-    const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin, int *ms)
+    const es256_pk_t *pk, const fido_blob_t *ecdh, const fido_blob_t *token,
+    int *ms)
 {
 	fido_blob_t	 f;
 	fido_opt_t	 uv = cred->uv;
@@ -89,11 +90,9 @@ fido_dev_make_cred_tx(fido_dev_t *dev, fido_cred_t *cred,
 		}
 
 	/* user verification */
-	if (pin != NULL ||
-	    fido_dev_puat_blob(dev) != NULL ||
-	    (uv == FIDO_OPT_TRUE && fido_dev_supports_permissions(dev))) {
-		if ((r = cbor_add_uv_params(dev, cmd, &cred->cdh, pk, ecdh,
-		    pin, cred->rp.id, &argv[7], &argv[8], ms)) != FIDO_OK) {
+	if (token != NULL) {
+		if ((r = cbor_add_uv_params(dev, &cred->cdh, token, &argv[7],
+		    &argv[8])) != FIDO_OK) {
 			fido_log_debug("%s: cbor_add_uv_params", __func__);
 			goto fail;
 		}
@@ -178,11 +177,12 @@ fail:
 
 static int
 fido_dev_make_cred_wait(fido_dev_t *dev, fido_cred_t *cred,
-    const es256_pk_t *pk, const fido_blob_t *ecdh, const char *pin, int *ms)
+    const es256_pk_t *pk, const fido_blob_t *ecdh, const fido_blob_t *token,
+    int *ms)
 {
 	int  r;
 
-	if ((r = fido_dev_make_cred_tx(dev, cred, pk, ecdh, pin, ms)) != FIDO_OK ||
+	if ((r = fido_dev_make_cred_tx(dev, cred, pk, ecdh, token, ms)) != FIDO_OK ||
 	    (r = fido_dev_make_cred_rx(dev, cred, ms)) != FIDO_OK)
 		return (r);
 
@@ -197,29 +197,17 @@ decrypt_hmac_secret(const fido_dev_t *dev, fido_cred_t *cred,
 	    &cred->hmac_secret));
 }
 
-static bool
-need_ecdh(const fido_dev_t *dev, const fido_cred_t *cred, const char *pin)
-{
-	if (cred->ext.attr.mask & FIDO_EXT_HMAC_SECRET_MC)
-		return true;
-
-	/* If available, prefer cached PUAT */
-	if (fido_dev_puat_blob(dev) != NULL)
-		return false;
-
-	if (pin != NULL)
-		return true;
-
-	return cred->uv == FIDO_OPT_TRUE && fido_dev_supports_permissions(dev);
-}
-
 int
 fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 {
-	fido_blob_t	*ecdh = NULL;
-	es256_pk_t	*pk = NULL;
-	int		 ms = dev->timeout_ms;
-	int 		 r;
+	const fido_blob_t	*token = NULL;
+	fido_blob_t	         token_store;
+	fido_blob_t	        *ecdh = NULL;
+	es256_pk_t	        *pk = NULL;
+	int		         ms = dev->timeout_ms;
+	int 		         r;
+
+	memset(&token_store, 0, sizeof(token_store));
 
 #ifdef USE_WINHELLO
 	if (dev->flags & FIDO_DEV_WINHELLO)
@@ -232,20 +220,33 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 		return (u2f_register(dev, cred, &ms));
 	}
 
-	if (cred->cdh.ptr == NULL || cred->type == 0) {
-		fido_log_debug("%s: cdh=%p, type=%d", __func__,
-		    (void *)cred->cdh.ptr, cred->type);
+	if (cred->cdh.ptr == NULL || cred->type == 0 || cred->rp.id == NULL) {
+		fido_log_debug("%s: cdh=%p, type=%d, rp.id=%p", __func__,
+		    (void *)cred->cdh.ptr, cred->type, (void *)cred->rp.id);
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
 	}
 
-	if (need_ecdh(dev, cred, pin) && (r = fido_do_ecdh(dev, &pk, &ecdh,
-	    &ms)) != FIDO_OK) {
+	/* (pk, ecdh) nullable unless the hmac-secret extension is requested */
+	if ((cred->ext.attr.mask & FIDO_EXT_HMAC_SECRET_MC) &&
+	    (r = fido_do_ecdh(dev, &pk, &ecdh, &ms)) != FIDO_OK) {
 		fido_log_debug("%s: fido_do_ecdh", __func__);
 		goto fail;
 	}
 
-	r = fido_dev_make_cred_wait(dev, cred, pk, ecdh, pin, &ms);
+	if (!fido_blob_is_empty(&dev->puat))
+		token = &dev->puat;
+	else if (pin != NULL || (cred->uv == FIDO_OPT_TRUE &&
+	    fido_dev_supports_permissions(dev))) {
+		if ((r = fido_dev_get_uv_token(dev, CTAP_CBOR_MAKECRED, pin,
+		    ecdh, pk, cred->rp.id, &token_store, &ms)) != FIDO_OK) {
+			fido_log_debug("%s: fido_dev_get_uv_token", __func__);
+			goto fail;
+		}
+		token = &token_store;
+	}
+
+	r = fido_dev_make_cred_wait(dev, cred, pk, ecdh, token, &ms);
 	if (r == FIDO_OK && (cred->ext.attr.mask & FIDO_EXT_HMAC_SECRET_MC)) {
 		if (decrypt_hmac_secret(dev, cred, ecdh) < 0) {
 			fido_log_debug("%s: decrypt_hmac_secret", __func__);
@@ -257,6 +258,7 @@ fido_dev_make_cred(fido_dev_t *dev, fido_cred_t *cred, const char *pin)
 fail:
 	es256_pk_free(&pk);
 	fido_blob_free(&ecdh);
+	fido_blob_reset(&token_store);
 
 	return (r);
 }
