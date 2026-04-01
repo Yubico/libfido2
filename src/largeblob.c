@@ -546,35 +546,6 @@ fail:
 }
 
 static int
-largeblob_get_uv_token(fido_dev_t *dev, const char *pin, fido_blob_t *token,
-    int *ms)
-{
-	es256_pk_t *pk = NULL;
-	fido_blob_t *ecdh = NULL;
-	int r;
-
-	if ((r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
-		fido_log_debug("%s: fido_do_ecdh", __func__);
-		goto fail;
-	}
-	if ((r = fido_dev_get_uv_token(dev, CTAP_CBOR_LARGEBLOB, pin, ecdh, pk,
-	    NULL, token, ms)) != FIDO_OK) {
-		fido_log_debug("%s: fido_dev_get_uv_token", __func__);
-		goto fail;
-	}
-
-	r = FIDO_OK;
-fail:
-	if (r != FIDO_OK)
-		fido_blob_reset(token);
-
-	fido_blob_free(&ecdh);
-	es256_pk_free(&pk);
-
-	return r;
-}
-
-static int
 largeblob_set_array(fido_dev_t *dev, const cbor_item_t *item, const char *pin,
     int *ms)
 {
@@ -616,9 +587,9 @@ largeblob_set_array(fido_dev_t *dev, const cbor_item_t *item, const char *pin,
 
 	if ((token = fido_dev_puat_blob(dev)) == NULL &&
 	    (pin != NULL || fido_dev_supports_permissions(dev))) {
-		if ((r = largeblob_get_uv_token(dev, pin, &token_store,
-		    ms)) != FIDO_OK) {
-			fido_log_debug("%s: largeblob_get_uv_token", __func__);
+		if ((r = fido_dev_get_uv_token(dev, CTAP_CBOR_LARGEBLOB, pin,
+		    NULL, NULL, NULL, &tmp_token, ms)) != FIDO_OK) {
+			fido_log_debug("%s: fido_dev_get_uv_token", __func__);
 			goto fail;
 		}
 		token = &token_store;
