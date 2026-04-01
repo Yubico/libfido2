@@ -67,29 +67,6 @@ bio_get_cmd(const fido_dev_t *dev)
 }
 
 static int
-bio_get_uv_token(fido_dev_t *dev, const char *pin, uint8_t cmd,
-    fido_blob_t *token, int *ms)
-{
-	es256_pk_t	*pk = NULL;
-	fido_blob_t	*ecdh = NULL;
-	int		 r;
-
-	if ((r = fido_do_ecdh(dev, &pk, &ecdh, ms)) != FIDO_OK) {
-		fido_log_debug("%s: fido_do_ecdh", __func__);
-		return r;
-	}
-
-	r = fido_dev_get_uv_token(dev, cmd, pin, ecdh, pk, NULL, token, ms);
-	if (r != FIDO_OK)
-		fido_log_debug("%s: fido_dev_get_uv_token", __func__);
-
-	es256_pk_free(&pk);
-	fido_blob_free(&ecdh);
-
-	return r;
-}
-
-static int
 bio_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **sub_argv, size_t sub_argc,
     const char *pin, const fido_blob_t *token, int *ms)
 {
@@ -113,10 +90,11 @@ bio_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **sub_argv, size_t sub_argc,
 	}
 
 	if (pin && !token) {
-		if ((r = bio_get_uv_token(dev, pin, cmd, &token_store,
-		    ms)) != FIDO_OK)
+		if ((r = fido_dev_get_uv_token(dev, bio_get_cmd(dev), pin, NULL,
+		    NULL, NULL, &token_store, ms) != FIDO_OK)) {
+			fido_log_debug("%s: fido_dev_get_uv_token", __func__);
 			goto fail;
-
+		}
 		token = &token_store;
 	}
 
@@ -501,10 +479,13 @@ fido_bio_dev_enroll_begin(fido_dev_t *dev, fido_bio_template_t *t,
 	if (token)
 		r = fido_blob_set(&e->token, token->ptr, token->len);
 	else
-		r = bio_get_uv_token(dev, pin, CTAP_CBOR_BIO_ENROLL_PRE, &e->token, &ms);
+		r = fido_dev_get_uv_token(dev, bio_get_cmd(dev), pin, NULL,
+		    NULL, NULL, &e->token, &ms);
 
-	if (r != FIDO_OK)
+	if (r != FIDO_OK) {
+		fido_log_debug("%s: token", __func__);
 		return (r);
+	}
 
 	return (bio_enroll_begin_wait(dev, t, e, timo_ms, &ms));
 }
