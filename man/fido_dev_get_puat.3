@@ -47,7 +47,7 @@
 .Sh DESCRIPTION
 The
 .Fn fido_dev_get_puat
-negotiates a FIDO2 PIN/UV Auth token with the permission flags specified by
+negotiates a FIDO2 PIN/UV Auth token with the permission bitmask specified by
 .Fa perm
 and associates it with
 .Fa dev .
@@ -130,6 +130,27 @@ function returns a pointer to the PIN/UV Auth token currently associated with
 .Fa dev .
 The corresponding length can be obtained by calling
 .Fn fido_dev_puat_len .
+.Pp
+Associating a token with
+.Fa dev
+has the main benefit of reducing the user interaction to a minimum in
+a sequence of operations where each would require some form of UV.
+Likewise, if multiple operations in a sequence need to be authenticated by a
+PIN, using a token avoids the need of caching the PIN for the duration of the
+whole sequence.
+.Pp
+Once a token is associated with
+.Fa dev ,
+it will take precedence over the regular PIN/UV Authentication for all
+operations that support the use of a token, until it is cleared from
+.Fa dev .
+The validity of the token is determined by the authenticator;
+it may expire and its permissions may be affected by its use.
+An invalid token is not automatically cleared from
+.Fa dev .
+.Pp
+For further details on token semantics, please refer to the FIDO Client
+to Authenticator Protocol (CTAP) standard.
 .Sh RETURN VALUES
 On success,
 .Fn fido_dev_get_puat
