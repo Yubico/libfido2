@@ -339,12 +339,12 @@ else()
 endif()
 
 # Avoid https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66425
-if(CMAKE_COMPILER_IS_GNUCC)
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
 	add_compile_options(-Wno-unused-result)
 endif()
 
 # Decide which keyword to use for thread-local storage.
-if(CMAKE_COMPILER_IS_GNUCC OR
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
    CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
    CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
 	set(TLS "__thread")
