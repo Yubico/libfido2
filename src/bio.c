@@ -97,7 +97,6 @@ bio_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **sub_argv, size_t sub_argc,
 	fido_blob_t	 token_store;
 	fido_blob_t	 f;
 	fido_blob_t	 hmac;
-	const uint8_t	 cmd = bio_get_cmd(dev);
 	int		 r = FIDO_ERR_INTERNAL;
 
 	memset(&f, 0, sizeof(f));
@@ -113,8 +112,8 @@ bio_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **sub_argv, size_t sub_argc,
 	}
 
 	if (pin && !token) {
-		if ((r = bio_get_uv_token(dev, pin, cmd, &token_store,
-		    ms)) != FIDO_OK)
+		if ((r = bio_get_uv_token(dev, pin, bio_get_cmd(dev),
+		    &token_store, ms)) != FIDO_OK)
 			goto fail;
 
 		token = &token_store;
@@ -135,7 +134,7 @@ bio_tx(fido_dev_t *dev, uint8_t subcmd, cbor_item_t **sub_argv, size_t sub_argc,
 	}
 
 	/* framing and transmission */
-	if (cbor_build_frame(cmd, argv, nitems(argv), &f) < 0 ||
+	if (cbor_build_frame(bio_get_cmd(dev), argv, nitems(argv), &f) < 0 ||
 	    fido_tx(dev, CTAP_CMD_CBOR, f.ptr, f.len, ms) < 0) {
 		fido_log_debug("%s: fido_tx", __func__);
 		r = FIDO_ERR_TX;
