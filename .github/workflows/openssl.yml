@@ -3,7 +3,7 @@
 # license that can be found in the LICENSE file.
 # SPDX-License-Identifier: BSD-2-Clause
 
-name: openssl3
+name: openssl
 
 on:
   pull_request:
@@ -20,10 +20,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - cc: gcc-13
-          - cc: clang-20
-          - cc: i686-w64-mingw32-gcc-11
+        cc: [gcc-13, clang-20, i686-w64-mingw32-gcc-11]
+        openssl_version: [openssl-3.0.16, openssl-4.0.0-beta1]
     steps:
     - uses: actions/checkout@v6
     - name: dependencies
@@ -45,4 +43,5 @@ jobs:
     - name: build
       env:
         CC: ${{ matrix.cc }}
-      run: ./.actions/build-linux-openssl3-${CC%-*}
+        OPENSSL_VERSION: ${{ matrix.openssl_version }}
+      run: ./.actions/build-linux-openssl-${CC%-*}
