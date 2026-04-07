@@ -16,17 +16,14 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-24.04
-            cc: gcc-13
-          - os: ubuntu-24.04
-            cc: clang-20
-          - os: ubuntu-24.04
-            cc: i686-w64-mingw32-gcc-11
+          - cc: gcc-13
+          - cc: clang-20
+          - cc: i686-w64-mingw32-gcc-11
     steps:
     - uses: actions/checkout@v6
     - name: dependencies
