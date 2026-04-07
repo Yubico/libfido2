@@ -66,8 +66,8 @@ require_option() {
 }
 
 require_option "clientPin"
-[ "x${UV}" != "x" ] && require_option "uv"
-if check_option "alwaysUv" && [ "x${UV}" = "x" ]; then
+[ "${UV}" != "" ] && require_option "uv"
+if check_option "alwaysUv" && [ "${UV}" = "" ]; then
 	# fido2-assert -G does not fall back to asking to PIN
 	# fido2-cred -M -u only works with built-in UV
 	echo "alwaysUv require built-in UV" 1>&2
@@ -199,7 +199,7 @@ get_assert no.tld "-h -t up=false" wrap-cred hmac-salt wrap-assert && exit 1
 get_assert no.tld "-h -t up=false -t pin=true" wrap-cred hmac-salt wrap-assert && exit 1
 get_assert no.tld "-h -t up=false -t pin=false" wrap-cred hmac-salt wrap-assert && exit 1
 
-if [ "x${UV}" != "x" ]; then
+if [ "${UV}" != "" ]; then
 	get_assert no.tld "-t uv=true" wrap-cred /dev/null wrap-assert
 	verify_assert "-v" wrap-pubkey wrap-assert
 	get_assert no.tld "-t uv=true -t pin=true" wrap-cred /dev/null wrap-assert
@@ -288,7 +288,7 @@ get_assert no.tld "-r -h -t up=false" /dev/null hmac-salt wrap-assert && exit 1
 get_assert no.tld "-r -h -t up=false -t pin=true" /dev/null hmac-salt wrap-assert && exit 1
 get_assert no.tld "-r -h -t up=false -t pin=false" /dev/null hmac-salt wrap-assert && exit 1
 
-if [ "x${UV}" != "x" ]; then
+if [ "${UV}" != "" ]; then
 	get_assert no.tld "-r -t uv=true" /dev/null /dev/null wrap-assert
 	get_assert no.tld "-r -t uv=true -t pin=true" /dev/null /dev/null wrap-assert
 	get_assert no.tld "-r -t uv=true -t pin=false" /dev/null /dev/null wrap-assert
