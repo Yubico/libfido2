@@ -148,6 +148,12 @@ The validity of the token is determined by the authenticator;
 it may expire and its permissions may be affected by its use.
 An invalid token is not automatically cleared from
 .Fa dev .
+Applications can call
+.Fn fido_dev_set_puat
+or
+.Fn fido_dev_get_puat
+to discard or obtain a new PIN/UV Auth token and retry the failed operation as
+appropriate.
 .Pp
 For further details on token semantics, please refer to the FIDO Client
 to Authenticator Protocol (CTAP) standard.
