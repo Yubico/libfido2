@@ -115,6 +115,11 @@ elseif(APPLE)
 	endif()
 endif()
 
+if(WIN32)
+	configure_file(version.rc.in version.rc @ONLY)
+	set(VERSION_RC "${CMAKE_CURRENT_BINARY_DIR}/version.rc")
+endif()
+
 list(APPEND TARGET_LIBRARIES
 	${CBOR_LIBRARIES}
 	${CRYPTO_LIBRARIES}
@@ -138,7 +143,8 @@ endif()
 
 # dynamic library
 if(BUILD_SHARED_LIBS)
-	add_library(fido2_shared SHARED ${FIDO_SOURCES} ${COMPAT_SOURCES})
+	add_library(fido2_shared SHARED ${FIDO_SOURCES} ${COMPAT_SOURCES}
+		${VERSION_RC})
 	set_target_properties(fido2_shared PROPERTIES OUTPUT_NAME fido2
 		VERSION ${FIDO_VERSION} SOVERSION ${FIDO_MAJOR})
 	target_link_libraries(fido2_shared ${TARGET_LIBRARIES})

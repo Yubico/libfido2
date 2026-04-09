@@ -1,0 +1,41 @@
+/*
+ * Copyright (c) 2026 Yubico AB. All rights reserved.
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE file.
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
+#include <winresrc.h>
+
+VS_VERSION_INFO VERSIONINFO
+	FILEVERSION	@FIDO_MAJOR@,@FIDO_MINOR@,@FIDO_PATCH@,0
+	PRODUCTVERSION	@FIDO_MAJOR@,@FIDO_MINOR@,@FIDO_PATCH@,0
+	FILEFLAGSMASK	VS_FFI_FILEFLAGSMASK
+#ifdef DEBUG
+	FILEFLAGS	VS_FF_DEBUG
+#else
+	FILEFLAGS	0x0L
+#endif
+	FILEOS		VOS_NT_WINDOWS32
+	FILETYPE	VFT_DLL
+	FILESUBTYPE	VFT2_UNKNOWN
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904B0"
+		BEGIN
+			VALUE "CompanyName",      "Yubico AB"
+			VALUE "FileDescription",  "libfido2 - FIDO2 Library"
+			VALUE "FileVersion",      "@FIDO_VERSION@"
+			VALUE "InternalName",     "fido2.dll"
+			VALUE "LegalCopyright",   "Copyright (c) 2018-2026 Yubico AB. All rights reserved."
+			VALUE "OriginalFilename", "fido2.dll"
+			VALUE "ProductName",      "libfido2"
+			VALUE "ProductVersion",   "@FIDO_VERSION@"
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x0409, 0x04B0
+	END
+END
