@@ -1,3 +1,46 @@
+* Version 1.17.0 (unreleased)
+ ** Added CTAP 2.3 support.
+ ** Support application-managed PIN/UV Auth tokens; gh#806.
+ ** Support 64-byte hmac-secret salts when using windows://hello.
+ ** Fixed a U2F transaction handling bug when a timeout had been set; gh#917.
+ ** Fixed a bug where stdin was closed on fido_nl_new failure; gh#923.
+ ** fido2-token: new -G -t mode to to retrieve a PPUAT.
+ ** fido2-token: new -I -t mode for deciphering encrypted fields.
+ ** fido2-cred -M: support the -t toggle argument
+ ** Improved documentation and examples.
+ ** New API calls:
+  - fido_cbor_info_attfmts_len;
+  - fido_cbor_info_attfmts_ptr;
+  - fido_cbor_info_cfgcmds_len;
+  - fido_cbor_info_cfgcmds_ptr;
+  - fido_cbor_info_decrypt;
+  - fido_cbor_info_encid_len;
+  - fido_cbor_info_encid_ptr;
+  - fido_cbor_info_encstate_len;
+  - fido_cbor_info_encstate_ptr;
+  - fido_cbor_info_id_len;
+  - fido_cbor_info_id_ptr;
+  - fido_cbor_info_long_touch_reset;
+  - fido_cbor_info_maxpinlen;
+  - fido_cbor_info_pin_policy;
+  - fido_cbor_info_pin_policy_url_len;
+  - fido_cbor_info_pin_policy_url_ptr;
+  - fido_cbor_info_reset_transports_len;
+  - fido_cbor_info_reset_transports_ptr;
+  - fido_cbor_info_state_len;
+  - fido_cbor_info_state_ptr;
+  - fido_cbor_info_uv_count_since_pin;
+  - fido_cred_hmac_secret_len;
+  - fido_cred_hmac_secret_ptr;
+  - fido_cred_payment;
+  - fido_cred_set_hmac_salt;
+  - fido_cred_set_hmac_secret;
+  - fido_dev_get_puat;
+  - fido_dev_get_uv_retry_count;
+  - fido_dev_puat_len;
+  - fido_dev_puat_ptr;
+  - fido_dev_set_puat.
+
 * Version 1.16.0 (2025-05-06)
  ** Added support for enterprise attestation.
  ** Improved handling of invalid key handles in U2F key lookup; gh#819.
