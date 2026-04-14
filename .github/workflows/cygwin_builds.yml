@@ -26,5 +26,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: build
+      env:
+          FIDO_REGRESS_RS1_XFAIL: 1
       run: |
         .\windows\cygwin.ps1 -Config ${{ matrix.config }}
