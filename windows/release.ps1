@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 $ErrorActionPreference = "Stop"
-$Architectures = @('x64', 'Win32', 'ARM64', 'ARM')
-$InstallPrefixes =  @('Win64', 'Win32', 'ARM64', 'ARM')
+$Architectures = @('x64', 'Win32', 'ARM64')
+$InstallPrefixes =  @('Win64', 'Win32', 'ARM64')
 $Types = @('dynamic', 'static')
 $Config = 'Release'
 $SDK = '143'
@@ -18,9 +18,6 @@ foreach ($Arch in $Architectures) {
 			Arch   = $Arch
 			Type   = $Type
 			Config = $Config
-		}
-		if ($buildParams['Arch'] -eq 'ARM') {
-			$buildParams['WinSDK'] = '10.0.22621.0'
 		}
 		./build.ps1 @buildParams
 	}
