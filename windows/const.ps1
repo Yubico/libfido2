@@ -12,8 +12,8 @@ New-Variable -Name 'CRYPTO_LIB' -Value 'crypto' -Option Constant
 New-Variable -Name 'CRYPTO_DLL' -Value 'crypto-57' -Option Constant
 
 # libcbor coordinates.
-New-Variable -Name 'LIBCBOR' -Value 'libcbor-0.13.0' -Option Constant
-New-Variable -Name 'LIBCBOR_BRANCH' -Value 'v0.13.0' -Option Constant
+New-Variable -Name 'LIBCBOR' -Value 'libcbor-0.14.0' -Option Constant
+New-Variable -Name 'LIBCBOR_BRANCH' -Value 'v0.14.0' -Option Constant
 New-Variable -Name 'LIBCBOR_GIT' -Value 'https://github.com/pjk/libcbor' `
     -Option Constant
 
