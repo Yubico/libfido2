@@ -262,7 +262,7 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int *ms)
 	memcpy(buf, f.body.init.data, init_data_len);
 	r = init_data_len;
 
-	for (int seq = 0; r < payload_len; seq++) {
+	for (unsigned int seq = 0; r < payload_len; seq++) {
 		if (rx_frame(d, &f, ms) < 0) {
 			fido_log_debug("%s: rx_frame", __func__);
 			return (-1);
@@ -271,10 +271,10 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int *ms)
 		fido_log_xxd(&f, d->rx_len, "%s", __func__);
 #ifdef FIDO_FUZZ
 		f.cid = d->cid;
-		f.body.cont.seq = (uint8_t)seq;
+		f.body.cont.seq = seq & 0x7f;
 #endif
 
-		if (f.cid != d->cid || f.body.cont.seq != seq) {
+		if (f.cid != d->cid || f.body.cont.seq != (seq & 0x7f)) {
 			fido_log_debug("%s: cid (0x%x, 0x%x), seq (%d, %d)",
 			    __func__, f.cid, d->cid, f.body.cont.seq, seq);
 			return (-1);

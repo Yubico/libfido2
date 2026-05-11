@@ -12,7 +12,7 @@
 #include "fido/es256.h"
 
 #ifndef FIDO_MAXMSG_CRED
-#define FIDO_MAXMSG_CRED	4096
+#define FIDO_MAXMSG_CRED	0x7FFF
 #endif
 
 static int
