@@ -29,6 +29,8 @@ enum {
 	OPT_MASK = (((OPT_EDGE - 1) << 1) - 1),
 };
 
+#define IS_U2F(o) ((o) & OPT_FORCE_U2F)
+
 /* Parameter set defining a FIDO2 get assertion operation. */
 struct param {
 	char pin[MAXSTR];
@@ -171,6 +173,18 @@ fail:
 	return cbor_len;
 }
 
+static void
+reset(struct blob *wiredata, int u2f)
+{
+	if (u2f) {
+		wiredata->len = sizeof(dummy_wire_data_u2f);
+		memcpy(&wiredata->body, &dummy_wire_data_u2f, wiredata->len);
+	} else {
+		wiredata->len = sizeof(dummy_wire_data_fido);
+		memcpy(&wiredata->body, &dummy_wire_data_fido, wiredata->len);
+	}
+}
+
 size_t
 pack_dummy(uint8_t *ptr, size_t len)
 {
@@ -191,15 +205,14 @@ pack_dummy(uint8_t *ptr, size_t len)
 	dummy.es256.len = sizeof(dummy_es256);
 	dummy.rs256.len = sizeof(dummy_rs256);
 	dummy.eddsa.len = sizeof(dummy_eddsa);
-	dummy.wire_data.len = sizeof(dummy_wire_data_fido);
 
 	memcpy(&dummy.cred.body, &dummy_cdh, dummy.cred.len); /* XXX */
 	memcpy(&dummy.cdh.body, &dummy_cdh, dummy.cdh.len);
-	memcpy(&dummy.wire_data.body, &dummy_wire_data_fido,
-	    dummy.wire_data.len);
 	memcpy(&dummy.es256.body, &dummy_es256, dummy.es256.len);
 	memcpy(&dummy.rs256.body, &dummy_rs256, dummy.rs256.len);
 	memcpy(&dummy.eddsa.body, &dummy_eddsa, dummy.eddsa.len);
+
+	reset(&dummy.wire_data, 0);
 
 	assert((blob_len = pack(blob, sizeof(blob), &dummy)) != 0);
 
@@ -518,6 +531,8 @@ out:
 void
 mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 {
+	const uint8_t old_opt = p->opt;
+
 	if (flags & MUTATE_SEED)
 		p->seed = (int)seed;
 
@@ -540,15 +555,8 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 	}
 
 	if (flags & MUTATE_WIREDATA) {
-		if (p->opt & OPT_FORCE_U2F) {
-			p->wire_data.len = sizeof(dummy_wire_data_u2f);
-			memcpy(&p->wire_data.body, &dummy_wire_data_u2f,
-			    p->wire_data.len);
-		} else {
-			p->wire_data.len = sizeof(dummy_wire_data_fido);
-			memcpy(&p->wire_data.body, &dummy_wire_data_fido,
-			    p->wire_data.len);
-		}
+		if (IS_U2F(old_opt) != IS_U2F(p->opt))
+			reset(&p->wire_data, IS_U2F(p->opt));
 		mutate_blob(&p->wire_data);
 	}
 }
