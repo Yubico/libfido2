@@ -11,6 +11,7 @@ cbor_array_push
 cbor_build_bool
 cbor_build_bytestring
 cbor_build_negint16
+cbor_build_negint64
 cbor_build_negint8
 cbor_build_string
 cbor_build_uint16
@@ -27,6 +28,9 @@ cbor_serialize_alloc
 clock_gettime
 deflate
 deflateInit2_
+inflate
+inflateInit2_
+uncompress
 EC_KEY_get0_group
 EC_KEY_get0_private_key
 EC_KEY_new_by_curve_name
@@ -60,8 +64,10 @@ EVP_PKEY_new_raw_public_key
 EVP_PKEY_paramgen
 EVP_PKEY_paramgen_init
 EVP_PKEY_verify_init
+EVP_aes_128_cbc
 EVP_sha1
 EVP_sha256
+EVP_sha384
 fido_tx
 getrandom
 HMAC
