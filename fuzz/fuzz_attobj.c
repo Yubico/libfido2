@@ -210,7 +210,7 @@ pack(uint8_t *ptr, size_t len, const struct param *p)
 
 	memset(argv, 0, sizeof(argv));
 
-	if ((array = cbor_new_definite_array(17)) == NULL ||
+	if ((array = cbor_new_definite_array(5)) == NULL ||
 	    (argv[0] = pack_int(p->seed)) == NULL ||
 	    (argv[1] = pack_string(p->rp_id)) == NULL ||
 	    (argv[2] = pack_blob(&p->cdh)) == NULL ||
