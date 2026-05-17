@@ -197,8 +197,6 @@ LLVMFuzzerCustomMutator(uint8_t *data, size_t size, size_t maxsize,
 	uint8_t blob[MAXCORPUS];
 	size_t blob_len;
 
-	memset(&p, 0, sizeof(p));
-
 #ifdef WITH_MSAN
 	__msan_unpoison(data, maxsize);
 #endif
