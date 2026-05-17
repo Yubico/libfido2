@@ -280,9 +280,6 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 
 	if (flags & MUTATE_PARAM) {
 		mutate_byte(&p->type);
-		p->attobj.len = sizeof(dummy_attestation_object);
-		memcpy(&p->attobj.body, &dummy_attestation_object,
-		    p->attobj.len);
 		mutate_blob(&p->attobj);
 	}
 }
