@@ -516,6 +516,9 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 		mutate_string(p->rp_id);
 		mutate_string(p->rp_name);
 
+		if ((p->ext & FIDO_EXT_HMAC_SECRET) && p->excl_cred.len > 64)
+			p->excl_cred.len = (p->excl_cred.len & 1) ? 64 : 32;
+
 		p->opt &= OPT_MASK;
 	}
 
