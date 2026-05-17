@@ -564,5 +564,6 @@ mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 		mutate_blob(&p->set_pin_wire_data);
 		mutate_blob(&p->change_pin_wire_data);
 		mutate_blob(&p->retry_wire_data);
+		mutate_blob(&p->config_wire_data);
 	}
 }
