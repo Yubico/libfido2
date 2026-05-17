@@ -415,6 +415,22 @@ WRAP(const EVP_MD *,
 	1
 )
 
+WRAP(const EVP_MD *,
+	EVP_sha384,
+	(void),
+	NULL,
+	(),
+	1
+)
+
+WRAP(const EVP_CIPHER *,
+	EVP_aes_128_cbc,
+	(void),
+	NULL,
+	(),
+	1
+)
+
 WRAP(const EVP_CIPHER *,
 	EVP_aes_256_cbc,
 	(void),
@@ -525,6 +541,14 @@ WRAP(cbor_item_t *,
 WRAP(cbor_item_t *,
 	cbor_build_negint16,
 	(uint16_t value),
+	NULL,
+	(value),
+	1
+)
+
+WRAP(cbor_item_t *,
+	cbor_build_negint64,
+	(uint64_t value),
 	NULL,
 	(value),
 	1
@@ -660,6 +684,45 @@ WRAP(int,
 	    stream_size),
 	1
 )
+
+WRAP(int,
+	inflateInit2_,
+	(z_streamp strm, int windowBits, const char *version, int stream_size),
+	Z_STREAM_ERROR,
+	(strm, windowBits, version, stream_size),
+	1
+)
+
+int __wrap_inflate(z_streamp, int);
+int __real_inflate(z_streamp, int);
+
+int
+__wrap_inflate(z_streamp strm, int flush)
+{
+	if (prng_up && uniform_random(400) < 1)
+		return Z_BUF_ERROR;
+
+	/* should never happen, but we check for it */
+	if (prng_up && uniform_random(400) < 1) {
+		strm->avail_out = 1;
+		return Z_STREAM_END;
+	}
+
+	return __real_inflate(strm, flush);
+}
+
+int __wrap_uncompress(Bytef *, uLongf *, const Bytef *, uLong);
+int __real_uncompress(Bytef *, uLongf *, const Bytef *, uLong);
+
+int
+__wrap_uncompress(Bytef *dest, uLongf *destLen, const Bytef *source,
+    uLong sourceLen)
+{
+	if (prng_up && uniform_random(400) < 1)
+		return Z_BUF_ERROR;
+
+	return __real_uncompress(dest, destLen, source, sourceLen);
+}
 
 int __wrap_deflate(z_streamp, int);
 int __real_deflate(z_streamp, int);
