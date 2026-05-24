@@ -14,7 +14,9 @@ xargs -0 awk '/^.Sh NAME/,/^.Nd/' < "$T/files" | \
 xargs -0 awk '/^.Fn/ { print $2 }' < "$T/files" | sort -u > "$T/Fn"
 (cd "$T" && diff -u Nm Fn)
 
-cut -c2- ../src/export.llvm | sort > "$T/exports"
+cut -c2- ../src/export.llvm | sort > "$T/full_exports"
+sort obsolete > "$T/obsolete"
+comm -23 "$T/full_exports" "$T/obsolete" > "$T/exports"
 (cd "$T" && diff -u Nm exports)
 
 awk '/^list\(APPEND MAN_SOURCES/,/^\)/' CMakeLists.txt | \
@@ -39,6 +41,7 @@ while read -r f; do
 done < "$T/exports" | sort > "$T/actual_prototypes"
 (cd "$T" && diff -u documented_prototypes actual_prototypes)
 
-(cd "$T" && rm files Nm Fn exports listed_sources actual_sources \
-    listed_aliases actual_aliases documented_prototypes actual_prototypes)
+(cd "$T" && rm -f -- files Nm Fn full_exports exports obsolete listed_sources \
+    actual_sources listed_aliases actual_aliases documented_prototypes \
+    actual_prototypes)
 rmdir -- "$T"
