@@ -11,6 +11,9 @@ SCAN=scan-build${CC#clang}
 # Check exports.
 (cd src && ./diff_exports.sh)
 
+# Check man pages.
+(cd man && ./check.sh)
+
 # Build, analyze, and install libfido2.
 for T in Debug Release; do
 	mkdir build-$T
