@@ -31,7 +31,7 @@ xargs -0 grep -o "^.Fn [A-Za-z0-9_]* \"" < "$T/files" | \
 
 xargs -0 grep -hB1 "^.Fn [A-Za-z0-9_]* \"" < "$T/files" | \
     sed -E 's/^.F[tn] //;s/\*[^"\*]+"/\*"/g;s/ [^" \*]+"/"/g;/^--$/d' | \
-    paste -d " " - - | sed 's/\* /\*/' | sort > "$T/documented_prototypes"
+    paste -d "|" - - | sed 's/\*|/\*/;s/|/ /' | sort > "$T/documented_prototypes"
 while read -r f; do
 	awk "/\/\*/ { next } /$f\(/,/;/" ../src/fido.h ../src/fido/*.h | \
 	    sed -E 's/^[ ]+//;s/[ ]+/ /' | tr '\n' ' ' | \
