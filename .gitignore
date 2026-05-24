@@ -1,4 +1,5 @@
 build/
+compile_commands.json
 cscope.out
 fuzz/build/
 fuzz/corpus.tgz*
