@@ -6,30 +6,32 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 T=$(mktemp -d) || exit 1
+trap 'rm -rf -- "$T"' EXIT
 find . -maxdepth 1 -type f -name '*.3' -print0 > "$T/files"
 
+rc=0
 xargs -0 awk '/^.Sh NAME/,/^.Nd/' < "$T/files" | \
     awk '/^.Nm/ { print $2 }' | sort -u > "$T/Nm"
 # shellcheck disable=SC2016
 xargs -0 awk '/^.Fn/ { print $2 }' < "$T/files" | sort -u > "$T/Fn"
-(cd "$T" && diff -u Nm Fn)
+(cd "$T" && diff -u Nm Fn) || rc=1
 
 cut -c2- ../src/export.llvm | sort > "$T/full_exports"
 sort obsolete > "$T/obsolete"
 comm -23 "$T/full_exports" "$T/obsolete" > "$T/exports"
-(cd "$T" && diff -u Nm exports)
+(cd "$T" && diff -u Nm exports) || rc=1
 
 awk '/^list\(APPEND MAN_SOURCES/,/^\)/' CMakeLists.txt | \
     awk '/.3$/ { print $1 }' | sort > "$T/listed_sources"
 xargs -0 -n1 basename < "$T/files" | sort > "$T/actual_sources"
-(cd "$T" && diff -u listed_sources actual_sources)
+(cd "$T" && diff -u listed_sources actual_sources) || rc=1
 
 awk '/^list\(APPEND MAN_ALIAS/,/^\)/' CMakeLists.txt | \
     sed '1d;$d' | awk '{ print $1, $2 }' | sort > "$T/listed_aliases"
 xargs -0 grep -o "^.Fn [A-Za-z0-9_]* \"" < "$T/files" | \
     cut -c3- | sed 's/\.3:\.Fn//;s/ "//' | awk '$1 != $2' | \
     sort > "$T/actual_aliases"
-(cd "$T" && diff -u listed_aliases actual_aliases)
+(cd "$T" && diff -u listed_aliases actual_aliases) || rc=1
 
 xargs -0 grep -hB1 "^.Fn [A-Za-z0-9_]* \"" < "$T/files" | \
     sed -E 's/^.F[tn] //;s/\*[^"\*]+"/\*"/g;s/ [^" \*]+"/"/g;/^--$/d' | \
@@ -39,9 +41,10 @@ while read -r f; do
 	    sed -E 's/^[ ]+//;s/[ ]+/ /' | tr '\n' ' ' | \
 	    sed 's/(/ "/;s/, /" "/g;s/);/"/;s/ $/\n/'
 done < "$T/exports" | sort > "$T/actual_prototypes"
-(cd "$T" && diff -u documented_prototypes actual_prototypes)
+(cd "$T" && diff -u documented_prototypes actual_prototypes) || rc=1
 
 (cd "$T" && rm -f -- files Nm Fn full_exports exports obsolete listed_sources \
     actual_sources listed_aliases actual_aliases documented_prototypes \
     actual_prototypes)
 rmdir -- "$T"
+exit "$rc"
