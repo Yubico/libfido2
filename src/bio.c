@@ -300,9 +300,6 @@ fido_bio_dev_get_template_array(fido_dev_t *dev, fido_bio_template_array_t *ta,
 {
 	int ms = dev->timeout_ms;
 
-	if (pin == NULL && fido_dev_puat_blob(dev) == NULL)
-		return (FIDO_ERR_INVALID_ARGUMENT);
-
 	return (bio_get_template_array_wait(dev, ta, pin, &ms));
 }
 
@@ -348,7 +345,7 @@ fido_bio_dev_set_template_name(fido_dev_t *dev, const fido_bio_template_t *t,
 {
 	int ms = dev->timeout_ms;
 
-	if ((pin == NULL && fido_dev_puat_blob(dev) == NULL) || t->name == NULL)
+	if (t->name == NULL)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	return (bio_set_template_name_wait(dev, t, pin, &ms));
@@ -491,8 +488,7 @@ fido_bio_dev_enroll_begin(fido_dev_t *dev, fido_bio_template_t *t,
 	int ms = dev->timeout_ms;
 	int r;
 
-	if ((pin == NULL && fido_blob_is_empty(&dev->puat)) ||
-	    !fido_blob_is_empty(&e->token))
+	if (!fido_blob_is_empty(&e->token))
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	if ((r = bio_resolve_token(dev, &e->token, pin, &ms)) != FIDO_OK) {
