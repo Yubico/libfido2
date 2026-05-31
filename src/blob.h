@@ -8,6 +8,8 @@
 #ifndef _BLOB_H
 #define _BLOB_H
 
+#include <sys/types.h>
+
 #include <cbor.h>
 #include <stdlib.h>
 
