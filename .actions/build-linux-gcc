@@ -21,3 +21,15 @@ done
 	sudo update-alternatives --set awk "$(which original-awk)"
 }
 udev/check.sh udev/fidodevs
+
+# Check installed header files.
+CFLAGS="$(pkg-config --cflags libcrypto)"
+export CFLAGS
+find /usr/local/include/fido.h /usr/local/include/fido -type f -name '*.h' \
+    -print0 | xargs -0 tools/include_check.sh
+
+# Check internal header files.
+find examples fuzz openbsd-compat regress src/fido tools -type f -name '*.h' \
+    -print0 | xargs -0 tools/include_check.sh
+find src -type f -name '*.h' ! -name 'webauthn.h' -print0 | xargs -0 \
+    env CFLAGS="$CFLAGS -D_FIDO_INTERNAL" tools/include_check.sh
