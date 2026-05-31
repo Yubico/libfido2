@@ -16,6 +16,7 @@
 #include <signal.h>
 #endif
 
+#include <openssl/evp.h>
 #include <stdint.h>
 
 #include "fido/types.h"
