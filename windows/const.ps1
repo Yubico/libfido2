@@ -7,7 +7,7 @@
 New-Variable -Name 'LIBRESSL_URL' `
     -Value 'https://ftp.openbsd.org/pub/OpenBSD/LibreSSL' `
     -Option Constant
-New-Variable -Name 'LIBRESSL' -Value 'libressl-4.3.1' -Option Constant
+New-Variable -Name 'LIBRESSL' -Value 'libressl-4.3.2' -Option Constant
 New-Variable -Name 'CRYPTO_LIB' -Value 'crypto' -Option Constant
 New-Variable -Name 'CRYPTO_DLL' -Value 'crypto-57' -Option Constant
 
