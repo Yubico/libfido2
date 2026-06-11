@@ -29,6 +29,7 @@ list(APPEND FIDO_SOURCES
 	iso7816.c
 	largeblob.c
 	log.c
+	mldsa.c
 	pin.c
 	random.c
 	reset.c
