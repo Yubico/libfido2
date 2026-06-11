@@ -10,6 +10,7 @@
 #include <fido/es384.h>
 #include <fido/rs256.h>
 #include <fido/eddsa.h>
+#include <fido/mldsa.h>
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -32,7 +33,7 @@ static const unsigned char cd[32] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: assert [-t es256|es384|rs256|eddsa] "
+	fprintf(stderr, "usage: assert [-t es256|es384|rs256|eddsa|mldsa44|mldsa65|mldsa87] "
 	    "[-a cred_id] [-h hmac_secret] [-s hmac_salt] [-P pin] "
 	    "[-T seconds] [-b blobkey] [-puv] <pubkey> <device>\n");
 	exit(EXIT_FAILURE);
@@ -46,11 +47,14 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 	fido_assert_t	*assert = NULL;
 	EC_KEY		*ec = NULL;
 	RSA		*rsa = NULL;
-	EVP_PKEY	*eddsa = NULL;
+	EVP_PKEY	*pkey = NULL;
 	es256_pk_t	*es256_pk = NULL;
 	es384_pk_t	*es384_pk = NULL;
 	rs256_pk_t	*rs256_pk = NULL;
 	eddsa_pk_t	*eddsa_pk = NULL;
+	mldsa44_pk_t	*mldsa44_pk = NULL;
+	mldsa65_pk_t	*mldsa65_pk = NULL;
+	mldsa87_pk_t	*mldsa87_pk = NULL;
 	void		*pk;
 	int		 r;
 
@@ -102,18 +106,52 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 
 		break;
 	case COSE_EDDSA:
-		if ((eddsa = read_eddsa_pubkey(key)) == NULL)
+		if ((pkey = read_eddsa_pubkey(key)) == NULL)
 			errx(1, "read_eddsa_pubkey");
 
 		if ((eddsa_pk = eddsa_pk_new()) == NULL)
 			errx(1, "eddsa_pk_new");
 
-		if (eddsa_pk_from_EVP_PKEY(eddsa_pk, eddsa) != FIDO_OK)
+		if (eddsa_pk_from_EVP_PKEY(eddsa_pk, pkey) != FIDO_OK)
 			errx(1, "eddsa_pk_from_EVP_PKEY");
 
 		pk = eddsa_pk;
-		EVP_PKEY_free(eddsa);
-		eddsa = NULL;
+		EVP_PKEY_free(pkey);
+		pkey = NULL;
+
+		break;
+	case COSE_MLDSA44:
+	case COSE_MLDSA65:
+	case COSE_MLDSA87:
+		if ((pkey = read_mldsa_pubkey(key)) == NULL)
+			errx(1, "read_mldsa_pubkey");
+
+		switch (type) {
+		case COSE_MLDSA44:
+		    if ((mldsa44_pk = mldsa44_pk_new()) == NULL)
+			    errx(1, "mldsa44_pk_new");
+		    if (mldsa44_pk_from_EVP_PKEY(mldsa44_pk, pkey) != FIDO_OK)
+			    errx(1, "mldsa44_pk_from_EVP_PKEY");
+		    pk = mldsa44_pk;
+		    break;
+		case COSE_MLDSA65:
+		    if ((mldsa65_pk = mldsa65_pk_new()) == NULL)
+			    errx(1, "mldsa65_pk_new");
+		    if (mldsa65_pk_from_EVP_PKEY(mldsa65_pk, pkey) != FIDO_OK)
+			    errx(1, "mldsa65_pk_from_EVP_PKEY");
+		    pk = mldsa65_pk;
+		    break;
+		case COSE_MLDSA87:
+		    if ((mldsa87_pk = mldsa87_pk_new()) == NULL)
+			    errx(1, "mldsa87_pk_new");
+		    if (mldsa87_pk_from_EVP_PKEY(mldsa87_pk, pkey) != FIDO_OK)
+			    errx(1, "mldsa87_pk_from_EVP_PKEY");
+		    pk = mldsa87_pk;
+		    break;
+		}
+
+		EVP_PKEY_free(pkey);
+		pkey = NULL;
 
 		break;
 	default:
@@ -168,6 +206,9 @@ verify_assert(int type, const unsigned char *authdata_ptr, size_t authdata_len,
 	es384_pk_free(&es384_pk);
 	rs256_pk_free(&rs256_pk);
 	eddsa_pk_free(&eddsa_pk);
+	mldsa44_pk_free(&mldsa44_pk);
+	mldsa65_pk_free(&mldsa65_pk);
+	mldsa87_pk_free(&mldsa87_pk);
 
 	fido_assert_free(&assert);
 }
@@ -246,6 +287,12 @@ main(int argc, char **argv)
 				type = COSE_RS256;
 			else if (strcmp(optarg, "eddsa") == 0)
 				type = COSE_EDDSA;
+			else if (strcmp(optarg, "mldsa44") == 0)
+				type = COSE_MLDSA44;
+			else if (strcmp(optarg, "mldsa65") == 0)
+				type = COSE_MLDSA65;
+			else if (strcmp(optarg, "mldsa87") == 0)
+				type = COSE_MLDSA87;
 			else
 				errx(1, "unknown type %s", optarg);
 			break;

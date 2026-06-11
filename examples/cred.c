@@ -35,7 +35,7 @@ static const unsigned char user_id[32] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: cred [-t es256|es384|rs256|eddsa] [-k pubkey] "
+	fprintf(stderr, "usage: cred [-t es256|es384|rs256|eddsa|mldsa44|mldsa65|mldsa87] [-k pubkey] "
 	    "[-ei cred_id] [-P pin] [-T seconds] [-b blobkey] [-c cred_protect] "
 	    "[-a mode] [-hruv] "
 	    "<device>\n");
@@ -138,6 +138,21 @@ out:
 			    fido_cred_pubkey_ptr(cred),
 			    fido_cred_pubkey_len(cred)) < 0)
 				errx(1, "write_eddsa_pubkey");
+		} else if (type == COSE_MLDSA44) {
+			if (write_mldsa44_pubkey(key_out,
+			    fido_cred_pubkey_ptr(cred),
+			    fido_cred_pubkey_len(cred)) < 0)
+				errx(1, "write_mldsa44_pubkey");
+		} else if (type == COSE_MLDSA65) {
+			if (write_mldsa65_pubkey(key_out,
+			    fido_cred_pubkey_ptr(cred),
+			    fido_cred_pubkey_len(cred)) < 0)
+				errx(1, "write_mldsa65_pubkey");
+		} else if (type == COSE_MLDSA87) {
+			if (write_mldsa87_pubkey(key_out,
+			    fido_cred_pubkey_ptr(cred),
+			    fido_cred_pubkey_len(cred)) < 0)
+				errx(1, "write_mldsa87_pubkey");
 		}
 	}
 
@@ -236,6 +251,12 @@ main(int argc, char **argv)
 				type = COSE_RS256;
 			else if (strcmp(optarg, "eddsa") == 0)
 				type = COSE_EDDSA;
+			else if (strcmp(optarg, "mldsa44") == 0)
+				type = COSE_MLDSA44;
+			else if (strcmp(optarg, "mldsa65") == 0)
+				type = COSE_MLDSA65;
+			else if (strcmp(optarg, "mldsa87") == 0)
+				type = COSE_MLDSA87;
 			else
 				errx(1, "unknown type %s", optarg);
 			break;
