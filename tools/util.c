@@ -17,6 +17,7 @@
 #include <fido/es384.h>
 #include <fido/rs256.h>
 #include <fido/eddsa.h>
+#include <fido/mldsa.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -392,7 +393,7 @@ fail:
 }
 
 EVP_PKEY *
-read_eddsa_pubkey(const char *path)
+read_evp_pkey(const char *path)
 {
 	FILE *fp = NULL;
 	EVP_PKEY *pkey = NULL;
@@ -453,6 +454,120 @@ fail:
 	return (ok);
 }
 
+int
+write_mldsa44_pubkey(FILE *f, const void *ptr, size_t len)
+{
+	EVP_PKEY *pkey = NULL;
+	mldsa44_pk_t *pk = NULL;
+	int ok = -1;
+
+	if ((pk = mldsa44_pk_new()) == NULL) {
+		warnx("mldsa44_pk_new");
+		goto fail;
+	}
+
+	if (mldsa44_pk_from_ptr(pk, ptr, len) != FIDO_OK) {
+		warnx("mldsa44_pk_from_ptr");
+		goto fail;
+	}
+
+	if ((pkey = mldsa44_pk_to_EVP_PKEY(pk)) == NULL) {
+		warnx("mldsa44_pk_to_EVP_PKEY");
+		goto fail;
+	}
+
+	if (PEM_write_PUBKEY(f, pkey) == 0) {
+		warnx("PEM_write_PUBKEY");
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	mldsa44_pk_free(&pk);
+
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+
+	return (ok);
+}
+
+int
+write_mldsa65_pubkey(FILE *f, const void *ptr, size_t len)
+{
+	EVP_PKEY *pkey = NULL;
+	mldsa65_pk_t *pk = NULL;
+	int ok = -1;
+
+	if ((pk = mldsa65_pk_new()) == NULL) {
+		warnx("mldsa65_pk_new");
+		goto fail;
+	}
+
+	if (mldsa65_pk_from_ptr(pk, ptr, len) != FIDO_OK) {
+		warnx("mldsa65_pk_from_ptr");
+		goto fail;
+	}
+
+	if ((pkey = mldsa65_pk_to_EVP_PKEY(pk)) == NULL) {
+		warnx("mldsa65_pk_to_EVP_PKEY");
+		goto fail;
+	}
+
+	if (PEM_write_PUBKEY(f, pkey) == 0) {
+		warnx("PEM_write_PUBKEY");
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	mldsa65_pk_free(&pk);
+
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+
+	return (ok);
+}
+
+int
+write_mldsa87_pubkey(FILE *f, const void *ptr, size_t len)
+{
+	EVP_PKEY *pkey = NULL;
+	mldsa87_pk_t *pk = NULL;
+	int ok = -1;
+
+	if ((pk = mldsa87_pk_new()) == NULL) {
+		warnx("mldsa87_pk_new");
+		goto fail;
+	}
+
+	if (mldsa87_pk_from_ptr(pk, ptr, len) != FIDO_OK) {
+		warnx("mldsa87_pk_from_ptr");
+		goto fail;
+	}
+
+	if ((pkey = mldsa87_pk_to_EVP_PKEY(pk)) == NULL) {
+		warnx("mldsa87_pk_to_EVP_PKEY");
+		goto fail;
+	}
+
+	if (PEM_write_PUBKEY(f, pkey) == 0) {
+		warnx("PEM_write_PUBKEY");
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	mldsa87_pk_free(&pk);
+
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+
+	return (ok);
+}
+
 void
 print_cred(FILE *out_f, int type, const fido_cred_t *cred)
 {
@@ -482,6 +597,18 @@ print_cred(FILE *out_f, int type, const fido_cred_t *cred)
 		write_eddsa_pubkey(out_f, fido_cred_pubkey_ptr(cred),
 		    fido_cred_pubkey_len(cred));
 		break;
+	case COSE_MLDSA44:
+		write_mldsa44_pubkey(out_f, fido_cred_pubkey_ptr(cred),
+		    fido_cred_pubkey_len(cred));
+		break;
+	case COSE_MLDSA65:
+		write_mldsa65_pubkey(out_f, fido_cred_pubkey_ptr(cred),
+		    fido_cred_pubkey_len(cred));
+		break;
+	case COSE_MLDSA87:
+		write_mldsa87_pubkey(out_f, fido_cred_pubkey_ptr(cred),
+		    fido_cred_pubkey_len(cred));
+		break;
 	default:
 		errx(1, "print_cred: unknown type");
 	}
@@ -500,6 +627,12 @@ cose_type(const char *str, int *type)
 		*type = COSE_RS256;
 	else if (strcmp(str, "eddsa") == 0)
 		*type = COSE_EDDSA;
+	else if (strcmp(str, "mldsa44") == 0)
+		*type = COSE_MLDSA44;
+	else if (strcmp(str, "mldsa65") == 0)
+		*type = COSE_MLDSA65;
+	else if (strcmp(str, "mldsa87") == 0)
+		*type = COSE_MLDSA87;
 	else {
 		*type = 0;
 		return (-1);
@@ -520,6 +653,12 @@ cose_string(int type)
 		return ("rs256");
 	case COSE_EDDSA:
 		return ("eddsa");
+	case COSE_MLDSA44:
+		return ("mldsa44");
+	case COSE_MLDSA65:
+		return ("mldsa65");
+	case COSE_MLDSA87:
+		return ("mldsa87");
 	default:
 		return ("unknown");
 	}
