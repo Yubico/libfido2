@@ -412,6 +412,8 @@ fido_init(int flags)
 		fido_log_init();
 
 	disable_u2f_fallback = (flags & FIDO_DISABLE_U2F_FALLBACK);
+
+	fido_init_cbor_allocs();
 }
 
 fido_dev_t *
