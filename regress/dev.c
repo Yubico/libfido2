@@ -214,6 +214,22 @@ timeout_misc(void)
 	fido_dev_free(&dev);
 }
 
+/* PJK/libcbor#418 */
+static void
+cbor_alloc_cap(void)
+{
+	/* array header declaring 0x10000000 (268M) elements */
+	const unsigned char blob[] = {
+		0x9b, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00,
+	};
+	struct cbor_load_result cbor;
+	cbor_item_t *item;
+
+	item = cbor_load(blob, sizeof(blob), &cbor);
+	assert(item == NULL);
+	assert(cbor.error.code == CBOR_ERR_MEMERROR);
+}
+
 int
 main(void)
 {
@@ -228,6 +244,7 @@ main(void)
 	timeout_rx();
 	timeout_ok();
 	timeout_misc();
+	cbor_alloc_cap();
 
 	exit(0);
 }

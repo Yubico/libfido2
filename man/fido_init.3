@@ -76,6 +76,19 @@ will not fallback to U2F in
 if a device claims to support FIDO2 but fails to respond to
 a CTAP 2.0 greeting.
 .Pp
+.Fn fido_init
+also installs a per-thread allocator that bounds the total size of CBOR
+allocations performed by
+.Em libfido2
+to
+.Dv FIDO_CBOR_MAX_ALLOC
+bytes (64MB by default).
+This guards against malicious or malfunctioning authenticators that declare
+an oversized element count in a CBOR message header in order to make
+.Em libfido2
+attempt an excessive memory allocation; once the budget is exhausted,
+the offending message is rejected as if it were malformed.
+.Pp
 The
 .Fn fido_set_log_handler
 function causes

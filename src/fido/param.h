@@ -101,6 +101,20 @@
 #define FIDO_MAXMSG	2048
 #endif
 
+/*
+ * Total memory budget, in bytes, for libcbor allocations made while
+ * decoding a single CBOR message. cbor_load() pre-allocates storage for
+ * definite-length arrays and maps sized by the element count declared in
+ * the message header, before reading any element data; without a cap, a
+ * malicious or malfunctioning authenticator can use a tiny message to
+ * trigger a multi-gigabyte allocation (see PJK/libcbor#418). This budget
+ * is well above FIDO_MAXMSG/FIDO_MAXMSG_CRED and any realistic largeBlob
+ * array, but far below what could exhaust process memory.
+ */
+#ifndef FIDO_CBOR_MAX_ALLOC
+#define FIDO_CBOR_MAX_ALLOC	(64 * 1024 * 1024) /* 64MB */
+#endif
+
 /* CTAP capability bits. */
 #define FIDO_CAP_WINK	0x01 /* if set, device supports CTAP_CMD_WINK */
 #define FIDO_CAP_CBOR	0x04 /* if set, device supports CTAP_CMD_CBOR */
