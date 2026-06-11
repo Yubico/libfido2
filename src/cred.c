@@ -332,7 +332,61 @@ fail:
 }
 
 static int
-verify_attstmt(const fido_blob_t *dgst, const fido_attstmt_t *attstmt)
+x509_alg_to_cose(const fido_attstmt_t *attstmt)
+{
+	BIO *rawcert = NULL;
+	X509 *cert = NULL;
+	const ASN1_OBJECT *obj;
+	const X509_ALGOR *alg = NULL;
+	int r;
+
+	if ((rawcert = BIO_new_mem_buf(attstmt->x5c.ptr[0].ptr,
+	    (int)attstmt->x5c.ptr[0].len)) == NULL ||
+	    (cert = d2i_X509_bio(rawcert, NULL)) == NULL ||
+	    (alg = X509_get0_tbs_sigalg(cert)) == NULL) {
+		fido_log_debug("%s: x509", __func__);
+		r = COSE_UNSPEC;
+		goto fail;
+	}
+
+	X509_ALGOR_get0(&obj, NULL, NULL, alg);
+	switch (OBJ_obj2nid(obj)) {
+	case NID_sha256WithRSAEncryption:
+	    r = COSE_RS256;
+	    break;
+	case NID_ecdsa_with_SHA256:
+	    r = COSE_ES256;
+	    break;
+	case NID_ED25519:
+	    r = COSE_EDDSA;
+	    break;
+	case NID_ecdsa_with_SHA384:
+	    r = COSE_ES384;
+	    break;
+	case NID_ML_DSA_44:
+	    r = COSE_MLDSA44;
+	    break;
+	case NID_ML_DSA_65:
+	    r = COSE_MLDSA65;
+	    break;
+	case NID_ML_DSA_87:
+	    r = COSE_MLDSA87;
+	    break;
+	default:
+	    r = COSE_UNSPEC;
+	    fido_log_debug("%s: unknown oid", __func__);
+	    break;
+	}
+fail:
+	BIO_free(rawcert);
+	X509_free(cert);
+
+	return r;
+}
+
+
+static int
+verify_attstmt(int alg, const fido_blob_t *dgst, const fido_attstmt_t *attstmt)
 {
 	BIO		*rawcert = NULL;
 	X509		*cert = NULL;
@@ -360,7 +414,7 @@ verify_attstmt(const fido_blob_t *dgst, const fido_attstmt_t *attstmt)
 		goto fail;
 	}
 
-	switch (attstmt->alg) {
+	switch (alg) {
 	case COSE_UNSPEC:
 	case COSE_ES256:
 		ok = es256_verify_sig(dgst, pkey, &attstmt->sig);
@@ -387,7 +441,7 @@ verify_attstmt(const fido_blob_t *dgst, const fido_attstmt_t *attstmt)
 		ok = mldsa87_verify_sig(dgst, pkey, &attstmt->sig);
 		break;
 	default:
-		fido_log_debug("%s: unknown alg %d", __func__, attstmt->alg);
+		fido_log_debug("%s: unknown alg %d", __func__, alg);
 		break;
 	}
 
@@ -450,7 +504,7 @@ fido_cred_verify(const fido_cred_t *cred)
 	}
 
 	if ((cose_alg = cred->attstmt.alg) == COSE_UNSPEC)
-		cose_alg = COSE_ES256; /* backwards compat */
+		cose_alg = x509_alg_to_cose(&cred->attstmt); /* XXX: kludge, revert? */
 
 	if (!strcmp(cred->fmt, "packed")) {
 		if (fido_get_signed_hash(cose_alg, &dgst, &cred->cdh,
@@ -480,7 +534,7 @@ fido_cred_verify(const fido_cred_t *cred)
 		goto out;
 	}
 
-	if (verify_attstmt(&dgst, &cred->attstmt) < 0) {
+	if (verify_attstmt(cose_alg, &dgst, &cred->attstmt) < 0) {
 		fido_log_debug("%s: verify_attstmt", __func__);
 		r = FIDO_ERR_INVALID_SIG;
 		goto out;
