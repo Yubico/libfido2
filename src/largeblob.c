@@ -550,13 +550,13 @@ largeblob_set_array(fido_dev_t *dev, const cbor_item_t *item, const char *pin,
     int *ms)
 {
 	unsigned char dgst[SHA256_DIGEST_LENGTH];
-	fido_blob_t cbor, token_store;
+	fido_blob_t cbor, tmp_token;
 	const fido_blob_t *token = NULL;
 	size_t chunklen, maxchunklen, totalsize;
 	int r;
 
 	memset(&cbor, 0, sizeof(cbor));
-	memset(&token_store, 0, sizeof(token_store));
+	memset(&tmp_token, 0, sizeof(tmp_token));
 
 	if ((maxchunklen = get_chunklen(dev)) == 0) {
 		fido_log_debug("%s: maxchunklen=%zu", __func__, maxchunklen);
@@ -592,7 +592,7 @@ largeblob_set_array(fido_dev_t *dev, const cbor_item_t *item, const char *pin,
 			fido_log_debug("%s: fido_dev_get_uv_token", __func__);
 			goto fail;
 		}
-		token = &token_store;
+		token = &tmp_token;
 	}
 
 	for (size_t offset = 0; offset < cbor.len; offset += chunklen) {
@@ -614,7 +614,7 @@ largeblob_set_array(fido_dev_t *dev, const cbor_item_t *item, const char *pin,
 
 	r = FIDO_OK;
 fail:
-	fido_blob_reset(&token_store);
+	fido_blob_reset(&tmp_token);
 	fido_blob_reset(&cbor);
 
 	return r;
