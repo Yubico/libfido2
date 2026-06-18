@@ -148,3 +148,10 @@ Please use https://github.com/Yubico/libfido2/issues[GitHub Issues] to report
 bugs. To report security issues, please contact security@yubico.com. A PGP
 public key can be found at
 https://www.yubico.com/support/security-advisories/issue-rating-system/.
+
+=== Security considerations
+
+*libfido2* applies defense-in-depth measures against malicious or
+malfunctioning authenticators, including CBOR messages crafted to trigger
+oversized memory allocations. See link:SECURITY-CONSIDERATIONS.md[] for
+details.

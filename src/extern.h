@@ -103,6 +103,9 @@ void cbor_vector_free(cbor_item_t **, size_t);
 int cbor_array_append(cbor_item_t **, cbor_item_t *);
 int cbor_array_drop(cbor_item_t **, size_t);
 
+/* cbor allocator */
+void fido_init_cbor_allocs(void);
+
 /* deflate */
 int fido_compress(fido_blob_t *, const fido_blob_t *);
 int fido_uncompress(fido_blob_t *, const fido_blob_t *, size_t);
