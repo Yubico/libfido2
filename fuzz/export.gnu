@@ -255,6 +255,7 @@
 		fido_dev_info_set;
 		fido_dev_info_vendor;
 		fido_dev_is_fido2;
+		fido_dev_is_winhello;
 		fido_dev_major;
 		fido_dev_make_cred;
 		fido_dev_minor;
