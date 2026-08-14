@@ -313,7 +313,9 @@ pack_rp(wchar_t **id, wchar_t **name, WEBAUTHN_RP_ENTITY_INFORMATION *out,
 		fido_log_debug("%s: id", __func__);
 		return -1;
 	}
-	if (in->name && (out->pwszName = *name = to_utf16(in->name)) == NULL) {
+	/* NOTE: webauthn requires rp.name; hybrid transport enforces it. */
+	if ((out->pwszName = *name = to_utf16(in->name ? in->name : in->id))
+	    == NULL) {
 		fido_log_debug("%s: name", __func__);
 		return -1;
 	}
@@ -324,6 +326,8 @@ static int
 pack_user(wchar_t **name, wchar_t **icon, wchar_t **display_name,
     WEBAUTHN_USER_ENTITY_INFORMATION *out, const fido_user_t *in)
 {
+	const char *dn;
+
 	if (in->id.ptr == NULL || in->id.len > ULONG_MAX) {
 		fido_log_debug("%s: id", __func__);
 		return -1;
@@ -344,9 +348,11 @@ pack_user(wchar_t **name, wchar_t **icon, wchar_t **display_name,
 			return -1;
 		}
 	}
-	if (in->display_name != NULL) {
-		if ((out->pwszDisplayName = *display_name =
-		    to_utf16(in->display_name)) == NULL) {
+	/* NOTE: webauthn requires user.displayName; hybrid enforces it. */
+	dn = in->display_name ? in->display_name : in->name;
+	if (dn != NULL) {
+		if ((out->pwszDisplayName = *display_name = to_utf16(dn))
+		    == NULL) {
 			fido_log_debug("%s: display_name", __func__);
 			return -1;
 		}
