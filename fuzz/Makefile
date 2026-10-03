@@ -75,7 +75,8 @@ clean: run
 
 ${CORPORA}:
 	-mkdir -p $@
-	gsutil -q -m rsync -d -r ${REMOTE}/libFuzzer/libfido2_$(@:/corpus=) $@
+	gcloud storage rsync -r ${REMOTE}/libFuzzer/libfido2_$(@:/corpus=) $@ \
+		--no-user-output-enabled
 
 fetch-oss-fuzz: ${CORPORA}
 	find ${TARGETS} -type f -size +8192c -print0 | xargs -0 rm
