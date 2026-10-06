@@ -19,12 +19,12 @@
 #endif
 
 int
-fido_hid_unix_open(const char *path)
+fido_hid_unix_open_flags(const char *path, int flags)
 {
 	int fd;
 	struct stat st;
 
-	if ((fd = open(path, O_RDWR)) == -1) {
+	if ((fd = open(path, flags)) == -1) {
 		if (errno != ENOENT && errno != ENXIO)
 			fido_log_error(errno, "%s: open %s", __func__, path);
 		return (-1);
@@ -45,6 +45,12 @@ fido_hid_unix_open(const char *path)
 	}
 
 	return (fd);
+}
+
+int
+fido_hid_unix_open(const char *path)
+{
+	return fido_hid_unix_open_flags(path, O_RDWR);
 }
 
 int
