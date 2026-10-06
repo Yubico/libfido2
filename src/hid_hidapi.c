@@ -7,6 +7,7 @@
 
 #ifdef __linux__
 #include <sys/ioctl.h>
+#include <sys/file.h>
 #include <linux/hidraw.h>
 #include <linux/input.h>
 #include <fcntl.h>
@@ -22,6 +23,7 @@ struct hid_hidapi {
 	void *handle;
 	size_t report_in_len;
 	size_t report_out_len;
+	int devfd;
 };
 
 static size_t
@@ -161,6 +163,43 @@ is_fido(const struct hid_device_info *hdi)
 }
 #endif
 
+static int lock_dev(const char *path)
+{
+	int fd, retries = 0;
+
+	if ((fd = fido_hid_unix_open_flags(path, O_RDONLY)) == -1) {
+		fido_log_debug("%s: fido_hid_unix_open", __func__);
+		return -1;
+	}
+
+	while (flock(fd, LOCK_EX|LOCK_NB) == -1) {
+		long interval_ms;
+		struct timespec tv_pause;
+
+		if (errno != EWOULDBLOCK) {
+			fido_log_error(errno, "%s: flock", __func__);
+			close(fd);
+			return -1;
+		}
+		fido_log_debug("waiting for lock...");
+		if (retries++ >= 20) {
+			fido_log_debug("%s: flock timeout", __func__);
+			close(fd);
+			return -1;
+		}
+		interval_ms = retries * 100000000L;
+		tv_pause.tv_sec = interval_ms / 1000000000L;
+		tv_pause.tv_nsec = interval_ms % 1000000000L;
+		if (nanosleep(&tv_pause, NULL) == -1) {
+			fido_log_error(errno, "%s: nanosleep", __func__);
+			close(fd);
+			return -1;
+		}
+	}
+
+	return fd;
+}
+
 void *
 fido_hid_open(const char *path)
 {
@@ -170,7 +209,13 @@ fido_hid_open(const char *path)
 		return (NULL);
 	}
 
+	if ((ctx->devfd = lock_dev(path)) == -1) {
+		free(ctx);
+		return (NULL);
+	}
+
 	if ((ctx->handle = hid_open_path(path)) == NULL) {
+		close(ctx->devfd);
 		free(ctx);
 		return (NULL);
 	}
@@ -186,6 +231,7 @@ fido_hid_close(void *handle)
 	struct hid_hidapi *ctx = handle;
 
 	hid_close(ctx->handle);
+	close(ctx->devfd);
 	free(ctx);
 }
 
