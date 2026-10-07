@@ -26,7 +26,9 @@ struct hid_hidapi {
 	void *handle;
 	size_t report_in_len;
 	size_t report_out_len;
+#ifdef __linux__
 	int devfd;
+#endif
 };
 
 static size_t
@@ -166,6 +168,7 @@ is_fido(const struct hid_device_info *hdi)
 }
 #endif
 
+#ifdef __linux__
 static int
 lock_dev(const char *path)
 {
@@ -203,6 +206,7 @@ lock_dev(const char *path)
 
 	return fd;
 }
+#endif
 
 void *
 fido_hid_open(const char *path)
@@ -213,13 +217,17 @@ fido_hid_open(const char *path)
 		return (NULL);
 	}
 
+#ifdef __linux__
 	if ((ctx->devfd = lock_dev(path)) == -1) {
 		free(ctx);
 		return (NULL);
 	}
+#endif
 
 	if ((ctx->handle = hid_open_path(path)) == NULL) {
+#ifdef __linux__
 		close(ctx->devfd);
+#endif
 		free(ctx);
 		return (NULL);
 	}
@@ -235,7 +243,9 @@ fido_hid_close(void *handle)
 	struct hid_hidapi *ctx = handle;
 
 	hid_close(ctx->handle);
+#ifdef __linux__
 	close(ctx->devfd);
+#endif
 	free(ctx);
 }
 
