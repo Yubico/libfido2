@@ -131,14 +131,9 @@ mldsa87_pk_from_EVP_PKEY(mldsa87_pk_t *pk, const EVP_PKEY *pkey)
 }
 
 static int
-mldsa_pk_from_ptr(const char *name, void *dst, size_t dlen,
-    const void *src, size_t slen)
+mldsa_pk_from_ptr(void *dst, size_t dlen, const void *src, size_t slen)
 {
-	EVP_PKEY *pkey;
-
 	if (slen != dlen)
-		return FIDO_ERR_INVALID_ARGUMENT;
-	if ((pkey = mldsa_pk_to_EVP_PKEY(name, src, slen)) == NULL)
 		return FIDO_ERR_INVALID_ARGUMENT;
 
 	memcpy(dst, src, dlen);
@@ -148,19 +143,19 @@ mldsa_pk_from_ptr(const char *name, void *dst, size_t dlen,
 int
 mldsa44_pk_from_ptr(mldsa44_pk_t *pk, const void *ptr, size_t len)
 {
-	return mldsa_pk_from_ptr(LN_ML_DSA_44, pk->pk, sizeof(pk->pk), ptr, len);
+	return mldsa_pk_from_ptr(pk->pk, sizeof(pk->pk), ptr, len);
 }
 
 int
 mldsa65_pk_from_ptr(mldsa65_pk_t *pk, const void *ptr, size_t len)
 {
-	return mldsa_pk_from_ptr(LN_ML_DSA_65, pk->pk, sizeof(pk->pk), ptr, len);
+	return mldsa_pk_from_ptr(pk->pk, sizeof(pk->pk), ptr, len);
 }
 
 int
 mldsa87_pk_from_ptr(mldsa87_pk_t *pk, const void *ptr, size_t len)
 {
-	return mldsa_pk_from_ptr(LN_ML_DSA_87, pk->pk, sizeof(pk->pk), ptr, len);
+	return mldsa_pk_from_ptr(pk->pk, sizeof(pk->pk), ptr, len);
 }
 
 static int
