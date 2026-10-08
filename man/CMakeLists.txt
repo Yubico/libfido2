@@ -16,9 +16,8 @@ list(APPEND MAN_SOURCES
 	fido2-assert.1
 	fido2-cred.1
 	fido2-token.1
-	fido_init.3
-	fido_assert_new.3
 	fido_assert_allow_cred.3
+	fido_assert_new.3
 	fido_assert_set_authdata.3
 	fido_assert_verify.3
 	fido_bio_dev_get_info.3
@@ -26,11 +25,11 @@ list(APPEND MAN_SOURCES
 	fido_bio_info_new.3
 	fido_bio_template.3
 	fido_cbor_info_new.3
-	fido_cred_new.3
 	fido_cred_exclude.3
-	fido_credman_metadata_new.3
+	fido_cred_new.3
 	fido_cred_set_authdata.3
 	fido_cred_verify.3
+	fido_credman_metadata_new.3
 	fido_dev_enable_entattest.3
 	fido_dev_get_assert.3
 	fido_dev_get_puat.3
@@ -41,7 +40,11 @@ list(APPEND MAN_SOURCES
 	fido_dev_open.3
 	fido_dev_set_io_functions.3
 	fido_dev_set_pin.3
+	fido_init.3
 	fido_strerr.3
+	mldsa44_pk_new.3
+	mldsa65_pk_new.3
+	mldsa87_pk_new.3
 	rs256_pk_new.3
 )
 
