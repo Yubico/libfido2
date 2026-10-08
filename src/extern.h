@@ -122,6 +122,7 @@ int fido_hid_read(void *, unsigned char *, size_t, int);
 int fido_hid_write(void *, const unsigned char *, size_t);
 int fido_hid_get_usage(const uint8_t *, size_t, uint32_t *);
 int fido_hid_get_report_len(const uint8_t *, size_t, size_t *, size_t *);
+int fido_hid_unix_open_flags(const char *, int flags);
 int fido_hid_unix_open(const char *);
 int fido_hid_unix_wait(int, int, const fido_sigset_t *);
 int fido_hid_set_sigmask(void *, const fido_sigset_t *);
