@@ -82,6 +82,9 @@ int es256_pk_decode(const cbor_item_t *, es256_pk_t *);
 int es384_pk_decode(const cbor_item_t *, es384_pk_t *);
 int rs256_pk_decode(const cbor_item_t *, rs256_pk_t *);
 int eddsa_pk_decode(const cbor_item_t *, eddsa_pk_t *);
+int mldsa44_pk_decode(const cbor_item_t *, mldsa44_pk_t *);
+int mldsa65_pk_decode(const cbor_item_t *, mldsa65_pk_t *);
+int mldsa87_pk_decode(const cbor_item_t *, mldsa87_pk_t *);
 
 /* auxiliary cbor routines */
 int cbor_add_bool(cbor_item_t *, const char *, fido_opt_t);
@@ -229,14 +232,23 @@ int fido_time_delta(const struct timespec *, int *);
 int fido_to_uint64(const char *, int, uint64_t *);
 
 /* crypto */
+int eddsa_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
 int es256_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
 int es384_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
-int rs256_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
-int eddsa_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
+int mldsa44_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
+int mldsa65_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
+int mldsa87_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
 int rs1_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
+int rs256_verify_sig(const fido_blob_t *, EVP_PKEY *, const fido_blob_t *);
 int es256_pk_verify_sig(const fido_blob_t *, const es256_pk_t *,
     const fido_blob_t *);
 int es384_pk_verify_sig(const fido_blob_t *, const es384_pk_t *,
+    const fido_blob_t *);
+int mldsa44_pk_verify_sig(const fido_blob_t *, const mldsa44_pk_t *,
+    const fido_blob_t *);
+int mldsa65_pk_verify_sig(const fido_blob_t *, const mldsa65_pk_t *,
+    const fido_blob_t *);
+int mldsa87_pk_verify_sig(const fido_blob_t *, const mldsa87_pk_t *,
     const fido_blob_t *);
 int rs256_pk_verify_sig(const fido_blob_t *, const rs256_pk_t *,
     const fido_blob_t *);

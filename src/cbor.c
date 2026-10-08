@@ -1042,6 +1042,14 @@ get_cose_alg(const cbor_item_t *item, int *cose_alg)
 			return (-1);
 		}
 		break;
+	case COSE_MLDSA44:
+	case COSE_MLDSA65:
+	case COSE_MLDSA87:
+		if (cose_key.kty != COSE_KTY_AKP) {
+			fido_log_debug("%s: invalid kty", __func__);
+			return (-1);
+		}
+		break;
 	case COSE_RS256:
 		if (cose_key.kty != COSE_KTY_RSA) {
 			fido_log_debug("%s: invalid kty/crv", __func__);
@@ -1089,6 +1097,24 @@ cbor_decode_pubkey(const cbor_item_t *item, int *type, void *key)
 	case COSE_EDDSA:
 		if (eddsa_pk_decode(item, key) < 0) {
 			fido_log_debug("%s: eddsa_pk_decode", __func__);
+			return (-1);
+		}
+		break;
+	case COSE_MLDSA44:
+		if (mldsa44_pk_decode(item, key) < 0) {
+			fido_log_debug("%s: mldsa44_pk_decode", __func__);
+			return (-1);
+		}
+		break;
+	case COSE_MLDSA65:
+		if (mldsa65_pk_decode(item, key) < 0) {
+			fido_log_debug("%s: mldsa65_pk_decode", __func__);
+			return (-1);
+		}
+		break;
+	case COSE_MLDSA87:
+		if (mldsa87_pk_decode(item, key) < 0) {
+			fido_log_debug("%s: mldsa87_pk_decode", __func__);
 			return (-1);
 		}
 		break;
@@ -1550,7 +1576,8 @@ decode_attstmt_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 		attstmt->alg = -(int)cbor_get_int(val) - 1;
 		if (attstmt->alg != COSE_ES256 && attstmt->alg != COSE_ES384 &&
 		    attstmt->alg != COSE_RS256 && attstmt->alg != COSE_EDDSA &&
-		    attstmt->alg != COSE_RS1) {
+		    attstmt->alg != COSE_RS1 && attstmt->alg != COSE_MLDSA44 &&
+		    attstmt->alg != COSE_MLDSA65 && attstmt->alg != COSE_MLDSA87) {
 			fido_log_debug("%s: unsupported attstmt->alg=%d",
 			    __func__, attstmt->alg);
 			goto out;
