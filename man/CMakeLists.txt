@@ -316,6 +316,18 @@ list(APPEND MAN_ALIAS
 	rs256_pk_new rs256_pk_from_EVP_PKEY
 	rs256_pk_new rs256_pk_from_RSA
 	rs256_pk_new rs256_pk_to_EVP_PKEY
+	mldsa44_pk_new mldsa44_pk_free
+	mldsa44_pk_new mldsa44_pk_from_EVP_PKEY
+	mldsa44_pk_new mldsa44_pk_from_ptr
+	mldsa44_pk_new mldsa44_pk_to_EVP_PKEY
+	mldsa65_pk_new mldsa65_pk_free
+	mldsa65_pk_new mldsa65_pk_from_EVP_PKEY
+	mldsa65_pk_new mldsa65_pk_from_ptr
+	mldsa65_pk_new mldsa65_pk_to_EVP_PKEY
+	mldsa87_pk_new mldsa87_pk_free
+	mldsa87_pk_new mldsa87_pk_from_EVP_PKEY
+	mldsa87_pk_new mldsa87_pk_from_ptr
+	mldsa87_pk_new mldsa87_pk_to_EVP_PKEY
 )
 
 list(LENGTH MAN_ALIAS MAN_ALIAS_LEN)
