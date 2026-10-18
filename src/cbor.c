@@ -936,7 +936,12 @@ cbor_encode_assert_ext(fido_dev_t *dev, const fido_assert_ext_t *ext,
 int
 cbor_decode_fmt(const cbor_item_t *item, char **fmt)
 {
-	char	*type = NULL;
+	char *type = NULL;
+
+	if (*fmt != NULL) {
+		fido_log_debug("%s: dup", __func__);
+		return (-1);
+	}
 
 	if (cbor_string_copy(item, &type) < 0) {
 		fido_log_debug("%s: cbor_string_copy", __func__);
