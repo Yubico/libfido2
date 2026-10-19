@@ -262,7 +262,14 @@ rx(fido_dev_t *d, uint8_t cmd, unsigned char *buf, size_t count, int *ms)
 	memcpy(buf, f.body.init.data, init_data_len);
 	r = init_data_len;
 
-	for (int seq = 0; r < payload_len; seq++) {
+	/*
+	 * The continuation frame sequence number is 7 bits wide. Strict
+	 * spec adherence would dictate capping it at 127. But larger
+	 * payloads are possible (e.g., PQC algorithms). We're therefore
+	 * aligning with BLE framing, Chromium implementation, and emerging
+	 * consensus in FIDO to allow wrapping of the sequence number.
+	 */
+	for (uint8_t seq = 0; r < payload_len; seq = (seq + 1) % 128) {
 		if (rx_frame(d, &f, ms) < 0) {
 			fido_log_debug("%s: rx_frame", __func__);
 			return (-1);
