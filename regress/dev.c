@@ -147,6 +147,28 @@ has_pin(void)
 }
 
 static void
+authkey_status(void)
+{
+	const uint8_t	 authkey_status_data[] = {
+			    WIREDATA_CTAP_CBOR_INFO,
+			    WIREDATA_CTAP_CBOR_PIN_AUTH_BLOCKED
+			 };
+	uint8_t		*wiredata;
+	fido_dev_t	*dev = NULL;
+
+	wiredata = wiredata_setup(authkey_status_data,
+	    sizeof(authkey_status_data));
+	assert((dev = fido_dev_new()) != NULL);
+	setup_dummy_io(dev);
+	assert(fido_dev_open(dev, "dummy") == FIDO_OK);
+	assert(fido_dev_set_pin(dev, "top secret", NULL) ==
+	    FIDO_ERR_PIN_AUTH_BLOCKED);
+	assert(fido_dev_close(dev) == FIDO_OK);
+	fido_dev_free(&dev);
+	wiredata_clear(&wiredata);
+}
+
+static void
 timeout_rx(void)
 {
 	const uint8_t	 timeout_rx_data[] = {
@@ -225,6 +247,7 @@ main(void)
 	double_close();
 	is_fido2();
 	has_pin();
+	authkey_status();
 	timeout_rx();
 	timeout_ok();
 	timeout_misc();
