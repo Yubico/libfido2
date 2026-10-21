@@ -339,10 +339,6 @@ do_auth(fido_dev_t *dev, const fido_blob_t *cdh, const char *rp_id,
 	uint8_t		 key_id_len;
 	int		 r;
 
-#ifdef FIDO_FUZZ
-	*ms = 0; /* XXX */
-#endif
-
 	if (cdh->len != SHA256_DIGEST_LENGTH || key_id->len > UINT8_MAX ||
 	    rp_id == NULL) {
 		r = FIDO_ERR_INVALID_ARGUMENT;
