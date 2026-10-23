@@ -214,6 +214,44 @@ timeout_misc(void)
 	fido_dev_free(&dev);
 }
 
+/* gh#1011 */
+static void
+get_puat_authkey_status(void)
+{
+	const uint8_t	 cbor_info_data[] = { WIREDATA_CTAP_CBOR_INFO };
+	const uint8_t	 authkey_status[] = {
+		0x00, 0x22, 0x00, 0x02, 0x90, 0x00, 0x01, 0x34,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	};
+	uint8_t		 stream[sizeof(cbor_info_data) + sizeof(authkey_status)];
+	uint8_t		*wiredata;
+	fido_dev_t	*dev = NULL;
+
+	memcpy(stream, cbor_info_data, sizeof(cbor_info_data));
+	memcpy(stream + sizeof(cbor_info_data), authkey_status,
+	    sizeof(authkey_status));
+
+	wiredata = wiredata_setup(stream, sizeof(stream));
+	assert((dev = fido_dev_new()) != NULL);
+	setup_dummy_io(dev);
+	assert(fido_dev_open(dev, "dummy") == FIDO_OK);
+	assert(fido_dev_supports_permissions(dev) == true);
+	/* the getKeyAgreement reply is a lone CTAP2 status byte
+	 * (CTAP2_ERR_PIN_AUTH_BLOCKED); it must reach the caller */
+	assert(fido_dev_get_puat(dev, FIDO_PUAT_GETASSERT, "example.com",
+	    "top secret") == FIDO_ERR_PIN_AUTH_BLOCKED);
+	assert(fido_dev_puat_len(dev) == 0);
+	assert(fido_dev_close(dev) == FIDO_OK);
+	fido_dev_free(&dev);
+	wiredata_clear(&wiredata);
+}
+
 int
 main(void)
 {
@@ -228,6 +266,7 @@ main(void)
 	timeout_rx();
 	timeout_ok();
 	timeout_misc();
+	get_puat_authkey_status();
 
 	exit(0);
 }
