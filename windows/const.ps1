@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Yubico AB. All rights reserved.
+# Copyright (c) 2021-2026 Yubico AB. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 # SPDX-License-Identifier: BSD-2-Clause
@@ -7,7 +7,7 @@
 New-Variable -Name 'LIBRESSL_URL' `
     -Value 'https://ftp.openbsd.org/pub/OpenBSD/LibreSSL' `
     -Option Constant
-New-Variable -Name 'LIBRESSL' -Value 'libressl-4.3.3' -Option Constant
+New-Variable -Name 'LIBRESSL' -Value 'libressl-4.4.0' -Option Constant
 New-Variable -Name 'CRYPTO_LIB' -Value 'crypto' -Option Constant
 New-Variable -Name 'CRYPTO_DLL' -Value 'crypto-57' -Option Constant
 
