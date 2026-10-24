@@ -90,6 +90,7 @@ SCardTransmit
 SHA1
 SHA256
 strdup
+timingsafe_bcmp
 udev_device_get_devnode
 udev_device_get_parent_with_subsystem_devtype
 udev_device_get_sysattr_value

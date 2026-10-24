@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Yubico AB. All rights reserved.
+ * Copyright (c) 2019-2026 Yubico AB. All rights reserved.
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <zlib.h>
 
 #include "mutator_aux.h"
@@ -758,6 +759,21 @@ __wrap_asprintf(char **strp, const char *fmt, ...)
 	va_start(ap, fmt);
 	r = vasprintf(strp, fmt, ap);
 	va_end(ap);
+
+	return r;
+}
+
+int __wrap_timingsafe_bcmp(const void *, const void *, size_t);
+int __real_timingsafe_bcmp(const void *, const void *, size_t);
+
+/* mutated inputs rarely carry matching digests; mostly ignore them */
+int
+__wrap_timingsafe_bcmp(const void *b1, const void *b2, size_t len)
+{
+	int r = __real_timingsafe_bcmp(b1, b2, len);
+
+	if (r && prng_up && uniform_random(400) < 399)
+		return 0; /* synthetic success */
 
 	return r;
 }
