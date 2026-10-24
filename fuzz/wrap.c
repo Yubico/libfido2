@@ -86,15 +86,6 @@ WRAP(ssize_t,
 )
 
 WRAP(int,
-	EVP_Cipher,
-	(EVP_CIPHER_CTX *ctx, unsigned char *out, const unsigned char *in,
-	    unsigned int inl),
-	-1,
-	(ctx, out, in, inl),
-	1
-)
-
-WRAP(int,
 	EVP_CIPHER_CTX_ctrl,
 	(EVP_CIPHER_CTX *ctx, int type, int arg, void *ptr),
 	0,
@@ -774,6 +765,30 @@ __wrap_timingsafe_bcmp(const void *b1, const void *b2, size_t len)
 
 	if (r && prng_up && uniform_random(400) < 399)
 		return 0; /* synthetic success */
+
+	return r;
+}
+
+int __wrap_EVP_Cipher(EVP_CIPHER_CTX *, unsigned char *, const unsigned char *,
+    unsigned int);
+int __real_EVP_Cipher(EVP_CIPHER_CTX *, unsigned char *, const unsigned char *,
+    unsigned int);
+
+int
+__wrap_EVP_Cipher(EVP_CIPHER_CTX *ctx, unsigned char *out,
+    const unsigned char *in, unsigned int inl)
+{
+	int r;
+
+	if (prng_up && uniform_random(400) < 1)
+		return -1; /* synthetic failure */
+	if (prng_up && out != NULL && in != NULL && uniform_random(2) < 1) {
+		memcpy(out, in, inl);
+		return 0; /* synthetic success */
+	}
+	if ((r = __real_EVP_Cipher(ctx, out, in, inl)) < 0 &&
+	    prng_up && out == NULL && in == NULL && inl == 0)
+		return 0; /* synthetic tag verification */
 
 	return r;
 }
