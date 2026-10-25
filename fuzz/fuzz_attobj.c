@@ -273,6 +273,19 @@ pack_dummy(uint8_t *ptr, size_t len)
 }
 
 void
+cross_over(struct param *p1, const struct param *p2, unsigned int seed,
+    unsigned int flags) NO_MSAN
+{
+	if (flags & MUTATE_SEED)
+		cross_int(&p1->seed, &p2->seed, &seed);
+
+	if (flags & MUTATE_PARAM) {
+		cross_byte(&p1->type, &p2->type, &seed);
+		cross_blob(&p1->attobj, &p2->attobj, &seed);
+	}
+}
+
+void
 mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 {
 	if (flags & MUTATE_SEED)

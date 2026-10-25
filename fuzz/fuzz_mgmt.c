@@ -548,6 +548,28 @@ test(const struct param *p)
 }
 
 void
+cross_over(struct param *p1, const struct param *p2, unsigned int seed,
+    unsigned int flags) NO_MSAN
+{
+	if (flags & MUTATE_SEED)
+		cross_int(&p1->seed, &p2->seed, &seed);
+
+	if (flags & MUTATE_PARAM) {
+		cross_string(p1->pin1, p2->pin1, &seed);
+		cross_string(p1->pin2, p2->pin2, &seed);
+	}
+
+	if (flags & MUTATE_WIREDATA) {
+		cross_blob(&p1->reset_wire_data, &p2->reset_wire_data, &seed);
+		cross_blob(&p1->info_wire_data, &p2->info_wire_data, &seed);
+		cross_blob(&p1->set_pin_wire_data, &p2->set_pin_wire_data, &seed);
+		cross_blob(&p1->change_pin_wire_data, &p2->change_pin_wire_data, &seed);
+		cross_blob(&p1->retry_wire_data, &p2->retry_wire_data, &seed);
+		cross_blob(&p1->config_wire_data, &p2->config_wire_data, &seed);
+	}
+}
+
+void
 mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 {
 	if (flags & MUTATE_SEED)

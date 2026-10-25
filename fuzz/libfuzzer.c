@@ -27,10 +27,13 @@ static unsigned long long test_fail;
 static unsigned long long test_total;
 static unsigned long long mutate_fail;
 static unsigned long long mutate_total;
+static unsigned long long crossover_fail;
+static unsigned long long crossover_total;
 
 int LLVMFuzzerInitialize(int *, char ***);
 int LLVMFuzzerTestOneInput(const uint8_t *, size_t);
 size_t LLVMFuzzerCustomMutator(uint8_t *, size_t, size_t, unsigned int);
+size_t LLVMFuzzerCustomCrossOver(const uint8_t *, size_t, const uint8_t *, size_t, uint8_t *, size_t, unsigned int);
 
 static int
 save_seed(const char *opt)
@@ -224,6 +227,53 @@ LLVMFuzzerCustomMutator(uint8_t *data, size_t size, size_t maxsize,
 	free(p);
 
 	memcpy(data, blob, blob_len);
+
+	return blob_len;
+}
+
+size_t
+LLVMFuzzerCustomCrossOver(const uint8_t *data1, size_t size1,
+    const uint8_t *data2, size_t size2, uint8_t *out, size_t max_out_size,
+    unsigned int seed) NO_MSAN
+{
+	struct param *p1 = NULL, *p2 = NULL;
+	uint8_t blob[MAXCORPUS];
+	size_t blob_len;
+
+#ifdef WITH_MSAN
+	__msan_unpoison(data1, size1);
+	__msan_unpoison(data2, size2);
+#endif
+
+	if (++crossover_total % 100000 == 0 && debug) {
+		double r = (double)crossover_fail/(double)crossover_total *
+		    100.0;
+		fprintf(stderr, "%s: %llu/%llu (%.2f%%)\n", __func__,
+		    crossover_fail, crossover_total, r);
+	}
+
+	if ((p1 = unpack(data1, size1)) == NULL ||
+	    (p2 = unpack(data2, size2)) == NULL) {
+		crossover_fail++;
+		free(p1);
+		free(p2);
+		return 0;
+	}
+
+	cross_over(p1, p2, seed, flags);
+
+	if ((blob_len = pack(blob, sizeof(blob), p1)) == 0 ||
+	    blob_len > sizeof(blob) || blob_len > max_out_size) {
+		crossover_fail++;
+		free(p1);
+		free(p2);
+		return 0;
+	}
+
+	free(p1);
+	free(p2);
+
+	memcpy(out, blob, blob_len);
 
 	return blob_len;
 }

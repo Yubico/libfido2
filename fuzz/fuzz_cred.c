@@ -492,6 +492,36 @@ test(const struct param *p)
 }
 
 void
+cross_over(struct param *p1, const struct param *p2, unsigned int seed,
+    unsigned int flags) NO_MSAN
+{
+	if (flags & MUTATE_SEED)
+		cross_int(&p1->seed, &p2->seed, &seed);
+
+	if (flags & MUTATE_PARAM) {
+		cross_byte(&p1->rk, &p2->rk, &seed);
+		cross_byte(&p1->type, &p2->type, &seed);
+		cross_byte(&p1->opt, &p2->opt, &seed);
+		cross_byte(&p1->uv, &p2->uv, &seed);
+		cross_byte(&p1->excl_count, &p2->excl_count, &seed);
+		cross_int(&p1->ext, &p2->ext, &seed);
+		cross_blob(&p1->cdh, &p2->cdh, &seed);
+		cross_blob(&p1->user_id, &p2->user_id, &seed);
+		cross_blob(&p1->excl_cred, &p2->excl_cred, &seed);
+		cross_string(p1->pin, p2->pin, &seed);
+		cross_string(p1->user_icon, p2->user_icon, &seed);
+		cross_string(p1->user_name, p2->user_name, &seed);
+		cross_string(p1->user_nick, p2->user_nick, &seed);
+		cross_string(p1->rp_id, p2->rp_id, &seed);
+		cross_string(p1->rp_name, p2->rp_name, &seed);
+	}
+
+	if (flags & MUTATE_WIREDATA) {
+		cross_blob(&p1->wire_data, &p2->wire_data, &seed);
+	}
+}
+
+void
 mutate(struct param *p, unsigned int seed, unsigned int flags) NO_MSAN
 {
 	const uint8_t old_opt = p->opt;

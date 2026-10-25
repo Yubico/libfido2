@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "mutator_aux.h"
+#include "../openbsd-compat/openbsd-compat.h"
 
 int fido_nfc_rx(fido_dev_t *, uint8_t, unsigned char *, size_t, int);
 int fido_nfc_tx(fido_dev_t *, uint8_t, const unsigned char *, size_t);
@@ -168,6 +169,38 @@ mutate_string(char *s)
 
 	n = LLVMFuzzerMutate((uint8_t *)s, strlen(s), MAXSTR - 1);
 	s[n] = '\0';
+}
+
+void
+cross_byte(uint8_t *b1, const uint8_t *b2, unsigned int *seed)
+{
+	if (*seed & 1U)
+		*b1 = *b2;
+	*seed >>= 1;
+}
+
+void
+cross_int(int *i1, const int *i2, unsigned int *seed)
+{
+	if (*seed & 1U)
+		*i1 = *i2;
+	*seed >>= 1;
+}
+
+void
+cross_blob(struct blob *blob1, const struct blob *blob2, unsigned int *seed)
+{
+	if (*seed & 1U)
+		*blob1 = *blob2;
+	*seed >>= 1;
+}
+
+void
+cross_string(char *s1, const char *s2, unsigned int *seed)
+{
+	if (*seed & 1U)
+		strlcpy(s1, s2, MAXSTR);
+	*seed >>= 1;
 }
 
 static int
