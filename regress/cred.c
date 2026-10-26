@@ -3022,6 +3022,38 @@ entattest(void)
 	fido_dev_free(&dev);
 }
 
+/* empty containers may have no storage (PJK/libcbor#437) */
+static void
+empty_attstmt(void)
+{
+	const unsigned char empty_map[] = { 0xa0 };
+	struct cbor_load_result cbor;
+	unsigned char *attobj = NULL;
+	size_t len, alloclen = 0;
+	cbor_item_t *map;
+	fido_cred_t *c;
+
+	c = alloc_cred();
+	assert(fido_cred_set_attstmt(c, empty_map, sizeof(empty_map)) == FIDO_OK);
+	assert(fido_cred_attstmt_len(c) == sizeof(empty_map));
+	free_cred(c);
+
+	assert((map = cbor_new_definite_map(3)) != NULL);
+	push_kv(map, "fmt", cbor_build_string("none"));
+	push_kv(map, "attStmt", cbor_new_definite_map(0));
+	push_kv(map, "authData", cbor_load(authdata_tpm_es256,
+	    sizeof(authdata_tpm_es256), &cbor));
+	assert((len = cbor_serialize_alloc(map, &attobj, &alloclen)));
+	cbor_decref(&map);
+
+	c = alloc_cred();
+	assert(fido_cred_set_type(c, COSE_ES256) == FIDO_OK);
+	assert(fido_cred_set_attobj(c, attobj, len) == FIDO_OK);
+	assert(strcmp(fido_cred_fmt(c), "none") == 0);
+	free_cred(c);
+	free(attobj);
+}
+
 int
 main(void)
 {
@@ -3056,6 +3088,7 @@ main(void)
 	valid_tpm_rs256_cred(xfail);
 	valid_tpm_es256_cred(xfail);
 	attestation_object();
+	empty_attstmt();
 	makecred();
 	entattest();
 

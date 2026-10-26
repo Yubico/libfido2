@@ -73,7 +73,8 @@ unpack_string(cbor_item_t *item, char *v)
 	    (len = cbor_bytestring_length(item)) >= MAXSTR)
 		return -1;
 
-	memcpy(v, cbor_bytestring_handle(item), len);
+	if (len != 0)
+		memcpy(v, cbor_bytestring_handle(item), len);
 	v[len] = '\0';
 
 	return 0;
@@ -98,7 +99,8 @@ unpack_blob(cbor_item_t *item, struct blob *v)
 	    (v->len = cbor_bytestring_length(item)) > sizeof(v->body))
 		return -1;
 
-	memcpy(v->body, cbor_bytestring_handle(item), v->len);
+	if (v->len != 0)
+		memcpy(v->body, cbor_bytestring_handle(item), v->len);
 
 	return 0;
 }
