@@ -680,7 +680,7 @@ fido_cred_set_authdata(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 	if (ptr == NULL || len == 0)
 		goto fail;
 
-	if ((item = cbor_load(ptr, len, &cbor)) == NULL) {
+	if ((item = fido_cbor_load(ptr, len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
 		goto fail;
 	}
@@ -808,7 +808,7 @@ fido_cred_set_attstmt(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 	if (ptr == NULL || len == 0)
 		goto fail;
 
-	if ((item = cbor_load(ptr, len, &cbor)) == NULL) {
+	if ((item = fido_cbor_load(ptr, len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
 		goto fail;
 	}
@@ -841,7 +841,7 @@ fido_cred_set_attobj(fido_cred_t *cred, const unsigned char *ptr, size_t len)
 	if (ptr == NULL || len == 0)
 		goto fail;
 
-	if ((item = cbor_load(ptr, len, &cbor)) == NULL) {
+	if ((item = fido_cbor_load(ptr, len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
 		goto fail;
 	}

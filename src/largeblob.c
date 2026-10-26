@@ -246,7 +246,7 @@ largeblob_array_load(const uint8_t *ptr, size_t len)
 		return NULL;
 	}
 	len -= LARGEBLOB_DIGEST_LENGTH;
-	if ((item = cbor_load(ptr, len, &cbor)) == NULL) {
+	if ((item = fido_cbor_load(ptr, len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
 		return NULL;
 	}
@@ -864,7 +864,7 @@ fido_dev_largeblob_set_array(fido_dev_t *dev, const unsigned char *cbor_ptr,
 		    (const void *)cbor_ptr, cbor_len);
 		return FIDO_ERR_INVALID_ARGUMENT;
 	}
-	if ((item = cbor_load(cbor_ptr, cbor_len, &cbor_result)) == NULL) {
+	if ((item = fido_cbor_load(cbor_ptr, cbor_len, &cbor_result)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
 		return FIDO_ERR_INVALID_ARGUMENT;
 	}

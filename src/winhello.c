@@ -812,7 +812,7 @@ translate_winhello_cred(fido_cred_t *cred,
 		fido_log_debug("%s: pbAttestationObject", __func__);
 		goto fail;
 	}
-	if ((item = cbor_load(att->pbAttestationObject,
+	if ((item = fido_cbor_load(att->pbAttestationObject,
 	    att->cbAttestationObject, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
 		goto fail;

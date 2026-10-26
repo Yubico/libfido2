@@ -95,6 +95,8 @@ int cbor_bytestring_copy(const cbor_item_t *, unsigned char **, size_t *);
 int cbor_map_iter(const cbor_item_t *, void *, int(*)(const cbor_item_t *,
     const cbor_item_t *, void *));
 int cbor_string_copy(const cbor_item_t *, char **);
+cbor_item_t *fido_cbor_load(const unsigned char *, size_t,
+    struct cbor_load_result *);
 int cbor_parse_reply(const unsigned char *, size_t, void *,
     int(*)(const cbor_item_t *, const cbor_item_t *, void *));
 int cbor_add_uv_params(const fido_dev_t *, const fido_blob_t *,

@@ -479,7 +479,7 @@ fido_get_signed_hash(int cose_alg, fido_blob_t *dgst,
 
 	fido_log_debug("%s: cose_alg=%d", __func__, cose_alg);
 
-	if ((item = cbor_load(authdata_cbor->ptr, authdata_cbor->len,
+	if ((item = fido_cbor_load(authdata_cbor->ptr, authdata_cbor->len,
 	    &cbor)) == NULL || cbor_isa_bytestring(item) == false ||
 	    cbor_bytestring_is_definite(item) == false) {
 		fido_log_debug("%s: authdata", __func__);
@@ -1074,7 +1074,7 @@ fido_assert_set_authdata(fido_assert_t *assert, size_t idx,
 	stmt = &assert->stmt[idx];
 	fido_assert_clean_authdata(stmt);
 
-	if ((item = cbor_load(ptr, len, &cbor)) == NULL) {
+	if ((item = fido_cbor_load(ptr, len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
 		r = FIDO_ERR_INVALID_ARGUMENT;
 		goto fail;
