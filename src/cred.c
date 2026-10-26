@@ -12,7 +12,7 @@
 #include "fido/es256.h"
 
 #ifndef FIDO_MAXMSG_CRED
-#define FIDO_MAXMSG_CRED	4096
+#define FIDO_MAXMSG_CRED	0x7FFF
 #endif
 
 static int
@@ -332,7 +332,61 @@ fail:
 }
 
 static int
-verify_attstmt(const fido_blob_t *dgst, const fido_attstmt_t *attstmt)
+x509_alg_to_cose(const fido_attstmt_t *attstmt)
+{
+	BIO *rawcert = NULL;
+	X509 *cert = NULL;
+	const ASN1_OBJECT *obj;
+	const X509_ALGOR *alg = NULL;
+	int r;
+
+	if ((rawcert = BIO_new_mem_buf(attstmt->x5c.ptr[0].ptr,
+	    (int)attstmt->x5c.ptr[0].len)) == NULL ||
+	    (cert = d2i_X509_bio(rawcert, NULL)) == NULL ||
+	    (alg = X509_get0_tbs_sigalg(cert)) == NULL) {
+		fido_log_debug("%s: x509", __func__);
+		r = COSE_UNSPEC;
+		goto fail;
+	}
+
+	X509_ALGOR_get0(&obj, NULL, NULL, alg);
+	switch (OBJ_obj2nid(obj)) {
+	case NID_sha256WithRSAEncryption:
+	    r = COSE_RS256;
+	    break;
+	case NID_ecdsa_with_SHA256:
+	    r = COSE_ES256;
+	    break;
+	case NID_ED25519:
+	    r = COSE_EDDSA;
+	    break;
+	case NID_ecdsa_with_SHA384:
+	    r = COSE_ES384;
+	    break;
+	case NID_ML_DSA_44:
+	    r = COSE_MLDSA44;
+	    break;
+	case NID_ML_DSA_65:
+	    r = COSE_MLDSA65;
+	    break;
+	case NID_ML_DSA_87:
+	    r = COSE_MLDSA87;
+	    break;
+	default:
+	    r = COSE_UNSPEC;
+	    fido_log_debug("%s: unknown oid", __func__);
+	    break;
+	}
+fail:
+	BIO_free(rawcert);
+	X509_free(cert);
+
+	return r;
+}
+
+
+static int
+verify_attstmt(int alg, const fido_blob_t *dgst, const fido_attstmt_t *attstmt)
 {
 	BIO		*rawcert = NULL;
 	X509		*cert = NULL;
@@ -360,7 +414,7 @@ verify_attstmt(const fido_blob_t *dgst, const fido_attstmt_t *attstmt)
 		goto fail;
 	}
 
-	switch (attstmt->alg) {
+	switch (alg) {
 	case COSE_UNSPEC:
 	case COSE_ES256:
 		ok = es256_verify_sig(dgst, pkey, &attstmt->sig);
@@ -377,8 +431,17 @@ verify_attstmt(const fido_blob_t *dgst, const fido_attstmt_t *attstmt)
 	case COSE_EDDSA:
 		ok = eddsa_verify_sig(dgst, pkey, &attstmt->sig);
 		break;
+	case COSE_MLDSA44:
+		ok = mldsa44_verify_sig(dgst, pkey, &attstmt->sig);
+		break;
+	case COSE_MLDSA65:
+		ok = mldsa65_verify_sig(dgst, pkey, &attstmt->sig);
+		break;
+	case COSE_MLDSA87:
+		ok = mldsa87_verify_sig(dgst, pkey, &attstmt->sig);
+		break;
 	default:
-		fido_log_debug("%s: unknown alg %d", __func__, attstmt->alg);
+		fido_log_debug("%s: unknown alg %d", __func__, alg);
 		break;
 	}
 
@@ -393,13 +456,18 @@ fail:
 int
 fido_cred_verify(const fido_cred_t *cred)
 {
-	unsigned char	buf[1024]; /* XXX */
 	fido_blob_t	dgst;
 	int		cose_alg;
 	int		r;
 
-	dgst.ptr = buf;
-	dgst.len = sizeof(buf);
+	dgst.len = 8192;
+	dgst.ptr = malloc(dgst.len);
+
+	if (dgst.ptr == NULL) {
+		fido_log_debug("%s: malloc", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto out;
+	}
 
 	/* do we have everything we need? */
 	if (cred->cdh.ptr == NULL || cred->authdata_cbor.ptr == NULL ||
@@ -436,7 +504,7 @@ fido_cred_verify(const fido_cred_t *cred)
 	}
 
 	if ((cose_alg = cred->attstmt.alg) == COSE_UNSPEC)
-		cose_alg = COSE_ES256; /* backwards compat */
+		cose_alg = x509_alg_to_cose(&cred->attstmt); /* XXX: kludge, revert? */
 
 	if (!strcmp(cred->fmt, "packed")) {
 		if (fido_get_signed_hash(cose_alg, &dgst, &cred->cdh,
@@ -466,7 +534,7 @@ fido_cred_verify(const fido_cred_t *cred)
 		goto out;
 	}
 
-	if (verify_attstmt(&dgst, &cred->attstmt) < 0) {
+	if (verify_attstmt(cose_alg, &dgst, &cred->attstmt) < 0) {
 		fido_log_debug("%s: verify_attstmt", __func__);
 		r = FIDO_ERR_INVALID_SIG;
 		goto out;
@@ -474,7 +542,7 @@ fido_cred_verify(const fido_cred_t *cred)
 
 	r = FIDO_OK;
 out:
-	explicit_bzero(buf, sizeof(buf));
+	fido_blob_reset(&dgst);
 
 	return (r);
 }
@@ -482,13 +550,18 @@ out:
 int
 fido_cred_verify_self(const fido_cred_t *cred)
 {
-	unsigned char	buf[1024]; /* XXX */
 	fido_blob_t	dgst;
 	int		ok = -1;
 	int		r;
 
-	dgst.ptr = buf;
-	dgst.len = sizeof(buf);
+	dgst.len = 8192;
+	dgst.ptr = malloc(dgst.len);
+
+	if (dgst.ptr == NULL) {
+		fido_log_debug("%s: malloc", __func__);
+		r = FIDO_ERR_INTERNAL;
+		goto out;
+	}
 
 	/* do we have everything we need? */
 	if (cred->cdh.ptr == NULL || cred->authdata_cbor.ptr == NULL ||
@@ -562,6 +635,18 @@ fido_cred_verify_self(const fido_cred_t *cred)
 		ok = eddsa_pk_verify_sig(&dgst, &cred->attcred.pubkey.eddsa,
 		    &cred->attstmt.sig);
 		break;
+	case COSE_MLDSA44:
+		ok = mldsa44_pk_verify_sig(&dgst, &cred->attcred.pubkey.mldsa44,
+		    &cred->attstmt.sig);
+		break;
+	case COSE_MLDSA65:
+		ok = mldsa65_pk_verify_sig(&dgst, &cred->attcred.pubkey.mldsa65,
+		    &cred->attstmt.sig);
+		break;
+	case COSE_MLDSA87:
+		ok = mldsa87_pk_verify_sig(&dgst, &cred->attcred.pubkey.mldsa87,
+		    &cred->attstmt.sig);
+		break;
 	default:
 		fido_log_debug("%s: unsupported cose_alg %d", __func__,
 		    cred->attcred.type);
@@ -575,7 +660,7 @@ fido_cred_verify_self(const fido_cred_t *cred)
 		r = FIDO_OK;
 
 out:
-	explicit_bzero(buf, sizeof(buf));
+	fido_blob_reset(&dgst);
 
 	return (r);
 }
@@ -1157,7 +1242,9 @@ fido_cred_set_type(fido_cred_t *cred, int cose_alg)
 	if (cred->type != 0)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 	if (cose_alg != COSE_ES256 && cose_alg != COSE_ES384 &&
-	    cose_alg != COSE_RS256 && cose_alg != COSE_EDDSA)
+	    cose_alg != COSE_RS256 && cose_alg != COSE_EDDSA &&
+	    cose_alg != COSE_MLDSA44 && cose_alg != COSE_MLDSA65 &&
+	    cose_alg != COSE_MLDSA87)
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
 	cred->type = cose_alg;
@@ -1297,6 +1384,15 @@ fido_cred_pubkey_ptr(const fido_cred_t *cred)
 	case COSE_EDDSA:
 		ptr = &cred->attcred.pubkey.eddsa;
 		break;
+	case COSE_MLDSA44:
+		ptr = &cred->attcred.pubkey.mldsa44;
+		break;
+	case COSE_MLDSA65:
+		ptr = &cred->attcred.pubkey.mldsa65;
+		break;
+	case COSE_MLDSA87:
+		ptr = &cred->attcred.pubkey.mldsa87;
+		break;
 	default:
 		ptr = NULL;
 		break;
@@ -1322,6 +1418,15 @@ fido_cred_pubkey_len(const fido_cred_t *cred)
 		break;
 	case COSE_EDDSA:
 		len = sizeof(cred->attcred.pubkey.eddsa);
+		break;
+	case COSE_MLDSA44:
+		len = sizeof(cred->attcred.pubkey.mldsa44);
+		break;
+	case COSE_MLDSA65:
+		len = sizeof(cred->attcred.pubkey.mldsa65);
+		break;
+	case COSE_MLDSA87:
+		len = sizeof(cred->attcred.pubkey.mldsa87);
 		break;
 	default:
 		len = 0;

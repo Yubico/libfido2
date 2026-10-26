@@ -16,6 +16,7 @@
 EC_KEY *read_ec_pubkey(const char *);
 RSA *read_rsa_pubkey(const  char *);
 EVP_PKEY *read_eddsa_pubkey(const char *);
+EVP_PKEY *read_mldsa_pubkey(const char *);
 int base10(const char *, long long *);
 int read_blob(const char *, unsigned char **, size_t *);
 int write_blob(const char *, const unsigned char *, size_t);
@@ -23,5 +24,8 @@ int write_es256_pubkey(const char *, const void *, size_t);
 int write_es384_pubkey(const char *, const void *, size_t);
 int write_rs256_pubkey(const char *, const void *, size_t);
 int write_eddsa_pubkey(const char *, const void *, size_t);
+int write_mldsa44_pubkey(const char *, const void *, size_t);
+int write_mldsa65_pubkey(const char *, const void *, size_t);
+int write_mldsa87_pubkey(const char *, const void *, size_t);
 
 #endif /* _EXTERN_H_ */

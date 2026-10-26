@@ -112,6 +112,21 @@ typedef struct eddsa_pk {
 	unsigned char x[32];
 } eddsa_pk_t;
 
+/* COSE ML-DSA-44 */
+typedef struct mldsa44_pk {
+	unsigned char pk[1312];
+} mldsa44_pk_t;
+
+/* COSE ML-DSA-65 */
+typedef struct mldsa65_pk {
+	unsigned char pk[1952];
+} mldsa65_pk_t;
+
+/* COSE ML-DSA-87 */
+typedef struct mldsa87_pk {
+	unsigned char pk[2592];
+} mldsa87_pk_t;
+
 PACKED_TYPE(fido_authdata_t,
 struct fido_authdata {
 	unsigned char rp_id_hash[32]; /* sha256 of fido_rp.id */
@@ -132,10 +147,13 @@ typedef struct fido_attcred {
 	fido_blob_t   id;         /* credential id */
 	int           type;       /* credential's cose algorithm */
 	union {                   /* credential's public key */
+		eddsa_pk_t eddsa;
 		es256_pk_t es256;
 		es384_pk_t es384;
+		mldsa44_pk_t mldsa44;
+		mldsa65_pk_t mldsa65;
+		mldsa87_pk_t mldsa87;
 		rs256_pk_t rs256;
-		eddsa_pk_t eddsa;
 	} pubkey;
 } fido_attcred_t;
 
@@ -358,6 +376,9 @@ typedef struct es256_sk es256_sk_t;
 typedef struct es384_pk es384_pk_t;
 typedef struct rs256_pk rs256_pk_t;
 typedef struct eddsa_pk eddsa_pk_t;
+typedef struct mldsa44_pk mldsa44_pk_t;
+typedef struct mldsa65_pk mldsa65_pk_t;
+typedef struct mldsa87_pk mldsa87_pk_t;
 #endif /* _FIDO_INTERNAL */
 
 #ifdef __cplusplus

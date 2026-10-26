@@ -98,7 +98,7 @@
 
 /* Maximum message size in bytes. */
 #ifndef FIDO_MAXMSG
-#define FIDO_MAXMSG	2048
+#define FIDO_MAXMSG	0x7fff
 #endif
 
 /* CTAP capability bits. */
@@ -112,6 +112,9 @@
 #define COSE_EDDSA	-8
 #define COSE_ECDH_ES256	-25
 #define COSE_ES384	-35
+#define COSE_MLDSA44	-48
+#define COSE_MLDSA65	-49
+#define COSE_MLDSA87	-50
 #define COSE_RS256	-257
 #define COSE_RS1	-65535
 
@@ -119,6 +122,7 @@
 #define COSE_KTY_OKP	1
 #define COSE_KTY_EC2	2
 #define COSE_KTY_RSA	3
+#define COSE_KTY_AKP	7
 
 /* Supported curves. */
 #define COSE_P256	1
