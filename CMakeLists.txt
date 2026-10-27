@@ -25,10 +25,9 @@ if(CHECK_PIE_SUPPORTED)
 	check_pie_supported(LANGUAGES C)
 endif()
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_COLOR_MAKEFILE OFF)
-set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_COLOR_MAKEFILE          OFF CACHE BOOL "Color output during build")
+set(CMAKE_VERBOSE_MAKEFILE        ON  CACHE BOOL "Verbose makefile")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON  CACHE BOOL "Output of compile commands during generation")
 
 set(FIDO_MAJOR "1")
 set(FIDO_MINOR "18")
