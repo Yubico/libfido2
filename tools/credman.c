@@ -136,7 +136,7 @@ print_rk(const fido_credman_rk_t *rk, size_t idx)
 	prot = prot_string(fido_cred_prot(cred));
 
 	printf("%02u: %s %s %s %s %s %spay\n", (unsigned)idx, id,
-	    fido_cred_display_name(cred), user_id, type, prot,
+	    fido_cred_user_name(cred), user_id, type, prot,
 	    fido_cred_payment(cred) ? "" : "no");
 
 	r = 0;
