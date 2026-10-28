@@ -69,6 +69,7 @@ struct param *unpack(const uint8_t *, size_t);
 size_t pack(uint8_t *, size_t, const struct param *);
 size_t pack_dummy(uint8_t *, size_t);
 void mutate(struct param *, unsigned int, unsigned int);
+void cross_over(struct param*, const struct param*, unsigned int, unsigned int);
 void test(const struct param *);
 
 void consume(const void *, size_t);
@@ -88,6 +89,11 @@ void mutate_byte(uint8_t *);
 void mutate_int(int *);
 void mutate_blob(struct blob *);
 void mutate_string(char *);
+
+void cross_byte(uint8_t *, const uint8_t *, unsigned int *);
+void cross_int(int *, const int *, unsigned int *);
+void cross_blob(struct blob *, const struct blob *, unsigned int *);
+void cross_string(char *, const char *, unsigned int *);
 
 ssize_t fd_read(int, void *, size_t);
 ssize_t fd_write(int, const void *, size_t);
