@@ -16,6 +16,7 @@
 #include <fido/es256.h>
 
 #include <openssl/bio.h>
+#include <openssl/hmac.h>
 #include <openssl/pem.h>
 
 #define ASSERT_NOT_NULL(e)	assert((e) != NULL)
@@ -117,8 +118,8 @@ es256_pk_cmp(const char *ptr, size_t len)
 		warnx("es256_pk_to_EVP_PKEY");
 		goto out;
 	}
-	if ((r = EVP_PKEY_cmp(pkA, pkB)) != 1) {
-		warnx("EVP_PKEY_cmp: %d", r);
+	if ((r = EVP_PKEY_eq(pkA, pkB)) != 1) {
+		warnx("EVP_PKEY_eq: %d", r);
 		goto out;
 	}
 
@@ -174,7 +175,7 @@ valid_curve(const unsigned char *raw, size_t raw_len)
 	ASSERT_OK(es256_pk_from_EVP_PKEY(pkA, pkeyA));
 	ASSERT_OK(es256_pk_from_ptr(pkB, raw, raw_len));
 	ASSERT_NOT_NULL((pkeyB = es256_pk_to_EVP_PKEY(pkB)));
-	assert(EVP_PKEY_cmp(pkeyA, pkeyB) == 1);
+	assert(EVP_PKEY_eq(pkeyA, pkeyB) == 1);
 
 	EVP_PKEY_free(pkeyA);
 	EVP_PKEY_free(pkeyB);
@@ -182,11 +183,92 @@ valid_curve(const unsigned char *raw, size_t raw_len)
 	es256_pk_free(&pkB);
 }
 
+#ifdef FIDO_TEST_INTERNAL
+static void
+key_agreement(void)
+{
+	es256_sk_t first, second;
+	es256_pk_t pub, roundtrip;
+	EVP_PKEY *key_a, *key_b, *peer;
+	EVP_PKEY_CTX *ctx_a, *ctx_b;
+	unsigned char secret_a[32], secret_b[32];
+	size_t len_a = sizeof(secret_a), len_b = sizeof(secret_b);
+
+	memset(&first, 0, sizeof(first));
+	memset(&second, 0, sizeof(second));
+	first.d[sizeof(first.d) - 1] = 1;
+	second.d[sizeof(second.d) - 1] = 2;
+	ASSERT_NOT_NULL((key_a = es256_sk_to_EVP_PKEY(&first)));
+	ASSERT_NOT_NULL((key_b = es256_sk_to_EVP_PKEY(&second)));
+	assert(es256_derive_pk(&first, &pub) == 0);
+	ASSERT_OK(es256_pk_from_EVP_PKEY(&roundtrip, key_a));
+	assert(memcmp(&pub, &roundtrip, sizeof(pub)) == 0);
+	ASSERT_NOT_NULL((ctx_a = EVP_PKEY_CTX_new(key_a, NULL)));
+	ASSERT_NOT_NULL((ctx_b = EVP_PKEY_CTX_new(key_b, NULL)));
+	assert(EVP_PKEY_derive_init(ctx_a) == 1);
+	assert(EVP_PKEY_derive_set_peer(ctx_a, key_b) == 1);
+	assert(EVP_PKEY_derive(ctx_a, secret_a, &len_a) == 1);
+	assert(EVP_PKEY_derive_init(ctx_b) == 1);
+	assert(EVP_PKEY_derive_set_peer(ctx_b, key_a) == 1);
+	assert(EVP_PKEY_derive(ctx_b, secret_b, &len_b) == 1);
+	assert(len_a == sizeof(secret_a) && len_b == sizeof(secret_b));
+	assert(memcmp(secret_a, secret_b, sizeof(secret_a)) == 0);
+	EVP_PKEY_CTX_free(ctx_a);
+	EVP_PKEY_CTX_free(ctx_b);
+	EVP_PKEY_free(key_a);
+	EVP_PKEY_free(key_b);
+
+	assert(es256_sk_create(&first) == 0);
+	ASSERT_NOT_NULL((key_a = es256_sk_to_EVP_PKEY(&first)));
+	assert(es256_derive_pk(&first, &pub) == 0);
+	ASSERT_NOT_NULL((peer = es256_pk_to_EVP_PKEY(&pub)));
+	ASSERT_OK(es256_pk_from_EVP_PKEY(&roundtrip, key_a));
+	assert(memcmp(&pub, &roundtrip, sizeof(pub)) == 0);
+	EVP_PKEY_free(peer);
+	EVP_PKEY_free(key_a);
+}
+
+static void
+pin_change_hmac(void)
+{
+	fido_dev_t dev;
+	unsigned char key[64], data[80], expected[32];
+	fido_blob_t secret = { key, sizeof(key) };
+	fido_blob_t new_pin = { data, 64 };
+	fido_blob_t pin_hash = { data + 64, 16 };
+	cbor_item_t *auth;
+	unsigned int expected_len;
+
+	memset(&dev, 0, sizeof(dev));
+	memset(key, 0x11, sizeof(key));
+	memset(data, 0x22, sizeof(data));
+	ASSERT_NULL(cbor_encode_change_pin_auth(&dev, &secret, &new_pin,
+	    &pin_hash));
+	for (int protocol = 1; protocol <= 2; protocol++) {
+		dev.flags = protocol == 1 ? FIDO_DEV_PIN_PROTOCOL1 :
+		    FIDO_DEV_PIN_PROTOCOL2;
+		ASSERT_NOT_NULL(HMAC(EVP_sha256(), key, protocol == 1 ? 64 : 32,
+		    data, sizeof(data), expected, &expected_len));
+		assert(expected_len == sizeof(expected));
+		ASSERT_NOT_NULL((auth = cbor_encode_change_pin_auth(&dev,
+		    &secret, &new_pin, &pin_hash)));
+		assert(cbor_bytestring_length(auth) == (protocol == 1 ? 16 : 32));
+		assert(memcmp(cbor_bytestring_handle(auth), expected,
+		    cbor_bytestring_length(auth)) == 0);
+		cbor_decref(&auth);
+	}
+}
+#endif
+
 int
 main(void)
 {
 	fido_init(0);
 
+#ifdef FIDO_TEST_INTERNAL
+	key_agreement();
+	pin_change_hmac();
+#endif
 	short_coord();
 	full_coord();
 

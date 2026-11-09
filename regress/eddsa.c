@@ -87,8 +87,8 @@ eddsa_pk_cmp(const char *ptr, size_t len)
 		warnx("eddsa_pk_to_EVP_PKEY");
 		goto out;
 	}
-	if ((r = EVP_PKEY_cmp(pkA, pkB)) != 1) {
-		warnx("EVP_PKEY_cmp: %d", r);
+	if ((r = EVP_PKEY_eq(pkA, pkB)) != 1) {
+		warnx("EVP_PKEY_eq: %d", r);
 		goto out;
 	}
 
@@ -137,7 +137,7 @@ valid_key(void)
 	ASSERT_OK(eddsa_pk_from_EVP_PKEY(pkA, pkeyA));
 	ASSERT_OK(eddsa_pk_from_ptr(pkB, eddsa_raw, sizeof(eddsa_raw)));
 	ASSERT_NOT_NULL((pkeyB = eddsa_pk_to_EVP_PKEY((const eddsa_pk_t *)eddsa_raw)));
-	assert(EVP_PKEY_cmp(pkeyA, pkeyB) == 1);
+	assert(EVP_PKEY_eq(pkeyA, pkeyB) == 1);
 	assert(eddsa_pk_cmp(eddsa, sizeof(eddsa)) == 0);
 #endif
 

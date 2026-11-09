@@ -127,38 +127,6 @@ fail:
 	return (ok);
 }
 
-EC_KEY *
-read_ec_pubkey(const char *path)
-{
-	FILE *fp = NULL;
-	EVP_PKEY *pkey = NULL;
-	EC_KEY *ec = NULL;
-
-	if ((fp = fopen(path, "r")) == NULL) {
-		warn("fopen");
-		goto fail;
-	}
-
-	if ((pkey = PEM_read_PUBKEY(fp, NULL, NULL, NULL)) == NULL) {
-		warnx("PEM_read_PUBKEY");
-		goto fail;
-	}
-	if ((ec = EVP_PKEY_get1_EC_KEY(pkey)) == NULL) {
-		warnx("EVP_PKEY_get1_EC_KEY");
-		goto fail;
-	}
-
-fail:
-	if (fp != NULL) {
-		fclose(fp);
-	}
-	if (pkey != NULL) {
-		EVP_PKEY_free(pkey);
-	}
-
-	return (ec);
-}
-
 int
 write_es256_pubkey(const char *path, const void *ptr, size_t len)
 {
@@ -273,38 +241,6 @@ fail:
 	return (ok);
 }
 
-RSA *
-read_rsa_pubkey(const char *path)
-{
-	FILE *fp = NULL;
-	EVP_PKEY *pkey = NULL;
-	RSA *rsa = NULL;
-
-	if ((fp = fopen(path, "r")) == NULL) {
-		warn("fopen");
-		goto fail;
-	}
-
-	if ((pkey = PEM_read_PUBKEY(fp, NULL, NULL, NULL)) == NULL) {
-		warnx("PEM_read_PUBKEY");
-		goto fail;
-	}
-	if ((rsa = EVP_PKEY_get1_RSA(pkey)) == NULL) {
-		warnx("EVP_PKEY_get1_RSA");
-		goto fail;
-	}
-
-fail:
-	if (fp != NULL) {
-		fclose(fp);
-	}
-	if (pkey != NULL) {
-		EVP_PKEY_free(pkey);
-	}
-
-	return (rsa);
-}
-
 int
 write_rs256_pubkey(const char *path, const void *ptr, size_t len)
 {
@@ -363,7 +299,7 @@ fail:
 }
 
 EVP_PKEY *
-read_eddsa_pubkey(const char *path)
+read_pubkey(const char *path)
 {
 	FILE *fp = NULL;
 	EVP_PKEY *pkey = NULL;
