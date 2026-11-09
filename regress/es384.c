@@ -129,8 +129,8 @@ es384_pk_cmp(const char *ptr, size_t len)
 		warnx("es384_pk_to_EVP_PKEY");
 		goto out;
 	}
-	if ((r = EVP_PKEY_cmp(pkA, pkB)) != 1) {
-		warnx("EVP_PKEY_cmp: %d", r);
+	if ((r = EVP_PKEY_eq(pkA, pkB)) != 1) {
+		warnx("EVP_PKEY_eq: %d", r);
 		goto out;
 	}
 
@@ -188,7 +188,7 @@ valid_curve(const unsigned char *raw, size_t raw_len)
 	ASSERT_OK(es384_pk_from_EVP_PKEY(pkA, pkeyA));
 	ASSERT_OK(es384_pk_from_ptr(pkB, raw, raw_len));
 	ASSERT_NOT_NULL((pkeyB = es384_pk_to_EVP_PKEY(pkB)));
-	assert(EVP_PKEY_cmp(pkeyA, pkeyB) == 1);
+	assert(EVP_PKEY_eq(pkeyA, pkeyB) == 1);
 
 	EVP_PKEY_free(pkeyA);
 	EVP_PKEY_free(pkeyB);

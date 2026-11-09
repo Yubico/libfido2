@@ -843,10 +843,15 @@ cbor_encode_change_pin_auth(const fido_dev_t *dev, const fido_blob_t *secret,
     const fido_blob_t *new_pin_enc, const fido_blob_t *pin_hash_enc)
 {
 	unsigned char	 dgst[SHA256_DIGEST_LENGTH];
-	unsigned int	 dgst_len;
+	size_t		 dgst_len;
+	EVP_MAC		*mac = NULL;
+	EVP_MAC_CTX	*ctx = NULL;
+	char		 digest_name[] = "SHA256";
+	OSSL_PARAM	 params[] = {
+		OSSL_PARAM_construct_utf8_string("digest", digest_name, 0),
+		OSSL_PARAM_construct_end(),
+	};
 	cbor_item_t	*item = NULL;
-	const EVP_MD	*md = NULL;
-	HMAC_CTX	*ctx = NULL;
 	fido_blob_t	 key;
 	uint8_t		 prot;
 	size_t		 outlen;
@@ -862,12 +867,12 @@ cbor_encode_change_pin_auth(const fido_dev_t *dev, const fido_blob_t *secret,
 	if (prot == CTAP_PIN_PROTOCOL2 && key.len > 32)
 		key.len = 32;
 
-	if ((ctx = HMAC_CTX_new()) == NULL ||
-	    (md = EVP_sha256())  == NULL ||
-	    HMAC_Init_ex(ctx, key.ptr, (int)key.len, md, NULL) == 0 ||
-	    HMAC_Update(ctx, new_pin_enc->ptr, new_pin_enc->len) == 0 ||
-	    HMAC_Update(ctx, pin_hash_enc->ptr, pin_hash_enc->len) == 0 ||
-	    HMAC_Final(ctx, dgst, &dgst_len) == 0 ||
+	if ((mac = EVP_MAC_fetch(NULL, "HMAC", NULL)) == NULL ||
+	    (ctx = EVP_MAC_CTX_new(mac)) == NULL ||
+	    EVP_MAC_init(ctx, key.ptr, key.len, params) != 1 ||
+	    EVP_MAC_update(ctx, new_pin_enc->ptr, new_pin_enc->len) != 1 ||
+	    EVP_MAC_update(ctx, pin_hash_enc->ptr, pin_hash_enc->len) != 1 ||
+	    EVP_MAC_final(ctx, dgst, &dgst_len, sizeof(dgst)) != 1 ||
 	    dgst_len != SHA256_DIGEST_LENGTH) {
 		fido_log_debug("%s: HMAC", __func__);
 		goto fail;
@@ -881,7 +886,8 @@ cbor_encode_change_pin_auth(const fido_dev_t *dev, const fido_blob_t *secret,
 	}
 
 fail:
-	HMAC_CTX_free(ctx);
+	EVP_MAC_CTX_free(ctx);
+	EVP_MAC_free(mac);
 
 	return (item);
 }

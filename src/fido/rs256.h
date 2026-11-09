@@ -49,7 +49,9 @@ void rs256_pk_free(rs256_pk_t **);
 EVP_PKEY *rs256_pk_to_EVP_PKEY(const rs256_pk_t *);
 
 int rs256_pk_from_EVP_PKEY(rs256_pk_t *, const EVP_PKEY *);
+#ifndef OPENSSL_NO_DEPRECATED_3_0
 int rs256_pk_from_RSA(rs256_pk_t *, const RSA *);
+#endif
 int rs256_pk_from_ptr(rs256_pk_t *, const void *, size_t);
 
 #ifdef __cplusplus

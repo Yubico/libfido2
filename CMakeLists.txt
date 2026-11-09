@@ -329,10 +329,6 @@ else()
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer")
 	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -D_FORTIFY_SOURCE=2")
 
-	if(CRYPTO_VERSION VERSION_GREATER_EQUAL 3.0)
-		add_definitions(-DOPENSSL_API_COMPAT=0x10100000L)
-	endif()
-
 	if(NOT FUZZ)
 		set(EXTRA_CFLAGS "${EXTRA_CFLAGS} -Wframe-larger-than=2047")
 	endif()
@@ -357,12 +353,32 @@ if(USE_PCSC)
 	add_definitions(-DUSE_PCSC)
 endif()
 
+add_definitions(-DOPENSSL_SUPPRESS_DEPRECATED)
+include(CheckCSourceCompiles)
+set(CMAKE_REQUIRED_INCLUDES ${CRYPTO_INCLUDE_DIRS})
+check_c_source_compiles("#include <openssl/ec.h>
+#ifdef OPENSSL_NO_DEPRECATED_3_0
+#error OpenSSL legacy API is unavailable
+#endif
+int main(void) { return 0; }" HAVE_OPENSSL_LEGACY_API)
+unset(CMAKE_REQUIRED_INCLUDES)
+
+foreach(format gnu llvm msvc)
+	file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/export.${format}" symbols)
+	if(NOT HAVE_OPENSSL_LEGACY_API)
+		string(REGEX REPLACE
+		    "[^\n]*(es256_pk_from_EC_KEY|es384_pk_from_EC_KEY|rs256_pk_from_RSA)[^\n]*\n"
+		    "" symbols "${symbols}")
+	endif()
+	file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/export.${format}" "${symbols}\n")
+endforeach()
+
 # export list
 if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
    CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
 	# clang + lld
 	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-	    " -exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/src/export.llvm")
+	    " -exported_symbols_list ${CMAKE_CURRENT_BINARY_DIR}/export.llvm")
 elseif(NOT MSVC)
 	# clang/gcc + gnu ld
 	if(FUZZ)
@@ -370,7 +386,7 @@ elseif(NOT MSVC)
 		    " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/fuzz/export.gnu")
 	else()
 		string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-		    " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/src/export.gnu")
+		    " -Wl,--version-script=${CMAKE_CURRENT_BINARY_DIR}/export.gnu")
 	endif()
 	if(NOT WIN32)
 		string(CONCAT CMAKE_SHARED_LINKER_FLAGS
@@ -390,7 +406,7 @@ elseif(NOT MSVC)
 	endif()
 else()
 	string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-	    " /def:\"${CMAKE_CURRENT_SOURCE_DIR}/src/export.msvc\"")
+	    " /def:\"${CMAKE_CURRENT_BINARY_DIR}/export.msvc\"")
 endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/src)

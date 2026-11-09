@@ -11,12 +11,7 @@
 
 #include "fido.h"
 #include "fido/rs256.h"
-
-#if OPENSSL_VERSION_NUMBER >= 0x30000000
-#define get0_RSA(x)	EVP_PKEY_get0_RSA((x))
-#else
-#define get0_RSA(x)	EVP_PKEY_get0((x))
-#endif
+#include "openssl_compat.h"
 
 #if defined(__GNUC__)
 #define PRAGMA(s) _Pragma(s)
@@ -121,59 +116,40 @@ rs256_pk_from_ptr(rs256_pk_t *pk, const void *ptr, size_t len)
 EVP_PKEY *
 rs256_pk_to_EVP_PKEY(const rs256_pk_t *k)
 {
-	RSA		*rsa = NULL;
-	EVP_PKEY	*pkey = NULL;
-	BIGNUM		*n = NULL;
-	BIGNUM		*e = NULL;
-	int		 ok = -1;
+	OSSL_PARAM_BLD *bld = NULL;
+	OSSL_PARAM *params = NULL;
+	EVP_PKEY_CTX *ctx = NULL;
+	EVP_PKEY *pkey = NULL;
+	BIGNUM *modulus = NULL;
+	BIGNUM *exponent = NULL;
+	int ok = -1;
 
-	if ((n = BN_new()) == NULL || (e = BN_new()) == NULL)
-		goto fail;
-
-	if (BN_bin2bn(k->n, sizeof(k->n), n) == NULL ||
-	    BN_bin2bn(k->e, sizeof(k->e), e) == NULL) {
-		fido_log_debug("%s: BN_bin2bn", __func__);
-		goto fail;
-	}
-
-	if ((rsa = RSA_new()) == NULL || RSA_set0_key(rsa, n, e, NULL) == 0) {
-		fido_log_debug("%s: RSA_set0_key", __func__);
-		goto fail;
-	}
-
-	/* at this point, n and e belong to rsa */
-	n = NULL;
-	e = NULL;
-
-	if (RSA_bits(rsa) != 2048) {
-		fido_log_debug("%s: invalid key length", __func__);
-		goto fail;
-	}
-
-	if ((pkey = EVP_PKEY_new()) == NULL ||
-	    EVP_PKEY_assign_RSA(pkey, rsa) == 0) {
-		fido_log_debug("%s: EVP_PKEY_assign_RSA", __func__);
-		goto fail;
-	}
-
-	rsa = NULL; /* at this point, rsa belongs to evp */
-
+	if ((modulus = BN_bin2bn(k->n, sizeof(k->n), NULL)) == NULL ||
+	    (exponent = BN_bin2bn(k->e, sizeof(k->e), NULL)) == NULL ||
+	    BN_num_bits(modulus) != 2048 ||
+	    (bld = OSSL_PARAM_BLD_new()) == NULL ||
+	    OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_N, modulus) != 1 ||
+	    OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_E, exponent) != 1 ||
+	    (params = OSSL_PARAM_BLD_to_param(bld)) == NULL ||
+	    (ctx = EVP_PKEY_CTX_new_from_name(NULL, "RSA", NULL)) == NULL ||
+	    EVP_PKEY_fromdata_init(ctx) != 1 ||
+	    EVP_PKEY_fromdata(ctx, &pkey, EVP_PKEY_PUBLIC_KEY, params) != 1)
+		goto done;
 	ok = 0;
-fail:
-	if (n != NULL)
-		BN_free(n);
-	if (e != NULL)
-		BN_free(e);
-	if (rsa != NULL)
-		RSA_free(rsa);
-	if (ok < 0 && pkey != NULL) {
+done:
+	BN_free(modulus);
+	BN_free(exponent);
+	OSSL_PARAM_free(params);
+	OSSL_PARAM_BLD_free(bld);
+	EVP_PKEY_CTX_free(ctx);
+	if (ok < 0) {
 		EVP_PKEY_free(pkey);
 		pkey = NULL;
 	}
-
 	return (pkey);
 }
 
+#ifndef OPENSSL_NO_DEPRECATED_3_0
 int
 rs256_pk_from_RSA(rs256_pk_t *pk, const RSA *rsa)
 {
@@ -208,17 +184,29 @@ rs256_pk_from_RSA(rs256_pk_t *pk, const RSA *rsa)
 
 	return (FIDO_OK);
 }
+#endif
 
 int
 rs256_pk_from_EVP_PKEY(rs256_pk_t *pk, const EVP_PKEY *pkey)
 {
-	const RSA *rsa;
+	BIGNUM *modulus = NULL;
+	BIGNUM *exponent = NULL;
+	int ok = FIDO_ERR_INVALID_ARGUMENT;
 
-	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA ||
-	    (rsa = get0_RSA(pkey)) == NULL)
-		return (FIDO_ERR_INVALID_ARGUMENT);
-
-	return (rs256_pk_from_RSA(pk, rsa));
+	if (EVP_PKEY_is_a(pkey, "RSA") != 1 || EVP_PKEY_get_bits(pkey) != 2048)
+		goto done;
+	if (EVP_PKEY_get_bn_param(pkey, OSSL_PKEY_PARAM_RSA_N, &modulus) != 1 ||
+	    EVP_PKEY_get_bn_param(pkey, OSSL_PKEY_PARAM_RSA_E, &exponent) != 1 ||
+	    BN_bn2binpad(modulus, pk->n, sizeof(pk->n)) != sizeof(pk->n) ||
+	    BN_bn2binpad(exponent, pk->e, sizeof(pk->e)) != sizeof(pk->e)) {
+		ok = FIDO_ERR_INTERNAL;
+		goto done;
+	}
+	ok = FIDO_OK;
+done:
+	BN_free(modulus);
+	BN_free(exponent);
+	return (ok);
 }
 
 int
