@@ -523,26 +523,33 @@ fido_hid_set_sigmask(void *handle, const fido_sigset_t *sigmask)
 	return (FIDO_ERR_INTERNAL);
 }
 
-static void
+static SInt32
 schedule_io_loop(struct hid_osx *ctx, int ms)
 {
+	SInt32 rc;
+
 	IOHIDDeviceScheduleWithRunLoop(ctx->ref, CFRunLoopGetCurrent(),
 	    ctx->loop_id);
 
 	if (ms == -1)
 		ms = 5000; /* wait 5 seconds by default */
 
-	CFRunLoopRunInMode(ctx->loop_id, (double)ms/1000.0, true);
+	rc = CFRunLoopRunInMode(ctx->loop_id, (double)ms/1000.0, true);
 
 	IOHIDDeviceUnscheduleFromRunLoop(ctx->ref, CFRunLoopGetCurrent(),
 	    ctx->loop_id);
+
+	return (rc);
 }
 
 int
 fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 {
 	struct hid_osx		*ctx = handle;
+	struct timespec		 ts_start;
 	ssize_t			 r;
+	SInt32			 rc;
+	int			 again, saved_errno;
 
 	explicit_bzero(buf, len);
 	explicit_bzero(ctx->report, sizeof(ctx->report));
@@ -559,9 +566,25 @@ fido_hid_read(void *handle, unsigned char *buf, size_t len, int ms)
 			return (-1);
 		}
 
-		schedule_io_loop(ctx, ms);
+		if (ms == -1)
+			ms = 5000; /* wait 5 seconds by default */
 
-		if ((r = read(ctx->report_pipe[0], buf, len)) == -1) {
+		/* the run loop can return before the report callback has run */
+		do {
+			if (fido_time_now(&ts_start) != 0)
+				return (-1);
+			rc = schedule_io_loop(ctx, ms);
+			r = read(ctx->report_pipe[0], buf, len);
+			again = r == -1 && (errno == EAGAIN || errno == EWOULDBLOCK);
+			if (again) {
+				saved_errno = errno;
+				fido_log_debug("%s: run loop returned %d with no "
+				    "frame", __func__, (int)rc);
+				errno = saved_errno;
+			}
+		} while (again && fido_time_delta(&ts_start, &ms) == 0 && ms > 0);
+
+		if (r == -1) {
 			fido_log_error(errno, "%s: read", __func__);
 			return (-1);
 		}
