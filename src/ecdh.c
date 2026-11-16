@@ -180,10 +180,13 @@ fido_do_ecdh(fido_dev_t *dev, es256_pk_t **pk, fido_blob_t **ecdh, int *ms)
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
 	}
-	if ((ak = es256_pk_new()) == NULL ||
-	    fido_dev_authkey(dev, ak, ms) != FIDO_OK) {
-		fido_log_debug("%s: fido_dev_authkey", __func__);
+	if ((ak = es256_pk_new()) == NULL) {
+		fido_log_debug("%s: es256_pk_new", __func__);
 		r = FIDO_ERR_INTERNAL;
+		goto fail;
+	}
+	if ((r = fido_dev_authkey(dev, ak, ms)) != FIDO_OK) {
+		fido_log_debug("%s: fido_dev_authkey", __func__);
 		goto fail;
 	}
 	if (do_ecdh(dev, sk, ak, ecdh) < 0) {
