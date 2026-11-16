@@ -395,6 +395,10 @@ fido_dev_get_puat(fido_dev_t *dev, unsigned int perm, const char *rpid,
 	if (!fido_dev_is_fido2(dev) || fido_dev_is_winhello(dev))
 		return (FIDO_ERR_INVALID_ARGUMENT);
 
+	/* the legacy getPinToken path cannot negotiate perm or rpid */
+	if (!fido_dev_supports_permissions(dev))
+		return (FIDO_ERR_UNSUPPORTED_OPTION);
+
 	return (fido_dev_get_uv_token_wait(dev, perm, pin, NULL, NULL, rpid,
 	    &dev->puat, &ms));
 }
