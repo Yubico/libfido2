@@ -260,7 +260,7 @@ fido_hid_open(const char *path)
 	struct hid_linux *ctx;
 	struct hidraw_report_descriptor *hrd;
 	struct timespec tv_pause;
-	long interval_ms, retries = 0;
+	long interval_ns, retries = 0;
 	bool looped;
 
 retry:
@@ -284,9 +284,9 @@ retry:
 			fido_hid_close(ctx);
 			return (NULL);
 		}
-		interval_ms = retries * 100000000L;
-		tv_pause.tv_sec = interval_ms / 1000000000L;
-		tv_pause.tv_nsec = interval_ms % 1000000000L;
+		interval_ns = retries * 100000000L;
+		tv_pause.tv_sec = interval_ns / 1000000000L;
+		tv_pause.tv_nsec = interval_ns % 1000000000L;
 		if (nanosleep(&tv_pause, NULL) == -1) {
 			fido_log_error(errno, "%s: nanosleep", __func__);
 			fido_hid_close(ctx);
