@@ -35,7 +35,7 @@ jobs:
       run: |
         sudo apt -q update
         sudo apt install -q -y libcbor-dev libudev-dev libz-dev \
-          original-awk mandoc libpcsclite-dev
+          original-awk mandoc libpcsclite-dev libsystemd-dev
         sudo apt remove -y libssl-dev
         if [ "${CC%-*}" == "clang" ]; then
           sudo ./.actions/setup_clang "${CC}"
