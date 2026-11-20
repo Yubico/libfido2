@@ -366,7 +366,7 @@ largeblob_array_lookup(fido_blob_t *out, size_t *idx, const cbor_item_t *item,
 	memset(&blob, 0, sizeof(blob));
 	if (idx != NULL)
 		*idx = 0;
-	if ((v = cbor_array_handle(item)) == NULL)
+	if ((v = cbor_array_handle(item)) == NULL && cbor_array_size(item) != 0)
 		return FIDO_ERR_INVALID_ARGUMENT;
 	for (size_t i = 0; i < cbor_array_size(item); i++) {
 		if (largeblob_decode(&blob, v[i]) < 0 ||

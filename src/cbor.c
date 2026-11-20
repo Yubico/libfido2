@@ -49,7 +49,7 @@ ctap_check_cbor(cbor_item_t *prev, cbor_item_t *curr)
 		prev_len = cbor_string_length(prev);
 
 		if (curr_len > prev_len || (curr_len == prev_len &&
-		    memcmp(cbor_string_handle(prev), cbor_string_handle(curr),
+		    curr_len != 0 && memcmp(cbor_string_handle(prev), cbor_string_handle(curr),
 		    curr_len) < 0))
 			return (0);
 	}
@@ -66,12 +66,13 @@ cbor_map_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
 	struct cbor_pair	*v;
 	size_t			 n;
 
+	if ((n = cbor_map_size(item)) == 0)
+		return (0);
+
 	if ((v = cbor_map_handle(item)) == NULL) {
 		fido_log_debug("%s: cbor_map_handle", __func__);
 		return (-1);
 	}
-
-	n = cbor_map_size(item);
 
 	for (size_t i = 0; i < n; i++) {
 		if (v[i].key == NULL || v[i].value == NULL) {
@@ -100,12 +101,13 @@ cbor_array_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
 	cbor_item_t	**v;
 	size_t		  n;
 
+	if ((n = cbor_array_size(item)) == 0)
+		return (0);
+
 	if ((v = cbor_array_handle(item)) == NULL) {
 		fido_log_debug("%s: cbor_array_handle", __func__);
 		return (-1);
 	}
-
-	n = cbor_array_size(item);
 
 	for (size_t i = 0; i < n; i++)
 		if (v[i] == NULL || f(v[i], arg) < 0) {
@@ -192,7 +194,8 @@ cbor_bytestring_copy(const cbor_item_t *item, unsigned char **buf, size_t *len)
 		return (-1);
 	}
 
-	memcpy(*buf, cbor_bytestring_handle(item), *len);
+	if (*len != 0)
+		memcpy(*buf, cbor_bytestring_handle(item), *len);
 
 	return (0);
 }
@@ -217,7 +220,8 @@ cbor_string_copy(const cbor_item_t *item, char **str)
 	    (*str = malloc(len + 1)) == NULL)
 		return (-1);
 
-	memcpy(*str, cbor_string_handle(item), len);
+	if (len != 0)
+		memcpy(*str, cbor_string_handle(item), len);
 	(*str)[len] = '\0';
 
 	return (0);
@@ -1799,8 +1803,8 @@ cbor_array_append(cbor_item_t **array, cbor_item_t *item)
 	cbor_item_t **v, *ret;
 	size_t n;
 
-	if ((v = cbor_array_handle(*array)) == NULL ||
-	    (n = cbor_array_size(*array)) == SIZE_MAX ||
+	if ((n = cbor_array_size(*array)) == SIZE_MAX ||
+	    ((v = cbor_array_handle(*array)) == NULL && n != 0) ||
 	    (ret = cbor_new_definite_array(n + 1)) == NULL)
 		return -1;
 	for (size_t i = 0; i < n; i++) {
