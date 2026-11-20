@@ -3022,6 +3022,48 @@ entattest(void)
 	fido_dev_free(&dev);
 }
 
+/* PJK/libcbor#418 */
+static void *
+guarded_malloc(size_t n)
+{
+	assert(n < 1024 * 1024);
+	return (malloc(n));
+}
+
+static void *
+guarded_realloc(void *p, size_t n)
+{
+	assert(n < 1024 * 1024);
+	return (realloc(p, n));
+}
+
+static void
+oversized_cbor(void)
+{
+	/* array claiming 0x10000000 elements */
+	const unsigned char wide[] = {
+		0x9b, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00,
+	};
+	/* nested arrays, each claiming 200 elements; 200 * 256 > 512 */
+	unsigned char deep[512];
+	fido_cred_t *c;
+	size_t i;
+
+	for (i = 0; i < sizeof(deep); i += 2) {
+		deep[i] = 0x98;
+		deep[i + 1] = 0xc8;
+	}
+
+	cbor_set_allocs(guarded_malloc, guarded_realloc, free);
+	c = alloc_cred();
+	assert(fido_cred_set_attobj(c, wide, sizeof(wide)) ==
+	    FIDO_ERR_INVALID_ARGUMENT);
+	assert(fido_cred_set_attobj(c, deep, sizeof(deep)) ==
+	    FIDO_ERR_INVALID_ARGUMENT);
+	free_cred(c);
+	cbor_set_allocs(malloc, realloc, free);
+}
+
 int
 main(void)
 {
@@ -3056,6 +3098,7 @@ main(void)
 	valid_tpm_rs256_cred(xfail);
 	valid_tpm_es256_cred(xfail);
 	attestation_object();
+	oversized_cbor();
 	makecred();
 	entattest();
 
