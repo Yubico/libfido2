@@ -138,6 +138,15 @@ print_algorithms(const fido_cbor_info_t *ci)
 		case COSE_EDDSA:
 			cose = "eddsa";
 			break;
+		case COSE_MLDSA44:
+			cose = "mldsa44";
+			break;
+		case COSE_MLDSA65:
+			cose = "mldsa65";
+			break;
+		case COSE_MLDSA87:
+			cose = "mldsa87";
+			break;
 		}
 		if (fido_cbor_info_algorithm_type(ci, i) != NULL)
 			type = fido_cbor_info_algorithm_type(ci, i);

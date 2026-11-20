@@ -454,12 +454,13 @@ get_es384_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
 }
 
 static int
-get_eddsa_hash(fido_blob_t *dgst, const fido_blob_t *clientdata,
+get_message(fido_blob_t *dgst, const fido_blob_t *clientdata,
     const fido_blob_t *authdata)
 {
 	if (SIZE_MAX - authdata->len < clientdata->len ||
-	    dgst->len < authdata->len + clientdata->len)
+	    dgst->len < authdata->len + clientdata->len) {
 		return (-1);
+	}
 
 	memcpy(dgst->ptr, authdata->ptr, authdata->len);
 	memcpy(dgst->ptr + authdata->len, clientdata->ptr, clientdata->len);
@@ -497,7 +498,10 @@ fido_get_signed_hash(int cose_alg, fido_blob_t *dgst,
 		ok = get_es384_hash(dgst, clientdata, &authdata);
 		break;
 	case COSE_EDDSA:
-		ok = get_eddsa_hash(dgst, clientdata, &authdata);
+	case COSE_MLDSA44:
+	case COSE_MLDSA65:
+	case COSE_MLDSA87:
+		ok = get_message(dgst, clientdata, &authdata);
 		break;
 	default:
 		fido_log_debug("%s: unknown cose_alg", __func__);
@@ -514,14 +518,18 @@ int
 fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
     const void *pk)
 {
-	unsigned char		 buf[1024]; /* XXX */
 	fido_blob_t		 dgst;
 	const fido_assert_stmt	*stmt = NULL;
 	int			 ok = -1;
 	int			 r;
 
-	dgst.ptr = buf;
-	dgst.len = sizeof(buf);
+	dgst.len = 8192;
+	dgst.ptr = malloc(dgst.len);
+
+	if (dgst.ptr == NULL) {
+		r = FIDO_ERR_INTERNAL;
+		goto out;
+	}
 
 	if (idx >= assert->stmt_len || pk == NULL) {
 		r = FIDO_ERR_INVALID_ARGUMENT;
@@ -579,6 +587,15 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 	case COSE_EDDSA:
 		ok = eddsa_pk_verify_sig(&dgst, pk, &stmt->sig);
 		break;
+	case COSE_MLDSA44:
+		ok = mldsa44_pk_verify_sig(&dgst, pk, &stmt->sig);
+		break;
+	case COSE_MLDSA65:
+		ok = mldsa65_pk_verify_sig(&dgst, pk, &stmt->sig);
+		break;
+	case COSE_MLDSA87:
+		ok = mldsa87_pk_verify_sig(&dgst, pk, &stmt->sig);
+		break;
 	default:
 		fido_log_debug("%s: unsupported cose_alg %d", __func__,
 		    cose_alg);
@@ -591,7 +608,7 @@ fido_assert_verify(const fido_assert_t *assert, size_t idx, int cose_alg,
 	else
 		r = FIDO_OK;
 out:
-	explicit_bzero(buf, sizeof(buf));
+	fido_blob_reset(&dgst);
 
 	return (r);
 }

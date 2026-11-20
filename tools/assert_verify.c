@@ -10,6 +10,7 @@
 #include <fido/es384.h>
 #include <fido/rs256.h>
 #include <fido/eddsa.h>
+#include <fido/mldsa.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -93,11 +94,14 @@ load_pubkey(int type, const char *file)
 {
 	EC_KEY *ec = NULL;
 	RSA *rsa = NULL;
-	EVP_PKEY *eddsa = NULL;
+	EVP_PKEY *pkey = NULL;
 	es256_pk_t *es256_pk = NULL;
 	es384_pk_t *es384_pk = NULL;
 	rs256_pk_t *rs256_pk = NULL;
 	eddsa_pk_t *eddsa_pk = NULL;
+	mldsa44_pk_t *mldsa44_pk = NULL;
+	mldsa65_pk_t *mldsa65_pk = NULL;
+	mldsa87_pk_t *mldsa87_pk = NULL;
 	void *pk = NULL;
 
 	switch (type) {
@@ -132,14 +136,44 @@ load_pubkey(int type, const char *file)
 		RSA_free(rsa);
 		break;
 	case COSE_EDDSA:
-		if ((eddsa = read_eddsa_pubkey(file)) == NULL)
-			errx(1, "read_eddsa_pubkey");
+		if ((pkey = read_evp_pkey(file)) == NULL)
+			errx(1, "read_evp_pkey");
 		if ((eddsa_pk = eddsa_pk_new()) == NULL)
 			errx(1, "eddsa_pk_new");
-		if (eddsa_pk_from_EVP_PKEY(eddsa_pk, eddsa) != FIDO_OK)
+		if (eddsa_pk_from_EVP_PKEY(eddsa_pk, pkey) != FIDO_OK)
 			errx(1, "eddsa_pk_from_EVP_PKEY");
 		pk = eddsa_pk;
-		EVP_PKEY_free(eddsa);
+		EVP_PKEY_free(pkey);
+		break;
+	case COSE_MLDSA44:
+		if ((pkey = read_evp_pkey(file)) == NULL)
+			errx(1, "read_evp_pkey");
+		if ((mldsa44_pk = mldsa44_pk_new()) == NULL)
+			errx(1, "mldsa44_pk_new");
+		if (mldsa44_pk_from_EVP_PKEY(mldsa44_pk, pkey) != FIDO_OK)
+			errx(1, "mldsa44_pk_from_EVP_PKEY");
+		pk = mldsa44_pk;
+		EVP_PKEY_free(pkey);
+		break;
+	case COSE_MLDSA65:
+		if ((pkey = read_evp_pkey(file)) == NULL)
+			errx(1, "read_evp_pkey");
+		if ((mldsa65_pk = mldsa65_pk_new()) == NULL)
+			errx(1, "mldsa65_pk_new");
+		if (mldsa65_pk_from_EVP_PKEY(mldsa65_pk, pkey) != FIDO_OK)
+			errx(1, "mldsa65_pk_from_EVP_PKEY");
+		pk = mldsa65_pk;
+		EVP_PKEY_free(pkey);
+		break;
+	case COSE_MLDSA87:
+		if ((pkey = read_evp_pkey(file)) == NULL)
+			errx(1, "read_evp_pkey");
+		if ((mldsa87_pk = mldsa87_pk_new()) == NULL)
+			errx(1, "mldsa87_pk_new");
+		if (mldsa87_pk_from_EVP_PKEY(mldsa87_pk, pkey) != FIDO_OK)
+			errx(1, "mldsa87_pk_from_EVP_PKEY");
+		pk = mldsa87_pk;
+		EVP_PKEY_free(pkey);
 		break;
 	default:
 		errx(1, "invalid type %d", type);
