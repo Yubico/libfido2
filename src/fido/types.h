@@ -124,7 +124,6 @@ PACKED_TYPE(fido_attcred_raw_t,
 struct fido_attcred_raw {
 	unsigned char aaguid[16]; /* credential's aaguid */
 	uint16_t      id_len;     /* credential id length */
-	uint8_t       body[];     /* credential id + pubkey */
 })
 
 typedef struct fido_attcred {
