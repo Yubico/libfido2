@@ -21,43 +21,33 @@ if(NOT MSVC)
 	    "-Wconversion -Wsign-conversion")
 endif()
 
-# manifest
 add_executable(manifest manifest.c ${COMPAT_SOURCES})
 target_link_libraries(manifest ${_FIDO2_LIBRARY})
 
-# info
 add_executable(info info.c ${COMPAT_SOURCES})
 target_link_libraries(info ${_FIDO2_LIBRARY})
 
-# reset
 add_executable(reset reset.c util.c ${COMPAT_SOURCES})
 target_link_libraries(reset ${_FIDO2_LIBRARY})
 
-# cred
 add_executable(cred cred.c util.c ${COMPAT_SOURCES})
 target_link_libraries(cred ${_FIDO2_LIBRARY})
 
-# assert
 add_executable(assert assert.c util.c ${COMPAT_SOURCES})
 target_link_libraries(assert ${_FIDO2_LIBRARY})
 
-# setpin
 add_executable(setpin setpin.c ${COMPAT_SOURCES})
 target_link_libraries(setpin ${_FIDO2_LIBRARY})
 
-# retries
 add_executable(retries retries.c ${COMPAT_SOURCES})
 target_link_libraries(retries ${_FIDO2_LIBRARY})
 
-# select
 add_executable(select select.c ${COMPAT_SOURCES})
 target_link_libraries(select ${_FIDO2_LIBRARY})
 
-# bio
 add_executable(bio bio.c ${COMPAT_SOURCES})
 target_link_libraries(bio ${_FIDO2_LIBRARY})
 
-# largeblob
 add_executable(largeblob largeblob.c ${COMPAT_SOURCES})
 target_link_libraries(largeblob ${_FIDO2_LIBRARY})
 
