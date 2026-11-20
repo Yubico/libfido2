@@ -74,7 +74,8 @@ unpack_string(cbor_item_t *item, char *v)
 	    (len = cbor_bytestring_length(item)) >= MAXSTR)
 		return -1;
 
-	memcpy(v, cbor_bytestring_handle(item), len);
+	if (len)
+		memcpy(v, cbor_bytestring_handle(item), len);
 	v[len] = '\0';
 
 	return 0;
