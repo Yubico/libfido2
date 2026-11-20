@@ -7,19 +7,19 @@
 New-Variable -Name 'LIBRESSL_URL' `
     -Value 'https://ftp.openbsd.org/pub/OpenBSD/LibreSSL' `
     -Option Constant
-New-Variable -Name 'LIBRESSL' -Value 'libressl-4.4.0' -Option Constant
+New-Variable -Name 'LIBRESSL' -Value 'libressl-4.4.1' -Option Constant
 New-Variable -Name 'CRYPTO_LIB' -Value 'crypto' -Option Constant
 New-Variable -Name 'CRYPTO_DLL' -Value 'crypto-57' -Option Constant
 
 # libcbor coordinates.
-New-Variable -Name 'LIBCBOR' -Value 'libcbor-0.14.0' -Option Constant
-New-Variable -Name 'LIBCBOR_BRANCH' -Value 'v0.14.0' -Option Constant
+New-Variable -Name 'LIBCBOR' -Value 'libcbor-0.15.0' -Option Constant
+New-Variable -Name 'LIBCBOR_BRANCH' -Value 'v0.15.0' -Option Constant
 New-Variable -Name 'LIBCBOR_GIT' -Value 'https://github.com/pjk/libcbor' `
     -Option Constant
 
 # zlib coordinates.
-New-Variable -Name 'ZLIB' -Value 'zlib-1.3.1' -Option Constant
-New-Variable -Name 'ZLIB_BRANCH' -Value 'v1.3.1' -Option Constant
+New-Variable -Name 'ZLIB' -Value 'zlib-1.4' -Option Constant
+New-Variable -Name 'ZLIB_BRANCH' -Value 'v1.4' -Option Constant
 New-Variable -Name 'ZLIB_GIT' -Value 'https://github.com/madler/zlib' `
     -Option Constant
 
