@@ -13,9 +13,7 @@
 #include <openssl/rsa.h>
 
 /* util.c */
-EC_KEY *read_ec_pubkey(const char *);
-RSA *read_rsa_pubkey(const  char *);
-EVP_PKEY *read_eddsa_pubkey(const char *);
+EVP_PKEY *read_pubkey(const char *);
 int base10(const char *, long long *);
 int read_blob(const char *, unsigned char **, size_t *);
 int write_blob(const char *, const unsigned char *, size_t);

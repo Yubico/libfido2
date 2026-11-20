@@ -48,7 +48,9 @@ es256_pk_t *es256_pk_new(void);
 void es256_pk_free(es256_pk_t **);
 EVP_PKEY *es256_pk_to_EVP_PKEY(const es256_pk_t *);
 
+#ifndef OPENSSL_NO_DEPRECATED_3_0
 int es256_pk_from_EC_KEY(es256_pk_t *, const EC_KEY *);
+#endif
 int es256_pk_from_EVP_PKEY(es256_pk_t *, const EVP_PKEY *);
 int es256_pk_from_ptr(es256_pk_t *, const void *, size_t);
 

@@ -11,12 +11,7 @@
 
 #include "fido.h"
 #include "fido/es384.h"
-
-#if OPENSSL_VERSION_NUMBER >= 0x30000000
-#define get0_EC_KEY(x)	EVP_PKEY_get0_EC_KEY((x))
-#else
-#define get0_EC_KEY(x)	EVP_PKEY_get0((x))
-#endif
+#include "openssl_compat.h"
 
 static int
 decode_coord(const cbor_item_t *item, void *xy, size_t xy_len)
@@ -111,71 +106,11 @@ es384_pk_from_ptr(es384_pk_t *pk, const void *ptr, size_t len)
 EVP_PKEY *
 es384_pk_to_EVP_PKEY(const es384_pk_t *k)
 {
-	BN_CTX		*bnctx = NULL;
-	EC_KEY		*ec = NULL;
-	EC_POINT	*q = NULL;
-	EVP_PKEY	*pkey = NULL;
-	BIGNUM		*x = NULL;
-	BIGNUM		*y = NULL;
-	const EC_GROUP	*g = NULL;
-	int		 ok = -1;
-
-	if ((bnctx = BN_CTX_new()) == NULL)
-		goto fail;
-
-	BN_CTX_start(bnctx);
-
-	if ((x = BN_CTX_get(bnctx)) == NULL ||
-	    (y = BN_CTX_get(bnctx)) == NULL)
-		goto fail;
-
-	if (BN_bin2bn(k->x, sizeof(k->x), x) == NULL ||
-	    BN_bin2bn(k->y, sizeof(k->y), y) == NULL) {
-		fido_log_debug("%s: BN_bin2bn", __func__);
-		goto fail;
-	}
-
-	if ((ec = EC_KEY_new_by_curve_name(NID_secp384r1)) == NULL ||
-	    (g = EC_KEY_get0_group(ec)) == NULL) {
-		fido_log_debug("%s: EC_KEY init", __func__);
-		goto fail;
-	}
-
-	if ((q = EC_POINT_new(g)) == NULL ||
-	    EC_POINT_set_affine_coordinates_GFp(g, q, x, y, bnctx) == 0 ||
-	    EC_KEY_set_public_key(ec, q) == 0) {
-		fido_log_debug("%s: EC_KEY_set_public_key", __func__);
-		goto fail;
-	}
-
-	if ((pkey = EVP_PKEY_new()) == NULL ||
-	    EVP_PKEY_assign_EC_KEY(pkey, ec) == 0) {
-		fido_log_debug("%s: EVP_PKEY_assign_EC_KEY", __func__);
-		goto fail;
-	}
-
-	ec = NULL; /* at this point, ec belongs to evp */
-
-	ok = 0;
-fail:
-	if (bnctx != NULL) {
-		BN_CTX_end(bnctx);
-		BN_CTX_free(bnctx);
-	}
-
-	if (ec != NULL)
-		EC_KEY_free(ec);
-	if (q != NULL)
-		EC_POINT_free(q);
-
-	if (ok < 0 && pkey != NULL) {
-		EVP_PKEY_free(pkey);
-		pkey = NULL;
-	}
-
-	return (pkey);
+	return (fido_ec_pk_to_pkey(NID_secp384r1, k->x, k->y,
+	    sizeof(k->x), NULL));
 }
 
+#ifndef OPENSSL_NO_DEPRECATED_3_0
 int
 es384_pk_from_EC_KEY(es384_pk_t *pk, const EC_KEY *ec)
 {
@@ -235,17 +170,13 @@ fail:
 
 	return (ok);
 }
+#endif
 
 int
 es384_pk_from_EVP_PKEY(es384_pk_t *pk, const EVP_PKEY *pkey)
 {
-	const EC_KEY *ec;
-
-	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_EC ||
-	    (ec = get0_EC_KEY(pkey)) == NULL)
-		return (FIDO_ERR_INVALID_ARGUMENT);
-
-	return (es384_pk_from_EC_KEY(pk, ec));
+	return (fido_ec_pk_from_pkey(pkey, NID_secp384r1, pk->x, pk->y,
+	    sizeof(pk->x)));
 }
 
 int
