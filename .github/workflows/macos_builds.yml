@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-15, macos-14 ]
+        os: [ macos-15, macos-latest ]
     steps:
     - uses: actions/checkout@v6
     - name: dependencies
