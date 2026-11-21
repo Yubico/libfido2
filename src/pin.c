@@ -608,7 +608,7 @@ fido_dev_get_retry_count_tx(fido_dev_t *dev, uint8_t subcmd, int *ms)
 	memset(&f, 0, sizeof(f));
 	memset(argv, 0, sizeof(argv));
 
-	if ((argv[0] = cbor_build_uint8(1)) == NULL ||
+	if ((argv[0] = cbor_encode_pin_opt(dev)) == NULL ||
 	    (argv[1] = cbor_build_uint8(subcmd)) == NULL) {
 		r = FIDO_ERR_INTERNAL;
 		goto fail;
