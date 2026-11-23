@@ -1642,7 +1642,7 @@ decode_cred_id_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	if (!strcmp(name, "id"))
 		if (fido_blob_decode(val, id) < 0) {
-			fido_log_debug("%s: cbor_bytestring_copy", __func__);
+			fido_log_debug("%s: fido_blob_decode", __func__);
 			goto out;
 		}
 
