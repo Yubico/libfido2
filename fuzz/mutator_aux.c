@@ -44,6 +44,15 @@ consume(const void *body, size_t len)
 }
 
 void
+consume_maybe(const void *body, size_t len)
+{
+	assert((body == NULL) == (len == 0)); /* Ensure consistency */
+
+	if (body)
+		consume(body, len);
+}
+
+void
 consume_str(const char *str)
 {
 	if (str != NULL)

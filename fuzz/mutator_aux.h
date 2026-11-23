@@ -73,6 +73,7 @@ void cross_over(struct param*, const struct param*, unsigned int, unsigned int);
 void test(const struct param *);
 
 void consume(const void *, size_t);
+void consume_maybe(const void *, size_t);
 void consume_str(const char *);
 
 int unpack_blob(cbor_item_t *, struct blob *);
