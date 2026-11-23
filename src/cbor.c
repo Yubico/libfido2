@@ -48,9 +48,11 @@ ctap_check_cbor(cbor_item_t *prev, cbor_item_t *curr)
 		curr_len = cbor_string_length(curr);
 		prev_len = cbor_string_length(prev);
 
-		if (curr_len > prev_len || (curr_len == prev_len &&
-		    memcmp(cbor_string_handle(prev), cbor_string_handle(curr),
-		    curr_len) < 0))
+		if (curr_len > prev_len)
+			return (0);
+
+		if (curr_len == prev_len && prev_len > 0 && memcmp(
+		    cbor_string_handle(prev), cbor_string_handle(curr), curr_len) < 0)
 			return (0);
 	}
 
