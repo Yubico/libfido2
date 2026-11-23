@@ -217,7 +217,8 @@ cbor_string_copy(const cbor_item_t *item, char **str)
 	    (*str = malloc(len + 1)) == NULL)
 		return (-1);
 
-	memcpy(*str, cbor_string_handle(item), len);
+	if (len > 0)
+		memcpy(*str, cbor_string_handle(item), len);
 	(*str)[len] = '\0';
 
 	return (0);
