@@ -188,7 +188,11 @@ cbor_bytestring_copy(const cbor_item_t *item, unsigned char **buf, size_t *len)
 		return (-1);
 	}
 
-	*len = cbor_bytestring_length(item);
+	if ((*len = cbor_bytestring_length(item)) == 0) {
+		*buf = NULL;
+		return (0);
+	}
+
 	if ((*buf = malloc(*len)) == NULL) {
 		*len = 0;
 		return (-1);
