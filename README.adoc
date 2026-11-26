@@ -124,6 +124,7 @@ officially supported.
 | BUILD_SHARED_LIBS | Build a shared library                  | ON
 | BUILD_STATIC_LIBS | Build a static library                  | ON
 | BUILD_TOOLS       | Build auxiliary tools                   | ON
+| ENABLE_HARDENING  | Enable toolchain hardening              | ON
 | FUZZ              | Enable fuzzing instrumentation          | OFF
 | NFC_LINUX         | Enable netlink NFC support on Linux     | ON
 | USE_HIDAPI        | Use hidapi as the HID backend           | OFF
