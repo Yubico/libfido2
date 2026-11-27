@@ -11,12 +11,7 @@
 
 #include "fido.h"
 #include "fido/es256.h"
-
-#if OPENSSL_VERSION_NUMBER >= 0x30000000
-#define get0_EC_KEY(x)	EVP_PKEY_get0_EC_KEY((x))
-#else
-#define get0_EC_KEY(x)	EVP_PKEY_get0((x))
-#endif
+#include "openssl_compat.h"
 
 static const int es256_nid = NID_X9_62_prime256v1;
 
@@ -224,9 +219,7 @@ es256_sk_create(es256_sk_t *key)
 	EVP_PKEY_CTX	*kctx = NULL;
 	EVP_PKEY	*p = NULL;
 	EVP_PKEY	*k = NULL;
-	const EC_KEY	*ec;
-	const BIGNUM	*d;
-	int		 n;
+	BIGNUM		*d = NULL;
 	int		 ok = -1;
 
 	if ((pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL)) == NULL ||
@@ -243,16 +236,15 @@ es256_sk_create(es256_sk_t *key)
 		goto fail;
 	}
 
-	if ((ec = EVP_PKEY_get0_EC_KEY(k)) == NULL ||
-	    (d = EC_KEY_get0_private_key(ec)) == NULL ||
-	    (n = BN_num_bytes(d)) < 0 || (size_t)n > sizeof(key->d) ||
-	    (n = BN_bn2bin(d, key->d)) < 0 || (size_t)n > sizeof(key->d)) {
-		fido_log_debug("%s: EC_KEY_get0_private_key", __func__);
+	if (EVP_PKEY_get_bn_param(k, OSSL_PKEY_PARAM_PRIV_KEY, &d) != 1 ||
+	    BN_bn2binpad(d, key->d, sizeof(key->d)) != sizeof(key->d)) {
+		fido_log_debug("%s: EVP_PKEY_get_bn_param", __func__);
 		goto fail;
 	}
 
 	ok = 0;
 fail:
+	BN_clear_free(d);
 	if (p != NULL)
 		EVP_PKEY_free(p);
 	if (k != NULL)
@@ -268,71 +260,10 @@ fail:
 EVP_PKEY *
 es256_pk_to_EVP_PKEY(const es256_pk_t *k)
 {
-	BN_CTX		*bnctx = NULL;
-	EC_KEY		*ec = NULL;
-	EC_POINT	*q = NULL;
-	EVP_PKEY	*pkey = NULL;
-	BIGNUM		*x = NULL;
-	BIGNUM		*y = NULL;
-	const EC_GROUP	*g = NULL;
-	int		 ok = -1;
-
-	if ((bnctx = BN_CTX_new()) == NULL)
-		goto fail;
-
-	BN_CTX_start(bnctx);
-
-	if ((x = BN_CTX_get(bnctx)) == NULL ||
-	    (y = BN_CTX_get(bnctx)) == NULL)
-		goto fail;
-
-	if (BN_bin2bn(k->x, sizeof(k->x), x) == NULL ||
-	    BN_bin2bn(k->y, sizeof(k->y), y) == NULL) {
-		fido_log_debug("%s: BN_bin2bn", __func__);
-		goto fail;
-	}
-
-	if ((ec = EC_KEY_new_by_curve_name(es256_nid)) == NULL ||
-	    (g = EC_KEY_get0_group(ec)) == NULL) {
-		fido_log_debug("%s: EC_KEY init", __func__);
-		goto fail;
-	}
-
-	if ((q = EC_POINT_new(g)) == NULL ||
-	    EC_POINT_set_affine_coordinates_GFp(g, q, x, y, bnctx) == 0 ||
-	    EC_KEY_set_public_key(ec, q) == 0) {
-		fido_log_debug("%s: EC_KEY_set_public_key", __func__);
-		goto fail;
-	}
-
-	if ((pkey = EVP_PKEY_new()) == NULL ||
-	    EVP_PKEY_assign_EC_KEY(pkey, ec) == 0) {
-		fido_log_debug("%s: EVP_PKEY_assign_EC_KEY", __func__);
-		goto fail;
-	}
-
-	ec = NULL; /* at this point, ec belongs to evp */
-
-	ok = 0;
-fail:
-	if (bnctx != NULL) {
-		BN_CTX_end(bnctx);
-		BN_CTX_free(bnctx);
-	}
-
-	if (ec != NULL)
-		EC_KEY_free(ec);
-	if (q != NULL)
-		EC_POINT_free(q);
-
-	if (ok < 0 && pkey != NULL) {
-		EVP_PKEY_free(pkey);
-		pkey = NULL;
-	}
-
-	return (pkey);
+	return (fido_ec_pk_to_pkey(es256_nid, k->x, k->y, sizeof(k->x), NULL));
 }
 
+#ifndef OPENSSL_NO_DEPRECATED_3_0
 int
 es256_pk_from_EC_KEY(es256_pk_t *pk, const EC_KEY *ec)
 {
@@ -392,68 +323,28 @@ fail:
 
 	return (ok);
 }
+#endif
 
 int
 es256_pk_from_EVP_PKEY(es256_pk_t *pk, const EVP_PKEY *pkey)
 {
-	const EC_KEY *ec;
-
-	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_EC ||
-	    (ec = get0_EC_KEY(pkey)) == NULL)
-		return (FIDO_ERR_INVALID_ARGUMENT);
-
-	return (es256_pk_from_EC_KEY(pk, ec));
+	return (fido_ec_pk_from_pkey(pkey, es256_nid, pk->x, pk->y,
+	    sizeof(pk->x)));
 }
 
 EVP_PKEY *
 es256_sk_to_EVP_PKEY(const es256_sk_t *k)
 {
-	BN_CTX		*bnctx = NULL;
-	EC_KEY		*ec = NULL;
-	EVP_PKEY	*pkey = NULL;
-	BIGNUM		*d = NULL;
-	int		 ok = -1;
+	es256_pk_t pk;
+	BIGNUM *priv = NULL;
+	EVP_PKEY *pkey = NULL;
 
-	if ((bnctx = BN_CTX_new()) == NULL)
-		goto fail;
-
-	BN_CTX_start(bnctx);
-
-	if ((d = BN_CTX_get(bnctx)) == NULL ||
-	    BN_bin2bn(k->d, sizeof(k->d), d) == NULL) {
-		fido_log_debug("%s: BN_bin2bn", __func__);
-		goto fail;
-	}
-
-	if ((ec = EC_KEY_new_by_curve_name(es256_nid)) == NULL ||
-	    EC_KEY_set_private_key(ec, d) == 0) {
-		fido_log_debug("%s: EC_KEY_set_private_key", __func__);
-		goto fail;
-	}
-
-	if ((pkey = EVP_PKEY_new()) == NULL ||
-	    EVP_PKEY_assign_EC_KEY(pkey, ec) == 0) {
-		fido_log_debug("%s: EVP_PKEY_assign_EC_KEY", __func__);
-		goto fail;
-	}
-
-	ec = NULL; /* at this point, ec belongs to evp */
-
-	ok = 0;
-fail:
-	if (bnctx != NULL) {
-		BN_CTX_end(bnctx);
-		BN_CTX_free(bnctx);
-	}
-
-	if (ec != NULL)
-		EC_KEY_free(ec);
-
-	if (ok < 0 && pkey != NULL) {
-		EVP_PKEY_free(pkey);
-		pkey = NULL;
-	}
-
+	if (es256_derive_pk(k, &pk) < 0 ||
+	    (priv = BN_bin2bn(k->d, sizeof(k->d), NULL)) == NULL)
+		goto done;
+	pkey = fido_ec_pk_to_pkey(es256_nid, pk.x, pk.y, sizeof(pk.x), priv);
+done:
+	BN_clear_free(priv);
 	return (pkey);
 }
 
@@ -461,34 +352,33 @@ int
 es256_derive_pk(const es256_sk_t *sk, es256_pk_t *pk)
 {
 	BIGNUM		*d = NULL;
-	EC_KEY		*ec = NULL;
 	EC_POINT	*q = NULL;
-	const EC_GROUP	*g = NULL;
+	EC_GROUP	*g = NULL;
+	unsigned char	 pub[1 + sizeof(*pk)];
 	int		 ok = -1;
 
 	if ((d = BN_bin2bn(sk->d, (int)sizeof(sk->d), NULL)) == NULL ||
-	    (ec = EC_KEY_new_by_curve_name(es256_nid)) == NULL ||
-	    (g = EC_KEY_get0_group(ec)) == NULL ||
+	    (g = EC_GROUP_new_by_curve_name(es256_nid)) == NULL ||
 	    (q = EC_POINT_new(g)) == NULL) {
 		fido_log_debug("%s: get", __func__);
 		goto fail;
 	}
 
 	if (EC_POINT_mul(g, q, d, NULL, NULL, NULL) == 0 ||
-	    EC_KEY_set_public_key(ec, q) == 0 ||
-	    es256_pk_from_EC_KEY(pk, ec) != FIDO_OK) {
+	    EC_POINT_point2oct(g, q, POINT_CONVERSION_UNCOMPRESSED, pub,
+	    sizeof(pub), NULL) != sizeof(pub)) {
 		fido_log_debug("%s: set", __func__);
 		goto fail;
 	}
 
+	memcpy(pk, pub + 1, sizeof(*pk));
 	ok = 0;
 fail:
 	if (d != NULL)
 		BN_clear_free(d);
 	if (q != NULL)
 		EC_POINT_free(q);
-	if (ec != NULL)
-		EC_KEY_free(ec);
+	EC_GROUP_free(g);
 
 	return (ok);
 }

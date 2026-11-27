@@ -50,6 +50,8 @@ add_regress_test(regress_es256 SOURCES es256.c LIBS ${_FIDO2_LIBRARY})
 add_regress_test(regress_es384 SOURCES es384.c LIBS ${_FIDO2_LIBRARY})
 add_regress_test(regress_rs256 SOURCES rs256.c LIBS ${_FIDO2_LIBRARY})
 if(BUILD_STATIC_LIBS)
+	add_regress_test(regress_es256_internal SOURCES es256.c LIBS fido2)
+	target_compile_definitions(regress_es256_internal PRIVATE FIDO_TEST_INTERNAL)
 	add_regress_test(regress_compress SOURCES compress.c LIBS fido2)
 endif()
 
