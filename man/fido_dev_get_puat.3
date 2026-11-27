@@ -110,6 +110,20 @@ The
 is ignored.
 .El
 .Pp
+.Fn fido_dev_get_puat
+requires the authenticator to support the negotiation of PIN/UV Auth
+tokens with permissions
+(the pinUvAuthToken option in the response to authenticatorGetInfo).
+On authenticators without such support,
+.Fn fido_dev_get_puat
+fails with
+.Dv FIDO_ERR_UNSUPPORTED_OPTION
+rather than falling back to a legacy getPinToken exchange, which
+cannot convey
+.Fa perm
+or
+.Fa rpid .
+.Pp
 The
 .Fn fido_dev_set_puat
 function can be used to associate a token retrieved out-of-band with

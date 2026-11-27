@@ -18,6 +18,16 @@
 #include "../fuzz/wiredata_fido2.h"
 #include "extern.h"
 
+#define REGRESS_WIREDATA_CTAP_CBOR_INFO_LEGACY				\
+	0x00, 0x22, 0x00, 0x02, 0x90, 0x00, 0x39, 0x00, \
+	0xa6, 0x01, 0x81, 0x68, 0x46, 0x49, 0x44, 0x4f, \
+	0x5f, 0x32, 0x5f, 0x30, 0x02, 0x80, 0x03, 0x50, \
+	0x60, 0x94, 0x27, 0x69, 0x3c, 0x31, 0x41, 0x08, \
+	0x49, 0x55, 0x7f, 0x1f, 0x4c, 0xf2, 0xbf, 0xa5, \
+	0x04, 0xa2, 0x62, 0x72, 0x6b, 0xf5, 0x69, 0x63, \
+	0x6c, 0x69, 0x65, 0x6e, 0x74, 0x50, 0x69, 0x6e, \
+	0xf5, 0x05, 0x19, 0x06, 0x00, 0x06, 0x81, 0x01,
+
 /* gh#56 */
 static void
 open_iff_ok(void)
@@ -214,6 +224,54 @@ timeout_misc(void)
 	fido_dev_free(&dev);
 }
 
+/* gh#1006 */
+static void
+get_puat_legacy(void)
+{
+	const uint8_t	 cbor_info_data[] =
+	    { REGRESS_WIREDATA_CTAP_CBOR_INFO_LEGACY };
+	uint8_t		*wiredata;
+	fido_dev_t	*dev = NULL;
+
+	wiredata = wiredata_setup(cbor_info_data, sizeof(cbor_info_data));
+	assert((dev = fido_dev_new()) != NULL);
+	setup_dummy_io(dev);
+	assert(fido_dev_open(dev, "dummy") == FIDO_OK);
+	assert(fido_dev_is_fido2(dev) == true);
+	assert(fido_dev_supports_pin(dev) == true);
+	assert(fido_dev_supports_permissions(dev) == false);
+	/* the legacy getPinToken path cannot convey perm or rpid */
+	assert(fido_dev_get_puat(dev, FIDO_PUAT_GETASSERT, "example.com",
+	    "top secret") == FIDO_ERR_UNSUPPORTED_OPTION);
+	assert(fido_dev_puat_len(dev) == 0);
+	assert(fido_dev_close(dev) == FIDO_OK);
+	fido_dev_free(&dev);
+	wiredata_clear(&wiredata);
+}
+
+/* gh#1006 */
+static void
+get_puat_perms(void)
+{
+	const uint8_t	 cbor_info_data[] = { WIREDATA_CTAP_CBOR_INFO };
+	uint8_t		*wiredata;
+	fido_dev_t	*dev = NULL;
+
+	wiredata = wiredata_setup(cbor_info_data, sizeof(cbor_info_data));
+	assert((dev = fido_dev_new()) != NULL);
+	setup_dummy_io(dev);
+	assert(fido_dev_open(dev, "dummy") == FIDO_OK);
+	assert(fido_dev_supports_permissions(dev) == true);
+	/* permitted; the call proceeds to the ECDH exchange, for which
+	 * no reply is canned (fido_do_ecdh() reports FIDO_ERR_INTERNAL) */
+	assert(fido_dev_get_puat(dev, FIDO_PUAT_GETASSERT, "example.com",
+	    "top secret") == FIDO_ERR_INTERNAL);
+	assert(fido_dev_puat_len(dev) == 0);
+	assert(fido_dev_close(dev) == FIDO_OK);
+	fido_dev_free(&dev);
+	wiredata_clear(&wiredata);
+}
+
 int
 main(void)
 {
@@ -228,6 +286,8 @@ main(void)
 	timeout_rx();
 	timeout_ok();
 	timeout_misc();
+	get_puat_legacy();
+	get_puat_perms();
 
 	exit(0);
 }
