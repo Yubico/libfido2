@@ -48,9 +48,11 @@ ctap_check_cbor(cbor_item_t *prev, cbor_item_t *curr)
 		curr_len = cbor_string_length(curr);
 		prev_len = cbor_string_length(prev);
 
-		if (curr_len > prev_len || (curr_len == prev_len &&
-		    memcmp(cbor_string_handle(prev), cbor_string_handle(curr),
-		    curr_len) < 0))
+		if (curr_len > prev_len)
+			return (0);
+
+		if (curr_len == prev_len && prev_len > 0 && memcmp(
+		    cbor_string_handle(prev), cbor_string_handle(curr), curr_len) < 0)
 			return (0);
 	}
 
@@ -186,7 +188,11 @@ cbor_bytestring_copy(const cbor_item_t *item, unsigned char **buf, size_t *len)
 		return (-1);
 	}
 
-	*len = cbor_bytestring_length(item);
+	if ((*len = cbor_bytestring_length(item)) == 0) {
+		*buf = NULL;
+		return (0);
+	}
+
 	if ((*buf = malloc(*len)) == NULL) {
 		*len = 0;
 		return (-1);
@@ -217,7 +223,8 @@ cbor_string_copy(const cbor_item_t *item, char **str)
 	    (*str = malloc(len + 1)) == NULL)
 		return (-1);
 
-	memcpy(*str, cbor_string_handle(item), len);
+	if (len > 0)
+		memcpy(*str, cbor_string_handle(item), len);
 	(*str)[len] = '\0';
 
 	return (0);
@@ -1639,7 +1646,7 @@ decode_cred_id_entry(const cbor_item_t *key, const cbor_item_t *val, void *arg)
 
 	if (!strcmp(name, "id"))
 		if (fido_blob_decode(val, id) < 0) {
-			fido_log_debug("%s: cbor_bytestring_copy", __func__);
+			fido_log_debug("%s: fido_blob_decode", __func__);
 			goto out;
 		}
 
