@@ -38,6 +38,7 @@ char *
 get_pin(const char *path)
 {
 	char *pin;
+	char *pin_ev = 0;
 	char prompt[1024];
 	int r, ok = -1;
 
@@ -45,14 +46,20 @@ get_pin(const char *path)
 		warn("%s: calloc", __func__);
 		return NULL;
 	}
-	if ((r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ",
-	    path)) < 0 || (size_t)r >= sizeof(prompt)) {
-		warn("%s: snprintf", __func__);
-		goto out;
-	}
-	if (!readpassphrase(prompt, pin, PINBUF_LEN, RPP_ECHO_OFF)) {
-		warnx("%s: readpassphrase", __func__);
-		goto out;
+
+	if ((pin_ev = getenv("FIDO2_PIN")) != 0) {
+		strncpy(pin, pin_ev, PINBUF_LEN - 1);
+	} else {
+		if ((r = snprintf(prompt, sizeof(prompt), "Enter PIN for %s: ",
+		    path)) < 0 || (size_t)r >= sizeof(prompt)) {
+			warn("%s: snprintf", __func__);
+			goto out;
+		}
+
+		if (!readpassphrase(prompt, pin, PINBUF_LEN, RPP_ECHO_OFF)) {
+			warnx("%s: readpassphrase", __func__);
+			goto out;
+		}
 	}
 
 	ok = 0;
