@@ -117,6 +117,59 @@ cbor_array_iter(const cbor_item_t *item, void *arg, int(*f)(const cbor_item_t *,
 	return (0);
 }
 
+static void
+count_array(void *arg, uint64_t n)
+{
+	uint64_t *claimed = arg;
+
+	*claimed = n > UINT64_MAX - *claimed ? UINT64_MAX : *claimed + n;
+}
+
+static void
+count_map(void *arg, uint64_t n)
+{
+	count_array(arg, n);
+	count_array(arg, n);
+}
+
+/*
+ * cbor_load() preallocates storage for definite-length arrays and maps
+ * based on the count in the header, before any element is read
+ * (PJK/libcbor#418). Every element is at least one byte, so the elements
+ * claimed by all headers in a buffer can never exceed its length. Reject
+ * input that claims more before handing it to cbor_load(). This bounds
+ * allocations by the input size without touching libcbor's allocator.
+ */
+cbor_item_t *
+fido_cbor_load(const unsigned char *ptr, size_t len,
+    struct cbor_load_result *res)
+{
+	struct cbor_callbacks		cb = cbor_empty_callbacks;
+	struct cbor_decoder_result	d;
+	uint64_t			claimed = 0;
+	size_t				off = 0;
+
+	cb.array_start = count_array;
+	cb.map_start = count_map;
+
+	while (off < len) {
+		d = cbor_stream_decode(ptr + off, len - off, &cb, &claimed);
+		if (d.status != CBOR_DECODER_FINISHED || d.read == 0)
+			break; /* let cbor_load() report the error */
+		off += d.read;
+		if (claimed > len) {
+			fido_log_debug("%s: claimed=%llu, len=%zu", __func__,
+			    (unsigned long long)claimed, len);
+			memset(res, 0, sizeof(*res));
+			res->error.code = CBOR_ERR_MALFORMATED;
+			res->error.position = off;
+			return (NULL);
+		}
+	}
+
+	return (cbor_load(ptr, len, res));
+}
+
 int
 cbor_parse_reply(const unsigned char *blob, size_t blob_len, void *arg,
     int(*parser)(const cbor_item_t *, const cbor_item_t *, void *))
@@ -137,7 +190,7 @@ cbor_parse_reply(const unsigned char *blob, size_t blob_len, void *arg,
 		goto fail;
 	}
 
-	if ((item = cbor_load(blob + 1, blob_len - 1, &cbor)) == NULL) {
+	if ((item = fido_cbor_load(blob + 1, blob_len - 1, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
 		r = FIDO_ERR_RX_NOT_CBOR;
 		goto fail;
@@ -1138,7 +1191,7 @@ decode_attcred(const unsigned char **buf, size_t *len, int cose_alg,
 		return (-1);
 	}
 
-	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
+	if ((item = fido_cbor_load(*buf, *len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
 		goto fail;
 	}
@@ -1293,7 +1346,7 @@ decode_cred_extensions(const unsigned char **buf, size_t *len,
 
 	fido_log_xxd(*buf, *len, "%s", __func__);
 
-	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
+	if ((item = fido_cbor_load(*buf, *len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
 		goto fail;
 	}
@@ -1368,7 +1421,7 @@ decode_assert_extensions(const unsigned char **buf, size_t *len,
 
 	fido_log_xxd(*buf, *len, "%s", __func__);
 
-	if ((item = cbor_load(*buf, *len, &cbor)) == NULL) {
+	if ((item = fido_cbor_load(*buf, *len, &cbor)) == NULL) {
 		fido_log_debug("%s: cbor_load", __func__);
 		goto fail;
 	}
