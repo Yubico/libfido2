@@ -17,6 +17,7 @@
 #include <fido/es384.h>
 #include <fido/rs256.h>
 #include <fido/eddsa.h>
+#include <fido/mldsa.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -386,6 +387,30 @@ fail:
 	return (pkey);
 }
 
+EVP_PKEY *
+read_mldsa_pubkey(const char *path)
+{
+	FILE *fp = NULL;
+	EVP_PKEY *pkey = NULL;
+
+	if ((fp = fopen(path, "r")) == NULL) {
+		warn("fopen");
+		goto fail;
+	}
+
+	if ((pkey = PEM_read_PUBKEY(fp, NULL, NULL, NULL)) == NULL) {
+		warnx("PEM_read_PUBKEY");
+		goto fail;
+	}
+
+fail:
+	if (fp) {
+		fclose(fp);
+	}
+
+	return (pkey);
+}
+
 int
 write_eddsa_pubkey(const char *path, const void *ptr, size_t len)
 {
@@ -429,6 +454,177 @@ write_eddsa_pubkey(const char *path, const void *ptr, size_t len)
 	ok = 0;
 fail:
 	eddsa_pk_free(&pk);
+
+	if (fp != NULL) {
+		fclose(fp);
+	}
+	if (fd != -1) {
+		close(fd);
+	}
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+
+	return (ok);
+}
+
+int
+write_mldsa44_pubkey(const char *path, const void *ptr, size_t len)
+{
+	FILE *fp = NULL;
+	EVP_PKEY *pkey = NULL;
+	mldsa44_pk_t *pk = NULL;
+	int fd = -1;
+	int ok = -1;
+
+	if ((pk = mldsa44_pk_new()) == NULL) {
+		warnx("mldsa44_pk_new");
+		goto fail;
+	}
+
+	if (mldsa44_pk_from_ptr(pk, ptr, len) != FIDO_OK) {
+		warnx("mldsa44_pk_from_ptr");
+		goto fail;
+	}
+
+	if ((fd = open(path, O_WRONLY | O_CREAT, 0644)) < 0) {
+		warn("open %s", path);
+		goto fail;
+	}
+
+	if ((fp = fdopen(fd, "w")) == NULL) {
+		warn("fdopen");
+		goto fail;
+	}
+	fd = -1; /* owned by fp now */
+
+	if ((pkey = mldsa44_pk_to_EVP_PKEY(pk)) == NULL) {
+		warnx("mldsa44_pk_to_EVP_PKEY");
+		goto fail;
+	}
+
+	if (PEM_write_PUBKEY(fp, pkey) == 0) {
+		warnx("PEM_write_PUBKEY");
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	mldsa44_pk_free(&pk);
+
+	if (fp != NULL) {
+		fclose(fp);
+	}
+	if (fd != -1) {
+		close(fd);
+	}
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+
+	return (ok);
+}
+
+int
+write_mldsa65_pubkey(const char *path, const void *ptr, size_t len)
+{
+	FILE *fp = NULL;
+	EVP_PKEY *pkey = NULL;
+	mldsa65_pk_t *pk = NULL;
+	int fd = -1;
+	int ok = -1;
+
+	if ((pk = mldsa65_pk_new()) == NULL) {
+		warnx("mldsa65_pk_new");
+		goto fail;
+	}
+
+	if (mldsa65_pk_from_ptr(pk, ptr, len) != FIDO_OK) {
+		warnx("mldsa65_pk_from_ptr");
+		goto fail;
+	}
+
+	if ((fd = open(path, O_WRONLY | O_CREAT, 0665)) < 0) {
+		warn("open %s", path);
+		goto fail;
+	}
+
+	if ((fp = fdopen(fd, "w")) == NULL) {
+		warn("fdopen");
+		goto fail;
+	}
+	fd = -1; /* owned by fp now */
+
+	if ((pkey = mldsa65_pk_to_EVP_PKEY(pk)) == NULL) {
+		warnx("mldsa65_pk_to_EVP_PKEY");
+		goto fail;
+	}
+
+	if (PEM_write_PUBKEY(fp, pkey) == 0) {
+		warnx("PEM_write_PUBKEY");
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	mldsa65_pk_free(&pk);
+
+	if (fp != NULL) {
+		fclose(fp);
+	}
+	if (fd != -1) {
+		close(fd);
+	}
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+
+	return (ok);
+}
+
+int
+write_mldsa87_pubkey(const char *path, const void *ptr, size_t len)
+{
+	FILE *fp = NULL;
+	EVP_PKEY *pkey = NULL;
+	mldsa87_pk_t *pk = NULL;
+	int fd = -1;
+	int ok = -1;
+
+	if ((pk = mldsa87_pk_new()) == NULL) {
+		warnx("mldsa87_pk_new");
+		goto fail;
+	}
+
+	if (mldsa87_pk_from_ptr(pk, ptr, len) != FIDO_OK) {
+		warnx("mldsa87_pk_from_ptr");
+		goto fail;
+	}
+
+	if ((fd = open(path, O_WRONLY | O_CREAT, 0665)) < 0) {
+		warn("open %s", path);
+		goto fail;
+	}
+
+	if ((fp = fdopen(fd, "w")) == NULL) {
+		warn("fdopen");
+		goto fail;
+	}
+	fd = -1; /* owned by fp now */
+
+	if ((pkey = mldsa87_pk_to_EVP_PKEY(pk)) == NULL) {
+		warnx("mldsa87_pk_to_EVP_PKEY");
+		goto fail;
+	}
+
+	if (PEM_write_PUBKEY(fp, pkey) == 0) {
+		warnx("PEM_write_PUBKEY");
+		goto fail;
+	}
+
+	ok = 0;
+fail:
+	mldsa87_pk_free(&pk);
 
 	if (fp != NULL) {
 		fclose(fp);
